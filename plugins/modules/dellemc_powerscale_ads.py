@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # Copyright: (c) 2021, DellEMC
 
+# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 """Ansible module for managing ADS authentication provider on PowerScale"""
 
 from __future__ import absolute_import, division, print_function
@@ -104,7 +106,7 @@ EXAMPLES = r'''
       domain_name: "ansibleneo.com"
       instance_name: "ansibleneo.com"
       ads_user: "administrator"
-      ads_password: "Password123!"
+      ads_password: "*****"
       ads_parameters:
         groupnet: "groupnet5"
         home_directory_template: "/ifs/home/%D/%U"

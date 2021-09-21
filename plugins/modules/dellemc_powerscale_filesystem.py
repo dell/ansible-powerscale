@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # Copyright: (c) 2019, DellEMC
 
+# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
@@ -130,7 +132,7 @@ EXAMPLES = r'''
      verify_ssl: "{{verify_ssl}}"
      username: "{{user}}"
      password: "{{password}}"
-     path: "{{path}}"
+     path: "<path>"
      access_zone: "{{access_zone}}"
      owner:
        name: 'ansible_user'
@@ -157,7 +159,7 @@ EXAMPLES = r'''
       verify_ssl: "{{verify_ssl}}"
       username: "{{user}}"
       password: "{{password}}"
-      path: "{{path}}"
+      path: "<path>"
       owner:
        name: 'ansible_user'
        provider_type: 'ldap'
@@ -171,7 +173,7 @@ EXAMPLES = r'''
      username: "{{user}}"
      password: "{{password}}"
      access_zone: "{{access_zone}}"
-     path: "{{path}}"
+     path: "<path>"
      state: "{{state_present}}"
 
   - name: Get filesystem details with snapshots
@@ -182,7 +184,7 @@ EXAMPLES = r'''
      username: "{{user}}"
      password: "{{password}}"
      access_zone: "{{access_zone}}"
-     path: "{{path}}"
+     path: "<path>"
      list_snapshots: "{{list_snapshots_true}}"
      state: "{{state_present}}"
 
@@ -193,7 +195,7 @@ EXAMPLES = r'''
       verify_ssl: "{{verify_ssl}}"
       username: "{{user}}"
       password: "{{password}}"
-      path: "{{path}}"
+      path: "<path>"
       access_zone: "{{access_zone}}"
       quota:
         hard_limit_size: 15
@@ -208,7 +210,7 @@ EXAMPLES = r'''
       verify_ssl: "{{verify_ssl}}"
       username: "{{user}}"
       password: "{{password}}"
-      path: "{{path}}"
+      path: "<path>"
       access_zone: "{{access_zone}}"
       owner:
        name: 'ansible_user'
@@ -225,7 +227,7 @@ EXAMPLES = r'''
      verify_ssl: "{{verify_ssl}}"
      api_user: "{{api_user}}"
      api_password: "{{api_password}}"
-     path: "{{path}}"
+     path: "<path>"
      access_zone: "{{access_zone}}"
      quota:
        quota_state: "absent"
@@ -239,7 +241,7 @@ EXAMPLES = r'''
      username: "{{user}}"
      password: "{{password}}"
      access_zone: "{{access_zone}}"
-     path: "{{path}}"
+     path: "<path>"
      state: "{{state_absent}}"
 '''
 
@@ -1225,7 +1227,7 @@ class PowerScaleFileSystem(object):
 
 def get_powerscale_filesystem_parameters():
     return dict(
-        path=dict(required=True, type='str'),
+        path=dict(required=True, type='str', no_log=True),
         access_zone=dict(required=False, type='str',
                          default='System'),
         owner=dict(required=False, type='dict'),

@@ -1,4 +1,14 @@
 # ansible-powerscale Change Log
+## Version 1.3.0 - released on 23/09/21
+- Added CRUD operations for SyncIQ Policy module.
+- Added CRUD operations for SyncIQ Performance Rule module.
+- Added support to create a job for SyncIQ Policy module.
+- Support to retrieve and modify details of a SyncIQ job in SyncIQ jobs module.
+- Support to fetch details of a SyncIQ report and all sub-reports in SyncIQ report module.
+- Support to fetch details of a SyncIQ target report and all target sub-reports in SyncIQ report module.
+- Gather facts module is enhanced to list SyncIQ policies, SyncIQ Performance rules, SyncIQ reports, SyncIQ target reports, SyncIQ target cluster certificates. 
+- Added dual licensing
+
 ## Version 1.2.0 - released on 25/06/21
 - Map or unmap authentication providers to/from an access zone
 - Support extended for OneFS version 9.1.0.
