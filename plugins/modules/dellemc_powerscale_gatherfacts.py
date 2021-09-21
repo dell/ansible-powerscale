@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # Copyright: (c) 2019, DellEMC
 
+# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 """Ansible module for Gathering information about DellEMC PowerScale"""
 
 from __future__ import (absolute_import, division, print_function)
@@ -28,13 +30,19 @@ description:
   Get list of users and groups for an access zone.
   Get list of smb_shares in the PowerScale cluster,
   Get list of nfs_exports in the PowerScale cluster,
-  Get list of active clients in the PowerScale cluster.
+  Get list of active clients in the PowerScale cluster,
+  Get list of SyncIQ reports in the PowerScale cluster,
+  Get list of SyncIQ target reports in the PowerScale cluster,
+  Get list of SyncIQ target cluster certificates in the PowerScale cluster,
+  Get list of SyncIQ policies in the PowerScale cluster.
+  Get list of SyncIQ performance rules in the PowerScale cluster.
 
 extends_documentation_fragment:
   - dellemc.powerscale.dellemc_powerscale.powerscale
 
 author:
 - Ambuj Dubey (@AmbujDube) <ansible.team@dell.com>
+- Spandita Panigrahi(@panigs7) <ansible.team@dell.com>
 
 options:
   access_zone:
@@ -57,15 +65,27 @@ options:
     - smb_shares
     - nfs_exports
     - clients
+    - synciq_reports
+    - synciq_target_reports
+    - synciq_policies
+    - synciq_target_cluster_certificates
+    - synciq_performance_rules
     - The list of attributes, access_zones and nodes is for the entire PowerScale
       cluster
     - The list of providers, users and groups is specific to the specified
       access zone
+    - The list of syncIQ reports and syncIQ target reports for the entire PowerScale
+      cluster
+    - The list of syncIQ policies, syncIQ target cluster certificates and syncIQ performance rules
+      for the entire PowerScale cluster
     required: True
     choices: [attributes, access_zones, nodes, providers, users, groups,
-              smb_shares, nfs_exports, clients]
+              smb_shares, nfs_exports, clients, synciq_reports, synciq_target_reports,
+              synciq_policies, synciq_target_cluster_certificates, synciq_performance_rules]
     type: list
     elements: str
+notes:
+- Listing of SyncIQ target cluster certificates is not supported by isi_sdk_8_1_1 version.
   '''
 
 EXAMPLES = r'''
@@ -164,6 +184,47 @@ EXAMPLES = r'''
       api_password: "{{api_password}}"
       gather_subset:
         - clients
+
+  - name: Get list of SyncIQ reports and SyncIQ target Reports in the PowerScale cluster
+    dellemc_powerscale_gatherfacts:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{powerscaleport}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      gather_subset:
+        - synciq_reports
+        - synciq_target_reports
+
+  - name: Get list of SyncIQ policies in the PowerScale cluster
+    dellemc_powerscale_gatherfacts:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{powerscaleport}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      gather_subset:
+        - synciq_policies
+
+  - name: Get list of SyncIQ target cluster certificates in the PowerScale cluster
+    dellemc_powerscale_gatherfacts:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{powerscaleport}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      gather_subset:
+        - synciq_target_cluster_certificates
+
+  - name: Get list of SyncIQ performance rules in the PowerScale cluster
+    dellemc_powerscale_gatherfacts:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{powerscaleport}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      gather_subset:
+        - synciq_performance_rules
 '''
 
 RETURN = r''' '''
@@ -205,6 +266,7 @@ class PowerScaleGatherFacts(object):
         self.auth_api = self.isi_sdk.AuthApi(self.api_client)
         self.protocol_api = self.isi_sdk.ProtocolsApi(self.api_client)
         self.statistics_api = self.isi_sdk.StatisticsApi(self.api_client)
+        self.synciq_api = self.isi_sdk.SyncApi(self.api_client)
 
     def get_attributes_list(self):
         """Get the list of attributes of a given PowerScale Storage"""
@@ -394,6 +456,104 @@ class PowerScaleGatherFacts(object):
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
+    def get_synciq_reports(self):
+        """Get the list of SyncIQ Reports of a given PowerScale Storage"""
+        try:
+            synciq_reports_list = []
+            synciq_reports_details = (self.synciq_api.get_sync_reports()).to_dict()
+            for i in range(synciq_reports_details['total']):
+                synciq_reports_dict = {"id": synciq_reports_details['reports'][i]['id'],
+                                       "name": synciq_reports_details['reports'][i]['policy_name']}
+                synciq_reports_list.append(synciq_reports_dict)
+            return synciq_reports_list
+        except Exception as e:
+            error_msg = (
+                'Get SyncIQ Report list for PowerScale cluster: {0} failed with'
+                'error: {1}'.format(
+                    self.module.params['onefs_host'],
+                    utils.determine_error(e)))
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
+
+    def get_syniq_policies_list(self):
+        """Get the list of SyncIQ policies of a given PowerScale Storage"""
+        try:
+            policies_list = []
+            policies_details = (self.synciq_api.list_sync_policies()).to_dict()
+            policies = policies_details['policies']
+            if policies:
+                for policy in policies:
+                    policies_list.append({"name": policy['name'],
+                                          "id": policy['id'],
+                                          "source_root_path": policy['source_root_path'],
+                                          "target_path": policy['target_path'],
+                                          "action": policy['action'],
+                                          "schedule": policy['schedule'],
+                                          "enabled": policy['enabled']})
+            return policies_list
+        except Exception as e:
+            error_msg = (
+                'Get list of SyncIQ Policies for PowerScale: %s failed with'
+                'error: %s' % (self.module.params['onefs_host'],
+                               utils.determine_error(e)))
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
+
+    def get_synciq_target_reports(self):
+        """Get the list of SyncIQ Target Reports of a given PowerScale Storage"""
+        try:
+            synciq_target_reports_list = []
+            synciq_target_reports_details = (self.synciq_api.get_target_reports()).to_dict()
+            for i in range(synciq_target_reports_details['total']):
+                synciq_target_reports_dict = {"id": synciq_target_reports_details['reports'][i]['id'],
+                                              "name": synciq_target_reports_details['reports'][i]['policy_name']}
+                synciq_target_reports_list.append(synciq_target_reports_dict)
+            return synciq_target_reports_list
+        except Exception as e:
+            error_msg = ('Get SyncIQ Target Report list for PowerScale cluster: {0} failed with'
+                         'error: {1}'.format(self.module.params['onefs_host'], utils.determine_error(e)))
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
+
+    def get_synciq_target_cluster_certificates_list(self):
+        """Get the list of SyncIQ target cluster certificates of a given PowerScale Storage"""
+        try:
+            cert_list = []
+            cert_details = (self.synciq_api.list_certificates_peer()).to_dict()
+            certs = cert_details['certificates']
+            if certs:
+                for certificate in certs:
+                    cert_list.append({"name": certificate['name'],
+                                      "id": certificate['id']})
+            return cert_list
+        except Exception as e:
+            error_msg = (
+                'Get list of SyncIQ target cluster certificates for PowerScale: %s failed with'
+                'error: %s' % (
+                    self.module.params['onefs_host'],
+                    utils.determine_error(e)))
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
+
+    def get_synciq_performance_rules(self):
+        """Get the list of SyncIQ performance rules of a given PowerScale Storage"""
+        try:
+            synciq_performance_rule_list = []
+            synciq_performance_rule_details = (self.synciq_api.list_sync_rules()).to_dict()
+            for rule in synciq_performance_rule_details['rules']:
+                synciq_performance_rule_dict = {"id": rule['id'],
+                                                "schedule": rule['schedule'],
+                                                "enabled": rule['enabled'],
+                                                "type": rule['type'],
+                                                "limit": get_sync_rule_limit_unit(rule['limit'], rule['type'])}
+                synciq_performance_rule_list.append(synciq_performance_rule_dict)
+            return synciq_performance_rule_list
+        except Exception as e:
+            error_msg = ('Get SyncIQ performance rules list for PowerScale cluster: %s failed with'
+                         'error: %s' % (self.module.params['onefs_host'], utils.determine_error(e)))
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
+
     def perform_module_operation(self):
         """Perform different actions on Gatherfacts based on user parameter
         chosen in playbook
@@ -412,6 +572,12 @@ class PowerScaleGatherFacts(object):
         smb_shares = []
         clients = []
         nfs_exports = []
+        synciq_reports = []
+        synciq_target_reports = []
+        synciq_policies = []
+        synciq_target_cluster_certificates = []
+        synciq_performance_rules = []
+
         if 'attributes' in str(subset):
             attributes = self.get_attributes_list()
         if 'access_zones' in str(subset):
@@ -430,7 +596,21 @@ class PowerScaleGatherFacts(object):
             clients = self.get_clients_list()
         if 'nfs_exports' in str(subset):
             nfs_exports = self.get_nfs_exports_list(access_zone)
-        self.module.exit_json(
+        if 'synciq_reports' in str(subset):
+            synciq_reports = self.get_synciq_reports()
+        if 'synciq_target_reports' in str(subset):
+            synciq_target_reports = self.get_synciq_target_reports()
+        if 'synciq_policies' in str(subset):
+            synciq_policies = self.get_syniq_policies_list()
+        if 'synciq_target_cluster_certificates' in str(subset) and utils.ISI_SDK_VERSION_9:
+            synciq_target_cluster_certificates = self.get_synciq_target_cluster_certificates_list()
+        elif 'synciq_target_cluster_certificates' in str(subset) and not utils.ISI_SDK_VERSION_9:
+            self.module.fail_json("Listing of SyncIQ target cluster certificates is not supported by "
+                                  "isi_sdk_8_1_1 version.")
+        if 'synciq_performance_rules' in str(subset):
+            synciq_performance_rules = self.get_synciq_performance_rules()
+
+        result = dict(
             Attributes=attributes,
             AccessZones=access_zones,
             Nodes=nodes,
@@ -439,7 +619,31 @@ class PowerScaleGatherFacts(object):
             Groups=groups,
             SmbShares=smb_shares,
             Clients=clients,
-            NfsExports=nfs_exports)
+            NfsExports=nfs_exports,
+            SynciqReports=synciq_reports,
+            SynciqTargetReports=synciq_target_reports,
+            SynciqPolicies=synciq_policies,
+            SynciqPerformanceRules=synciq_performance_rules
+        )
+
+        if utils.ISI_SDK_VERSION_9:
+            result.update(SynciqTargetClusterCertificate=synciq_target_cluster_certificates)
+
+        self.module.exit_json(**result)
+
+
+def get_sync_rule_limit_unit(limit, type):
+    """Get performance rule limit with unit"""
+    if type == 'bandwidth':
+        unit = 'kb/s'
+    elif type == 'cpu':
+        unit = '%'
+    elif type == 'file_count':
+        unit = 'files/sec'
+    elif type == 'worker':
+        unit = '%'
+
+    return str(limit) + unit
 
 
 def get_powerscale_gatherfacts_parameters():
@@ -457,14 +661,19 @@ def get_powerscale_gatherfacts_parameters():
                                     'groups',
                                     'smb_shares',
                                     'nfs_exports',
-                                    'clients'
+                                    'clients',
+                                    'synciq_reports',
+                                    'synciq_target_reports',
+                                    'synciq_policies',
+                                    'synciq_target_cluster_certificates',
+                                    'synciq_performance_rules'
                                     ]),
     )
 
 
 def main():
     """Create PowerScale GatherFacts object and perform action on it
-        based on user input from playbook"""
+       based on user input from playbook"""
     obj = PowerScaleGatherFacts()
     obj.perform_module_operation()
 

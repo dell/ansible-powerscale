@@ -1,5 +1,8 @@
 #!/usr/bin/python
 # Copyright: (c) 2019, DellEMC
+
+# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 """ Ansible module for managing Groups on PowerScale"""
 
 from __future__ import (absolute_import, division, print_function)
