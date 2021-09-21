@@ -4,7 +4,7 @@ The Ansible Modules for Dell EMC PowerScale allow Data Center and IT administrat
 The capabilities of the Ansible modules are managing users, groups, node, active directory, ldap, access zones, file system, nfs exports, smb shares, snapshots, snapshot schedules and smart quotas, syncIQ policies, syncIQ performance rules, syncIQ reports, syncIQ target reports, syncIQ jobs and to gather facts from the array. The tasks can be executed by running simple playbooks written in yaml syntax.
 
 ## License
-Ansible collection for PowerScale is released and licensed under the GPL-3.0 license. See [LICENSE](https://www.gnu.org/licenses/gpl-3.0.txt) for the full terms. Ansible modules and modules utilities that are part of the Ansible collection for PowerScale are released and licensed under the Apache 2.0 license. See [MODULE-LICENSE](https://www.apache.org/licenses/LICENSE-2.0.txt) for the full terms.
+Ansible collection for PowerScale is released and licensed under the GPL-3.0 license. See [LICENSE](LICENSE) for the full terms. Ansible modules and modules utilities that are part of the Ansible collection for PowerScale are released and licensed under the Apache 2.0 license. See [MODULE-LICENSE](MODULE-LICENSE) for the full terms.
 
 ## Support
 Ansible collection for PowerScale are supported by Dell EMC and are provided under the terms of the license attached to the collection. Please see the [LICENSE](#license) section for the full terms. Dell EMC does not provide any support for the source code modifications. For any Ansible modules issues, questions or feedback, join the [Dell EMC Automation Community](https://www.dell.com/community/Automation/bd-p/Automation).
