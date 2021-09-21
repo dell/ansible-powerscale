@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # Copyright: (c) 2019, DellEMC
 
+# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 """Ansible module for managing snapshot schedules on PowerScale"""
 
 from __future__ import absolute_import, division, print_function
@@ -105,7 +107,7 @@ EXAMPLES = r'''
       api_password: "{{api_password}}"
       name: "{{name}}"
       access_zone: '{{access_zone}}'
-      path: '{{path1}}'
+      path: '<path>'
       alias: "{{alias1}}"
       desired_retention: "{{desired_retention1}}"
       pattern: "{{pattern1}}"
@@ -556,8 +558,8 @@ class PowerScaleSnapshotSchedule(object):
                     retention_unit, effective_path, pattern, schedule)
 
         if state == 'present' and not snapshot_schedule_details:
-            LOG.info("Creating new snapshot schedule: %s for path: %s",
-                     name, effective_path)
+            LOG.debug("Creating new snapshot schedule: %s for path: %s",
+                      name, effective_path)
             result['changed'] = self.create_snapshot_schedule(
                 name, alias, effective_path, desired_retention,
                 retention_unit, pattern, schedule) or result['changed']
@@ -600,7 +602,7 @@ def get_powerscale_snapshotschedule_parameters():
     return dict(
         name=dict(required=True, type='str'),
         access_zone=dict(type='str', default='System'),
-        path=dict(type='str'),
+        path=dict(type='str', no_log=True),
         new_name=dict(type='str'),
         pattern=dict(type='str'),
         schedule=dict(type='str'),

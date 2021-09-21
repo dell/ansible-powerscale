@@ -1,6 +1,6 @@
 **Ansible Modules for Dell EMC PowerScale** 
 =========================================
-### Release Notes 1.2.0
+### Release Notes 1.3.0
 
 >   © 2021 Dell Inc. or its subsidiaries. All rights reserved. Dell,
 >   EMC, and other trademarks are trademarks of Dell Inc. or its
@@ -27,7 +27,7 @@ Table 1. Revision history
 
 | Revision | Date      | Description                                               |
 |----------|-----------|-----------------------------------------------------------|
-| 01      | Jun 2021  | Ansible Modules for Dell EMC PowerScale 1.2.0              |
+| 01      | Sep 2021  | Ansible Modules for Dell EMC PowerScale 1.3.0              |
 
 
 Product Description
@@ -40,8 +40,12 @@ The Ansible Modules for Dell EMC PowerScale support the following features:
 - Modify user, groups, filesystem, access zone, NFS export, smart quotas, SMB share, snapshot and snapshot schedule of a filesystem.
 - Delete user, groups, filesystem, NFS export, smart quotas, SMB share, snapshot and snapshot schedule of a filesystem.
 - Get details of user, groups, node, filesystem, access zone, NFS export, smart quotas, SMB share, snapshot and snapshot schedule of a filesystem.
+- Get details of SyncIQ policies, SyncIQ jobs, SyncIQ reports, SyncIQ target reports and SyncIQ performance rules of the cluster.
 - Add, modify and remove Active Directory and LDAP to Authentication providers list.
-- Map or unmap Active Directory and LDAP Authentication providers to Access zone.  
+- Map or unmap Active Directory and LDAP Authentication providers to Access zone.
+- Create, modify and delete SyncIQ policy.
+- Create job on SyncIQ policy and modify the state of SyncIQ Job.
+- Create, modify and delete SyncIQ performance rule.
 - Get attributes and entities of the array. 
   
 The Ansible modules use playbooks, written in yaml syntax, to list, show, create, delete, and modify each of these entities.
@@ -50,7 +54,7 @@ Features
 ---------------------------
 This section describes the features of the Ansible Modules for Dell EMC PowerScale for this release.
 
-The Ansible Modules for Dell EMC PowerScale release 1.2.0 supports the following features: 
+The Ansible Modules for Dell EMC PowerScale release 1.3.0 supports the following features: 
  - Idempotency 
    - Has been handled in all modules.
    - Allows the playbook to be run multiple times .
@@ -64,42 +68,40 @@ The Ansible Modules for Dell EMC PowerScale release 1.2.0 supports the following
   - Absolute path = Access zone base path + relative path provided by the user.
 
 MODULES
--   The Access Zone module has the following enhancements: 
-    -   Map or unmap authentication providers to/from an access zone.
-    
--   The File System module is enhanced to support the following functionality: 
-    -   Create a filesystem is updated to support both isi_sdk_8_1_1 and isi_sdk_9_0_0.
-    -   Update a filesystem is updated to support both isi_sdk_8_1_1 and isi_sdk_9_0_0.
-    
--   The ADS module supports the following functionality:
-    -   Add Active Directory provider to authentication providers.
-    -   Modify Active Directory provider parameters.
-    -   Remove Active Directory provider from authentication providers.
-    -   Retrieve details of Active Directory provider.
-    
--   The LDAP module supports the following functionality:
-    -   Add LDAP provider to authentication providers.
-    -   Modify LDAP provider parameters.
-    -   Remove LDAP provider from authentication providers.
-    -   Retrieve details of LDAP provider.
+-   The SyncIQ Policy module supports the following functionality: 
+    -   Create a SyncIQ policy
+    -   Modify a SyncIQ policy
+    -   Create a job on SyncIQ policy
+    -   Delete a SyncIQ policy
+    -   Retieve details of SyncIQ policy
 
--   The Node module supports the following functionality:
-    -   Get Node details of Dell EMC PowerScale storage
-     
+-   The SyncIQ Jobs module supports the following functionality: 
+    -   Modify state of SyncIQ job
+    -   Cancel a SyncIQ job
+    -   Retreive details of SyncIQ job
+
+-   The SyncIQ Rules module supports the following functionality: 
+    -   Create a SyncIQ performance rule
+    -   Modify a SyncIQ performance rule
+    -   Delete a SyncIQ performance rule
+    -   Retreive details of SyncIQ performance rule
+
+-   The SyncIQ Reports module supports the following functionality:
+    -   Retreive details of SyncIQ reports
+
+-   The SyncIQ Target Reports module supports the following functionality:
+    -   Retreive details of SyncIQ target reports
+
 -   The Gather Facts module is enhanced to support the following functionality: 
     -   Get details of the any entity listed below:
     
-        - Nodes
-        - Nfs exports
-        - Smb shares
-        - Active clients
-    
- -  The Smart Quotas module is enhanced to support the following functionality: 
-     -   Create a default-user/default-group quota.  
-     -   Modify the attributes of quota like include_overheads(8_1_1)/thresholds_on(9_0_0), soft_grace_period, hard_limit_size.
-     -   Updated code to support both isi_sdk_8_1_1 and isi_sdk_9_0_0.
-     -   Get details of the default-user/default-group quota. 
-     -   Delete the default-user/default-group quota.
+        - SyncIQ policies
+        - SyncIQ performance rules
+        - SyncIQ reports
+        - SyncIQ target reports
+        - SyncIQ target cluster certificates
+
+-   Added dual licensing.
     
 Known issues
 ------------
@@ -116,6 +118,9 @@ Known problems in this release are listed.
 - Snapshot creation with alias name
     - Alias name attribute remains null in spite of creating snapshot with alias name.
     - This is an issue with PowerScale rest API. Alias name is not getting appended to the attribute in response.
+
+- SyncIQ Job creation/modification/retreival
+    - Creation, modification or retrieval of SyncIQ job can fail with error, "Invalid value for 'action', must be one of ['copy', 'sync']" if there are jobs of action resync_prep/allow_write/allow_write_revert running on the SyncIQ policy.
 
 Limitations
 -----------
@@ -139,16 +144,19 @@ This section lists the limitations in this release of Ansible Modules for Dell E
   -  Modification of include_snap_data flag is not supported.
      
 - NFS Export 
-  - If there multiple exports present with the same path in an access zone, operations on such exports fail. 
+  - If there are multiple exports present with the same path in an access zone, operations on such exports fail. 
     
 - Smart Quota
 
   - Once the limits are assigned to the quota, then the quota can't be converted to accounting. Only modification to the threshold limits is permitted.
-  - Its mandatory to pass 'quota' parameter for create and modify operations for any quota type.
+  - It's mandatory to pass 'quota' parameter for create and modify operations for any quota type.
+
+- SyncIQ Performance Rule
+  - Operations performed in parallel from other interfaces apart from playbook cannot guarantee desirable results.
     
 - No support for advanced PowerScale features
   
-  - Advanced PowerScale features include SyncIQ, tiering, replication, and so on.  
+  - Advanced PowerScale features include tiering, replication, and so on.  
 ----------------
 Software media, organization, and files 
 -----------
