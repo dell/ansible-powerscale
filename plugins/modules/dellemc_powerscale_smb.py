@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # Copyright: (c) 2019, DellEMC
 
+# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
@@ -128,7 +130,7 @@ EXAMPLES = r'''
         api_user: "{{api_user}}"
         api_password: "{{api_password}}"
         share_name: "{{name}}"
-        path: "{{path}}"
+        path: "<path>"
         access_zone: "{{non_system_access_zone}}"
         state: "{{state_present}}"
 
@@ -139,7 +141,7 @@ EXAMPLES = r'''
         api_user: "{{api_user}}"
         api_password: "{{api_password}}"
         share_name: "{{name}}"
-        path: "{{system_az_path}}"
+        path: "<system_az_path>"
         description: "{{description}}"
         permissions:
           - user_name: "{{system_az_user}}"
@@ -160,7 +162,7 @@ EXAMPLES = r'''
         api_user: "{{api_user}}"
         api_password: "{{api_password}}"
         share_name: "{{name}}"
-        path: "{{system_az_path}}"
+        path: "<system_az_path>"
         description: "{{description}}"
         permissions:
           - user_name: "{{system_az_user}}"
@@ -199,7 +201,7 @@ EXAMPLES = r'''
         api_user: "{{api_user}}"
         api_password: "{{api_password}}"
         share_name: "{{name}}"
-        path: "{{non_system_az_path}}"
+        path: "<non_system_az_path>"
         access_zone: "{{non_system_access_zone}}"
         description: "{{description}}"
         permissions:
@@ -375,8 +377,8 @@ class PowerScaleSMB(object):
             zone_path = (self.zone_summary_api.
                          get_zones_summary_zone(access_zone)).to_dict()
             zone_base_path = zone_path['summary']['path']
-            LOG.info("Successfully got zone_base_path for %s is %s",
-                     access_zone, zone_base_path)
+            LOG.debug("Successfully got zone_base_path for %s is %s",
+                      access_zone, zone_base_path)
             return zone_base_path
         except Exception as e:
             error_message = "Unable to fetch base path of Access Zone {0} ," \
@@ -803,8 +805,8 @@ class PowerScaleSMB(object):
         """Checking if SMB attribute has changed & if modification required"""
         try:
 
-            LOG.info("is_smb_modified called with "
-                     "params: %s", smb_params)
+            LOG.debug("is_smb_modified called with "
+                      "params: %s", smb_params)
 
             if self.module.params['permissions'] and \
                     self.is_permission_modified(smb_params['permissions']):
@@ -882,8 +884,8 @@ class PowerScaleSMB(object):
         """Updating SMB attributes"""
         try:
 
-            LOG.info("updating SMB: %s details with : %s ", smb_share_id,
-                     smb_details)
+            LOG.debug("updating SMB: %s details with : %s ", smb_share_id,
+                      smb_details)
             if self.module.params['permissions'] is not None:
 
                 permissions = self.make_permissions(
@@ -1015,8 +1017,8 @@ class PowerScaleSMB(object):
 
         smb_details = self.get_smb_details(share_name, access_zone)
 
-        LOG.info('SMB Details with unmodified mode/mask '
-                 'bits : %s', smb_details)
+        LOG.debug('SMB Details with unmodified mode/mask '
+                  'bits : %s', smb_details)
         to_modify = False
 
         if smb_details:
@@ -1070,7 +1072,7 @@ class PowerScaleSMB(object):
                 "{0:o}".format(smb_details['shares'][0]
                                ['file_create_mode'])
 
-            LOG.info('SMB Details : %s ', smb_details)
+            LOG.debug('SMB Details : %s ', smb_details)
             result['smb_details'] = smb_details
 
         self.module.exit_json(**result)
@@ -1079,7 +1081,7 @@ class PowerScaleSMB(object):
 def get_powerscale_smb_parameters():
     return dict(
         share_name=dict(required=True, type='str'),
-        path=dict(type='str'),
+        path=dict(type='str', no_log=True),
         access_zone=dict(type='str', default='System'),
         description=dict(type='str'),
         permissions=dict(type='list', elements='dict'),

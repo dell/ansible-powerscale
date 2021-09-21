@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # Copyright: (c) 2020, DellEMC
 
+# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 """Ansible module for managing NFS Exports on DellEMC PowerScale"""
 
 from __future__ import absolute_import, division, print_function
@@ -125,7 +127,7 @@ EXAMPLES = r'''
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
       verify_ssl: "{{verify_ssl}}"
-      path: "{{path}}"
+      path: "<path>"
       access_zone: "{{access_zone}}"
       read_only_clients:
       - "{{client1}}"
@@ -141,7 +143,7 @@ EXAMPLES = r'''
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
       verify_ssl: "{{verify_ssl}}"
-      path: "{{path}}"
+      path: "<path>"
       access_zone: "{{access_zone}}"
       state: 'present'
 
@@ -151,7 +153,7 @@ EXAMPLES = r'''
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
       verify_ssl: "{{verify_ssl}}"
-      path: "{{path}}"
+      path: "<path>"
       access_zone: "{{access_zone}}"
       root_clients:
       - "{{client4}}"
@@ -164,7 +166,7 @@ EXAMPLES = r'''
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
       verify_ssl: "{{verify_ssl}}"
-      path: "{{path}}"
+      path: "<path>"
       access_zone: "{{access_zone}}"
       sub_directories_mountable: True
       state: 'present'
@@ -175,7 +177,7 @@ EXAMPLES = r'''
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
       verify_ssl: "{{verify_ssl}}"
-      path: "{{path}}"
+      path: "<path>"
       access_zone: "{{access_zone}}"
       root_clients:
       - "{{client4}}"
@@ -188,7 +190,7 @@ EXAMPLES = r'''
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
       verify_ssl: "{{verify_ssl}}"
-      path: "{{path}}"
+      path: "<path>"
       access_zone: "{{access_zone}}"
       description: "new description"
       state: 'present'
@@ -199,7 +201,7 @@ EXAMPLES = r'''
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
       verify_ssl: "{{verify_ssl}}"
-      path: "{{path}}"
+      path: "<path>"
       access_zone: "{{access_zone}}"
       read_only: False
       state: 'present'
@@ -210,7 +212,7 @@ EXAMPLES = r'''
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
       verify_ssl: "{{verify_ssl}}"
-      path: "{{path}}"
+      path: "<path>"
       access_zone: "{{access_zone}}"
       state: 'absent'
 
@@ -326,8 +328,8 @@ class PowerScaleNfsExport(object):
         '''
         Get details of an NFS export using filesystem path and access zone
         '''
-        LOG.info("Getting NFS export details for path: %s and access zone: "
-                 "%s", path, access_zone)
+        LOG.debug("Getting NFS export details for path: %s and access zone: "
+                  "%s", path, access_zone)
         try:
             NfsExportsExtendedObj = self.protocol_api.list_nfs_exports(
                 path=path, zone=access_zone)
@@ -337,8 +339,8 @@ class PowerScaleNfsExport(object):
                 self.module.fail_json(msg=error_msg)
 
             elif NfsExportsExtendedObj.total == 0:
-                LOG.info('NFS Export for given path: %s and access zone: %s '
-                         'not found', path, access_zone)
+                LOG.debug('NFS Export for given path: %s and access zone: %s '
+                          'not found', path, access_zone)
                 return {}
 
             else:
@@ -589,7 +591,7 @@ class PowerScaleNfsExport(object):
             nfs_export.read_only = read_only_value if read_only_flag else None
             nfs_export.all_dirs = all_dirs_value if all_dirs_flag else None
             nfs_export.description = description_value if description_flag else None
-            LOG.info('Modifying NFS Export with  %s details', nfs_export)
+            LOG.debug('Modifying NFS Export with  %s details', nfs_export)
 
             try:
                 self.protocol_api.update_nfs_export(
@@ -698,7 +700,7 @@ class PowerScaleNfsExport(object):
 
     def get_powerscale_nfs_parameters(self):
         return dict(
-            path=dict(required=True, type='str'),
+            path=dict(required=True, type='str', no_log=True),
             access_zone=dict(type='str', default='System'),
             clients=dict(type='list', elements='str'),
             root_clients=dict(type='list', elements='str'),

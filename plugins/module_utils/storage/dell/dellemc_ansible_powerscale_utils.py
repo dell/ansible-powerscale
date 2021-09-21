@@ -110,9 +110,9 @@ options:
 
 def get_powerscale_management_host_parameters():
     return dict(
-        onefs_host=dict(type='str', required=True),
+        onefs_host=dict(type='str', required=True, no_log=True),
         verify_ssl=dict(choices=[True, False], type='bool', required=True),
-        port_no=dict(type='str', default='8080'),
+        port_no=dict(type='str', default='8080', no_log=True),
         api_user=dict(type='str', required=True),
         api_password=dict(type='str', required=True, no_log=True)
     )
@@ -256,12 +256,13 @@ def validate_module_pre_reqs(module_params):
     POWERSCALE_SDK_IMPORT = find_compatible_powerscale_sdk(module_params)
     if POWERSCALE_SDK_IMPORT and \
             not POWERSCALE_SDK_IMPORT["powerscale_package_imported"]:
-        if IMPORT_PKGS_FAIL:
+        if POWERSCALE_SDK_IMPORT['error_message']:
+            error_message = POWERSCALE_SDK_IMPORT['error_message']
+        elif IMPORT_PKGS_FAIL:
             error_message = get_missing_pkgs()
         prereqs_check = dict(
             all_packages_found=False,
-            error_message=POWERSCALE_SDK_IMPORT['error_message'] +
-            error_message
+            error_message=error_message
         )
         return prereqs_check
 
@@ -313,6 +314,7 @@ def import_powerscale_sdk(sdk):
 def find_compatible_powerscale_sdk(module_params):
     global HAS_POWERSCALE_SDK
     error_message = ""
+    targeted_onefs_version = "9.0.0.0"
 
     powerscale_packages = [pkg for pkg in pkg_resources.working_set
                            if pkg.key.startswith("isi-sdk")]
@@ -324,7 +326,7 @@ def find_compatible_powerscale_sdk(module_params):
             cluster_api = isi_sdk.ClusterApi(api_client)
             if parse_version(cluster_api.get_cluster_config()
                              .to_dict()['onefs_version']['release']) \
-                    < parse_version('9.1.0.0'):
+                    < parse_version(targeted_onefs_version):
                 compatible_powerscale_sdk = POWERSCALE_SDK_8_1_1
             else:
                 compatible_powerscale_sdk = POWERSCALE_SDK_9_0_0
@@ -339,9 +341,9 @@ def find_compatible_powerscale_sdk(module_params):
 
     if not HAS_POWERSCALE_SDK:
         IMPORT_PKGS_FAIL.append('PowerScale python library. Please install'
-                                ' isi-sdk-9-0-0 for OneFS 9.1 and'
-                                ' isi-sdk-8-1-1 for OneFS version less'
-                                ' than 9.1')
+                                ' isi-sdk-9-0-0 for OneFS version 9.0 and above'
+                                ' and isi-sdk-8-1-1 for OneFS version less'
+                                ' than 9.0')
 
     return dict(powerscale_package_imported=HAS_POWERSCALE_SDK,
                 error_message=error_message)
@@ -405,3 +407,67 @@ def determine_error(error_obj):
 def get_missing_pkgs():
     return "Unable to import " + ",".join(IMPORT_PKGS_FAIL) + \
         ". Please install the required package(s)."
+
+
+''' Returns time in seconds '''
+
+
+def get_time_in_seconds(time, time_units):
+
+    min_in_sec = 60
+    hour_in_sec = 60 * 60
+    day_in_sec = 24 * 60 * 60
+    weeks_in_sec = 7 * 24 * 60 * 60
+    months_in_sec = 30 * 24 * 60 * 60
+    years_in_sec = 365 * 24 * 60 * 60
+    if time and time > 0:
+        if time_units in 'minutes':
+            return time * min_in_sec
+        elif time_units in 'hours':
+            return time * hour_in_sec
+        elif time_units in 'days':
+            return time * day_in_sec
+        elif time_units in 'weeks':
+            return time * weeks_in_sec
+        elif time_units in 'months':
+            return time * months_in_sec
+        elif time_units in 'years':
+            return time * years_in_sec
+        else:
+            return time
+    else:
+        return 0
+
+
+''' Returns time with unit '''
+
+
+def get_time_with_unit(time):
+    sec_in_min = 60
+    sec_in_hour = 60 * 60
+    sec_in_day = 24 * 60 * 60
+
+    if time % sec_in_day == 0:
+        time = time / sec_in_day
+        unit = 'days'
+
+    elif time % sec_in_hour == 0:
+        time = time / sec_in_hour
+        unit = 'hours'
+
+    else:
+        time = time / sec_in_min
+        unit = 'minutes'
+    return "%s %s" % (time, unit)
+
+
+'''
+Check whether input string is empty
+'''
+
+
+def is_input_empty(item):
+    if item == "" or item.isspace():
+        return True
+    else:
+        return False

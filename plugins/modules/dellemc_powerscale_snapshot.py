@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # Copyright: (c) 2019, DellEMC
 
+# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
@@ -90,7 +92,7 @@ EXAMPLES = r'''
         verify_ssl: "{{verify_ssl}}"
         api_user: "{{api_user}}"
         api_password: "{{api_password}}"
-        path: "{{ansible_path}}"
+        path: "<path>"
         access_zone: "{{access_zone}}"
         snapshot_name: "{{snapshot_name}}"
         desired_retention: "{{desired_retention}}"
@@ -739,7 +741,7 @@ class PowerScaleSnapshot(object):
             info_message = "Creating new snapshot: " \
                            "{0} for filesystem: {1}".format(snapshot_name,
                                                             effective_path)
-            LOG.info(info_message)
+            LOG.debug(info_message)
             result['changed'] = \
                 self.create_filesystem_snapshot(snapshot_name,
                                                 alias,
@@ -790,7 +792,7 @@ class PowerScaleSnapshot(object):
 def get_powerscale_snapshot_parameters():
     return dict(
         snapshot_name=dict(required=True, type='str'),
-        path=dict(type='str'),
+        path=dict(type='str', no_log=True),
         access_zone=dict(type='str', default='System'),
         new_snapshot_name=dict(type='str'),
         expiration_timestamp=dict(type='str'),

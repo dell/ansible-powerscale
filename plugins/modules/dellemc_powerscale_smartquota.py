@@ -1,5 +1,8 @@
 #!/usr/bin/python
 # Copyright: (c) 2020, DellEMC
+
+# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 """ Ansible module for managing Smart Quota on PowerScale"""
 from __future__ import (absolute_import, division, print_function)
 
@@ -160,7 +163,7 @@ EXAMPLES = r'''
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
-      path: "/sample_az/sample_fs"
+      path: "<path>"
       quota_type: "user"
       user_name: "{{user_name}}"
       access_zone: "sample-zone"
@@ -181,7 +184,7 @@ EXAMPLES = r'''
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
-      path: "/sample_az/sample_fs"
+      path: "<path>"
       quota_type: "directory"
       quota:
         include_snapshots: "True"
@@ -194,7 +197,7 @@ EXAMPLES = r'''
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
-      path: "/sample_az/sample_fs"
+      path: "<path>"
       quota_type: "default-user"
       quota:
         include_snapshots: "True"
@@ -207,7 +210,7 @@ EXAMPLES = r'''
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
-      path: "/sample_az/sample_fs"
+      path: "<path>"
       quota_type: "group"
       group_name: "{{user_name}}"
       access_zone: "sample-zone"
@@ -222,7 +225,7 @@ EXAMPLES = r'''
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
-      path: "/sample_az/sample_fs"
+      path: "<path>"
       quota_type: "user"
       user_name: "{{user_name}}"
       access_zone: "sample-zone"
@@ -241,7 +244,7 @@ EXAMPLES = r'''
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
-      path: "/sample_az/sample_fs"
+      path: "<path>"
       quota_type: "default-user"
       access_zone: "sample-zone"
       quota:
@@ -259,7 +262,7 @@ EXAMPLES = r'''
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
-      path: "/sample_az/sample_fs"
+      path: "<path>"
       quota_type: "directory"
       quota:
         include_snapshots: "True"
@@ -271,7 +274,7 @@ EXAMPLES = r'''
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
-      path: "/sample_az/sample_fs"
+      path: "<path>"
       quota_type: "default-group"
       quota:
         include_snapshots: "True"
@@ -387,8 +390,8 @@ class PowerScaleSmartQuota(object):
             zone_path = (self.zone_summary_api.
                          get_zones_summary_zone(access_zone)).to_dict()
             zone_base_path = zone_path['summary']['path']
-            LOG.info("Successfully got zone_base_path for %s is %s",
-                     access_zone, zone_base_path)
+            LOG.debug("Successfully got zone_base_path for %s is %s",
+                      access_zone, zone_base_path)
             return zone_base_path
         except Exception as e:
             error_message = 'Unable to fetch base path of Access Zone %s' \
@@ -475,7 +478,7 @@ class PowerScaleSmartQuota(object):
             self.quota_api_instance.update_quota_quota(
                 quota_quota=quota_params_obj, quota_quota_id=quota_id)
             msg = "Quota Updated successfully for path %s" % path
-            LOG.info(msg)
+            LOG.debug(msg)
             return True
         except utils.ApiException as e:
             error_message = "Update quota for path %s failed with %s" \
@@ -543,7 +546,7 @@ class PowerScaleSmartQuota(object):
                 quota = api_response.quotas[0].to_dict()
                 msg = "Get Quota Details Successful. Quota Details: %s"\
                       % quota
-                LOG.info(msg)
+                LOG.debug(msg)
                 return quota, quota_id
             LOG.info("Get Quota Details Failed. Quota does not exist.")
             return None, None
@@ -563,7 +566,7 @@ class PowerScaleSmartQuota(object):
         try:
             self.quota_api_instance.delete_quota_quota(quota_id)
             msg = "Quota Deleted Successfully for Path %s" % path
-            LOG.info(msg)
+            LOG.debug(msg)
             return True
         except Exception as e:
             error_message = "Delete quota for %s failed with %s" \
@@ -786,7 +789,7 @@ def get_powerscale_smartquota_parameters():
     """This method provides parameters required for the ansible Smart Quota
     module on PowerScale"""
     return dict(
-        path=dict(required=True, type='str'),
+        path=dict(required=True, type='str', no_log=True),
         user_name=dict(type='str'),
         group_name=dict(type='str'),
         access_zone=dict(type='str', default='system'),
