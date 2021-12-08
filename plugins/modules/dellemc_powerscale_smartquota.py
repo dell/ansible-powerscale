@@ -71,7 +71,7 @@ options:
     - This option acts as a filter for all operations except creation.
     type: str
     default: 'local'
-    choices: [ 'local', 'file', 'ldap', 'ads']
+    choices: [ 'local', 'file', 'ldap', 'ads', nis ]
   quota:
     description:
     - Specifies Smart Quota parameters.
@@ -794,7 +794,7 @@ def get_powerscale_smartquota_parameters():
         group_name=dict(type='str'),
         access_zone=dict(type='str', default='system'),
         provider_type=dict(type='str', default='local',
-                           choices=['local', 'file', 'ldap', 'ads']),
+                           choices=['local', 'file', 'ldap', 'ads', 'nis']),
         quota_type=dict(required=True, type='str',
                         choices=['user', 'group', 'directory',
                                  'default-user', 'default-group']),

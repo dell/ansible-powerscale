@@ -63,7 +63,7 @@ options:
     - This option acts as a filter for all operations except creation.
     type: str
     default: 'local'
-    choices: [ 'local', 'file', 'ldap', 'ads']
+    choices: [ 'local', 'file', 'ldap', 'ads', 'nis' ]
   enabled:
     description:
     - Enabled is a bool variable which is used to enable or disable
@@ -751,7 +751,7 @@ def get_powerscale_user_parameters():
         password=dict(required=False, type='str', no_log=True),
         access_zone=dict(required=False, type='str', default='system'),
         provider_type=dict(required=False, type='str',
-                           choices=['local', 'file', 'ldap', 'ads'],
+                           choices=['local', 'file', 'ldap', 'ads', 'nis'],
                            default='local'),
         enabled=dict(required=False, type='bool'),
         primary_group=dict(required=False, type='str'),

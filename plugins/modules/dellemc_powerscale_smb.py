@@ -74,7 +74,7 @@ options:
     - b)'permission' can be 'read'/''write'/'full'
     - c)'permission_type' can be 'allow'/'deny'
     - The fourth entry 'provider_type' is optional (default is 'local')
-    - d)'provider_type' can be 'local'/'file'/'ads'/'ldap'
+    - d)'provider_type' can be 'local'/'file'/'ads'/'ldap'/'nis'
     type: list
     elements: dict
   access_based_enumeration:

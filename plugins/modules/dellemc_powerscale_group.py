@@ -59,7 +59,7 @@ options:
     - This option acts as a filter for all operations except creation.
     type: str
     default: 'local'
-    choices: [ 'local', 'file', 'ldap', 'ads']
+    choices: [ 'local', 'file', 'ldap', 'ads', 'nis']
   state:
     description:
     - The state option is used to determine whether the group
@@ -574,7 +574,7 @@ def get_powerscale_group_parameters():
         group_id=dict(required=False, type='str'),
         access_zone=dict(required=False, type='str', default='system'),
         provider_type=dict(required=False, type='str',
-                           choices=['local', 'file', 'ldap', 'ads'],
+                           choices=['local', 'file', 'ldap', 'ads', 'nis'],
                            default='local'),
         state=dict(required=True, type='str', choices=['present', 'absent']),
         users=dict(required=False, type='list', elements='dict'),
