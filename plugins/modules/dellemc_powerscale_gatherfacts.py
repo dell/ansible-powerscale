@@ -26,7 +26,7 @@ description:
   Get attributes of the PowerScale cluster,
   Get list of access zones in the PowerScale cluster,
   Get list of nodes in the PowerScale cluster,
-  Get list of authentication providers for an access zone,
+  Get list of authentication providers for all access zones or a specific access zone,
   Get list of users and groups for an access zone.
   Get list of smb_shares in the PowerScale cluster,
   Get list of nfs_exports in the PowerScale cluster,
@@ -36,6 +36,11 @@ description:
   Get list of SyncIQ target cluster certificates in the PowerScale cluster,
   Get list of SyncIQ policies in the PowerScale cluster.
   Get list of SyncIQ performance rules in the PowerScale cluster.
+  Get list of network groupnets of the PowerScale cluster.
+  Get list of network pools for all access zones or a specific access zone of the PowerScale cluster.
+  Get list of network rules of the PowerScale cluster.
+  Get list of network subnets of the PowerScale cluster.
+  Get list of network interfaces of the PowerScale cluster.
 
 extends_documentation_fragment:
   - dellemc.powerscale.dellemc_powerscale.powerscale
@@ -45,6 +50,11 @@ author:
 - Spandita Panigrahi(@panigs7) <ansible.team@dell.com>
 
 options:
+  include_all_access_zones:
+    description:
+    - Specifies if requested component details need to be fetched from all access zones.
+    - It is mutually exclusive with access_zone.
+    type: bool
   access_zone:
     description:
     - The access zone. If no Access Zone is specified, the 'System' access
@@ -70,6 +80,11 @@ options:
     - synciq_policies
     - synciq_target_cluster_certificates
     - synciq_performance_rules
+    - network_groupnets
+    - network_pools
+    - network_rules
+    - network_interfaces
+    - network_subnets
     - The list of attributes, access_zones and nodes is for the entire PowerScale
       cluster
     - The list of providers, users and groups is specific to the specified
@@ -78,13 +93,17 @@ options:
       cluster
     - The list of syncIQ policies, syncIQ target cluster certificates and syncIQ performance rules
       for the entire PowerScale cluster
+    - The list of network pools is specific to the specified access zone or for all access zones
+    - The list of network groupnets, network subnets, network rules and network interfaces is for the entire PowerScale cluster
     required: True
     choices: [attributes, access_zones, nodes, providers, users, groups,
               smb_shares, nfs_exports, clients, synciq_reports, synciq_target_reports,
-              synciq_policies, synciq_target_cluster_certificates, synciq_performance_rules]
+              synciq_policies, synciq_target_cluster_certificates, synciq_performance_rules,
+              network_groupnets, network_subnets, network_pools, network_rules, network_interfaces]
     type: list
     elements: str
 notes:
+- The parameters access_zone and include_all_access_zones are mutually exclusive.
 - Listing of SyncIQ target cluster certificates is not supported by isi_sdk_8_1_1 version.
   '''
 
@@ -128,6 +147,18 @@ EXAMPLES = r'''
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
       access_zone: "{{access_zone}}"
+      gather_subset:
+        - providers
+
+  - name: Get list of authentication providers for all access zones of the
+          PowerScale cluster
+    dellemc_powerscale_gatherfacts:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{powerscaleport}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      include_all_access_zones: True
       gather_subset:
         - providers
 
@@ -225,6 +256,60 @@ EXAMPLES = r'''
       api_password: "{{api_password}}"
       gather_subset:
         - synciq_performance_rules
+
+  - name: Get list of network groupnets of the PowerScale cluster
+    dellemc_powerscale_gatherfacts:
+      onefs_host: "{{onefs_host}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      gather_subset:
+        - network_groupnets
+
+  - name: Get list of network pools of the PowerScale cluster
+    dellemc_powerscale_gatherfacts:
+      onefs_host: "{{onefs_host}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      gather_subset:
+        - network_pools
+
+  - name: Get list of network pools for all access zones of the PowerScale cluster
+    dellemc_powerscale_gatherfacts:
+      onefs_host: "{{onefs_host}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      include_all_access_zones: True
+      gather_subset:
+        - network_pools
+
+  - name: Get list of network rules of the PowerScale cluster
+    dellemc_powerscale_gatherfacts:
+      onefs_host: "{{onefs_host}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      gather_subset:
+        - network_rules
+
+  - name: Get list of network interfaces of the PowerScale cluster
+    dellemc_powerscale_gatherfacts:
+      onefs_host: "{{onefs_host}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      gather_subset:
+        - network_interfaces
+
+  - name: Get list of network subnets of the PowerScale cluster
+    dellemc_powerscale_gatherfacts:
+      onefs_host: "{{onefs_host}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      gather_subset:
+        - network_subnets
 '''
 
 RETURN = r''' '''
@@ -245,10 +330,12 @@ class PowerScaleGatherFacts(object):
         self.module_params = utils \
             .get_powerscale_management_host_parameters()
         self.module_params.update(get_powerscale_gatherfacts_parameters())
+        mutually_exclusive_args = [['access_zone', 'include_all_access_zones']]
 
         # initialize the Ansible module
         self.module = AnsibleModule(argument_spec=self.module_params,
-                                    supports_check_mode=False
+                                    supports_check_mode=False,
+                                    mutually_exclusive=mutually_exclusive_args
                                     )
 
         PREREQS_VALIDATE = utils.validate_module_pre_reqs(self.module.params)
@@ -267,6 +354,7 @@ class PowerScaleGatherFacts(object):
         self.protocol_api = self.isi_sdk.ProtocolsApi(self.api_client)
         self.statistics_api = self.isi_sdk.StatisticsApi(self.api_client)
         self.synciq_api = self.isi_sdk.SyncApi(self.api_client)
+        self.network_api = self.isi_sdk.NetworkApi(self.api_client)
 
     def get_attributes_list(self):
         """Get the list of attributes of a given PowerScale Storage"""
@@ -327,13 +415,18 @@ class PowerScaleGatherFacts(object):
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
-    def get_providers_list(self, access_zone):
+    def get_providers_list(self, access_zone, include_all_access_zones):
         """Get the list of authentication providers for an access zone of a
         given PowerScale Storage"""
         try:
-            providers_list = (self.auth_api
-                              .get_providers_summary(zone=access_zone))\
-                .to_dict()
+            if include_all_access_zones:
+                providers_list = (self.auth_api
+                                  .get_providers_summary())\
+                    .to_dict()
+            else:
+                providers_list = (self.auth_api
+                                  .get_providers_summary(zone=access_zone))\
+                    .to_dict()
             LOG.info('Got authentication Providers from PowerScale cluster %s',
                      self.module.params['onefs_host'])
             return providers_list
@@ -554,10 +647,125 @@ class PowerScaleGatherFacts(object):
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
+    def get_network_groupnets(self):
+        """Get the list of network groupnets of a given PowerScale Storage"""
+        try:
+            network_groupnet_list = []
+            network_groupnet_details = (self.network_api.list_network_groupnets()).to_dict()
+            groupnets = network_groupnet_details['groupnets']
+            if groupnets:
+                for groupnet in groupnets:
+                    network_groupnet_list.append({
+                        "id": groupnet["id"],
+                        "name": groupnet["name"]
+                    })
+            return network_groupnet_list
+        except Exception as e:
+            error_msg = (
+                'Getting list of network groupnets for PowerScale: %s failed with '
+                'error: %s' % (
+                    self.module.params['onefs_host'],
+                    utils.determine_error(e)))
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
+
+    def get_network_pools(self, access_zone, include_all_access_zones):
+        """Get the list of network pools of a given PowerScale Storage"""
+        try:
+            network_pool_list = []
+            if include_all_access_zones:
+                network_pool_details = (self.network_api.get_network_pools()).to_dict()
+            else:
+                network_pool_details = (self.network_api.get_network_pools(access_zone=access_zone)).to_dict()
+            pools = network_pool_details['pools']
+            if pools:
+                for pool in pools:
+                    network_pool_list.append({
+                        "id": pool["id"],
+                        "name": pool["name"]
+                    })
+            return network_pool_list
+        except Exception as e:
+            error_msg = (
+                'Getting list of network pools for PowerScale: %s failed with '
+                'error: %s' % (
+                    self.module.params['onefs_host'],
+                    utils.determine_error(e)))
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
+
+    def get_network_rules(self):
+        """Get the list of network rules of a given PowerScale Storage"""
+        try:
+            network_rule_list = []
+            network_rule_details = (self.network_api.get_network_rules()).to_dict()
+            rules = network_rule_details['rules']
+            if rules:
+                for rule in rules:
+                    network_rule_list.append({
+                        "id": rule["id"],
+                        "name": rule["name"]
+                    })
+            return network_rule_list
+        except Exception as e:
+            error_msg = (
+                'Getting list of network rules for PowerScale: %s failed with '
+                'error: %s' % (
+                    self.module.params['onefs_host'],
+                    utils.determine_error(e)))
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
+
+    def get_network_interfaces(self):
+        """Get the list of network interfaces of a given PowerScale Storage"""
+        try:
+            network_interfaces_list = []
+            network_interfaces_details = (self.network_api.get_network_interfaces()).to_dict()
+            interfaces = network_interfaces_details['interfaces']
+            if interfaces:
+                for interface in interfaces:
+                    network_interfaces_list.append({
+                        "id": interface["id"],
+                        "name": interface["name"],
+                        "lnn": interface["lnn"]
+                    })
+            return network_interfaces_list
+        except Exception as e:
+            error_msg = (
+                'Getting list of network interfaces for PowerScale: %s failed with '
+                'error: %s' % (
+                    self.module.params['onefs_host'],
+                    utils.determine_error(e)))
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
+
+    def get_network_subnets(self):
+        """Getting list of network subnets of a given PowerScale Storage"""
+        try:
+            network_subnet_list = []
+            network_subnets_details = (self.network_api.get_network_subnets()).to_dict()
+            subnets = network_subnets_details['subnets']
+            if subnets:
+                for subnet in subnets:
+                    network_subnet_list.append({
+                        "id": subnet["id"],
+                        "name": subnet["name"]
+                    })
+            return network_subnet_list
+        except Exception as e:
+            error_msg = (
+                'Getting list of network subnets for PowerScale: %s failed with '
+                'error: %s' % (
+                    self.module.params['onefs_host'],
+                    utils.determine_error(e)))
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
+
     def perform_module_operation(self):
         """Perform different actions on Gatherfacts based on user parameter
         chosen in playbook
         """
+        include_all_access_zones = self.module.params['include_all_access_zones']
         access_zone = self.module.params['access_zone']
         subset = self.module.params['gather_subset']
         if not subset:
@@ -577,6 +785,11 @@ class PowerScaleGatherFacts(object):
         synciq_policies = []
         synciq_target_cluster_certificates = []
         synciq_performance_rules = []
+        network_pools = []
+        network_groupnets = []
+        network_rules = []
+        network_interfaces = []
+        network_subnets = []
 
         if 'attributes' in str(subset):
             attributes = self.get_attributes_list()
@@ -585,7 +798,7 @@ class PowerScaleGatherFacts(object):
         if 'nodes' in str(subset):
             nodes = self.get_nodes_list()
         if 'providers' in str(subset):
-            providers = self.get_providers_list(access_zone)
+            providers = self.get_providers_list(access_zone, include_all_access_zones)
         if 'users' in str(subset):
             users = self.get_users_list(access_zone)
         if 'groups' in str(subset):
@@ -609,6 +822,16 @@ class PowerScaleGatherFacts(object):
                                   "isi_sdk_8_1_1 version.")
         if 'synciq_performance_rules' in str(subset):
             synciq_performance_rules = self.get_synciq_performance_rules()
+        if 'network_groupnets' in str(subset):
+            network_groupnets = self.get_network_groupnets()
+        if 'network_pools' in str(subset):
+            network_pools = self.get_network_pools(access_zone, include_all_access_zones)
+        if 'network_rules' in str(subset):
+            network_rules = self.get_network_rules()
+        if 'network_interfaces' in str(subset):
+            network_interfaces = self.get_network_interfaces()
+        if 'network_subnets' in str(subset):
+            network_subnets = self.get_network_subnets()
 
         result = dict(
             Attributes=attributes,
@@ -623,7 +846,12 @@ class PowerScaleGatherFacts(object):
             SynciqReports=synciq_reports,
             SynciqTargetReports=synciq_target_reports,
             SynciqPolicies=synciq_policies,
-            SynciqPerformanceRules=synciq_performance_rules
+            SynciqPerformanceRules=synciq_performance_rules,
+            NetworkGroupnets=network_groupnets,
+            NetworkPools=network_pools,
+            NetworkRules=network_rules,
+            NetworkInterfaces=network_interfaces,
+            NetworkSubnets=network_subnets
         )
 
         if utils.ISI_SDK_VERSION_9:
@@ -650,6 +878,7 @@ def get_powerscale_gatherfacts_parameters():
     """This method provide parameter required for the ansible gatherfacts
         modules on PowerScale"""
     return dict(
+        include_all_access_zones=dict(required=False, type='bool'),
         access_zone=dict(required=False, type='str',
                          default='System'),
         gather_subset=dict(type='list', required=True, elements='str',
@@ -666,7 +895,12 @@ def get_powerscale_gatherfacts_parameters():
                                     'synciq_target_reports',
                                     'synciq_policies',
                                     'synciq_target_cluster_certificates',
-                                    'synciq_performance_rules'
+                                    'synciq_performance_rules',
+                                    'network_groupnets',
+                                    'network_pools',
+                                    'network_rules',
+                                    'network_interfaces',
+                                    'network_subnets'
                                     ]),
     )
 

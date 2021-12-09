@@ -228,17 +228,11 @@ Validates the package pre-requisites of invoking module
 
 def validate_module_pre_reqs(module_params):
     error_message = ""
-    min_py_ver = '2.8.0'
-    max_py_ver = '3.7.0'
     cur_py_ver = "{0}.{1}.{2}".format(str(sys.version_info[0]),
                                       str(sys.version_info[1]),
                                       str(sys.version_info[2]))
 
-    is_supported_py_version = (parse_version(min_py_ver) <=
-                               parse_version(cur_py_ver) <
-                               parse_version(max_py_ver))
-
-    if not is_supported_py_version:
+    if not validate_python_version(cur_py_ver):
         prereqs_check = dict(
             all_packages_found=False,
             error_message="Python version {0} is not yet supported by this"
@@ -359,6 +353,21 @@ def get_threshold_overhead_parameter():
         return "thresholds_include_overhead"
 
 
+''' Validates python version being used is compatible '''
+
+
+def validate_python_version(cur_py_ver):
+    min_py_ver = '2.8.0'
+    mid_py_ver = '3.7.0'
+    max_py_ver = '3.9.0'
+
+    return ((parse_version(min_py_ver) <=
+             parse_version(cur_py_ver) <
+             parse_version(mid_py_ver)) or
+            (parse_version(cur_py_ver) >=
+             parse_version(max_py_ver)))
+
+
 ''' Validates threshold overhead parameter based on imported sdk version '''
 
 
@@ -471,3 +480,34 @@ def is_input_empty(item):
         return True
     else:
         return False
+
+
+'''
+Validates string against regex pattern
+'''
+
+
+def is_invalid_name(name, key):
+    if name is not None:
+        name_len = len(name)
+        if name_len > 32:
+            return "The maximum length for " + key + " is 32"
+        regexp = re.compile(r'^[a-zA-Z0-9_-]*$')
+        if name_len <= 1 or not regexp.search(name):
+            return "The value for " + key + " is invalid"
+
+
+'''
+Validates if ip is valid subnet mask
+'''
+
+
+def is_valid_netmask(netmask):
+    if netmask:
+        regexp = re.compile(r'^((128|192|224|240|248|252|254)\.0\.0\.0)|'
+                            r'(255\.(((0|128|192|224|240|248|252|254)\.0\.0)|'
+                            r'(255\.(((0|128|192|224|240|248|252|254)\.0)|'
+                            r'255\.(0|128|192|224|240|248|252|254)))))$')
+        if not regexp.search(netmask):
+            return False
+        return True
