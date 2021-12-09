@@ -1,4 +1,14 @@
 # ansible-powerscale Change Log
+## Version 1.4.0 - released on 16/12/21
+- Added CRUD operations for Groupnet module.
+- Added CRUD operations for Subnet module.
+- Added CRUD operations for Network Pool module.
+- Added CRUD operations for Network Rule module.
+- Support to retrieve and modify email settings in Settings module.
+- Support to retrieve, add and remove NTP servers in Settings module.
+- Access zone module is enhanced to support creation of an access zone.
+- Gather facts module is enhanced to list network groupnets, network subnets, network pools, network rules and network interfaces.
+
 ## Version 1.3.0 - released on 23/09/21
 - Added CRUD operations for SyncIQ Policy module.
 - Added CRUD operations for SyncIQ Performance Rule module.
