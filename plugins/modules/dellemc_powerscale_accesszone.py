@@ -37,7 +37,19 @@ options:
     - The name of the access zone.
     type: str
     required: True
-
+  path:
+    description:
+    - Specifies the access zone base directory path.
+    type: str
+  groupnet:
+    description:
+    - Name of the groupnet for create access zone
+    type: str
+    default: groupnet0
+  create_path:
+    description:
+    - Determines if a path is created when a path does not exist.
+    type: bool
   smb:
     description:
     - Specifies the default SMB setting parameters of access zone.
@@ -52,23 +64,23 @@ options:
         default: default acl
       directory_create_mask:
         description:
-        - Specifies the UNIX mask bits(octal) that are removed when a directory
+        - Specifies the UNIX mask bits (octal) that are removed when a directory
           is created, restricting permissions.
         - Mask bits are applied before mode bits are applied.
         type: str
       directory_create_mode:
         description:
-        - Specifies the UNIX mode bits(octal) that are added when a directory is
+        - Specifies the UNIX mode bits (octal) that are added when a directory is
           created, enabling permissions.
         type: str
       file_create_mask:
         description:
-        - Specifies the UNIX mask bits(octal) that are removed when a file is
+        - Specifies the UNIX mask bits (octal) that are removed when a file is
           created, restricting permissions.
         type: str
       file_create_mode:
         description:
-        - Specifies the UNIX mode bits(octal) that are added when a file is
+        - Specifies the UNIX mode bits (octal) that are added when a file is
           created, enabling permissions.
         type: str
       access_based_enumeration:
@@ -132,7 +144,7 @@ options:
     required: False
   auth_providers:
     description:
-    - Specifies the auth providers which needs to be added or removed from access zone.
+    - Specifies the auth providers which need to be added or removed from access zone.
     - If auth_providers are given, then provider_state should also be specified.
     type: list
     elements: dict
@@ -158,7 +170,7 @@ options:
     required: True
 
 notes:
-- Creation/Deletion of access zone is not allowed through the Ansible module.
+- Deletion of access zone is not allowed through the Ansible module.
 '''
 
 EXAMPLES = r'''
@@ -258,6 +270,22 @@ EXAMPLES = r'''
       auth_providers:
          - provider_name: "System"
            provider_type: "file"
+      state: "present"
+
+- name: Create New Access Zone
+  dellemc_powerscale_accesszone:
+      onefs_host: "{{onefs_host}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      az_name: "{{access zone}}"
+      path: "/ifs/test_dir"
+      groupnet: "groupnet1"
+      create_path: True
+      provider_state: "add"
+      auth_providers:
+        - provider_name: "System"
+          provider_type: "file"
       state: "present"
 '''
 
@@ -603,6 +631,43 @@ class PowerScaleAccessZone(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
+    def construct_az_params(self, az_params):
+        az_params_create = {}
+        az_params_create['auth_providers'] = []
+
+        az_params_create['name'] = az_params['az_name']
+        az_params_create['groupnet'] = az_params['groupnet']
+
+        # force_overlap flag is defaulted to true,
+        # since this parameter is required to be true for access zone creation.
+        az_params_create['force_overlap'] = True
+        az_params_create['path'] = az_params['path']
+
+        if az_params['auth_providers']:
+            for providers in az_params['auth_providers']:
+                if providers['provider_type']:
+                    az_params_create['auth_providers'].append(providers['provider_type'] + ":" + providers['provider_name'])
+        if az_params['create_path']:
+            az_params_create['create_path'] = True
+        return az_params_create
+
+    def create_access_zone(self, access_zone_params):
+        try:
+            self.api_instance.create_zone(access_zone_params)
+            return True
+        except Exception as e:
+            error_msg = utils.determine_error(error_obj=e)
+            error_message = 'Creation of access zone %s ' \
+                'failed with error: %s' % (access_zone_params['name'], error_msg)
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    def validate_input(self, az_params):
+        if not az_params['path']:
+            error_message = 'Please provide a valid path to create an access zone'
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
     def perform_module_operation(self):
         """
         Perform different actions on access zone module based on parameters
@@ -614,6 +679,10 @@ class PowerScaleAccessZone(object):
         nfs = self.module.params['nfs']
         provider_state = self.module.params['provider_state']
         auth_providers = self.module.params['auth_providers']
+        path = self.module.params['path']
+        groupnet = self.module.params['groupnet']
+        create_path = self.module.params['create_path']
+        az_params = self.module.params
 
         # result is a dictionary that contains changed status and access zone
         # details
@@ -641,11 +710,13 @@ class PowerScaleAccessZone(object):
             result['access_zone_modify_flag'] = access_zone_modify_flag
 
         if state == 'present' and not access_zone_details:
-            error_message = 'Access zone {0} not found - Creation of access' \
-                            ' zone is not allowed through Ansible module'.\
-                format(name)
-            LOG.error(error_message)
-            self.module.fail_json(msg=error_message)
+            self.validate_input(az_params)
+            access_zone_params = self.construct_az_params(az_params)
+            access_zone = self.create_access_zone(access_zone_params)
+            result['changed'] = access_zone
+            if result['changed']:
+                access_zone_details = self.get_details(name)
+                result['access_zone_details'] = self.get_details(name)
 
         if state == 'absent' and access_zone_details:
             error_message = 'Deletion of access zone is not allowed through' \
@@ -670,7 +741,6 @@ class PowerScaleAccessZone(object):
             if nfs_export_flag or nfs_zone_flag:
                 result['nfs_modify_flag'] = self.nfs_modify(
                     name, nfs, nfs_export_flag, nfs_zone_flag)
-
         result['access_zone_details'] = access_zone_details
         if result['smb_modify_flag'] or result['nfs_modify_flag'] or \
                 result['access_zone_modify_flag']:
@@ -685,6 +755,9 @@ def get_powerscale_accesszone_parameters():
     modules on PowerScale"""
     return dict(
         az_name=dict(required=True, type='str'),
+        path=dict(required=False, type='str'),
+        groupnet=dict(required=False, type='str', default='groupnet0'),
+        create_path=dict(required=False, type='bool'),
         smb=dict(required=False, type='dict'),
         nfs=dict(required=False, type='dict'),
         provider_state=dict(required=False, type='str', choices=['add', 'remove']),

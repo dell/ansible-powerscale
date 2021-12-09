@@ -15,7 +15,7 @@ DOCUMENTATION = r'''
 module: dellemc_powerscale_node
 version_added: '1.2.0'
 
-short_description: get node info of DellEMC PowerScale storage
+short_description: Get node info of DellEMC PowerScale storage
 
 description:
 - Get information of a node belonging to the PowerScale cluster
@@ -48,7 +48,33 @@ EXAMPLES = r'''
     api_password: "{{api_password}}"
     node_id: "{{cluster_node_id}}"
     state: "present"
-   '''
+'''
+
+RETURN = r'''
+changed:
+    description: Whether or not the resource has changed.
+    returned: always
+    type: bool
+cluster_node_details:
+    description: The cluster node details.
+    type: complex
+    returned: When cluster node exists
+    contains:
+        id:
+            description: Node id (device number) of a node.
+            type: int
+        lnn:
+            description: Logical Node Number (LNN) of a node.
+            type: int
+        partitions:
+            description: Node partition information.
+            type: complex
+            contains:
+                count:
+                    description: Count of how many partitions are included.
+                    type: int
+'''
+
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import dellemc_ansible_powerscale_utils as utils

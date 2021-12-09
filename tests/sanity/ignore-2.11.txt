@@ -16,3 +16,14 @@ plugins/modules/dellemc_powerscale_synciqreports.py validate-modules:missing-gpl
 plugins/modules/dellemc_powerscale_synciqrules.py validate-modules:missing-gplv3-license
 plugins/modules/dellemc_powerscale_synciqtargetreports.py validate-modules:missing-gplv3-license
 plugins/modules/dellemc_powerscale_user.py validate-modules:missing-gplv3-license
+plugins/modules/dellemc_powerscale_groupnet.py validate-modules:missing-gplv3-license
+plugins/modules/dellemc_powerscale_subnet.py validate-modules:missing-gplv3-license
+plugins/modules/dellemc_powerscale_subnet.py import-2.6
+plugins/modules/dellemc_powerscale_subnet.py import-2.7
+plugins/modules/dellemc_powerscale_groupnet.py import-2.6
+plugins/modules/dellemc_powerscale_groupnet.py import-2.7
+plugins/modules/dellemc_powerscale_networkrule.py validate-modules:missing-gplv3-license
+plugins/modules/dellemc_powerscale_networkpool.py validate-modules:missing-gplv3-license
+plugins/modules/dellemc_powerscale_settings.py validate-modules:missing-gplv3-license
+plugins/modules/dellemc_powerscale_networkpool.py import-2.6
+plugins/modules/dellemc_powerscale_networkpool.py import-2.7

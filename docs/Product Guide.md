@@ -1,114 +1,941 @@
 # Ansible Modules for Dell EMC PowerScale
-## Product Guide 1.3.0
+## Product Guide 1.4.0
 © 2021 Dell Inc. or its subsidiaries. All rights reserved. Dell, EMC, and other trademarks are trademarks of Dell Inc. or its subsidiaries. Other trademarks may be trademarks of their respective owners.
 
 --------------
 ## Contents
-*   [LDAP Module](#ldap-module)
+*   [Groupnet Module](#groupnet-module)
     *   [Synopsis](#synopsis)
     *   [Parameters](#parameters)
-    *   [Notes](#notes)
     *   [Examples](#examples)
     *   [Return Values](#return-values)
     *   [Authors](#authors)
-*   [SyncIQ Reports Module](#synciq-reports-module)
+*   [Network Pool Module](#network-pool-module)
     *   [Synopsis](#synopsis-1)
     *   [Parameters](#parameters-1)
     *   [Examples](#examples-1)
     *   [Return Values](#return-values-1)
     *   [Authors](#authors-1)
-*   [Smart Quota Module](#smart-quota-module)
+*   [LDAP Module](#ldap-module)
     *   [Synopsis](#synopsis-2)
     *   [Parameters](#parameters-2)
-    *   [Notes](#notes-1)
+    *   [Notes](#notes)
     *   [Examples](#examples-2)
     *   [Return Values](#return-values-2)
     *   [Authors](#authors-2)
-*   [SyncIQ Target Reports Module](#synciq-target-reports-module)
+*   [SyncIQ Reports Module](#synciq-reports-module)
     *   [Synopsis](#synopsis-3)
     *   [Parameters](#parameters-3)
     *   [Examples](#examples-3)
     *   [Return Values](#return-values-3)
     *   [Authors](#authors-3)
-*   [ADS Module](#ads-module)
+*   [Subnet Module](#subnet-module)
     *   [Synopsis](#synopsis-4)
     *   [Parameters](#parameters-4)
     *   [Examples](#examples-4)
     *   [Return Values](#return-values-4)
     *   [Authors](#authors-4)
-*   [Snapshot Schedule Module](#snapshot-schedule-module)
+*   [Smart Quota Module](#smart-quota-module)
     *   [Synopsis](#synopsis-5)
     *   [Parameters](#parameters-5)
+    *   [Notes](#notes-1)
     *   [Examples](#examples-5)
     *   [Return Values](#return-values-5)
     *   [Authors](#authors-5)
-*   [User Module](#user-module)
+*   [SyncIQ Target Reports Module](#synciq-target-reports-module)
     *   [Synopsis](#synopsis-6)
     *   [Parameters](#parameters-6)
     *   [Examples](#examples-6)
     *   [Return Values](#return-values-6)
     *   [Authors](#authors-6)
-*   [SMB Module](#smb-module)
+*   [ADS Module](#ads-module)
     *   [Synopsis](#synopsis-7)
     *   [Parameters](#parameters-7)
     *   [Examples](#examples-7)
     *   [Return Values](#return-values-7)
     *   [Authors](#authors-7)
-*   [Snapshot Module](#snapshot-module)
+*   [Network Rule Module](#network-rule-module)
     *   [Synopsis](#synopsis-8)
     *   [Parameters](#parameters-8)
     *   [Examples](#examples-8)
     *   [Return Values](#return-values-8)
     *   [Authors](#authors-8)
-*   [SyncIQ Performance Rules Module](#synciq-performance-rules-module)
+*   [Snapshot Schedule Module](#snapshot-schedule-module)
     *   [Synopsis](#synopsis-9)
     *   [Parameters](#parameters-9)
-    *   [Notes](#notes-2)
     *   [Examples](#examples-9)
     *   [Return Values](#return-values-9)
     *   [Authors](#authors-9)
-*   [Accesszone Module](#accesszone-module)
+*   [User Module](#user-module)
     *   [Synopsis](#synopsis-10)
     *   [Parameters](#parameters-10)
-    *   [Notes](#notes-3)
     *   [Examples](#examples-10)
     *   [Return Values](#return-values-10)
     *   [Authors](#authors-10)
-*   [SyncIQ Job Module](#synciq-job-module)
+*   [SMB Module](#smb-module)
     *   [Synopsis](#synopsis-11)
     *   [Parameters](#parameters-11)
-    *   [Notes](#notes-4)
     *   [Examples](#examples-11)
     *   [Return Values](#return-values-11)
     *   [Authors](#authors-11)
-*   [NFS Module](#nfs-module)
+*   [Snapshot Module](#snapshot-module)
     *   [Synopsis](#synopsis-12)
     *   [Parameters](#parameters-12)
     *   [Examples](#examples-12)
     *   [Return Values](#return-values-12)
     *   [Authors](#authors-12)
-*   [SyncIQ Policy Module](#synciq-policy-module)
+*   [SyncIQ Rules Module](#synciq-rules-module)
     *   [Synopsis](#synopsis-13)
     *   [Parameters](#parameters-13)
-    *   [Notes](#notes-5)
+    *   [Notes](#notes-2)
     *   [Examples](#examples-13)
     *   [Return Values](#return-values-13)
     *   [Authors](#authors-13)
-*   [Group Module](#group-module)
+*   [Access Zone Module](#access-zone-module)
     *   [Synopsis](#synopsis-14)
     *   [Parameters](#parameters-14)
+    *   [Notes](#notes-3)
     *   [Examples](#examples-14)
     *   [Return Values](#return-values-14)
     *   [Authors](#authors-14)
-*   [File System Module](#file-system-module)
+*   [Node Module](#node-module)
     *   [Synopsis](#synopsis-15)
     *   [Parameters](#parameters-15)
     *   [Examples](#examples-15)
     *   [Return Values](#return-values-15)
     *   [Authors](#authors-15)
+*   [SyncIQ Job Module](#synciq-job-module)
+    *   [Synopsis](#synopsis-16)
+    *   [Parameters](#parameters-16)
+    *   [Notes](#notes-4)
+    *   [Examples](#examples-16)
+    *   [Return Values](#return-values-16)
+    *   [Authors](#authors-16)
+*   [NFS Module](#nfs-module)
+    *   [Synopsis](#synopsis-17)
+    *   [Parameters](#parameters-17)
+    *   [Examples](#examples-17)
+    *   [Return Values](#return-values-17)
+    *   [Authors](#authors-17)
+*   [SyncIQ Policy Module](#synciq-policy-module)
+    *   [Synopsis](#synopsis-18)
+    *   [Parameters](#parameters-18)
+    *   [Notes](#notes-5)
+    *   [Examples](#examples-18)
+    *   [Return Values](#return-values-18)
+    *   [Authors](#authors-18)
+*   [Settings Module](#settings-module)
+    *   [Synopsis](#synopsis-19)
+    *   [Parameters](#parameters-19)
+    *   [Examples](#examples-19)
+    *   [Return Values](#return-values-19)
+    *   [Authors](#authors-19)
+*   [Group Module](#group-module)
+    *   [Synopsis](#synopsis-20)
+    *   [Parameters](#parameters-20)
+    *   [Examples](#examples-20)
+    *   [Return Values](#return-values-20)
+    *   [Authors](#authors-20)
+*   [File System Module](#file-system-module)
+    *   [Synopsis](#synopsis-21)
+    *   [Parameters](#parameters-21)
+    *   [Examples](#examples-21)
+    *   [Return Values](#return-values-21)
+    *   [Authors](#authors-21)
+*   [Gatherfacts Module](#gatherfacts-module)
+    *   [Synopsis](#synopsis-22)
+    *   [Parameters](#parameters-22)
+    *   [Examples](#examples-22)
+    *   [Authors](#authors-22)
 
 --------------
 
+# Groupnet Module
+
+Manages groupnet configuration on PowerScale
+
+### Synopsis
+ Manages the groupnet configuration on the PowerScale storage system. This includes creating, modifying, deleting and retrieving the details of the groupnet.
+
+### Parameters
+                                                                                                                                                                                                                                                                                                                
+<table>
+    <tr>
+        <th colspan=1>Parameter</th>
+        <th width="20%">Type</th>
+        <th>Required</th>
+        <th>Default</th>
+        <th>Choices</th>
+        <th width="80%">Description</th>
+    </tr>
+                                                            <tr>
+            <td colspan=1 > groupnet_name</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> The name of the groupnet. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > description</td>
+            <td> str  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> A description of the groupnet. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > new_groupnet_name</td>
+            <td> str  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> Name of the groupnet when renaming an existing groupnet </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > dns_servers</td>
+            <td> list   <br> elements: str </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> List of Domain Name Server IP addresses. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > dns_server_state</td>
+            <td> str  </td>
+            <td></td>
+            <td></td>
+            <td> <ul> <li>add</li>  <li>remove</li> </ul></td>
+            <td> <br> Specifies if the dns_servers should be added or removed from the groupnet. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > dns_search_suffix</td>
+            <td> list   <br> elements: str </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> List of DNS search suffixes. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > dns_search_suffix_state</td>
+            <td> str  </td>
+            <td></td>
+            <td></td>
+            <td> <ul> <li>add</li>  <li>remove</li> </ul></td>
+            <td> <br> Specifies if the dns search suffix should be added or removed from the groupnet. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > state</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td> <ul> <li>present</li>  <li>absent</li> </ul></td>
+            <td> <br> The state of the groupnet after the task is performed.  <br> present - indicates that the groupnet should exist on the system.  <br> absent - indicates that the groupnet should not exist on the system. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > onefs_host</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> IP address or FQDN of the PowerScale cluster. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > port_no</td>
+            <td> str  </td>
+            <td></td>
+            <td> 8080 </td>
+            <td></td>
+            <td> <br> Port number of the PowerScale cluster.It defaults to 8080 if not specified. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > verify_ssl</td>
+            <td> bool  </td>
+            <td> True </td>
+            <td></td>
+            <td> <ul> <li>True</li>  <li>False</li> </ul></td>
+            <td> <br> boolean variable to specify whether to validate SSL certificate or not.  <br> True - indicates that the SSL certificate should be verified.  <br> False - indicates that the SSL certificate should not be verified. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > api_user</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> username of the PowerScale cluster. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > api_password</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> the password of the PowerScale cluster. </td>
+        </tr>
+                                            </table>
+
+
+### Examples
+```
+- name: Create a groupnet
+  dellemc_powerscale_groupnet:
+      onefs_host: "{{onefs_host}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      groupnet_name: "groupnet_test"
+      description: "Test Groupnet"
+      dns_servers:
+        - '198.10.**.***'
+      dns_server_state: 'add'
+      dns_search_suffix:
+        - 'samplesearch.com'
+      dns_search_suffix_state: 'add'
+      state: "present"
+
+- name: Add dns_servers to a groupnet
+  dellemc_powerscale_groupnet:
+      onefs_host: "{{onefs_host}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      groupnet_name: "groupnet_test"
+      dns_servers:
+        - '198.10.**.***'
+      dns_server_state: 'add'
+      state: "present"
+
+- name: Remove dns_servers from a groupnet
+  dellemc_powerscale_groupnet:
+      onefs_host: "{{onefs_host}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      groupnet_name: "groupnet_test"
+      dns_servers:
+        - '198.10.**.***'
+      dns_server_state: 'remove'
+      state: "present"
+
+- name: Add dns_search_suffix to a groupnet
+  dellemc_powerscale_groupnet:
+      onefs_host: "{{onefs_host}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      groupnet_name: "groupnet_test"
+      dns_search_suffix:
+        - 'samplesearch.com'
+      dns_search_suffix_state: 'add'
+      state: "present"
+
+- name: Remove dns_search_suffix from a groupnet
+  dellemc_powerscale_groupnet:
+      onefs_host: "{{onefs_host}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      groupnet_name: "groupnet_test"
+      dns_search_suffix:
+        - 'samplesearch.com'
+      dns_search_suffix_state: 'remove'
+      state: "present"
+
+- name: Rename a groupnet
+  dellemc_powerscale_groupnet:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{port_no}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      groupnet_name: "groupnet_test"
+      new_groupnet_name: "groupnet_test_rename"
+
+- name: Get groupnet details
+  dellemc_powerscale_groupnet:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{port_no}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      groupnet_name: "groupnet_test"
+      state: "present"
+
+- name: Delete a groupnet
+  dellemc_powerscale_groupnet:
+      onefs_host: "{{onefs_host}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      groupnet_name: "groupnet_test"
+      state: "absent"
+```
+
+### Return Values
+                                                                                                                                                                                                                                        
+<table>
+    <tr>
+        <th colspan=2>Key</th>
+        <th>Type</th>
+        <th>Returned</th>
+        <th width="100%">Description</th>
+    </tr>
+                                                                                    <tr>
+            <td colspan=2 > changed </td>
+            <td>  bool </td>
+            <td> always </td>
+            <td> Whether or not the resource has changed </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > groupnet_details </td>
+            <td>  complex </td>
+            <td> When a groupnet exists </td>
+            <td> Groupnet details </td>
+        </tr>
+                            <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > dns_search </td>
+                <td> list </td>
+                <td>success</td>
+                <td> List of DNS search suffixes </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > dns_servers </td>
+                <td> list </td>
+                <td>success</td>
+                <td> List of Domain Name Server IP addresses </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > id </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Unique Groupnet ID. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > name </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Name of groupnet </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > subnets </td>
+                <td> list </td>
+                <td>success</td>
+                <td> List of names of the subnets in the groupnet </td>
+            </tr>
+                                        </table>
+
+### Authors
+* Jennifer John (@johnj9) <ansible.team@dell.com>
+
+--------------------------------
+# Network Pool Module
+
+Manages Network Pools on PowerScale Storage System
+
+### Synopsis
+ Managing Network Pools on the PowerScale Storage System includes creating, modifying, deleting and reterving details of network pool.
+
+### Parameters
+                                                                                                                                                                                                                                                                                                                                                                                                    
+<table>
+    <tr>
+        <th colspan=2>Parameter</th>
+        <th width="20%">Type</th>
+        <th>Required</th>
+        <th>Default</th>
+        <th>Choices</th>
+        <th width="80%">Description</th>
+    </tr>
+                                                            <tr>
+            <td colspan=2 > pool_name</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> The Name of the pool. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > new_pool_name</td>
+            <td> str  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> Name of the pool when renaming an existing pool. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > groupnet_name</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> The name of the groupnet. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > subnet_name</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> The name of the subnet. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > description</td>
+            <td> str  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> Description of the pool. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > access_zone</td>
+            <td> str  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> Name of access zone to be associated with pool. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > state</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td> <ul> <li>absent</li>  <li>present</li> </ul></td>
+            <td> <br> The state option is used to mention the existence of pool. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > additional_pool_params</td>
+            <td> dict  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> Define additional parameters for pool. </td>
+        </tr>
+                            <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > ranges </td>
+                <td> list   <br> elements: dict </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>  <br> List of IP address ranges in this pool.  </td>
+            </tr>
+                    <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > range_state </td>
+                <td> str  </td>
+                <td></td>
+                <td></td>
+                <td> <ul> <li>add</li>  <li>remove</li> </ul></td>
+                <td>  <br> This signifies if range needs to be added or removed.  </td>
+            </tr>
+                    <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > ifaces </td>
+                <td> list   <br> elements: dict </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>  <br> List of Pool interface members.  </td>
+            </tr>
+                    <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > iface_state </td>
+                <td> str  </td>
+                <td></td>
+                <td></td>
+                <td> <ul> <li>add</li>  <li>remove</li> </ul></td>
+                <td>  <br> This signifies if interface needs to be added or removed.  </td>
+            </tr>
+                            <tr>
+            <td colspan=2 > sc_params</td>
+            <td> dict  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> SmartConnect Parameters </td>
+        </tr>
+                            <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > sc_dns_zone </td>
+                <td> str  </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>  <br> SmartConnect zone name for the pool.  </td>
+            </tr>
+                    <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > sc_subnet </td>
+                <td> str  </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>  <br> Name of SmartConnect service subnet for this pool.  </td>
+            </tr>
+                    <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > sc_connect_policy </td>
+                <td> str  </td>
+                <td></td>
+                <td></td>
+                <td> <ul> <li>round_robin</li>  <li>conn_count</li>  <li>throughput</li>  <li>cpu_usage</li> </ul></td>
+                <td>  <br> SmartConnect client connection balancing policy.  </td>
+            </tr>
+                    <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > sc_failover_policy </td>
+                <td> str  </td>
+                <td></td>
+                <td></td>
+                <td> <ul> <li>round_robin</li>  <li>conn_count</li>  <li>throughput</li>  <li>cpu_usage</li> </ul></td>
+                <td>  <br> SmartConnect IP failover policy.  </td>
+            </tr>
+                    <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > rebalance_policy </td>
+                <td> str  </td>
+                <td></td>
+                <td></td>
+                <td> <ul> <li>auto</li>  <li>manual</li> </ul></td>
+                <td>  <br> Rebalance policy.  </td>
+            </tr>
+                    <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > alloc_method </td>
+                <td> str  </td>
+                <td></td>
+                <td></td>
+                <td> <ul> <li>dynamic</li>  <li>static</li> </ul></td>
+                <td>  <br> Specifies how IP address allocation is done among pool members.  </td>
+            </tr>
+                    <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > sc_auto_unsuspend_delay </td>
+                <td> int  </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>  <br> Time delay in seconds before a node which has been automatically unsuspended becomes usable in SmartConnect responses for pool zones.  </td>
+            </tr>
+                    <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > sc_ttl </td>
+                <td> int  </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>  <br> Time to live value for SmartConnect DNS query responses in seconds.  </td>
+            </tr>
+                    <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > aggregation_mode </td>
+                <td> str  </td>
+                <td></td>
+                <td></td>
+                <td> <ul> <li>roundrobin</li>  <li>failover</li>  <li>lacp</li>  <li>fec</li> </ul></td>
+                <td>  <br> OneFS supports the following NIC aggregation modes.  </td>
+            </tr>
+                            <tr>
+            <td colspan=2 > onefs_host</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> IP address or FQDN of the PowerScale cluster. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > port_no</td>
+            <td> str  </td>
+            <td></td>
+            <td> 8080 </td>
+            <td></td>
+            <td> <br> Port number of the PowerScale cluster.It defaults to 8080 if not specified. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > verify_ssl</td>
+            <td> bool  </td>
+            <td> True </td>
+            <td></td>
+            <td> <ul> <li>True</li>  <li>False</li> </ul></td>
+            <td> <br> boolean variable to specify whether to validate SSL certificate or not.  <br> True - indicates that the SSL certificate should be verified.  <br> False - indicates that the SSL certificate should not be verified. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > api_user</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> username of the PowerScale cluster. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > api_password</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> the password of the PowerScale cluster. </td>
+        </tr>
+                                            </table>
+
+
+### Examples
+```
+    - name: Create Network Pool
+      dellemc_powerscale_subnet:
+      onefs_host: "{{onefs_host}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      groupnet: "groupnet0"
+      subnet: "subnet0"
+      pool: "Test_Pool_2"
+      access_zone: "system"
+      state: "present"
+
+    - name: Get Network Pool
+      dellemc_powerscale_subnet:
+      onefs_host: "{{onefs_host}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      groupnet: "groupnet0"
+      subnet: "subnet0"
+      pool: "Test_Pool_2"
+      state: "present"
+
+    - name: Modify Network Pool
+      dellemc_powerscale_subnet:
+      onefs_host: "{{onefs_host}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      groupnet: "groupnet0"
+      subnet: "subnet0"
+      pool: "Test_Pool_2"
+      additional_pool_params:
+        ranges:
+        - low: "10.230.**.***"
+          high: "10.230.**.***"
+        range_state: "add"
+        ifaces:
+        - iface: "ext-1"
+          lnn: 1
+        iface_state: "add"
+      sc_params:
+        sc_dns_zone: "10.230.**.***"
+        sc_connect_policy: "throughput"
+        sc_failover_policy: "throughput"
+        rebalance_policy: "auto"
+        alloc_method: "static"
+        sc_auto_unsuspend_delay: 200
+        sc_ttl: 200
+      aggregation_mode: "fec"
+      description: "Pool Created by Ansible Modify"
+      state: "present"
+
+    - name: Delete Network Pool
+      dellemc_powerscale_subnet:
+      onefs_host: "{{onefs_host}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      groupnet: "groupnet0"
+      subnet: "subnet0"
+      pool: "Test_Pool_2"
+      state: "absent"
+
+    - name: Rename a network Pool
+      dellemc_powerscale_networkpool:
+      onefs_host: "{{onefs_host}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      groupnet_name: "groupnet0"
+      subnet_name: "subnet0"
+      pool_name: "Test_Pool"
+      new_pool_name: "Test_Pool_Rename"
+      state: "present"
+```
+
+### Return Values
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+<table>
+    <tr>
+        <th colspan=2>Key</th>
+        <th>Type</th>
+        <th>Returned</th>
+        <th width="100%">Description</th>
+    </tr>
+                                                                                    <tr>
+            <td colspan=2 > changed </td>
+            <td>  bool </td>
+            <td> always </td>
+            <td> Whether or not the resource has changed </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > pools </td>
+            <td>  complex </td>
+            <td> always </td>
+            <td> Details of the network pool </td>
+        </tr>
+                            <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > access_zone </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Name of a valid access zone to map IP address pool to the zone. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > addr_family </td>
+                <td> str </td>
+                <td>success</td>
+                <td> IP address format. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > aggregation_mode </td>
+                <td> str </td>
+                <td>success</td>
+                <td> OneFS supports the following NIC aggregation modes. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > alloc_method </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Specifies how IP address allocation is done among pool members. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > description </td>
+                <td> str </td>
+                <td>success</td>
+                <td> A description of the pool. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > groupnet </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Name of the groupnet this pool belongs to. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > id </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Unique Pool ID. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > ifaces </td>
+                <td> str </td>
+                <td>success</td>
+                <td> List of interface members in this pool. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > name </td>
+                <td> str </td>
+                <td>success</td>
+                <td> The name of the pool. It must be unique throughout the given subnet. It's a required field with POST method. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > ranges </td>
+                <td> str </td>
+                <td>success</td>
+                <td> List of IP address ranges in this pool. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > rebalance_policy </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Rebalance policy. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > sc_auto_unsuspend_delay </td>
+                <td> int </td>
+                <td>success</td>
+                <td> Time delay in seconds before a node which has been automatically unsuspended becomes usable in SmartConnect responses for pool zones. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > sc_connect_policy </td>
+                <td> str </td>
+                <td>success</td>
+                <td> SmartConnect client connection balancing policy. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > sc_dns_zone </td>
+                <td> str </td>
+                <td>success</td>
+                <td> SmartConnect zone name for the pool. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > sc_dns_zone_aliases </td>
+                <td> list </td>
+                <td>success</td>
+                <td> List of SmartConnect zone aliases (DNS names) to the pool. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > sc_failover_policy </td>
+                <td> str </td>
+                <td>success</td>
+                <td> SmartConnect IP failover policy. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > sc_subnet </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Name of SmartConnect service subnet for this pool. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > sc_suspended_nodes </td>
+                <td> list </td>
+                <td>success</td>
+                <td> List of LNNs showing currently suspended nodes in SmartConnect. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > sc_ttl </td>
+                <td> int </td>
+                <td>success</td>
+                <td> Time to live value for SmartConnect DNS query responses in seconds. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > static_routes </td>
+                <td> list </td>
+                <td>success</td>
+                <td> List of interface members in this pool. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > subnet </td>
+                <td> str </td>
+                <td>success</td>
+                <td> The name of the subnet. </td>
+            </tr>
+                                        </table>
+
+### Authors
+* Meenakshi Dembi (@dembim) <ansible.team@dell.com>
+
+--------------------------------
 # LDAP Module
 
 Manage LDAP authentication provider on PowerScale
@@ -1296,6 +2123,367 @@ Provides the SyncIQ reports for PowerScale Storage System
 
 ### Authors
 * Meenakshi Dembi (@dembim) <ansible.team@dell.com>
+
+--------------------------------
+# Subnet Module
+
+Manages subnet configuration on PowerScale
+
+### Synopsis
+ Manages the subnet configuration on the PowerScale storage system. This includes creating, modifying, deleting and retrieving the details of the subnet.
+
+### Parameters
+                                                                                                                                                                                                                                                                                                                                                        
+<table>
+    <tr>
+        <th colspan=2>Parameter</th>
+        <th width="20%">Type</th>
+        <th>Required</th>
+        <th>Default</th>
+        <th>Choices</th>
+        <th width="80%">Description</th>
+    </tr>
+                                                            <tr>
+            <td colspan=2 > subnet_name</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> Name of the subnet </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > groupnet_name</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> Name of the groupnet </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > description</td>
+            <td> str  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> A description of the subnet. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > netmask</td>
+            <td> str  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> Netmask of the subnet </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > gateway_priority</td>
+            <td> int  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> Gateway priority </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > new_subnet_name</td>
+            <td> str  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> Name of the subnet when renaming an existing subnet </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > subnet_params</td>
+            <td> dict  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> Specify additional parameters to configure the subnet. </td>
+        </tr>
+                            <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > gateway </td>
+                <td> str  </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>  <br> Gateway IP address. </td>
+            </tr>
+                    <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > sc_service_addrs </td>
+                <td> list   <br> elements: dict </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>  <br> List of IP addresses that SmartConnect listens for DNS requests.  </td>
+            </tr>
+                    <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > sc_service_addrs_state </td>
+                <td> str  </td>
+                <td></td>
+                <td></td>
+                <td> <ul> <li>add</li>  <li>remove</li> </ul></td>
+                <td>  <br> Specifies if the sc_service_addrs range need to be added or removed from the subnet.  </td>
+            </tr>
+                    <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > mtu </td>
+                <td> int  </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>  <br> MTU of the subnet. </td>
+            </tr>
+                    <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > vlan_enabled </td>
+                <td> bool  </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>  <br> VLAN tagging enabled or disabled </td>
+            </tr>
+                    <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > vlan_id </td>
+                <td> int  </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>  <br> VLAN ID for all interfaces in the subnet. </td>
+            </tr>
+                            <tr>
+            <td colspan=2 > state</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td> <ul> <li>absent</li>  <li>present</li> </ul></td>
+            <td> <br> The state of the subnet after the task is performed.  <br> present - indicates that the subnet should exist on the system.  <br> absent - indicates that the subnet should not exist on the system. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > onefs_host</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> IP address or FQDN of the PowerScale cluster. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > port_no</td>
+            <td> str  </td>
+            <td></td>
+            <td> 8080 </td>
+            <td></td>
+            <td> <br> Port number of the PowerScale cluster.It defaults to 8080 if not specified. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > verify_ssl</td>
+            <td> bool  </td>
+            <td> True </td>
+            <td></td>
+            <td> <ul> <li>True</li>  <li>False</li> </ul></td>
+            <td> <br> boolean variable to specify whether to validate SSL certificate or not.  <br> True - indicates that the SSL certificate should be verified.  <br> False - indicates that the SSL certificate should not be verified. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > api_user</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> username of the PowerScale cluster. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > api_password</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> the password of the PowerScale cluster. </td>
+        </tr>
+                                            </table>
+
+
+### Examples
+```
+- name: Create a subnet
+  dellemc_powerscale_subnet:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{port_no}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      groupnet_name: "groupnet_test"
+      subnet_name: "subnet_test"
+      description: "Test subnet"
+      netmask: '198.10.**.***'
+      gateway_priority: 1
+      subnet_params:
+        gateway: '198.10.**.***'
+        sc_service_addrs:
+          - start_range : '198.10.**.***'
+            end_range: '198.10.**.***'
+        sc_service_addrs_state: "add"
+        mtu: 1500
+        vlan_enabled: true
+        vlan_id: 22
+      state: 'present'
+
+- name: Modify a subnet
+  dellemc_powerscale_subnet:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{port_no}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      groupnet_name: "groupnet_test"
+      subnet_name: "subnet_test"
+      description: "Test subnet"
+      netmask: '198.10.**.***'
+      gateway_priority: 2
+      subnet_params:
+        gateway: '198.10.**.***'
+        mtu: 1500
+        vlan_enabled: true
+        vlan_id: 22
+      state: 'present'
+
+- name: Rename a subnet
+  dellemc_powerscale_subnet:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{port_no}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      groupnet_name: "groupnet_test"
+      subnet_name: "subnet_test"
+      new_subnet_name: "subnet_test_rename"
+
+- name: Add smart connect service ip range to subnet
+  dellemc_powerscale_subnet:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{port_no}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      groupnet_name: "groupnet_test"
+      subnet_name: "subnet_test"
+      subnet_params:
+        sc_service_addrs:
+          - start_range : '198.10.**.***'
+            end_range: '198.10.**.***'
+        sc_service_addrs_state: "add"
+      state: 'present'
+
+- name: Remove smart connect service ip range from subnet
+  dellemc_powerscale_subnet:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{port_no}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      groupnet_name: "groupnet_test"
+      subnet_name: "subnet_test"
+      subnet_params:
+        sc_service_addrs:
+          - start_range : '198.10.**.***'
+            end_range: '198.10.**.***'
+        sc_service_addrs_state: "remove"
+      state: 'present'
+
+- name: Delete a subnet
+  dellemc_powerscale_subnet:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{port_no}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      groupnet_name: "groupnet_test"
+      subnet_name: "subnet_test"
+      state: 'absent'
+```
+
+### Return Values
+                                                                                                                                                                                                                                                                                                    
+<table>
+    <tr>
+        <th colspan=2>Key</th>
+        <th>Type</th>
+        <th>Returned</th>
+        <th width="100%">Description</th>
+    </tr>
+                                                                                    <tr>
+            <td colspan=2 > changed </td>
+            <td>  bool </td>
+            <td> always </td>
+            <td> Whether or not the resource has changed </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > subnet_details </td>
+            <td>  complex </td>
+            <td> When a subnet exists </td>
+            <td> Subnet details </td>
+        </tr>
+                            <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > addr_family </td>
+                <td> str </td>
+                <td>success</td>
+                <td> IP address format. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > groupnet </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Name of the groupnet this subnet belongs to. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > id </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Unique subnet id. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > mtu </td>
+                <td> int </td>
+                <td>success</td>
+                <td> MTU of the subnet. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > name </td>
+                <td> str </td>
+                <td>success</td>
+                <td> The name of the subnet. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > pools </td>
+                <td> list </td>
+                <td>success</td>
+                <td> List of names of pools in the subnet. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > prefixlen </td>
+                <td> int </td>
+                <td>success</td>
+                <td> Subnet prefix length. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > sc_service_addr </td>
+                <td> list </td>
+                <td>success</td>
+                <td> The address that SmartConnect listens for DNS requests. </td>
+            </tr>
+                                        </table>
+
+### Authors
+* Jennifer John (@johnj9) <ansible.team@dell.com>
 
 --------------------------------
 # Smart Quota Module
@@ -2880,6 +4068,283 @@ Manages the ADS authentication provider on PowerScale
 * Jennifer John (@johnj9) <ansible.team@dell.com>
 
 --------------------------------
+# Network Rule Module
+
+Manages Network provisioning rules for DellEMC PowerScale Storage
+
+### Synopsis
+ Modify an existing network provisioning rule Create a new network provisioning rule Delete a network provisioning rule View the details of a network provisioning rule
+
+### Parameters
+                                                                                                                                                                                                                                                                                                                                    
+<table>
+    <tr>
+        <th colspan=1>Parameter</th>
+        <th width="20%">Type</th>
+        <th>Required</th>
+        <th>Default</th>
+        <th>Choices</th>
+        <th width="80%">Description</th>
+    </tr>
+                                                            <tr>
+            <td colspan=1 > description</td>
+            <td> str  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> Description for rule  <br> It can be no more than 128 bytes in length </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > groupnet_name</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> Groupnet name to which this provisioning rule applies </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > iface</td>
+            <td> str  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> Interface to which the rule applies </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > node_type</td>
+            <td> str  </td>
+            <td></td>
+            <td></td>
+            <td> <ul> <li>any</li>  <li>storage</li>  <li>accelerator</li>  <li>backup-accelerator</li> </ul></td>
+            <td> <br> Node types to which the provisioning rule applies </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > pool_name</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> Pool to which this provisioning rule applies </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > rule_name</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> Name of provisioning rule </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > new_rule_name</td>
+            <td> str  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> Name of provisioning rule when renaming an existing rule </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > subnet_name</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> Name of the subnet to which this provisioning rule applies </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > state</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td> <ul> <li>absent</li>  <li>present</li> </ul></td>
+            <td> <br> State of provisioning rule </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > onefs_host</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> IP address or FQDN of the PowerScale cluster. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > port_no</td>
+            <td> str  </td>
+            <td></td>
+            <td> 8080 </td>
+            <td></td>
+            <td> <br> Port number of the PowerScale cluster.It defaults to 8080 if not specified. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > verify_ssl</td>
+            <td> bool  </td>
+            <td> True </td>
+            <td></td>
+            <td> <ul> <li>True</li>  <li>False</li> </ul></td>
+            <td> <br> boolean variable to specify whether to validate SSL certificate or not.  <br> True - indicates that the SSL certificate should be verified.  <br> False - indicates that the SSL certificate should not be verified. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > api_user</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> username of the PowerScale cluster. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > api_password</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> the password of the PowerScale cluster. </td>
+        </tr>
+                                            </table>
+
+
+### Examples
+```
+  - name: Get the details of a network rule
+    dellemc_powerscale_network_rule:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{port_no}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      groupnet_name: "groupnet1"
+      subnet_name: "subnet1"
+      pool_name: "pool1"
+      rule_name: "rule1"
+      state: "present"
+
+  - name: Create a new network provisioning rule
+    dellemc_powerscale_network_rule:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{port_no}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      groupnet_name: "groupnet1"
+      subnet_name: "subnet1"
+      pool_name: "pool1"
+      rule_name: "new_rule"
+      description: "Rename existing rule"
+      iface: "ext1"
+      node_type: "storage"
+      state: "present"
+
+  - name: Modifying an existing network provisioning rule
+    dellemc_powerscale_network_rule:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{port_no}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      groupnet_name: "groupnet1"
+      subnet_name: "subnet1"
+      pool_name: "pool1"
+      rule_name: "rule_name"
+      description: "Modify rule"
+      iface: "ext1"
+      node_type: "storage"
+      state: "present"
+
+  - name: Delete a network provisioning rule
+    dellemc_powerscale_network_rule:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{port_no}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      groupnet_name: "groupnet1"
+      subnet_name: "subnet1"
+      pool_name: "pool1"
+      rule_name: "rule"
+      state: absent
+```
+
+### Return Values
+                                                                                                                                                                                                                                                                                                    
+<table>
+    <tr>
+        <th colspan=2>Key</th>
+        <th>Type</th>
+        <th>Returned</th>
+        <th width="100%">Description</th>
+    </tr>
+                                                                                    <tr>
+            <td colspan=2 > changed </td>
+            <td>  bool </td>
+            <td> Always </td>
+            <td> Whether or not the resource has changed </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > network_rule_details </td>
+            <td>  complex </td>
+            <td> When a network provisioning rule exists </td>
+            <td> Network provisioning rule details </td>
+        </tr>
+                            <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > description </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Description of network provisioning rule </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > groupnet </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Name of groupnet to which this rule belongs </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > id </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Unique ID for network provisioning rule </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > iface </td>
+                <td> str </td>
+                <td>success</td>
+                <td> ['Interface name to which this rule belongs', 'For example, ext-1'] </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > name </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Name of network provisioning rule </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > node_type </td>
+                <td> str </td>
+                <td>success</td>
+                <td> ['Node type to which the provisioning rule applies'] </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > pool </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Name of pool to which this rule belongs </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > subnet </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Name of subnet to which this rule belongs </td>
+            </tr>
+                                        </table>
+
+### Authors
+* Spandita Panigrahi (@panigs7) <ansible.team@dell.com>
+
+--------------------------------
 # Snapshot Schedule Module
 
 Manage snapshot schedules on Dell EMC PowerScale.
@@ -4445,7 +5910,7 @@ Manage snapshots on Dell EMC PowerScale.
 * Prashant Rakheja (@prashant-dell) <ansible.team@dell.com>
 
 --------------------------------
-# SyncIQ Performance Rules Module
+# SyncIQ Rules Module
 
 Manage SyncIQ performance rules on PowerScale
 
@@ -4721,7 +6186,7 @@ Manage SyncIQ performance rules on PowerScale
 * Spandita Panigrahi (@panigs7) <ansible.team@dell.com>
 
 --------------------------------
-# Accesszone Module
+# Access Zone Module
 
 Manages access zones on PowerScale
 
@@ -4729,7 +6194,7 @@ Manages access zones on PowerScale
  Managing access zones on the PowerScale storage system includes getting details of the access zone and modifying the smb and nfs settings.
 
 ### Parameters
-                                                                                                                                                                                                                                                                                                                                                                    
+                                                                                                                                                                                                                                                                                                                                                                                                                                
 <table>
     <tr>
         <th colspan=2>Parameter</th>
@@ -4746,6 +6211,30 @@ Manages access zones on PowerScale
             <td></td>
             <td></td>
             <td> <br> The name of the access zone. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > path</td>
+            <td> str  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> Specifies the access zone base directory path. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > groupnet</td>
+            <td> str  </td>
+            <td></td>
+            <td> groupnet0 </td>
+            <td></td>
+            <td> <br> Name of the groupnet for create access zone </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > create_path</td>
+            <td> bool  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> Determines if a path is created when a path does not exist. </td>
         </tr>
                     <tr>
             <td colspan=2 > smb</td>
@@ -4771,7 +6260,7 @@ Manages access zones on PowerScale
                 <td></td>
                 <td></td>
                 <td></td>
-                <td>  <br> Specifies the UNIX mask bits(octal) that are removed when a directory is created, restricting permissions.  <br> Mask bits are applied before mode bits are applied.  </td>
+                <td>  <br> Specifies the UNIX mask bits (octal) that are removed when a directory is created, restricting permissions.  <br> Mask bits are applied before mode bits are applied.  </td>
             </tr>
                     <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
@@ -4780,7 +6269,7 @@ Manages access zones on PowerScale
                 <td></td>
                 <td></td>
                 <td></td>
-                <td>  <br> Specifies the UNIX mode bits(octal) that are added when a directory is created, enabling permissions.  </td>
+                <td>  <br> Specifies the UNIX mode bits (octal) that are added when a directory is created, enabling permissions.  </td>
             </tr>
                     <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
@@ -4789,7 +6278,7 @@ Manages access zones on PowerScale
                 <td></td>
                 <td></td>
                 <td></td>
-                <td>  <br> Specifies the UNIX mask bits(octal) that are removed when a file is created, restricting permissions.  </td>
+                <td>  <br> Specifies the UNIX mask bits (octal) that are removed when a file is created, restricting permissions.  </td>
             </tr>
                     <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
@@ -4798,7 +6287,7 @@ Manages access zones on PowerScale
                 <td></td>
                 <td></td>
                 <td></td>
-                <td>  <br> Specifies the UNIX mode bits(octal) that are added when a file is created, enabling permissions.  </td>
+                <td>  <br> Specifies the UNIX mode bits (octal) that are added when a file is created, enabling permissions.  </td>
             </tr>
                     <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
@@ -4912,7 +6401,7 @@ Manages access zones on PowerScale
             <td></td>
             <td></td>
             <td></td>
-            <td> <br> Specifies the auth providers which needs to be added or removed from access zone.  <br> If auth_providers are given, then provider_state should also be specified. </td>
+            <td> <br> Specifies the auth providers which need to be added or removed from access zone.  <br> If auth_providers are given, then provider_state should also be specified. </td>
         </tr>
                             <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
@@ -4983,7 +6472,7 @@ Manages access zones on PowerScale
                                                     </table>
 
 ### Notes
-* Creation/Deletion of access zone is not allowed through the Ansible module.
+* Deletion of access zone is not allowed through the Ansible module.
 
 ### Examples
 ```
@@ -5083,6 +6572,22 @@ Manages access zones on PowerScale
       auth_providers:
          - provider_name: "System"
            provider_type: "file"
+      state: "present"
+
+- name: Create New Access Zone
+  dellemc_powerscale_accesszone:
+      onefs_host: "{{onefs_host}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      az_name: "{{access zone}}"
+      path: "/ifs/test_dir"
+      groupnet: "groupnet1"
+      create_path: True
+      provider_state: "add"
+      auth_providers:
+        - provider_name: "System"
+          provider_type: "file"
       state: "present"
 ```
 
@@ -5245,6 +6750,151 @@ Manages access zones on PowerScale
 
 ### Authors
 * Akash Shendge (@shenda1) <ansible.team@dell.com>
+
+--------------------------------
+# Node Module
+
+Get node info of DellEMC PowerScale storage
+
+### Synopsis
+ Get information of a node belonging to the PowerScale cluster
+
+### Parameters
+                                                                                                                                                                                        
+<table>
+    <tr>
+        <th colspan=1>Parameter</th>
+        <th width="20%">Type</th>
+        <th>Required</th>
+        <th>Default</th>
+        <th>Choices</th>
+        <th width="80%">Description</th>
+    </tr>
+                                                            <tr>
+            <td colspan=1 > node_id</td>
+            <td> int  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> The Logical node Number of a PowerScale cluster node </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > state</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td> <ul> <li>absent</li>  <li>present</li> </ul></td>
+            <td> <br> Defines whether the node should exist or not. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > onefs_host</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> IP address or FQDN of the PowerScale cluster. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > port_no</td>
+            <td> str  </td>
+            <td></td>
+            <td> 8080 </td>
+            <td></td>
+            <td> <br> Port number of the PowerScale cluster.It defaults to 8080 if not specified. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > verify_ssl</td>
+            <td> bool  </td>
+            <td> True </td>
+            <td></td>
+            <td> <ul> <li>True</li>  <li>False</li> </ul></td>
+            <td> <br> boolean variable to specify whether to validate SSL certificate or not.  <br> True - indicates that the SSL certificate should be verified.  <br> False - indicates that the SSL certificate should not be verified. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > api_user</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> username of the PowerScale cluster. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > api_password</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> the password of the PowerScale cluster. </td>
+        </tr>
+                                            </table>
+
+
+### Examples
+```
+- name: get node info of the PowerScale cluster node
+  dellemc_powerscale_node:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    node_id: "{{cluster_node_id}}"
+    state: "present"
+```
+
+### Return Values
+                                                                                                                                                                                                                                                                                                            
+<table>
+    <tr>
+        <th colspan=3>Key</th>
+        <th>Type</th>
+        <th>Returned</th>
+        <th width="100%">Description</th>
+    </tr>
+                                                                                    <tr>
+            <td colspan=3 > changed </td>
+            <td>  bool </td>
+            <td> always </td>
+            <td> Whether or not the resource has changed. </td>
+        </tr>
+                    <tr>
+            <td colspan=3 > cluster_node_details </td>
+            <td>  complex </td>
+            <td> When cluster node exists </td>
+            <td> The cluster node details. </td>
+        </tr>
+                            <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=2 > id </td>
+                <td> int </td>
+                <td>success</td>
+                <td> Node id (device number) of a node. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=2 > lnn </td>
+                <td> int </td>
+                <td>success</td>
+                <td> Logical Node Number (LNN) of a node. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=2 > partitions </td>
+                <td> complex </td>
+                <td>success</td>
+                <td> Node partition information. </td>
+            </tr>
+                                         <tr>
+                    <td class="elbow-placeholder">&nbsp;</td>
+                    <td class="elbow-placeholder">&nbsp;</td>
+                    <td colspan=1 > count </td>
+                    <td> int </td>
+                    <td>success</td>
+                    <td> Count of how many partitions are included. </td>
+                </tr>
+                                                                    </table>
+
+### Authors
+* Ganesh Prabhu(@prabhg5) <ansible.team@dell.com>>
 
 --------------------------------
 # SyncIQ Job Module
@@ -6428,6 +8078,331 @@ Manage SyncIQ policies on PowerScale
 * Spandita Panigrahi (@panigs7) <ansible.team@dell.com>
 
 --------------------------------
+# Settings Module
+
+Manages general settings for PowerScale storage system
+
+### Synopsis
+ Managing general settings on the PowerScale storage system which includes get and update operations for email settings and add, remove and get operations for NTP servers.
+
+### Parameters
+                                                                                                                                                                                                                                                                                            
+<table>
+    <tr>
+        <th colspan=1>Parameter</th>
+        <th width="20%">Type</th>
+        <th>Required</th>
+        <th>Default</th>
+        <th>Choices</th>
+        <th width="80%">Description</th>
+    </tr>
+                                                            <tr>
+            <td colspan=1 > mail_relay</td>
+            <td> str  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> The address of the SMTP server to be used for relaying the notification messages.  <br> An SMTP server is required in order to send notifications.  <br> If this str is empty, no emails will be sent. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > mail_sender</td>
+            <td> str  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> The full email address that will appear as the sender of notification messages. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > mail_subject</td>
+            <td> str  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> The subject line for notification messages from this cluster. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > email_settings</td>
+            <td> bool  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> This is an addition flag to view the email settings. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > ntp_servers</td>
+            <td> list   <br> elements: str </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> List of NTP servers which need to be configured. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > state</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td> <ul> <li>absent</li>  <li>present</li> </ul></td>
+            <td> <br> The state option is used to mention the existence of pool. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > ntp_server_id</td>
+            <td> str  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> ID of NTP server. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > onefs_host</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> IP address or FQDN of the PowerScale cluster. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > port_no</td>
+            <td> str  </td>
+            <td></td>
+            <td> 8080 </td>
+            <td></td>
+            <td> <br> Port number of the PowerScale cluster.It defaults to 8080 if not specified. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > verify_ssl</td>
+            <td> bool  </td>
+            <td> True </td>
+            <td></td>
+            <td> <ul> <li>True</li>  <li>False</li> </ul></td>
+            <td> <br> boolean variable to specify whether to validate SSL certificate or not.  <br> True - indicates that the SSL certificate should be verified.  <br> False - indicates that the SSL certificate should not be verified. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > api_user</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> username of the PowerScale cluster. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > api_password</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> the password of the PowerScale cluster. </td>
+        </tr>
+                                            </table>
+
+
+### Examples
+```
+  - name: Get email settings
+    dellemc_powerscale_settings:
+      onefs_host: "{{onefs_host}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      email_settings: "{{email_settings}}"
+      state: "{{state_present}}"
+
+  - name: Update email settings
+    dellemc_powerscale_settings:
+      onefs_host: "{{onefs_host}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      state: "{{state_present}}"
+      mail_relay: "mailrelay.itp.dell.com"
+      mail_sender: "lab-a2@dell.com"
+      mail_subject: "lab-a2-alerts"
+
+  - name: Add NTP server
+    dellemc_powerscale_settings:
+      onefs_host: "{{onefs_host}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      ntp_servers:
+      - "10.106.**.***"
+      - "10.106.**.***"
+      state: "{{state_present}}"
+
+  - name: Add NTP server - Idempotency
+    dellemc_powerscale_settings:
+      onefs_host: "{{onefs_host}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      ntp_servers:
+      - "10.106.**.***"
+      - "10.106.**.***"
+      state: "{{state_present}}"
+
+  - name: Get NTP server
+    dellemc_powerscale_settings:
+      onefs_host: "{{onefs_host}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      ntp_server_id: "10.106.**.***"
+      state: "{{state_present}}"
+
+  - name: Remove NTP server
+    dellemc_powerscale_settings:
+      onefs_host: "{{onefs_host}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      ntp_servers:
+      - "10.106.**.***"
+      - "10.106.**.***"
+      state: "{{state_absent}}"
+
+  - name: Remove NTP server - Idempotency
+    dellemc_powerscale_settings:
+      onefs_host: "{{onefs_host}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      ntp_servers:
+      - "10.106.**.***"
+      - "10.106.**.***"
+      state: "{{state_absent}}"
+
+  - name: Update email settings and add NTP server
+    dellemc_powerscale_settings:
+      onefs_host: "{{onefs_host}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      state: "{{state_present}}"
+      mail_relay: "mailrelay.itp.dell.com"
+      mail_sender: "lab-a2@dell.com"
+      mail_subject: "lab-a2-alerts"
+      ntp_servers:
+      - "10.106.**.***"
+      - "10.106.**.***"
+```
+
+### Return Values
+                                                                                                                                                                                                                                                                                                                                                                                                        
+<table>
+    <tr>
+        <th colspan=2>Key</th>
+        <th>Type</th>
+        <th>Returned</th>
+        <th width="100%">Description</th>
+    </tr>
+                                                                                    <tr>
+            <td colspan=2 > changed </td>
+            <td>  bool </td>
+            <td> Always </td>
+            <td> Whether or not the resource has changed </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > settings </td>
+            <td>  complex </td>
+            <td> Always </td>
+            <td> Details of the email settings. </td>
+        </tr>
+                            <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > batch_mode </td>
+                <td> str </td>
+                <td>success</td>
+                <td> This setting determines how notifications will be batched together to be sent by email. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > id </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Field id. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > key </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Key value from key_file that maps to this server. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > mail_relay </td>
+                <td> str </td>
+                <td>success</td>
+                <td> The address of the SMTP server to be used for relaying the notification messages. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > mail_sender </td>
+                <td> str </td>
+                <td>success</td>
+                <td> The full email address that will appear as the sender of notification messages. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > mail_subject </td>
+                <td> str </td>
+                <td>success</td>
+                <td> The subject line for notification messages from this cluster. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > name </td>
+                <td> str </td>
+                <td>success</td>
+                <td> NTP server name. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > smtp_auth_passwd_set </td>
+                <td> bool </td>
+                <td>success</td>
+                <td> Indicates if an SMTP authentication password is set. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > smtp_auth_security </td>
+                <td> str </td>
+                <td>success</td>
+                <td> The type of secure communication protocol to use if SMTP is being used. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > smtp_auth_username </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Username to authenticate with if SMTP authentication is being used. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > smtp_port </td>
+                <td> int </td>
+                <td>success</td>
+                <td> The port on the SMTP server to be used for relaying the notification messages. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > use_smtp_auth </td>
+                <td> bool </td>
+                <td>success</td>
+                <td> If true, this cluster will send SMTP authentication credentials to the SMTP relay server in order to send its notification emails. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > user_template </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Location of a custom template file that can be used to specify the layout of the notification emails. </td>
+            </tr>
+                                        </table>
+
+### Authors
+* Meenakshi Dembi (@dembim) <ansible.team@dell.com>
+
+--------------------------------
 # Group Module
 
 Manage Groups on the PowerScale Storage System
@@ -7105,5 +9080,285 @@ Manage Filesystems on PowerScale
 
 ### Authors
 * Prashant Rakheja (@prashant-dell) <ansible.team@dell.com>
+
+--------------------------------
+# Gatherfacts Module
+
+Gathering information about DellEMC PowerScale Storage
+
+### Synopsis
+ Gathering information about DellEMC PowerScale Storage System includes Get attributes of the PowerScale cluster, Get list of access zones in the PowerScale cluster, Get list of nodes in the PowerScale cluster, Get list of authentication providers for all access zones or a specific access zone, Get list of users and groups for an access zone. Get list of smb_shares in the PowerScale cluster, Get list of nfs_exports in the PowerScale cluster, Get list of active clients in the PowerScale cluster, Get list of SyncIQ reports in the PowerScale cluster, Get list of SyncIQ target reports in the PowerScale cluster, Get list of SyncIQ target cluster certificates in the PowerScale cluster, Get list of SyncIQ policies in the PowerScale cluster. Get list of SyncIQ performance rules in the PowerScale cluster. Get list of network groupnets of the PowerScale cluster. Get list of network pools for all access zones or a specific access zone of the PowerScale cluster. Get list of network rules of the PowerScale cluster. Get list of network subnets of the PowerScale cluster. Get list of network interfaces of the PowerScale cluster.
+
+### Parameters
+
+<table>
+    <tr>
+        <th colspan=1>Parameter</th>
+        <th width="20%">Type</th>
+        <th>Required</th>
+        <th>Default</th>
+        <th>Choices</th>
+        <th width="80%">Description</th>
+    </tr>
+                                                            <tr>
+            <td colspan=1 > include_all_access_zones</td>
+            <td> bool  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> Specifies if requested component details need to be fetched from all access zones.  <br> It is mutually exclusive with access_zone. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > access_zone</td>
+            <td> str  </td>
+            <td></td>
+            <td> System </td>
+            <td></td>
+            <td> <br> The access zone. If no Access Zone is specified, the 'System' access zone would be taken by default. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > gather_subset</td>
+            <td> list   <br> elements: str </td>
+            <td> True </td>
+            <td></td>
+            <td> <ul> <li>attributes</li>  <li>access_zones</li>  <li>nodes</li>  <li>providers</li>  <li>users</li>  <li>groups</li>  <li>smb_shares</li>  <li>nfs_exports</li>  <li>clients</li>  <li>synciq_reports</li>  <li>synciq_target_reports</li>  <li>synciq_policies</li>  <li>synciq_target_cluster_certificates</li>  <li>synciq_performance_rules</li>  <li>network_groupnets</li>  <li>network_subnets</li>  <li>network_pools</li>  <li>network_rules</li>  <li>network_interfaces</li> </ul></td>
+            <td> <br> List of string variables to specify the PowerScale Storage System entities for which information is required.  <br> List of all PowerScale Storage System entities supported by the module -  <br> attributes  <br> access_zones  <br> nodes  <br> providers  <br> users  <br> groups  <br> smb_shares  <br> nfs_exports  <br> clients  <br> synciq_reports  <br> synciq_target_reports  <br> synciq_policies  <br> synciq_target_cluster_certificates  <br> synciq_performance_rules  <br> network_groupnets  <br> network_pools  <br> network_rules  <br> network_interfaces  <br> network_subnets  <br> The list of attributes, access_zones and nodes is for the entire PowerScale cluster  <br> The list of providers, users and groups is specific to the specified access zone  <br> The list of syncIQ reports and syncIQ target reports for the entire PowerScale cluster  <br> The list of syncIQ policies, syncIQ target cluster certificates and syncIQ performance rules for the entire PowerScale cluster  <br> The list of network pools is specific to the specified access zone or for all access zones  <br> The list of network groupnets, network subnets, network rules and network interfaces is for the entire PowerScale cluster </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > onefs_host</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> IP address or FQDN of the PowerScale cluster. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > port_no</td>
+            <td> str  </td>
+            <td></td>
+            <td> 8080 </td>
+            <td></td>
+            <td> <br> Port number of the PowerScale cluster.It defaults to 8080 if not specified. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > verify_ssl</td>
+            <td> bool  </td>
+            <td> True </td>
+            <td></td>
+            <td> <ul> <li>True</li>  <li>False</li> </ul></td>
+            <td> <br> boolean variable to specify whether to validate SSL certificate or not.  <br> True - indicates that the SSL certificate should be verified.  <br> False - indicates that the SSL certificate should not be verified. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > api_user</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> username of the PowerScale cluster. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > api_password</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> the password of the PowerScale cluster. </td>
+        </tr>
+                                                    </table>
+
+### Notes
+* The parameters access_zone and include_all_access_zones are mutually exclusive.
+* Listing of SyncIQ target cluster certificates is not supported by isi_sdk_8_1_1 version.
+
+### Examples
+```
+  - name: Get attributes of the PowerScale cluster
+    dellemc_powerscale_gatherfacts:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{powerscaleport}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      gather_subset:
+        - attributes
+  - name: Get access_zones of the PowerScale cluster
+    dellemc_powerscale_gatherfacts:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{powerscaleport}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      gather_subset:
+        - access_zones
+  - name: Get nodes of the PowerScale cluster
+    dellemc_powerscale_gatherfacts:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{powerscaleport}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      gather_subset:
+        - nodes
+  - name: Get list of authentication providers for an access zone of the
+          PowerScale cluster
+    dellemc_powerscale_gatherfacts:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{powerscaleport}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      access_zone: "{{access_zone}}"
+      gather_subset:
+        - providers
+  - name: Get list of authentication providers for all access zones of the
+          PowerScale cluster
+    dellemc_powerscale_gatherfacts:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{powerscaleport}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      include_all_access_zones: True
+      gather_subset:
+        - providers
+  - name: Get list of users for an access zone of the PowerScale cluster
+    dellemc_powerscale_gatherfacts:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{powerscaleport}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      access_zone: "{{access_zone}}"
+      gather_subset:
+        - users
+  - name: Get list of groups for an access zone of the PowerScale cluster
+    dellemc_powerscale_gatherfacts:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{powerscaleport}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      access_zone: "{{access_zone}}"
+      gather_subset:
+        - groups
+  - name: Get list of smb shares in the PowerScale cluster
+    dellemc_powerscale_gatherfacts:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{powerscaleport}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      access_zone: "{{access_zone}}"
+      gather_subset:
+        - smb_shares
+  - name: Get list of nfs exports in the PowerScale cluster
+    dellemc_powerscale_gatherfacts:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{powerscaleport}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      access_zone: "{{access_zone}}"
+      gather_subset:
+        - nfs_exports
+  - name: Get list of clients in the PowerScale cluster
+    dellemc_powerscale_gatherfacts:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{powerscaleport}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      gather_subset:
+        - clients
+  - name: Get list of SyncIQ reports and SyncIQ target Reports in the PowerScale cluster
+    dellemc_powerscale_gatherfacts:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{powerscaleport}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      gather_subset:
+        - synciq_reports
+        - synciq_target_reports
+  - name: Get list of SyncIQ policies in the PowerScale cluster
+    dellemc_powerscale_gatherfacts:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{powerscaleport}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      gather_subset:
+        - synciq_policies
+  - name: Get list of SyncIQ target cluster certificates in the PowerScale cluster
+    dellemc_powerscale_gatherfacts:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{powerscaleport}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      gather_subset:
+        - synciq_target_cluster_certificates
+  - name: Get list of SyncIQ performance rules in the PowerScale cluster
+    dellemc_powerscale_gatherfacts:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{powerscaleport}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      gather_subset:
+        - synciq_performance_rules
+  - name: Get list of network groupnets of the PowerScale cluster
+    dellemc_powerscale_gatherfacts:
+      onefs_host: "{{onefs_host}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      gather_subset:
+        - network_groupnets
+  - name: Get list of network pools of the PowerScale cluster
+    dellemc_powerscale_gatherfacts:
+      onefs_host: "{{onefs_host}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      gather_subset:
+        - network_pools
+  - name: Get list of network pools for all access zones of the PowerScale cluster
+    dellemc_powerscale_gatherfacts:
+      onefs_host: "{{onefs_host}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      include_all_access_zones: True
+      gather_subset:
+        - network_pools
+  - name: Get list of network rules of the PowerScale cluster
+    dellemc_powerscale_gatherfacts:
+      onefs_host: "{{onefs_host}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      gather_subset:
+        - network_rules
+  - name: Get list of network interfaces of the PowerScale cluster
+    dellemc_powerscale_gatherfacts:
+      onefs_host: "{{onefs_host}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      gather_subset:
+        - network_interfaces
+  - name: Get list of network subnets of the PowerScale cluster
+    dellemc_powerscale_gatherfacts:
+      onefs_host: "{{onefs_host}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      gather_subset:
+        - network_subnets
+```
+
+### Authors
+* Ambuj Dubey (@AmbujDube) <ansible.team@dell.com>
+* Spandita Panigrahi(@panigs7) <ansible.team@dell.com>
 
 --------------------------------

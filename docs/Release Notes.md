@@ -1,6 +1,6 @@
 **Ansible Modules for Dell EMC PowerScale** 
 =========================================
-### Release Notes 1.3.0
+### Release Notes 1.4.0
 
 >   © 2021 Dell Inc. or its subsidiaries. All rights reserved. Dell,
 >   EMC, and other trademarks are trademarks of Dell Inc. or its
@@ -12,12 +12,12 @@ Content
 These release notes contain supplemental information about Ansible
 Modules for Dell EMC PowerScale.
 
--   Revision History
--   Product Description
--   Features 
--   Known Problem and limitations
--   Software media, organization, and files
--   Additional resources 
+-   [Revision History](#revision-history)
+-   [Product Description](#product-description)
+-   [Features](#features) 
+-   [Known issues and limitations](#known-issues)
+-   [Software media, organization, and files](#software-media-organization-and-files)
+-   [Additional resources](#additional-resources) 
 
 Revision history
 ----------------
@@ -27,7 +27,7 @@ Table 1. Revision history
 
 | Revision | Date      | Description                                               |
 |----------|-----------|-----------------------------------------------------------|
-| 01      | Sep 2021  | Ansible Modules for Dell EMC PowerScale 1.3.0              |
+| 01      | Dec 2021  | Ansible Modules for Dell EMC PowerScale 1.4.0              |
 
 
 Product Description
@@ -46,6 +46,12 @@ The Ansible Modules for Dell EMC PowerScale support the following features:
 - Create, modify and delete SyncIQ policy.
 - Create job on SyncIQ policy and modify the state of SyncIQ Job.
 - Create, modify and delete SyncIQ performance rule.
+- Create, modify and delete Groupnet, Subnet, Network Pool and Network Rule.
+- Get details of Groupnet, Subnet, Network Pool and Network Rule.
+- Modify cluster email settings.
+- Get cluster email settings and NTP Server details.
+- Add and remove NTP Servers
+- Create an access zone.
 - Get attributes and entities of the array. 
   
 The Ansible modules use playbooks, written in yaml syntax, to list, show, create, delete, and modify each of these entities.
@@ -54,10 +60,10 @@ Features
 ---------------------------
 This section describes the features of the Ansible Modules for Dell EMC PowerScale for this release.
 
-The Ansible Modules for Dell EMC PowerScale release 1.3.0 supports the following features: 
+The Ansible Modules for Dell EMC PowerScale release 1.4.0 supports the following features: 
  - Idempotency 
    - Has been handled in all modules.
-   - Allows the playbook to be run multiple times .
+   - Allows the playbook to be run multiple times.
    - Avoids the need for complex rollbacks. 
      
 - Access Zones 
@@ -68,59 +74,58 @@ The Ansible Modules for Dell EMC PowerScale release 1.3.0 supports the following
   - Absolute path = Access zone base path + relative path provided by the user.
 
 MODULES
--   The SyncIQ Policy module supports the following functionality: 
-    -   Create a SyncIQ policy
-    -   Modify a SyncIQ policy
-    -   Create a job on SyncIQ policy
-    -   Delete a SyncIQ policy
-    -   Retieve details of SyncIQ policy
+-   The Groupnet module supports the following functionality: 
+    -   Create a Groupnet
+    -   Modify a Groupnet
+    -   Delete a Groupnet
+    -   Retrieve details of a Groupnet
 
--   The SyncIQ Jobs module supports the following functionality: 
-    -   Modify state of SyncIQ job
-    -   Cancel a SyncIQ job
-    -   Retreive details of SyncIQ job
+-   The Subnet module supports the following functionality: 
+    -   Create a Subnet
+    -   Modify a Subnet
+    -   Delete a Subnet
+    -   Retrieve details of a Subnet
 
--   The SyncIQ Rules module supports the following functionality: 
-    -   Create a SyncIQ performance rule
-    -   Modify a SyncIQ performance rule
-    -   Delete a SyncIQ performance rule
-    -   Retreive details of SyncIQ performance rule
+-   The Network Pool module supports the following functionality: 
+    -   Create a Network Pool
+    -   Modify a Network Pool
+    -   Delete a Network Pool
+    -   Retrieve details of a Network Pool
 
--   The SyncIQ Reports module supports the following functionality:
-    -   Retreive details of SyncIQ reports
+-   The Network Rule module supports the following functionality: 
+    -   Create a Network Rule
+    -   Modify a Network Rule
+    -   Delete a Network Rule
+    -   Retrieve details of a Network Rule
 
--   The SyncIQ Target Reports module supports the following functionality:
-    -   Retreive details of SyncIQ target reports
+-   The Settings module supports the following functionality:
+    -   Retrieve details of cluster email
+    -   Modify cluster email settings
+    -   Addition of NTP Servers
+    -   Deletion of NTP Servers
+
+-   The Access zone module is enhanced to support the following functionality:
+    -   Create an access zone
 
 -   The Gather Facts module is enhanced to support the following functionality: 
     -   Get details of the any entity listed below:
     
-        - SyncIQ policies
-        - SyncIQ performance rules
-        - SyncIQ reports
-        - SyncIQ target reports
-        - SyncIQ target cluster certificates
-
--   Added dual licensing.
+        - Network Groupnets
+        - Network Subnets
+        - Network Pools
+        - Network Rules
+        - Network Interfaces
     
 Known issues
 ------------
 Known problems in this release are listed.
- 
-- Snapshot schedule  
-    - If the playbook has a desired_retention field, running same the playbook again returns the changed as True (Idempotency does not work).
-     
-- Filesystem Creation 
-    - Creation of a filesystem can fail when api_user: "admin" because it is possible that the admin user may not have privileges to set an ACLs. 
-      
-     - In that case, create a filesystem with api_user: "root".
-    
-- Snapshot creation with alias name
-    - Alias name attribute remains null in spite of creating snapshot with alias name.
-    - This is an issue with PowerScale rest API. Alias name is not getting appended to the attribute in response.
 
-- SyncIQ Job creation/modification/retreival
-    - Creation, modification or retrieval of SyncIQ job can fail with error, "Invalid value for 'action', must be one of ['copy', 'sync']" if there are jobs of action resync_prep/allow_write/allow_write_revert running on the SyncIQ policy.
+| **Issue**        | **Description**           | **Resolution**  |
+| ------------- |-------------| -----|
+| Snapshot schedule | If the playbook has a desired_retention field, running same the playbook again returns the changed as True (Idempotency does not work) | This is an issue in the supported OneFS versions. |
+| Filesystem creation | Creation of a filesystem can fail when api_user: "admin" because it is possible that the admin user may not have privileges to set an ACLs | Create a filesystem with api_user: "root". |
+| Snapshot creation with alias name | Alias name attribute remains null in spite of creating snapshot with alias name | This is an issue with the PowerScale rest API. Alias name is not getting appended to the attribute in response. |
+| SyncIQ Job creation/modification/retrieval | When SyncIQ policy has any job of the type "resync_prep/allow_write/allow_write_revert" then creation, modification or retrieval of SyncIQ job will fail with an error saying "Invalid value for 'action', must be one of ['copy', 'sync']". | This is an issue in the supported OneFS versions. |
 
 Limitations
 -----------
@@ -135,7 +140,7 @@ This section lists the limitations in this release of Ansible Modules for Dell E
 
 - Access Zone
   
-  - Creation and deletion of access zones is not supported. 
+  - Deletion of access zones is not supported. 
  
 - Filesystems
   
@@ -161,24 +166,22 @@ This section lists the limitations in this release of Ansible Modules for Dell E
 Software media, organization, and files 
 -----------
 The software package is available for download from the [Ansible Modules
-for PowerScale GitHub](https://github.com/dell/ansible-powerscale/) page.
+for PowerScale GitHub](../) page.
 
 Additional resources
 --------------------
 This section provides more information about the product, how to get support, and provide feedback.
 
-Documentation
--------------
-This section lists the related documentation for Ansible Modules for Dell EMC PowerScale.
- The documentation is available on the Ansible Modules for PowerScale GitHub page. The documentation includes the following:
-  -  Ansible Modules for Dell EMC PowerScale Release Notes (this document).
-  - Ansible Modules for Dell EMC PowerScale Product Guide
+- Documentation
+    - This section lists the related documentation for Ansible Modules for Dell EMC PowerScale.
+    - The documentation is available on the Ansible Modules for PowerScale GitHub page. The documentation includes the following:
+      -  Ansible Modules for Dell EMC PowerScale Release Notes (this document).
+      -  Ansible Modules for Dell EMC PowerScale Product Guide
 
-Troubleshooting and support
-----------------
-The Dell Container Community provides your primary source of support services. 
+- Troubleshooting and support
+    - The Dell Container Community provides your primary source of support services. 
 
-For any setup, configuration issues, questions or feedback, join the Dell EMC Container community at https://www.dell.com/community/ Containers/bd-p/Containers.
+    - For any setup, configuration issues, questions or feedback, join the Dell EMC Container community at https://www.dell.com/community/Containers/bd-p/Containers.
 
 - Technical support 
   
@@ -186,22 +189,21 @@ For any setup, configuration issues, questions or feedback, join the Dell EMC Co
       
     - To get a valid support agreement or for other questions about your account, contact your Dell EMC sales representative. 
 
-     - For documentation, release notes, software updates, and other information about Dell EMC products, go to [Dell EMC Online Support](https://www.dell.com/support/home/en-in).
+    - For documentation, release notes, software updates, and other information about Dell EMC products, go to [Dell EMC Online Support](https://www.dell.com/support/home/en-in).
     
-Support 
----------
- - Use the resources in this topic to get help and support. 
-   
+- Support 
+    - Use the resources in this topic to get help and support. 
+      
 
- - The source code available on Github is unsupported and provided solely under the terms of the license attached to the source code. 
-   
+    - The source code available on Github is unsupported and provided solely under the terms of the license attached to the source code. 
+      
 
- - For clarity, Dell EMC does not provide support for any source code modifications. 
+    - For clarity, Dell EMC does not provide support for any source code modifications. 
 
 
- - For any Ansible module setup, configuration issues, questions or feedback, 
-join the Dell EMC Automation community
-   at https:// www.dell.com/community/Automation/bd-p/Automation?ref=lithium_menu 
-   
+    - For any Ansible module setup, configuration issues, questions or feedback, 
+    join the Dell EMC Automation community
+      at https:// www.dell.com/community/Automation/bd-p/Automation?ref=lithium_menu 
+      
 
- - For any Dell EMC storage issues, please contact Dell support at: https://www.dell.com/support.
+    - For any Dell EMC storage issues, please contact Dell support at: https://www.dell.com/support.
