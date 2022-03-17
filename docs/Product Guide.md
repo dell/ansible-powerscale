@@ -1,6 +1,6 @@
-# Ansible Modules for Dell EMC PowerScale
-## Product Guide 1.4.0
-© 2021 Dell Inc. or its subsidiaries. All rights reserved. Dell, EMC, and other trademarks are trademarks of Dell Inc. or its subsidiaries. Other trademarks may be trademarks of their respective owners.
+# Ansible Modules for Dell Technologies PowerScale
+## Product Guide 1.5.0
+© 2022 Dell Inc. or its subsidiaries. All rights reserved. Dell and other trademarks are trademarks of Dell Inc. or its subsidiaries. Other trademarks may be trademarks of their respective owners.
 
 --------------
 ## Contents
@@ -139,14 +139,22 @@
 *   [File System Module](#file-system-module)
     *   [Synopsis](#synopsis-21)
     *   [Parameters](#parameters-21)
+    *   [Notes](#notes-6)
     *   [Examples](#examples-21)
     *   [Return Values](#return-values-21)
     *   [Authors](#authors-21)
-*   [Gatherfacts Module](#gatherfacts-module)
+*   [Network Settings Module](#network-settings-module)
     *   [Synopsis](#synopsis-22)
     *   [Parameters](#parameters-22)
     *   [Examples](#examples-22)
+    *   [Return Values](#return-values-22)
     *   [Authors](#authors-22)
+*   [Smartpool Settings Module](#smartpool-settings-module)
+    *   [Synopsis](#synopsis-23)
+    *   [Parameters](#parameters-23)
+    *   [Examples](#examples-23)
+    *   [Return Values](#return-values-23)
+    *   [Authors](#authors-23)
 
 --------------
 
@@ -190,7 +198,7 @@ Manages groupnet configuration on PowerScale
             <td></td>
             <td></td>
             <td></td>
-            <td> <br> Name of the groupnet when renaming an existing groupnet </td>
+            <td> Name of the groupnet when renaming an existing groupnet. </td>
         </tr>
                     <tr>
             <td colspan=1 > dns_servers</td>
@@ -278,7 +286,7 @@ Manages groupnet configuration on PowerScale
 ### Examples
 ```
 - name: Create a groupnet
-  dellemc_powerscale_groupnet:
+  dellemc.powerscale.groupnet:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -294,7 +302,7 @@ Manages groupnet configuration on PowerScale
       state: "present"
 
 - name: Add dns_servers to a groupnet
-  dellemc_powerscale_groupnet:
+  dellemc.powerscale.groupnet:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -306,7 +314,7 @@ Manages groupnet configuration on PowerScale
       state: "present"
 
 - name: Remove dns_servers from a groupnet
-  dellemc_powerscale_groupnet:
+  dellemc.powerscale.groupnet:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -318,7 +326,7 @@ Manages groupnet configuration on PowerScale
       state: "present"
 
 - name: Add dns_search_suffix to a groupnet
-  dellemc_powerscale_groupnet:
+  dellemc.powerscale.groupnet:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -330,7 +338,7 @@ Manages groupnet configuration on PowerScale
       state: "present"
 
 - name: Remove dns_search_suffix from a groupnet
-  dellemc_powerscale_groupnet:
+  dellemc.powerscale.groupnet:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -342,7 +350,7 @@ Manages groupnet configuration on PowerScale
       state: "present"
 
 - name: Rename a groupnet
-  dellemc_powerscale_groupnet:
+  dellemc.powerscale.groupnet:
       onefs_host: "{{onefs_host}}"
       port_no: "{{port_no}}"
       api_user: "{{api_user}}"
@@ -352,7 +360,7 @@ Manages groupnet configuration on PowerScale
       new_groupnet_name: "groupnet_test_rename"
 
 - name: Get groupnet details
-  dellemc_powerscale_groupnet:
+  dellemc.powerscale.groupnet:
       onefs_host: "{{onefs_host}}"
       port_no: "{{port_no}}"
       api_user: "{{api_user}}"
@@ -362,7 +370,7 @@ Manages groupnet configuration on PowerScale
       state: "present"
 
 - name: Delete a groupnet
-  dellemc_powerscale_groupnet:
+  dellemc.powerscale.groupnet:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -384,13 +392,13 @@ Manages groupnet configuration on PowerScale
             <td colspan=2 > changed </td>
             <td>  bool </td>
             <td> always </td>
-            <td> Whether or not the resource has changed </td>
+            <td> Whether or not the resource has changed. </td>
         </tr>
                     <tr>
             <td colspan=2 > groupnet_details </td>
             <td>  complex </td>
             <td> When a groupnet exists </td>
-            <td> Groupnet details </td>
+            <td> Groupnet details. </td>
         </tr>
                             <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
@@ -557,7 +565,7 @@ Manages Network Pools on PowerScale Storage System
             <td></td>
             <td></td>
             <td></td>
-            <td> <br> SmartConnect Parameters </td>
+            <td> <br> SmartConnect Parameters. </td>
         </tr>
                             <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
@@ -686,7 +694,7 @@ Manages Network Pools on PowerScale Storage System
 ### Examples
 ```
     - name: Create Network Pool
-      dellemc_powerscale_subnet:
+      dellemc.powerscale.networkpool:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -698,7 +706,7 @@ Manages Network Pools on PowerScale Storage System
       state: "present"
 
     - name: Get Network Pool
-      dellemc_powerscale_subnet:
+      dellemc.powerscale.networkpool:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -709,7 +717,7 @@ Manages Network Pools on PowerScale Storage System
       state: "present"
 
     - name: Modify Network Pool
-      dellemc_powerscale_subnet:
+      dellemc.powerscale.networkpool:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -739,7 +747,7 @@ Manages Network Pools on PowerScale Storage System
       state: "present"
 
     - name: Delete Network Pool
-      dellemc_powerscale_subnet:
+      dellemc.powerscale.networkpool:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -750,7 +758,7 @@ Manages Network Pools on PowerScale Storage System
       state: "absent"
 
     - name: Rename a network Pool
-      dellemc_powerscale_networkpool:
+      dellemc.powerscale.networkpool:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -775,13 +783,13 @@ Manages Network Pools on PowerScale Storage System
             <td colspan=2 > changed </td>
             <td>  bool </td>
             <td> always </td>
-            <td> Whether or not the resource has changed </td>
+            <td> Whether or not the resource has changed. </td>
         </tr>
                     <tr>
             <td colspan=2 > pools </td>
             <td>  complex </td>
             <td> always </td>
-            <td> Details of the network pool </td>
+            <td> Details of the network pool. </td>
         </tr>
                             <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
@@ -1077,7 +1085,7 @@ Manage LDAP authentication provider on PowerScale
 ### Examples
 ```
 - name: Add an LDAP provider
-  dellemc_powerscale_ldap:
+  dellemc.powerscale.ldap:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -1095,7 +1103,7 @@ Manage LDAP authentication provider on PowerScale
       state: "present"
 
 - name: Add server_uris to an LDAP provider
-  dellemc_powerscale_ldap:
+  dellemc.powerscale.ldap:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -1107,7 +1115,7 @@ Manage LDAP authentication provider on PowerScale
       state: "present"
 
 - name: Remove server_uris from an LDAP provider
-  dellemc_powerscale_ldap:
+  dellemc.powerscale.ldap:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -1119,7 +1127,7 @@ Manage LDAP authentication provider on PowerScale
       state: "present"
 
 - name: Modify LDAP provider
-  dellemc_powerscale_ldap:
+  dellemc.powerscale.ldap:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -1131,7 +1139,7 @@ Manage LDAP authentication provider on PowerScale
       state: "present"
 
 - name: Get LDAP provider details
-  dellemc_powerscale_ldap:
+  dellemc.powerscale.ldap:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -1140,7 +1148,7 @@ Manage LDAP authentication provider on PowerScale
       state: "present"
 
 - name: Delete a LDAP provider
-  dellemc_powerscale_ldap:
+  dellemc.powerscale.ldap:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -1162,13 +1170,13 @@ Manage LDAP authentication provider on PowerScale
             <td colspan=2 > changed </td>
             <td>  bool </td>
             <td> always </td>
-            <td> Whether or not the resource has changed </td>
+            <td> Whether or not the resource has changed. </td>
         </tr>
                     <tr>
             <td colspan=2 > ldap_provider_details </td>
             <td>  complex </td>
             <td> When LDAP provider exists </td>
-            <td> The LDAP provider details </td>
+            <td> The LDAP provider details. </td>
         </tr>
                             <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
@@ -1330,7 +1338,7 @@ Provides the SyncIQ reports for PowerScale Storage System
 ```
   - name: Get a single SyncIQ report with id
     register: result
-    dellemc_powerscale_synciqreports:
+    dellemc.powerscale.synciqreports:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -1340,7 +1348,7 @@ Provides the SyncIQ reports for PowerScale Storage System
 
   - name: Get a single SyncIQ report with name
     register: result
-    dellemc_powerscale_synciqreports:
+    dellemc.powerscale.synciqreports:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -1350,7 +1358,7 @@ Provides the SyncIQ reports for PowerScale Storage System
 
   - name: Get all SyncIQ sub-reports with report id
     register: result
-    dellemc_powerscale_synciqreports:
+    dellemc.powerscale.synciqreports:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -1361,7 +1369,7 @@ Provides the SyncIQ reports for PowerScale Storage System
 
   - name: Get all SyncIQ sub-reports with report name
     register: result
-    dellemc_powerscale_synciqreports:
+    dellemc.powerscale.synciqreports:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -1372,7 +1380,7 @@ Provides the SyncIQ reports for PowerScale Storage System
 
   - name: Get a single SyncIQ sub-report with sub-report id
     register: result
-    dellemc_powerscale_synciqreports:
+    dellemc.powerscale.synciqreports:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -1395,7 +1403,7 @@ Provides the SyncIQ reports for PowerScale Storage System
             <td colspan=5 > changed </td>
             <td>  bool </td>
             <td> always </td>
-            <td> Whether or not the resource has changed </td>
+            <td> Whether or not the resource has changed. </td>
         </tr>
                     <tr>
             <td colspan=5 > synciq_report </td>
@@ -2149,7 +2157,7 @@ Manages subnet configuration on PowerScale
             <td> True </td>
             <td></td>
             <td></td>
-            <td> <br> Name of the subnet </td>
+            <td> <br> Name of the subnet. </td>
         </tr>
                     <tr>
             <td colspan=2 > groupnet_name</td>
@@ -2157,7 +2165,7 @@ Manages subnet configuration on PowerScale
             <td> True </td>
             <td></td>
             <td></td>
-            <td> <br> Name of the groupnet </td>
+            <td> <br> Nane of the groupnet. </td>
         </tr>
                     <tr>
             <td colspan=2 > description</td>
@@ -2173,7 +2181,7 @@ Manages subnet configuration on PowerScale
             <td></td>
             <td></td>
             <td></td>
-            <td> <br> Netmask of the subnet </td>
+            <td> <br> Netmask of the subnet. </td>
         </tr>
                     <tr>
             <td colspan=2 > gateway_priority</td>
@@ -2181,7 +2189,7 @@ Manages subnet configuration on PowerScale
             <td></td>
             <td></td>
             <td></td>
-            <td> <br> Gateway priority </td>
+            <td> <br> Gateway priority. </td>
         </tr>
                     <tr>
             <td colspan=2 > new_subnet_name</td>
@@ -2189,7 +2197,7 @@ Manages subnet configuration on PowerScale
             <td></td>
             <td></td>
             <td></td>
-            <td> <br> Name of the subnet when renaming an existing subnet </td>
+            <td> <br> Nane of the subnet when renaming an existing subnet. </td>
         </tr>
                     <tr>
             <td colspan=2 > subnet_params</td>
@@ -2215,7 +2223,7 @@ Manages subnet configuration on PowerScale
                 <td></td>
                 <td></td>
                 <td></td>
-                <td>  <br> List of IP addresses that SmartConnect listens for DNS requests.  </td>
+                <td>  <br> List of IP addresses that SmartConnect listens for DNS requests. </td>
             </tr>
                     <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
@@ -2224,7 +2232,7 @@ Manages subnet configuration on PowerScale
                 <td></td>
                 <td></td>
                 <td> <ul> <li>add</li>  <li>remove</li> </ul></td>
-                <td>  <br> Specifies if the sc_service_addrs range need to be added or removed from the subnet.  </td>
+                <td>  <br> Specifies if the sc_service_ip range need to be added or removed from the subnet. </td>
             </tr>
                     <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
@@ -2233,7 +2241,7 @@ Manages subnet configuration on PowerScale
                 <td></td>
                 <td></td>
                 <td></td>
-                <td>  <br> MTU of the subnet. </td>
+                <td>  <br> MTU of the subnet.  </td>
             </tr>
                     <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
@@ -2242,7 +2250,7 @@ Manages subnet configuration on PowerScale
                 <td></td>
                 <td></td>
                 <td></td>
-                <td>  <br> VLAN tagging enabled or disabled </td>
+                <td>  <br> VLAN tagging enabled or disabled. </td>
             </tr>
                     <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
@@ -2307,7 +2315,7 @@ Manages subnet configuration on PowerScale
 ### Examples
 ```
 - name: Create a subnet
-  dellemc_powerscale_subnet:
+  dellemc.powerscale.subnet:
       onefs_host: "{{onefs_host}}"
       port_no: "{{port_no}}"
       api_user: "{{api_user}}"
@@ -2330,7 +2338,7 @@ Manages subnet configuration on PowerScale
       state: 'present'
 
 - name: Modify a subnet
-  dellemc_powerscale_subnet:
+  dellemc.powerscale.subnet:
       onefs_host: "{{onefs_host}}"
       port_no: "{{port_no}}"
       api_user: "{{api_user}}"
@@ -2349,7 +2357,7 @@ Manages subnet configuration on PowerScale
       state: 'present'
 
 - name: Rename a subnet
-  dellemc_powerscale_subnet:
+  dellemc.powerscale.subnet:
       onefs_host: "{{onefs_host}}"
       port_no: "{{port_no}}"
       api_user: "{{api_user}}"
@@ -2360,7 +2368,7 @@ Manages subnet configuration on PowerScale
       new_subnet_name: "subnet_test_rename"
 
 - name: Add smart connect service ip range to subnet
-  dellemc_powerscale_subnet:
+  dellemc.powerscale.subnet:
       onefs_host: "{{onefs_host}}"
       port_no: "{{port_no}}"
       api_user: "{{api_user}}"
@@ -2376,7 +2384,7 @@ Manages subnet configuration on PowerScale
       state: 'present'
 
 - name: Remove smart connect service ip range from subnet
-  dellemc_powerscale_subnet:
+  dellemc.powerscale.subnet:
       onefs_host: "{{onefs_host}}"
       port_no: "{{port_no}}"
       api_user: "{{api_user}}"
@@ -2392,7 +2400,7 @@ Manages subnet configuration on PowerScale
       state: 'present'
 
 - name: Delete a subnet
-  dellemc_powerscale_subnet:
+  dellemc.powerscale.subnet:
       onefs_host: "{{onefs_host}}"
       port_no: "{{port_no}}"
       api_user: "{{api_user}}"
@@ -2416,13 +2424,13 @@ Manages subnet configuration on PowerScale
             <td colspan=2 > changed </td>
             <td>  bool </td>
             <td> always </td>
-            <td> Whether or not the resource has changed </td>
+            <td> Whether or not the resource has changed. </td>
         </tr>
                     <tr>
             <td colspan=2 > subnet_details </td>
             <td>  complex </td>
             <td> When a subnet exists </td>
-            <td> Subnet details </td>
+            <td> Subnet details. </td>
         </tr>
                             <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
@@ -2590,7 +2598,7 @@ Manage Smart Quotas on PowerScale
                     <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
                 <td colspan=1 > advisory_limit_size </td>
-                <td> int  </td>
+                <td> float  </td>
                 <td></td>
                 <td></td>
                 <td></td>
@@ -2599,7 +2607,7 @@ Manage Smart Quotas on PowerScale
                     <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
                 <td colspan=1 > soft_limit_size </td>
-                <td> int  </td>
+                <td> float  </td>
                 <td></td>
                 <td></td>
                 <td></td>
@@ -2626,7 +2634,7 @@ Manage Smart Quotas on PowerScale
                     <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
                 <td colspan=1 > hard_limit_size </td>
-                <td> int  </td>
+                <td> float  </td>
                 <td></td>
                 <td></td>
                 <td></td>
@@ -2694,12 +2702,12 @@ Manage Smart Quotas on PowerScale
 ### Notes
 * To perform any operation, path, quota_type and state are mandatory parameters.
 * There can be two quotas for each type per directory, one with snapshots included and one without snapshots included.
-* Once the limits are assigned, then the quota can't be converted to accounting. Only modification to the threshold limits is permitted.
+* Once the limits are assigned, then the quota cannot be converted to accounting. Only modification to the threshold limits is permitted.
 
 ### Examples
 ```
   - name: Create a Quota for a User excluding snapshot.
-    dellemc_powerscale_smartquota:
+    dellemc.powerscale.smartquota:
       onefs_host: "{{onefs_host}}"
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
@@ -2720,7 +2728,7 @@ Manage Smart Quotas on PowerScale
       state: "present"
 
   - name: Create a Quota for a Directory for accounting includes snapshots and data protection overheads.
-    dellemc_powerscale_smartquota:
+    dellemc.powerscale.smartquota:
       onefs_host: "{{onefs_host}}"
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
@@ -2733,7 +2741,7 @@ Manage Smart Quotas on PowerScale
       state: "present"
 
   - name: Create default-user Quota for a Directory with snaps and overheads
-    dellemc_powerscale_smartquota:
+    dellemc.powerscale.smartquota:
       onefs_host: "{{onefs_host}}"
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
@@ -2746,7 +2754,7 @@ Manage Smart Quotas on PowerScale
       state: "present"
 
   - name: Get a Quota Details for a Group
-    dellemc_powerscale_smartquota:
+    dellemc.powerscale.smartquota:
       onefs_host: "{{onefs_host}}"
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
@@ -2761,7 +2769,7 @@ Manage Smart Quotas on PowerScale
       state: "present"
 
   - name: Update Quota for a User
-    dellemc_powerscale_smartquota:
+    dellemc.powerscale.smartquota:
       onefs_host: "{{onefs_host}}"
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
@@ -2780,7 +2788,7 @@ Manage Smart Quotas on PowerScale
       state: "present"
 
   - name: Modify Soft Limit and Grace period of default-user Quota
-    dellemc_powerscale_smartquota:
+    dellemc.powerscale.smartquota:
       onefs_host: "{{onefs_host}}"
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
@@ -2798,7 +2806,7 @@ Manage Smart Quotas on PowerScale
       state: "present"
 
   - name: Delete a Quota for a Directory
-    dellemc_powerscale_smartquota:
+    dellemc.powerscale.smartquota:
       onefs_host: "{{onefs_host}}"
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
@@ -2810,7 +2818,7 @@ Manage Smart Quotas on PowerScale
       state: "absent"
 
   - name: Delete Quota for a default-group
-    dellemc_powerscale_smartquota:
+    dellemc.powerscale.smartquota:
       onefs_host: "{{onefs_host}}"
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
@@ -2835,7 +2843,7 @@ Manage Smart Quotas on PowerScale
             <td colspan=2 > changed </td>
             <td>  bool </td>
             <td> always </td>
-            <td> Whether or not the resource has changed </td>
+            <td> Whether or not the resource has changed. </td>
         </tr>
                     <tr>
             <td colspan=2 > quota_details </td>
@@ -2989,7 +2997,7 @@ Provides the SyncIQ target reports for PowerScale Storage System
 ```
   - name: Get a single SyncIQ target report with id
     register: result
-    dellemc_powerscale_synciqtargetreports:
+    dellemc.powerscale.synciqtargetreports:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -2999,7 +3007,7 @@ Provides the SyncIQ target reports for PowerScale Storage System
 
   - name: Get a single SyncIQ target report with name
     register: result
-    dellemc_powerscale_synciqtargetreports:
+    dellemc.powerscale.synciqtargetreports:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -3009,7 +3017,7 @@ Provides the SyncIQ target reports for PowerScale Storage System
 
   - name: Get all SyncIQ target sub-reports with report id
     register: result
-    dellemc_powerscale_synciqtargetreports:
+    dellemc.powerscale.synciqtargetreports:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -3020,7 +3028,7 @@ Provides the SyncIQ target reports for PowerScale Storage System
 
   - name: Get all SyncIQ target sub-reports with report name
     register: result
-    dellemc_powerscale_synciqtargetreports:
+    dellemc.powerscale.synciqtargetreports:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -3031,7 +3039,7 @@ Provides the SyncIQ target reports for PowerScale Storage System
 
   - name: Get a single SyncIQ target sub-report with sub-report id
     register: result
-    dellemc_powerscale_synciqreports:
+    dellemc.powerscale.synciqtargetreports:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -3054,7 +3062,7 @@ Provides the SyncIQ target reports for PowerScale Storage System
             <td colspan=5 > changed </td>
             <td>  bool </td>
             <td> always </td>
-            <td> Whether or not the resource has changed </td>
+            <td> Whether or not the resource has changed. </td>
         </tr>
                     <tr>
             <td colspan=5 > synciq_target_report </td>
@@ -3816,7 +3824,7 @@ Manages the ADS authentication provider on PowerScale
             <td></td>
             <td></td>
             <td></td>
-            <td> <br> Specifies the instance name of Active Directory provider.  <br> This is an optional parameter during create, and defaults to the provider name if it is not specified during the create operation.  <br> get, modify and delete operations can also be performed through instance_name.  <br> It is mutually exclusive with domain_name for get, modify and delete operations. </td>
+            <td> <br> Specifies the instance name of Active Directory provider.  <br> This is an optional parameter during create, and defaults to the provider name if it is not specified during the create operation.  <br> Get, modify and delete operations can also be performed through instance_name.  <br> It is mutually exclusive with domain_name for get, modify and delete operations. </td>
         </tr>
                     <tr>
             <td colspan=2 > ads_user</td>
@@ -3868,6 +3876,24 @@ Manages the ADS authentication provider on PowerScale
                 <td></td>
                 <td> <ul> <li>/bin/sh</li>  <li>/bin/csh</li>  <li>/bin/tcsh</li>  <li>/bin/zsh</li>  <li>/bin/bash</li>  <li>/bin/rbash</li>  <li>/sbin/nologin</li> </ul></td>
                 <td>  <br> Specifies the login shell path.  <br> This is an optional parameter and defaults to '/bin/zsh'.  </td>
+            </tr>
+                    <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > machine_account </td>
+                <td> str  </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>  <br> Specifies the machine account name when creating a SAM account with Active Directory.  <br> The default cluster name is called 'default'.  </td>
+            </tr>
+                    <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > organizational_unit </td>
+                <td> str  </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>  <br> Specifies the organizational unit.  </td>
             </tr>
                             <tr>
             <td colspan=2 > state</td>
@@ -3923,7 +3949,7 @@ Manages the ADS authentication provider on PowerScale
 ### Examples
 ```
 - name: Add an Active Directory provider
-  dellemc_powerscale_ads:
+  dellemc.powerscale.ads:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -3936,10 +3962,12 @@ Manages the ADS authentication provider on PowerScale
         groupnet: "groupnet5"
         home_directory_template: "/ifs/home/%D/%U"
         login_shell: "/bin/zsh"
+        machine_account: "test_account"
+        organizational_unit: "org/sub_org"
       state: "present"
 
 - name: Modify an Active Directory provider with domain name
-  dellemc_powerscale_ads:
+  dellemc.powerscale.ads:
       onefs_host: "{{onefs_host}}"
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
@@ -3951,7 +3979,7 @@ Manages the ADS authentication provider on PowerScale
       state: "present"
 
 - name: Modify an Active Directory provider with instance name
-  dellemc_powerscale_ads:
+  dellemc.powerscale.ads:
       onefs_host: "{{onefs_host}}"
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
@@ -3963,7 +3991,7 @@ Manages the ADS authentication provider on PowerScale
       state: "present"
 
 - name: Get Active Directory provider details with domain name
-  dellemc_powerscale_ads:
+  dellemc.powerscale.ads:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -3972,7 +4000,7 @@ Manages the ADS authentication provider on PowerScale
       state: "present"
 
 - name: Get Active Directory provider details with instance name
-  dellemc_powerscale_ads:
+  dellemc.powerscale.ads:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -3981,7 +4009,7 @@ Manages the ADS authentication provider on PowerScale
       state: "present"
 
 - name: Delete an Active Directory provider with domain name
-  dellemc_powerscale_ads:
+  dellemc.powerscale.ads:
       onefs_host: "{{onefs_host}}"
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
@@ -3990,7 +4018,7 @@ Manages the ADS authentication provider on PowerScale
       state: "absent"
 
 - name: Delete an Active Directory provider with instance name
-  dellemc_powerscale_ads:
+  dellemc.powerscale.ads:
       onefs_host: "{{onefs_host}}"
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
@@ -4012,7 +4040,7 @@ Manages the ADS authentication provider on PowerScale
             <td colspan=2 > ads_provider_details </td>
             <td>  complex </td>
             <td> When Active Directory provider exists </td>
-            <td> The Active Directory provider details </td>
+            <td> The Active Directory provider details. </td>
         </tr>
                             <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
@@ -4060,7 +4088,7 @@ Manages the ADS authentication provider on PowerScale
             <td colspan=2 > changed </td>
             <td>  bool </td>
             <td> always </td>
-            <td> Whether or not the resource has changed </td>
+            <td> Whether or not the resource has changed. </td>
         </tr>
                     </table>
 
@@ -4073,7 +4101,10 @@ Manages the ADS authentication provider on PowerScale
 Manages Network provisioning rules for DellEMC PowerScale Storage
 
 ### Synopsis
- Modify an existing network provisioning rule Create a new network provisioning rule Delete a network provisioning rule View the details of a network provisioning rule
+ Modify an existing network provisioning rule.
+ Create a new network provisioning rule.
+ Delete a network provisioning rule.
+ View the details of a network provisioning rule.
 
 ### Parameters
                                                                                                                                                                                                                                                                                                                                     
@@ -4092,7 +4123,7 @@ Manages Network provisioning rules for DellEMC PowerScale Storage
             <td></td>
             <td></td>
             <td></td>
-            <td> <br> Description for rule  <br> It can be no more than 128 bytes in length </td>
+            <td> <br> Description for rule.  <br> It can be no more than 128 bytes in length. </td>
         </tr>
                     <tr>
             <td colspan=1 > groupnet_name</td>
@@ -4100,7 +4131,7 @@ Manages Network provisioning rules for DellEMC PowerScale Storage
             <td> True </td>
             <td></td>
             <td></td>
-            <td> <br> Groupnet name to which this provisioning rule applies </td>
+            <td> <br> Groupnet name to which this provisioning rule applies. </td>
         </tr>
                     <tr>
             <td colspan=1 > iface</td>
@@ -4108,7 +4139,7 @@ Manages Network provisioning rules for DellEMC PowerScale Storage
             <td></td>
             <td></td>
             <td></td>
-            <td> <br> Interface to which the rule applies </td>
+            <td> <br> Interface to which the rule applies. </td>
         </tr>
                     <tr>
             <td colspan=1 > node_type</td>
@@ -4116,7 +4147,7 @@ Manages Network provisioning rules for DellEMC PowerScale Storage
             <td></td>
             <td></td>
             <td> <ul> <li>any</li>  <li>storage</li>  <li>accelerator</li>  <li>backup-accelerator</li> </ul></td>
-            <td> <br> Node types to which the provisioning rule applies </td>
+            <td> <br> Node types to which the provisioning rule applies. </td>
         </tr>
                     <tr>
             <td colspan=1 > pool_name</td>
@@ -4124,7 +4155,7 @@ Manages Network provisioning rules for DellEMC PowerScale Storage
             <td> True </td>
             <td></td>
             <td></td>
-            <td> <br> Pool to which this provisioning rule applies </td>
+            <td> <br> Pool to which this provisioning rule applies. </td>
         </tr>
                     <tr>
             <td colspan=1 > rule_name</td>
@@ -4132,7 +4163,7 @@ Manages Network provisioning rules for DellEMC PowerScale Storage
             <td> True </td>
             <td></td>
             <td></td>
-            <td> <br> Name of provisioning rule </td>
+            <td> <br> Name of provisioning rule. </td>
         </tr>
                     <tr>
             <td colspan=1 > new_rule_name</td>
@@ -4140,7 +4171,7 @@ Manages Network provisioning rules for DellEMC PowerScale Storage
             <td></td>
             <td></td>
             <td></td>
-            <td> <br> Name of provisioning rule when renaming an existing rule </td>
+            <td> <br> Name of provisioning rule when renaming an existing rule. </td>
         </tr>
                     <tr>
             <td colspan=1 > subnet_name</td>
@@ -4148,7 +4179,7 @@ Manages Network provisioning rules for DellEMC PowerScale Storage
             <td> True </td>
             <td></td>
             <td></td>
-            <td> <br> Name of the subnet to which this provisioning rule applies </td>
+            <td> <br> Name of the subnet to which this provisioning rule applies. </td>
         </tr>
                     <tr>
             <td colspan=1 > state</td>
@@ -4156,7 +4187,7 @@ Manages Network provisioning rules for DellEMC PowerScale Storage
             <td> True </td>
             <td></td>
             <td> <ul> <li>absent</li>  <li>present</li> </ul></td>
-            <td> <br> State of provisioning rule </td>
+            <td> <br> State of provisioning rule. </td>
         </tr>
                     <tr>
             <td colspan=1 > onefs_host</td>
@@ -4204,7 +4235,7 @@ Manages Network provisioning rules for DellEMC PowerScale Storage
 ### Examples
 ```
   - name: Get the details of a network rule
-    dellemc_powerscale_network_rule:
+    dellemc.powerscale.networkrule:
       onefs_host: "{{onefs_host}}"
       port_no: "{{port_no}}"
       api_user: "{{api_user}}"
@@ -4217,7 +4248,7 @@ Manages Network provisioning rules for DellEMC PowerScale Storage
       state: "present"
 
   - name: Create a new network provisioning rule
-    dellemc_powerscale_network_rule:
+    dellemc.powerscale.networkrule:
       onefs_host: "{{onefs_host}}"
       port_no: "{{port_no}}"
       api_user: "{{api_user}}"
@@ -4233,7 +4264,7 @@ Manages Network provisioning rules for DellEMC PowerScale Storage
       state: "present"
 
   - name: Modifying an existing network provisioning rule
-    dellemc_powerscale_network_rule:
+    dellemc.powerscale.networkrule:
       onefs_host: "{{onefs_host}}"
       port_no: "{{port_no}}"
       api_user: "{{api_user}}"
@@ -4249,7 +4280,7 @@ Manages Network provisioning rules for DellEMC PowerScale Storage
       state: "present"
 
   - name: Delete a network provisioning rule
-    dellemc_powerscale_network_rule:
+    dellemc.powerscale.networkrule:
       onefs_host: "{{onefs_host}}"
       port_no: "{{port_no}}"
       api_user: "{{api_user}}"
@@ -4275,13 +4306,13 @@ Manages Network provisioning rules for DellEMC PowerScale Storage
             <td colspan=2 > changed </td>
             <td>  bool </td>
             <td> Always </td>
-            <td> Whether or not the resource has changed </td>
+            <td> Whether or not the resource has changed. </td>
         </tr>
                     <tr>
             <td colspan=2 > network_rule_details </td>
             <td>  complex </td>
             <td> When a network provisioning rule exists </td>
-            <td> Network provisioning rule details </td>
+            <td> Network provisioning rule details. </td>
         </tr>
                             <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
@@ -4347,10 +4378,10 @@ Manages Network provisioning rules for DellEMC PowerScale Storage
 --------------------------------
 # Snapshot Schedule Module
 
-Manage snapshot schedules on Dell EMC PowerScale.
+Manage snapshot schedules on Dell EMC PowerScale
 
 ### Synopsis
- You can perform the following operations
+ You can perform the following operations.
  Managing snapshot schedules on PowerScale.
  Create snapshot schedule.
  Modify snapshot schedule.
@@ -4494,7 +4525,7 @@ Manage snapshot schedules on Dell EMC PowerScale.
 ### Examples
 ```
 - name: Create snapshot schedule
-  dellemc_powerscale_snapshotschedule:
+  dellemc.powerscale.snapshotschedule:
       onefs_host: "{{onefs_host}}"
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
@@ -4509,7 +4540,7 @@ Manage snapshot schedules on Dell EMC PowerScale.
       state: "{{state_present}}"
 
 - name: Get details of snapshot schedule
-  dellemc_powerscale_snapshotschedule:
+  dellemc.powerscale.snapshotschedule:
       onefs_host: "{{onefs_host}}"
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
@@ -4518,7 +4549,7 @@ Manage snapshot schedules on Dell EMC PowerScale.
       state: "{{state_present}}"
 
 - name: Rename snapshot schedule
-  dellemc_powerscale_snapshotschedule:
+  dellemc.powerscale.snapshotschedule:
       onefs_host: "{{onefs_host}}"
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
@@ -4528,7 +4559,7 @@ Manage snapshot schedules on Dell EMC PowerScale.
       state: "{{state_present}}"
 
 - name: Modify alias of snapshot schedule
-  dellemc_powerscale_snapshotschedule:
+  dellemc.powerscale.snapshotschedule:
       onefs_host: "{{onefs_host}}"
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
@@ -4538,7 +4569,7 @@ Manage snapshot schedules on Dell EMC PowerScale.
       state: "{{state_present}}"
 
 - name: Modify pattern of snapshot schedule
-  dellemc_powerscale_snapshotschedule:
+  dellemc.powerscale.snapshotschedule:
       onefs_host: "{{onefs_host}}"
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
@@ -4548,7 +4579,7 @@ Manage snapshot schedules on Dell EMC PowerScale.
       state: "{{state_present}}"
 
 - name: Modify schedule of snapshot schedule
-  dellemc_powerscale_snapshotschedule:
+  dellemc.powerscale.snapshotschedule:
       onefs_host: "{{onefs_host}}"
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
@@ -4558,7 +4589,7 @@ Manage snapshot schedules on Dell EMC PowerScale.
       state: "{{state_present}}"
 
 - name: Modify retention of snapshot schedule
-  dellemc_powerscale_snapshotschedule:
+  dellemc.powerscale.snapshotschedule:
       onefs_host: "{{onefs_host}}"
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
@@ -4569,7 +4600,7 @@ Manage snapshot schedules on Dell EMC PowerScale.
       state: "{{state_present}}"
 
 - name: Delete snapshot schedule
-  dellemc_powerscale_snapshotschedule:
+  dellemc.powerscale.snapshotschedule:
       onefs_host: "{{onefs_host}}"
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
@@ -4578,7 +4609,7 @@ Manage snapshot schedules on Dell EMC PowerScale.
       state: "{{state_absent}}"
 
 - name: Delete snapshot schedule - Idempotency
-  dellemc_powerscale_snapshotschedule:
+  dellemc.powerscale.snapshotschedule:
       onefs_host: "{{onefs_host}}"
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
@@ -4600,13 +4631,13 @@ Manage snapshot schedules on Dell EMC PowerScale.
             <td colspan=5 > changed </td>
             <td>  bool </td>
             <td> always </td>
-            <td> Whether or not the resource has changed </td>
+            <td> Whether or not the resource has changed. </td>
         </tr>
                     <tr>
             <td colspan=5 > snapshot_schedule_details </td>
             <td>  complex </td>
             <td> When snapshot schedule exists </td>
-            <td> Details of the snapshot schedule including snapshot details </td>
+            <td> Details of the snapshot schedule including snapshot details. </td>
         </tr>
                             <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
@@ -4897,7 +4928,7 @@ Manage users on the PowerScale Storage System
 ### Examples
 ```
   - name: Get User Details using user name
-    dellemc_powerscale_user:
+    dellemc.powerscale.user:
       onefs_host: "{{onefs_host}}"
       port_no: "{{port_no}}"
       api_user: "{{api_user}}"
@@ -4909,7 +4940,7 @@ Manage users on the PowerScale Storage System
       state: "present"
 
   - name: Create User
-    dellemc_powerscale_user:
+    dellemc.powerscale.user:
       onefs_host: "{{onefs_host}}"
       port_no: "{{port_no}}"
       api_user: "{{api_user}}"
@@ -4930,7 +4961,7 @@ Manage users on the PowerScale Storage System
       state: "present"
 
   - name: Update User's Full Name and email using user name
-    dellemc_powerscale_user:
+    dellemc.powerscale.user:
       onefs_host: "{{onefs_host}}"
       port_no: "{{port_no}}"
       api_user: "{{api_user}}"
@@ -4944,7 +4975,7 @@ Manage users on the PowerScale Storage System
       state: "present"
 
   - name: Disable User Account using User Id
-    dellemc_powerscale_user:
+    dellemc.powerscale.user:
       onefs_host: "{{onefs_host}}"
       port_no: "{{port_no}}"
       api_user: "{{api_user}}"
@@ -4957,7 +4988,7 @@ Manage users on the PowerScale Storage System
       state: "present"
 
   - name: Add user to a role using Username
-    dellemc_powerscale_user:
+    dellemc.powerscale.user:
       onefs_host: "{{onefs_host}}"
       port_no: "{{port_no}}"
       api_user: "{{api_user}}"
@@ -4970,7 +5001,7 @@ Manage users on the PowerScale Storage System
       state: "present"
 
   - name: Remove user from a role using User id
-    dellemc_powerscale_user:
+    dellemc.powerscale.user:
       onefs_host: "{{onefs_host}}"
       port_no: "{{port_no}}"
       api_user: "{{api_user}}"
@@ -4982,7 +5013,7 @@ Manage users on the PowerScale Storage System
       state: "present"
 
   - name: Delete User using user name
-    dellemc_powerscale_user:
+    dellemc.powerscale.user:
       onefs_host: "{{onefs_host}}"
       port_no: "{{port_no}}"
       api_user: "{{api_user}}"
@@ -5007,7 +5038,7 @@ Manage users on the PowerScale Storage System
             <td colspan=4 > changed </td>
             <td>  bool </td>
             <td> always </td>
-            <td> Whether or not the resource has changed </td>
+            <td> Whether or not the resource has changed. </td>
         </tr>
                     <tr>
             <td colspan=4 > user_details </td>
@@ -5207,7 +5238,7 @@ Manage SMB shares on Dell EMC PowerScale. You can perform the following operatio
             <td></td>
             <td></td>
             <td></td>
-            <td> <br> Specifies permission for specific user, group, or trustee. Valid options read, write, and full.  <br> This is a list of dictionaries. Each dictionry entry has 3 mandatory values-  <br> a)'user_name'/'group_name'/'wellknown' can have actual name of the trustee like 'user'/'group'/'wellknown'  <br> b)'permission' can be 'read'/''write'/'full'  <br> c)'permission_type' can be 'allow'/'deny'  <br> The fourth entry 'provider_type' is optional (default is 'local')  <br> d)'provider_type' can be 'local'/'file'/'ads'/'ldap' </td>
+            <td> <br> Specifies permission for specific user, group, or trustee. Valid options read, write, and full.  <br> This is a list of dictionaries. Each dictionry entry has 3 mandatory values as listed below.  <br> 1)'user_name'/'group_name'/'wellknown' can have actual name of the trustee like 'user'/'group'/'wellknown'.  <br> 2)'permission' can be 'read'/''write'/'full'.  <br> 3)'permission_type' can be 'allow'/'deny'.  <br> The fourth entry 'provider_type' is optional (default is 'local').  <br> 4)'provider_type' can be 'local'/'file'/'ads'/'ldap'. </td>
         </tr>
                     <tr>
             <td colspan=1 > access_based_enumeration</td>
@@ -5247,7 +5278,7 @@ Manage SMB shares on Dell EMC PowerScale. You can perform the following operatio
             <td></td>
             <td></td>
             <td></td>
-            <td> <br> Directory creates mask bits. Octal value for owner, group, and others vs read, write, and execute </td>
+            <td> <br> Directory creates mask bits. Octal value for owner, group, and others against read, write, and execute. </td>
         </tr>
                     <tr>
             <td colspan=1 > directory_create_mode</td>
@@ -5255,7 +5286,7 @@ Manage SMB shares on Dell EMC PowerScale. You can perform the following operatio
             <td></td>
             <td></td>
             <td></td>
-            <td> <br> Directory creates mode bits. Octal value for owner, group, and others vs read, write, and execute </td>
+            <td> <br> Directory creates mode bits. Octal value for owner, group, and others against read, write, and execute. </td>
         </tr>
                     <tr>
             <td colspan=1 > file_create_mask</td>
@@ -5263,7 +5294,7 @@ Manage SMB shares on Dell EMC PowerScale. You can perform the following operatio
             <td></td>
             <td></td>
             <td></td>
-            <td> <br> File creates mask bits. Octal value for owner, group, and others vs read, write, and execute </td>
+            <td> <br> File creates mask bits. Octal value for owner, group, and others against read, write, and execute. </td>
         </tr>
                     <tr>
             <td colspan=1 > file_create_mode</td>
@@ -5271,7 +5302,7 @@ Manage SMB shares on Dell EMC PowerScale. You can perform the following operatio
             <td></td>
             <td></td>
             <td></td>
-            <td> <br> File creates mode bits. Octal value for owner, group, and others vs read, write, and execute </td>
+            <td> <br> File creates mode bits. Octal value for owner, group, and others against read, write, and execute. </td>
         </tr>
                     <tr>
             <td colspan=1 > state</td>
@@ -5327,7 +5358,7 @@ Manage SMB shares on Dell EMC PowerScale. You can perform the following operatio
 ### Examples
 ```
     - name: Create SMB share for non system access zone
-      dellemc_powerscale_smb:
+      dellemc.powerscale.smb:
         onefs_host: "{{onefs_host}}"
         verify_ssl: "{{verify_ssl}}"
         api_user: "{{api_user}}"
@@ -5338,7 +5369,7 @@ Manage SMB shares on Dell EMC PowerScale. You can perform the following operatio
         state: "{{state_present}}"
 
     - name: Create SMB share for system access zone
-      dellemc_powerscale_smb:
+      dellemc.powerscale.smb:
         onefs_host: "{{onefs_host}}"
         verify_ssl: "{{verify_ssl}}"
         api_user: "{{api_user}}"
@@ -5359,7 +5390,7 @@ Manage SMB shares on Dell EMC PowerScale. You can perform the following operatio
       state: "{{state_present}}"
 
     - name: Modify user permission for SMB share
-      dellemc_powerscale_smb:
+      dellemc.powerscale.smb:
         onefs_host: "{{onefs_host}}"
         verify_ssl: "{{verify_ssl}}"
         api_user: "{{api_user}}"
@@ -5380,7 +5411,7 @@ Manage SMB shares on Dell EMC PowerScale. You can perform the following operatio
         state: "{{state_present}}"
 
     - name: Delete system access zone SMB share
-      dellemc_powerscale_smb:
+      dellemc.powerscale.smb:
         onefs_host: "{{onefs_host}}"
         verify_ssl: "{{verify_ssl}}"
         api_user: "{{api_user}}"
@@ -5389,7 +5420,7 @@ Manage SMB shares on Dell EMC PowerScale. You can perform the following operatio
         state: "{{state_absent}}"
 
     - name: Get SMB share details
-      dellemc_powerscale_smb:
+      dellemc.powerscale.smb:
         onefs_host: "{{onefs_host}}"
         verify_ssl: "{{verify_ssl}}"
         api_user: "{{api_user}}"
@@ -5398,7 +5429,7 @@ Manage SMB shares on Dell EMC PowerScale. You can perform the following operatio
         state: "{{state_present}}"
 
     - name: Create SMB share for non system access zone
-      dellemc_powerscale_smb:
+      dellemc.powerscale.smb:
         onefs_host: "{{onefs_host}}"
         verify_ssl: "{{verify_ssl}}"
         api_user: "{{api_user}}"
@@ -5420,7 +5451,7 @@ Manage SMB shares on Dell EMC PowerScale. You can perform the following operatio
         state: "{{state_present}}"
 
     - name: Modify description for an non system access zone SMB share
-      dellemc_powerscale_smb:
+      dellemc.powerscale.smb:
         onefs_host: "{{onefs_host}}"
         verify_ssl: "{{verify_ssl}}"
         api_user: "{{api_user}}"
@@ -5431,7 +5462,7 @@ Manage SMB shares on Dell EMC PowerScale. You can perform the following operatio
         state: "{{state_present}}"
 
     - name: Modify name for an existing non system access zone SMB share
-      dellemc_powerscale_smb:
+      dellemc.powerscale.smb:
         onefs_host: "{{onefs_host}}"
         verify_ssl: "{{verify_ssl}}"
         api_user: "{{api_user}}"
@@ -5570,10 +5601,10 @@ Manage SMB shares on Dell EMC PowerScale. You can perform the following operatio
 --------------------------------
 # Snapshot Module
 
-Manage snapshots on Dell EMC PowerScale.
+Manage snapshots on Dell EMC PowerScale
 
 ### Synopsis
- You can perform the following operations
+ You can perform the following operations.
  Managing snapshots on PowerScale.
  Create a filesystem snapshot.
  Modify a filesystem snapshot.
@@ -5709,7 +5740,7 @@ Manage snapshots on Dell EMC PowerScale.
 ### Examples
 ```
     - name: Create a filesystem snapshot on PowerScale
-      dellemc_powerscale_snapshot:
+      dellemc.powerscale.snapshot:
         onefs_host: "{{onefs_host}}"
         verify_ssl: "{{verify_ssl}}"
         api_user: "{{api_user}}"
@@ -5723,7 +5754,7 @@ Manage snapshots on Dell EMC PowerScale.
         state: "{{present}}"
 
     - name: Get details of a filesystem snapshot
-      dellemc_powerscale_snapshot:
+      dellemc.powerscale.snapshot:
         onefs_host: "{{onefs_host}}"
         verify_ssl: "{{verify_ssl}}"
         api_user: "{{api_user}}"
@@ -5732,7 +5763,7 @@ Manage snapshots on Dell EMC PowerScale.
         state: "{{present}}"
 
     - name: Modify filesystem snapshot desired retention
-      dellemc_powerscale_snapshot:
+      dellemc.powerscale.snapshot:
         onefs_host: "{{onefs_host}}"
         verify_ssl: "{{verify_ssl}}"
         api_user: "{{api_user}}"
@@ -5743,7 +5774,7 @@ Manage snapshots on Dell EMC PowerScale.
         state: "{{present}}"
 
     - name: Modify filesystem snapshot expiration timestamp
-      dellemc_powerscale_snapshot:
+      dellemc.powerscale.snapshot:
         onefs_host: "{{onefs_host}}"
         verify_ssl: "{{verify_ssl}}"
         api_user: "{{api_user}}"
@@ -5753,7 +5784,7 @@ Manage snapshots on Dell EMC PowerScale.
         state: "{{present}}"
 
     - name: Modify filesystem snapshot alias
-      dellemc_powerscale_snapshot:
+      dellemc.powerscale.snapshot:
         onefs_host: "{{onefs_host}}"
         verify_ssl: "{{verify_ssl}}"
         api_user: "{{api_user}}"
@@ -5763,7 +5794,7 @@ Manage snapshots on Dell EMC PowerScale.
         state: "{{present}}"
 
     - name: Delete snapshot alias
-      dellemc_powerscale_snapshot:
+      dellemc.powerscale.snapshot:
         onefs_host: "{{onefs_host}}"
         verify_ssl: "{{verify_ssl}}"
         api_user: "{{api_user}}"
@@ -5773,7 +5804,7 @@ Manage snapshots on Dell EMC PowerScale.
         state: "{{present}}"
 
     - name: Rename filesystem snapshot
-      dellemc_powerscale_snapshot:
+      dellemc.powerscale.snapshot:
         onefs_host: "{{onefs_host}}"
         verify_ssl: "{{verify_ssl}}"
         api_user: "{{api_user}}"
@@ -5783,7 +5814,7 @@ Manage snapshots on Dell EMC PowerScale.
         state: "{{present}}"
 
     - name: Delete filesystem snapshot
-      dellemc_powerscale_snapshot:
+      dellemc.powerscale.snapshot:
         onefs_host: "{{onefs_host}}"
         verify_ssl: "{{verify_ssl}}"
         api_user: "{{api_user}}"
@@ -5805,7 +5836,7 @@ Manage snapshots on Dell EMC PowerScale.
             <td colspan=2 > changed </td>
             <td>  bool </td>
             <td> always </td>
-            <td> Whether or not the resource has changed </td>
+            <td> Whether or not the resource has changed. </td>
         </tr>
                     <tr>
             <td colspan=2 > snapshot_details </td>
@@ -5915,7 +5946,7 @@ Manage snapshots on Dell EMC PowerScale.
 Manage SyncIQ performance rules on PowerScale
 
 ### Synopsis
- Managing SyncIQ performance rules on PowerScale includes create a SyncIQ performance rule, modify a SyncIQ performance rule, get details of a SyncIQ performance rule, delete a SyncIQ performance rule
+ Managing SyncIQ performance rules on PowerScale includes create a SyncIQ performance rule, modify a SyncIQ performance rule, get details of a SyncIQ performance rule, delete a SyncIQ performance rule.
 
 ### Parameters
                                                                                                                                                                                                                                                                                                                                         
@@ -5934,7 +5965,7 @@ Manage SyncIQ performance rules on PowerScale
             <td></td>
             <td></td>
             <td> <ul> <li>bandwidth</li>  <li>file_count</li>  <li>cpu</li>  <li>worker</li> </ul></td>
-            <td> <br> The type of system resource this rule limits.  <br> This is mandatory parameter while creating/deleting a performance rule  <br> This cannot be modified. </td>
+            <td> <br> The type of system resource this rule limits.  <br> This is mandatory parameter while creating/deleting a performance rule.  <br> This cannot be modified. </td>
         </tr>
                     <tr>
             <td colspan=2 > sync_rule_id</td>
@@ -5966,7 +5997,7 @@ Manage SyncIQ performance rules on PowerScale
             <td></td>
             <td></td>
             <td></td>
-            <td> <br> Indicates whether the performance rule is currently in effect during its specified interval  <br> This mandatory while creating/deleting a performance rule. </td>
+            <td> <br> Indicates whether the performance rule is currently in effect during its specified interval.  <br> This mandatory while creating/deleting a performance rule. </td>
         </tr>
                     <tr>
             <td colspan=2 > schedule</td>
@@ -6059,7 +6090,7 @@ Manage SyncIQ performance rules on PowerScale
 ### Examples
 ```
   - name: Create SyncIQ performance rule
-    dellemc_powerscale_synciqrules:
+    dellemc.powerscale.synciqrules:
       onefs_host: "{{onefs_host}}"
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
@@ -6078,7 +6109,7 @@ Manage SyncIQ performance rules on PowerScale
       state: "present"
 
   - name: Modify SyncIQ performance rule
-    dellemc_powerscale_synciqpolicy:
+    dellemc.powerscale.synciqrules:
       onefs_host: "{{onefs_host}}"
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
@@ -6089,7 +6120,7 @@ Manage SyncIQ performance rules on PowerScale
       state: "present"
 
   - name: Get SyncIQ performance rule details
-    dellemc_powerscale_synciqpolicy:
+    dellemc.powerscale.synciqrules:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -6098,7 +6129,7 @@ Manage SyncIQ performance rules on PowerScale
       state: "present"
 
   - name: Delete SyncIQ performance rule
-    dellemc_powerscale_synciqpolicy:
+    dellemc.powerscale.synciqrules:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -6130,13 +6161,13 @@ Manage SyncIQ performance rules on PowerScale
             <td colspan=2 > changed </td>
             <td>  bool </td>
             <td> always </td>
-            <td> Whether or not the resource has changed </td>
+            <td> Whether or not the resource has changed. </td>
         </tr>
                     <tr>
             <td colspan=2 > sync_rule_details </td>
             <td>  complex </td>
             <td> When SyncIQ performance rule exists </td>
-            <td> Details of the SyncIQ performance rule </td>
+            <td> Details of the SyncIQ performance rule. </td>
         </tr>
                             <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
@@ -6226,7 +6257,7 @@ Manages access zones on PowerScale
             <td></td>
             <td> groupnet0 </td>
             <td></td>
-            <td> <br> Name of the groupnet for create access zone </td>
+            <td> <br> Name of the groupnet for create access zone. </td>
         </tr>
                     <tr>
             <td colspan=2 > create_path</td>
@@ -6477,7 +6508,7 @@ Manages access zones on PowerScale
 ### Examples
 ```
 - name: Get details of access zone including smb and nfs settings
-  dellemc_powerscale_accesszone:
+  dellemc.powerscale.accesszone:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -6486,7 +6517,7 @@ Manages access zones on PowerScale
       state: "present"
 
 - name: Modify smb settings of access zone
-  dellemc_powerscale_accesszone:
+  dellemc.powerscale.accesszone:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -6505,7 +6536,7 @@ Manages access zones on PowerScale
         oplocks: true
 
 - name: Modify nfs settings of access zone
-  dellemc_powerscale_accesszone:
+  dellemc.powerscale.accesszone:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -6521,7 +6552,7 @@ Manages access zones on PowerScale
         nfsv4_no_names: false
 
 - name: Modify smb and nfs settings of access zone
-  dellemc_powerscale_accesszone:
+  dellemc.powerscale.accesszone:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -6547,7 +6578,7 @@ Manages access zones on PowerScale
         nfsv4_no_names: false
 
 - name: Add Auth Providers to the  access zone
-  dellemc_powerscale_accesszone:
+  dellemc.powerscale.accesszone:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -6562,7 +6593,7 @@ Manages access zones on PowerScale
       state: "present"
 
 - name: Remove Auth Providers from the  access zone
-  dellemc_powerscale_accesszone:
+  dellemc.powerscale.accesszone:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -6575,7 +6606,7 @@ Manages access zones on PowerScale
       state: "present"
 
 - name: Create New Access Zone
-  dellemc_powerscale_accesszone:
+  dellemc.powerscale.accesszone:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -6604,7 +6635,7 @@ Manages access zones on PowerScale
             <td colspan=6 > access_zone_details </td>
             <td>  complex </td>
             <td> When access zone exists </td>
-            <td> The access zone details </td>
+            <td> The access zone details. </td>
         </tr>
                             <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
@@ -6726,25 +6757,25 @@ Manages access zones on PowerScale
             <td colspan=6 > access_zone_modify_flag </td>
             <td>  bool </td>
             <td> on success </td>
-            <td> Whether auth providers linked to access zone has changed </td>
+            <td> Whether auth providers linked to access zone has changed. </td>
         </tr>
                     <tr>
             <td colspan=6 > changed </td>
             <td>  bool </td>
             <td> always </td>
-            <td> Whether or not the resource has changed </td>
+            <td> Whether or not the resource has changed. </td>
         </tr>
                     <tr>
             <td colspan=6 > nfs_modify_flag </td>
             <td>  bool </td>
             <td> on success </td>
-            <td> Whether or not the default NFS settings of access zone has changed </td>
+            <td> Whether or not the default NFS settings of access zone has changed. </td>
         </tr>
                     <tr>
             <td colspan=6 > smb_modify_flag </td>
             <td>  bool </td>
             <td> on success </td>
-            <td> Whether or not the default SMB settings of access zone has changed </td>
+            <td> Whether or not the default SMB settings of access zone has changed. </td>
         </tr>
                     </table>
 
@@ -6757,7 +6788,7 @@ Manages access zones on PowerScale
 Get node info of DellEMC PowerScale storage
 
 ### Synopsis
- Get information of a node belonging to the PowerScale cluster
+ Get information of a node belonging to the PowerScale cluster.
 
 ### Parameters
                                                                                                                                                                                         
@@ -6776,7 +6807,7 @@ Get node info of DellEMC PowerScale storage
             <td> True </td>
             <td></td>
             <td></td>
-            <td> <br> The Logical node Number of a PowerScale cluster node </td>
+            <td> <br> The Logical node Number of a PowerScale cluster node. </td>
         </tr>
                     <tr>
             <td colspan=1 > state</td>
@@ -6831,8 +6862,8 @@ Get node info of DellEMC PowerScale storage
 
 ### Examples
 ```
-- name: get node info of the PowerScale cluster node
-  dellemc_powerscale_node:
+- name: Get node info of the PowerScale cluster node
+  dellemc.powerscale.node:
     onefs_host: "{{onefs_host}}"
     verify_ssl: "{{verify_ssl}}"
     api_user: "{{api_user}}"
@@ -6987,7 +7018,7 @@ Manage SyncIQ jobs on PowerScale
 ### Examples
 ```
 - name: Get SyncIQ job details
-  dellemc_powerscale_synciqjob:
+  dellemc.powerscale.synciqjob:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -6996,7 +7027,7 @@ Manage SyncIQ jobs on PowerScale
       state: "present"
 
 - name: Pause a SyncIQ job when in running state
-  dellemc_powerscale_synciqjob:
+  dellemc.powerscale.synciqjob:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -7006,7 +7037,7 @@ Manage SyncIQ jobs on PowerScale
       state: "present"
 
 - name: Resume a SyncIQ job when in paused state
-  dellemc_powerscale_synciqjob:
+  dellemc.powerscale.synciqjob:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -7016,7 +7047,7 @@ Manage SyncIQ jobs on PowerScale
       state: "present"
 
 - name: Cancel a SyncIQ job
-  dellemc_powerscale_synciqjob:
+  dellemc.powerscale.synciqjob:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -7039,13 +7070,13 @@ Manage SyncIQ jobs on PowerScale
             <td colspan=2 > changed </td>
             <td>  bool </td>
             <td> always </td>
-            <td> Whether or not the resource has changed </td>
+            <td> Whether or not the resource has changed. </td>
         </tr>
                     <tr>
             <td colspan=2 > job_details </td>
             <td>  complex </td>
             <td> When SyncIQ job exists </td>
-            <td> The SyncIQ job details </td>
+            <td> The SyncIQ job details. </td>
         </tr>
                             <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
@@ -7093,7 +7124,7 @@ Manage SyncIQ jobs on PowerScale
             <td colspan=2 > modified_job </td>
             <td>  complex </td>
             <td> When SyncIQ job is modified </td>
-            <td> The modified SyncIQ job details </td>
+            <td> The modified SyncIQ job details. </td>
         </tr>
                             <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
@@ -7267,7 +7298,7 @@ Manage NFS exports on a DellEMC PowerScale system
 ### Examples
 ```
   - name: Create NFS Export
-    dellemc_powerscale_nfs:
+    dellemc.powerscale.nfs:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -7283,7 +7314,7 @@ Manage NFS exports on a DellEMC PowerScale system
       state: 'present'
 
   - name: Get NFS Export
-    dellemc_powerscale_nfs:
+    dellemc.powerscale.nfs:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -7293,7 +7324,7 @@ Manage NFS exports on a DellEMC PowerScale system
       state: 'present'
 
   - name: Add a root client
-    dellemc_powerscale_nfs:
+    dellemc.powerscale.nfs:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -7306,7 +7337,7 @@ Manage NFS exports on a DellEMC PowerScale system
       state: 'present'
 
   - name: Set sub_directories_mountable flag to True
-    dellemc_powerscale_nfs:
+    dellemc.powerscale.nfs:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -7317,7 +7348,7 @@ Manage NFS exports on a DellEMC PowerScale system
       state: 'present'
 
   - name: Remove a root client
-    dellemc_powerscale_nfs:
+    dellemc.powerscale.nfs:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -7330,7 +7361,7 @@ Manage NFS exports on a DellEMC PowerScale system
       state: 'present'
 
   - name: Modify description
-    dellemc_powerscale_nfs:
+    dellemc.powerscale.nfs:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -7341,7 +7372,7 @@ Manage NFS exports on a DellEMC PowerScale system
       state: 'present'
 
   - name: Set read_only flag to False
-    dellemc_powerscale_nfs:
+    dellemc.powerscale.nfs:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -7352,7 +7383,7 @@ Manage NFS exports on a DellEMC PowerScale system
       state: 'present'
 
   - name: Delete NFS Export
-    dellemc_powerscale_nfs:
+    dellemc.powerscale.nfs:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -7464,7 +7495,7 @@ Manage NFS exports on a DellEMC PowerScale system
 Manage SyncIQ policies on PowerScale
 
 ### Synopsis
- Managing SyncIQ policies on PowerScale includes create a SyncIQ policy, modify a SyncIQ policy, get details of a SyncIQ policy, creating jobs on SyncIQ policy
+ Managing SyncIQ policies on PowerScale includes create a SyncIQ policy, modify a SyncIQ policy, get details of a SyncIQ policy, creating jobs on SyncIQ policy.
 
 ### Parameters
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
@@ -7507,7 +7538,7 @@ Manage SyncIQ policies on PowerScale
             <td></td>
             <td></td>
             <td> <ul> <li>sync</li>  <li>copy</li> </ul></td>
-            <td> <br> Indicates type of replication action to be performed on the source </td>
+            <td> <br> Indicates type of replication action to be performed on the source. </td>
         </tr>
                     <tr>
             <td colspan=2 > state</td>
@@ -7523,7 +7554,7 @@ Manage SyncIQ policies on PowerScale
             <td></td>
             <td></td>
             <td></td>
-            <td> <br> Description of the policy </td>
+            <td> <br> Description of the policy. </td>
         </tr>
                     <tr>
             <td colspan=2 > enabled</td>
@@ -7531,7 +7562,7 @@ Manage SyncIQ policies on PowerScale
             <td></td>
             <td></td>
             <td></td>
-            <td> <br> Indicates whether policy is enabled or disabled </td>
+            <td> <br> Indicates whether policy is enabled or disabled. </td>
         </tr>
                     <tr>
             <td colspan=2 > run_job</td>
@@ -7539,7 +7570,7 @@ Manage SyncIQ policies on PowerScale
             <td></td>
             <td></td>
             <td> <ul> <li>on-schedule</li>  <li>when-source-modified</li>  <li>when-snapshot-taken</li> </ul></td>
-            <td> <br> Types of scheduling a job on the policy </td>
+            <td> <br> Types of scheduling a job on the policy. </td>
         </tr>
                     <tr>
             <td colspan=2 > job_delay</td>
@@ -7595,7 +7626,7 @@ Manage SyncIQ policies on PowerScale
             <td></td>
             <td></td>
             <td></td>
-            <td> <br> Schedule set when run_policy is 'on-schedule'  <br> It must be in isidate format.  <br> If the format is not proper an error will be thrown. </td>
+            <td> <br> Schedule set when run_policy is 'on-schedule'.  <br> It must be in isidate format.  <br> If the format is not proper an error will be thrown. </td>
         </tr>
                     <tr>
             <td colspan=2 > source_cluster</td>
@@ -7726,7 +7757,7 @@ Manage SyncIQ policies on PowerScale
             <td></td>
             <td></td>
             <td></td>
-            <td> <br> Specifies the parameters to create a job on SyncIQ policy </td>
+            <td> <br> Specifies the parameters to create a job on SyncIQ policy. </td>
         </tr>
                             <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
@@ -7812,7 +7843,7 @@ Manage SyncIQ policies on PowerScale
 ### Examples
 ```
   - name: Create SyncIQ policy
-    dellemc_powerscale_synciqpolicy:
+    dellemc.powerscale.synciqpolicy:
       onefs_host: "{{onefs_host}}"
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
@@ -7843,7 +7874,7 @@ Manage SyncIQ policies on PowerScale
       state: "present"
 
   - name: Modify SyncIQ policy
-    dellemc_powerscale_synciqpolicy:
+    dellemc.powerscale.synciqpolicy:
       onefs_host: "{{onefs_host}}"
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
@@ -7870,7 +7901,7 @@ Manage SyncIQ policies on PowerScale
       state: "present"
 
   - name: Rename a SyncIQ policy
-    dellemc_powerscale_synciqpolicy:
+    dellemc.powerscale.synciqpolicy:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -7880,7 +7911,7 @@ Manage SyncIQ policies on PowerScale
       state: "present"
 
   - name: Get SyncIQ policy details
-    dellemc_powerscale_synciqpolicy:
+    dellemc.powerscale.synciqpolicy:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -7889,7 +7920,7 @@ Manage SyncIQ policies on PowerScale
       state: "present"
 
   - name: Create a job on SyncIQ policy
-    dellemc_powerscale_synciqpolicy:
+    dellemc.powerscale.synciqpolicy:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -7902,7 +7933,7 @@ Manage SyncIQ policies on PowerScale
       state: "present"
 
   - name: Create a resync_prep job on SyncIQ policy
-    dellemc_powerscale_synciqpolicy:
+    dellemc.powerscale.synciqpolicy:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -7915,7 +7946,7 @@ Manage SyncIQ policies on PowerScale
       state: "present"
 
   - name: Allow writes on target of SyncIQ policy
-    dellemc_powerscale_synciqpolicy:
+    dellemc.powerscale.synciqpolicy:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -7929,7 +7960,7 @@ Manage SyncIQ policies on PowerScale
       state: "present"
 
   - name: Disallow writes on target of SyncIQ policy
-    dellemc_powerscale_synciqpolicy:
+    dellemc.powerscale.synciqpolicy:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -7943,7 +7974,7 @@ Manage SyncIQ policies on PowerScale
       state: "present"
 
   - name: Delete SyncIQ policy by policy name
-    dellemc_powerscale_synciqpolicy:
+    dellemc.powerscale.synciqpolicy:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -7952,7 +7983,7 @@ Manage SyncIQ policies on PowerScale
       state: "absent"
 
   - name: Delete SyncIQ policy by policy ID
-    dellemc_powerscale_synciqpolicy:
+    dellemc.powerscale.synciqpolicy:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -7974,13 +8005,13 @@ Manage SyncIQ policies on PowerScale
             <td colspan=2 > changed </td>
             <td>  bool </td>
             <td> always </td>
-            <td> Whether or not the resource has changed </td>
+            <td> Whether or not the resource has changed. </td>
         </tr>
                     <tr>
             <td colspan=2 > synciq_policy_details </td>
             <td>  complex </td>
             <td> When SyncIQ policy exists </td>
-            <td> Details of the SyncIQ policy </td>
+            <td> Details of the SyncIQ policy. </td>
         </tr>
                             <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
@@ -8049,7 +8080,7 @@ Manage SyncIQ policies on PowerScale
             <td colspan=2 > target_synciq_policy_details </td>
             <td>  complex </td>
             <td> When failover/failback is performed on target cluster </td>
-            <td> Details of the target SyncIQ policy </td>
+            <td> Details of the target SyncIQ policy. </td>
         </tr>
                             <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
@@ -8198,7 +8229,7 @@ Manages general settings for PowerScale storage system
 ### Examples
 ```
   - name: Get email settings
-    dellemc_powerscale_settings:
+    dellemc.powerscale.settings:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -8207,7 +8238,7 @@ Manages general settings for PowerScale storage system
       state: "{{state_present}}"
 
   - name: Update email settings
-    dellemc_powerscale_settings:
+    dellemc.powerscale.settings:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -8218,7 +8249,7 @@ Manages general settings for PowerScale storage system
       mail_subject: "lab-a2-alerts"
 
   - name: Add NTP server
-    dellemc_powerscale_settings:
+    dellemc.powerscale.settings:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -8229,7 +8260,7 @@ Manages general settings for PowerScale storage system
       state: "{{state_present}}"
 
   - name: Add NTP server - Idempotency
-    dellemc_powerscale_settings:
+    dellemc.powerscale.settings:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -8240,7 +8271,7 @@ Manages general settings for PowerScale storage system
       state: "{{state_present}}"
 
   - name: Get NTP server
-    dellemc_powerscale_settings:
+    dellemc.powerscale.settings:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -8249,7 +8280,7 @@ Manages general settings for PowerScale storage system
       state: "{{state_present}}"
 
   - name: Remove NTP server
-    dellemc_powerscale_settings:
+    dellemc.powerscale.settings:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -8260,7 +8291,7 @@ Manages general settings for PowerScale storage system
       state: "{{state_absent}}"
 
   - name: Remove NTP server - Idempotency
-    dellemc_powerscale_settings:
+    dellemc.powerscale.settings:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -8271,7 +8302,7 @@ Manages general settings for PowerScale storage system
       state: "{{state_absent}}"
 
   - name: Update email settings and add NTP server
-    dellemc_powerscale_settings:
+    dellemc.powerscale.settings:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -8286,8 +8317,9 @@ Manages general settings for PowerScale storage system
 ```
 
 ### Return Values
-                                                                                                                                                                                                                                                                                                                                                                                                        
-<table>
+
+
+ <table>
     <tr>
         <th colspan=2>Key</th>
         <th>Type</th>
@@ -8298,7 +8330,7 @@ Manages general settings for PowerScale storage system
             <td colspan=2 > changed </td>
             <td>  bool </td>
             <td> Always </td>
-            <td> Whether or not the resource has changed </td>
+            <td> Whether or not the resource has changed. </td>
         </tr>
                     <tr>
             <td colspan=2 > settings </td>
@@ -8397,7 +8429,7 @@ Manages general settings for PowerScale storage system
                 <td>success</td>
                 <td> Location of a custom template file that can be used to specify the layout of the notification emails. </td>
             </tr>
-                                        </table>
+                                        </table>                                                                                                                                                                                                                                                                                                                                                                                                                                   
 
 ### Authors
 * Meenakshi Dembi (@dembim) <ansible.team@dell.com>
@@ -8467,7 +8499,7 @@ Manage Groups on the PowerScale Storage System
             <td></td>
             <td></td>
             <td></td>
-            <td> <br> Either user_name or user_id is needed to add or remove the user from the group.  <br> users can be part of multiple groups. </td>
+            <td> <br> Either user_name or user_id is needed to add or remove the user from the group.  <br> Users can be part of multiple groups. </td>
         </tr>
                     <tr>
             <td colspan=1 > user_state</td>
@@ -8523,7 +8555,7 @@ Manage Groups on the PowerScale Storage System
 ### Examples
 ```
   - name: Create a Group
-    dellemc_powerscale_group:
+    dellemc.powerscale.group:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -8534,7 +8566,7 @@ Manage Groups on the PowerScale Storage System
       state: "present"
 
   - name: Create Group with Users
-    dellemc_powerscale_group:
+    dellemc.powerscale.group:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -8550,7 +8582,7 @@ Manage Groups on the PowerScale Storage System
       state: "present"
 
   - name: Get Details of the Group using Group Id
-    dellemc_powerscale_group:
+    dellemc.powerscale.group:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -8561,7 +8593,7 @@ Manage Groups on the PowerScale Storage System
       state: "present"
 
   - name: Delete the Group using Group Name
-    dellemc_powerscale_group:
+    dellemc.powerscale.group:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -8572,7 +8604,7 @@ Manage Groups on the PowerScale Storage System
       state: "absent"
 
   - name: Add Users to a Group
-    dellemc_powerscale_group:
+    dellemc.powerscale.group:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -8588,7 +8620,7 @@ Manage Groups on the PowerScale Storage System
       state: "present"
 
   - name: Remove Users from a Group
-    dellemc_powerscale_group:
+    dellemc.powerscale.group:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -8617,13 +8649,13 @@ Manage Groups on the PowerScale Storage System
             <td colspan=5 > changed </td>
             <td>  bool </td>
             <td> always </td>
-            <td> Whether or not the resource has changed </td>
+            <td> Whether or not the resource has changed. </td>
         </tr>
                     <tr>
             <td colspan=5 > group_details </td>
             <td>  complex </td>
             <td> When group exists </td>
-            <td> Details of the group </td>
+            <td> Details of the group. </td>
         </tr>
                             <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
@@ -8726,7 +8758,7 @@ Manage Filesystems on PowerScale
  Managing Filesystems on PowerScale Storage System includes Create a new Filesystem, Delete a Filesystem, Get details of a filesystem, Modify a Filesystem (Quota, ACLs).
 
 ### Parameters
-                                                                                                                                                                                                                                                                                                                                    
+                                                                                                                                                                                                                                                                                                                                                            
 <table>
     <tr>
         <th colspan=1>Parameter</th>
@@ -8785,12 +8817,20 @@ Manage Filesystems on PowerScale
             <td> <br> Creates intermediate folders recursively when set to true. </td>
         </tr>
                     <tr>
+            <td colspan=1 > recursive_force_delete</td>
+            <td> bool  </td>
+            <td></td>
+            <td> False </td>
+            <td></td>
+            <td> <br> Deletes sub files and folders recursively when set to true even if the filesystem is not empty. </td>
+        </tr>
+                    <tr>
             <td colspan=1 > quota</td>
             <td> dict  </td>
             <td></td>
             <td></td>
             <td></td>
-            <td> <br> The Smart Quota for the filesystem. Only directory Quotas are supported.  <br> The following sub-options are supported for Quota. - include_snap_data(boolean), - include_data_protection_overhead(boolean), - thresholds_on(app_logical_size, fs_logical_size, physical_size) - advisory_limit_size(int), - soft_limit_size(int), - hard_limit_size(int), - cap_unit (MB, GB or TB), - quota_state (present or absent).  <br> The default grace period is 7 days. Modification of grace period is not supported.  <br> The default capacity unit is GB.  <br> The parameter include_data_protection_overhead is supported for SDK 8.1.1  <br> For SDK 9.0.0 the parameter include_data_protection_overhead is deprecated and thresholds_on is used. </td>
+            <td> <br> The Smart Quota for the filesystem. Only directory Quotas are supported.  <br> The following sub-options are supported for Quota. - include_snap_data(boolean), - include_data_protection_overhead(boolean), - thresholds_on(app_logical_size, fs_logical_size, physical_size) - advisory_limit_size(int), - soft_limit_size(int), - hard_limit_size(int), - cap_unit (MB, GB or TB), - quota_state (present or absent).  <br> The default grace period is 7 days. Modification of grace period is not supported.  <br> The default capacity unit is GB.  <br> The parameter include_data_protection_overhead is supported for SDK 8.1.1.  <br> For SDK 9.0.0 the parameter include_data_protection_overhead is deprecated and thresholds_on is used. </td>
         </tr>
                     <tr>
             <td colspan=1 > state</td>
@@ -8848,40 +8888,42 @@ Manage Filesystems on PowerScale
             <td></td>
             <td> <br> the password of the PowerScale cluster. </td>
         </tr>
-                                            </table>
+                                                    </table>
 
+### Notes
+* While deleting a filesystem when recursive_force_delete is set as True it deletes all sub files and folders recursively even if the filesystem is not empty.
 
 ### Examples
 ```
   - name: Create Filesystem with Quota in given access zone
-    dellemc_powerscale_filesystem:
-     onefs_host: "{{powerscalehost}}"
-     port: "{{powerscaleport}}"
-     verify_ssl: "{{verify_ssl}}"
-     username: "{{user}}"
-     password: "{{password}}"
-     path: "<path>"
-     access_zone: "{{access_zone}}"
-     owner:
-       name: 'ansible_user'
-       provider_type: 'ldap'
-     group:
-       name: 'ansible_group'
-       provider_type: 'ldap'
-     access_control: "{{access_control}}"
-     quota:
-       include_snap_data: False
-       include_data_protection_overhead: False
-       advisory_limit_size: 2
-       soft_limit_size: 5
-       hard_limit_size: 10
-       cap_unit: "GB"
-       quota_state: "present"
-     recursive: "{{recursive}}"
-     state: "{{state_present}}"
+    dellemc.powerscale.filesystem:
+      onefs_host: "{{powerscalehost}}"
+      port: "{{powerscaleport}}"
+      verify_ssl: "{{verify_ssl}}"
+      username: "{{user}}"
+      password: "{{password}}"
+      path: "<path>"
+      access_zone: "{{access_zone}}"
+      owner:
+        name: 'ansible_user'
+        provider_type: 'ldap'
+      group:
+        name: 'ansible_group'
+        provider_type: 'ldap'
+      access_control: "{{access_control}}"
+      quota:
+        include_snap_data: False
+        include_data_protection_overhead: False
+        advisory_limit_size: 2
+        soft_limit_size: 5
+        hard_limit_size: 10
+        cap_unit: "GB"
+        quota_state: "present"
+      recursive: "{{recursive}}"
+      state: "{{state_present}}"
 
   - name: Create Filesystem in default (system) access zone, without Quota
-    dellemc_powerscale_filesystem:
+    dellemc.powerscale.filesystem:
       onefs_host: "{{powerscalehost}}"
       port: "{{powerscaleport}}"
       verify_ssl: "{{verify_ssl}}"
@@ -8889,35 +8931,35 @@ Manage Filesystems on PowerScale
       password: "{{password}}"
       path: "<path>"
       owner:
-       name: 'ansible_user'
-       provider_type: 'ldap'
+        name: 'ansible_user'
+        provider_type: 'ldap'
       state: "{{state_present}}"
 
   - name: Get filesystem details
-    dellemc_powerscale_filesystem:
-     onefs_host: "{{powerscalehost}}"
-     port: "{{powerscaleport}}"
-     verify_ssl: "{{verify_ssl}}"
-     username: "{{user}}"
-     password: "{{password}}"
-     access_zone: "{{access_zone}}"
-     path: "<path>"
-     state: "{{state_present}}"
+    dellemc.powerscale.filesystem:
+      onefs_host: "{{powerscalehost}}"
+      port: "{{powerscaleport}}"
+      verify_ssl: "{{verify_ssl}}"
+      username: "{{user}}"
+      password: "{{password}}"
+      access_zone: "{{access_zone}}"
+      path: "<path>"
+      state: "{{state_present}}"
 
   - name: Get filesystem details with snapshots
-    dellemc_powerscale_filesystem:
-     onefs_host: "{{powerscalehost}}"
-     port: "{{powerscaleport}}"
-     verify_ssl: "{{verify_ssl}}"
-     username: "{{user}}"
-     password: "{{password}}"
-     access_zone: "{{access_zone}}"
-     path: "<path>"
-     list_snapshots: "{{list_snapshots_true}}"
-     state: "{{state_present}}"
+    dellemc.powerscale.filesystem:
+      onefs_host: "{{powerscalehost}}"
+      port: "{{powerscaleport}}"
+      verify_ssl: "{{verify_ssl}}"
+      username: "{{user}}"
+      password: "{{password}}"
+      access_zone: "{{access_zone}}"
+      path: "<path>"
+      list_snapshots: "{{list_snapshots_true}}"
+      state: "{{state_present}}"
 
   - name: Modify Filesystem Hard Quota
-    dellemc_powerscale_filesystem:
+    dellemc.powerscale.filesystem:
       onefs_host: "{{powerscalehost}}"
       port: "{{powerscaleport}}"
       verify_ssl: "{{verify_ssl}}"
@@ -8932,7 +8974,7 @@ Manage Filesystems on PowerScale
       state: "{{state_present}}"
 
   - name: Modify Filesystem Owner, Group and ACL
-    dellemc_powerscale_filesystem:
+    dellemc.powerscale.filesystem:
       onefs_host: "{{powerscalehost}}"
       port: "{{powerscaleport}}"
       verify_ssl: "{{verify_ssl}}"
@@ -8941,40 +8983,41 @@ Manage Filesystems on PowerScale
       path: "<path>"
       access_zone: "{{access_zone}}"
       owner:
-       name: 'ansible_user'
-       provider_type: 'ldap'
+        name: 'ansible_user'
+        provider_type: 'ldap'
       group:
-       name: 'ansible_group'
-       provider_type: 'ldap'
+        name: 'ansible_group'
+        provider_type: 'ldap'
       access_control: "{{new_access_control}}"
       state: "{{state_present}}"
 
   - name: Remove Quota from FS
-    dellemc_powerscale_filesystem:
-     onefs_host: "{{onefs_host}}"
-     verify_ssl: "{{verify_ssl}}"
-     api_user: "{{api_user}}"
-     api_password: "{{api_password}}"
-     path: "<path>"
-     access_zone: "{{access_zone}}"
-     quota:
-       quota_state: "absent"
-     state: "{{state_present}}"
+    dellemc.powerscale.filesystem:
+      onefs_host: "{{onefs_host}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      path: "<path>"
+      access_zone: "{{access_zone}}"
+      quota:
+        quota_state: "absent"
+      state: "{{state_present}}"
 
   - name: Delete filesystem
-    dellemc_powerscale_filesystem:
-     onefs_host: "{{powerscalehost}}"
-     port: "{{powerscaleport}}"
-     verify_ssl: "{{verify_ssl}}"
-     username: "{{user}}"
-     password: "{{password}}"
-     access_zone: "{{access_zone}}"
-     path: "<path>"
-     state: "{{state_absent}}"
+    dellemc.powerscale.filesystem:
+      onefs_host: "{{powerscalehost}}"
+      port: "{{powerscaleport}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{user}}"
+      api_password: "{{password}}"
+      access_zone: "{{access_zone}}"
+      path: "<path>"
+      recursive_force_delete: "{{recursive_force_delete}}"
+      state: "{{state_absent}}"
 ```
 
 ### Return Values
-                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+                                                                                                                                                                                                                                                                                                                                                                                                                                                        
 <table>
     <tr>
         <th colspan=2>Key</th>
@@ -8982,11 +9025,11 @@ Manage Filesystems on PowerScale
         <th>Returned</th>
         <th width="100%">Description</th>
     </tr>
-                                                                                    <tr>
+                                                                                            <tr>
             <td colspan=2 > changed </td>
             <td>  bool </td>
             <td> always </td>
-            <td> Whether or not the resource has changed </td>
+            <td> Whether or not the resource has changed. </td>
         </tr>
                     <tr>
             <td colspan=2 > filesystem_details </td>
@@ -9082,15 +9125,15 @@ Manage Filesystems on PowerScale
 * Prashant Rakheja (@prashant-dell) <ansible.team@dell.com>
 
 --------------------------------
-# Gatherfacts Module
+# Network Settings Module
 
-Gathering information about DellEMC PowerScale Storage
+Manages Network Settings on PowerScale Storage System
 
 ### Synopsis
- Gathering information about DellEMC PowerScale Storage System includes Get attributes of the PowerScale cluster, Get list of access zones in the PowerScale cluster, Get list of nodes in the PowerScale cluster, Get list of authentication providers for all access zones or a specific access zone, Get list of users and groups for an access zone. Get list of smb_shares in the PowerScale cluster, Get list of nfs_exports in the PowerScale cluster, Get list of active clients in the PowerScale cluster, Get list of SyncIQ reports in the PowerScale cluster, Get list of SyncIQ target reports in the PowerScale cluster, Get list of SyncIQ target cluster certificates in the PowerScale cluster, Get list of SyncIQ policies in the PowerScale cluster. Get list of SyncIQ performance rules in the PowerScale cluster. Get list of network groupnets of the PowerScale cluster. Get list of network pools for all access zones or a specific access zone of the PowerScale cluster. Get list of network rules of the PowerScale cluster. Get list of network subnets of the PowerScale cluster. Get list of network interfaces of the PowerScale cluster.
+ Managing Network Settings on the PowerScale Storage System includes modifying and retrieving details of network settings.
 
 ### Parameters
-
+                                                                                                                                                                                        
 <table>
     <tr>
         <th colspan=1>Parameter</th>
@@ -9101,28 +9144,20 @@ Gathering information about DellEMC PowerScale Storage
         <th width="80%">Description</th>
     </tr>
                                                             <tr>
-            <td colspan=1 > include_all_access_zones</td>
+            <td colspan=1 > enable_source_routing</td>
             <td> bool  </td>
             <td></td>
             <td></td>
             <td></td>
-            <td> <br> Specifies if requested component details need to be fetched from all access zones.  <br> It is mutually exclusive with access_zone. </td>
+            <td> <br> The value for enabling or disabling source based routing. </td>
         </tr>
                     <tr>
-            <td colspan=1 > access_zone</td>
+            <td colspan=1 > state</td>
             <td> str  </td>
-            <td></td>
-            <td> System </td>
-            <td></td>
-            <td> <br> The access zone. If no Access Zone is specified, the 'System' access zone would be taken by default. </td>
-        </tr>
-                    <tr>
-            <td colspan=1 > gather_subset</td>
-            <td> list   <br> elements: str </td>
             <td> True </td>
             <td></td>
-            <td> <ul> <li>attributes</li>  <li>access_zones</li>  <li>nodes</li>  <li>providers</li>  <li>users</li>  <li>groups</li>  <li>smb_shares</li>  <li>nfs_exports</li>  <li>clients</li>  <li>synciq_reports</li>  <li>synciq_target_reports</li>  <li>synciq_policies</li>  <li>synciq_target_cluster_certificates</li>  <li>synciq_performance_rules</li>  <li>network_groupnets</li>  <li>network_subnets</li>  <li>network_pools</li>  <li>network_rules</li>  <li>network_interfaces</li> </ul></td>
-            <td> <br> List of string variables to specify the PowerScale Storage System entities for which information is required.  <br> List of all PowerScale Storage System entities supported by the module -  <br> attributes  <br> access_zones  <br> nodes  <br> providers  <br> users  <br> groups  <br> smb_shares  <br> nfs_exports  <br> clients  <br> synciq_reports  <br> synciq_target_reports  <br> synciq_policies  <br> synciq_target_cluster_certificates  <br> synciq_performance_rules  <br> network_groupnets  <br> network_pools  <br> network_rules  <br> network_interfaces  <br> network_subnets  <br> The list of attributes, access_zones and nodes is for the entire PowerScale cluster  <br> The list of providers, users and groups is specific to the specified access zone  <br> The list of syncIQ reports and syncIQ target reports for the entire PowerScale cluster  <br> The list of syncIQ policies, syncIQ target cluster certificates and syncIQ performance rules for the entire PowerScale cluster  <br> The list of network pools is specific to the specified access zone or for all access zones  <br> The list of network groupnets, network subnets, network rules and network interfaces is for the entire PowerScale cluster </td>
+            <td> <ul> <li>present</li> </ul></td>
+            <td> <br> State of network settings. </td>
         </tr>
                     <tr>
             <td colspan=1 > onefs_host</td>
@@ -9164,201 +9199,328 @@ Gathering information about DellEMC PowerScale Storage
             <td></td>
             <td> <br> the password of the PowerScale cluster. </td>
         </tr>
-                                                    </table>
+                                            </table>
 
-### Notes
-* The parameters access_zone and include_all_access_zones are mutually exclusive.
-* Listing of SyncIQ target cluster certificates is not supported by isi_sdk_8_1_1 version.
 
 ### Examples
 ```
-  - name: Get attributes of the PowerScale cluster
-    dellemc_powerscale_gatherfacts:
+    - name: Get Network settings
+      dellemc.powerscale.networksettings:
       onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
-      gather_subset:
-        - attributes
-  - name: Get access_zones of the PowerScale cluster
-    dellemc_powerscale_gatherfacts:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
       verify_ssl: "{{verify_ssl}}"
+      state: "{{state_present}}"
+
+    - name: Enable source based routing
+      dellemc.powerscale.networksettings:
+      onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
-      gather_subset:
-        - access_zones
-  - name: Get nodes of the PowerScale cluster
-    dellemc_powerscale_gatherfacts:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
       verify_ssl: "{{verify_ssl}}"
+      enable_source_routing: True
+      state: "{{state_present}}"
+
+    - name: Disable source based routing
+      dellemc.powerscale.networksettings:
+      onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
-      gather_subset:
-        - nodes
-  - name: Get list of authentication providers for an access zone of the
-          PowerScale cluster
-    dellemc_powerscale_gatherfacts:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
       verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      access_zone: "{{access_zone}}"
-      gather_subset:
-        - providers
-  - name: Get list of authentication providers for all access zones of the
-          PowerScale cluster
-    dellemc_powerscale_gatherfacts:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      include_all_access_zones: True
-      gather_subset:
-        - providers
-  - name: Get list of users for an access zone of the PowerScale cluster
-    dellemc_powerscale_gatherfacts:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      access_zone: "{{access_zone}}"
-      gather_subset:
-        - users
-  - name: Get list of groups for an access zone of the PowerScale cluster
-    dellemc_powerscale_gatherfacts:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      access_zone: "{{access_zone}}"
-      gather_subset:
-        - groups
-  - name: Get list of smb shares in the PowerScale cluster
-    dellemc_powerscale_gatherfacts:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      access_zone: "{{access_zone}}"
-      gather_subset:
-        - smb_shares
-  - name: Get list of nfs exports in the PowerScale cluster
-    dellemc_powerscale_gatherfacts:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      access_zone: "{{access_zone}}"
-      gather_subset:
-        - nfs_exports
-  - name: Get list of clients in the PowerScale cluster
-    dellemc_powerscale_gatherfacts:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - clients
-  - name: Get list of SyncIQ reports and SyncIQ target Reports in the PowerScale cluster
-    dellemc_powerscale_gatherfacts:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - synciq_reports
-        - synciq_target_reports
-  - name: Get list of SyncIQ policies in the PowerScale cluster
-    dellemc_powerscale_gatherfacts:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - synciq_policies
-  - name: Get list of SyncIQ target cluster certificates in the PowerScale cluster
-    dellemc_powerscale_gatherfacts:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - synciq_target_cluster_certificates
-  - name: Get list of SyncIQ performance rules in the PowerScale cluster
-    dellemc_powerscale_gatherfacts:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - synciq_performance_rules
-  - name: Get list of network groupnets of the PowerScale cluster
-    dellemc_powerscale_gatherfacts:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - network_groupnets
-  - name: Get list of network pools of the PowerScale cluster
-    dellemc_powerscale_gatherfacts:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - network_pools
-  - name: Get list of network pools for all access zones of the PowerScale cluster
-    dellemc_powerscale_gatherfacts:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      include_all_access_zones: True
-      gather_subset:
-        - network_pools
-  - name: Get list of network rules of the PowerScale cluster
-    dellemc_powerscale_gatherfacts:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - network_rules
-  - name: Get list of network interfaces of the PowerScale cluster
-    dellemc_powerscale_gatherfacts:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - network_interfaces
-  - name: Get list of network subnets of the PowerScale cluster
-    dellemc_powerscale_gatherfacts:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - network_subnets
+      enable_source_routing: False
+      state: "{{state_present}}"
 ```
 
+### Return Values
+                                                                                                                                                                                                                    
+<table>
+    <tr>
+        <th colspan=2>Key</th>
+        <th>Type</th>
+        <th>Returned</th>
+        <th width="100%">Description</th>
+    </tr>
+                                                                                    <tr>
+            <td colspan=2 > changed </td>
+            <td>  bool </td>
+            <td> always </td>
+            <td> Whether or not the resource has changed. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > network_settings </td>
+            <td>  complex </td>
+            <td> always </td>
+            <td> Details of the network settings. </td>
+        </tr>
+                            <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > default_groupnet </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Default client-side DNS settings for non-multitenancy aware programs. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > sbr </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Enable or disable source based routing. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > sc_rebalance_delay </td>
+                <td> int </td>
+                <td>success</td>
+                <td> Delay in seconds for IP rebalance. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > tcp_ports </td>
+                <td> list </td>
+                <td>success</td>
+                <td> List of client TCP ports. </td>
+            </tr>
+                                        </table>
+
 ### Authors
-* Ambuj Dubey (@AmbujDube) <ansible.team@dell.com>
-* Spandita Panigrahi(@panigs7) <ansible.team@dell.com>
+* Meenakshi Dembi (@dembim) <ansible.team@dell.com>
+
+--------------------------------
+# Smartpool Settings Module
+
+Manages Smartpool Settings on PowerScale Storage System
+
+### Synopsis
+ Managing Smartpool Settings on the PowerScale Storage System includes modifying and retrieving details of Smartpool settings.
+
+### Parameters
+                                                                                                                                                                                                            
+<table>
+    <tr>
+        <th colspan=1>Parameter</th>
+        <th width="20%">Type</th>
+        <th>Required</th>
+        <th>Default</th>
+        <th>Choices</th>
+        <th width="80%">Description</th>
+    </tr>
+                                                            <tr>
+            <td colspan=1 > virtual_hot_spare_hide_spare</td>
+            <td> bool  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> Hide reserved virtual hot spare space from free space counts. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > virtual_hot_spare_limit_percent</td>
+            <td> int  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> The percent space to reserve for the virtual hot spare, from 0-20. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > state</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td> <ul> <li>present</li> </ul></td>
+            <td> <br> State of smartpool settings. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > onefs_host</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> IP address or FQDN of the PowerScale cluster. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > port_no</td>
+            <td> str  </td>
+            <td></td>
+            <td> 8080 </td>
+            <td></td>
+            <td> <br> Port number of the PowerScale cluster.It defaults to 8080 if not specified. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > verify_ssl</td>
+            <td> bool  </td>
+            <td> True </td>
+            <td></td>
+            <td> <ul> <li>True</li>  <li>False</li> </ul></td>
+            <td> <br> boolean variable to specify whether to validate SSL certificate or not.  <br> True - indicates that the SSL certificate should be verified.  <br> False - indicates that the SSL certificate should not be verified. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > api_user</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> username of the PowerScale cluster. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > api_password</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> the password of the PowerScale cluster. </td>
+        </tr>
+                                            </table>
+
+
+### Examples
+```
+    - name: Get SmartPool settings
+      dellemc.powerscale.smartpoolsettings:
+      onefs_host: "{{onefs_host}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      state: "{{state_present}}"
+
+    - name: Modify SmartPool setting
+      dellemc.powerscale.smartpoolsettings:
+      onefs_host: "{{onefs_host}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      virtual_hot_spare_limit_percent: 10
+      virtual_hot_spare_hide_spare: True
+      state: "present"
+```
+
+### Return Values
+                                                                                                                                                                                                                                                                                                                                                                                                                                                
+<table>
+    <tr>
+        <th colspan=2>Key</th>
+        <th>Type</th>
+        <th>Returned</th>
+        <th width="100%">Description</th>
+    </tr>
+                                                                                    <tr>
+            <td colspan=2 > changed </td>
+            <td>  bool </td>
+            <td> always </td>
+            <td> Whether or not the resource has changed. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > smartpool_settings </td>
+            <td>  complex </td>
+            <td> always </td>
+            <td> Details of the smartpool settings </td>
+        </tr>
+                            <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > automatically_manage_io_optimization </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Automatically manage IO optimization settings on files. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > automatically_manage_protection </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Automatically manage protection settings on files. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > global_namespace_acceleration_enabled </td>
+                <td> bool </td>
+                <td>success</td>
+                <td> Optimize namespace operations by storing metadata on SSDs. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > global_namespace_acceleration_state </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Whether or not namespace operation optimizations are currently in effect. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > protect_directories_one_level_higher </td>
+                <td> bool </td>
+                <td>success</td>
+                <td> Automatically add additional protection level to all directories. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > spillover_enabled </td>
+                <td> bool </td>
+                <td>success</td>
+                <td> Spill writes into other pools as needed. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > spillover_target </td>
+                <td> dict </td>
+                <td>success</td>
+                <td> Target pool for spilled writes. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > ssd_l3_cache_default_enabled </td>
+                <td> bool </td>
+                <td>success</td>
+                <td> The L3 Cache default enabled state. This specifies whether L3 Cache should be enabled on new node pools. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > ssd_qab_mirrors </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Controls number of mirrors of QAB blocks to place on SSDs. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > ssd_system_btree_mirrors </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Controls number of mirrors of system B-tree blocks to place on SSDs. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > ssd_system_delta_mirrors </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Controls number of mirrors of system delta blocks to place on SSDs. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > virtual_hot_spare_deny_writes </td>
+                <td> bool </td>
+                <td>success</td>
+                <td> Deny writes into reserved virtual hot spare space. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > virtual_hot_spare_hide_spare </td>
+                <td> bool </td>
+                <td>success</td>
+                <td> Hide reserved virtual hot spare space from free space counts. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > virtual_hot_spare_limit_drives </td>
+                <td> int </td>
+                <td>success</td>
+                <td> The number of drives to reserve for the virtual hot spare, from 0-4. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > virtual_hot_spare_limit_percent </td>
+                <td> int </td>
+                <td>success</td>
+                <td> The percent space to reserve for the virtual hot spare, from 0-20. </td>
+            </tr>
+                                        </table>
+
+### Authors
+* Meenakshi Dembi (@dembim) <ansible.team@dell.com>
 
 --------------------------------

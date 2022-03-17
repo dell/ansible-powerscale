@@ -7,12 +7,8 @@
 from __future__ import (absolute_import, division, print_function)
 
 __metaclass__ = type
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'
-                    }
 
-MODULE_UTILS_PATH = 'ansible_collections.dellemc.powerscale.plugins.modules.dellemc_powerscale_settings.utils'
+MODULE_UTILS_PATH = 'ansible_collections.dellemc.powerscale.plugins.modules.settings.utils'
 
 SETTINGS = {'email_settings': [{'mail_relay': 'mailrelay.itp.xyz.net',
                                 'mail_sender': 'lab-a2@dell.com',
