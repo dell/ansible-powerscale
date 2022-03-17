@@ -7,12 +7,8 @@
 from __future__ import (absolute_import, division, print_function)
 
 __metaclass__ = type
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'
-                    }
 
-MODULE_UTILS_PATH = 'ansible_collections.dellemc.powerscale.plugins.modules.dellemc_powerscale_networkrule.utils'
+MODULE_UTILS_PATH = 'ansible_collections.dellemc.powerscale.plugins.modules.networkrule.utils'
 
 NETWORK_RULES = {'rules': [{'description': '',
                             'groupnet': 'groupnet0',

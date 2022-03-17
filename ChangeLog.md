@@ -1,4 +1,13 @@
 # ansible-powerscale Change Log
+## Version 1.5.0 - released on 25/03/22
+- Support to retrieve and modify network settings in Network Settings module.
+- Support to retrieve and modify smartpool settings in Smartpool Settings module.
+- SmartQuota module is enhanced to support float values for Quota Parameters.
+- ADS module is enhanced to support machine_account & organizational_unit parameters while creating ADS provider.
+- Removal of dellemc_powerscale prefix from all the modules name.
+- Support for recursive force deletion of filesystem directories.
+- Added rotating file handler for log files.
+
 ## Version 1.4.0 - released on 16/12/21
 - Added CRUD operations for Groupnet module.
 - Added CRUD operations for Subnet module.
