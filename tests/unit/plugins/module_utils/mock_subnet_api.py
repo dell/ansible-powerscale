@@ -7,10 +7,8 @@
 from __future__ import (absolute_import, division, print_function)
 
 __metaclass__ = type
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'
-                    }
+GENERIC_FAILURE_MSG = " failed with error"
+MOCK_IP_ADDRESS_VALUE = '10.*.*.*'
 
 
 def get_subnet_details(subnet_name):
@@ -18,10 +16,10 @@ def get_subnet_details(subnet_name):
         return None
     else:
         return {'subnets': [{'addr_family': 'ipv4',
-                             'base_addr': '10.*.*.*',
+                             'base_addr': MOCK_IP_ADDRESS_VALUE,
                              'description': 'Initial subnet',
                              'dsr_addrs': [],
-                             'gateway': '10.*.*.*',
+                             'gateway': MOCK_IP_ADDRESS_VALUE,
                              'gateway_priority': 10,
                              'groupnet': 'groupnet0',
                              'id': 'groupnet0.subnet0',
@@ -31,8 +29,8 @@ def get_subnet_details(subnet_name):
                              'prefixlen': 21,
                              'sc_service_addrs': [
                                  {
-                                     'high': '10.*.*.*',
-                                     'low': '10.*.*.*'
+                                     'high': MOCK_IP_ADDRESS_VALUE,
+                                     'low': MOCK_IP_ADDRESS_VALUE
                                  }
                              ],
                              'sc_service_name': "",
@@ -73,19 +71,19 @@ def get_invalid_sc_ip():
 
 
 def get_subnet_ex_msg(subnet_name):
-    return "Getting details of subnet " + subnet_name + " failed with error"
+    return "Getting details of subnet " + subnet_name + GENERIC_FAILURE_MSG
 
 
 def modify_subnet_ex_msg(subnet_name):
-    return "Modifying subnet " + subnet_name + " failed with error"
+    return "Modifying subnet " + subnet_name + GENERIC_FAILURE_MSG
 
 
 def delete_subnet_ex_msg(subnet_name):
-    return "Deleting subnet " + subnet_name + " failed with error"
+    return "Deleting subnet " + subnet_name + GENERIC_FAILURE_MSG
 
 
 def create_subnet_ex_msg(subnet_name):
-    return "Creating subnet " + subnet_name + " failed with error"
+    return "Creating subnet " + subnet_name + GENERIC_FAILURE_MSG
 
 
 def get_invalid_mtu():
