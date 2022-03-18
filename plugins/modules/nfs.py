@@ -117,7 +117,7 @@ options:
 EXAMPLES = r'''
 
   - name: Create NFS Export
-    nfs:
+    dellemc.powerscale.nfs:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -133,7 +133,7 @@ EXAMPLES = r'''
       state: 'present'
 
   - name: Get NFS Export
-    nfs:
+    dellemc.powerscale.nfs:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -143,7 +143,7 @@ EXAMPLES = r'''
       state: 'present'
 
   - name: Add a root client
-    nfs:
+    dellemc.powerscale.nfs:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -156,7 +156,7 @@ EXAMPLES = r'''
       state: 'present'
 
   - name: Set sub_directories_mountable flag to True
-    nfs:
+    dellemc.powerscale.nfs:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -167,7 +167,7 @@ EXAMPLES = r'''
       state: 'present'
 
   - name: Remove a root client
-    nfs:
+    dellemc.powerscale.nfs:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -180,7 +180,7 @@ EXAMPLES = r'''
       state: 'present'
 
   - name: Modify description
-    nfs:
+    dellemc.powerscale.nfs:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -191,7 +191,7 @@ EXAMPLES = r'''
       state: 'present'
 
   - name: Set read_only flag to False
-    nfs:
+    dellemc.powerscale.nfs:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -202,7 +202,7 @@ EXAMPLES = r'''
       state: 'present'
 
   - name: Delete NFS Export
-    nfs:
+    dellemc.powerscale.nfs:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
