@@ -7,14 +7,14 @@
 from __future__ import (absolute_import, division, print_function)
 
 __metaclass__ = type
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'
-                    }
 
 import random
 import string
 
 
 def get_desc(length):
-    return ''.join([random.choice(string.ascii_letters) for i in range(length)])
+    desc = ''
+    while(length > 0):
+        desc += random.choice(string.ascii_letters)
+        length -= 1
+    return desc

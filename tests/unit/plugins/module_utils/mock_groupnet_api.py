@@ -7,10 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 __metaclass__ = type
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'
-                    }
+GENERIC_FAILURE_MSG = " failed with error"
 
 
 def get_groupnet_details(groupnet_name):
@@ -42,19 +39,19 @@ def get_invalid_dns():
 
 
 def get_groupnet_ex_msg(groupnet_name):
-    return "Getting details of groupnet " + groupnet_name + " failed with error"
+    return "Getting details of groupnet " + groupnet_name + GENERIC_FAILURE_MSG
 
 
 def modify_groupnet_ex_msg(groupnet_name):
-    return "Modifying groupnet " + groupnet_name + " failed with error"
+    return "Modifying groupnet " + groupnet_name + GENERIC_FAILURE_MSG
 
 
 def delete_groupnet_ex_msg(groupnet_name):
-    return "Deleting groupnet " + groupnet_name + " failed with error"
+    return "Deleting groupnet " + groupnet_name + GENERIC_FAILURE_MSG
 
 
 def create_groupnet_ex_msg(groupnet_name):
-    return "Creating groupnet " + groupnet_name + " failed with error"
+    return "Creating groupnet " + groupnet_name + GENERIC_FAILURE_MSG
 
 
 def get_invalid_desc():

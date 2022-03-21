@@ -10,7 +10,6 @@ IMPORT_PKGS_FAIL = []
 POWERSCALE_SDK_9_0_0 = "isi_sdk_9_0_0"
 POWERSCALE_SDK_8_1_1 = "isi_sdk_8_1_1"
 
-'''import urllib3'''
 try:
     import urllib3
 
@@ -18,13 +17,11 @@ try:
 except ImportError:
     IMPORT_PKGS_FAIL.append("urllib3")
 
-'''import dateutil'''
 try:
     import dateutil.relativedelta
 except ImportError:
     IMPORT_PKGS_FAIL.append("python-dateutil")
 
-'''import pkg_resources'''
 try:
     from pkg_resources import parse_version
     import pkg_resources
@@ -33,7 +30,6 @@ except ImportError:
     HAS_PKG_RESOURCES = False
     IMPORT_PKGS_FAIL.append("pkg_resources")
 
-'''import importlib'''
 try:
     import importlib
     HAS_IMPORTLIB = True
@@ -42,6 +38,8 @@ except ImportError:
     IMPORT_PKGS_FAIL.append("importlib")
 
 import logging
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.dellemc_powerscale_logging_handler \
+    import CustomRotatingFileHandler
 import math
 from decimal import Decimal
 import re
@@ -158,12 +156,20 @@ returns logger object
 '''
 
 
-def get_logger(module_name, log_file_name='dellemc_ansible_provisioning.log',
+def get_logger(module_name, log_file_name='ansible_powerscale.log',
                log_devel=logging.INFO):
     FORMAT = '%(asctime)-15s %(filename)s %(levelname)s : %(message)s'
+    max_bytes = 5 * 1024 * 1024
     logging.basicConfig(filename=log_file_name, format=FORMAT)
     LOG = logging.getLogger(module_name)
     LOG.setLevel(log_devel)
+    handler = CustomRotatingFileHandler(log_file_name,
+                                        maxBytes=max_bytes,
+                                        backupCount=5)
+    formatter = logging.Formatter(FORMAT)
+    handler.setFormatter(formatter)
+    LOG.addHandler(handler)
+    LOG.propagate = False
     return LOG
 
 
@@ -371,7 +377,7 @@ def validate_python_version(cur_py_ver):
 ''' Validates threshold overhead parameter based on imported sdk version '''
 
 
-def validateThresholdOverheadParameter(quota, threshold_overhead_param):
+def validate_threshold_overhead_parameter(quota, threshold_overhead_param):
     error_msg = None
     key = 'thresholds_on'
     if ISI_SDK_VERSION_9:
