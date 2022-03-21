@@ -52,9 +52,9 @@ notes:
             - the password of the PowerScale cluster.
             required: True
     requirements:
-      - A DellEMC PowerScale Storage system.
-      - Ansible 2.7 and above.
+      - A Dell EMC PowerScale Storage system.
+      - Ansible 2.10, 2.11 or 2.12.
     notes:
-      - The modules prefixed with dellemc_powerscale are built to support the
-        DellEMC PowerScale storage platform.
+      - The modules present in this collection named as 'dellemc.powerscale'
+        are built to support the Dell EMC PowerScale storage platform.
     '''
