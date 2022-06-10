@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ansible-version: [stable-2.10]
+i        ansible-version: [stable-2.11]
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -35,6 +35,46 @@ jobs:
           name: collection
           path: .cache/collection-tarballs
 
+
+#Unit tests (OPTIONAL)
+#
+#https://docs.ansible.com/ansible/latest/dev_guide/testing_units.html
+
+  unit:
+    name: Unit Tests
+    needs: [build]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.8, 3.9]
+        ansible-version: [ stable-2.11, stable-2.12, stable-2.13]
+
+    steps:
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install ansible (${{ matrix.ansible-version }}) version
+        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible-version }}.tar.gz --disable-pip-version-check
+
+      - name: Download migrated collection artifacts
+        uses: actions/download-artifact@v1
+        with:
+          name: collection
+          path: .cache/collection-tarballs
+
+      - name: Setup Unit test Pre-requisites
+        run: |
+          ansible-galaxy collection install .cache/collection-tarballs/*.tar.gz
+          if [ -f /home/runner/.ansible/collections/ansible_collections/dellemc/powerscale/tests/requirements.txt ]; then pip install -r /home/runner/.ansible/collections/ansible_collections/dellemc/powerscale/tests/requirements.txt; fi
+
+
+      - name: Run Unit tests using ansible-test
+        run: ansible-test units -v --color --python ${{ matrix.python-version }} --coverage
+        working-directory: /home/runner/.ansible/collections/ansible_collections/dellemc/powerscale
+
 ###
 # Sanity tests (REQUIRED)
 #
@@ -46,7 +86,7 @@ jobs:
     needs: [build]
     strategy:
       matrix:
-        ansible-version: [stable-2.10, stable-2.11, stable-2.12]
+        ansible-version: [stable-2.11, stable-2.12, stable-2.13]
 
     steps:
       - name: Set up Python 3.9
