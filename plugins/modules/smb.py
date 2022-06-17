@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: (c) 2019, DellEMC
+# Copyright: (c) 2019, Dell Technologies
 
 # Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -15,7 +15,7 @@ module: smb
 
 version_added: '1.2.0'
 
-short_description: Manage SMB shares on Dell EMC PowerScale. You can perform the following operations
+short_description: Manage SMB shares on PowerScale Storage System. You can perform the following operations
 description:
 - Managing SMB share on PowerScale.
 - Create a new SMB share.
@@ -24,7 +24,7 @@ description:
 - Delete an existing SMB share.
 
 extends_documentation_fragment:
-  - dellemc.powerscale.dellemc_powerscale.powerscale
+  - dellemc.powerscale.powerscale
 
 author:
 - Arindam Datta (@dattaarindam) <ansible.team@dell.com>
@@ -295,7 +295,7 @@ smb_details:
 import re
 import logging
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
-    import dellemc_ansible_powerscale_utils as utils
+    import utils
 from ansible.module_utils.basic import AnsibleModule
 
 LOG = utils.get_logger('smb')

@@ -1,5 +1,5 @@
 ### REQUIRED
-
+---
 # The namespace of the collection. This can be a company/brand/organization or product namespace under which all
 # content lives. May only contain alphanumeric characters and underscores. Additionally namespaces cannot start with
 # underscores or numbers and cannot contain consecutive underscores
@@ -9,7 +9,7 @@ namespace: dellemc
 name: powerscale
 
 # The version of the collection. Must be compatible with semantic versioning
-version: 1.5.0
+version: 1.6.0
 
 # The path to the Markdown (.md) readme file. This path is relative to the root of the collection
 readme: README.md
@@ -27,12 +27,13 @@ authors:
 - Ganesh Ashok Prabhu <ansible.team@dell.com>
 - Jennifer John <ansible.team@dell.com>
 - Spandita Panigrahi <ansible.team@dell.com>
+- Meenakshi Dembi <ansible.team@dell.com>
 
 
 ### OPTIONAL but strongly recommended
 
 # A short summary description of the collection
-description: Ansible modules for Dell EMC PowerScale
+description: Ansible modules for PowerScale
 
 # Either a single license or a list of licenses for content inside of a collection. Ansible Galaxy currently only
 # accepts L(SPDX,https://spdx.org/licenses/) licenses. This key is mutually exclusive with 'license_file'
@@ -51,13 +52,13 @@ tags: [storage]
 dependencies: {}
 
 # The URL of the originating SCM repository
-repository: https://github.com/dell/ansible-powerscale/tree/1.5.0
+repository: https://github.com/dell/ansible-powerscale/tree/1.6.0
 
 # The URL to any online docs
-documentation: https://github.com/dell/ansible-powerscale/tree/1.5.0/docs
+documentation: https://github.com/dell/ansible-powerscale/tree/1.6.0/docs
 
 # The URL to the homepage of the collection/project
-homepage: https://github.com/dell/ansible-powerscale/tree/1.5.0
+homepage: https://github.com/dell/ansible-powerscale/tree/1.6.0
 
 # The URL to the collection issue tracker
 issues: https://www.dell.com/community/Automation/bd-p/Automation

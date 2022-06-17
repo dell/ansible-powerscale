@@ -1,9 +1,9 @@
 #!/usr/bin/python
-# Copyright: (c) 2020, DellEMC
+# Copyright: (c) 2020, Dell Technologies
 
 # Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-"""Ansible module for managing NFS Exports on DellEMC PowerScale"""
+"""Ansible module for managing NFS Exports on PowerScale"""
 
 from __future__ import absolute_import, division, print_function
 
@@ -13,14 +13,14 @@ DOCUMENTATION = r'''
 ---
 module: nfs
 version_added: '1.2.0'
-short_description:  Manage NFS exports on a DellEMC PowerScale system
+short_description:  Manage NFS exports on a PowerScale Storage System
 description:
 - Managing NFS exports on an PowerScale system includes creating NFS export for
   a directory in an access zone, adding or removing clients, modifying
   different parameters of the export and deleting export.
 
 extends_documentation_fragment:
-  - dellemc.powerscale.dellemc_powerscale.powerscale
+  - dellemc.powerscale.powerscale
 
 author:
 - Manisha Agrawal(@agrawm3) <ansible.team@dell.com>
@@ -264,11 +264,11 @@ NFS_export_details:
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
-    import dellemc_ansible_powerscale_utils as utils
+    import utils
 import logging
 import re
 
-LOG = utils.get_logger(module_name='nfs')
+LOG = utils.get_logger('nfs')
 
 
 class NfsExport(object):

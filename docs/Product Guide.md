@@ -1,160 +1,191 @@
 # Ansible Modules for Dell Technologies PowerScale
-## Product Guide 1.5.0
-© 2022 Dell Inc. or its subsidiaries. All rights reserved. Dell and other trademarks are trademarks of Dell Inc. or its subsidiaries. Other trademarks may be trademarks of their respective owners.
+## Product Guide 1.6.0
+© 2022 Dell Inc. or its subsidiaries. All rights reserved. Dell, and other trademarks are trademarks of Dell Inc. or its subsidiaries. Other trademarks may be trademarks of their respective owners.
 
 --------------
 ## Contents
 *   [Groupnet Module](#groupnet-module)
-    *   [Synopsis](#synopsis)
-    *   [Parameters](#parameters)
-    *   [Examples](#examples)
-    *   [Return Values](#return-values)
-    *   [Authors](#authors)
+    *   [Synopsis](#synopsis-0)
+    *   [Parameters](#parameters-0)
+    *   [Notes](#notes-0)
+    *   [Examples](#examples-0)
+    *   [Return Values](#return-values-0)
+    *   [Authors](#authors-0)
 *   [Network Pool Module](#network-pool-module)
     *   [Synopsis](#synopsis-1)
     *   [Parameters](#parameters-1)
+    *   [Notes](#notes-1)
     *   [Examples](#examples-1)
     *   [Return Values](#return-values-1)
     *   [Authors](#authors-1)
 *   [LDAP Module](#ldap-module)
     *   [Synopsis](#synopsis-2)
     *   [Parameters](#parameters-2)
-    *   [Notes](#notes)
+    *   [Notes](#notes-2)
     *   [Examples](#examples-2)
     *   [Return Values](#return-values-2)
     *   [Authors](#authors-2)
-*   [SyncIQ Reports Module](#synciq-reports-module)
+*   [SyncIQ Reports Module](#synciqreports)
     *   [Synopsis](#synopsis-3)
     *   [Parameters](#parameters-3)
+    *   [Notes](#notes-3)
     *   [Examples](#examples-3)
     *   [Return Values](#return-values-3)
     *   [Authors](#authors-3)
 *   [Subnet Module](#subnet-module)
     *   [Synopsis](#synopsis-4)
     *   [Parameters](#parameters-4)
+    *   [Notes](#notes-4)
     *   [Examples](#examples-4)
     *   [Return Values](#return-values-4)
     *   [Authors](#authors-4)
 *   [Smart Quota Module](#smart-quota-module)
     *   [Synopsis](#synopsis-5)
     *   [Parameters](#parameters-5)
-    *   [Notes](#notes-1)
+    *   [Notes](#notes-5)
     *   [Examples](#examples-5)
     *   [Return Values](#return-values-5)
     *   [Authors](#authors-5)
 *   [SyncIQ Target Reports Module](#synciq-target-reports-module)
     *   [Synopsis](#synopsis-6)
     *   [Parameters](#parameters-6)
+    *   [Notes](#notes-6)
     *   [Examples](#examples-6)
     *   [Return Values](#return-values-6)
     *   [Authors](#authors-6)
 *   [ADS Module](#ads-module)
     *   [Synopsis](#synopsis-7)
     *   [Parameters](#parameters-7)
+    *   [Notes](#notes-7)
     *   [Examples](#examples-7)
     *   [Return Values](#return-values-7)
     *   [Authors](#authors-7)
 *   [Network Rule Module](#network-rule-module)
     *   [Synopsis](#synopsis-8)
     *   [Parameters](#parameters-8)
+    *   [Notes](#notes-8)
     *   [Examples](#examples-8)
     *   [Return Values](#return-values-8)
     *   [Authors](#authors-8)
 *   [Snapshot Schedule Module](#snapshot-schedule-module)
     *   [Synopsis](#synopsis-9)
     *   [Parameters](#parameters-9)
+    *   [Notes](#notes-9)
     *   [Examples](#examples-9)
     *   [Return Values](#return-values-9)
     *   [Authors](#authors-9)
 *   [User Module](#user-module)
     *   [Synopsis](#synopsis-10)
     *   [Parameters](#parameters-10)
+    *   [Notes](#notes-10)
     *   [Examples](#examples-10)
     *   [Return Values](#return-values-10)
     *   [Authors](#authors-10)
 *   [SMB Module](#smb-module)
     *   [Synopsis](#synopsis-11)
     *   [Parameters](#parameters-11)
+    *   [Notes](#notes-11)
     *   [Examples](#examples-11)
     *   [Return Values](#return-values-11)
     *   [Authors](#authors-11)
 *   [Snapshot Module](#snapshot-module)
     *   [Synopsis](#synopsis-12)
     *   [Parameters](#parameters-12)
+    *   [Notes](#notes-12)
     *   [Examples](#examples-12)
     *   [Return Values](#return-values-12)
     *   [Authors](#authors-12)
 *   [SyncIQ Rules Module](#synciq-rules-module)
     *   [Synopsis](#synopsis-13)
     *   [Parameters](#parameters-13)
-    *   [Notes](#notes-2)
+    *   [Notes](#notes-13)
     *   [Examples](#examples-13)
     *   [Return Values](#return-values-13)
     *   [Authors](#authors-13)
 *   [Access Zone Module](#access-zone-module)
     *   [Synopsis](#synopsis-14)
     *   [Parameters](#parameters-14)
-    *   [Notes](#notes-3)
+    *   [Notes](#notes-14)
     *   [Examples](#examples-14)
     *   [Return Values](#return-values-14)
     *   [Authors](#authors-14)
 *   [Node Module](#node-module)
     *   [Synopsis](#synopsis-15)
     *   [Parameters](#parameters-15)
+    *   [Notes](#notes-15)
     *   [Examples](#examples-15)
     *   [Return Values](#return-values-15)
     *   [Authors](#authors-15)
 *   [SyncIQ Job Module](#synciq-job-module)
     *   [Synopsis](#synopsis-16)
     *   [Parameters](#parameters-16)
-    *   [Notes](#notes-4)
+    *   [Notes](#notes-16)
     *   [Examples](#examples-16)
     *   [Return Values](#return-values-16)
     *   [Authors](#authors-16)
 *   [NFS Module](#nfs-module)
     *   [Synopsis](#synopsis-17)
     *   [Parameters](#parameters-17)
+    *   [Notes](#notes-17)
     *   [Examples](#examples-17)
     *   [Return Values](#return-values-17)
     *   [Authors](#authors-17)
 *   [SyncIQ Policy Module](#synciq-policy-module)
     *   [Synopsis](#synopsis-18)
     *   [Parameters](#parameters-18)
-    *   [Notes](#notes-5)
+    *   [Notes](#notes-18)
     *   [Examples](#examples-18)
     *   [Return Values](#return-values-18)
     *   [Authors](#authors-18)
 *   [Settings Module](#settings-module)
     *   [Synopsis](#synopsis-19)
     *   [Parameters](#parameters-19)
+    *   [Notes](#notes-19)
     *   [Examples](#examples-19)
     *   [Return Values](#return-values-19)
     *   [Authors](#authors-19)
 *   [Group Module](#group-module)
     *   [Synopsis](#synopsis-20)
     *   [Parameters](#parameters-20)
+    *   [Notes](#notes-20)
     *   [Examples](#examples-20)
     *   [Return Values](#return-values-20)
     *   [Authors](#authors-20)
 *   [File System Module](#file-system-module)
     *   [Synopsis](#synopsis-21)
     *   [Parameters](#parameters-21)
-    *   [Notes](#notes-6)
+    *   [Notes](#notes-21)
     *   [Examples](#examples-21)
     *   [Return Values](#return-values-21)
     *   [Authors](#authors-21)
 *   [Network Settings Module](#network-settings-module)
     *   [Synopsis](#synopsis-22)
     *   [Parameters](#parameters-22)
+    *   [Notes](#notes-22)
     *   [Examples](#examples-22)
     *   [Return Values](#return-values-22)
     *   [Authors](#authors-22)
 *   [Smartpool Settings Module](#smartpool-settings-module)
     *   [Synopsis](#synopsis-23)
     *   [Parameters](#parameters-23)
+    *   [Notes](#notes-23)
     *   [Examples](#examples-23)
     *   [Return Values](#return-values-23)
     *   [Authors](#authors-23)
+*   [Filepool Policy Module](#filepool-policy-module)
+    *   [Synopsis](#synopsis-24)
+    *   [Parameters](#parameters-24)
+    *   [Notes](#notes-24)
+    *   [Examples](#examples-24)
+    *   [Return Values](#return-values-24)
+    *   [Authors](#authors-24)
+*   [Storagepool Tier Module](#storagepool-tier-module)
+    *   [Synopsis](#synopsis-25)
+    *   [Parameters](#parameters-25)
+    *   [Notes](#notes-25)
+    *   [Examples](#examples-25)
+    *   [Return Values](#return-values-25)
+    *   [Authors](#authors-25)
 
 --------------
 
@@ -166,7 +197,7 @@ Manages groupnet configuration on PowerScale
  Manages the groupnet configuration on the PowerScale storage system. This includes creating, modifying, deleting and retrieving the details of the groupnet.
 
 ### Parameters
-                                                                                                                                                                                                                                                                                                                
+                                                                                                                                                                                                                                                                                                                    
 <table>
     <tr>
         <th colspan=1>Parameter</th>
@@ -198,7 +229,7 @@ Manages groupnet configuration on PowerScale
             <td></td>
             <td></td>
             <td></td>
-            <td> Name of the groupnet when renaming an existing groupnet. </td>
+            <td> <br>Name of the groupnet when renaming an existing groupnet. </td>
         </tr>
                     <tr>
             <td colspan=1 > dns_servers</td>
@@ -280,8 +311,10 @@ Manages groupnet configuration on PowerScale
             <td></td>
             <td> <br> the password of the PowerScale cluster. </td>
         </tr>
-                                            </table>
+                                                    </table>
 
+### Notes
+* The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 ### Examples
 ```
@@ -380,7 +413,7 @@ Manages groupnet configuration on PowerScale
 ```
 
 ### Return Values
-                                                                                                                                                                                                                                        
+                                                                                                                                                                                                                                            
 <table>
     <tr>
         <th colspan=2>Key</th>
@@ -388,7 +421,7 @@ Manages groupnet configuration on PowerScale
         <th>Returned</th>
         <th width="100%">Description</th>
     </tr>
-                                                                                    <tr>
+                                                                                            <tr>
             <td colspan=2 > changed </td>
             <td>  bool </td>
             <td> always </td>
@@ -449,7 +482,7 @@ Manages Network Pools on PowerScale Storage System
  Managing Network Pools on the PowerScale Storage System includes creating, modifying, deleting and reterving details of network pool.
 
 ### Parameters
-                                                                                                                                                                                                                                                                                                                                                                                                    
+                                                                                                                                                                                                                                                                                                                                                                                                        
 <table>
     <tr>
         <th colspan=2>Parameter</th>
@@ -688,8 +721,10 @@ Manages Network Pools on PowerScale Storage System
             <td></td>
             <td> <br> the password of the PowerScale cluster. </td>
         </tr>
-                                            </table>
+                                                    </table>
 
+### Notes
+* The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 ### Examples
 ```
@@ -771,7 +806,7 @@ Manages Network Pools on PowerScale Storage System
 ```
 
 ### Return Values
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
 <table>
     <tr>
         <th colspan=2>Key</th>
@@ -779,7 +814,7 @@ Manages Network Pools on PowerScale Storage System
         <th>Returned</th>
         <th width="100%">Description</th>
     </tr>
-                                                                                    <tr>
+                                                                                            <tr>
             <td colspan=2 > changed </td>
             <td>  bool </td>
             <td> always </td>
@@ -1081,6 +1116,7 @@ Manage LDAP authentication provider on PowerScale
 
 ### Notes
 * This module does not support modification of bind_password of LDAP provider. The value specified for bind_password will be ignored during modify.
+* The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 ### Examples
 ```
@@ -1233,7 +1269,7 @@ Manage LDAP authentication provider on PowerScale
 * Jennifer John (@johnj9) <ansible.team@dell.com>
 
 --------------------------------
-# SyncIQ Reports Module
+# synciqreports
 
 Provides the SyncIQ reports for PowerScale Storage System
 
@@ -1241,7 +1277,7 @@ Provides the SyncIQ reports for PowerScale Storage System
  This module provides the SyncIQ reports for PowerScale Storage System.
 
 ### Parameters
-                                                                                                                                                                                                                                                    
+                                                                                                                                                                                                                                                        
 <table>
     <tr>
         <th colspan=1>Parameter</th>
@@ -1331,8 +1367,10 @@ Provides the SyncIQ reports for PowerScale Storage System
             <td></td>
             <td> <br> the password of the PowerScale cluster. </td>
         </tr>
-                                            </table>
+                                                    </table>
 
+### Notes
+* The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 ### Examples
 ```
@@ -1391,7 +1429,7 @@ Provides the SyncIQ reports for PowerScale Storage System
 ```
 
 ### Return Values
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
 <table>
     <tr>
         <th colspan=5>Key</th>
@@ -1399,7 +1437,7 @@ Provides the SyncIQ reports for PowerScale Storage System
         <th>Returned</th>
         <th width="100%">Description</th>
     </tr>
-                                                                                    <tr>
+                                                                                            <tr>
             <td colspan=5 > changed </td>
             <td>  bool </td>
             <td> always </td>
@@ -2141,7 +2179,7 @@ Manages subnet configuration on PowerScale
  Manages the subnet configuration on the PowerScale storage system. This includes creating, modifying, deleting and retrieving the details of the subnet.
 
 ### Parameters
-                                                                                                                                                                                                                                                                                                                                                        
+                                                                                                                                                                                                                                                                                                                                                            
 <table>
     <tr>
         <th colspan=2>Parameter</th>
@@ -2165,7 +2203,7 @@ Manages subnet configuration on PowerScale
             <td> True </td>
             <td></td>
             <td></td>
-            <td> <br> Nane of the groupnet. </td>
+            <td> <br> Name of the groupnet. </td>
         </tr>
                     <tr>
             <td colspan=2 > description</td>
@@ -2173,7 +2211,7 @@ Manages subnet configuration on PowerScale
             <td></td>
             <td></td>
             <td></td>
-            <td> <br> A description of the subnet. </td>
+            <td> <br> Description of the subnet.  </td>
         </tr>
                     <tr>
             <td colspan=2 > netmask</td>
@@ -2197,7 +2235,7 @@ Manages subnet configuration on PowerScale
             <td></td>
             <td></td>
             <td></td>
-            <td> <br> Nane of the subnet when renaming an existing subnet. </td>
+            <td> <br> Name of the subnet when renaming an existing subnet. </td>
         </tr>
                     <tr>
             <td colspan=2 > subnet_params</td>
@@ -2241,7 +2279,7 @@ Manages subnet configuration on PowerScale
                 <td></td>
                 <td></td>
                 <td></td>
-                <td>  <br> MTU of the subnet.  </td>
+                <td>  <br> MTU of the subnet. </td>
             </tr>
                     <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
@@ -2309,8 +2347,10 @@ Manages subnet configuration on PowerScale
             <td></td>
             <td> <br> the password of the PowerScale cluster. </td>
         </tr>
-                                            </table>
+                                                    </table>
 
+### Notes
+* The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 ### Examples
 ```
@@ -2412,7 +2452,7 @@ Manages subnet configuration on PowerScale
 ```
 
 ### Return Values
-                                                                                                                                                                                                                                                                                                    
+                                                                                                                                                                                                                                                                                                        
 <table>
     <tr>
         <th colspan=2>Key</th>
@@ -2420,7 +2460,7 @@ Manages subnet configuration on PowerScale
         <th>Returned</th>
         <th width="100%">Description</th>
     </tr>
-                                                                                    <tr>
+                                                                                            <tr>
             <td colspan=2 > changed </td>
             <td>  bool </td>
             <td> always </td>
@@ -2649,6 +2689,15 @@ Manage Smart Quotas on PowerScale
                 <td> <ul> <li>GB</li>  <li>TB</li> </ul></td>
                 <td>  <br> Unit of storage for the hard, soft and advisory limits.  <br> This parameter is required if any of the hard, soft or advisory limits is specified.  </td>
             </tr>
+                    <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > container </td>
+                <td> bool  </td>
+                <td></td>
+                <td> False </td>
+                <td></td>
+                <td>  <br> If true, SMB shares using the quota directory see the quota thresholds as share size. </td>
+            </tr>
                             <tr>
             <td colspan=2 > state</td>
             <td> str  </td>
@@ -2703,6 +2752,7 @@ Manage Smart Quotas on PowerScale
 * To perform any operation, path, quota_type and state are mandatory parameters.
 * There can be two quotas for each type per directory, one with snapshots included and one without snapshots included.
 * Once the limits are assigned, then the quota cannot be converted to accounting. Only modification to the threshold limits is permitted.
+* The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 ### Examples
 ```
@@ -2831,7 +2881,7 @@ Manage Smart Quotas on PowerScale
 ```
 
 ### Return Values
-                                                                                                                                                                                                                                            
+                                                                                                                                                                                                                                                                
 <table>
     <tr>
         <th colspan=2>Key</th>
@@ -2852,6 +2902,13 @@ Manage Smart Quotas on PowerScale
             <td> The quota details. </td>
         </tr>
                             <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > container </td>
+                <td> bool </td>
+                <td>success</td>
+                <td> If true, SMB shares using the quota directory see the quota thresholds as share size. </td>
+            </tr>
+                                <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
                 <td colspan=1 > enforced </td>
                 <td> bool </td>
@@ -2900,7 +2957,7 @@ Provides the SyncIQ target reports for PowerScale Storage System
  This module provides the SyncIQ target reports for PowerScale Storage System.
 
 ### Parameters
-                                                                                                                                                                                                                                                    
+                                                                                                                                                                                                                                                        
 <table>
     <tr>
         <th colspan=1>Parameter</th>
@@ -2990,8 +3047,10 @@ Provides the SyncIQ target reports for PowerScale Storage System
             <td></td>
             <td> <br> the password of the PowerScale cluster. </td>
         </tr>
-                                            </table>
+                                                    </table>
 
+### Notes
+* The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 ### Examples
 ```
@@ -3050,7 +3109,7 @@ Provides the SyncIQ target reports for PowerScale Storage System
 ```
 
 ### Return Values
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
 <table>
     <tr>
         <th colspan=5>Key</th>
@@ -3058,7 +3117,7 @@ Provides the SyncIQ target reports for PowerScale Storage System
         <th>Returned</th>
         <th width="100%">Description</th>
     </tr>
-                                                                                    <tr>
+                                                                                            <tr>
             <td colspan=5 > changed </td>
             <td>  bool </td>
             <td> always </td>
@@ -3800,7 +3859,7 @@ Manages the ADS authentication provider on PowerScale
  Manages the Active Directory authentication provider on the PowerScale storage system. This includes creating, modifying, deleting and retreiving the details of an ADS provider.
 
 ### Parameters
-                                                                                                                                                                                                                                                                                                                
+                                                                                                                                                                                                                                                                                                                    
 <table>
     <tr>
         <th colspan=2>Parameter</th>
@@ -3943,8 +4002,10 @@ Manages the ADS authentication provider on PowerScale
             <td></td>
             <td> <br> the password of the PowerScale cluster. </td>
         </tr>
-                                            </table>
+                                                    </table>
 
+### Notes
+* The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 ### Examples
 ```
@@ -4028,7 +4089,7 @@ Manages the ADS authentication provider on PowerScale
 ```
 
 ### Return Values
-                                                                                                                                                                                                                                                            
+                                                                                                                                                                                                                                                                                    
 <table>
     <tr>
         <th colspan=2>Key</th>
@@ -4036,7 +4097,7 @@ Manages the ADS authentication provider on PowerScale
         <th>Returned</th>
         <th width="100%">Description</th>
     </tr>
-                                                                                    <tr>
+                                                                                            <tr>
             <td colspan=2 > ads_provider_details </td>
             <td>  complex </td>
             <td> When Active Directory provider exists </td>
@@ -4079,6 +4140,13 @@ Manages the ADS authentication provider on PowerScale
             </tr>
                                 <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > machine_account </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Specifies the machine account name when creating a SAM account with Active Directory. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
                 <td colspan=1 > name </td>
                 <td> str </td>
                 <td>success</td>
@@ -4098,7 +4166,7 @@ Manages the ADS authentication provider on PowerScale
 --------------------------------
 # Network Rule Module
 
-Manages Network provisioning rules for DellEMC PowerScale Storage
+Manages Network provisioning rules for PowerScale Storage System
 
 ### Synopsis
  Modify an existing network provisioning rule.
@@ -4107,7 +4175,7 @@ Manages Network provisioning rules for DellEMC PowerScale Storage
  View the details of a network provisioning rule.
 
 ### Parameters
-                                                                                                                                                                                                                                                                                                                                    
+                                                                                                                                                                                                                                                                                                                                        
 <table>
     <tr>
         <th colspan=1>Parameter</th>
@@ -4163,7 +4231,7 @@ Manages Network provisioning rules for DellEMC PowerScale Storage
             <td> True </td>
             <td></td>
             <td></td>
-            <td> <br> Name of provisioning rule. </td>
+            <td> <br> Name of provisioning rule.  </td>
         </tr>
                     <tr>
             <td colspan=1 > new_rule_name</td>
@@ -4187,7 +4255,7 @@ Manages Network provisioning rules for DellEMC PowerScale Storage
             <td> True </td>
             <td></td>
             <td> <ul> <li>absent</li>  <li>present</li> </ul></td>
-            <td> <br> State of provisioning rule. </td>
+            <td> <br> State of provisioning rule.  </td>
         </tr>
                     <tr>
             <td colspan=1 > onefs_host</td>
@@ -4229,8 +4297,10 @@ Manages Network provisioning rules for DellEMC PowerScale Storage
             <td></td>
             <td> <br> the password of the PowerScale cluster. </td>
         </tr>
-                                            </table>
+                                                    </table>
 
+### Notes
+* The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 ### Examples
 ```
@@ -4294,7 +4364,7 @@ Manages Network provisioning rules for DellEMC PowerScale Storage
 ```
 
 ### Return Values
-                                                                                                                                                                                                                                                                                                    
+                                                                                                                                                                                                                                                                                                        
 <table>
     <tr>
         <th colspan=2>Key</th>
@@ -4302,7 +4372,7 @@ Manages Network provisioning rules for DellEMC PowerScale Storage
         <th>Returned</th>
         <th width="100%">Description</th>
     </tr>
-                                                                                    <tr>
+                                                                                            <tr>
             <td colspan=2 > changed </td>
             <td>  bool </td>
             <td> Always </td>
@@ -4378,7 +4448,7 @@ Manages Network provisioning rules for DellEMC PowerScale Storage
 --------------------------------
 # Snapshot Schedule Module
 
-Manage snapshot schedules on Dell EMC PowerScale
+Manage snapshot schedules on PowerScale
 
 ### Synopsis
  You can perform the following operations.
@@ -4389,7 +4459,7 @@ Manage snapshot schedules on Dell EMC PowerScale
  Delete snapshot schedule.
 
 ### Parameters
-                                                                                                                                                                                                                                                                                                                                                        
+                                                                                                                                                                                                                                                                                                                                                            
 <table>
     <tr>
         <th colspan=1>Parameter</th>
@@ -4519,8 +4589,10 @@ Manage snapshot schedules on Dell EMC PowerScale
             <td></td>
             <td> <br> the password of the PowerScale cluster. </td>
         </tr>
-                                            </table>
+                                                    </table>
 
+### Notes
+* The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 ### Examples
 ```
@@ -4619,7 +4691,7 @@ Manage snapshot schedules on Dell EMC PowerScale
 ```
 
 ### Return Values
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
 <table>
     <tr>
         <th colspan=5>Key</th>
@@ -4627,7 +4699,7 @@ Manage snapshot schedules on Dell EMC PowerScale
         <th>Returned</th>
         <th width="100%">Description</th>
     </tr>
-                                                                                    <tr>
+                                                                                            <tr>
             <td colspan=5 > changed </td>
             <td>  bool </td>
             <td> always </td>
@@ -4760,7 +4832,7 @@ Manage users on the PowerScale Storage System
  Managing Users on the PowerScale Storage System includes create user, delete user, update user, get user, add role and remove role.
 
 ### Parameters
-                                                                                                                                                                                                                                                                                                                                                                                                                                        
+                                                                                                                                                                                                                                                                                                                                                                                                                                            
 <table>
     <tr>
         <th colspan=1>Parameter</th>
@@ -4922,8 +4994,10 @@ Manage users on the PowerScale Storage System
             <td></td>
             <td> <br> the password of the PowerScale cluster. </td>
         </tr>
-                                            </table>
+                                                    </table>
 
+### Notes
+* The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 ### Examples
 ```
@@ -5026,7 +5100,7 @@ Manage users on the PowerScale Storage System
 ```
 
 ### Return Values
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
 <table>
     <tr>
         <th colspan=4>Key</th>
@@ -5034,7 +5108,7 @@ Manage users on the PowerScale Storage System
         <th>Returned</th>
         <th width="100%">Description</th>
     </tr>
-                                                                                    <tr>
+                                                                                            <tr>
             <td colspan=4 > changed </td>
             <td>  bool </td>
             <td> always </td>
@@ -5172,7 +5246,7 @@ Manage users on the PowerScale Storage System
 --------------------------------
 # SMB Module
 
-Manage SMB shares on Dell EMC PowerScale. You can perform the following operations
+Manage SMB shares on PowerScale Storage System. You can perform the following operations
 
 ### Synopsis
  Managing SMB share on PowerScale.
@@ -5182,7 +5256,7 @@ Manage SMB shares on Dell EMC PowerScale. You can perform the following operatio
  Delete an existing SMB share.
 
 ### Parameters
-                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                
 <table>
     <tr>
         <th colspan=1>Parameter</th>
@@ -5352,8 +5426,10 @@ Manage SMB shares on Dell EMC PowerScale. You can perform the following operatio
             <td></td>
             <td> <br> the password of the PowerScale cluster. </td>
         </tr>
-                                            </table>
+                                                    </table>
 
+### Notes
+* The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 ### Examples
 ```
@@ -5475,7 +5551,7 @@ Manage SMB shares on Dell EMC PowerScale. You can perform the following operatio
 ```
 
 ### Return Values
-                                                                                                                                                                                                                                                                                                                                                                                                                            
+                                                                                                                                                                                                                                                                                                                                                                                                                                
 <table>
     <tr>
         <th colspan=2>Key</th>
@@ -5483,7 +5559,7 @@ Manage SMB shares on Dell EMC PowerScale. You can perform the following operatio
         <th>Returned</th>
         <th width="100%">Description</th>
     </tr>
-                                                                                    <tr>
+                                                                                            <tr>
             <td colspan=2 > changed </td>
             <td>  bool </td>
             <td> always </td>
@@ -5601,7 +5677,7 @@ Manage SMB shares on Dell EMC PowerScale. You can perform the following operatio
 --------------------------------
 # Snapshot Module
 
-Manage snapshots on Dell EMC PowerScale
+Manage snapshots on PowerScale
 
 ### Synopsis
  You can perform the following operations.
@@ -5612,7 +5688,7 @@ Manage snapshots on Dell EMC PowerScale
  Delete a filesystem snapshot.
 
 ### Parameters
-                                                                                                                                                                                                                                                                                                                                    
+                                                                                                                                                                                                                                                                                                                                        
 <table>
     <tr>
         <th colspan=1>Parameter</th>
@@ -5734,8 +5810,10 @@ Manage snapshots on Dell EMC PowerScale
             <td></td>
             <td> <br> the password of the PowerScale cluster. </td>
         </tr>
-                                            </table>
+                                                    </table>
 
+### Notes
+* The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 ### Examples
 ```
@@ -5824,7 +5902,7 @@ Manage snapshots on Dell EMC PowerScale
 ```
 
 ### Return Values
-                                                                                                                                                                                                                                                                                                                                                                                                        
+                                                                                                                                                                                                                                                                                                                                                                                                            
 <table>
     <tr>
         <th colspan=2>Key</th>
@@ -5832,7 +5910,7 @@ Manage snapshots on Dell EMC PowerScale
         <th>Returned</th>
         <th width="100%">Description</th>
     </tr>
-                                                                                    <tr>
+                                                                                            <tr>
             <td colspan=2 > changed </td>
             <td>  bool </td>
             <td> always </td>
@@ -5943,7 +6021,7 @@ Manage snapshots on Dell EMC PowerScale
 --------------------------------
 # SyncIQ Rules Module
 
-Manage SyncIQ performance rules on PowerScale
+Manage SyncIQ performance rules on PowerScale Storage System.
 
 ### Synopsis
  Managing SyncIQ performance rules on PowerScale includes create a SyncIQ performance rule, modify a SyncIQ performance rule, get details of a SyncIQ performance rule, delete a SyncIQ performance rule.
@@ -6086,6 +6164,7 @@ Manage SyncIQ performance rules on PowerScale
 
 ### Notes
 * Operations performed in parallel from other interfaces apart from playbook cannot guarantee desirable results.
+* The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 ### Examples
 ```
@@ -6504,6 +6583,7 @@ Manages access zones on PowerScale
 
 ### Notes
 * Deletion of access zone is not allowed through the Ansible module.
+* The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 ### Examples
 ```
@@ -6785,13 +6865,13 @@ Manages access zones on PowerScale
 --------------------------------
 # Node Module
 
-Get node info of DellEMC PowerScale storage
+Get node info of PowerScale Storage System.
 
 ### Synopsis
  Get information of a node belonging to the PowerScale cluster.
 
 ### Parameters
-                                                                                                                                                                                        
+                                                                                                                                                                                            
 <table>
     <tr>
         <th colspan=1>Parameter</th>
@@ -6857,8 +6937,10 @@ Get node info of DellEMC PowerScale storage
             <td></td>
             <td> <br> the password of the PowerScale cluster. </td>
         </tr>
-                                            </table>
+                                                    </table>
 
+### Notes
+* The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 ### Examples
 ```
@@ -6873,7 +6955,7 @@ Get node info of DellEMC PowerScale storage
 ```
 
 ### Return Values
-                                                                                                                                                                                                                                                                                                            
+                                                                                                                                                                                                                                                                                                                
 <table>
     <tr>
         <th colspan=3>Key</th>
@@ -6881,7 +6963,7 @@ Get node info of DellEMC PowerScale storage
         <th>Returned</th>
         <th width="100%">Description</th>
     </tr>
-                                                                                    <tr>
+                                                                                            <tr>
             <td colspan=3 > changed </td>
             <td>  bool </td>
             <td> always </td>
@@ -7014,6 +7096,7 @@ Manage SyncIQ jobs on PowerScale
 
 ### Notes
 * There is delay in the actual state change of the SyncIQ job. The state change of jobs in 'scheduled' state is not supported.
+* The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 ### Examples
 ```
@@ -7148,13 +7231,13 @@ Manage SyncIQ jobs on PowerScale
 --------------------------------
 # NFS Module
 
-Manage NFS exports on a DellEMC PowerScale system
+Manage NFS exports on a PowerScale Storage System
 
 ### Synopsis
  Managing NFS exports on an PowerScale system includes creating NFS export for a directory in an access zone, adding or removing clients, modifying different parameters of the export and deleting export.
 
 ### Parameters
-                                                                                                                                                                                                                                                                                                                                                                            
+                                                                                                                                                                                                                                                                                                                                                                                
 <table>
     <tr>
         <th colspan=1>Parameter</th>
@@ -7292,8 +7375,10 @@ Manage NFS exports on a DellEMC PowerScale system
             <td></td>
             <td> <br> the password of the PowerScale cluster. </td>
         </tr>
-                                            </table>
+                                                    </table>
 
+### Notes
+* The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 ### Examples
 ```
@@ -7394,7 +7479,7 @@ Manage NFS exports on a DellEMC PowerScale system
 ```
 
 ### Return Values
-                                                                                                                                                                                                                                                                                                                                            
+                                                                                                                                                                                                                                                                                                                                                
 <table>
     <tr>
         <th colspan=2>Key</th>
@@ -7402,7 +7487,7 @@ Manage NFS exports on a DellEMC PowerScale system
         <th>Returned</th>
         <th width="100%">Description</th>
     </tr>
-                                                                                    <tr>
+                                                                                            <tr>
             <td colspan=2 > NFS_export_details </td>
             <td>  complex </td>
             <td> always </td>
@@ -7839,6 +7924,7 @@ Manage SyncIQ policies on PowerScale
 
 ### Notes
 * There is a delay to view the jobs running on the policy.
+* The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 ### Examples
 ```
@@ -8117,7 +8203,7 @@ Manages general settings for PowerScale storage system
  Managing general settings on the PowerScale storage system which includes get and update operations for email settings and add, remove and get operations for NTP servers.
 
 ### Parameters
-                                                                                                                                                                                                                                                                                            
+                                                                                                                                                                                                                                                                                                
 <table>
     <tr>
         <th colspan=1>Parameter</th>
@@ -8223,8 +8309,10 @@ Manages general settings for PowerScale storage system
             <td></td>
             <td> <br> the password of the PowerScale cluster. </td>
         </tr>
-                                            </table>
+                                                    </table>
 
+### Notes
+* The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 ### Examples
 ```
@@ -8317,16 +8405,15 @@ Manages general settings for PowerScale storage system
 ```
 
 ### Return Values
-
-
- <table>
+                                                                                                                                                                                                                                                                                                                                                                                                            
+<table>
     <tr>
         <th colspan=2>Key</th>
         <th>Type</th>
         <th>Returned</th>
         <th width="100%">Description</th>
     </tr>
-                                                                                    <tr>
+                                                                                            <tr>
             <td colspan=2 > changed </td>
             <td>  bool </td>
             <td> Always </td>
@@ -8429,7 +8516,7 @@ Manages general settings for PowerScale storage system
                 <td>success</td>
                 <td> Location of a custom template file that can be used to specify the layout of the notification emails. </td>
             </tr>
-                                        </table>                                                                                                                                                                                                                                                                                                                                                                                                                                   
+                                        </table>
 
 ### Authors
 * Meenakshi Dembi (@dembim) <ansible.team@dell.com>
@@ -8443,7 +8530,7 @@ Manage Groups on the PowerScale Storage System
  Managing Groups on the PowerScale Storage System includes create group, delete group,  get group, add users and remove users.
 
 ### Parameters
-                                                                                                                                                                                                                                                                                            
+                                                                                                                                                                                                                                                                                                
 <table>
     <tr>
         <th colspan=1>Parameter</th>
@@ -8549,8 +8636,10 @@ Manage Groups on the PowerScale Storage System
             <td></td>
             <td> <br> the password of the PowerScale cluster. </td>
         </tr>
-                                            </table>
+                                                    </table>
 
+### Notes
+* The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 ### Examples
 ```
@@ -8637,7 +8726,7 @@ Manage Groups on the PowerScale Storage System
 ```
 
 ### Return Values
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
 <table>
     <tr>
         <th colspan=5>Key</th>
@@ -8645,7 +8734,7 @@ Manage Groups on the PowerScale Storage System
         <th>Returned</th>
         <th width="100%">Description</th>
     </tr>
-                                                                                    <tr>
+                                                                                            <tr>
             <td colspan=5 > changed </td>
             <td>  bool </td>
             <td> always </td>
@@ -8758,10 +8847,10 @@ Manage Filesystems on PowerScale
  Managing Filesystems on PowerScale Storage System includes Create a new Filesystem, Delete a Filesystem, Get details of a filesystem, Modify a Filesystem (Quota, ACLs).
 
 ### Parameters
-                                                                                                                                                                                                                                                                                                                                                            
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
 <table>
     <tr>
-        <th colspan=1>Parameter</th>
+        <th colspan=2>Parameter</th>
         <th width="20%">Type</th>
         <th>Required</th>
         <th>Default</th>
@@ -8769,7 +8858,7 @@ Manage Filesystems on PowerScale
         <th width="80%">Description</th>
     </tr>
                                                             <tr>
-            <td colspan=1 > path</td>
+            <td colspan=2 > path</td>
             <td> str  </td>
             <td> True </td>
             <td></td>
@@ -8777,7 +8866,7 @@ Manage Filesystems on PowerScale
             <td> <br> This is the directory path. It is the absolute path for System access zone and is relative if using a non-System access zone. For example, if your access zone is 'Ansible' and it has a base path '/ifs/ansible' and the path specified is '/user1', then the effective path would be '/ifs/ansible/user1'. If your access zone is System, and you have 'directory1' in the access zone, the path provided should be '/ifs/directory1'. </td>
         </tr>
                     <tr>
-            <td colspan=1 > access_zone</td>
+            <td colspan=2 > access_zone</td>
             <td> str  </td>
             <td></td>
             <td> System </td>
@@ -8785,15 +8874,15 @@ Manage Filesystems on PowerScale
             <td> <br> The access zone. If no Access Zone is specified, the 'System' access zone would be taken by default. </td>
         </tr>
                     <tr>
-            <td colspan=1 > owner</td>
+            <td colspan=2 > owner</td>
             <td> dict  </td>
             <td></td>
             <td></td>
             <td></td>
-            <td> <br> The owner of the Filesystem.  <br> This parameter is required while creating a Filesystem.  <br> The following sub-options are supported for Owner. - name(str), - provider_type(str).  <br> If you specify owner, then the corresponding name is mandatory.  <br> The provider_type is optional and it defaults to 'local'.  <br> The supported values for provider_type are 'local', 'file', 'ldap' and 'ads'. </td>
+            <td> <br> The owner of the Filesystem.  <br> This parameter is required when creating a Filesystem.  <br> The following sub-options are supported for Owner. - name(str), - provider_type(str).  <br> If you specify owner, then the corresponding name is mandatory.  <br> The provider_type is optional and it defaults to 'local'.  <br> The supported values for provider_type are 'local', 'file', 'ldap' and 'ads'. </td>
         </tr>
                     <tr>
-            <td colspan=1 > group</td>
+            <td colspan=2 > group</td>
             <td> dict  </td>
             <td></td>
             <td></td>
@@ -8801,15 +8890,67 @@ Manage Filesystems on PowerScale
             <td> <br> The group of the Filesystem.  <br> The following sub-options are supported for Group. - name(str), - provider_type(str).  <br> If you specify  a group, then the corresponding name is mandatory.  <br> The provider_type is optional, it defaults to 'local'.  <br> The supported values for provider_type are 'local', 'file', 'ldap' and 'ads'. </td>
         </tr>
                     <tr>
-            <td colspan=1 > access_control</td>
+            <td colspan=2 > access_control</td>
             <td> str  </td>
             <td></td>
             <td></td>
             <td></td>
-            <td> <br> The ACL value for the directory.  <br> At the time of creation, users can either provide input such as 'private_read' , 'private' , 'public_read', 'public_read_write', 'public' or in POSIX format (eg 0700).  <br> Modification of ACL is only supported from POSIX to POSIX mode. </td>
+            <td> <br> The ACL value for the directory.  <br> At the time of creation, users can either provide input such as 'private_read' , 'private' , 'public_read', 'public_read_write', 'public' or in POSIX format (eg 0700).  <br> Modification of ACL is only supported from POSIX to POSIX mode.  <br> This field is mutually exclusive with access_control_rights. </td>
         </tr>
                     <tr>
-            <td colspan=1 > recursive</td>
+            <td colspan=2 > access_control_rights</td>
+            <td> dict  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> Manage user rights and set ACL permissions for files and directories. </td>
+        </tr>
+                            <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > access_rights </td>
+                <td> list   <br> elements: str </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>  <br> Provides the list of access rights that are defined for the directory.  </td>
+            </tr>
+                    <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > access_type </td>
+                <td> str  </td>
+                <td> True </td>
+                <td></td>
+                <td> <ul> <li>allow</li>  <li>deny</li> </ul></td>
+                <td>  <br> Allows or denies access to the directory based on the access rights set for the trustee.  </td>
+            </tr>
+                    <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > inherit_flags </td>
+                <td> list   <br> elements: str </td>
+                <td></td>
+                <td></td>
+                <td> <ul> <li>object_inherit</li>  <li>container_inherit</li>  <li>inherit_only</li>  <li>no_prop_inherit</li>  <li>inherited_ace</li> </ul></td>
+                <td>  <br> Provides the inherit flags set for the directory.  </td>
+            </tr>
+                    <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > trustee </td>
+                <td> str  </td>
+                <td> True </td>
+                <td></td>
+                <td></td>
+                <td>  <br> Provides the trustee (user or group) name.  </td>
+            </tr>
+                            <tr>
+            <td colspan=2 > access_control_rights_state</td>
+            <td> str  </td>
+            <td></td>
+            <td></td>
+            <td> <ul> <li>add</li>  <li>remove</li> </ul></td>
+            <td> <br> Specifies if the access rights are to be added or deleted for the trustee.  <br> It is required together with access_control_rights. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > recursive</td>
             <td> bool  </td>
             <td></td>
             <td> True </td>
@@ -8817,7 +8958,7 @@ Manage Filesystems on PowerScale
             <td> <br> Creates intermediate folders recursively when set to true. </td>
         </tr>
                     <tr>
-            <td colspan=1 > recursive_force_delete</td>
+            <td colspan=2 > recursive_force_delete</td>
             <td> bool  </td>
             <td></td>
             <td> False </td>
@@ -8825,15 +8966,96 @@ Manage Filesystems on PowerScale
             <td> <br> Deletes sub files and folders recursively when set to true even if the filesystem is not empty. </td>
         </tr>
                     <tr>
-            <td colspan=1 > quota</td>
+            <td colspan=2 > quota</td>
             <td> dict  </td>
             <td></td>
             <td></td>
             <td></td>
-            <td> <br> The Smart Quota for the filesystem. Only directory Quotas are supported.  <br> The following sub-options are supported for Quota. - include_snap_data(boolean), - include_data_protection_overhead(boolean), - thresholds_on(app_logical_size, fs_logical_size, physical_size) - advisory_limit_size(int), - soft_limit_size(int), - hard_limit_size(int), - cap_unit (MB, GB or TB), - quota_state (present or absent).  <br> The default grace period is 7 days. Modification of grace period is not supported.  <br> The default capacity unit is GB.  <br> The parameter include_data_protection_overhead is supported for SDK 8.1.1.  <br> For SDK 9.0.0 the parameter include_data_protection_overhead is deprecated and thresholds_on is used. </td>
+            <td> <br> The Smart Quota for the filesystem. Only directory Quotas are supported.  <br> The following sub-options are supported for Quota. </td>
         </tr>
+                            <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > include_snap_data </td>
+                <td> bool  </td>
+                <td></td>
+                <td> False </td>
+                <td></td>
+                <td>  <br> Whether to include the snapshots in the quota or not.  </td>
+            </tr>
                     <tr>
-            <td colspan=1 > state</td>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > include_data_protection_overhead </td>
+                <td> bool  </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>  <br> Whether to include the data protection overheads in the quota or not.  <br> If not passed during quota creation then quota will be created excluding the overheads.  <br> This parameter is supported for SDK 8.1.1  </td>
+            </tr>
+                    <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > thresholds_on </td>
+                <td> str  </td>
+                <td></td>
+                <td></td>
+                <td> <ul> <li>app_logical_size</li>  <li>fs_logical_size</li>  <li>physical_size</li> </ul></td>
+                <td>  <br> For SDK 9.1.0 the parameter include_overheads is deprecated and thresholds_on is used.  </td>
+            </tr>
+                    <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > advisory_limit_size </td>
+                <td> int  </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>  <br> The threshold value after which the advisory notification will be sent.  </td>
+            </tr>
+                    <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > soft_limit_size </td>
+                <td> int  </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>  <br> Threshold value after which the soft limit exceeded notification will be sent and the soft_grace period will start.  <br> Write access will be restricted after the grace period expires.  <br> Both soft_grace_period and soft_limit_size are required to modify soft threshold for the quota.  </td>
+            </tr>
+                    <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > hard_limit_size </td>
+                <td> int  </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>  <br> Threshold value after which a hard limit exceeded notification will be sent.  <br> Write access will be restricted after the hard limit is exceeded.  </td>
+            </tr>
+                    <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > cap_unit </td>
+                <td> str  </td>
+                <td></td>
+                <td></td>
+                <td> <ul> <li>GB</li>  <li>TB</li> </ul></td>
+                <td>  <br> Unit of storage for the hard, soft and advisory limits.  <br> This parameter is required if any of the hard, soft or advisory limits is specified.  </td>
+            </tr>
+                    <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > container </td>
+                <td> bool  </td>
+                <td></td>
+                <td> False </td>
+                <td></td>
+                <td>  <br> If true, SMB shares using the quota directory see the quota thresholds as share size.</td>
+            </tr>
+                    <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > quota_state </td>
+                <td> str  </td>
+                <td></td>
+                <td></td>
+                <td> <ul> <li>absent</li>  <li>present</li> </ul></td>
+                <td>  <br> Defines whether the quota should exist or not. </td>
+            </tr>
+                            <tr>
+            <td colspan=2 > state</td>
             <td> str  </td>
             <td> True </td>
             <td></td>
@@ -8841,7 +9063,7 @@ Manage Filesystems on PowerScale
             <td> <br> Defines whether the Filesystem should exist or not.  <br> A filesystem with NFS exports or SMB shares cannot be deleted.  <br> Any Quotas on the Filesystem need to be removed before deleting the filesystem. </td>
         </tr>
                     <tr>
-            <td colspan=1 > list_snapshots</td>
+            <td colspan=2 > list_snapshots</td>
             <td> bool  </td>
             <td></td>
             <td> False </td>
@@ -8849,7 +9071,7 @@ Manage Filesystems on PowerScale
             <td> <br> If set to true, the filesystem's snapshots are returned. </td>
         </tr>
                     <tr>
-            <td colspan=1 > onefs_host</td>
+            <td colspan=2 > onefs_host</td>
             <td> str  </td>
             <td> True </td>
             <td></td>
@@ -8857,7 +9079,7 @@ Manage Filesystems on PowerScale
             <td> <br> IP address or FQDN of the PowerScale cluster. </td>
         </tr>
                     <tr>
-            <td colspan=1 > port_no</td>
+            <td colspan=2 > port_no</td>
             <td> str  </td>
             <td></td>
             <td> 8080 </td>
@@ -8865,7 +9087,7 @@ Manage Filesystems on PowerScale
             <td> <br> Port number of the PowerScale cluster.It defaults to 8080 if not specified. </td>
         </tr>
                     <tr>
-            <td colspan=1 > verify_ssl</td>
+            <td colspan=2 > verify_ssl</td>
             <td> bool  </td>
             <td> True </td>
             <td></td>
@@ -8873,7 +9095,7 @@ Manage Filesystems on PowerScale
             <td> <br> boolean variable to specify whether to validate SSL certificate or not.  <br> True - indicates that the SSL certificate should be verified.  <br> False - indicates that the SSL certificate should not be verified. </td>
         </tr>
                     <tr>
-            <td colspan=1 > api_user</td>
+            <td colspan=2 > api_user</td>
             <td> str  </td>
             <td> True </td>
             <td></td>
@@ -8881,7 +9103,7 @@ Manage Filesystems on PowerScale
             <td> <br> username of the PowerScale cluster. </td>
         </tr>
                     <tr>
-            <td colspan=1 > api_password</td>
+            <td colspan=2 > api_password</td>
             <td> str  </td>
             <td> True </td>
             <td></td>
@@ -8891,17 +9113,20 @@ Manage Filesystems on PowerScale
                                                     </table>
 
 ### Notes
-* While deleting a filesystem when recursive_force_delete is set as True it deletes all sub files and folders recursively even if the filesystem is not empty.
+* While deleting a filesystem when recursive_force_delete is set as True it deletes all sub files and folders recursively. This is true even if the filesystem is not empty.
+* Modification of inherit_flags of filesystem ACL is successful only if access_rights is also specified in the access_control_rights dictionary.
+* Check_mode is not supported.
+* The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 ### Examples
 ```
   - name: Create Filesystem with Quota in given access zone
     dellemc.powerscale.filesystem:
-      onefs_host: "{{powerscalehost}}"
-      port: "{{powerscaleport}}"
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{powerscaleport}}"
       verify_ssl: "{{verify_ssl}}"
-      username: "{{user}}"
-      password: "{{password}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
       path: "<path>"
       access_zone: "{{access_zone}}"
       owner:
@@ -8919,16 +9144,17 @@ Manage Filesystems on PowerScale
         hard_limit_size: 10
         cap_unit: "GB"
         quota_state: "present"
+        container: True
       recursive: "{{recursive}}"
       state: "{{state_present}}"
 
   - name: Create Filesystem in default (system) access zone, without Quota
     dellemc.powerscale.filesystem:
-      onefs_host: "{{powerscalehost}}"
-      port: "{{powerscaleport}}"
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{powerscaleport}}"
       verify_ssl: "{{verify_ssl}}"
-      username: "{{user}}"
-      password: "{{password}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
       path: "<path>"
       owner:
         name: 'ansible_user'
@@ -8937,22 +9163,22 @@ Manage Filesystems on PowerScale
 
   - name: Get filesystem details
     dellemc.powerscale.filesystem:
-      onefs_host: "{{powerscalehost}}"
-      port: "{{powerscaleport}}"
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{powerscaleport}}"
       verify_ssl: "{{verify_ssl}}"
-      username: "{{user}}"
-      password: "{{password}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
       access_zone: "{{access_zone}}"
       path: "<path>"
       state: "{{state_present}}"
 
   - name: Get filesystem details with snapshots
     dellemc.powerscale.filesystem:
-      onefs_host: "{{powerscalehost}}"
-      port: "{{powerscaleport}}"
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{powerscaleport}}"
       verify_ssl: "{{verify_ssl}}"
-      username: "{{user}}"
-      password: "{{password}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
       access_zone: "{{access_zone}}"
       path: "<path>"
       list_snapshots: "{{list_snapshots_true}}"
@@ -8960,26 +9186,27 @@ Manage Filesystems on PowerScale
 
   - name: Modify Filesystem Hard Quota
     dellemc.powerscale.filesystem:
-      onefs_host: "{{powerscalehost}}"
-      port: "{{powerscaleport}}"
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{powerscaleport}}"
       verify_ssl: "{{verify_ssl}}"
-      username: "{{user}}"
-      password: "{{password}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
       path: "<path>"
       access_zone: "{{access_zone}}"
       quota:
         hard_limit_size: 15
         cap_unit: "GB"
         quota_state: "present"
+        container: True
       state: "{{state_present}}"
 
   - name: Modify Filesystem Owner, Group and ACL
     dellemc.powerscale.filesystem:
-      onefs_host: "{{powerscalehost}}"
-      port: "{{powerscaleport}}"
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{powerscaleport}}"
       verify_ssl: "{{verify_ssl}}"
-      username: "{{user}}"
-      password: "{{password}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
       path: "<path>"
       access_zone: "{{access_zone}}"
       owner:
@@ -8990,6 +9217,38 @@ Manage Filesystems on PowerScale
         provider_type: 'ldap'
       access_control: "{{new_access_control}}"
       state: "{{state_present}}"
+
+  - name: Modify Filesystem to add access control rights
+    dellemc.powerscale.filesystem:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{powerscaleport}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      path: "/ifs/test"
+      access_control_rights:
+        access_type: "allow"
+        access_rights:
+            - dir_gen_all
+        inherit_flags:
+            - container_inherit
+        trustee: test_user
+      access_control_rights_state: "add"
+      state: "present"
+
+  - name: Modify Filesystem to remove access control rights
+    dellemc.powerscale.filesystem:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{powerscaleport}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      path: "/ifs/test"
+      access_control_rights:
+        access_type: "allow"
+        trustee: test_user
+      access_control_rights_state: "remove"
+      state: "present"
 
   - name: Remove Quota from FS
     dellemc.powerscale.filesystem:
@@ -9005,11 +9264,11 @@ Manage Filesystems on PowerScale
 
   - name: Delete filesystem
     dellemc.powerscale.filesystem:
-      onefs_host: "{{powerscalehost}}"
-      port: "{{powerscaleport}}"
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{powerscaleport}}"
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{user}}"
-      api_password: "{{password}}"
+      api_password: "{{api_password}}"
       access_zone: "{{access_zone}}"
       path: "<path>"
       recursive_force_delete: "{{recursive_force_delete}}"
@@ -9017,7 +9276,7 @@ Manage Filesystems on PowerScale
 ```
 
 ### Return Values
-                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
 <table>
     <tr>
         <th colspan=2>Key</th>
@@ -9093,6 +9352,13 @@ Manage Filesystems on PowerScale
         </tr>
                             <tr>
                 <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > container </td>
+                <td> bool </td>
+                <td>success</td>
+                <td> If true, SMB shares using the quota directory see the quota thresholds as share size. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
                 <td colspan=1 > enforced </td>
                 <td> bool </td>
                 <td>success</td>
@@ -9133,7 +9399,7 @@ Manages Network Settings on PowerScale Storage System
  Managing Network Settings on the PowerScale Storage System includes modifying and retrieving details of network settings.
 
 ### Parameters
-                                                                                                                                                                                        
+                                                                                                                                                                                            
 <table>
     <tr>
         <th colspan=1>Parameter</th>
@@ -9199,8 +9465,10 @@ Manages Network Settings on PowerScale Storage System
             <td></td>
             <td> <br> the password of the PowerScale cluster. </td>
         </tr>
-                                            </table>
+                                                    </table>
 
+### Notes
+* The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 ### Examples
 ```
@@ -9232,7 +9500,7 @@ Manages Network Settings on PowerScale Storage System
 ```
 
 ### Return Values
-                                                                                                                                                                                                                    
+                                                                                                                                                                                                                        
 <table>
     <tr>
         <th colspan=2>Key</th>
@@ -9240,7 +9508,7 @@ Manages Network Settings on PowerScale Storage System
         <th>Returned</th>
         <th width="100%">Description</th>
     </tr>
-                                                                                    <tr>
+                                                                                            <tr>
             <td colspan=2 > changed </td>
             <td>  bool </td>
             <td> always </td>
@@ -9294,7 +9562,7 @@ Manages Smartpool Settings on PowerScale Storage System
  Managing Smartpool Settings on the PowerScale Storage System includes modifying and retrieving details of Smartpool settings.
 
 ### Parameters
-                                                                                                                                                                                                            
+                                                                                                                                                                                                                
 <table>
     <tr>
         <th colspan=1>Parameter</th>
@@ -9368,8 +9636,10 @@ Manages Smartpool Settings on PowerScale Storage System
             <td></td>
             <td> <br> the password of the PowerScale cluster. </td>
         </tr>
-                                            </table>
+                                                    </table>
 
+### Notes
+* The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 ### Examples
 ```
@@ -9393,7 +9663,7 @@ Manages Smartpool Settings on PowerScale Storage System
 ```
 
 ### Return Values
-                                                                                                                                                                                                                                                                                                                                                                                                                                                
+                                                                                                                                                                                                                                                                                                                                                                                                                                                    
 <table>
     <tr>
         <th colspan=2>Key</th>
@@ -9401,7 +9671,7 @@ Manages Smartpool Settings on PowerScale Storage System
         <th>Returned</th>
         <th width="100%">Description</th>
     </tr>
-                                                                                    <tr>
+                                                                                            <tr>
             <td colspan=2 > changed </td>
             <td>  bool </td>
             <td> always </td>
@@ -9522,5 +9792,530 @@ Manages Smartpool Settings on PowerScale Storage System
 
 ### Authors
 * Meenakshi Dembi (@dembim) <ansible.team@dell.com>
+
+--------------------------------
+# Filepool Policy Module
+
+Manages file pool policy on PowerScale
+
+### Synopsis
+ Managing file pool policy on PowerScale Storage System. This includes creating a new file pool policy, deleting a file pool policy and retrieving the details of a file pool policy.
+
+### Parameters
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+<table>
+    <tr>
+        <th colspan=2>Parameter</th>
+        <th width="20%">Type</th>
+        <th>Required</th>
+        <th>Default</th>
+        <th>Choices</th>
+        <th width="80%">Description</th>
+    </tr>
+                                                            <tr>
+            <td colspan=2 > policy_id</td>
+            <td> str  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> Unique Id of the file pool policy.  <br> It is mutually exclusive with policy_name. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > policy_name</td>
+            <td> str  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> Unique name of the file pool policy.  <br> It is mutually exclusive with policy_id.  <br> Mandatory for file pool policy creation. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > description</td>
+            <td> str  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> A description of the file pool policy. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > apply_order</td>
+            <td> int  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> The order in which the policy should be applied.  <br> It is relative to other policies. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > apply_data_storage_policy</td>
+            <td> dict  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> AAction to move files to storage pool or tier. </td>
+        </tr>
+                            <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > ssd_strategy </td>
+                <td> str  </td>
+                <td></td>
+                <td></td>
+                <td> <ul> <li>SSD_metadata_read_acceleration</li>  <li>SSD_metadata_read_write_acceleration</li>  <li>avoid_SSD</li>  <li>SSD_for_metadata_and_data</li> </ul></td>
+                <td>  <br> Strategy for ssd. </td>
+            </tr>
+                    <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > storagepool </td>
+                <td> str  </td>
+                <td></td>
+                <td> anywhere </td>
+                <td></td>
+                <td>  <br> Name of the storage pool. </td>
+            </tr>
+                            <tr>
+            <td colspan=2 > apply_snapshot_storage_policy</td>
+            <td> dict  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> Action to move snapshots to storage pool or tier. </td>
+        </tr>
+                            <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > ssd_strategy </td>
+                <td> str  </td>
+                <td></td>
+                <td></td>
+                <td> <ul> <li>SSD_metadata_read_acceleration</li>  <li>SSD_metadata_read_write_acceleration</li>  <li>avoid_SSD</li>  <li>SSD_for_metadata_and_data</li> </ul></td>
+                <td>  <br> Strategy for ssd. </td>
+            </tr>
+                    <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > storagepool </td>
+                <td> str  </td>
+                <td></td>
+                <td> anywhere </td>
+                <td></td>
+                <td>  <br> Name of the storage pool. </td>
+            </tr>
+                            <tr>
+            <td colspan=2 > set_requested_protection</td>
+            <td> str  </td>
+            <td></td>
+            <td></td>
+            <td> <ul> <li>default_protection_of_node_pool_or_tier</li>  <li>tolerate_failure_of_1_drive_or_1_node</li>  <li>tolerate_failure_of_2_drives_or_1_node</li>  <li>tolerate_failure_of_2_drives_or_2_nodes</li>  <li>tolerate_failure_of_3_drives_or_1_node</li>  <li>tolerate_failure_of_3_drives_or_(1_node_and_1drive)</li>  <li>tolerate_failure_of_3_drives_or_3_nodes</li>  <li>tolerate_failure_of_4_drives_or_1_node</li>  <li>tolerate_failure_of_4_drives_or_2_nodes</li>  <li>tolerate_failure_of_4_drives_or_4_nodes</li>  <li>mirrored_over_2_nodes</li>  <li>mirrored_over_3_nodes</li>  <li>mirrored_over_4_nodes</li>  <li>mirrored_over_5_nodes</li>  <li>mirrored_over_6_nodes</li>  <li>mirrored_over_7_nodes</li>  <li>mirrored_over_8_nodes</li> </ul></td>
+            <td> <br> Action to change requested protection. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > set_data_access_pattern</td>
+            <td> str  </td>
+            <td></td>
+            <td></td>
+            <td> <ul> <li>random</li>  <li>concurrency</li>  <li>streaming</li> </ul></td>
+            <td> <br> Action to set data access pattern optimization. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > set_write_performance_optimization</td>
+            <td> str  </td>
+            <td></td>
+            <td></td>
+            <td> <ul> <li>enable_smartcache</li>  <li>disable_smartcache</li> </ul></td>
+            <td> <br> Action to set write performance optimization. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > file_matching_pattern</td>
+            <td> dict  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> The file matching rules for the policy. </td>
+        </tr>
+                            <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > or_criteria </td>
+                <td> list   <br> elements: dict </td>
+                <td> True </td>
+                <td></td>
+                <td></td>
+                <td>  <br> or criteria conditions for the file policy.  <br> Maximum of 3 criteria's is possible.  </td>
+            </tr>
+                            <tr>
+            <td colspan=2 > state</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td> <ul> <li>absent</li>  <li>present</li> </ul></td>
+            <td> <br> The state option is used to mention the existence of file pool policy. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > onefs_host</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> IP address or FQDN of the PowerScale cluster. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > port_no</td>
+            <td> str  </td>
+            <td></td>
+            <td> 8080 </td>
+            <td></td>
+            <td> <br> Port number of the PowerScale cluster.It defaults to 8080 if not specified. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > verify_ssl</td>
+            <td> bool  </td>
+            <td> True </td>
+            <td></td>
+            <td> <ul> <li>True</li>  <li>False</li> </ul></td>
+            <td> <br> boolean variable to specify whether to validate SSL certificate or not.  <br> True - indicates that the SSL certificate should be verified.  <br> False - indicates that the SSL certificate should not be verified. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > api_user</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> username of the PowerScale cluster. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > api_password</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> the password of the PowerScale cluster. </td>
+        </tr>
+                                                    </table>
+
+### Notes
+* Modifying a file pool policy is not supported.
+* The check_mode is supported.
+* The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
+
+### Examples
+```
+- name: Get a file pool policy
+  dellemc.powerscale.filepoolpolicy:
+      onefs_host: "{{onefs_host}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      policy_name: "test_11"
+      state: 'present'
+
+- name: Delete a file pool policy
+  dellemc.powerscale.filepoolpolicy:
+      onefs_host: "{{onefs_host}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      policy_name: "test_11"
+      state: 'absent'
+
+- name: Create a file pool policy
+  dellemc.powerscale.filepoolpolicy:
+      onefs_host: "{{onefs_host}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      policy_name: "test_policy_1"
+      description: 'Creating a policy'
+      apply_order: 1
+      apply_data_storage_policy:
+            ssd_strategy: "SSD_metadata_read_acceleration"
+            storagepool: "test_tier"
+      set_data_access_pattern: "concurrency"
+      set_requested_protection: "mirrored_over_3_nodes"
+      set_write_performance_optimization: "enable_smartcache"
+      file_matching_pattern:
+        or_criteria:
+            - and_criteria:
+              - type: "file_name"
+                condition: "does_not_match"
+                value: "file_name_test"
+                case_sensitive: True
+              - type: "accessed"
+                condition: "after"
+                datetime_value: "2022-04-04 23:30"
+              - type: "created"
+                condition: "is_newer_than"
+                relative_datetime_count:
+                  time_value: 12
+                  time_unit: "years"
+            - and_criteria:
+              - type: "size"
+                condition: "not_equal"
+                size_info:
+                  size_value: 60
+                  size_unit: "MB"
+              - type: "file_attribute"
+                condition: "does_not_match"
+                field: "test_field"
+                value: "uni"
+              - type: "file_attribute"
+                condition: "exists"
+                field: "test"
+      state: 'present'
+```
+
+### Return Values
+                                                                                                                                                                                                                                                                                                                                                                            
+<table>
+    <tr>
+        <th colspan=3>Key</th>
+        <th>Type</th>
+        <th>Returned</th>
+        <th width="100%">Description</th>
+    </tr>
+                                                                                            <tr>
+            <td colspan=3 > changed </td>
+            <td>  bool </td>
+            <td> always </td>
+            <td> Whether or not the resource has changed. </td>
+        </tr>
+                    <tr>
+            <td colspan=3 > filepool_policy_details </td>
+            <td>  complex </td>
+            <td> When a Policy exists </td>
+            <td> Policy details. </td>
+        </tr>
+                            <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=2 > actions </td>
+                <td> list </td>
+                <td>success</td>
+                <td> List of action's available for the policy. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=2 > apply_order </td>
+                <td> int </td>
+                <td>success</td>
+                <td> The order in which policy is present with respect to other policies. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=2 > description </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Description of the policy. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=2 > file_matching_pattern </td>
+                <td> complex </td>
+                <td>success</td>
+                <td> File matching pattern of the policy. </td>
+            </tr>
+                                         <tr>
+                    <td class="elbow-placeholder">&nbsp;</td>
+                    <td class="elbow-placeholder">&nbsp;</td>
+                    <td colspan=1 > or_criteria </td>
+                    <td> list </td>
+                    <td>success</td>
+                    <td> or criteria conditions for the file policy. </td>
+                </tr>
+                                                            <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=2 > id </td>
+                <td> int </td>
+                <td>success</td>
+                <td> Unique ID of the policy. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=2 > name </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Unique name of the policy. </td>
+            </tr>
+                                        </table>
+
+### Authors
+* Ananthu S Kuttattu (@kuttattz) <ansible.team@dell.com>
+
+--------------------------------
+# Storagepool Tier Module
+
+Manages storage pool tier on PowerScale
+
+### Synopsis
+ Managing storage pool tier on PowerScale Storage System. This includes creating a new storage pool tier, deleting a storage pool tier and retrieving the details of a storage pool tier.
+
+### Parameters
+                                                                                                                                                                                                                                    
+<table>
+    <tr>
+        <th colspan=1>Parameter</th>
+        <th width="20%">Type</th>
+        <th>Required</th>
+        <th>Default</th>
+        <th>Choices</th>
+        <th width="80%">Description</th>
+    </tr>
+                                                            <tr>
+            <td colspan=1 > tier_id</td>
+            <td> int  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> Unique Id of the storage pool tier.  <br> It is mutually exclusive with tier_name. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > tier_name</td>
+            <td> str  </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> Unique name of the storage pool tier.  <br> It is mutually exclusive with tier_id.  <br> Mandatory for storage pool tier creation. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > nodepools</td>
+            <td> list   <br> elements: str </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td> <br> List of names of the nodepool's. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > state</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td> <ul> <li>absent</li>  <li>present</li> </ul></td>
+            <td> <br> The state option is used to mention the existence of storage pool tier. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > onefs_host</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> IP address or FQDN of the PowerScale cluster. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > port_no</td>
+            <td> str  </td>
+            <td></td>
+            <td> 8080 </td>
+            <td></td>
+            <td> <br> Port number of the PowerScale cluster.It defaults to 8080 if not specified. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > verify_ssl</td>
+            <td> bool  </td>
+            <td> True </td>
+            <td></td>
+            <td> <ul> <li>True</li>  <li>False</li> </ul></td>
+            <td> <br> boolean variable to specify whether to validate SSL certificate or not.  <br> True - indicates that the SSL certificate should be verified.  <br> False - indicates that the SSL certificate should not be verified. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > api_user</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> username of the PowerScale cluster. </td>
+        </tr>
+                    <tr>
+            <td colspan=1 > api_password</td>
+            <td> str  </td>
+            <td> True </td>
+            <td></td>
+            <td></td>
+            <td> <br> the password of the PowerScale cluster. </td>
+        </tr>
+                                                    </table>
+
+### Notes
+* Modifying a storage pool tier is not supported.
+* The check_mode is supported.
+* The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
+
+### Examples
+```
+- name: Get storage pool tier details
+  dellemc.powerscale.storagepooltier:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    tier_name: "test_tier"
+    state: 'present'
+
+- name: Create a storage pool tier
+  dellemc.powerscale.storagepooltier:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    tier_name: "test_tier"
+    nodepools:
+    - "test_nodepool"
+    state: 'present'
+
+- name: Delete a storage pool tier
+  dellemc.powerscale.storagepooltier:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    tier_name: "test_tier"
+    state: 'absent'
+```
+
+### Return Values
+                                                                                                                                                                                                                        
+<table>
+    <tr>
+        <th colspan=2>Key</th>
+        <th>Type</th>
+        <th>Returned</th>
+        <th width="100%">Description</th>
+    </tr>
+                                                                                            <tr>
+            <td colspan=2 > changed </td>
+            <td>  bool </td>
+            <td> always </td>
+            <td> Whether or not the resource has changed. </td>
+        </tr>
+                    <tr>
+            <td colspan=2 > storage_pool_tier_details </td>
+            <td>  complex </td>
+            <td> When a tier exists </td>
+            <td> Storage pool tier details. </td>
+        </tr>
+                            <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > children </td>
+                <td> list </td>
+                <td>success</td>
+                <td> Nodepool's of the storage pool tier. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > id </td>
+                <td> int </td>
+                <td>success</td>
+                <td> Unique ID of the storage pool tier. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > lnns </td>
+                <td> list </td>
+                <td>success</td>
+                <td> The nodes that are part of this tier. </td>
+            </tr>
+                                <tr>
+                <td class="elbow-placeholder">&nbsp;</td>
+                <td colspan=1 > name </td>
+                <td> str </td>
+                <td>success</td>
+                <td> Unique name of the storage pool tier. </td>
+            </tr>
+                                        </table>
+
+### Authors
+* Ananthu S Kuttattu (@kuttattz) <ansible.team@dell.com>
 
 --------------------------------

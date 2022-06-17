@@ -1,4 +1,14 @@
 # ansible-powerscale Change Log
+## Version 1.6.0 - released on 28/06/22
+- Support to retrieve, create and delete filepool policy in Filepool Policy module.
+- Support to retrieve, create and delete storagetier in Storagepool Tier module.
+- SmartQuota module is enhanced to support container parameter.
+- Filesystem module is enhanced to support ACL and container parameter.
+- Info module is enhanced to support NodePools and Storagepool Tiers Subsets.
+- Added files required for Ansible execution environment.
+- Check mode is supported for Info, Filepool Policy and Storagepool Tier modules.
+- Added execution environment manifest file to support building an execution environment with ansible-builder.
+
 ## Version 1.5.0 - released on 25/03/22
 - Support to retrieve and modify network settings in Network Settings module.
 - Support to retrieve and modify smartpool settings in Smartpool Settings module.
