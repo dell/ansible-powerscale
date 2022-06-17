@@ -1,5 +1,5 @@
 certifi
-isi-sdk-9-0-0
+isi-sdk-9-1-0
 isi-sdk-8-1-1
 python-dateutil
 setuptools

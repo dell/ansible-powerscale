@@ -1,4 +1,4 @@
-# Copyright: (c) 2021, DellEMC
+# Copyright: (c) 2021, Dell Technologies
 
 # Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -11,7 +11,7 @@ __metaclass__ = type
 import pytest
 from mock.mock import MagicMock
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
-    import dellemc_ansible_powerscale_utils as utils
+    import utils
 
 utils.get_logger = MagicMock()
 utils.isi_sdk = MagicMock()
@@ -28,7 +28,7 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils \
 
 
 class TestGroupnet():
-    MODULE_UTILS_PATH = 'ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.dellemc_ansible_powerscale_utils'
+    MODULE_UTILS_PATH = 'ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.utils'
     groupnet_name = 'groupnet_test'
     groupnet_args = {'groupnet_name': groupnet_name, 'state': 'present',
                      'description': None, 'dns_servers': [],

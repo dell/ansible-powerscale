@@ -1,4 +1,4 @@
-# Copyright: (c) 2021, DellEMC
+# Copyright: (c) 2021, Dell Technologies
 
 # Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -11,7 +11,7 @@ __metaclass__ = type
 
 class MockGatherfactsApi:
     MODULE_PATH = 'ansible_collections.dellemc.powerscale.plugins.modules.info.Info.'
-    MODULE_UTILS_PATH = 'ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.dellemc_ansible_powerscale_utils'
+    MODULE_UTILS_PATH = 'ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.utils'
     GATHERFACTS_COMMON_ARGS = {
         'onefs_host': '**.***.**.***',
         'access_zone': 'System',
@@ -54,6 +54,10 @@ class MockGatherfactsApi:
         'NetworkInterfaces': [
         ],
         'NetworkSubnets': [
+        ],
+        'NodePools': [
+        ],
+        'StoragePoolTiers': [
         ]
     }
 
@@ -437,4 +441,174 @@ class MockGatherfactsApi:
             ]
         else:
             return "Getting list of network subnets for PowerScale: %s failed with error: SDK Error message" % (
+                   MockGatherfactsApi.GATHERFACTS_COMMON_ARGS['onefs_host'])
+
+    @staticmethod
+    def get_node_pool_response(response_type):
+        if response_type == 'api':
+            return {
+                "nodepools": [
+                    {
+                        "can_disable_l3": True,
+                        "can_enable_l3": True,
+                        "health_flags": [],
+                        "id": 75,
+                        "l3": True,
+                        "l3_status": "l3",
+                        "lnns": [1, 2, 3],
+                        "manual": False,
+                        "name": "test_name_1",
+                        "node_type_ids": [3],
+                        "protection_policy": "+2d:1n",
+                        "tier": "esa_tier",
+                        "usage": {"avail_bytes": "1111111111111",
+                                  "avail_hdd_bytes": "1111111111111",
+                                  "avail_ssd_bytes": "0",
+                                  "balanced": False,
+                                  "free_bytes": "1111111111111",
+                                  "free_hdd_bytes": "1111111111111",
+                                  "free_ssd_bytes": "0",
+                                  "pct_used": "11.1111",
+                                  "pct_used_hdd": "11.1111",
+                                  "pct_used_ssd": "0.00000",
+                                  "total_bytes": "1111111111111",
+                                  "total_hdd_bytes": "1111111111111",
+                                  "total_ssd_bytes": "0",
+                                  "usable_bytes": "1111111111111",
+                                  "usable_hdd_bytes": "1111111111111",
+                                  "usable_ssd_bytes": "0",
+                                  "used_bytes": "11111111111111",
+                                  "used_hdd_bytes": "11111111111111",
+                                  "used_ssd_bytes": "0",
+                                  "virtual_hot_spare_bytes": "1111111111111"}
+                    }
+                ]
+            }
+        elif response_type == 'module':
+            return [
+                {
+                    "id": 75,
+                    "name": "test_name_1"
+                }
+            ]
+        else:
+            return "Getting list of node pools for PowerScale: %s failed with error: SDK Error message" % (
+                   MockGatherfactsApi.GATHERFACTS_COMMON_ARGS['onefs_host'])
+
+    @staticmethod
+    def get_storage_tier_response(response_type):
+        if response_type == 'api':
+            return {
+                "tiers": [
+                    {
+                        "children": [],
+                        "id": 38,
+                        "lnns": [],
+                        "name": "test_tier_1",
+                        "node_type_ids": [],
+                        "usage": {
+                            "avail_bytes": "0",
+                            "avail_hdd_bytes": "0",
+                            "avail_ssd_bytes": "0",
+                            "balanced": True,
+                            "free_bytes": "0",
+                            "free_hdd_bytes": "0",
+                            "free_ssd_bytes": "0",
+                            "pct_used": "0.00000",
+                            "pct_used_hdd": "0.00000",
+                            "pct_used_ssd": "0.00000",
+                            "total_bytes": "0",
+                            "total_hdd_bytes": "0",
+                            "total_ssd_bytes": "0",
+                            "usable_bytes": "0",
+                            "usable_hdd_bytes": "0",
+                            "usable_ssd_bytes": "0",
+                            "used_bytes": "0",
+                            "used_hdd_bytes": "0",
+                            "used_ssd_bytes": "0",
+                            "virtual_hot_spare_bytes": "0"
+                        }
+                    },
+                    {
+                        "children": [],
+                        "id": 54,
+                        "lnns": [],
+                        "name": "test_tier_2",
+                        "node_type_ids": [],
+                        "usage": {
+                            "avail_bytes": "0",
+                            "avail_hdd_bytes": "0",
+                            "avail_ssd_bytes": "0",
+                            "balanced": True,
+                            "free_bytes": "0",
+                            "free_hdd_bytes": "0",
+                            "free_ssd_bytes": "0",
+                            "pct_used": "0.00000",
+                            "pct_used_hdd": "0.00000",
+                            "pct_used_ssd": "0.00000",
+                            "total_bytes": "0",
+                            "total_hdd_bytes": "0",
+                            "total_ssd_bytes": "0",
+                            "usable_bytes": "0",
+                            "usable_hdd_bytes": "0",
+                            "usable_ssd_bytes": "0",
+                            "used_bytes": "0",
+                            "used_hdd_bytes": "0",
+                            "used_ssd_bytes": "0",
+                            "virtual_hot_spare_bytes": "0"
+                        }
+                    },
+                    {
+                        "children": [
+                            "test_child_1"
+                        ],
+                        "id": 95,
+                        "lnns": [
+                            1,
+                            2,
+                            3
+                        ],
+                        "name": "test_tier_3",
+                        "node_type_ids": [],
+                        "usage": {
+                            "avail_bytes": "1111111111111",
+                            "avail_hdd_bytes": "1111111111111",
+                            "avail_ssd_bytes": "0",
+                            "balanced": False,
+                            "free_bytes": "1111111111111",
+                            "free_hdd_bytes": "1111111111111",
+                            "free_ssd_bytes": "0",
+                            "pct_used": "91.5820",
+                            "pct_used_hdd": "91.5820",
+                            "pct_used_ssd": "0.00000",
+                            "total_bytes": "1111111111111",
+                            "total_hdd_bytes": "1111111111111",
+                            "total_ssd_bytes": "0",
+                            "usable_bytes": "1111111111111",
+                            "usable_hdd_bytes": "1111111111111",
+                            "usable_ssd_bytes": "0",
+                            "used_bytes": "11111111111111",
+                            "used_hdd_bytes": "11111111111111",
+                            "used_ssd_bytes": "0",
+                            "virtual_hot_spare_bytes": "1111111111111"
+                        }
+                    }],
+            }
+        elif response_type == 'module':
+            return [
+                {
+                    "id": 38,
+                    "name": "test_tier_1"
+                },
+                {
+                    "id": 54,
+                    "name": "test_tier_2"
+                },
+                {
+                    "id": 95,
+                    "name": "test_tier_3"
+                }
+            ]
+        else:
+            return "Getting list of storagepool tiers for PowerScale: %s failed with error: SDK Error message" % (
                    MockGatherfactsApi.GATHERFACTS_COMMON_ARGS['onefs_host'])

@@ -1,4 +1,4 @@
-# Copyright: (c) 2021, DellEMC
+# Copyright: (c) 2021, Dell Technologies
 
 # Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -17,7 +17,7 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_api_exception \
     import MockApiException
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
-    import dellemc_ansible_powerscale_utils as utils
+    import utils
 
 utils.get_logger = MagicMock()
 
@@ -147,3 +147,47 @@ class TestInfo():
         gatherfacts_module_mock.network_api.get_network_subnets = MagicMock(side_effect=MockApiException)
         gatherfacts_module_mock.perform_module_operation()
         assert MockGatherfactsApi.get_network_subnets_response('error') == gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
+
+    def test_get_node_pools(self, gatherfacts_module_mock):
+        node_pools = MockGatherfactsApi.get_node_pool_response('api')
+        self.get_module_args.update({
+            'gather_subset': ['node_pools']
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        gatherfacts_module_mock.storagepool_api = MagicMock()
+        gatherfacts_module_mock.storagepool_api.list_storagepool_nodepools = MagicMock(return_value=MockSDKResponse(node_pools))
+        gatherfacts_module_mock.perform_module_operation()
+        assert node_pools['nodepools'] == gatherfacts_module_mock.module.exit_json.call_args[1]['NodePools']
+
+    def test_get_node_pools_api_exception(self, gatherfacts_module_mock):
+        self.get_module_args.update({
+            'gather_subset': ['node_pools']
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        gatherfacts_module_mock.storagepool_api = MagicMock()
+        gatherfacts_module_mock.storagepool_api.list_storagepool_nodepools = MagicMock(side_effect=MockApiException)
+        gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_node_pool_response('error') == gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
+
+    def test_get_storagepool_tiers(self, gatherfacts_module_mock):
+        storage_tiers = MockGatherfactsApi.get_storage_tier_response('api')
+        self.get_module_args.update({
+            'gather_subset': ['storagepool_tiers']
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        gatherfacts_module_mock.storagepool_api = MagicMock()
+        gatherfacts_module_mock.storagepool_api.list_storagepool_tiers = MagicMock(return_value=MockSDKResponse(storage_tiers))
+        gatherfacts_module_mock.perform_module_operation()
+        print(storage_tiers['tiers'])
+        print(gatherfacts_module_mock.module.exit_json.call_args[1]['StoragePoolTiers'])
+        assert storage_tiers['tiers'] == gatherfacts_module_mock.module.exit_json.call_args[1]['StoragePoolTiers']
+
+    def test_get_storage_tiers_api_exception(self, gatherfacts_module_mock):
+        self.get_module_args.update({
+            'gather_subset': ['storagepool_tiers']
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        gatherfacts_module_mock.storagepool_api = MagicMock()
+        gatherfacts_module_mock.storagepool_api.list_storagepool_tiers = MagicMock(side_effect=MockApiException)
+        gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_storage_tier_response('error') == gatherfacts_module_mock.module.fail_json.call_args[1]['msg']

@@ -1,4 +1,4 @@
-# Copyright:  (c) 2022,  DellEMC
+# Copyright:  (c) 2022,  Dell Technologies
 
 # Apache License version 2.0 (see MODULE-LICENSE or http: //www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -24,6 +24,46 @@ class MockFileSystemApi:
     }
 
     @staticmethod
-    def delete_file_system_response(response_type):
-        if response_type == 'error':
-            return "Deletion of Filesystem"
+    def delete_file_system_response(error):
+        return "Deletion of Filesystem"
+
+    @staticmethod
+    def get_acl_response():
+        return {'acl': [
+            {
+                "accessrights": [
+                    "std_read_dac",
+                    "std_synchronize",
+                    "dir_read_attr"
+                ],
+                "accesstype": "allow",
+                "inherit_flags": [],
+                "trustee": {
+                    "id": "id:2000",
+                    "name": "test_group_1",
+                    "type": "group"
+                }
+            }],
+            "authoritative": "acl",
+            "group": {
+                "id": "id:2000",
+                "name": "test_group_1",
+                "type": "group"},
+            "mode": "0000",
+            "owner": {
+                "id": "id:2001",
+                "name": "ansible_test_user1",
+                "type": "user"}
+        }
+
+    @staticmethod
+    def get_acl_validation_error():
+        return "Please specify access_rights or inherit_flags to set ACL"
+
+    @staticmethod
+    def file_system_create_quota_response(error):
+        return "Creation of Quota update param failed with error"
+
+    @staticmethod
+    def file_system_update_quota_response(error):
+        return "Modification of Quota on path"
