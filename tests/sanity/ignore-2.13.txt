@@ -18,14 +18,11 @@ plugins/modules/synciqtargetreports.py validate-modules:missing-gplv3-license
 plugins/modules/user.py validate-modules:missing-gplv3-license
 plugins/modules/groupnet.py validate-modules:missing-gplv3-license
 plugins/modules/subnet.py validate-modules:missing-gplv3-license
-plugins/modules/subnet.py import-2.6
 plugins/modules/subnet.py import-2.7
-plugins/modules/groupnet.py import-2.6
 plugins/modules/groupnet.py import-2.7
 plugins/modules/networkrule.py validate-modules:missing-gplv3-license
 plugins/modules/networkpool.py validate-modules:missing-gplv3-license
 plugins/modules/settings.py validate-modules:missing-gplv3-license
-plugins/modules/networkpool.py import-2.6
 plugins/modules/networkpool.py import-2.7
 plugins/modules/networksettings.py validate-modules:missing-gplv3-license
 plugins/modules/smartpoolsettings.py validate-modules:missing-gplv3-license
