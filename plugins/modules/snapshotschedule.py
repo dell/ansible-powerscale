@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: (c) 2019, DellEMC
+# Copyright: (c) 2019, Dell Technologies
 
 # Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -13,7 +13,7 @@ DOCUMENTATION = r'''
 ---
 module: snapshotschedule
 version_added: '1.2.0'
-short_description: Manage snapshot schedules on Dell EMC PowerScale
+short_description: Manage snapshot schedules on PowerScale
 description:
 - You can perform the following operations.
 - Managing snapshot schedules on PowerScale.
@@ -23,7 +23,7 @@ description:
 - Delete snapshot schedule.
 
 extends_documentation_fragment:
-  - dellemc.powerscale.dellemc_powerscale.powerscale
+  - dellemc.powerscale.powerscale
 
 author:
 - Akash Shendge (@shenda1) <ansible.team@dell.com>
@@ -252,7 +252,7 @@ import logging
 import re
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
-    import dellemc_ansible_powerscale_utils as utils
+    import utils
 
 LOG = utils.get_logger('snapshotschedule')
 

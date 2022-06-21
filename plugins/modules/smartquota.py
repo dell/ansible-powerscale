@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: (c) 2020, DellEMC
+# Copyright: (c) 2020, Dell Technologies
 
 # Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -21,7 +21,7 @@ description:
   modifying, creating and deleting Smart Quotas.
 
 extends_documentation_fragment:
-  - dellemc.powerscale.dellemc_powerscale.powerscale
+  - dellemc.powerscale.powerscale
 
 author:
 - P Srinivas Rao (@srinivas-rao5) <ansible.team@dell.com>
@@ -135,6 +135,10 @@ options:
           limits is specified.
         type: str
         choices: ['GB', 'TB']
+      container:
+         description: If true, SMB shares using the quota directory see the quota thresholds as share size.
+         type: bool
+         default: False
   state:
     description:
     - Define whether the Smart Quota should exist or not.
@@ -297,6 +301,10 @@ quota_details:
             description: Whether the limits are enforced on Quota or not.
             type: bool
             sample: True
+        container:
+            description: If true, SMB shares using the quota directory see the quota thresholds as share size.
+            type: bool
+            sample: True
         thresholds:
             description: Includes information about all the limits imposed on quota.
                          The limits are mentioned in bytes and soft_grace is in seconds.
@@ -332,7 +340,7 @@ quota_details:
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
-    import dellemc_ansible_powerscale_utils as utils
+    import utils
 import re
 import copy
 
@@ -427,11 +435,18 @@ class SmartQuota(object):
         else:
             include_snapshots = quota_dict['include_snapshots']
 
+        if 'container' in quota_dict and quota_dict['container'] is not None \
+                and quota_type == "directory":
+            container = quota_dict['container']
+        else:
+            container = False
+
         quota_create_params = {
             'include_snapshots': include_snapshots, 'path': path,
             'enforced': enforced,
             'persona': persona,
-            'thresholds': threshold_obj, 'type': quota_type
+            'thresholds': threshold_obj,
+            'container': container, 'type': quota_type
         }
         if quota_dict is None or quota_dict[THRESHOLD_PARAM] is None \
                 and not utils.ISI_SDK_VERSION_9:
@@ -462,9 +477,11 @@ class SmartQuota(object):
         :param path: The path for which quota has to be updated.
         :return: True if the operation is successful.
         """
+
         threshold_obj = utils.isi_sdk.QuotaQuotaThresholds(
             advisory=quota_dict['advisory'], hard=quota_dict['hard'],
             soft=quota_dict['soft'], soft_grace=quota_dict['soft_grace'])
+
         get_quota_params = {'enforced': enforced,
                             utils.get_threshold_overhead_parameter():
                             quota_dict[THRESHOLD_PARAM],
@@ -800,6 +817,7 @@ def get_smartquota_parameters():
                                  'default-user', 'default-group']),
         quota=dict(type='dict',
                    options=dict(include_snapshots=dict(type='bool', default=False),
+                                container=dict(type='bool', default=False),
                                 include_overheads=dict(type='bool'),
                                 thresholds_on=dict(type='str',
                                                    choices=['app_logical_size',

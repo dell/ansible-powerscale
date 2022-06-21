@@ -7,7 +7,7 @@ HAS_POWERSCALE_SDK = False
 isi_sdk = None
 ISI_SDK_VERSION_9 = False
 IMPORT_PKGS_FAIL = []
-POWERSCALE_SDK_9_0_0 = "isi_sdk_9_0_0"
+POWERSCALE_SDK_9_1_0 = "isi_sdk_9_1_0"
 POWERSCALE_SDK_8_1_1 = "isi_sdk_8_1_1"
 
 try:
@@ -38,10 +38,11 @@ except ImportError:
     IMPORT_PKGS_FAIL.append("importlib")
 
 import logging
-from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.dellemc_powerscale_logging_handler \
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.logging_handler \
     import CustomRotatingFileHandler
 import math
 from decimal import Decimal
+import datetime
 import re
 import sys
 
@@ -108,7 +109,7 @@ options:
 
 def get_powerscale_management_host_parameters():
     return dict(
-        onefs_host=dict(type='str', required=True, no_log=True),
+        onefs_host=dict(type='str', required=True),
         verify_ssl=dict(choices=[True, False], type='bool', required=True),
         port_no=dict(type='str', default='8080', no_log=True),
         api_user=dict(type='str', required=True),
@@ -180,6 +181,7 @@ KB_IN_BYTES = 1024
 MB_IN_BYTES = 1024 * 1024
 GB_IN_BYTES = 1024 * 1024 * 1024
 TB_IN_BYTES = 1024 * 1024 * 1024 * 1024
+PB_IN_BYTES = 1024 * 1024 * 1024 * 1024 * 1024
 
 
 def get_size_bytes(size, cap_units):
@@ -301,7 +303,7 @@ def import_powerscale_sdk(sdk):
         ApiException = getattr(importlib.import_module(sdk + ".rest"),
                                'ApiException')
         HAS_POWERSCALE_SDK = True
-        ISI_SDK_VERSION_9 = True if isi_sdk.__name__ == POWERSCALE_SDK_9_0_0 \
+        ISI_SDK_VERSION_9 = True if isi_sdk.__name__ == POWERSCALE_SDK_9_1_0 \
             else False
 
     except ImportError:
@@ -329,7 +331,7 @@ def find_compatible_powerscale_sdk(module_params):
                     < parse_version(targeted_onefs_version):
                 compatible_powerscale_sdk = POWERSCALE_SDK_8_1_1
             else:
-                compatible_powerscale_sdk = POWERSCALE_SDK_9_0_0
+                compatible_powerscale_sdk = POWERSCALE_SDK_9_1_0
             if powerscale_sdk != compatible_powerscale_sdk:
                 import_powerscale_sdk(compatible_powerscale_sdk)
         except Exception as e:
@@ -476,6 +478,15 @@ def get_time_with_unit(time):
     return "%s %s" % (time, unit)
 
 
+''' Returns timestamp for given datetime string '''
+
+
+def get_datetime_timestamp(datetime_string, datetime_string_format):
+    datetime_value = datetime.datetime.strptime(datetime_string, datetime_string_format)
+    timestamp = datetime_value.timestamp()
+    return timestamp
+
+
 '''
 Check whether input string is empty
 '''
@@ -517,3 +528,17 @@ def is_valid_netmask(netmask):
         if not regexp.search(netmask):
             return False
         return True
+
+
+'''
+Returns sdk AclObject
+'''
+
+
+def get_acl_object():
+    try:
+        return getattr(importlib.import_module(isi_sdk.__name__ + ".models.acl_object"),
+                       'AclObject')
+
+    except ImportError:
+        return None

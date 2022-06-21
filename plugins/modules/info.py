@@ -1,9 +1,9 @@
 #!/usr/bin/python
-# Copyright: (c) 2019, DellEMC
+# Copyright: (c) 2019, Dell Technologies
 
 # Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-"""Ansible module for Gathering information about DellEMC PowerScale"""
+"""Ansible module for Gathering information about PowerScale"""
 
 from __future__ import (absolute_import, division, print_function)
 
@@ -15,10 +15,10 @@ module: info
 
 version_added: '1.2.0'
 
-short_description: Gathering information about DellEMC PowerScale Storage
+short_description: Gathering information about PowerScale Storage
 
 description:
-- Gathering information about DellEMC PowerScale Storage System includes
+- Gathering information about PowerScale Storage System includes
   Get attributes of the PowerScale cluster,
   Get list of access zones in the PowerScale cluster,
   Get list of nodes in the PowerScale cluster,
@@ -37,9 +37,11 @@ description:
   Get list of network rules of the PowerScale cluster.
   Get list of network subnets of the PowerScale cluster.
   Get list of network interfaces of the PowerScale cluster.
+  Get list of node pools of PowerScale cluster.
+  Get list of storage pool tiers of PowerScale cluster.
 
 extends_documentation_fragment:
-  - dellemc.powerscale.dellemc_powerscale.powerscale
+  - dellemc.powerscale.powerscale
 
 author:
 - Ambuj Dubey (@AmbujDube) <ansible.team@dell.com>
@@ -81,9 +83,12 @@ options:
     - network_rules
     - network_interfaces
     - network_subnets
+    - node_pools
+    - storagepool_tiers
     - The list of attributes, access_zones and nodes is for the entire PowerScale
       cluster
-    - The list of providers, users and groups is specific to the specified
+    - The list of providers for the entire PowerScale cluster
+    - The list of users and groups is specific to the specified
       access zone
     - The list of syncIQ reports and syncIQ target reports for the entire PowerScale
       cluster
@@ -95,7 +100,7 @@ options:
     choices: [attributes, access_zones, nodes, providers, users, groups,
               smb_shares, nfs_exports, clients, synciq_reports, synciq_target_reports,
               synciq_policies, synciq_target_cluster_certificates, synciq_performance_rules,
-              network_groupnets, network_subnets, network_pools, network_rules, network_interfaces]
+              network_groupnets, network_subnets, network_pools, network_rules, network_interfaces, node_pools, storagepool_tiers]
     type: list
     elements: str
 notes:
@@ -134,18 +139,6 @@ EXAMPLES = r'''
       gather_subset:
         - nodes
 
-  - name: Get list of authentication providers for an access zone of the
-          PowerScale cluster
-    dellemc.powerscale.info:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      access_zone: "{{access_zone}}"
-      gather_subset:
-        - providers
-
   - name: Get list of authentication providers for all access zones of the
           PowerScale cluster
     dellemc.powerscale.info:
@@ -154,7 +147,6 @@ EXAMPLES = r'''
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
-      include_all_access_zones: True
       gather_subset:
         - providers
 
@@ -306,13 +298,33 @@ EXAMPLES = r'''
       api_password: "{{api_password}}"
       gather_subset:
         - network_subnets
+
+  - name: Get list of node pools of the PowerScale cluster
+    dellemc.powerscale.info:
+      onefs_host: "{{onefs_host}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      gather_subset:
+        - node_pools
+    register: subset_result
+
+  - name: Get list of storage pool tiers of the PowerScale cluster
+    dellemc.powerscale.info:
+      onefs_host: "{{onefs_host}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      gather_subset:
+        - storagepool_tiers
+    register: subset_result
 '''
 
 RETURN = r''' '''
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
-    import dellemc_ansible_powerscale_utils as utils
+    import utils
 
 LOG = utils.get_logger('info')
 
@@ -330,7 +342,7 @@ class Info(object):
 
         # initialize the Ansible module
         self.module = AnsibleModule(argument_spec=self.module_params,
-                                    supports_check_mode=False,
+                                    supports_check_mode=True,
                                     mutually_exclusive=mutually_exclusive_args
                                     )
 
@@ -351,6 +363,7 @@ class Info(object):
         self.statistics_api = self.isi_sdk.StatisticsApi(self.api_client)
         self.synciq_api = self.isi_sdk.SyncApi(self.api_client)
         self.network_api = self.isi_sdk.NetworkApi(self.api_client)
+        self.storagepool_api = self.isi_sdk.StoragepoolApi(self.api_client)
 
     def get_attributes_list(self):
         """Get the list of attributes of a given PowerScale Storage"""
@@ -411,28 +424,20 @@ class Info(object):
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
-    def get_providers_list(self, access_zone, include_all_access_zones):
+    def get_providers_list(self):
         """Get the list of authentication providers for an access zone of a
         given PowerScale Storage"""
         try:
-            if include_all_access_zones:
-                providers_list = (self.auth_api
-                                  .get_providers_summary())\
-                    .to_dict()
-            else:
-                providers_list = (self.auth_api
-                                  .get_providers_summary(zone=access_zone))\
-                    .to_dict()
+            providers_list = (self.auth_api.get_providers_summary()).to_dict()
             LOG.info('Got authentication Providers from PowerScale cluster %s',
                      self.module.params['onefs_host'])
             return providers_list
         except Exception as e:
             error_msg = (
                 'Get authentication Providers List for PowerScale'
-                ' cluster: {0} and access zone: {1} failed with'
-                ' error: {2}' .format(
+                ' cluster: {0} failed with'
+                ' error: {1}' .format(
                     self.module.params['onefs_host'],
-                    access_zone,
                     utils.determine_error(e)))
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
@@ -757,6 +762,36 @@ class Info(object):
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
+    def get_node_pools(self):
+        """Getting list of all the node pools of a given PowerScale Storage"""
+        try:
+            node_pool_details = (self.storagepool_api.list_storagepool_nodepools()).to_dict()
+            node_pools = node_pool_details['nodepools']
+            return node_pools
+        except Exception as e:
+            error_msg = (
+                'Getting list of node pools for PowerScale: %s failed with '
+                'error: %s' % (
+                    self.module.params['onefs_host'],
+                    utils.determine_error(e)))
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
+
+    def get_storagepool_tiers(self):
+        """Getting list of all the storage tiers of a given PowerScale Storage"""
+        try:
+            storagepool_tiers_details = (self.storagepool_api.list_storagepool_tiers()).to_dict()
+            storagepool_tiers = storagepool_tiers_details['tiers']
+            return storagepool_tiers
+        except Exception as e:
+            error_msg = (
+                'Getting list of storagepool tiers for PowerScale: %s failed with '
+                'error: %s' % (
+                    self.module.params['onefs_host'],
+                    utils.determine_error(e)))
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
+
     def perform_module_operation(self):
         """Perform different actions on Gatherfacts based on user parameter
         chosen in playbook
@@ -786,6 +821,8 @@ class Info(object):
         network_rules = []
         network_interfaces = []
         network_subnets = []
+        node_pools = []
+        storagepool_tiers = []
 
         if 'attributes' in str(subset):
             attributes = self.get_attributes_list()
@@ -794,7 +831,7 @@ class Info(object):
         if 'nodes' in str(subset):
             nodes = self.get_nodes_list()
         if 'providers' in str(subset):
-            providers = self.get_providers_list(access_zone, include_all_access_zones)
+            providers = self.get_providers_list()
         if 'users' in str(subset):
             users = self.get_users_list(access_zone)
         if 'groups' in str(subset):
@@ -828,6 +865,10 @@ class Info(object):
             network_interfaces = self.get_network_interfaces()
         if 'network_subnets' in str(subset):
             network_subnets = self.get_network_subnets()
+        if 'node_pools' in str(subset):
+            node_pools = self.get_node_pools()
+        if 'storagepool_tiers' in str(subset):
+            storagepool_tiers = self.get_storagepool_tiers()
 
         result = dict(
             Attributes=attributes,
@@ -847,7 +888,9 @@ class Info(object):
             NetworkPools=network_pools,
             NetworkRules=network_rules,
             NetworkInterfaces=network_interfaces,
-            NetworkSubnets=network_subnets
+            NetworkSubnets=network_subnets,
+            NodePools=node_pools,
+            StoragePoolTiers=storagepool_tiers
         )
 
         if utils.ISI_SDK_VERSION_9:
@@ -896,7 +939,9 @@ def get_info_parameters():
                                     'network_pools',
                                     'network_rules',
                                     'network_interfaces',
-                                    'network_subnets'
+                                    'network_subnets',
+                                    'node_pools',
+                                    'storagepool_tiers'
                                     ]),
     )
 

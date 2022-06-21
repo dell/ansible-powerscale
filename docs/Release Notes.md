@@ -1,6 +1,6 @@
 **Ansible Modules for Dell Technologies PowerScale** 
 =========================================
-### Release Notes 1.5.0
+### Release Notes 1.6.0
 
 >   © 2022 Dell Inc. or its subsidiaries. All rights reserved. Dell
 >   and other trademarks are trademarks of Dell Inc. or its
@@ -27,7 +27,7 @@ Table 1. Revision history
 
 | Revision | Date      | Description                                               |
 |----------|-----------|-----------------------------------------------------------|
-| 01      | March 2022  | Ansible Modules for Dell PowerScale 1.5.0              |
+| 01      | June 2022  | Ansible Modules for Dell PowerScale 1.6.0              |
 
 
 Product Description
@@ -54,6 +54,8 @@ The Ansible Modules for Dell PowerScale support the following features:
 - Create an access zone.
 - Get network and smart pool settings.
 - Modify network and smart pool settings.
+- Get Filepool policy and Storagepool tiers.
+- Create, delete Filepool policy and Storagepool tiers.
 - Get attributes and entities of the array. 
   
 The Ansible modules use playbooks, written in yaml syntax, to list, show, create, delete, and modify each of these entities.
@@ -62,7 +64,9 @@ Features
 ---------------------------
 This section describes the features of the Ansible Modules for Dell PowerScale for this release.
 
-The Ansible Modules for Dell PowerScale release 1.5.0 supports the following features: 
+Added execution environment manifest file to support building an execution environment with ansible-builder.
+
+The Ansible Modules for Dell PowerScale release 1.6.0 supports the following features: 
  - Idempotency 
    - Has been handled in all modules.
    - Allows the playbook to be run multiple times.
@@ -76,22 +80,19 @@ The Ansible Modules for Dell PowerScale release 1.5.0 supports the following fea
   - Absolute path = Access zone base path + relative path provided by the user.
 
 MODULES
--   The Network Settings module supports the following functionality:
-    -   Retrieve details of network settings.
-    -   Modify network settings.
+-   The Filepool Policy module supports the following functionality:
+    -   Retrieve details of filepool policy.
+    -   Create and delete filepool policy.
 
--   The Smartpool Settings module supports the following functionality:
-    -   Retrieve details of smartpool settings.
-    -   Modify smartpool settings.
+-   The Storagepool Tiers module supports the following functionality:
+    -   Retrieve details of Storagepool tiers.
+    -   Create and delete Storagepool tiers.
 
 -   The Smart Quota module is enhanced to support the following functionality:
-    -   Float value support for Quota Parameters.
-
--   The ADS module is enhanced to support the following functionality:
-    -   Creation of ADS provider supports machine_account & organizational_unit parameters.
+    -   Container Parameter is supported.
 
 -   The Filesystem module is enhanced to support the following functionality:
-    -   Recursive force deletion of filesystem directories.
+    -   ACL and container parameter are supported.
     
 Known issues
 ------------
@@ -99,7 +100,7 @@ Known problems in this release are listed.
 
 | **Issue**        | **Description**           | **Resolution**  |
 | ------------- |-------------| -----|
-| Snapshot schedule | If the playbook has a desired_retention field, running same the playbook again returns the changed as True (Idempotency does not work) | This is an issue in the supported OneFS versions. |
+| Snapshot schedule | If the playbook has a desired_retention field, running the same playbook again returns the changed as True (Idempotency does not work) | This is an issue in the supported OneFS versions. |
 | Filesystem creation | Creation of a filesystem can fail when api_user: "admin" is used because it is possible that the admin user may not have privileges to set an ACLs | Create a filesystem with api_user: "root". |
 | Snapshot creation with alias name | Alias name attribute remains null in spite of creating snapshot with alias name | This is an issue with the PowerScale rest API. Alias name is not getting appended to the attribute in response. |
 | SyncIQ Job creation/modification/retrieval | When SyncIQ policy has any job of the type "resync_prep/allow_write/allow_write_revert" then creation, modification or retrieval of SyncIQ job will fail with an error saying "Invalid value for 'action', must be one of ['copy', 'sync']". | This is an issue in the supported OneFS versions. |
@@ -120,8 +121,7 @@ This section lists the limitations in this release of Ansible Modules for Dell P
   - Deletion of access zones is not supported. 
  
 - Filesystems
-  
-  - ACLs can only be modified from POSIX to POSIX mode.
+
   -  Only directory quotas are supported but not user or group quotas.
   -  Modification of include_snap_data flag is not supported.
      
