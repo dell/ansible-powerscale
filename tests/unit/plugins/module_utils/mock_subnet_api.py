@@ -1,4 +1,4 @@
-# Copyright: (c) 2021, DellEMC
+# Copyright: (c) 2021, Dell Technologies
 
 # Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
 

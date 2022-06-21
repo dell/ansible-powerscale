@@ -1,4 +1,4 @@
-# Copyright: (c) 2022, DellEMC
+# Copyright: (c) 2022, Dell Technologies
 
 # Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -11,7 +11,7 @@ __metaclass__ = type
 import pytest
 from mock.mock import MagicMock
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
-    import dellemc_ansible_powerscale_utils as utils
+    import utils
 
 utils.get_logger = MagicMock()
 utils.isi_sdk = MagicMock()
@@ -26,7 +26,7 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock
 
 
 class TestAds():
-    MODULE_UTILS_PATH = 'ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.dellemc_ansible_powerscale_utils'
+    MODULE_UTILS_PATH = 'ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.utils'
     ads_args = {'domain_name': 'ads_domain', 'instance_name': 'ads_instance',
                 'ads_user': 'user', 'ads_password': '***', 'state': 'present',
                 'ads_parameters': {'groupnet': None, 'home_directory_template': None,

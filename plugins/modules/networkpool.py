@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: (c) 2021, DellEMC
+# Copyright: (c) 2021, Dell Technologies
 
 # Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -20,7 +20,7 @@ description:
   modifying, deleting and reterving details of network pool.
 
 extends_documentation_fragment:
-  - dellemc.powerscale.dellemc_powerscale.powerscale
+  - dellemc.powerscale.powerscale
 
 author:
 - Meenakshi Dembi (@dembim) <ansible.team@dell.com>
@@ -308,7 +308,7 @@ pools:
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
-    import dellemc_ansible_powerscale_utils as utils
+    import utils
 import ipaddress
 
 # initialize the logger

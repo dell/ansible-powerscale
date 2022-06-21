@@ -1,8 +1,9 @@
 #!/usr/bin/python
-# Copyright: (c) 2021, DellEMC
+# Copyright: (c) 2021, Dell Technologies
 
 # Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
 
+""" Ansible module for managing nodes on PowerScale"""
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
@@ -11,13 +12,13 @@ DOCUMENTATION = r'''
 module: node
 version_added: '1.2.0'
 
-short_description: Get node info of DellEMC PowerScale storage
+short_description: Get node info of PowerScale Storage System.
 
 description:
 - Get information of a node belonging to the PowerScale cluster.
 
 extends_documentation_fragment:
-  - dellemc.powerscale.dellemc_powerscale.powerscale
+  - dellemc.powerscale.powerscale
 
 author:
 - Ganesh Prabhu(@prabhg5) <ansible.team@dell.com>>
@@ -73,7 +74,7 @@ cluster_node_details:
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
-    import dellemc_ansible_powerscale_utils as utils
+    import utils
 import re
 
 LOG = utils.get_logger('node')
