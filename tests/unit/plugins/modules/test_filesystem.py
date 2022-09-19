@@ -72,7 +72,7 @@ class TestFileSystem():
                                          "access_control_rights":
                                          {"access_rights": ["dir_gen_all"], "inherit_flags": "container_inherit",
                                           "access_type": "allow",
-                                          "trustee": "test_user"},
+                                          "trustee": {"name": "test_user", "type": "user", "provider_type": "local"}},
                                         "access_zone": "System", "state": "present", "access_control_rights_state": "add"})
         filesystem_module_mock.module.params = self.get_filesystem_args
         filesystem_module_mock.get_filesystem = MagicMock(return_value={})
@@ -86,7 +86,7 @@ class TestFileSystem():
                                          "access_control_rights":
                                          {"access_rights": ["dir_gen_all"], "inherit_flags": "container_inherit",
                                           "access_type": "allow",
-                                          "trustee": "test_user"},
+                                          "trustee": {"name": "test_user", "type": "user", "provider_type": "local"}},
                                          "access_zone": "System", "state": "present", "access_control_rights_state": "add"})
         filesystem_module_mock.module.params = self.get_filesystem_args
         filesystem_module_mock.get_acl = MagicMock(return_value=MockFileSystemApi.get_acl_response())
@@ -99,7 +99,7 @@ class TestFileSystem():
         self.get_filesystem_args.update({"path": "/ifs/ATest3", "owner": {"name": "test"}, "group": {"name": "group_test"},
                                          "access_control_rights":
                                          {"access_type": "allow", "access_rights": None, "inherit_flags": None,
-                                          "trustee": "test_user"},
+                                          "trustee": {"name": "test_user", "type": "user", "provider_type": "local"}},
                                          "access_zone": "System", "state": "present", "access_control_rights_state": "add"})
         filesystem_module_mock.module.params = self.get_filesystem_args
         filesystem_module_mock.perform_module_operation()

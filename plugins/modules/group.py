@@ -56,7 +56,7 @@ options:
     - This option acts as a filter for all operations except creation.
     type: str
     default: 'local'
-    choices: [ 'local', 'file', 'ldap', 'ads']
+    choices: [ 'local', 'file', 'ldap', 'ads', 'nis']
   state:
     description:
     - The state option is used to determine whether the group
@@ -331,19 +331,25 @@ class Group(object):
         """Get the Group Details in PowerScale"""
         try:
             LOG.info("Getting Details of group %s ", group)
-            api_response = self.api_instance.get_auth_group(
-                auth_group_id=group,
-                provider=provider, zone=zone)
-            LOG.info("Group Details: %s", str(api_response))
-            api_response_dict = api_response.groups[0].to_dict()
-            group_user_details = self.get_group_members(
-                group, zone, provider)
-            if group_user_details:
-                api_response_dict['members'] = group_user_details
+            if provider != "nis":
+                api_response = self.api_instance.get_auth_group(
+                    auth_group_id=group,
+                    provider=provider, zone=zone)
+                LOG.info("Group Details: %s", str(api_response))
+                api_response_dict = api_response.groups[0].to_dict()
+                group_user_details = self.get_group_members(
+                    group, zone, provider)
+                if group_user_details:
+                    api_response_dict['members'] = group_user_details
+                else:
+                    api_response_dict['members'] = []
+                return api_response_dict
             else:
-                api_response_dict['members'] = []
-            return api_response_dict
-
+                api_response = self.api_instance.list_auth_groups(provider=provider, zone=zone)
+                group = group.split(":")
+                for item in api_response.groups:
+                    if item.name == group[1]:
+                        return item.to_dict()
         except utils.ApiException as e:
             if str(e.status) == "404":
                 error_message = "Get Group Details %s failed with %s" \
@@ -571,7 +577,7 @@ def get_group_parameters():
         group_id=dict(required=False, type='str'),
         access_zone=dict(required=False, type='str', default='system'),
         provider_type=dict(required=False, type='str',
-                           choices=['local', 'file', 'ldap', 'ads'],
+                           choices=['local', 'file', 'ldap', 'ads', 'nis'],
                            default='local'),
         state=dict(required=True, type='str', choices=['present', 'absent']),
         users=dict(required=False, type='list', elements='dict'),

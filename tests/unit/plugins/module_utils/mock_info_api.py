@@ -19,37 +19,39 @@ class MockGatherfactsApi:
     }
     EMPTY_GATHERSUBSET_ERROR_MSG = "Please specify gather_subset"
     EMPTY_RESULT = {
-        'SynciqTargetReports': [
-        ],
-        'NetworkPools': [
+        'Attributes': [
         ],
         'AccessZones': [
         ],
-        'SynciqReports': [
-        ],
-        'SynciqPerformanceRules': [
+        'Nodes': [
         ],
         'Providers': [
         ],
-        'Clients': [
-        ],
-        'SynciqPolicies': [
-        ],
-        'SmbShares': [
-        ],
-        'NetworkGroupnets': [
+        'Users': [
         ],
         'Groups': [
         ],
-        'Attributes': [
+        'SmbShares': [
+        ],
+        'Clients': [
         ],
         'NfsExports': [
         ],
+        'NfsAliases': [
+        ],
+        'SynciqReports': [
+        ],
+        'SynciqTargetReports': [
+        ],
+        'SynciqPolicies': [
+        ],
+        'SynciqPerformanceRules': [
+        ],
+        'NetworkGroupnets': [
+        ],
+        'NetworkPools': [
+        ],
         'NetworkRules': [
-        ],
-        'Nodes': [
-        ],
-        'Users': [
         ],
         'NetworkInterfaces': [
         ],
@@ -58,6 +60,8 @@ class MockGatherfactsApi:
         'NodePools': [
         ],
         'StoragePoolTiers': [
+        ],
+        'SynciqTargetClusterCertificate': [
         ]
     }
 
@@ -341,6 +345,51 @@ class MockGatherfactsApi:
             ]
         else:
             return "Getting list of network interfaces for PowerScale: %s failed with error: SDK Error message" % (
+                   MockGatherfactsApi.GATHERFACTS_COMMON_ARGS['onefs_host'])
+
+    @staticmethod
+    def get_nfs_aliases_response(response_type):
+        alias_1 = "/sample_alias_1"
+        alias_2 = "/sample_alias_2"
+        if response_type == 'api':
+            return {
+                "aliases": [
+                    {
+                        "health": "not exported",
+                        "id": alias_1,
+                        "name": alias_1,
+                        "path": "/ifs",
+                        "zone": "System"
+                    },
+                    {
+                        "health": "path not found",
+                        "id": alias_2,
+                        "name": alias_2,
+                        "path": "/ifs/Trisha",
+                        "zone": "System"
+                    }
+
+                ]
+            }
+        elif response_type == 'module':
+            return [
+                {
+                    "health": "not exported",
+                    "id": alias_1,
+                    "name": alias_1,
+                    "path": "/ifs",
+                    "zone": "System"
+                },
+                {
+                    "health": "path not found",
+                    "id": alias_2,
+                    "name": alias_2,
+                    "path": "/ifs/Trisha",
+                    "zone": "System"
+                }
+            ]
+        else:
+            return "Getting list of NFS aliases for PowerScale: %s failed with error: SDK Error message" % (
                    MockGatherfactsApi.GATHERFACTS_COMMON_ARGS['onefs_host'])
 
     @staticmethod

@@ -35,6 +35,7 @@ class TestInfo():
         gatherfacts_module_mock = Info()
         gatherfacts_module_mock.module = MagicMock()
         gatherfacts_module_mock.network_api = MagicMock()
+        gatherfacts_module_mock.protocol_api = MagicMock()
         return gatherfacts_module_mock
 
     def test_get_network_groupnets(self, gatherfacts_module_mock):
@@ -103,6 +104,7 @@ class TestInfo():
         assert MockGatherfactsApi.EMPTY_GATHERSUBSET_ERROR_MSG == gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
 
     def test_input_none(self, gatherfacts_module_mock):
+        self.get_module_args.update({})
         gatherfacts_module_mock.perform_module_operation()
         assert MockGatherfactsApi.EMPTY_RESULT == gatherfacts_module_mock.module.exit_json.call_args[1]
 
@@ -126,6 +128,29 @@ class TestInfo():
         gatherfacts_module_mock.network_api.get_network_interfaces = MagicMock(side_effect=MockApiException)
         gatherfacts_module_mock.perform_module_operation()
         assert MockGatherfactsApi.get_network_interfaces_response('error') == gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
+
+    def test_get_nfs_aliases(self, gatherfacts_module_mock):
+        nfs_aliases = MockGatherfactsApi.get_nfs_aliases_response('api')
+        self.get_module_args.update({
+            'zone': "System",
+            'gather_subset': ['nfs_aliases']
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        gatherfacts_module_mock.protocol_api = MagicMock()
+        gatherfacts_module_mock.protocol_api.list_nfs_aliases = MagicMock(return_value=MockSDKResponse(nfs_aliases))
+        gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_nfs_aliases_response('module') == gatherfacts_module_mock.module.exit_json.call_args[1]['NfsAliases']
+
+    def test_get_nfs_aliases_api_exception(self, gatherfacts_module_mock):
+        self.get_module_args.update({
+            'zone': "System",
+            'gather_subset': ['nfs_aliases']
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        gatherfacts_module_mock.protocol_api = MagicMock()
+        gatherfacts_module_mock.protocol_api.list_nfs_aliases = MagicMock(side_effect=MockApiException)
+        gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_nfs_aliases_response('error') == gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
 
     def test_get_network_subnets(self, gatherfacts_module_mock):
         network_subnets = MockGatherfactsApi.get_network_subnets_response('api')
