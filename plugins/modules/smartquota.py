@@ -68,7 +68,7 @@ options:
     - This option acts as a filter for all operations except creation.
     type: str
     default: 'local'
-    choices: [ 'local', 'file', 'ldap', 'ads']
+    choices: [ 'local', 'file', 'ldap', 'ads', 'nis']
   quota:
     description:
     - Specifies Smart Quota parameters.
@@ -672,7 +672,6 @@ class SmartQuota(object):
         if quota_type == "group":
             sid = self.get_sid(group_name, quota_type,
                                provider_type, access_zone)
-
         # Throw error if quota_type is directory/default-user/default-group
         # and parameters for user and group are provided
         if quota_type != 'user' and quota_type != 'group':
@@ -811,7 +810,7 @@ def get_smartquota_parameters():
         group_name=dict(type='str'),
         access_zone=dict(type='str', default='system'),
         provider_type=dict(type='str', default='local',
-                           choices=['local', 'file', 'ldap', 'ads']),
+                           choices=['local', 'file', 'ldap', 'ads', 'nis']),
         quota_type=dict(required=True, type='str',
                         choices=['user', 'group', 'directory',
                                  'default-user', 'default-group']),

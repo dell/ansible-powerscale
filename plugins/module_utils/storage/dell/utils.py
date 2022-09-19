@@ -438,7 +438,9 @@ def get_time_in_seconds(time, time_units):
     months_in_sec = 30 * 24 * 60 * 60
     years_in_sec = 365 * 24 * 60 * 60
     if time and time > 0:
-        if time_units in 'minutes':
+        if time_units in 'seconds':
+            return time
+        elif time_units in 'minutes':
             return time * min_in_sec
         elif time_units in 'hours':
             return time * hour_in_sec

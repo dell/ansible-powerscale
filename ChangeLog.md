@@ -1,4 +1,11 @@
 # ansible-powerscale Change Log
+## Version 1.7.0 - released on 27/09/22
+- Support to retrieve, create, modify and delete NFS alias in NFS Alias module.
+- Support to create and modify additional parameters of an SMB share in SMB module.
+- Access Zone, SMB, SmartQuota, User and Group module is enhanced to support NIS authentication provider.
+- SyncIQ Policy module is enhanced to support accelerated_failback and restrict_target_network of a policy.
+- Info module is enhanced to support listing of NFS aliases.
+
 ## Version 1.6.0 - released on 28/06/22
 - Support to retrieve, create and delete filepool policy in Filepool Policy module.
 - Support to retrieve, create and delete storagetier in Storagepool Tier module.

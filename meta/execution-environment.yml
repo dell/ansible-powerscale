@@ -1,8 +1,8 @@
 ---
 version: 1
 dependencies:
-  galaxy: ../requirements.yml
-  python: ../requirements.txt
+  galaxy: requirements.yml
+  python: requirements.txt
 additional_build_steps:
   prepend: |
     RUN yum install -y dnf wget

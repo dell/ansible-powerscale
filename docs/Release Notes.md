@@ -1,6 +1,6 @@
 **Ansible Modules for Dell Technologies PowerScale** 
 =========================================
-### Release Notes 1.6.0
+### Release notes 1.7.0
 
 >   © 2022 Dell Inc. or its subsidiaries. All rights reserved. Dell
 >   and other trademarks are trademarks of Dell Inc. or its
@@ -27,10 +27,10 @@ Table 1. Revision history
 
 | Revision | Date      | Description                                               |
 |----------|-----------|-----------------------------------------------------------|
-| 01      | June 2022  | Ansible Modules for Dell PowerScale 1.6.0              |
+| 01      | Sep 2022  | Ansible Modules for Dell PowerScale 1.7.0              |
 
 
-Product Description
+Product description
 -------------------
 This section describes the Ansible Modules for Dell PowerScale.
 The Ansible Modules for Dell PowerScale allow Data Center and IT administrators to use RedHat Ansible to automate and orchestrate the configuration and management of Dell  PowerScale arrays. 
@@ -56,6 +56,7 @@ The Ansible Modules for Dell PowerScale support the following features:
 - Modify network and smart pool settings.
 - Get Filepool policy and Storagepool tiers.
 - Create, delete Filepool policy and Storagepool tiers.
+- Get, Create, modify and delete NFS aliases. 
 - Get attributes and entities of the array. 
   
 The Ansible modules use playbooks, written in yaml syntax, to list, show, create, delete, and modify each of these entities.
@@ -66,34 +67,37 @@ This section describes the features of the Ansible Modules for Dell PowerScale f
 
 Added execution environment manifest file to support building an execution environment with ansible-builder.
 
-The Ansible Modules for Dell PowerScale release 1.6.0 supports the following features: 
+The Ansible Modules for Dell PowerScale release 1.7.0 supports the following features: 
  - Idempotency 
    - Has been handled in all modules.
    - Allows the playbook to be run multiple times.
    - Avoids the need for complex rollbacks. 
      
-- Access Zones 
+- Access zones 
   - PowerScale has a concept of access zones. These are to partition the cluster into multiple isolated sections.
   - Ansible modules support access zone operations that can also operate on the default (system) access zone.
   - Users and Groups can be specific to a particular access zone.
   - For non-system access zones, the path provided by the playbook is a relative path.
   - Absolute path = Access zone base path + relative path provided by the user.
 
-MODULES
--   The Filepool Policy module supports the following functionality:
-    -   Retrieve details of filepool policy.
-    -   Create and delete filepool policy.
+Modules
+-   The NFS Alias module supports this functionality:
+    -   Retrieve details of NFS alias.
+    -   Create, modify and delete NFS alias.
 
--   The Storagepool Tiers module supports the following functionality:
-    -   Retrieve details of Storagepool tiers.
-    -   Create and delete Storagepool tiers.
+-   The SMB module is enhanced to support this functionality:
+    -   NIS authentication provider.
+    -   Create and modify additonal parameters of SMB share.
 
--   The Smart Quota module is enhanced to support the following functionality:
-    -   Container Parameter is supported.
+-   The Access Zone, Smart Quota, User and Group module is enhanced to support this functionality:
+    -   NIS authentication provider.
 
--   The Filesystem module is enhanced to support the following functionality:
-    -   ACL and container parameter are supported.
-    
+-   The SyncIQ Policy module is enhanced to support this functionality:
+    -   accelerated_failback and restrict_target_network.
+
+-   The Info module is enhanced to support this functionality:
+    -   Retrieve details of NFS aliases.
+
 Known issues
 ------------
 Known problems in this release are listed.
@@ -104,6 +108,7 @@ Known problems in this release are listed.
 | Filesystem creation | Creation of a filesystem can fail when api_user: "admin" is used because it is possible that the admin user may not have privileges to set an ACLs | Create a filesystem with api_user: "root". |
 | Snapshot creation with alias name | Alias name attribute remains null in spite of creating snapshot with alias name | This is an issue with the PowerScale rest API. Alias name is not getting appended to the attribute in response. |
 | SyncIQ Job creation/modification/retrieval | When SyncIQ policy has any job of the type "resync_prep/allow_write/allow_write_revert" then creation, modification or retrieval of SyncIQ job will fail with an error saying "Invalid value for 'action', must be one of ['copy', 'sync']". | This is an issue in the supported OneFS versions. |
+| SMB share creation with NIS group permissions | Creating a SMB share with NIS group permissions fails with error that the group cannot be found | This is an issue in the supported OneFS versions. |
 
 Limitations
 -----------
@@ -143,7 +148,7 @@ This section lists the limitations in this release of Ansible Modules for Dell P
 Software media, organization, and files 
 -----------
 The software package is available for download from the [Ansible Modules
-for PowerScale GitHub](https://github.com/dell/ansible-powerscale/tree/1.5.0) page.
+for PowerScale GitHub](https://github.com/dell/ansible-powerscale/tree/1.7.0) page.
 
 Additional resources
 --------------------
