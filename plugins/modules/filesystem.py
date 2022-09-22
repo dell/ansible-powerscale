@@ -106,9 +106,27 @@ options:
                   'no_prop_inherit', 'inherited_ace']
       trustee:
         description:
-        - Provides the trustee (user or group) name.
+        - Provides the trustee (user or group) name and trustee provider_type.
+        type: dict
         required: True
-        type: str
+        suboptions:
+          name:
+            description:
+            - Provides the trustee (user or group) name.
+            type: str
+            required: True
+          type:
+            description:
+            - Provides the trustee type.
+            type: str
+            choices: ['user', 'group']
+            default: user
+          provider_type:
+            description:
+            - The provider_type is optional and it defaults to 'local'.
+            - The supported values for provider_type are 'local', 'file', 'ldap' and 'ads'.
+            type: str
+            default: local
   access_control_rights_state:
     description:
     - Specifies if the access rights are to be added or deleted for the trustee.
@@ -318,13 +336,16 @@ EXAMPLES = r'''
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
       path: "/ifs/test"
+      access_zone: "{{access_zone}}"
       access_control_rights:
         access_type: "allow"
         access_rights:
             - dir_gen_all
         inherit_flags:
             - container_inherit
-        trustee: test_user
+        trustee:
+            name: test_user
+            provider_type: "ldap"
       access_control_rights_state: "add"
       state: "present"
 
@@ -336,9 +357,16 @@ EXAMPLES = r'''
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
       path: "/ifs/test"
+      access_zone: "{{access_zone}}"
       access_control_rights:
         access_type: "allow"
-        trustee: test_user
+        access_rights:
+            - dir_gen_all
+        inherit_flags:
+            - container_inherit
+        trustee:
+            name: test_user
+            provider_type: "ldap"
       access_control_rights_state: "remove"
       state: "present"
 
@@ -690,7 +718,6 @@ class FileSystem(object):
                     overwrite=False)
             if quota is not None and quota['quota_state'] == 'present':
                 self.create_quota(quota, path)
-
             permissions = \
                 self.isi_sdk.NamespaceAcl(
                     authoritative='mode',
@@ -1044,17 +1071,21 @@ class FileSystem(object):
     def is_acl_rights_modified(self, filesystem_acl, acl_rights):
         """Determines if acl rights of filesystem are modified"""
         acl_trustee = []
+        trustee_id = self.get_trustee_id(acl_rights['trustee']['name'],
+                                         acl_rights['trustee']['type'],
+                                         self.module.params['access_zone'],
+                                         acl_rights['trustee']['provider_type'])
         for acl in filesystem_acl['acl']:
-            if not acl['trustee']['name']:
+            if not acl['trustee']['id']:
                 continue
-            acl_trustee.append(acl['trustee']['name'] + ":" + acl['accesstype'])
-            if acl['trustee']['name'] + ":" + acl['accesstype'] == \
-                    acl_rights['trustee'] + ":" + acl_rights['access_type'] and \
+            acl_trustee.append(acl['trustee']['id'] + ":" + acl['accesstype'])
+            if acl['trustee']['id'] + ":" + acl['accesstype'] == \
+                    trustee_id + ":" + acl_rights['access_type'] and \
                     (self.module.params['access_control_rights_state'] == 'add' and
                      self.is_access_or_inherit_modified(acl_rights, acl)):
                 return True
 
-        if acl_rights['trustee'] + ":" + acl_rights['access_type'] not in acl_trustee:
+        if trustee_id + ":" + acl_rights['access_type'] not in acl_trustee:
             if self.module.params['access_control_rights_state'] == 'add':
                 return True
         else:
@@ -1183,6 +1214,16 @@ class FileSystem(object):
             self.module.fail_json(msg='Please specify access_rights or '
                                   'inherit_flags to set ACL')
 
+    def get_trustee_id(self, trustee_name, type, access_zone, provider):
+        if type == 'user':
+            return self.get_owner_id(name=trustee_name,
+                                     zone=access_zone,
+                                     provider=provider)['users'][0]['uid']['id']
+        else:
+            return self.get_group_id(name=trustee_name,
+                                     zone=access_zone,
+                                     provider=provider)['groups'][0]['gid']['id']
+
     def get_acl_permissions(self, acl_rights):
         """Returns ACL permissions"""
         try:
@@ -1192,7 +1233,12 @@ class FileSystem(object):
             acl_obj.op = "add"
             if acl_state and acl_state == 'remove':
                 acl_obj.op = "delete"
-            trustee = {"name": acl_rights['trustee']}
+            trustee_id = \
+                self.get_trustee_id(acl_rights['trustee']['name'],
+                                    acl_rights['trustee']['type'],
+                                    self.module.params['access_zone'],
+                                    acl_rights['trustee']['provider_type'])
+            trustee = {"name": acl_rights['trustee']['name'], "id": trustee_id, "type": "user"}
             acl_obj.trustee = trustee
             acl_obj.accesstype = acl_rights['access_type']
             acl_obj.accessrights = acl_rights['access_rights']
@@ -1529,7 +1575,10 @@ def get_filesystem_parameters():
                                choices=['object_inherit', 'container_inherit',
                                         'inherit_only', 'no_prop_inherit',
                                         'inherited_ace']),
-            trustee=dict(required=True, type='str'))),
+            trustee=dict(required=True, type='dict',
+                         options=dict(name=dict(type='str', required=True),
+                                      type=dict(type='str', choices=['user', 'group'], default='user'),
+                                      provider_type=dict(type='str', default='local'))))),
         access_control_rights_state=dict(required=False, type='str',
                                          choices=['add', 'remove']),
         recursive=dict(required=False, type='bool',

@@ -84,7 +84,7 @@ options:
     default: 'seconds'
   rpo_alert:
     description:
-    - If run_job is set to 'on-schedule' is set to a time/date,
+    - If run_job is set to 'on-schedule' it is set to time/date,
       an alert is created if the specified RPO for this policy is exceeded.
     - The default value is 0, which will not generate RPO alerts.
     type: int
@@ -165,7 +165,7 @@ options:
             type: str
         target_path:
             description:
-            - The directory location to have the replicated source data at.
+            - The directory location to have the replicated source data.
             type: str
         target_certificate_id:
             description:
@@ -226,6 +226,18 @@ options:
               for allow_write, and allow_write_revert operation. This is an
               optional parameter and it defaults to 3.
             type: int
+  accelerated_failback:
+    description:
+    - If set to true, SyncIQ will perform failback configuration tasks during the next job run,
+      rather than waiting to perform those tasks during the failback process.
+      Performing these tasks ahead of time will increase the speed of failback operations.
+    - It defaults to True, if not specified.
+    type: bool
+  restrict_target_network:
+    description:
+    - If set to true then replication policies will connect only to nodes in the specified SmartConnect zone.
+      If set to false, replication policies are not restricted to specific nodes on the target cluster.
+    type: bool
 
 notes:
 - There is a delay to view the jobs running on the policy.
@@ -261,6 +273,8 @@ EXAMPLES = r'''
         target_snapshot_archive: True
         target_snapshot_expiration: 90
         exp_time_unit: "day"
+      accelerated_failback: False
+      restrict_target_network: True
       state: "present"
 
   - name: Modify SyncIQ policy
@@ -288,6 +302,8 @@ EXAMPLES = r'''
         target_certificate_id: "7sdgvejkiau7629903048hdjdkljsbwgsuasj716iuhywthsjk"
       target_snapshot:
         target_snapshot_archive: False
+      accelerated_failback: True
+      restrict_target_network: False
       state: "present"
 
   - name: Rename a SyncIQ policy
@@ -703,7 +719,8 @@ class SynciqPolicy(object):
                              'source_root_path', 'source_network',
                              'source_include_directories', 'source_exclude_directories',
                              'target_host', 'target_path', 'target_certificate_id', 'target_snapshot_archive',
-                             'target_snapshot_expiration', 'snapshot_sync_pattern'
+                             'target_snapshot_expiration', 'snapshot_sync_pattern', 'accelerated_failback',
+                             'restrict_target_network'
                              ]
 
         for param in input_param:
@@ -731,7 +748,7 @@ class SynciqPolicy(object):
         if input_param['target_cluster']:
             policy_param.update(construct_dict(input_param, 'target_cluster', policy_param_keys))
 
-            if input_param['target_cluster']['target_certificate_name']:
+            if 'target_certificate_name' in input_param['target_cluster'] and input_param['target_cluster']['target_certificate_name']:
                 policy_param['target_certificate_id'] = \
                     self.get_target_cert_id_name(cert_name=input_param['target_cluster']['target_certificate_name'])
 
@@ -751,9 +768,6 @@ class SynciqPolicy(object):
             self.module.fail_json(msg="Please provide a path to the source directory.")
         if 'target_path' not in policy_param.keys() or policy_param['target_path'] is None:
             self.module.fail_json(msg="Please provide a path to the target directory.")
-        if utils.ISI_SDK_VERSION_9 and ('target_certificate_id' not in policy_param.keys()
-                                        or policy_param['target_certificate_id'] is None):
-            self.module.fail_json(msg="Please provide a target certificate ID or name.")
         if 'target_host' not in policy_param.keys() or policy_param['target_host'] is None:
             self.module.fail_json(msg="Please provide target host.")
         if 'action' not in policy_param.keys() or policy_param['action'] is None:
@@ -885,7 +899,7 @@ class SynciqPolicy(object):
             if policy_obj is None and state == 'present':
                 # Check if all mandatory params are provided
                 self.validate_create_params(policy_param)
-
+                policy_param['accelerated_failback'] = True if input_param['accelerated_failback'] is None else input_param['accelerated_failback']
                 policy_id = self.create_synciq_policy(policy_param)
                 result['create_synciq_policy'] = True
                 result['changed'] = True
@@ -1045,6 +1059,8 @@ def get_synciqpolicy_parameters():
                                      source_snapshot=dict(type='str'),
                                      workers_per_node=dict(type='int'),
                                      wait_for_completion=dict(type='bool', default=False))),
+        accelerated_failback=dict(type='bool'),
+        restrict_target_network=dict(type='bool'),
         state=dict(required=True, type='str', choices=['present', 'absent'])
     )
 

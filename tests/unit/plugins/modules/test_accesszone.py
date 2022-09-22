@@ -80,6 +80,24 @@ class TestAccessZone():
         accesszone_module_mock.perform_module_operation()
         assert accesszone_module_mock.module.exit_json.call_args[1]['changed'] is True
 
+    def test_create_access_zone_parmset3(self, accesszone_module_mock):
+        self.get_access_zone_args.update({"az_name": "testaz",
+                                          "groupnet": "groupnet1",
+                                          "path": "/ifs",
+                                          "smb": None,
+                                          "nfs": None,
+                                          "force_overlap": True,
+                                          "state": "present",
+                                          "create_path": False,
+                                          "provider_state": "add",
+                                          "auth_providers": [{"provider_name": "nis-server", "provider_type": "nis"}]})
+        accesszone_module_mock.module.params = self.get_access_zone_args
+        accesszone_module_mock.get_details = MagicMock(return_value=[])
+        accesszone_module_mock.api_instance.create_zone = MagicMock(
+            return_value=MockSDKResponse(MockAccessZoneApi.ACCESS_ZONE['access_zone'][0]))
+        accesszone_module_mock.perform_module_operation()
+        assert accesszone_module_mock.module.exit_json.call_args[1]['changed'] is True
+
     def test_create_access_zone_with_exception(self, accesszone_module_mock):
         self.get_access_zone_args.update({"az_name": "testaz",
                                           "groupnet": "groupnet1",
