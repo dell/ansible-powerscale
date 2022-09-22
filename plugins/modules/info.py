@@ -26,6 +26,7 @@ description:
   Get list of users and groups for an access zone.
   Get list of smb_shares in the PowerScale cluster,
   Get list of nfs_exports in the PowerScale cluster,
+  Get list of nfs_aliases in the PowerScale cluster,
   Get list of active clients in the PowerScale cluster,
   Get list of SyncIQ reports in the PowerScale cluster,
   Get list of SyncIQ target reports in the PowerScale cluster,
@@ -72,6 +73,7 @@ options:
     - groups
     - smb_shares
     - nfs_exports
+    - nfs_aliases
     - clients
     - synciq_reports
     - synciq_target_reports
@@ -98,7 +100,7 @@ options:
     - The list of network groupnets, network subnets, network rules and network interfaces is for the entire PowerScale cluster
     required: True
     choices: [attributes, access_zones, nodes, providers, users, groups,
-              smb_shares, nfs_exports, clients, synciq_reports, synciq_target_reports,
+              smb_shares, nfs_exports, nfs_aliases, clients, synciq_reports, synciq_target_reports,
               synciq_policies, synciq_target_cluster_certificates, synciq_performance_rules,
               network_groupnets, network_subnets, network_pools, network_rules, network_interfaces, node_pools, storagepool_tiers]
     type: list
@@ -193,6 +195,17 @@ EXAMPLES = r'''
       access_zone: "{{access_zone}}"
       gather_subset:
         - nfs_exports
+
+  - name: Get list of nfs aliases in the PowerScale cluster
+    dellemc.powerscale.info:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{powerscaleport}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      access_zone: "{{access_zone}}"
+      gather_subset:
+        - nfs_aliases
 
   - name: Get list of clients in the PowerScale cluster
     dellemc.powerscale.info:
@@ -550,6 +563,23 @@ class Info(object):
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
+    def get_nfs_aliases_list(self, access_zone):
+        """Get the list of nfs_aliases of a given PowerScale Storage"""
+        try:
+            nfs_aliases_details = (self.protocol_api.list_nfs_aliases(zone=access_zone, check=True))\
+                .to_dict()
+            LOG.info('Got nfs_aliases from PowerScale cluster  %s',
+                     self.module.params['onefs_host'])
+            return nfs_aliases_details["aliases"]
+        except Exception as e:
+            error_msg = (
+                'Getting list of NFS aliases for PowerScale: {0} failed with'
+                ' error: {1}'.format(
+                    self.module.params['onefs_host'],
+                    utils.determine_error(e)))
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
+
     def get_synciq_reports(self):
         """Get the list of SyncIQ Reports of a given PowerScale Storage"""
         try:
@@ -811,6 +841,7 @@ class Info(object):
         smb_shares = []
         clients = []
         nfs_exports = []
+        nfs_aliases = []
         synciq_reports = []
         synciq_target_reports = []
         synciq_policies = []
@@ -842,6 +873,8 @@ class Info(object):
             clients = self.get_clients_list()
         if 'nfs_exports' in str(subset):
             nfs_exports = self.get_nfs_exports_list(access_zone)
+        if 'nfs_aliases' in str(subset):
+            nfs_aliases = self.get_nfs_aliases_list(access_zone)
         if 'synciq_reports' in str(subset):
             synciq_reports = self.get_synciq_reports()
         if 'synciq_target_reports' in str(subset):
@@ -880,6 +913,7 @@ class Info(object):
             SmbShares=smb_shares,
             Clients=clients,
             NfsExports=nfs_exports,
+            NfsAliases=nfs_aliases,
             SynciqReports=synciq_reports,
             SynciqTargetReports=synciq_target_reports,
             SynciqPolicies=synciq_policies,
@@ -929,6 +963,7 @@ def get_info_parameters():
                                     'groups',
                                     'smb_shares',
                                     'nfs_exports',
+                                    'nfs_aliases',
                                     'clients',
                                     'synciq_reports',
                                     'synciq_target_reports',

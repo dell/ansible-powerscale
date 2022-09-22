@@ -153,7 +153,7 @@ options:
       provider_type:
         description:
         - Specifies the auth provider type which needs to be added or removed from access zone.
-        choices: ['local', 'file', 'ldap', 'ads']
+        choices: ['local', 'file', 'ldap', 'ads', 'nis']
         type: str
         required: True
   state:
@@ -759,7 +759,7 @@ def get_accesszone_parameters():
         provider_state=dict(required=False, type='str', choices=['add', 'remove']),
         auth_providers=dict(required=False, type='list', elements='dict', options=dict(
             provider_name=dict(type='str', required=True),
-            provider_type=dict(type='str', required=True, choices=['local', 'file', 'ldap', 'ads'])
+            provider_type=dict(type='str', required=True, choices=['local', 'file', 'ldap', 'ads', 'nis'])
         )),
         state=dict(required=True, type='str', choices=['present', 'absent'])
     )

@@ -22,6 +22,7 @@ plugins/modules/subnet.py import-2.7
 plugins/modules/groupnet.py import-2.7
 plugins/modules/networkrule.py validate-modules:missing-gplv3-license
 plugins/modules/networkpool.py validate-modules:missing-gplv3-license
+plugins/modules/nfs_alias.py validate-modules:missing-gplv3-license
 plugins/modules/settings.py validate-modules:missing-gplv3-license
 plugins/modules/networkpool.py import-2.7
 plugins/modules/networksettings.py validate-modules:missing-gplv3-license
