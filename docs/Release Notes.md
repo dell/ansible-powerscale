@@ -1,6 +1,6 @@
 **Ansible Modules for Dell Technologies PowerScale** 
 =========================================
-### Release notes 1.7.0
+### Release notes 1.8.0
 
 >   © 2022 Dell Inc. or its subsidiaries. All rights reserved. Dell
 >   and other trademarks are trademarks of Dell Inc. or its
@@ -25,9 +25,9 @@ The table in this section lists the revision history of this document.
 
 Table 1. Revision history
 
-| Revision | Date      | Description                                               |
-|----------|-----------|-----------------------------------------------------------|
-| 01      | Sep 2022  | Ansible Modules for Dell PowerScale 1.7.0              |
+| Revision | Date          | Description                                               |
+|----------|---------------|-----------------------------------------------------------|
+| 01       | December 2022 | Ansible Modules for Dell PowerScale 1.8.0              |
 
 
 Product description
@@ -65,38 +65,11 @@ Features
 ---------------------------
 This section describes the features of the Ansible Modules for Dell PowerScale for this release.
 
-Added execution environment manifest file to support building an execution environment with ansible-builder.
-
-The Ansible Modules for Dell PowerScale release 1.7.0 supports the following features: 
- - Idempotency 
-   - Has been handled in all modules.
-   - Allows the playbook to be run multiple times.
-   - Avoids the need for complex rollbacks. 
-     
-- Access zones 
-  - PowerScale has a concept of access zones. These are to partition the cluster into multiple isolated sections.
-  - Ansible modules support access zone operations that can also operate on the default (system) access zone.
-  - Users and Groups can be specific to a particular access zone.
-  - For non-system access zones, the path provided by the playbook is a relative path.
-  - Absolute path = Access zone base path + relative path provided by the user.
+The Ansible Modules for Dell PowerScale release 1.8.0 supports the following features:
 
 Modules
--   The NFS Alias module supports this functionality:
-    -   Retrieve details of NFS alias.
-    -   Create, modify and delete NFS alias.
-
--   The SMB module is enhanced to support this functionality:
-    -   NIS authentication provider.
-    -   Create and modify additonal parameters of SMB share.
-
--   The Access Zone, Smart Quota, User and Group module is enhanced to support this functionality:
-    -   NIS authentication provider.
-
--   The SyncIQ Policy module is enhanced to support this functionality:
-    -   accelerated_failback and restrict_target_network.
-
--   The Info module is enhanced to support this functionality:
-    -   Retrieve details of NFS aliases.
+-   The NFS Export module supports this functionality:
+    -   Added support for security flavors while creating and modifying NFS export.
 
 Known issues
 ------------
@@ -105,7 +78,7 @@ Known problems in this release are listed.
 | **Issue**        | **Description**           | **Resolution**  |
 | ------------- |-------------| -----|
 | Snapshot schedule | If the playbook has a desired_retention field, running the same playbook again returns the changed as True (Idempotency does not work) | This is an issue in the supported OneFS versions. |
-| Filesystem creation | Creation of a filesystem can fail when api_user: "admin" is used because it is possible that the admin user may not have privileges to set an ACLs | Create a filesystem with api_user: "root". |
+| Filesystem creation | Creation of a filesystem can fail when api_user: "admin" is used because it is possible that the admin user may not have privileges to set an ACLs | Assigning privileges ISI_PRIV_IFS_RESTORE and ISI_PRIV_NS_TRAVERSE to the user should enable the creation of filesystem with ACL permissions. |
 | Snapshot creation with alias name | Alias name attribute remains null in spite of creating snapshot with alias name | This is an issue with the PowerScale rest API. Alias name is not getting appended to the attribute in response. |
 | SyncIQ Job creation/modification/retrieval | When SyncIQ policy has any job of the type "resync_prep/allow_write/allow_write_revert" then creation, modification or retrieval of SyncIQ job will fail with an error saying "Invalid value for 'action', must be one of ['copy', 'sync']". | This is an issue in the supported OneFS versions. |
 | SMB share creation with NIS group permissions | Creating a SMB share with NIS group permissions fails with error that the group cannot be found | This is an issue in the supported OneFS versions. |
@@ -148,7 +121,7 @@ This section lists the limitations in this release of Ansible Modules for Dell P
 Software media, organization, and files 
 -----------
 The software package is available for download from the [Ansible Modules
-for PowerScale GitHub](https://github.com/dell/ansible-powerscale/tree/1.7.0) page.
+for PowerScale GitHub](https://github.com/dell/ansible-powerscale/tree/1.8.0) page.
 
 Additional resources
 --------------------

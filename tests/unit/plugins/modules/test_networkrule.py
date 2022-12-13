@@ -81,7 +81,7 @@ class TestNetworkRule():
             return_value=MockSDKResponse(MockNetworkRuleApi.NETWORK_RULES))
         network_module_mock.perform_module_operation()
 
-        assert(network_module_mock.module.exit_json.call_args[1]['modify_network_rule'])
+        assert (network_module_mock.module.exit_json.call_args[1]['modify_network_rule'])
         assert network_module_mock.module.exit_json.call_args[1]['changed'] is True
 
     def test_delete_network_rule(self, network_module_mock):
@@ -93,7 +93,7 @@ class TestNetworkRule():
             return_value=MockSDKResponse(MockNetworkRuleApi.NETWORK_RULES))
         network_module_mock.perform_module_operation()
 
-        assert(network_module_mock.module.exit_json.call_args[1]['delete_network_rule'])
+        assert (network_module_mock.module.exit_json.call_args[1]['delete_network_rule'])
         assert network_module_mock.module.exit_json.call_args[1]['changed'] is True
 
     def test_rename_network_rule(self, network_module_mock):
@@ -105,7 +105,7 @@ class TestNetworkRule():
             return_value=MockSDKResponse(MockNetworkRuleApi.NETWORK_RULES))
         network_module_mock.perform_module_operation()
 
-        assert(network_module_mock.module.exit_json.call_args[1]['modify_network_rule'])
+        assert (network_module_mock.module.exit_json.call_args[1]['modify_network_rule'])
         assert network_module_mock.module.exit_json.call_args[1]['changed'] is True
 
     def test_create_rule_with_invalid_iface(self, network_module_mock):

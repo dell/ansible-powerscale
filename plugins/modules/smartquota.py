@@ -687,7 +687,7 @@ class SmartQuota(object):
             self.module.fail_json(msg="advisory/soft/hard limit provided,"
                                       " cap_unit not provided")
         if quota and quota['cap_unit'] \
-                and not(quota['advisory'] or quota['soft'] or quota['hard']):
+                and not (quota['advisory'] or quota['soft'] or quota['hard']):
             self.module.fail_json(
                 msg="cap_unit provided,"
                     " advisory/soft/hard limit not provided")
