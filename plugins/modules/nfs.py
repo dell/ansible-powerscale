@@ -15,24 +15,26 @@ module: nfs
 version_added: '1.2.0'
 short_description:  Manage NFS exports on a PowerScale Storage System
 description:
-- Managing NFS exports on an PowerScale system includes creating NFS export for
-  a directory in an access zone, adding or removing clients, modifying
-  different parameters of the export and deleting export.
+- Managing NFS exports on an PowerScale system includes retrieving details of
+  NFS export, creating NFS export in specified access zone, adding or removing
+  clients, modifying and deleting NFS export.
 
 extends_documentation_fragment:
   - dellemc.powerscale.powerscale
 
 author:
 - Manisha Agrawal(@agrawm3) <ansible.team@dell.com>
+- Bhavneet Sharma(@Bhavneet-Sharma) <ansible.team@dell.com>
 
 options:
   path:
     description:
     - Specifies the filesystem path. It is the absolute path for System access zone
-      and it is relative if using non-system access zone. For example, if your access
-      zone is 'Ansible' and it has a base path '/ifs/ansible' and the path
-      specified is '/user1', then the effective path would be '/ifs/ansible/user1'.
-      If your access zone is System, and you have 'directory1' in the access
+      and it is relative if using non-system access zone.
+    - For example, if your access zone is 'Ansible' and it has a base path
+      '/ifs/ansible' and the path specified is '/user1', then the effective
+      path would be '/ifs/ansible/user1'.
+    - If your access zone is System, and you have 'directory1' in the access
       zone, the path provided should be '/ifs/directory1'.
     - The directory on the path must exist - the NFS module will not create
       the directory.
@@ -96,26 +98,33 @@ options:
   state:
     description:
     - Defines whether the NFS export should exist or not.
-    - present indicates that the NFS export should exist in system.
-    - absent indicates that the NFS export should not exist in system.
+    - Value present indicates that the NFS export should exist in system.
+    - Value absent indicates that the NFS export should not exist in system.
     required: True
     type: str
     choices: [absent, present]
   client_state:
     description:
     - Defines whether the clients can access the NFS export.
-    - present-in-export indicates that the clients can access the NFS export.
-    - absent-in-export indicates that the client cannot access the NFS export.
+    - Value present-in-export indicates that the clients can access the NFS export.
+    - Value absent-in-export indicates that the client cannot access the NFS export.
     - Required when adding or removing access of clients from the export.
     - While removing clients, only the specified clients will be removed from
       the export, others will remain as is.
-    required: False
     type: str
     choices: [present-in-export, absent-in-export]
+  security_flavors:
+    description:
+    - Specifies the authentication types that are supported for this export.
+    type: list
+    elements: str
+    choices: ['unix', 'kerberos', 'kerberos_integrity', 'kerberos_privacy']
+
+notes:
+- The check_mode is not supported.
 '''
 
 EXAMPLES = r'''
-
   - name: Create NFS Export
     dellemc.powerscale.nfs:
       onefs_host: "{{onefs_host}}"
@@ -179,7 +188,7 @@ EXAMPLES = r'''
       client_state: 'absent-in-export'
       state: 'present'
 
-  - name: Modify description
+  - name: Modify NFS Export
     dellemc.powerscale.nfs:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
@@ -188,6 +197,9 @@ EXAMPLES = r'''
       path: "<path>"
       access_zone: "{{access_zone}}"
       description: "new description"
+      security_flavors:
+      - "kerberos_integrity"
+      - "kerberos"
       state: 'present'
 
   - name: Set read_only flag to False
@@ -210,7 +222,6 @@ EXAMPLES = r'''
       path: "<path>"
       access_zone: "{{access_zone}}"
       state: 'absent'
-
 '''
 
 RETURN = r'''
@@ -218,6 +229,7 @@ changed:
     description: A boolean indicating if the task had to make changes.
     returned: always
     type: bool
+    sample: "false"
 NFS_export_details:
     description: The updated NFS Export details.
     type: complex
@@ -260,6 +272,15 @@ NFS_export_details:
         description:
             description: Description for the export.
             type: str
+    sample: {
+        "all_dir": "false",
+        "block_size": 8192,
+        "clients": None,
+        "id": 9324,
+        "read_only_client": ["x.x.x.x"],
+        "security_flavors": ["unix", "krb5"],
+        "zone": "System"
+    }
 '''
 
 from ansible.module_utils.basic import AnsibleModule
@@ -391,11 +412,13 @@ class NfsExport(object):
                 read_only=self.module.params['read_only'],
                 all_dirs=self.module.params['sub_directories_mountable'],
                 description=self.module.params['description'],
+                security_flavors=get_security_keys(
+                    self.module.params['security_flavors']),
                 zone=self.module.params['access_zone'])
             return nfs_export
         except Exception as e:
             errorMsg = 'Create NfsExportCreateParams object for path {0}' \
-                'failed with error {1}'.format(
+                ' failed with error {1}'.format(
                     path, self.determine_error(e))
             LOG.error(errorMsg)
             self.module.fail_json(msg=errorMsg)
@@ -552,6 +575,16 @@ class NfsExport(object):
             _field_mod = True
         return _field_mod, field_value
 
+    def _is_security_flavour_mod(self, security_flavors, nfs_export):
+        """Check whether security flavours modification required"""
+        if security_flavors is not None:
+            security_flavors = get_security_keys(security_flavors)
+            if set(security_flavors) != set(
+                    self.result['NFS_export_details']['security_flavors']):
+                nfs_export.security_flavors = list(security_flavors)
+                return True, nfs_export
+        return False, nfs_export
+
     def modify_nfs_export(self, path, access_zone):
         '''
         Modify NFS export in system
@@ -569,13 +602,13 @@ class NfsExport(object):
             'sub_directories_mountable', 'all_dirs')
         description_flag, description_value = self._check_mod_field(
             'description', 'description')
+        security_flag, nfs_export = self._is_security_flavour_mod(
+            self.module.params['security_flavors'], nfs_export)
 
         if all(
             field_mod_flag is False for field_mod_flag in [
-                client_flag,
-                read_only_flag,
-                all_dirs_flag,
-                description_flag]):
+                client_flag, read_only_flag, all_dirs_flag, description_flag,
+                security_flag]):
             LOG.info(
                 'No change detected for the NFS Export, returning changed = False')
             return False
@@ -620,7 +653,7 @@ class NfsExport(object):
         except Exception as e:
             errorMsg = (
                 'Delete NFS export with path: {0}, zone: {1}, id: {2} failed'
-                'with error {3}'.format(
+                ' with error {3}'.format(
                     nfs_export['paths'][0],
                     nfs_export['zone'],
                     nfs_export['id'],
@@ -705,9 +738,29 @@ class NfsExport(object):
             description=dict(type='str'),
             read_only=dict(type='bool'),
             sub_directories_mountable=dict(type='bool'),
+            security_flavors=dict(
+                type='list', elements='str',
+                choices=['unix', 'kerberos', 'kerberos_integrity',
+                         'kerberos_privacy']),
             state=dict(required=True, type='str', choices=['present',
                                                            'absent'])
         )
+
+
+def get_security_keys(security_flavors):
+    """ Get valid keys as per SDK valid values"""
+    if security_flavors is not None:
+        for i in range(len(security_flavors)):
+            if security_flavors[i] == "kerberos":
+                security_flavors[i] = "krb5"
+            elif security_flavors[i] == "kerberos_integrity":
+                security_flavors[i] = "krb5i"
+            elif security_flavors[i] == "kerberos_privacy":
+                security_flavors[i] = "krb5p"
+            else:
+                security_flavors[i] = "unix"
+        return security_flavors
+    return None
 
 
 def main():

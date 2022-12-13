@@ -14,7 +14,7 @@ import string
 
 def get_desc(length):
     desc = ''
-    while(length > 0):
+    while (length > 0):
         desc += random.choice(string.ascii_letters)
         length -= 1
     return desc

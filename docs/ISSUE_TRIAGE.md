@@ -43,7 +43,7 @@ Should explain what happened, what was expected and how to reproduce it together
 
  - Ansible Version: [e.g. 2.13]
  - Python Version [e.g. 3.10]
- - Ansible modules for Dell PowerScale Version: [e.g. 1.7.0]
+ - Ansible modules for Dell PowerScale Version: [e.g. 1.8.0]
  - PowerScale SDK version: [e.g. isi-sdk-9-1-0]
  - Any other additional information...
 
@@ -118,7 +118,7 @@ If it's not perfectly clear that it's an actual bug, quickly try to reproduce it
 
 In general bugs and feature request issues should be labeled with a priority.
 
-This is the most difficult thing with triaging issues since it requires a lot of knowledge, context and experience before being able to think of and start feel comfortable adding a certain priority label.
+Adding priority levels can be difficult. Ensure you have the knowledge, context, and the experience before prioritizing any issues. If you have any uncertainty as to which priority level to assign, please ask the maintainers for help.
 
 The key here is asking for help and discuss issues to understand how more experienced project members think and reason. By doing that you learn more and eventually be more and more comfortable with prioritizing issues.
 
@@ -126,13 +126,13 @@ In case there is an uncertainty around the prioritization of an issue, please as
 
 | Label                             | Description                                                                                                              |
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `priority/critical`               | Highest priority. Must be actively worked on as someone's top priority right now.                                        |
+| `priority/critical`               | Highest priority. Must be actively worked on as someone's top priority immediately.                                        |
 | `priority/high`                   | Must be worked on soon, ideally in time for the next release.                                                            |
 | `priority/low`                    | Lowest priority. Possibly useful, but not yet enough interest in it.                                                     |
 
 ### Critical priority
 
-1. If an issue has been categorized and any of this criteria apply, the issue should be labeled as critical and must be actively worked on as someone's top priority right now.
+1. If an issue has been categorized and any of this criteria apply, the issue should be labeled as critical and must be actively worked on as someone's top priority immediately.
 
    - Results in any data loss
    - Critical security or performance issues
@@ -141,7 +141,7 @@ In case there is an uncertainty around the prioritization of an issue, please as
 
 2. Label the issue `priority/critical`.
 3. Escalate the problem to the maintainers.
-4. Assign or ask a maintainer for help assigning someone to make this issue their top priority right now.
+4. Assign or ask a maintainer for help assigning someone to make this issue their top priority immediately.
 5. Add the issue to the next upcoming release milestone.
 
 ### High priority
@@ -154,7 +154,7 @@ In case there is an uncertainty around the prioritization of an issue, please as
 ### Low priority
 
 1. If the issue is deemed possibly useful but a low priority label the issue `priority/low`.
-2. The amount of interest in the issue will determine if the priority changes to be higher.
+2. The amount of interest in the issue will determine if the priority elevated.
 3. Consider requesting [help from the community](#5-requesting-help-from-the-community).
 
 ## 5. Requesting help from the community
@@ -163,9 +163,10 @@ Depending on the issue and/or priority, it's always a good idea to consider sign
 
 In many cases the issue author or community as a whole is more suitable to contribute changes since they're experts in their domain. It's also quite common that someone has tried to get something to work using the documentation without success and made an effort to get it to work and/or reached out to the community to get the missing information.
 
-1. Kindly and politely add a comment to signal to users subscribed to updates of the issue.
-   - Explain that the issue would be nice to get resolved, but it isn't prioritized to work on by maintainers for an unforeseen future.
-   - If possible or applicable, try to help contributors getting starting by adding pointers and references to what code/files need to be changed and/or ideas of a good way to solve/implement the issue.
+1. Kindly and politely add a comment to alert update subscribers.
+   - Explain the issue and the need for resolution. Be sure and detail that the issue has not been prioritized and that the issue has not been scheduled for work by the maintainers.
+   - If possible or applicable, add pointers and references to the code/files that need to be revised. Provide any ideas as to the solution. This will help the maintainers get started on resolving the issue.
+.
 2. Label the issue with `help wanted`.
 3. If applicable, label the issue with `beginner friendly` to denote that the issue is suitable for a beginner to work on.
 
