@@ -38,7 +38,7 @@ Based on which PowerScale OneFS version is being used, use this procedure to ins
   #### Offline installation of collections
   1. Download the latest tar build from either of the available distribution channels [Ansible Galaxy](https://galaxy.ansible.com/dellemc/powerscale) /[Automation Hub](https://console.redhat.com/ansible/automation-hub/repo/published/dellemc/powerscale) and use this command to install the collection anywhere in your system:
 
-	      ansible-galaxy collection install dellemc-powerscale-1.7.0.tar.gz -p <install_path>
+	      ansible-galaxy collection install dellemc-powerscale-1.8.0.tar.gz -p <install_path>
 
   2. Set the environment variable:
 
@@ -65,7 +65,7 @@ Based on which PowerScale OneFS version is being used, use this procedure to ins
 
 ## Ansible modules execution
 
-The Ansible server must be configured with Python library for OneFS to run the Ansible playbooks. The [Documents](https://github.com/dell/ansible-powerscale/blob/1.7.0/docs) provide information on different Ansible modules along with their functions and syntax. The parameters table in the Product Guide provides information on various parameters which need to be configured before running the modules.
+The Ansible server must be configured with Python library for OneFS to run the Ansible playbooks. The [Documents](https://github.com/dell/ansible-powerscale/blob/1.8.0/docs) provide information on different Ansible modules along with their functions and syntax. The parameters table in the Product Guide provides information on various parameters which need to be configured before running the modules.
 
 ## SSL certificate validation
 

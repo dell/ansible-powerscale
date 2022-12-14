@@ -43,7 +43,7 @@ class ModuleDocFragment(object):
             - the password of the PowerScale cluster.
             required: True
     requirements:
-      - A Dell PowerScale Storage system. Ansible 2.11, 2.12 or 2.13.
+      - A Dell PowerScale Storage system. Ansible 2.12, 2.13 or 2.14.
     notes:
       - The modules present in this collection named as 'dellemc.powerscale'
         are built to support the Dell PowerScale storage platform.
