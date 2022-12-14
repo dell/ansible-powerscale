@@ -1,124 +1,124 @@
 ---
-requires_ansible: ">2.9"
+requires_ansible: ">=2.12"
 plugin_routing:
     modules:
         dellemc_powerscale_accesszone:
-            redirect: accesszone
+            redirect: dellemc.powerscale.accesszone
             deprecation:
                 removal_date: "2024-03-31"
                 warning_text: Use accesszone instead.
         dellemc_powerscale_ads:
-            redirect: ads
+            redirect: dellemc.powerscale.ads
             deprecation:
                 removal_date: "2024-03-31"
-                warning_text: Use dellemc.powerscale.ads instead.
+                warning_text: Use ads instead.
         dellemc_powerscale_filesystem:
-            redirect: filesystem
+            redirect: dellemc.powerscale.filesystem
             deprecation:
                 removal_date: "2024-03-31"
-                warning_text: Use dellemc.powerscale.filesystem instead.
+                warning_text: Use filesystem instead.
         dellemc_powerscale_group:
-            redirect: group
+            redirect: dellemc.powerscale.group
             deprecation:
                 removal_date: "2024-03-31"
-                warning_text: Use dellemc.powerscale.group instead.
+                warning_text: Use group instead.
         dellemc_powerscale_groupnet:
-            redirect: groupnet
+            redirect: dellemc.powerscale.groupnet
             deprecation:
                 removal_date: "2024-03-31"
-                warning_text: Use dellemc.powerscale.groupnet instead.
+                warning_text: Use groupnet instead.
         dellemc_powerscale_gatherfacts:
-            redirect: info
+            redirect: dellemc.powerscale.info
             deprecation:
                 removal_date: "2024-03-31"
-                warning_text: Use dellemc.powerscale.info instead.
+                warning_text: Use info instead.
         dellemc_powerscale_ldap:
-            redirect: ldap
+            redirect: dellemc.powerscale.ldap
             deprecation:
                 removal_date: "2024-03-31"
-                warning_text: Use dellemc.powerscale.ldap instead.
+                warning_text: Use ldap instead.
         dellemc_powerscale_networkpool:
-            redirect: networkpool
+            redirect: dellemc.powerscale.networkpool
             deprecation:
                 removal_date: "2024-03-31"
-                warning_text: Use dellemc.powerscale.networkpool instead.
+                warning_text: Use networkpool instead.
         dellemc_powerscale_networkrule:
-            redirect: networkrule
+            redirect: dellemc.powerscale.networkrule
             deprecation:
                 removal_date: "2024-03-31"
-                warning_text: Use dellemc.powerscale.networkrule instead.
+                warning_text: Use networkrule instead.
         dellemc_powerscale_networksettings:
-            redirect: networksettings
+            redirect: dellemc.powerscale.networksettings
             deprecation:
                 removal_date: "2024-03-31"
-                warning_text: Use dellemc.powerscale.networksettings instead.
+                warning_text: Use networksettings instead.
         dellemc_powerscale_nfs:
-            redirect: nfs
+            redirect: dellemc.powerscale.nfs
             deprecation:
                 removal_date: "2024-03-31"
-                warning_text: Use dellemc.powerscale.nfs instead.
+                warning_text: Use nfs instead.
         dellemc_powerscale_node:
-            redirect: node
+            redirect: dellemc.powerscale.node
             deprecation:
                 removal_date: "2024-03-31"
-                warning_text: Use dellemc.powerscale.node instead.
+                warning_text: Use node instead.
         dellemc_powerscale_settings:
-            redirect: settings
+            redirect: dellemc.powerscale.settings
             deprecation:
                 removal_date: "2024-03-31"
-                warning_text: Use dellemc.powerscale.settings instead.
+                warning_text: Use settings instead.
         dellemc_powerscale_smartquota:
-            redirect: smartquota
+            redirect: dellemc.powerscale.smartquota
             deprecation:
                 removal_date: "2024-03-31"
-                warning_text: Use dellemc.powerscale.smartquota instead.
+                warning_text: Use smartquota instead.
         dellemc_powerscale_smb:
-            redirect: smb
+            redirect: dellemc.powerscale.smb
             deprecation:
                 removal_date: "2024-03-31"
-                warning_text: Use dellemc.powerscale.smb instead.
+                warning_text: Use smb instead.
         dellemc_powerscale_snapshot:
-            redirect: snapshot
+            redirect: dellemc.powerscale.snapshot
             deprecation:
                 removal_date: "2024-03-31"
-                warning_text: Use dellemc.powerscale.snapshot instead.
+                warning_text: Use snapshot instead.
         dellemc_powerscale_snapshotschedule:
-            redirect: snapshotschedule
+            redirect: dellemc.powerscale.snapshotschedule
             deprecation:
                 removal_date: "2024-03-31"
-                warning_text: Use dellemc.powerscale.snapshotschedule instead.
+                warning_text: Use snapshotschedule instead.
         dellemc_powerscale_subnet:
-            redirect: subnet
+            redirect: dellemc.powerscale.subnet
             deprecation:
                 removal_date: "2024-03-31"
-                warning_text: Use dellemc.powerscale.subnet instead.
+                warning_text: Use subnet instead.
         dellemc_powerscale_synciqjob:
-            redirect: synciqjob
+            redirect: dellemc.powerscale.synciqjob
             deprecation:
                 removal_date: "2024-03-31"
-                warning_text: Use dellemc.powerscale.synciqjob instead.
+                warning_text: Use synciqjob instead.
         dellemc_powerscale_synciqpolicy:
-            redirect: synciqpolicy
+            redirect: dellemc.powerscale.synciqpolicy
             deprecation:
                 removal_date: "2024-03-31"
-                warning_text: Use dellemc.powerscale.synciqpolicy instead.
+                warning_text: Use synciqpolicy instead.
         dellemc_powerscale_synciqreports:
-            redirect: synciqreports
+            redirect: dellemc.powerscale.synciqreports
             deprecation:
                 removal_date: "2024-03-31"
-                warning_text: Use dellemc.powerscale.synciqreports instead.
+                warning_text: Use synciqreports instead.
         dellemc_powerscale_synciqtargetreports:
-            redirect: synciqtargetreports
+            redirect: dellemc.powerscale.synciqtargetreports
             deprecation:
                 removal_date: "2024-03-31"
-                warning_text: Use dellemc.powerscale.synciqtargetreports instead.
+                warning_text: Use synciqtargetreports instead.
         dellemc_powerscale_user:
-            redirect: user
+            redirect: dellemc.powerscale.user
             deprecation:
                 removal_date: "2024-03-31"
-                warning_text: Use dellemc.powerscale.user instead.
+                warning_text: Use user instead.
         dellemc_powerscale_synciqrules:
-            redirect: synciqrules
+            redirect: dellemc.powerscale.synciqrules
             deprecation:
                 removal_date: "2024-03-31"
-                warning_text: Use dellemc.powerscale.synciqrules instead.
+                warning_text: Use synciqrules instead.
