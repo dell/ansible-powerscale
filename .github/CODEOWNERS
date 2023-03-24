@@ -1,0 +1,19 @@
+# CODEOWNERS
+#
+# documentation for this file can be found at:
+# https://help.github.com/en/articles/about-code-owners
+
+# These are the default owners for the code and will
+# be requested for review when someone opens a pull request.
+# order is alphabetical for easier maintenance.
+#
+# Ananthu Kuttattu (kuttattz)
+# Bhavneet Sharma (Bhavneet-Sharma)
+# Jennifer John (Jennifer-John)
+# Meenakshi Dembi (meenakshidembi691)
+# Pavan Mudunuri (Pavan-Mudunuri)
+# Previnkumar G (Previnkumar-G)
+# Trisha Datta (trisha-dell)
+
+# for all files:
+* @kuttattz @Bhavneet-Sharma @Jennifer-John @meenakshidembi691 @Pavan-Mudunuri @Previnkumar-G @trisha-dell

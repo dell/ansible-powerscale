@@ -1,83 +1,99 @@
-# Ansible Modules for Dell EMC PowerScale
-The Ansible Modules for Dell EMC PowerScale allow Data Center and IT administrators to use RedHat Ansible to automate and orchestrate the configuration and management of Dell EMC PowerScale arrays.
+# Ansible Modules for Dell Technologies PowerScale
+The Ansible Modules for Dell Technologies (Dell) PowerScale allow Data Center and IT administrators to use RedHat Ansible to automate and orchestrate the configuration and management of Dell PowerScale arrays.
 
-The capabilities of the Ansible modules are managing users, groups, node, active directory, ldap, access zones, file system, nfs exports, smb shares, snapshots, snapshot schedules and smart quotas, and to gather facts from the array. The tasks can be executed by running simple playbooks written in yaml syntax.
+The Ansible Modules for Dell PowerScale support the following features:
+- Create user, groups, filesystem, NFS export, smart quotas, SMB share, snapshot and snapshot schedule of a filesystem.
+- Modify user, groups, filesystem, access zone, NFS export, smart quotas, SMB share, snapshot and snapshot schedule of a filesystem.
+- Delete user, groups, filesystem, NFS export, smart quotas, SMB share, snapshot and snapshot schedule of a filesystem.
+- Get details of user, groups, node, filesystem, access zone, NFS export, smart quotas, SMB share, snapshot and snapshot schedule of a filesystem.
+- Get details of SyncIQ policies, SyncIQ jobs, SyncIQ reports, SyncIQ target reports and SyncIQ performance rules of the cluster.
+- Add, modify and remove Active Directory and LDAP to Authentication providers list.
+- Map or unmap Active Directory and LDAP Authentication providers to Access zone.
+- Create, modify and delete SyncIQ policy.
+- Create job on SyncIQ policy and modify the state of SyncIQ Job.
+- Create, modify and delete SyncIQ performance rule.
+- Create, modify and delete Groupnet, Subnet, Network Pool and Network Rule.
+- Get details of Groupnet, Subnet, Network Pool and Network Rule.
+- Modify cluster email settings.
+- Get cluster email settings and NTP Server details.
+- Add and remove NTP Servers
+- Create an access zone.
+- Get network and smart pool settings.
+- Modify network and smart pool settings.
+- Get Filepool policy and Storagepool tiers.
+- Create, delete Filepool policy and Storagepool tiers.
+- Create, modify, get and delete NFS aliases.
+- Get attributes and entities of the array.
+- Find and close the SMB open files.
 
-## Support
-  * Ansible modules for PowerScale are supported by Dell EMC and are provided under the terms of the license attached to the source code.
-  * For any setup, configuration issues, questions or feedback, join the [Dell EMC Automation community](https://www.dell.com/community/Automation/bd-p/Automation).
-  * For any Dell EMC storage issues, please contact Dell support at: https://www.dell.com/support.
-  * Dell EMC does not provide support for any source code modifications.
+The tasks can be executed by running simple playbooks written in yaml syntax.
 
-## Supported Platforms
-  * Dell EMC PowerScale Arrays version 8.0 and above.
+## Table of contents
+
+* [Code of conduct](https://github.com/dell/ansible-powerscale/blob/1.9.0/docs/CODE_OF_CONDUCT.md)
+* [Maintainer guide](https://github.com/dell/ansible-powerscale/blob/1.9.0/docs/MAINTAINER_GUIDE.md)
+* [Committer guide](https://github.com/dell/ansible-powerscale/blob/1.9.0/docs/COMMITTER_GUIDE.md)
+* [Contributing guide](https://github.com/dell/ansible-powerscale/blob/1.9.0/docs/CONTRIBUTING.md)
+* [Branching strategy](https://github.com/dell/ansible-powerscale/blob/1.9.0/docs/BRANCHING.md)
+* [List of adopters](https://github.com/dell/ansible-powerscale/blob/1.9.0/docs/ADOPTERS.md)
+* [Maintainers](https://github.com/dell/ansible-powerscale/blob/1.9.0/docs/MAINTAINERS.md)
+* [Support](https://github.com/dell/ansible-powerscale/blob/1.9.0/docs/SUPPORT.md)
+* [Security](https://github.com/dell/ansible-powerscale/blob/1.9.0/docs/SECURITY.md)
+* [License](#license)
+* [Supported platforms](#supported-platforms)
+* [Prerequisites](#prerequisites)
+* [List of Ansible modules for Dell PowerScale](#list-of-ansible-modules-for-dell-powerscale)
+* [Installation and execution of Ansible modules for Dell PowerScale](#installation-and-execution-of-ansible-modules-for-dell-powerscale)
+* [Maintanence](#maintanence)
+
+## License
+Ansible collection for PowerScale is released and licensed under the GPL-3.0 license. See [LICENSE](https://github.com/dell/ansible-powerscale/blob/1.9.0/LICENSE) for the full terms. Ansible modules and modules utilities that are part of the Ansible collection for PowerScale are released and licensed under the Apache 2.0 license. See [MODULE-LICENSE](https://github.com/dell/ansible-powerscale/blob/1.9.0/MODULE-LICENSE) for the full terms.
+
+## Supported platforms
+  * Dell PowerScale OneFS versions 9.2.x, 9.3.x and 9.4.x
 
 ## Prerequisites
-  * Ansible 2.9, 2.10
-  * Python 3.5, 3.6, 3.7
-  * Red Hat Enterprise Linux 7.6, 7.7, 7.8, 8.2
-  * Python SDK for PowerScale (version 8.1.1 and 9.0.0)
+This table provides information about the software prerequisites for the Ansible Modules for Dell PowerScale.
 
-## Idempotency
-The modules are written in such a way that all requests are idempotent and hence fault-tolerant. It essentially means that the result of a successfully performed request is independent of the number of times it is executed.
+| **Ansible Modules** | **OneFS Version** | **Python version** | **Python SDK version** | **Ansible**              |
+|---------------------|-----------------------|--------------------|----------------------------|--------------------------|
+| v1.9.0 | 9.2.x <br> 9.3.x <br> 9.4.x | 3.9 <br> 3.10 <br> 3.11 | 9.1.0 | 2.12 <br> 2.13 <br> 2.14 | 
 
-## List of Ansible Modules for Dell EMC PowerScale
-  * File System Module
-  * Access Zone Module
-  * Users Module
-  * Groups Module
-  * Snapshot Module
-  * Snapshot Schedule Module
-  * NFS Module
-  * SMB Module
-  * Smart Quota Module
-  * Gather Facts Module
-  * Active Directory Module
-  * LDAP Module
-  * Node Module
+# List of Ansible modules for Dell PowerScale
+  * [File System Module](https://github.com/dell/ansible-powerscale/blob/1.9.0/docs/modules/filesystem.rst)
+  * [Access Zone Module](https://github.com/dell/ansible-powerscale/blob/1.9.0/docs/modules/accesszone.rst)
+  * [User Module](https://github.com/dell/ansible-powerscale/blob/1.9.0/docs/modules/user.rst)
+  * [Group Module](https://github.com/dell/ansible-powerscale/blob/1.9.0/docs/modules/group.rst)
+  * [Snapshot Module](https://github.com/dell/ansible-powerscale/blob/1.9.0/docs/modules/snapshot.rst)
+  * [Snapshot Schedule Module](https://github.com/dell/ansible-powerscale/blob/1.9.0/docs/modules/snapshotschedule.rst)
+  * [NFS Module](https://github.com/dell/ansible-powerscale/blob/1.9.0/docs/modules/nfs.rst)
+  * [SMB Module](https://github.com/dell/ansible-powerscale/blob/1.9.0/docs/modules/smb.rst)
+  * [Smart Quota Module](https://github.com/dell/ansible-powerscale/blob/1.9.0/docs/modules/smartquota.rst)
+  * [Info Module](https://github.com/dell/ansible-powerscale/blob/1.9.0/docs/modules/info.rst)
+  * [Active Directory Module](https://github.com/dell/ansible-powerscale/blob/1.9.0/docs/modules/ads.rst)
+  * [LDAP Module](https://github.com/dell/ansible-powerscale/blob/1.9.0/docs/modules/ldap.rst)
+  * [Node Module](https://github.com/dell/ansible-powerscale/blob/1.9.0/docs/modules/node.rst)
+  * [SyncIQ Policy Module](https://github.com/dell/ansible-powerscale/blob/1.9.0/docs/modules/synciqpolicy.rst)
+  * [SyncIQ Jobs Module](https://github.com/dell/ansible-powerscale/tree/1.9.0/docs/modules/synciqjob.rst)
+  * [SyncIQ Performance Rules Module](https://github.com/dell/ansible-powerscale/tree/1.9.0/docs/modules/synciqrules.rst)
+  * [SyncIQ Reports Module](https://github.com/dell/ansible-powerscale/tree/1.9.0/docs/modules/synciqreports.rst)
+  * [SyncIQ Target Reports Module](https://github.com/dell/ansible-powerscale/tree/1.9.0/docs/modules/synciqtargetreorts.rst)
+  * [Groupnet Module](https://github.com/dell/ansible-powerscale/tree/1.9.0/docs/modules/groupnet.rst)
+  * [Subnet Module](https://github.com/dell/ansible-powerscale/tree/1.9.0/docs/modules/subnet.rst)
+  * [Network Pool Module](https://github.com/dell/ansible-powerscale/tree/1.9.0/docs/modules/networkpool.rst)
+  * [Network Rule Module](https://github.com/dell/ansible-powerscale/tree/1.9.0/docs/modules/networkrule.rst)
+  * [NFS Alias Module](https://github.com/dell/ansible-powerscale/tree/1.9.0/docs/modules/nfs_alias.rst)
+  * [Settings Module](https://github.com/dell/ansible-powerscale/tree/1.9.0/docs/modules/settings.rst)
+  * [Network Setting Module](https://github.com/dell/ansible-powerscale/blob/1.9.0/docs/modules/networksettings.rst)
+  * [Smart Pool Setting Module](https://github.com/dell/ansible-powerscale/blob/1.9.0/docs/modules/smartpoolsettings.rst)
+  * [Filepool Policy Module](https://github.com/dell/ansible-powerscale/blob/1.9.0/docs/modules/filepoolpolicy.rst)
+  * [Storagepool Tier Module](https://github.com/dell/ansible-powerscale/blob/1.9.0/docs/modules/storagepooltier.rst)
+  * [SMB File Module](https://github.com/dell/ansible-powerscale/blob/1.9.0/docs/modules/smb_file.rst)
 
-## Installation of SDK
-Based on which PowerScale version is being used, install sdk as  follows:
-
-* For PowerScale version < 9.1.0, install python [sdk](https://pypi.org/project/isi-sdk-8-1-1/) named 'isi-sdk-8-1-1' as below: 
-  
-        pip install isi_sdk_8_1_1
-  
-* For PowerScale version 9.1.0, install python [sdk](https://pypi.org/project/isi-sdk-9-0-0/) named 'isi-sdk-9-0-0' as below:
-        
-        pip install isi_sdk_9_0_0
 
 
-## Installing Collections
+## Installation and execution of Ansible modules for Dell PowerScale
+The installation and execution steps of Ansible modules for Dell PowerScale can be found [here](https://github.com/dell/ansible-powerscale/blob/1.9.0/docs/INSTALLATION.md).
 
-  * Download the tar build and run the following command to install the collection anywhere in your system:
-        
-        ansible-galaxy collection install dellemc-powerscale-1.2.0.tar.gz -p <install_path>
-  
-  * Set the environment variable:
-        
-        export ANSIBLE_COLLECTIONS_PATHS=$ANSIBLE_COLLECTIONS_PATHS:<install_path>
-
-## Using Collections
-
-  * In order to use any Ansible module, ensure that the importation of the proper FQCN (Fully Qualified Collection Name) is embedded in the playbook. For example,
- <br>collections:
- <br>&nbsp;&nbsp;&nbsp; - dellemc.powerscale
-  * To generate Ansible documentation for a specific module, embed the FQCN before the module name. For example,
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *ansible-doc dellemc.powerscale.dellemc_powerscale_gatherfacts*
-
-## Running Ansible Modules
-
-The Ansible server must be configured with Python library for OneFS to run the Ansible playbooks. The [Documents](https://github.com/dell/ansible-powerscale/tree/1.2.0/docs) provide information on different Ansible modules along with their functions and syntax. The parameters table in the Product Guide provides information on various parameters which need to be configured before running the modules.
-
-## SSL Certificate Validation
-
-* Export the SSL certificate using KeyStore Explorer tool or from the browser in .crt format.
-* Append the SSL certificate to the Certifi package file cacert.pem.
-    * For Python 3.5 : cat <> >> /usr/local/lib/python3.5/dist-packages/certifi/cacert.pem
-    * For Python 2.7 : cat <> >> /usr/local/lib/python2.7/dist-packages/certifi/cacert.pem
-
-## Results
-Each module returns the updated state and details of the entity. 
-For example, if you are using the group module, all calls will return the updated details of the group.
-Sample result is shown in each module's documentation.
+## Maintenance
+Ansible Modules for Dell Technologies PowerScale deprecation cycle is aligned with [Ansible](https://docs.ansible.com/ansible/latest/dev_guide/module_lifecycle.html).
