@@ -61,8 +61,11 @@ class MockGatherfactsApi:
         ],
         'StoragePoolTiers': [
         ],
+<<<<<<< HEAD
         'SmbOpenFiles': [
         ],
+=======
+>>>>>>> 0a01b051f102176470948082e530d4f51e9af771
         'SynciqTargetClusterCertificate': [
         ]
     }
@@ -663,6 +666,7 @@ class MockGatherfactsApi:
         else:
             return "Getting list of storagepool tiers for PowerScale: %s failed with error: SDK Error message" % (
                    MockGatherfactsApi.GATHERFACTS_COMMON_ARGS['onefs_host'])
+<<<<<<< HEAD
 
     @staticmethod
     def get_smb_files_response(response_type):
@@ -695,3 +699,5 @@ class MockGatherfactsApi:
         else:
             return "Getting list of smb open files for PowerScale: %s failed with error: SDK Error message" % (
                    MockGatherfactsApi.GATHERFACTS_COMMON_ARGS['onefs_host'])
+=======
+>>>>>>> 0a01b051f102176470948082e530d4f51e9af771

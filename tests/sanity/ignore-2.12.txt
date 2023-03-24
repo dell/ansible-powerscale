@@ -43,6 +43,7 @@ plugins/modules/storagepooltier.py import-3.5
 plugins/modules/storagepooltier.py compile-2.6
 plugins/modules/storagepooltier.py compile-2.7
 plugins/modules/storagepooltier.py compile-3.5
+<<<<<<< HEAD
 plugins/modules/storagepooltier.py validate-modules:missing-gplv3-license
 plugins/modules/smb_file.py import-2.6
 plugins/modules/smb_file.py import-2.7
@@ -57,3 +58,6 @@ plugins/modules/group.py import-3.5
 plugins/modules/group.py compile-2.6
 plugins/modules/group.py compile-2.7
 plugins/modules/group.py compile-3.5
+=======
+plugins/modules/storagepooltier.py validate-modules:missing-gplv3-license
+>>>>>>> 0a01b051f102176470948082e530d4f51e9af771

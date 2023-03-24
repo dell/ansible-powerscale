@@ -5,6 +5,7 @@ Dellemc.Powerscale Change Logs
 .. contents:: Topics
 
 
+<<<<<<< HEAD
 v1.9.0
 ======
 
@@ -22,6 +23,8 @@ New Modules
 
 - dellemc.powerscale.smb_file - Find and close SMB open files on a PowerScale Storage system.
 
+=======
+>>>>>>> 0a01b051f102176470948082e530d4f51e9af771
 v1.8.0
 ======
 
@@ -71,7 +74,11 @@ v1.5.0
 Minor Changes
 -------------
 
+<<<<<<< HEAD
 - ADS module is enhanced to support machine_account and organizational_unit parameters while creating ADS provider.
+=======
+- ADS module is enhanced to support machine_account & organizational_unit parameters while creating ADS provider.
+>>>>>>> 0a01b051f102176470948082e530d4f51e9af771
 - Added rotating file handler for log files.
 - Removal of dellemc_powerscale prefix from all the modules name.
 - SmartQuota module is enhanced to support float values for Quota Parameters.
@@ -119,7 +126,11 @@ New Modules
 - dellemc.powerscale.synciqpolicy - Manage SyncIQ policies on PowerScale
 - dellemc.powerscale.synciqreports - Provides the SyncIQ reports for PowerScale Storage System
 - dellemc.powerscale.synciqrules - Manage SyncIQ performance rules on PowerScale Storage System.
+<<<<<<< HEAD
 - dellemc.powerscale.synciqtargetreports - Provides SyncIQ target reports on PowerScale Storage System
+=======
+- dellemc.powerscale.synciqtargetreports - Provides the SyncIQ target reports for PowerScale Storage System
+>>>>>>> 0a01b051f102176470948082e530d4f51e9af771
 
 v1.2.0
 ======
@@ -129,9 +140,15 @@ Minor Changes
 
 - Filesystem module is enhanced to support additional quota parameters.
 - Gather facts module is enhanced to list Nodes, NFS Exports, SMB shares and Active clients.
+<<<<<<< HEAD
 - Map or unmap authentication providers to/from an access zone.
 - Rebranded Isilon to PowerScale.
 - SmartQuota module is enhanced to support CRUD operations, for default-user and default-group quotas.
+=======
+- Map or unmap authentication providers to/from an access zone
+- Rebranded Isilon to PowerScale.
+- SmartQuota module is enhanced to support CRUD operations for default-user and default-group quotas.
+>>>>>>> 0a01b051f102176470948082e530d4f51e9af771
 - Support extended for OneFS version 9.1.0.
 
 New Modules

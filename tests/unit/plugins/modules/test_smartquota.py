@@ -27,12 +27,27 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock
 
 
 class TestSmartQuota():
+<<<<<<< HEAD
     get_smartquota_args = MockSmartQuotaApi.SMART_QUOTA_COMMON_ARGS
+=======
+    get_smartquota_args = {"path": None,
+                           "access_zone": None,
+                           "quota_type": None,
+                           "user_name": None,
+                           "group_name": None,
+                           "provider_type": None,
+                           "quota": None,
+                           "list_snapshots": None,
+                           "state": None
+                           }
+    MODULE_UTILS_PATH = 'ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.utils'
+>>>>>>> 0a01b051f102176470948082e530d4f51e9af771
 
     @pytest.fixture
     def smartquota_module_mock(self, mocker):
         smartquota_module_mock = SmartQuota()
         smartquota_module_mock.module = MagicMock()
+<<<<<<< HEAD
         utils.convert_size_with_unit = MagicMock()
         mocker.patch(MockSmartQuotaApi.MODULE_UTILS_PATH + '.ApiException',
                      new=MockApiException)
@@ -40,6 +55,13 @@ class TestSmartQuota():
 
     def test_smartquota_create_quota(self, smartquota_module_mock):
         self.get_smartquota_args.update({"path": MockSmartQuotaApi.PATH1,
+=======
+        mocker.patch(self.MODULE_UTILS_PATH + '.ApiException', new=MockApiException)
+        return smartquota_module_mock
+
+    def test_smartquota_create_quota(self, smartquota_module_mock):
+        self.get_smartquota_args.update({"path": "/Test/Test1",
+>>>>>>> 0a01b051f102176470948082e530d4f51e9af771
                                          "access_zone": "System",
                                          "quota_type": "directory",
                                          "user_name": "sample",
@@ -64,13 +86,21 @@ class TestSmartQuota():
         utils.validate_threshold_overhead_parameter = MagicMock(return_value=None)
         utils.isi_sdk.QuotaQuotaCreateParams = MagicMock(return_value=None)
         smartquota_module_mock.add_limits_with_unit = MagicMock()
+<<<<<<< HEAD
+=======
+        utils.convert_size_with_unit = MagicMock()
+>>>>>>> 0a01b051f102176470948082e530d4f51e9af771
         smartquota_module_mock.quota_api_instance.create_quota_quota = MagicMock(return_value=None)
         smartquota_module_mock.determine_error = MagicMock(return_value=None)
         smartquota_module_mock.perform_module_operation()
         assert smartquota_module_mock.module.exit_json.call_args[1]["changed"] is True
 
     def test_smartquota_create_quota_paramset1(self, smartquota_module_mock):
+<<<<<<< HEAD
         self.get_smartquota_args.update({"path": MockSmartQuotaApi.PATH1,
+=======
+        self.get_smartquota_args.update({"path": "/Test/Test1",
+>>>>>>> 0a01b051f102176470948082e530d4f51e9af771
                                          "access_zone": "System",
                                          "quota_type": "directory",
                                          "user_name": "sample",
@@ -82,7 +112,11 @@ class TestSmartQuota():
                                              "hard_limit_size": 10,
                                              "cap_unit": "GB",
                                              "soft_grace_period": 1,
+<<<<<<< HEAD
                                              "period_unit": "months",
+=======
+                                             "period_unit": "days",
+>>>>>>> 0a01b051f102176470948082e530d4f51e9af771
                                              "advisory_limit_size": 3,
                                              "include_overheads": True,
                                              "container": True,
@@ -95,6 +129,10 @@ class TestSmartQuota():
         utils.validate_threshold_overhead_parameter = MagicMock(return_value=None)
         utils.isi_sdk.QuotaQuotaCreateParams = MagicMock(return_value=None)
         smartquota_module_mock.add_limits_with_unit = MagicMock()
+<<<<<<< HEAD
+=======
+        utils.convert_size_with_unit = MagicMock()
+>>>>>>> 0a01b051f102176470948082e530d4f51e9af771
         smartquota_module_mock.quota_api_instance.create_quota_quota = MagicMock(return_value=None)
         smartquota_module_mock.determine_error = MagicMock(return_value=None)
         smartquota_module_mock.perform_module_operation()
@@ -111,7 +149,11 @@ class TestSmartQuota():
                                              "hard_limit_size": 10,
                                              "cap_unit": "GB",
                                              "soft_grace_period": 1,
+<<<<<<< HEAD
                                              "period_unit": "weeks",
+=======
+                                             "period_unit": "days",
+>>>>>>> 0a01b051f102176470948082e530d4f51e9af771
                                              "persona": None,
                                              "advisory_limit_size": 3,
                                              "include_overheads": True,
@@ -137,6 +179,7 @@ class TestSmartQuota():
         smartquota_module_mock.determine_error = MagicMock(return_value=None)
         smartquota_module_mock.quota_api_instance.create_quota_quota = MagicMock(side_effect=utils.ApiException)
         smartquota_module_mock.perform_module_operation()
+<<<<<<< HEAD
         assert MockSmartQuotaApi.smartquota_create_quota_response(path="Mock_Path") not in \
             smartquota_module_mock.module.fail_json.call_args[1]["msg"]
 
@@ -278,3 +321,7 @@ class TestSmartQuota():
                                                            az="sample-zone",
                                                            provider="local") \
             not in smartquota_module_mock.module.fail_json.call_args[1]['msg']
+=======
+        assert MockSmartQuotaApi.smartquota_create_quota_response("error", path="Mock_Path") not in \
+            smartquota_module_mock.module.fail_json.call_args[1]["msg"]
+>>>>>>> 0a01b051f102176470948082e530d4f51e9af771

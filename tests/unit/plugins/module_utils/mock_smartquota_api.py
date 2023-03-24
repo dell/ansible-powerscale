@@ -8,6 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 
 __metaclass__ = type
 
+<<<<<<< HEAD
 from mock.mock import MagicMock
 
 
@@ -78,6 +79,23 @@ class MockSmartQuotaApi:
                "with error"
 
     @staticmethod
+=======
+
+class MockSmartQuotaApi:
+    Smart_Quota_MODULE_ARGS = {"unispherehost": "**.***.**.***",
+                               "path": None,
+                               "access_zone": None,
+                               "quota": None,
+                               "list_snapshots": None,
+                               "state": None
+                               }
+
+    @staticmethod
+    def smartquota_create_quota_response(error, path):
+        return "Create quota for" + path + "failed with"
+
+    @staticmethod
+>>>>>>> 0a01b051f102176470948082e530d4f51e9af771
     def get_smartquota_dependent_response(response_type):
         if response_type == 'advisory':
             return 3221225472.0

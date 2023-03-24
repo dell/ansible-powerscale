@@ -40,7 +40,10 @@ description:
   Get list of network interfaces of the PowerScale cluster.
   Get list of node pools of PowerScale cluster.
   Get list of storage pool tiers of PowerScale cluster.
+<<<<<<< HEAD
   Get list of smb open files of PowerScale cluster.
+=======
+>>>>>>> 0a01b051f102176470948082e530d4f51e9af771
 
 extends_documentation_fragment:
   - dellemc.powerscale.powerscale
@@ -48,7 +51,10 @@ extends_documentation_fragment:
 author:
 - Ambuj Dubey (@AmbujDube) <ansible.team@dell.com>
 - Spandita Panigrahi(@panigs7) <ansible.team@dell.com>
+<<<<<<< HEAD
 - Pavan Mudunuri(@Pavan-Mudunuri) <ansible.team@dell.com>
+=======
+>>>>>>> 0a01b051f102176470948082e530d4f51e9af771
 
 options:
   include_all_access_zones:
@@ -89,7 +95,10 @@ options:
     - network_subnets
     - node_pools
     - storagepool_tiers
+<<<<<<< HEAD
     - smb_files
+=======
+>>>>>>> 0a01b051f102176470948082e530d4f51e9af771
     - The list of attributes, access_zones and nodes is for the entire PowerScale
       cluster
     - The list of providers for the entire PowerScale cluster
@@ -101,13 +110,20 @@ options:
       for the entire PowerScale cluster
     - The list of network pools is specific to the specified access zone or for all access zones
     - The list of network groupnets, network subnets, network rules and network interfaces is for the entire PowerScale cluster
+<<<<<<< HEAD
     - The list of smb open files for the entire PowerScale cluster
+=======
+>>>>>>> 0a01b051f102176470948082e530d4f51e9af771
     required: True
     choices: [attributes, access_zones, nodes, providers, users, groups,
               smb_shares, nfs_exports, nfs_aliases, clients, synciq_reports, synciq_target_reports,
               synciq_policies, synciq_target_cluster_certificates, synciq_performance_rules,
+<<<<<<< HEAD
               network_groupnets, network_subnets, network_pools, network_rules, network_interfaces,
               node_pools, storagepool_tiers, smb_files]
+=======
+              network_groupnets, network_subnets, network_pools, network_rules, network_interfaces, node_pools, storagepool_tiers]
+>>>>>>> 0a01b051f102176470948082e530d4f51e9af771
     type: list
     elements: str
 notes:
@@ -336,6 +352,7 @@ EXAMPLES = r'''
       gather_subset:
         - storagepool_tiers
     register: subset_result
+<<<<<<< HEAD
 
   - name: Get list of smb open files of the PowerScale cluster
     dellemc.powerscale.info:
@@ -345,6 +362,8 @@ EXAMPLES = r'''
       api_password: "{{api_password}}"
       gather_subset:
         - smb_files
+=======
+>>>>>>> 0a01b051f102176470948082e530d4f51e9af771
 '''
 
 RETURN = r''' '''
@@ -836,6 +855,7 @@ class Info(object):
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
+<<<<<<< HEAD
     def get_smb_files(self):
         """Get the list of smb open files given PowerScale Storage"""
         try:
@@ -853,6 +873,8 @@ class Info(object):
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
+=======
+>>>>>>> 0a01b051f102176470948082e530d4f51e9af771
     def perform_module_operation(self):
         """Perform different actions on Gatherfacts based on user parameter
         chosen in playbook
@@ -885,7 +907,10 @@ class Info(object):
         network_subnets = []
         node_pools = []
         storagepool_tiers = []
+<<<<<<< HEAD
         smb_files = []
+=======
+>>>>>>> 0a01b051f102176470948082e530d4f51e9af771
 
         if 'attributes' in str(subset):
             attributes = self.get_attributes_list()
@@ -934,8 +959,11 @@ class Info(object):
             node_pools = self.get_node_pools()
         if 'storagepool_tiers' in str(subset):
             storagepool_tiers = self.get_storagepool_tiers()
+<<<<<<< HEAD
         if 'smb_files' in str(subset):
             smb_files = self.get_smb_files()
+=======
+>>>>>>> 0a01b051f102176470948082e530d4f51e9af771
 
         result = dict(
             Attributes=attributes,
@@ -958,8 +986,12 @@ class Info(object):
             NetworkInterfaces=network_interfaces,
             NetworkSubnets=network_subnets,
             NodePools=node_pools,
+<<<<<<< HEAD
             StoragePoolTiers=storagepool_tiers,
             SmbOpenFiles=smb_files
+=======
+            StoragePoolTiers=storagepool_tiers
+>>>>>>> 0a01b051f102176470948082e530d4f51e9af771
         )
 
         if utils.ISI_SDK_VERSION_9:
@@ -1011,8 +1043,12 @@ def get_info_parameters():
                                     'network_interfaces',
                                     'network_subnets',
                                     'node_pools',
+<<<<<<< HEAD
                                     'storagepool_tiers',
                                     'smb_files'
+=======
+                                    'storagepool_tiers'
+>>>>>>> 0a01b051f102176470948082e530d4f51e9af771
                                     ]),
     )
 

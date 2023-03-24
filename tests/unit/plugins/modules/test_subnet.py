@@ -69,7 +69,11 @@ class TestSubnet():
         assert subnet_module_mock.module.fail_json.call_args[1]['msg'] \
             == MockSubnetApi.get_invalid_gateway_priority()
 
+<<<<<<< HEAD
     def test_invalid_subnet_name_len(self, subnet_module_mock):
+=======
+    def test_invalid_subnet_nameLen(self, subnet_module_mock):
+>>>>>>> 0a01b051f102176470948082e530d4f51e9af771
         subnet_name = 'subnet_test_subnet_test_subnet_test_'
         self.subnet_args.update({'subnet_name': subnet_name})
         subnet_module_mock.module.params = self.subnet_args
