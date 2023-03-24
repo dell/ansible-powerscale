@@ -241,12 +241,6 @@ class Group(object):
 
         self.module_params = utils.get_powerscale_management_host_parameters()
         self.module_params.update(get_group_parameters())
-<<<<<<< HEAD
-=======
-
-        mutually_exclusive = [['group_name', 'group_id']]
->>>>>>> 0a01b051f102176470948082e530d4f51e9af771
-
         required_one_of = [['group_name', 'group_id']]
         # initialize the ansible module
         self.module = AnsibleModule(argument_spec=self.module_params,

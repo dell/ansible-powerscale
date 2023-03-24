@@ -352,11 +352,7 @@ class NfsExport(object):
                 LOG.error(error_msg)
                 self.module.fail_json(msg=error_msg)
 
-<<<<<<< HEAD
             elif nfs_exports_extended_obj.total == 0:
-=======
-            elif NfsExportsExtendedObj.total == 0:
->>>>>>> 0a01b051f102176470948082e530d4f51e9af771
                 LOG.debug('NFS Export for given path: %s and access zone: %s '
                           'not found', path, access_zone)
                 return {}
@@ -421,11 +417,7 @@ class NfsExport(object):
                 zone=self.module.params['access_zone'])
             return nfs_export
         except Exception as e:
-<<<<<<< HEAD
             error_msg = 'Create NfsExportCreateParams object for path {0}' \
-=======
-            errorMsg = 'Create NfsExportCreateParams object for path {0}' \
->>>>>>> 0a01b051f102176470948082e530d4f51e9af771
                 ' failed with error {1}'.format(
                     path, self.determine_error(e))
             LOG.error(error_msg)

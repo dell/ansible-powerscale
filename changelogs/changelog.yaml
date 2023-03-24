@@ -43,15 +43,9 @@ releases:
       - Filesystem module is enhanced to support additional quota parameters.
       - Gather facts module is enhanced to list Nodes, NFS Exports, SMB shares and
         Active clients.
-<<<<<<< HEAD
       - Map or unmap authentication providers to/from an access zone.
       - Rebranded Isilon to PowerScale.
       - SmartQuota module is enhanced to support CRUD operations, for default-user
-=======
-      - Map or unmap authentication providers to/from an access zone
-      - Rebranded Isilon to PowerScale.
-      - SmartQuota module is enhanced to support CRUD operations for default-user
->>>>>>> 0a01b051f102176470948082e530d4f51e9af771
         and default-group quotas.
       - Support extended for OneFS version 9.1.0.
     modules:
@@ -78,17 +72,13 @@ releases:
     - description: Manage SyncIQ policies on PowerScale
       name: synciqpolicy
       namespace: ''
-    - description: Provides the SyncIQ reports for PowerScale Storage System
+    - description: Provides the SyncIQ reports on PowerScale Storage System
       name: synciqreports
       namespace: ''
     - description: Manage SyncIQ performance rules on PowerScale Storage System.
       name: synciqrules
       namespace: ''
-<<<<<<< HEAD
-    - description: Provides SyncIQ target reports on PowerScale Storage System
-=======
-    - description: Provides the SyncIQ target reports for PowerScale Storage System
->>>>>>> 0a01b051f102176470948082e530d4f51e9af771
+    - description: Provides SyncIQ target reports on PowerScale Storage System.
       name: synciqtargetreports
       namespace: ''
     release_date: '2021-09-23'
@@ -120,13 +110,8 @@ releases:
   1.5.0:
     changes:
       minor_changes:
-<<<<<<< HEAD
       - ADS module is enhanced to support machine_account and organizational_unit
         parameters while creating ADS provider.
-=======
-      - ADS module is enhanced to support machine_account & organizational_unit parameters
-        while creating ADS provider.
->>>>>>> 0a01b051f102176470948082e530d4f51e9af771
       - Added rotating file handler for log files.
       - Removal of dellemc_powerscale prefix from all the modules name.
       - SmartQuota module is enhanced to support float values for Quota Parameters.
@@ -177,7 +162,6 @@ releases:
       minor_changes:
       - Added support for security flavors while creating and modifying NFS export.
     release_date: '2022-12-20'
-<<<<<<< HEAD
   1.9.0:
     changes:
       minor_changes:
@@ -192,5 +176,4 @@ releases:
       name: smb_file
       namespace: ''
     release_date: '2023-03-31'
-=======
->>>>>>> 0a01b051f102176470948082e530d4f51e9af771
+

@@ -314,11 +314,7 @@ class Settings(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
-<<<<<<< HEAD
     def construct_ntp_server_body(self, ntp_server):
-=======
-    def construct_NTP_server_body(self, ntp_server):
->>>>>>> 0a01b051f102176470948082e530d4f51e9af771
         """
         Constructs NTP server body
         :param ntp_server: ID or Name of NTP server which is to be added.
@@ -338,11 +334,7 @@ class Settings(object):
                 LOG.error(error_message)
                 self.module.fail_json(msg=error_message)
 
-<<<<<<< HEAD
     def do_update(self, source, target):
-=======
-    def doUpdate(self, source, target):
->>>>>>> 0a01b051f102176470948082e530d4f51e9af771
         return source and source != target
 
     def perform_module_operation(self):
@@ -372,12 +364,7 @@ class Settings(object):
         if existing_email_settings:
             for setting in email_setting_keys:
                 if setting in self.module.params.keys() and \
-<<<<<<< HEAD
                         self.do_update(self.module.params[setting], existing_email_settings['settings'][setting]):
-=======
-                        self.doUpdate(self.module.params[setting], existing_email_settings['settings'][setting]):
->>>>>>> 0a01b051f102176470948082e530d4f51e9af771
-                    email_params[setting] = self.module.params[setting]
 
         if ntp_server_details:
             for index in range(len(ntp_server_details['servers'])):
@@ -396,11 +383,7 @@ class Settings(object):
             self.validate_input(ntp_servers)
             ntp_servers_final = (list(set(ntp_servers) - set(ntp_server_list_system)))
             for ntp_server in ntp_servers_final:
-<<<<<<< HEAD
                 server_details_to_update = self.construct_ntp_server_body(ntp_server)
-=======
-                server_details_to_update = self.construct_NTP_server_body(ntp_server)
->>>>>>> 0a01b051f102176470948082e530d4f51e9af771
                 self.add_ntp_server(server_details_to_update)
                 result['changed'] = True
             result['ntp_server'] = self.get_ntp_servers()

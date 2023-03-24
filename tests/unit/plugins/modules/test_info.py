@@ -36,10 +36,7 @@ class TestInfo():
         gatherfacts_module_mock.module = MagicMock()
         gatherfacts_module_mock.network_api = MagicMock()
         gatherfacts_module_mock.protocol_api = MagicMock()
-<<<<<<< HEAD
         utils.ISI_SDK_VERSION_9 = MagicMock(return_value=True)
-=======
->>>>>>> 0a01b051f102176470948082e530d4f51e9af771
         return gatherfacts_module_mock
 
     def test_get_network_groupnets(self, gatherfacts_module_mock):
@@ -207,11 +204,6 @@ class TestInfo():
         gatherfacts_module_mock.storagepool_api = MagicMock()
         gatherfacts_module_mock.storagepool_api.list_storagepool_tiers = MagicMock(return_value=MockSDKResponse(storage_tiers))
         gatherfacts_module_mock.perform_module_operation()
-<<<<<<< HEAD
-=======
-        print(storage_tiers['tiers'])
-        print(gatherfacts_module_mock.module.exit_json.call_args[1]['StoragePoolTiers'])
->>>>>>> 0a01b051f102176470948082e530d4f51e9af771
         assert storage_tiers['tiers'] == gatherfacts_module_mock.module.exit_json.call_args[1]['StoragePoolTiers']
 
     def test_get_storage_tiers_api_exception(self, gatherfacts_module_mock):
@@ -223,7 +215,6 @@ class TestInfo():
         gatherfacts_module_mock.storagepool_api.list_storagepool_tiers = MagicMock(side_effect=MockApiException)
         gatherfacts_module_mock.perform_module_operation()
         assert MockGatherfactsApi.get_storage_tier_response('error') == gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
-<<<<<<< HEAD
 
     def test_get_smb_files(self, gatherfacts_module_mock):
         smb_files = MockGatherfactsApi.get_smb_files_response('api')
@@ -245,5 +236,3 @@ class TestInfo():
         gatherfacts_module_mock.protocol_api.get_smb_openfiles = MagicMock(side_effect=MockApiException)
         gatherfacts_module_mock.perform_module_operation()
         assert MockGatherfactsApi.get_smb_files_response('error') == gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
-=======
->>>>>>> 0a01b051f102176470948082e530d4f51e9af771

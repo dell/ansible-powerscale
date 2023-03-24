@@ -344,12 +344,6 @@ class User(object):
 
         self.module_params = utils.get_powerscale_management_host_parameters()
         self.module_params.update(get_user_parameters())
-<<<<<<< HEAD
-=======
-
-        mutually_exclusive = [['user_name', 'user_id']]
->>>>>>> 0a01b051f102176470948082e530d4f51e9af771
-
         required_one_of = [
             ['user_name', 'user_id']
         ]
@@ -889,7 +883,6 @@ def get_user_parameters():
     """This method provide parameter required for the ansible user
     modules on PowerScale"""
     return dict(
-<<<<<<< HEAD
         user_name=dict(type='str'),
         user_id=dict(type='int'),
         password=dict(type='str', no_log=True),
@@ -903,22 +896,6 @@ def get_user_parameters():
         full_name=dict(type='str'),
         email=dict(type='str'),
         state=dict(type='str', required=True,
-=======
-        user_name=dict(required=False, type='str'),
-        user_id=dict(required=False, type='str'),
-        password=dict(required=False, type='str', no_log=True),
-        access_zone=dict(required=False, type='str', default='system'),
-        provider_type=dict(required=False, type='str',
-                           choices=['local', 'file', 'ldap', 'ads', 'nis'],
-                           default='local'),
-        enabled=dict(required=False, type='bool'),
-        primary_group=dict(required=False, type='str'),
-        home_directory=dict(required=False, type='str'),
-        shell=dict(required=False, type='str'),
-        full_name=dict(required=False, type='str'),
-        email=dict(required=False, type='str'),
-        state=dict(required=True, type='str',
->>>>>>> 0a01b051f102176470948082e530d4f51e9af771
                    choices=['present', 'absent']),
         role_name=dict(type='str'),
         role_state=dict(type='str',
