@@ -72,13 +72,13 @@ releases:
     - description: Manage SyncIQ policies on PowerScale
       name: synciqpolicy
       namespace: ''
-    - description: Provides the SyncIQ reports on PowerScale Storage System
+    - description: Provides the SyncIQ reports for PowerScale Storage System
       name: synciqreports
       namespace: ''
     - description: Manage SyncIQ performance rules on PowerScale Storage System.
       name: synciqrules
       namespace: ''
-    - description: Provides SyncIQ target reports on PowerScale Storage System.
+    - description: Provides SyncIQ target reports on PowerScale Storage System
       name: synciqtargetreports
       namespace: ''
     release_date: '2021-09-23'
@@ -176,4 +176,3 @@ releases:
       name: smb_file
       namespace: ''
     release_date: '2023-03-31'
-

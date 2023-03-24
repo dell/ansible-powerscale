@@ -344,6 +344,7 @@ class User(object):
 
         self.module_params = utils.get_powerscale_management_host_parameters()
         self.module_params.update(get_user_parameters())
+
         required_one_of = [
             ['user_name', 'user_id']
         ]

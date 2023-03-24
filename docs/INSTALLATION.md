@@ -37,7 +37,7 @@ Based on which PowerScale OneFS version is being used, use this procedure to ins
 
   #### Offline installation of collections
   1. Download the latest tar build from either of the available distribution channels [Ansible Galaxy](https://galaxy.ansible.com/dellemc/powerscale) /[Automation Hub](https://console.redhat.com/ansible/automation-hub/repo/published/dellemc/powerscale) and use this command to install the collection anywhere in your system:
-  
+
 	      ansible-galaxy collection install dellemc-powerscale-1.9.0.tar.gz -p <install_path>
 
   2. Set the environment variable:

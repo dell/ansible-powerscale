@@ -14,7 +14,7 @@ Modules for Dell Technologies (Dell) PowerScale.
 
 -   [Revision History](#revision-history)
 -   [Product Description](#product-description)
--   [New Features and Enhancements](#new-features-and-enhancements)
+-   [New Features and Enhancements](#new-features-and-enhancements) 
 -   [Known issues and limitations](#known-issues)
 -   [Software media, organization, and files](#software-media-organization-and-files)
 -   [Additional resources](#additional-resources) 
@@ -56,7 +56,7 @@ The Ansible Modules for Dell PowerScale support the following features:
 - Modify network and smart pool settings.
 - Get Filepool policy and Storagepool tiers.
 - Create, delete Filepool policy and Storagepool tiers.
-- Get, Create, modify and delete NFS aliases.
+- Get, Create, modify and delete NFS aliases. 
 - Get attributes and entities of the array.
 - Get details and close open SMB files.
   

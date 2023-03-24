@@ -365,6 +365,7 @@ class Settings(object):
             for setting in email_setting_keys:
                 if setting in self.module.params.keys() and \
                         self.do_update(self.module.params[setting], existing_email_settings['settings'][setting]):
+                    email_params[setting] = self.module.params[setting]
 
         if ntp_server_details:
             for index in range(len(ntp_server_details['servers'])):
