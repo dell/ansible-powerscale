@@ -60,7 +60,7 @@ class TestNetworkPool():
         assert network_pool == network_pool_module_mock.module.exit_json.call_args[1]['network_pool']
 
     def test_get_network_pool_with_exception(self, network_pool_module_mock):
-        network_pool = MockNetworkPoolApi.GET_NETWORK_POOLS
+        MockNetworkPoolApi.GET_NETWORK_POOLS
         self.get_network_pool_args.update({"state": "present"})
         network_pool_module_mock.module.params = self.get_network_pool_args
         network_pool_module_mock.network_groupnet_api.get_subnets_subnet_pool = MagicMock(side_effect=utils.ApiException)
@@ -69,7 +69,7 @@ class TestNetworkPool():
             network_pool_module_mock.module.fail_json.call_args[1]['msg']
 
     def test_get_network_pool_with_404_exception(self, network_pool_module_mock):
-        network_pool = MockNetworkPoolApi.GET_NETWORK_POOLS
+        MockNetworkPoolApi.GET_NETWORK_POOLS
         self.get_network_pool_args.update({"state": "present"})
         MockApiException.status = '404'
         network_pool_module_mock.module.params = self.get_network_pool_args

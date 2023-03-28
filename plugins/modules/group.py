@@ -28,14 +28,12 @@ options:
   group_name:
     description:
     - The name of the group.
-    - Required at the time of group creation, for the rest of the operations
-      either group_name or group_id is required.
     type: str
   group_id:
     description:
-    - The group_id is auto generated at the time of creation.
+    - The group_id is auto generated or can be assigned at the time of creation.
     - For all other operations either group_name or group_id is needed.
-    type: str
+    type: int
   access_zone:
     description:
     - This option mentions the zone in which a group is created.
@@ -90,6 +88,18 @@ EXAMPLES = r'''
       access_zone: "{{access_zone}}"
       provider_type: "{{provider_type}}"
       group_name: "{{group_name}}"
+      state: "present"
+
+  - name: Create a Group with group id
+    dellemc.powerscale.group:
+      onefs_host: "{{onefs_host}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      access_zone: "{{access_zone}}"
+      provider_type: "{{provider_type}}"
+      group_name: "Test_group"
+      group_id: 7000
       state: "present"
 
   - name: Create Group with Users
@@ -232,13 +242,10 @@ class Group(object):
         self.module_params = utils.get_powerscale_management_host_parameters()
         self.module_params.update(get_group_parameters())
 
-        mutually_exclusive = [['group_name', 'group_id']]
-
         required_one_of = [['group_name', 'group_id']]
         # initialize the ansible module
         self.module = AnsibleModule(argument_spec=self.module_params,
                                     supports_check_mode=False,
-                                    mutually_exclusive=mutually_exclusive,
                                     required_one_of=required_one_of)
 
         # result is a dictionary that contains changed status and
@@ -249,12 +256,10 @@ class Group(object):
                 and not PREREQS_VALIDATE["all_packages_found"]:
             self.module.fail_json(
                 msg=PREREQS_VALIDATE["error_message"])
-
         self.api_client = utils.get_powerscale_connection(self.module.params)
         self.api_instance = utils.isi_sdk.AuthApi(self.api_client)
         self.group_api_instance = utils.isi_sdk.AuthGroupsApi(
             self.api_client)
-
         LOG.info('Got the isi_sdk instance for authorization on to PowerScale')
 
     def check_provider_type(self, provider, message):
@@ -294,13 +299,13 @@ class Group(object):
                     self.module.fail_json(msg=error)
         return users_list
 
-    def create_group(self, group_name, zone, provider, users_list):
+    def create_group(self, group_name, group_id, zone, provider, users_list):
         """Create Group in PowerScale"""
         try:
             LOG.info("Creating Group %s", group_name)
             provider = self.check_provider_type(provider, 'Create')
             auth_group = utils.isi_sdk.AuthGroupCreateParams(
-                name=group_name, members=users_list)
+                name=group_name, gid=group_id, members=users_list)
             api_response = self.api_instance.create_auth_group(
                 auth_group=auth_group, zone=zone, provider=provider)
             LOG.info("The group is created with id: %s", str(api_response))
@@ -477,6 +482,17 @@ class Group(object):
             error = str(error_obj)
         return error
 
+    def check_if_id_exists(self, group_name, group_details):
+        """
+        Check if the id exists
+        :param group_name: Group name
+        :param group_details: Group details
+        :return: True if id exists.
+        """
+        if group_name is not None and group_name.lower() == group_details['gid']['name'].lower():
+            return False
+        return True
+
     def perform_module_operation(self):
         """
         Perform different actions on group module based on parameters
@@ -489,13 +505,14 @@ class Group(object):
         state = self.module.params['state']
         users = self.module.params['users']
         user_state = self.module.params['user_state']
-        if group_name and not group_id:
+        group = None
+        if group_name:
             group = 'GROUP:' + group_name
-        elif group_id and not group_name:
-            group = 'GID:' + group_id
-        else:
-            self.module.fail_json(msg="Invalid group_name or group_id"
-                                      " provided. Enter a valid string.")
+        if group_id:
+            group = 'GID:' + str(group_id)
+
+        if group is None:
+            self.module.fail_json(msg="Invalid group_name or group_id provided.")
 
         if not users and user_state:
             self.module.fail_json(msg="'user_state' is given,"
@@ -510,17 +527,22 @@ class Group(object):
             group_details = self.get_group_details(
                 group, access_zone, provider_type)
             if not group_details:
-                if group_id:
-                    error_message = 'Group with id %s not found' \
-                                    " on the system" % group_id
+                if not group_name:
+                    error_message = "Unable to create a group, 'group_name' is"\
+                                    " missing"
                     LOG.error(error_message)
                     self.module.fail_json(msg=error_message)
                 LOG.info("Create a Group %s ", group_name)
                 users_list = self.create_user_objects(users, user_state)
-                self.create_group(group_name, access_zone, provider_type,
+                self.create_group(group_name, group_id, access_zone, provider_type,
                                   users_list)
                 changed = True
             else:
+                id_exists = self.check_if_id_exists(group_name, group_details)
+                if id_exists:
+                    error_message = f'Group already exists with GID {group_id}'
+                    LOG.error(error_message)
+                    self.module.fail_json(msg=error_message)
                 if user_state and users:
                     user_modified_flag = False
                     for user in users:
@@ -574,7 +596,7 @@ def get_group_parameters():
     module on PowerScale"""
     return dict(
         group_name=dict(required=False, type='str'),
-        group_id=dict(required=False, type='str'),
+        group_id=dict(required=False, type='int'),
         access_zone=dict(required=False, type='str', default='system'),
         provider_type=dict(required=False, type='str',
                            choices=['local', 'file', 'ldap', 'ads', 'nis'],

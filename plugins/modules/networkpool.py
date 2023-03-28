@@ -404,10 +404,10 @@ class NetworkPool(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
-    def doUpdate(self, source, target):
+    def do_update(self, source, target):
         return source != target
 
-    def getModifyList(self, source, target, key, state):
+    def get_modify_list(self, source, target, key, state):
         if state == 'add':
             delta = [item for item in source[key] if item not in target[key]]
             if delta:
@@ -427,21 +427,23 @@ class NetworkPool(object):
         network_pool_keys = ['description', 'access_zone']
 
         for keys in network_pool_keys:
-            if pool_params[keys] and self.doUpdate(pool_details['pools'][0][keys], pool_params[keys]):
+            if pool_params[keys] and self.do_update(pool_details['pools'][0][keys], pool_params[keys]):
                 modify_pool_dict[keys] = pool_params[keys]
 
         if pool_params['new_pool_name'] and pool_params['new_pool_name'] != pool_details['pools'][0]['name']:
             modify_pool_dict['name'] = pool_params['new_pool_name']
 
         if pool_params['additional_pool_params']:
-            ifaces = self.getModifyList(pool_params['additional_pool_params'],
-                                        pool_details['pools'][0], 'ifaces', pool_params['additional_pool_params']['iface_state'])
+            ifaces = self.get_modify_list(pool_params['additional_pool_params'],
+                                          pool_details['pools'][0], 'ifaces',
+                                          pool_params['additional_pool_params']['iface_state'])
             if pool_params['additional_pool_params']['iface_state'] == "remove" or \
                pool_params['additional_pool_params']['iface_state'] == "add" and ifaces:
                 modify_pool_dict['ifaces'] = ifaces
 
-            ranges = self.getModifyList(pool_params['additional_pool_params'],
-                                        pool_details['pools'][0], 'ranges', pool_params['additional_pool_params']['range_state'])
+            ranges = self.get_modify_list(pool_params['additional_pool_params'],
+                                          pool_details['pools'][0], 'ranges',
+                                          pool_params['additional_pool_params']['range_state'])
             if pool_params['additional_pool_params']['range_state'] == "remove" or \
                pool_params['additional_pool_params']['range_state'] == "add" and ranges:
                 modify_pool_dict['ranges'] = ranges
@@ -563,7 +565,7 @@ class NetworkPool(object):
         if state == "present" and not pool_details:
             pool_params = self.construct_pool_parameters(input_param)
             if pool_params:
-                network_pool = self.create_network_pool(groupnet_name, subnet_name, pool_params)
+                self.create_network_pool(groupnet_name, subnet_name, pool_params)
                 result['changed'] = True
 
         # Form dictionary of modifiable parameters for a pool

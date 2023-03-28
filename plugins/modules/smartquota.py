@@ -435,11 +435,10 @@ class SmartQuota(object):
         else:
             include_snapshots = quota_dict['include_snapshots']
 
+        container = False
         if 'container' in quota_dict and quota_dict['container'] is not None \
                 and quota_type == "directory":
             container = quota_dict['container']
-        else:
-            container = False
 
         quota_create_params = {
             'include_snapshots': include_snapshots, 'path': path,
@@ -618,6 +617,62 @@ class SmartQuota(object):
         quota['soft_grace'] = quota.pop('soft_grace_period')
         return quota
 
+    def get_user_group_sid(self):
+        """Getting sid based on quota_type"""
+        quota_type = self.module.params['quota_type']
+        user_name = self.module.params['user_name']
+        group_name = self.module.params['group_name']
+        provider_type = self.module.params['provider_type']
+        access_zone = self.module.params['access_zone']
+        sid = None
+        # Get the sid(security identifier) for User
+        if quota_type == "user":
+            sid = self.get_sid(user_name, quota_type, provider_type,
+                               access_zone)
+            return sid
+        # Get the sid(security identifier) for Group
+        if quota_type == "group":
+            sid = self.get_sid(group_name, quota_type, provider_type,
+                               access_zone)
+            return sid
+        return sid
+
+    def effective_path(self, access_zone, path):
+        """Get the effective path any access zone"""
+        if access_zone is not None and access_zone.lower() == "system":
+            if path is not None and not path.startswith('/'):
+                err_msg = "Invalid path {0}, Path must start " \
+                          "with '/'".format(path)
+                LOG.error(err_msg)
+                self.module.fail_json(msg=err_msg)
+        elif access_zone is not None and access_zone.lower() != "system":
+            if path is not None and not path.startswith('/'):
+                path = "/{0}".format(path)
+            path = self.get_zone_base_path(access_zone) + path
+        return path
+
+    def validate_zone_path_params(self):
+        """Validate path and access zone parameters"""
+        param_list = ['access_zone', 'path']
+        for param in param_list:
+            if self.module.params[param] is not None and \
+                    (self.module.params[param].count(" ") > 0 or
+                     len(self.module.params[param].strip()) == 0):
+                self.module.fail_json(msg="Invalid %s provided. Provide "
+                                          "valid %s." % (param, param))
+
+    def validate_quota_cap_unit(self, quota=None):
+        """Checking whether quota limits and cap_unit provided properly"""
+        if quota:
+            if (quota['advisory'] or quota['soft'] or quota['hard']) and \
+                    not quota['cap_unit']:
+                self.module.fail_json(msg="advisory/soft/hard limit provided, "
+                                          "cap_unit not provided")
+            elif quota['cap_unit'] and \
+                    not (quota['advisory'] or quota['soft'] or quota['hard']):
+                self.module.fail_json(msg="cap_unit provided, advisory/soft/"
+                                          "hard limit not provided")
+
     def perform_module_operation(self):
         """
         Perform different actions on Smart Quota module based on parameters
@@ -627,14 +682,11 @@ class SmartQuota(object):
         quota_type = self.module.params['quota_type']
         user_name = self.module.params['user_name']
         group_name = self.module.params['group_name']
-
-        access_zone = self.module.params['access_zone']
-        if access_zone == "" or access_zone.isspace():
-            self.module.fail_json(msg="Invalid access_zone provided,"
-                                      " Please a provide valid access_zone")
-
-        provider_type = self.module.params['provider_type']
         state = self.module.params['state']
+        access_zone = self.module.params['access_zone']
+        path = self.module.params['path']
+
+        self.validate_zone_path_params()
 
         quota = copy.deepcopy(self.module.params['quota'])
         if quota:
@@ -645,10 +697,6 @@ class SmartQuota(object):
         message = "Quota Dictionary after conversion:  %s" % str(quota)
         LOG.debug(message)
 
-        path = self.module.params['path']
-        if path == "" or path.isspace():
-            self.module.fail_json(msg="Invalid path provided,"
-                                      " Please a provide valid path")
         VALIDATE_THRESHOLD = utils.validate_threshold_overhead_parameter(
             quota, "include_overheads")
         if VALIDATE_THRESHOLD and not VALIDATE_THRESHOLD["param_is_valid"]:
@@ -657,21 +705,12 @@ class SmartQuota(object):
             else "include_overheads"
         # If Access_Zone is System then absolute path is required
         # else relative path is taken
-        if access_zone.lower() == "system":
-            complete_path = path
-        else:
-            complete_path = self.get_zone_base_path(access_zone) + path
+        complete_path = self.effective_path(access_zone=access_zone, path=path)
 
         changed = False
-        # Get the sid(security identifier) for User
-        sid = None
-        if quota_type == "user":
-            sid = self.get_sid(user_name, quota_type,
-                               provider_type, access_zone)
-        # Get the sid(security identifier) for Group
-        if quota_type == "group":
-            sid = self.get_sid(group_name, quota_type,
-                               provider_type, access_zone)
+        # Get the sid(security identifier) for User/Group
+        sid = self.get_user_group_sid()
+
         # Throw error if quota_type is directory/default-user/default-group
         # and parameters for user and group are provided
         if quota_type != 'user' and quota_type != 'group':
@@ -682,19 +721,12 @@ class SmartQuota(object):
                         " user_name/group_name/provider_type not required.")
 
         # Throw error if limits and cap_unit are not passed together
-        if quota and (quota['advisory'] or quota['soft'] or quota['hard']) \
-                and not quota['cap_unit']:
-            self.module.fail_json(msg="advisory/soft/hard limit provided,"
-                                      " cap_unit not provided")
-        if quota and quota['cap_unit'] \
-                and not (quota['advisory'] or quota['soft'] or quota['hard']):
-            self.module.fail_json(
-                msg="cap_unit provided,"
-                    " advisory/soft/hard limit not provided")
+        self.validate_quota_cap_unit(quota=quota)
 
         # Get the details of the Quota
         quota_details, quota_id = self.get_quota_details(
-            include_snapshots, access_zone, quota_type, complete_path, sid)
+            include_snapshots=include_snapshots, zone=access_zone,
+            type=quota_type, path=complete_path, persona=sid)
 
         # Create a Quota
         if state == "present" and not quota_details:

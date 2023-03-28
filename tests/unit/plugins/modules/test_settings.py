@@ -55,7 +55,7 @@ class TestSettings():
         assert setting_params == setting_module_mock.module.exit_json.call_args[1]['email_settings']
 
     def test_get_email_settings_with_exception(self, setting_module_mock):
-        setting_params = MockSettingApi.GET_SETTINGS
+        MockSettingApi.GET_SETTINGS
         self.get_settings_args.update({"state": "present", "email_settings": True})
         setting_module_mock.module.params = self.get_settings_args
         setting_module_mock.cluster_api.get_email_settings = MagicMock(return_value=None)
@@ -92,7 +92,7 @@ class TestSettings():
         assert MockSettingApi.update_email_setting_failed_msg() in \
             setting_module_mock.module.fail_json.call_args[1]['msg']
 
-    def test_get_NTP_server(self, setting_module_mock):
+    def test_get_ntp_server(self, setting_module_mock):
         ntp_details = MockSettingApi.SETTINGS['NTP_server'][0]
         self.get_settings_args.update({"state": "present", "email_settings": False, "ntp_server_id": "1.1.1.1"})
         setting_module_mock.module.params = self.get_settings_args
@@ -102,7 +102,7 @@ class TestSettings():
         assert setting_module_mock.module.exit_json.call_args[1]['changed'] is False
         assert ntp_details == setting_module_mock.module.exit_json.call_args[1]['ntp_server']
 
-    def test_delete_NTP_server(self, setting_module_mock):
+    def test_delete_ntp_server(self, setting_module_mock):
         self.get_settings_args.update({"state": "absent", "email_settings": False, "ntp_servers": ['1.1.1.1']})
         setting_module_mock.module.params = self.get_settings_args
         setting_module_mock.protocol_api.list_ntp_servers = MagicMock(
@@ -112,7 +112,7 @@ class TestSettings():
         setting_module_mock.perform_module_operation()
         assert setting_module_mock.module.exit_json.call_args[1]['changed'] is True
 
-    def test_add_NTP_server(self, setting_module_mock):
+    def test_add_ntp_server(self, setting_module_mock):
         self.get_settings_args.update({"mail_relay": "mailrelaymod.itp.xyz.net", "mail_sender": "lab-a2_mod@dell.com",
                                        "mail_subject": "lab_mod-alerts", "state": "present", "email_settings": False,
                                        "ntp_servers": ['1.1.1.1', '2.2.2.2']})
@@ -124,7 +124,7 @@ class TestSettings():
         setting_module_mock.perform_module_operation()
         assert setting_module_mock.module.exit_json.call_args[1]['changed'] is True
 
-    def test_get_NTP_server_with_invalid_value(self, setting_module_mock):
+    def test_get_ntp_server_with_invalid_value(self, setting_module_mock):
         server = "asdasdasd"
         self.get_settings_args.update({"state": "present", "email_settings": False, "ntp_server_id": server})
         setting_module_mock.module.params = self.get_settings_args
@@ -133,7 +133,7 @@ class TestSettings():
         assert MockSettingApi.get_ntp_server_failed_msg(server) in \
             setting_module_mock.module.fail_json.call_args[1]['msg']
 
-    def test_add_NTP_server_with_blank_value(self, setting_module_mock):
+    def test_add_ntp_server_with_blank_value(self, setting_module_mock):
         server_list = ['1.1.1.1', '2.2.2.2']
         self.get_settings_args.update({"state": "present", "email_settings": False, "ntp_servers": server_list})
         setting_module_mock.module.params = self.get_settings_args
@@ -144,7 +144,7 @@ class TestSettings():
         assert MockSettingApi.add_blank_ntp_server_msg(server_list) in \
             setting_module_mock.module.fail_json.call_args[1]['msg']
 
-    def test_delete_NTP_server_with_invalid_value(self, setting_module_mock):
+    def test_delete_ntp_server_with_invalid_value(self, setting_module_mock):
         server = ["1.1.1.1"]
         self.get_settings_args.update({"state": "absent", "email_settings": False, "ntp_servers": server})
         setting_module_mock.module.params = self.get_settings_args

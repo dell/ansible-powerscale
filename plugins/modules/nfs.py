@@ -345,20 +345,20 @@ class NfsExport(object):
         LOG.debug("Getting NFS export details for path: %s and access zone: "
                   "%s", path, access_zone)
         try:
-            NfsExportsExtendedObj = self.protocol_api.list_nfs_exports(
+            nfs_exports_extended_obj = self.protocol_api.list_nfs_exports(
                 path=path, zone=access_zone)
-            if NfsExportsExtendedObj.total > 1:
+            if nfs_exports_extended_obj.total > 1:
                 error_msg = 'Multiple NFS Exports found'
                 LOG.error(error_msg)
                 self.module.fail_json(msg=error_msg)
 
-            elif NfsExportsExtendedObj.total == 0:
+            elif nfs_exports_extended_obj.total == 0:
                 LOG.debug('NFS Export for given path: %s and access zone: %s '
                           'not found', path, access_zone)
                 return {}
 
             else:
-                nfs_export = NfsExportsExtendedObj.exports[0]
+                nfs_export = nfs_exports_extended_obj.exports[0]
                 return nfs_export.to_dict()
 
         except Exception as e:
@@ -386,9 +386,9 @@ class NfsExport(object):
         LOG.info("Getting NFS export details for id: %s and access zone: %s",
                  nfs_export_id, access_zone)
         try:
-            NfsExportsObj = self.protocol_api.get_nfs_export(
+            nfs_exports_obj = self.protocol_api.get_nfs_export(
                 nfs_export_id, zone=access_zone)
-            nfs_export = NfsExportsObj.exports[0]
+            nfs_export = nfs_exports_obj.exports[0]
             return nfs_export.to_dict()
 
         except Exception as e:
@@ -417,11 +417,11 @@ class NfsExport(object):
                 zone=self.module.params['access_zone'])
             return nfs_export
         except Exception as e:
-            errorMsg = 'Create NfsExportCreateParams object for path {0}' \
+            error_msg = 'Create NfsExportCreateParams object for path {0}' \
                 ' failed with error {1}'.format(
                     path, self.determine_error(e))
-            LOG.error(errorMsg)
-            self.module.fail_json(msg=errorMsg)
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
 
     def create_nfs_export(self, path, access_zone):
         '''
@@ -437,11 +437,11 @@ class NfsExport(object):
             return True
 
         except Exception as e:
-            errorMsg = 'Create NFS export for path: {0} and access zone: {1}' \
+            error_msg = 'Create NFS export for path: {0} and access zone: {1}' \
                 ' failed with error: {2}'.format(
                     path, access_zone, self.determine_error(e))
-            LOG.error(errorMsg)
-            self.module.fail_json(msg=errorMsg)
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
 
     def _create_current_client_dict_from_playbook(self):
         client_dict_playbook_input = {
@@ -630,11 +630,11 @@ class NfsExport(object):
                 return True
 
             except Exception as e:
-                errorMsg = 'Modify NFS export for path: {0} and access zone:' \
+                error_msg = 'Modify NFS export for path: {0} and access zone:' \
                     ' {1} failed with error: {2}'.format(
                         path, access_zone, self.determine_error(e))
-                LOG.error(errorMsg)
-                self.module.fail_json(msg=errorMsg)
+                LOG.error(error_msg)
+                self.module.fail_json(msg=error_msg)
 
     def delete_nfs_export(self):
         '''
@@ -651,15 +651,15 @@ class NfsExport(object):
             self.result['NFS_export_details'] = {}
             return True
         except Exception as e:
-            errorMsg = (
+            error_msg = (
                 'Delete NFS export with path: {0}, zone: {1}, id: {2} failed'
                 ' with error {3}'.format(
                     nfs_export['paths'][0],
                     nfs_export['zone'],
                     nfs_export['id'],
                     self.determine_error(e)))
-            LOG.error(errorMsg)
-            self.module.fail_json(msg=errorMsg)
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
 
     def determine_error(self, error_obj):
         '''Format the error object'''

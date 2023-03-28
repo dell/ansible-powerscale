@@ -20,18 +20,17 @@ extends_documentation_fragment:
   - dellemc.powerscale.powerscale
 author:
 - P Srinivas Rao (@srinivas-rao5) <ansible.team@dell.com>
+- Trisha Datta (@trisha-dell) <ansible.team@dell.com>
 options:
   user_name:
     description:
     - The name of the user account.
-    - Required at the time of user creation, for rest of the operations
-      either user_name or user_id is required.
     type: str
   user_id:
     description:
-    - The user_id is auto generated at the time of creation.
+    - The user_id is auto generated or can be assigned at the time of creation.
     - For all other operations either user_name or user_id is needed.
-    type: str
+    type: int
   password:
     description:
     - The password for the user account.
@@ -116,6 +115,17 @@ options:
     - It is required when a role is added or removed from user.
     type: str
     choices: ['present-for-user', 'absent-for-user']
+  update_password:
+    description:
+    - This parameter controls the way the I(password) is updated during
+      the creation and modification of a user.
+    - C(always) will update password for each execution.
+    - C(on_create) will only set while creating a user.
+    - For modifying I(password), set the I(update_password) to
+      C(always).
+    choices: ['always', 'on_create']
+    default: always
+    type: str
 '''
 
 EXAMPLES = r'''
@@ -141,6 +151,28 @@ EXAMPLES = r'''
       access_zone: "{{access_zone}}"
       provider_type: "{{provider_type}}"
       user_name: "{{account_name}}"
+      password: "{{account_password}}"
+      primary_group: "{{primary_group}}"
+      enabled: "{{enabled}}"
+      email: "{{email}}"
+      full_name: "{{full_name}}"
+      home_directory: "{{home_directory}}"
+      shell: "{{shell}}"
+      role_name: "{{role_name}}"
+      role_state: "present-for-user"
+      state: "present"
+
+  - name: Create User with user id
+    dellemc.powerscale.user:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{port_no}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      access_zone: "{{access_zone}}"
+      provider_type: "{{provider_type}}"
+      user_name: "Test_User"
+      user_id: 7000
       password: "{{account_password}}"
       primary_group: "{{primary_group}}"
       enabled: "{{enabled}}"
@@ -215,6 +247,20 @@ EXAMPLES = r'''
       provider_type: "{{provider_type}}"
       user_name: "{{account_name}}"
       state: "absent"
+
+  - name: Modify password in non-system access zone update_password as "always"
+    dellemc.powerscale.user:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{port_no}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      access_zone: "{{access_zone}}"
+      provider_type: "{{provider_type}}"
+      user_name: "{{account_name}}"
+      password: "new_password"
+      update_password: "always"
+      state: "present"
 '''
 
 RETURN = r'''
@@ -299,8 +345,6 @@ class User(object):
         self.module_params = utils.get_powerscale_management_host_parameters()
         self.module_params.update(get_user_parameters())
 
-        mutually_exclusive = [['user_name', 'user_id']]
-
         required_one_of = [
             ['user_name', 'user_id']
         ]
@@ -308,7 +352,6 @@ class User(object):
         # initialize the ansible module
         self.module = AnsibleModule(argument_spec=self.module_params,
                                     supports_check_mode=False,
-                                    mutually_exclusive=mutually_exclusive,
                                     required_one_of=required_one_of)
 
         # result is a dictionary that contains changed status and
@@ -363,7 +406,7 @@ class User(object):
             error = str(error_obj)
         return error
 
-    def create_user(self, user_name, password, zone, provider,
+    def create_user(self, user_name, user_id, password, zone, provider,
                     enabled, primary_group, home_directory, shell,
                     full_name, email):
         """Create User in PowerScale"""
@@ -374,7 +417,7 @@ class User(object):
 
             provider = self.check_provider_type(provider, 'Create')
             auth_user = utils.isi_sdk.AuthUserCreateParams(
-                name=user_name, password=password, enabled=enabled,
+                name=user_name, uid=user_id, password=password, enabled=enabled,
                 primary_group=primary_group, home_directory=home_directory,
                 shell=shell, gecos=full_name, email=email)
 
@@ -400,35 +443,62 @@ class User(object):
             return True
         except Exception as e:
             error = self.determine_error(error_obj=e)
-            error_message = "Delete User '%s' failed with %s"\
+            error_message = "Delete User '%s' failed with %s" \
                             % (auth_user_id, error)
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
-    def is_user_modified(self, user_details):
-        """ Determines whether the user details are to be updated or not."""
+    def is_user_modified_sensitive(self, user_details):
+        """ Determines whether the user details are to be modified or not."""
         if self.module.params['enabled'] is not None:
             if self.module.params['enabled'] != user_details['enabled']:
                 return True
 
-        parameter_list = ['primary_group', 'shell', 'email', 'full_name',
-                          'home_directory']
-        case_sensitive_parameters = ['full_name', 'home_directory']
+        parameter_list = ['full_name', 'home_directory']
 
         for parameter in parameter_list:
             if self.module.params[parameter]:
                 if user_details[parameter]:
-                    if parameter not in case_sensitive_parameters:
-                        if self.module.params[parameter].lower() != \
-                                user_details[parameter].lower():
-                            return True
-                    else:
-                        if self.module.params[parameter] != \
-                                user_details[parameter]:
-                            return True
+                    if self.module.params[parameter] != \
+                            user_details[parameter]:
+                        return True
                 else:
                     return True
         return False
+
+    def is_user_modified_insensitive(self, user_details):
+        """ Determines whether the user details are to be modified or not."""
+
+        parameter_list = ['primary_group', 'shell', 'email']
+        for parameter in parameter_list:
+            if self.module.params[parameter]:
+                if user_details[parameter]:
+                    if self.module.params[parameter].lower() != \
+                            user_details[parameter].lower():
+                        return True
+                else:
+                    return True
+        return False
+
+    def modify_password(self, auth_user_id, zone):
+        """Modifying user password if needed"""
+        try:
+            if self.module.params['update_password'] == "always" and \
+                    self.module.params['password'] is not None:
+                auth_user = utils.isi_sdk.AuthUser(password=self.module.params['password'])
+
+                self.api_instance.update_auth_user(
+                    auth_user=auth_user, auth_user_id=auth_user_id,
+                    zone=zone)
+                LOG.info("User %s password is updated", auth_user_id)
+                return True
+            return False
+        except Exception as e:
+            error = self.determine_error(error_obj=e)
+            error_message = "Update password for User '%s' failed with %s" \
+                            % (auth_user_id, error)
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
 
     def update_user(self, auth_user_id, zone, provider, enabled,
                     primary_group, home_directory, shell,
@@ -457,29 +527,31 @@ class User(object):
 
     def get_user_details(self, auth_user_id, zone, provider):
         """Get the User Account Details in PowerScale"""
+        error_msg = "Get User Details %s failed with %s"
         try:
             api_response = self.api_instance.get_auth_user(
                 auth_user_id=auth_user_id,
                 zone=zone, provider=provider)
             LOG.info('User details are %s', str(api_response))
             api_response_dict = api_response.users[0].to_dict()
+
             return api_response_dict
 
         except utils.ApiException as e:
             if str(e.status) == "404":
-                error_message = "Get User Details %s failed with %s" \
-                                % (auth_user_id, self.determine_error(e))
+                error_message = error_msg \
+                    % (auth_user_id, self.determine_error(e))
                 LOG.info(error_message)
                 return None
             else:
-                error_message = "Get User Details %s failed with %s" \
-                                % (auth_user_id, self.determine_error(e))
+                error_message = error_msg \
+                    % (auth_user_id, self.determine_error(e))
                 LOG.error(error_message)
                 self.module.fail_json(msg=error_message)
 
         except Exception as e:
-            error_message = "Get User Details %s failed with %s" \
-                            % (auth_user_id, self.determine_error(e))
+            error_message = error_msg \
+                % (auth_user_id, self.determine_error(e))
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
@@ -530,67 +602,172 @@ class User(object):
         else:
             return False
 
+    def get_roles_for_user_by_name(self, user_name, api_response):
+        """ Get the roles for the user by user_name  """
+        roles_for_user = []
+        for role_name in api_response.roles:
+            if role_name.members:
+                for member in role_name.members:
+                    if member.name and (member.name.lower()
+                                        == user_name.lower()):
+                        roles_for_user.append(role_name.id.lower())
+        return roles_for_user
+
+    def get_roles_for_user_by_id(self, user_id, api_response):
+        """ Get the roles for the user by user_id """
+        roles_for_user = []
+        user_id = "UID:" + str(user_id)
+        for role_name in api_response.roles:
+            if role_name.members:
+                for member in role_name.members:
+                    if member.id == user_id:
+                        roles_for_user.append(role_name.id.lower())
+        return roles_for_user
+
     def get_roles_for_user(self, user_name, user_id):
         """ Get the roles for the user  """
-        roles_for_user = []
         try:
             api_response = self.api_instance.list_auth_roles()
             if user_name is not None:
-                for role_name in api_response.roles:
-                    if role_name.members:
-                        for member in role_name.members:
-                            if member.name and (member.name.lower()
-                                                == user_name.lower()):
-                                roles_for_user.append(role_name.id.lower())
-                return roles_for_user
+                return self.get_roles_for_user_by_name(user_name, api_response)
             else:
-                user_id = "UID:" + user_id
-                for role_name in api_response.roles:
-                    if role_name.members:
-                        for member in role_name.members:
-                            if member.id == user_id:
-                                roles_for_user.append(role_name.id.lower())
-                return roles_for_user
+                return self.get_roles_for_user_by_id(user_id, api_response)
         except utils.ApiException as e:
             error_message = "Exception when calling" \
                             " AuthApi->list_auth_roles: %s\n" % e
             LOG.error(error_message)
 
-    def perform_module_operation(self):
-        """
-        Perform different actions on user module based on parameters
-        chosen in playbook
-        """
-        user_name = self.module.params['user_name']
-        user_id = self.module.params['user_id']
-        password = self.module.params['password']
-        access_zone = self.module.params['access_zone']
-        provider_type = self.module.params['provider_type']
-        enabled = self.module.params['enabled']
-        primary_group = self.module.params['primary_group']
+    def collect_user_details(self, auth_user_id, access_zone, provider_type,
+                             role_name, role_state, user_name, user_id):
+        """Get the details of the user"""
+        user_details = self.get_user_details(
+            auth_user_id, access_zone, provider_type)
+        if user_details:
+            # Error is none so user exists, hence getting the list
+            # of roles for the user if the User is in System Access Zone
+            get_roles_flag = True
+            if (not role_name) and (role_state is None) and \
+                    (access_zone.lower() != "system"):
+                get_roles_flag = False
+                user_details['roles'] = []
+            if get_roles_flag:
+                user_details['roles'] = self.get_roles_for_user(
+                    user_name, user_id)
+        return user_details
+
+    def create_new_user(self, user_name, user_id, password, access_zone,
+                        provider_type, enabled, primary_group,
+                        home_directory, full_name, email,
+                        role_state, role_name, auth_user_id):
+        """Create a new user"""
+
+        if not user_name:
+            error_message = "Unable to create a user, 'user_name' is" \
+                            " missing"
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+        if not password:
+            error_message = "Unable to create a user, 'password' is" \
+                            " missing"
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
         shell = self.module.params['shell']
-        full_name = self.module.params['full_name']
-        email = self.module.params['email']
-        state = self.module.params['state']
-        role_name = self.module.params['role_name']
-        role_state = self.module.params['role_state']
+        self.create_user(user_name, user_id, password, access_zone,
+                         provider_type, enabled, primary_group,
+                         home_directory, shell, full_name, email)
+
+        if role_state == "present-for-user":
+            self.add_role_to_user(auth_user_id, role_name)
+
+        return True
+
+    def modify_existing_user(self, user_name, user_id, role_name, role_state,
+                             auth_user_id, user_details, home_directory,
+                             access_zone, provider_type, enabled,
+                             primary_group, full_name, email):
+        """Modifying details of a user"""
+
+        LOG.info("Modifying the user details.")
+        # Check for changes in role
+        shell = self.module.params['shell']
+        role_flag = self.is_user_part_of_role(
+            user_name, user_id, role_name)
+        role_changed = False
+        message = "role_flag %s" % role_flag
+        LOG.debug(message)
+
+        if role_flag:
+            if role_state == "absent-for-user":
+                role_changed = self.remove_role_from_user(
+                    auth_user_id, role_name)
+        else:
+            if role_state == "present-for-user":
+                role_changed = self.add_role_to_user(
+                    auth_user_id, role_name)
+
+        old_user_details = get_user_params_from_details(user_details)
+        modified_sensitive = self.is_user_modified_sensitive(old_user_details)
+        modified_insensitive = self.is_user_modified_insensitive(old_user_details)
+        user_details_changed = False
+        if home_directory and \
+                user_details['home_directory'] == home_directory:
+            home_directory = None
+
+        if modified_sensitive or modified_insensitive:
+            user_details_changed = self.update_user(
+                auth_user_id, access_zone, provider_type, enabled,
+                primary_group, home_directory, shell, full_name, email)
+
+        password_changed = self.modify_password(auth_user_id, access_zone)
+        return user_details_changed or role_changed or password_changed
+
+    def delete_existing_user(self, provider_type, auth_user_id, access_zone,
+                             role_name, role_state, user_name, user_id):
+        """Delete the user and related objects"""
+
+        if provider_type.lower() != 'local':
+            self.module.fail_json(
+                msg="Cannot delete user from %s  provider_type"
+                    % provider_type)
+        user_details = self.get_user_details(
+            auth_user_id, access_zone, provider_type)
+        if user_details:
+            get_roles_flag = True
+            if (not role_name) and (role_state is None) and \
+                    (access_zone.lower() != "system"):
+                get_roles_flag = False
+            roles_for_user = []
+            if get_roles_flag:
+                roles_for_user = self.get_roles_for_user(
+                    user_name, user_id)
+
+            if get_roles_flag and len(roles_for_user) != 0:
+                for role in roles_for_user:
+                    self.remove_role_from_user(auth_user_id, role)
+            return self.delete_user(auth_user_id, access_zone,
+                                    provider_type)
+        else:
+            return False
+
+    def set_validate_params(self, access_zone, user_name, user_id,
+                            email, role_name, role_state):
+        """Set and validate the params"""
 
         if self.module.params['home_directory'] and \
                 access_zone.lower() != 'system':
-
             self.module.params['home_directory'] = \
                 self.get_zone_base_path(access_zone) + \
                 self.module.params['home_directory']
 
         home_directory = self.module.params['home_directory']
-        if user_name and not user_id:
+        auth_user_id = None
+        if user_name:
             auth_user_id = 'USER:' + user_name
-        elif user_id and not user_name:
-            auth_user_id = 'UID:' + user_id
-        else:
-            self.module.fail_json(msg="Invalid user_name or user_id"
-                                      " provided. Enter a valid string.")
-
+        if user_id:
+            auth_user_id = 'UID:' + str(user_id)
+        if auth_user_id is None:
+            self.module.fail_json(
+                msg="Invalid user_name or user_id provided.")
         if email and re.search(
                 r'^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$',
                 email) is None:
@@ -605,104 +782,68 @@ class User(object):
             self.module.fail_json(
                 msg="roles can be assigned to users and groups of"
                     " System Access Zone, got %s" % access_zone)
+
+        return home_directory, auth_user_id
+
+    def check_if_id_exists(self, user_name, user_details):
+        """
+        Check if the id exists
+        :param user_name: User name
+        :param user_details: User details
+        :return: True if id exists.
+        """
+        if user_name == user_details['uid']['name']:
+            return False
+        return True
+
+    def perform_module_operation(self):
+        """
+        Perform different actions on user module based on parameters
+        chosen in playbook
+        """
+        user_name = self.module.params['user_name']
+        user_id = self.module.params['user_id']
+        password = self.module.params['password']
+        access_zone = self.module.params['access_zone']
+        provider_type = self.module.params['provider_type']
+        enabled = self.module.params['enabled']
+        primary_group = self.module.params['primary_group']
+        full_name = self.module.params['full_name']
+        email = self.module.params['email']
+        state = self.module.params['state']
+        role_name = self.module.params['role_name']
+        role_state = self.module.params['role_state']
+
+        changed = False
+        home_directory, auth_user_id = self.set_validate_params(access_zone, user_name, user_id,
+                                                                email, role_name, role_state)
         if state == "present":
-            # Get the details of the user.
-            user_details = self.get_user_details(
-                auth_user_id, access_zone, provider_type)
-            if user_details:
-                # Error is none so user exists, hence getting the list
-                # of roles for the user if the User is in System Access Zone
-                get_roles_flag = True
-                if (not role_name) and (role_state is None) and \
-                        (access_zone.lower() != "system"):
-                    get_roles_flag = False
-                    user_details['roles'] = []
-                if get_roles_flag:
-                    user_details['roles'] = self.get_roles_for_user(
-                        user_name, user_id)
+            user_details = self.collect_user_details(auth_user_id, access_zone,
+                                                     provider_type, role_name, role_state,
+                                                     user_name, user_id)
+            if user_details is not None and user_name is not None:
+                id_exists = self.check_if_id_exists(user_name, user_details)
+                if id_exists:
+                    error_message = "User already exists with UID %s" % user_id
+                    LOG.error(error_message)
+                    self.module.fail_json(msg=error_message)
             # If User Details is None, User is created.
             if not user_details:
-                if user_id:
-                    error_message = "User with user_id '%s'" \
-                                    " not found on the system" % user_id
-                    LOG.error(error_message)
-                    self.module.fail_json(msg=error_message)
-                if not password:
-                    error_message = "Unable to create a user, 'password' is"\
-                                    " missing"
-                    LOG.error(error_message)
-                    self.module.fail_json(msg=error_message)
-
-                self.create_user(user_name, password, access_zone,
-                                 provider_type, enabled, primary_group,
-                                 home_directory, shell, full_name, email)
-
-                if role_state == "present-for-user":
-                    self.add_role_to_user(auth_user_id, role_name)
-                changed = True
+                changed = self.create_new_user(user_name, user_id, password, access_zone,
+                                               provider_type, enabled, primary_group,
+                                               home_directory, full_name, email,
+                                               role_state, role_name, auth_user_id)
 
             else:
-                LOG.info("Update the user details.")
-                # Check for changes in role
-                role_flag = self.is_user_part_of_role(
-                    user_name, user_id, role_name)
-                role_changed = False
-                message = "role_flag %s" % role_flag
-                LOG.info(message)
-
-                if role_flag:
-                    if role_state == "absent-for-user":
-                        role_changed = self.remove_role_from_user(
-                            auth_user_id, role_name)
-                else:
-                    if role_state == "present-for-user":
-                        role_changed = self.add_role_to_user(
-                            auth_user_id, role_name)
-
-                old_user_details = get_user_params_from_details(user_details)
-                modified = self.is_user_modified(old_user_details)
-
-                user_details_changed = False
-                if home_directory and \
-                        user_details['home_directory'] == home_directory:
-                    home_directory = None
-
-                if modified:
-                    user_details_changed = self.update_user(
-                        auth_user_id, access_zone, provider_type, enabled,
-                        primary_group, home_directory, shell, full_name,
-                        email)
-
-                if user_details_changed or role_changed:
-                    changed = True
-                else:
-                    changed = False
-
+                changed = self.modify_existing_user(user_name, user_id, role_name,
+                                                    role_state, auth_user_id, user_details,
+                                                    home_directory, access_zone, provider_type,
+                                                    enabled, primary_group, full_name, email)
         # State == Absent (Delete User Account)
         else:
-            if provider_type.lower() != 'local':
-                self.module.fail_json(
-                    msg="Cannot Delete user from %s  provider_type"
-                        % provider_type)
-            user_details = self.get_user_details(
-                auth_user_id, access_zone, provider_type)
-            if user_details:
-                get_roles_flag = True
-                if (not role_name) and (role_state is None) and \
-                        (access_zone.lower() != "system"):
-                    get_roles_flag = False
-                roles_for_user = []
-                if get_roles_flag:
-                    roles_for_user = self.get_roles_for_user(
-                        user_name, user_id)
-
-                if get_roles_flag and len(roles_for_user) != 0:
-                    for role in roles_for_user:
-                        self.remove_role_from_user(auth_user_id, role)
-                changed = self.delete_user(auth_user_id, access_zone,
-                                           provider_type)
-            else:
-                changed = False
+            changed = self.delete_existing_user(provider_type, auth_user_id,
+                                                access_zone, role_name, role_state,
+                                                user_name, user_id)
         '''
         Finally update the module changed state and saving updated user
         details
@@ -743,24 +884,24 @@ def get_user_parameters():
     """This method provide parameter required for the ansible user
     modules on PowerScale"""
     return dict(
-        user_name=dict(required=False, type='str'),
-        user_id=dict(required=False, type='str'),
-        password=dict(required=False, type='str', no_log=True),
-        access_zone=dict(required=False, type='str', default='system'),
-        provider_type=dict(required=False, type='str',
-                           choices=['local', 'file', 'ldap', 'ads', 'nis'],
-                           default='local'),
-        enabled=dict(required=False, type='bool'),
-        primary_group=dict(required=False, type='str'),
-        home_directory=dict(required=False, type='str'),
-        shell=dict(required=False, type='str'),
-        full_name=dict(required=False, type='str'),
-        email=dict(required=False, type='str'),
-        state=dict(required=True, type='str',
+        user_name=dict(type='str'),
+        user_id=dict(type='int'),
+        password=dict(type='str', no_log=True),
+        access_zone=dict(type='str', default='system'),
+        provider_type=dict(type='str', default='local',
+                           choices=['local', 'file', 'ldap', 'ads', 'nis']),
+        enabled=dict(type='bool'),
+        primary_group=dict(type='str'),
+        home_directory=dict(type='str'),
+        shell=dict(type='str'),
+        full_name=dict(type='str'),
+        email=dict(type='str'),
+        state=dict(type='str', required=True,
                    choices=['present', 'absent']),
-        role_name=dict(required=False, type='str'),
-        role_state=dict(required=False, type='str',
-                        choices=['present-for-user', 'absent-for-user'])
+        role_name=dict(type='str'),
+        role_state=dict(type='str',
+                        choices=['present-for-user', 'absent-for-user']),
+        update_password=dict(type='str', choices=['on_create', 'always'], default='always')
     )
 
 
