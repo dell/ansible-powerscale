@@ -43,9 +43,9 @@ releases:
       - Filesystem module is enhanced to support additional quota parameters.
       - Gather facts module is enhanced to list Nodes, NFS Exports, SMB shares and
         Active clients.
-      - Map or unmap authentication providers to/from an access zone
+      - Map or unmap authentication providers to/from an access zone.
       - Rebranded Isilon to PowerScale.
-      - SmartQuota module is enhanced to support CRUD operations for default-user
+      - SmartQuota module is enhanced to support CRUD operations, for default-user
         and default-group quotas.
       - Support extended for OneFS version 9.1.0.
     modules:
@@ -78,7 +78,7 @@ releases:
     - description: Manage SyncIQ performance rules on PowerScale Storage System.
       name: synciqrules
       namespace: ''
-    - description: Provides the SyncIQ target reports for PowerScale Storage System
+    - description: Provides SyncIQ target reports on PowerScale Storage System
       name: synciqtargetreports
       namespace: ''
     release_date: '2021-09-23'
@@ -110,8 +110,8 @@ releases:
   1.5.0:
     changes:
       minor_changes:
-      - ADS module is enhanced to support machine_account & organizational_unit parameters
-        while creating ADS provider.
+      - ADS module is enhanced to support machine_account and organizational_unit
+        parameters while creating ADS provider.
       - Added rotating file handler for log files.
       - Removal of dellemc_powerscale prefix from all the modules name.
       - SmartQuota module is enhanced to support float values for Quota Parameters.
@@ -162,3 +162,17 @@ releases:
       minor_changes:
       - Added support for security flavors while creating and modifying NFS export.
     release_date: '2022-12-20'
+  1.9.0:
+    changes:
+      minor_changes:
+      - Added support to create a group using group_id.
+      - Added support to create a user using user_id.
+      - Added support to list SMB open files through Info module.
+      - Added support to update the password of the user.
+      - Enabled the path paramter of Smart Quota module to be consistent with other
+        modules.
+    modules:
+    - description: Find and close SMB open files on a PowerScale Storage system.
+      name: smb_file
+      namespace: ''
+    release_date: '2023-03-31'

@@ -5,6 +5,23 @@ Dellemc.Powerscale Change Logs
 .. contents:: Topics
 
 
+v1.9.0
+======
+
+Minor Changes
+-------------
+
+- Added support to create a group using group_id.
+- Added support to create a user using user_id.
+- Added support to list SMB open files through Info module.
+- Added support to update the password of the user.
+- Enabled the path parameter of Smart Quota module to be consistent with other modules.
+
+New Modules
+-----------
+
+- dellemc.powerscale.smb_file - Find and close SMB open files on a PowerScale Storage system.
+
 v1.8.0
 ======
 
@@ -54,7 +71,7 @@ v1.5.0
 Minor Changes
 -------------
 
-- ADS module is enhanced to support machine_account & organizational_unit parameters while creating ADS provider.
+- ADS module is enhanced to support machine_account and organizational_unit parameters while creating ADS provider.
 - Added rotating file handler for log files.
 - Removal of dellemc_powerscale prefix from all the modules name.
 - SmartQuota module is enhanced to support float values for Quota Parameters.
@@ -102,7 +119,7 @@ New Modules
 - dellemc.powerscale.synciqpolicy - Manage SyncIQ policies on PowerScale
 - dellemc.powerscale.synciqreports - Provides the SyncIQ reports for PowerScale Storage System
 - dellemc.powerscale.synciqrules - Manage SyncIQ performance rules on PowerScale Storage System.
-- dellemc.powerscale.synciqtargetreports - Provides the SyncIQ target reports for PowerScale Storage System
+- dellemc.powerscale.synciqtargetreports - Provides SyncIQ target reports on PowerScale Storage System
 
 v1.2.0
 ======
@@ -112,9 +129,9 @@ Minor Changes
 
 - Filesystem module is enhanced to support additional quota parameters.
 - Gather facts module is enhanced to list Nodes, NFS Exports, SMB shares and Active clients.
-- Map or unmap authentication providers to/from an access zone
+- Map or unmap authentication providers to/from an access zone.
 - Rebranded Isilon to PowerScale.
-- SmartQuota module is enhanced to support CRUD operations for default-user and default-group quotas.
+- SmartQuota module is enhanced to support CRUD operations, for default-user and default-group quotas.
 - Support extended for OneFS version 9.1.0.
 
 New Modules

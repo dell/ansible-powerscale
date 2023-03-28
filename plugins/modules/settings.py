@@ -314,7 +314,7 @@ class Settings(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
-    def construct_NTP_server_body(self, ntp_server):
+    def construct_ntp_server_body(self, ntp_server):
         """
         Constructs NTP server body
         :param ntp_server: ID or Name of NTP server which is to be added.
@@ -334,7 +334,7 @@ class Settings(object):
                 LOG.error(error_message)
                 self.module.fail_json(msg=error_message)
 
-    def doUpdate(self, source, target):
+    def do_update(self, source, target):
         return source and source != target
 
     def perform_module_operation(self):
@@ -364,7 +364,7 @@ class Settings(object):
         if existing_email_settings:
             for setting in email_setting_keys:
                 if setting in self.module.params.keys() and \
-                        self.doUpdate(self.module.params[setting], existing_email_settings['settings'][setting]):
+                        self.do_update(self.module.params[setting], existing_email_settings['settings'][setting]):
                     email_params[setting] = self.module.params[setting]
 
         if ntp_server_details:
@@ -384,7 +384,7 @@ class Settings(object):
             self.validate_input(ntp_servers)
             ntp_servers_final = (list(set(ntp_servers) - set(ntp_server_list_system)))
             for ntp_server in ntp_servers_final:
-                server_details_to_update = self.construct_NTP_server_body(ntp_server)
+                server_details_to_update = self.construct_ntp_server_body(ntp_server)
                 self.add_ntp_server(server_details_to_update)
                 result['changed'] = True
             result['ntp_server'] = self.get_ntp_servers()

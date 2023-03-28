@@ -36,6 +36,7 @@ class TestInfo():
         gatherfacts_module_mock.module = MagicMock()
         gatherfacts_module_mock.network_api = MagicMock()
         gatherfacts_module_mock.protocol_api = MagicMock()
+        utils.ISI_SDK_VERSION_9 = MagicMock(return_value=True)
         return gatherfacts_module_mock
 
     def test_get_network_groupnets(self, gatherfacts_module_mock):
@@ -203,8 +204,6 @@ class TestInfo():
         gatherfacts_module_mock.storagepool_api = MagicMock()
         gatherfacts_module_mock.storagepool_api.list_storagepool_tiers = MagicMock(return_value=MockSDKResponse(storage_tiers))
         gatherfacts_module_mock.perform_module_operation()
-        print(storage_tiers['tiers'])
-        print(gatherfacts_module_mock.module.exit_json.call_args[1]['StoragePoolTiers'])
         assert storage_tiers['tiers'] == gatherfacts_module_mock.module.exit_json.call_args[1]['StoragePoolTiers']
 
     def test_get_storage_tiers_api_exception(self, gatherfacts_module_mock):
@@ -216,3 +215,24 @@ class TestInfo():
         gatherfacts_module_mock.storagepool_api.list_storagepool_tiers = MagicMock(side_effect=MockApiException)
         gatherfacts_module_mock.perform_module_operation()
         assert MockGatherfactsApi.get_storage_tier_response('error') == gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
+
+    def test_get_smb_files(self, gatherfacts_module_mock):
+        smb_files = MockGatherfactsApi.get_smb_files_response('api')
+        self.get_module_args.update({
+            'gather_subset': ['smb_files']
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        gatherfacts_module_mock.protocol_api = MagicMock()
+        gatherfacts_module_mock.protocol_api.get_smb_openfiles = MagicMock(return_value=MockSDKResponse(smb_files))
+        gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_smb_files_response('module') == gatherfacts_module_mock.module.exit_json.call_args[1]['SmbOpenFiles']
+
+    def test_get_smb_files_api_exception(self, gatherfacts_module_mock):
+        self.get_module_args.update({
+            'gather_subset': ['smb_files']
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        gatherfacts_module_mock.protocol_api = MagicMock()
+        gatherfacts_module_mock.protocol_api.get_smb_openfiles = MagicMock(side_effect=MockApiException)
+        gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_smb_files_response('error') == gatherfacts_module_mock.module.fail_json.call_args[1]['msg']

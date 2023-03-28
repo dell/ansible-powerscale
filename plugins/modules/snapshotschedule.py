@@ -567,13 +567,15 @@ class SnapshotSchedule(object):
             if snapshot_schedule_details is None:
                 self.module.fail_json(msg="Snapshot schedule not found.")
 
-            if new_name != snapshot_schedule_details['schedules'][0]['name']:
-                self.validate_new_name(new_name)
-                LOG.info("Renaming snapshot schedule %s to new name %s",
-                         name, new_name)
-                result['changed'] = self.rename_snapshot_schedule(
-                    snapshot_schedule_details, new_name) or result['changed']
-                name = new_name
+            if snapshot_schedule_details is not None and \
+                    len(snapshot_schedule_details['schedules']) != 0:
+                if new_name != snapshot_schedule_details['schedules'][0]['name']:
+                    self.validate_new_name(new_name)
+                    LOG.info("Renaming snapshot schedule %s to new name %s",
+                             name, new_name)
+                    result['changed'] = self.rename_snapshot_schedule(
+                        snapshot_schedule_details, new_name) or result['changed']
+                    name = new_name
 
         if state == 'present' and is_schedule_modified:
             LOG.info("Modifying snapshot schedule %s", name)
