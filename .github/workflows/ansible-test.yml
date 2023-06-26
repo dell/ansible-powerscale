@@ -121,3 +121,43 @@ jobs:
       - name: Run sanity tests
         run: ansible-test sanity --docker -v --color
         working-directory: /home/runner/.ansible/collections/ansible_collections/dellemc/powerscale
+  lint:
+    name: Ansible lint
+    runs-on: ubuntu-latest
+    needs: [build]
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10", "3.11"]
+        ansible-version: [stable-2.13, stable-2.14, stable-2.15]
+
+    steps:
+      # Important: This sets up your GITHUB_WORKSPACE environment variable
+      - name: Checkout the source code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # needed for progressive mode to work
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install ansible (${{ matrix.ansible-version }}) version
+        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible-version }}.tar.gz --disable-pip-version-check
+
+      - name: Install ansible lint
+        run: pip install ansible-lint --disable-pip-version-check
+
+      - name: Download migrated collection artifacts
+        uses: actions/download-artifact@v1
+        with:
+          name: collection
+          path: .cache/collection-tarballs
+
+      - name: Install collection build
+        run: ansible-galaxy collection install .cache/collection-tarballs/*.tar.gz
+
+      - name: Run Ansible lint
+        run: ansible-lint --show-relpath
+        working-directory: /home/runner/work/ansible-powerscale/ansible-powerscale
