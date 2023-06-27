@@ -20,7 +20,9 @@ Requirements
 ------------
 The below requirements are needed on the host that executes this module.
 
-- A Dell PowerScale Storage system. Ansible 2.12, 2.13 or 2.14.
+- A Dell PowerScale Storage system.
+- Ansible-core 2.13 or later.
+- Python 3.9, 3.10 or 3.11.
 
 
 
@@ -36,15 +38,15 @@ Parameters
 
     This parameter is mandatory during create.
 
-    Server_uris should begin with ldap:// or ldaps:// if not validation error will be displayed.
+    *server_uris* should begin with ldap:// or ldaps:// if not validation error will be displayed.
 
 
   server_uri_state (optional, str, None)
-    Specifies if the server_uris need to be added or removed from the provider.
+    Specifies if the *server_uris* need to be added or removed from the provider.
 
-    This parameter is mandatory if server_uris is specified.
+    This parameter is mandatory if *server_uris* is specified.
 
-    While creating LDAP provider, this parameter value should be specified as 'present-in-ldap'.
+    While creating LDAP provider, this parameter value should be specified as ``present-in-ldap``.
 
 
   base_dn (optional, str, None)
@@ -75,9 +77,9 @@ Parameters
   state (True, str, None)
     The state of the LDAP provider after the task is performed.
 
-    present - indicates that the LDAP provider should exist on the system.
+    ``present`` - indicates that the LDAP provider should exist on the system.
 
-    absent - indicates that the LDAP provider should not exist on the system.
+    ``absent`` - indicates that the LDAP provider should not exist on the system.
 
 
   onefs_host (True, str, None)
@@ -91,9 +93,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    True - indicates that the SSL certificate should be verified.
+    ``true`` - indicates that the SSL certificate should be verified.
 
-    False - indicates that the SSL certificate should not be verified.
+    ``false`` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -111,7 +113,9 @@ Notes
 -----
 
 .. note::
-   - This module does not support modification of bind_password of LDAP provider. The value specified for bind_password will be ignored during modify.
+   - This module does not support modification of *bind_password* of LDAP provider.
+   - The value specified for *bind_password* will be ignored during modify.
+   - The *check_mode* is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -125,75 +129,75 @@ Examples
     
     - name: Add an LDAP provider
       dellemc.powerscale.ldap:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          ldap_name: "ldap_test"
-          server_uris:
-            - "{{server_uri_1}}"
-            - "{{server_uri_2}}"
-          server_uri_state: 'present-in-ldap'
-          base_dn: "DC=ansildap,DC=com"
-          ldap_parameters:
-            groupnet: "groupnet_ansildap"
-            bind_dn: "cn=admin,dc=example,dc=com"
-            bind_password: "{{bind_password}}"
-          state: "present"
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        ldap_name: "ldap_test"
+        server_uris:
+          - "{{server_uri_1}}"
+          - "{{server_uri_2}}"
+        server_uri_state: 'present-in-ldap'
+        base_dn: "DC=ansildap,DC=com"
+        ldap_parameters:
+          groupnet: "groupnet_ansildap"
+          bind_dn: "cn=admin,dc=example,dc=com"
+          bind_password: "{{bind_password}}"
+        state: "present"
 
     - name: Add server_uris to an LDAP provider
       dellemc.powerscale.ldap:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          ldap_name: "ldap_test"
-          server_uris:
-            - "{{server_uri_1}}"
-          server_uri_state: "present-in-ldap"
-          state: "present"
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        ldap_name: "ldap_test"
+        server_uris:
+          - "{{server_uri_1}}"
+        server_uri_state: "present-in-ldap"
+        state: "present"
 
     - name: Remove server_uris from an LDAP provider
       dellemc.powerscale.ldap:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          ldap_name: "ldap_test"
-          server_uris:
-            - "{{server_uri_1}}"
-          server_uri_state: "absent-in-ldap"
-          state: "present"
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        ldap_name: "ldap_test"
+        server_uris:
+          - "{{server_uri_1}}"
+        server_uri_state: "absent-in-ldap"
+        state: "present"
 
     - name: Modify LDAP provider
       dellemc.powerscale.ldap:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          ldap_name: "ldap_test"
-          base_dn: "DC=ansi_ldap,DC=com"
-          ldap_parameters:
-            bind_dn: "cn=admin,dc=test,dc=com"
-          state: "present"
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        ldap_name: "ldap_test"
+        base_dn: "DC=ansi_ldap,DC=com"
+        ldap_parameters:
+          bind_dn: "cn=admin,dc=test,dc=com"
+        state: "present"
 
     - name: Get LDAP provider details
       dellemc.powerscale.ldap:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          ldap_name: "ldap_test"
-          state: "present"
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        ldap_name: "ldap_test"
+        state: "present"
 
     - name: Delete a LDAP provider
       dellemc.powerscale.ldap:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          ldap_name: "ldap_test"
-          state: "absent"
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        ldap_name: "ldap_test"
+        state: "absent"
 
 
 

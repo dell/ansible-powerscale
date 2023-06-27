@@ -8,8 +8,6 @@ from __future__ import (absolute_import, division, print_function)
 
 __metaclass__ = type
 
-from mock.mock import MagicMock
-
 
 class MockGroupApi:
     MODULE_UTILS_PATH = 'ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.utils'

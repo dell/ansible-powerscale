@@ -20,7 +20,9 @@ Requirements
 ------------
 The below requirements are needed on the host that executes this module.
 
-- A Dell PowerScale Storage system. Ansible 2.12, 2.13 or 2.14.
+- A Dell PowerScale Storage system.
+- Ansible-core 2.13 or later.
+- Python 3.9, 3.10 or 3.11.
 
 
 
@@ -40,35 +42,35 @@ Parameters
 
     This parameter is required when creating a Filesystem.
 
-    The following sub-options are supported for Owner. - name(str), - provider_type(str).
+    The following sub-options are supported for Owner. - *name(str*), - *provider_type(str*).
 
     If you specify owner, then the corresponding name is mandatory.
 
-    The provider_type is optional and it defaults to 'local'.
+    The *provider_type* is optional and it defaults to ``local``.
 
-    The supported values for provider_type are 'local', 'file', 'ldap' and 'ads'.
+    The supported values for *provider_type* are ``local``, ``file``, ``ldap`` and ``ads``.
 
 
   group (optional, dict, None)
     The group of the Filesystem.
 
-    The following sub-options are supported for Group. - name(str), - provider_type(str).
+    The following sub-options are supported for Group. - *name(str*), - *provider_type(str*).
 
     If you specify  a group, then the corresponding name is mandatory.
 
-    The provider_type is optional, it defaults to 'local'.
+    The *provider_type* is optional, it defaults to ``local``.
 
-    The supported values for provider_type are 'local', 'file', 'ldap' and 'ads'.
+    The supported values for *provider_type* are ``local``, ``file``, ``ldap`` and ``ads``.
 
 
   access_control (optional, str, None)
     The ACL value for the directory.
 
-    At the time of creation, users can either provide input such as 'private_read' , 'private' , 'public_read', 'public_read_write', 'public' or in POSIX format (eg 0700).
+    At the time of creation, users can either provide input such as ``private_read`` , ``private`` , ``public_read``, ``public_read_write``, ``public`` or in ``POSIX`` format (eg 0700).
 
-    Modification of ACL is only supported from POSIX to POSIX mode.
+    Modification of ACL is only supported from ``POSIX`` to ``POSIX`` mode.
 
-    This field is mutually exclusive with access_control_rights.
+    This field is mutually exclusive with *access_control_rights*.
 
 
   access_control_rights (optional, dict, None)
@@ -88,7 +90,7 @@ Parameters
 
 
     trustee (True, dict, None)
-      Provides the trustee (user or group) name and trustee provider_type.
+      Provides the trustee (user or group) name and trustee *provider_type*.
 
 
       name (True, str, None)
@@ -100,9 +102,9 @@ Parameters
 
 
       provider_type (optional, str, local)
-        The provider_type is optional and it defaults to 'local'.
+        The *provider_type* is optional and it defaults to ``local``.
 
-        The supported values for provider_type are 'local', 'file', 'ldap' and 'ads'.
+        The supported values for *provider_type* are ``local``, ``file``, ``ldap`` and ``ads``.
 
 
 
@@ -110,15 +112,15 @@ Parameters
   access_control_rights_state (optional, str, None)
     Specifies if the access rights are to be added or deleted for the trustee.
 
-    It is required together with access_control_rights.
+    It is required together with *access_control_rights*.
 
 
   recursive (optional, bool, True)
-    Creates intermediate folders recursively when set to true.
+    Creates intermediate folders recursively when set to ``true``.
 
 
   recursive_force_delete (optional, bool, False)
-    Deletes sub files and folders recursively when set to true even if the filesystem is not empty.
+    Deletes sub files and folders recursively when set to ``true`` even if the filesystem is not empty.
 
 
   quota (optional, dict, None)
@@ -140,7 +142,7 @@ Parameters
 
 
     thresholds_on (optional, str, None)
-      For SDK 9.1.0 the parameter include_overheads is deprecated and thresholds_on is used.
+      For SDK 9.1.0 the parameter *include_overheads* is deprecated and *thresholds_on* is used.
 
 
     advisory_limit_size (optional, int, None)
@@ -148,11 +150,11 @@ Parameters
 
 
     soft_limit_size (optional, int, None)
-      Threshold value after which the soft limit exceeded notification will be sent and the soft_grace period will start.
+      Threshold value after which the soft limit exceeded notification will be sent and the *soft_grace* period will start.
 
       Write access will be restricted after the grace period expires.
 
-      Both soft_grace_period and soft_limit_size are required to modify soft threshold for the quota.
+      Both *soft_grace_period* and *soft_limit_size* are required to modify soft threshold for the quota.
 
 
     hard_limit_size (optional, int, None)
@@ -168,7 +170,7 @@ Parameters
 
 
     container (optional, bool, False)
-      If true, SMB shares using the quota directory see the quota thresholds as share size.
+      If ``true``, SMB shares using the quota directory see the quota thresholds as share size.
 
 
     quota_state (optional, str, None)
@@ -185,7 +187,7 @@ Parameters
 
 
   list_snapshots (optional, bool, False)
-    If set to true, the filesystem's snapshots are returned.
+    If set to ``true``, the filesystem's snapshots are returned.
 
 
   onefs_host (True, str, None)
@@ -199,9 +201,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    True - indicates that the SSL certificate should be verified.
+    ``true`` - indicates that the SSL certificate should be verified.
 
-    False - indicates that the SSL certificate should not be verified.
+    ``false`` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -219,9 +221,9 @@ Notes
 -----
 
 .. note::
-   - While deleting a filesystem when recursive_force_delete is set as True it deletes all sub files and folders recursively. This is true even if the filesystem is not empty.
-   - Modification of inherit_flags of filesystem ACL is successful only if access_rights is also specified in the access_control_rights dictionary.
-   - Check_mode is not supported.
+   - While deleting a filesystem when recursive_force_delete is set as ``true`` it deletes all sub files and folders recursively. This is ``true`` even if the filesystem is not empty.
+   - Modification of *inherit_flags* of filesystem ACL is successful only if *access_rights* is also specified in the *access_control_rights* dictionary.
+   - *Check_mode* is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -250,14 +252,14 @@ Examples
             provider_type: 'ldap'
           access_control: "{{access_control}}"
           quota:
-            include_snap_data: False
-            include_data_protection_overhead: False
+            include_snap_data: false
+            include_data_protection_overhead: false
             advisory_limit_size: 2
             soft_limit_size: 5
             hard_limit_size: 10
             cap_unit: "GB"
             quota_state: "present"
-            container: True
+            container: true
           recursive: "{{recursive}}"
           state: "{{state_present}}"
 
@@ -310,7 +312,7 @@ Examples
             hard_limit_size: 15
             cap_unit: "GB"
             quota_state: "present"
-            container: True
+            container: true
           state: "{{state_present}}"
 
       - name: Modify Filesystem Owner, Group and ACL
@@ -343,12 +345,12 @@ Examples
           access_control_rights:
             access_type: "allow"
             access_rights:
-                - dir_gen_all
+              - dir_gen_all
             inherit_flags:
-                - container_inherit
+              - container_inherit
             trustee:
-                name: test_user
-                provider_type: "ldap"
+              name: test_user
+              provider_type: "ldap"
           access_control_rights_state: "add"
           state: "present"
 
@@ -364,12 +366,12 @@ Examples
           access_control_rights:
             access_type: "allow"
             access_rights:
-                - dir_gen_all
+              - dir_gen_all
             inherit_flags:
-                - container_inherit
+              - container_inherit
             trustee:
-                name: test_user
-                provider_type: "ldap"
+              name: test_user
+              provider_type: "ldap"
           access_control_rights_state: "remove"
           state: "present"
 
@@ -384,6 +386,27 @@ Examples
           quota:
             quota_state: "absent"
           state: "{{state_present}}"
+
+      - name: Create Filesystem with access control rights for everyone
+        dellemc.powerscale.filesystem:
+          onefs_host: "{{onefs_host}}"
+          port_no: "{{powerscaleport}}"
+          verify_ssl: "{{verify_ssl}}"
+          api_user: "{{api_user}}"
+          api_password: "{{api_password}}"
+          path: "/ifs/test"
+          access_zone: "{{access_zone}}"
+          access_control_rights:
+            access_type: "allow"
+            access_rights:
+              - dir_gen_all
+            inherit_flags:
+              - container_inherit
+            trustee:
+              name: "everyone"
+              type: "wellknown"
+          access_control_rights_state: "add"
+          state: "present"
 
       - name: Delete filesystem
         dellemc.powerscale.filesystem:
@@ -428,7 +451,7 @@ quota_details (When Quota exists., complex, {'inodes': 1, 'logical': 0, 'physica
 
 
   container (, bool, True)
-    If true, SMB shares using the quota directory see the quota thresholds as share size.
+    If (true), SMB shares using the quota directory see the quota thresholds as share size.
 
 
   type (, str, directory)
@@ -440,7 +463,7 @@ quota_details (When Quota exists., complex, {'inodes': 1, 'logical': 0, 'physica
 
 
 
-filesystem_snapshots (When list_snapshots is True., complex, {'alias': None, 'created': 1636393464, 'expires': None, 'has_locks': False, 'id': 4, 'name': 'SIQ-latest', 'path': 'VALUE_SPECIFIED_IN_NO_LOG_PARAMETER', 'pct_filesystem': 2.435778242215747e-06, 'pct_reserve': 0.0, 'schedule': None, 'shadow_bytes': 0, 'size': 4096, 'state': 'active', 'target_id': None, 'target_name': None})
+filesystem_snapshots (When I(list_snapshots) is true., complex, {'alias': None, 'created': 1636393464, 'expires': None, 'has_locks': False, 'id': 4, 'name': 'SIQ-latest', 'path': 'VALUE_SPECIFIED_IN_NO_LOG_PARAMETER', 'pct_filesystem': 2.435778242215747e-06, 'pct_reserve': 0.0, 'schedule': None, 'shadow_bytes': 0, 'size': 4096, 'state': 'active', 'target_id': None, 'target_name': None})
   The filesystem snapshot details.
 
 
@@ -479,4 +502,5 @@ Authors
 ~~~~~~~
 
 - Prashant Rakheja (@prashant-dell) <ansible.team@dell.com>
+- Trisha Datta (@trisha-dell) <ansible.team@dell.com>
 

@@ -36,18 +36,19 @@ options:
     description:
     - This flag is used to fetch the list of target sub reports.
     type: bool
-    default: False
+    default: false
   state:
     description:
     - The state option is used to mention the existence of target reports.
     type: str
     required: true
     choices: [absent, present]
+notes:
+- The I(check_mode) is not supported.
 '''
 
 EXAMPLES = r'''
   - name: Get a single SyncIQ target report with id
-    register: result
     dellemc.powerscale.synciqtargetreports:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
@@ -57,7 +58,6 @@ EXAMPLES = r'''
       state: "present"
 
   - name: Get a single SyncIQ target report with name
-    register: result
     dellemc.powerscale.synciqtargetreports:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
@@ -67,29 +67,26 @@ EXAMPLES = r'''
       state: "present"
 
   - name: Get all SyncIQ target sub-reports with report id
-    register: result
     dellemc.powerscale.synciqtargetreports:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
       verify_ssl: "{{verify_ssl}}"
       id: "2-sample_policy"
-      include_sub_reports: "True"
+      include_sub_reports: true
       state: "present"
 
   - name: Get all SyncIQ target sub-reports with report name
-    register: result
     dellemc.powerscale.synciqtargetreports:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
       verify_ssl: "{{verify_ssl}}"
       name: "sample_policy"
-      include_sub_reports: "True"
+      include_sub_reports: true
       state: "present"
 
   - name: Get a single SyncIQ target sub-report with sub-report id
-    register: result
     dellemc.powerscale.synciqtargetreports:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"

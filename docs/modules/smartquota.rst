@@ -20,7 +20,9 @@ Requirements
 ------------
 The below requirements are needed on the host that executes this module.
 
-- A Dell PowerScale Storage system. Ansible 2.12, 2.13 or 2.14.
+- A Dell PowerScale Storage system.
+- Ansible-core 2.13 or later.
+- Python 3.9, 3.10 or 3.11.
 
 
 
@@ -56,7 +58,7 @@ Parameters
   provider_type (optional, str, local)
     This option defines the type which is used to authenticate the user/group.
 
-    If the provider_type is 'ads' then the domain name of the Active Directory Server has to be mentioned in the user_name. The format for the user_name should be 'DOMAIN_NAME\user_name' or "DOMAIN_NAME\\user_name".
+    If the *provider_type* is 'ads' then the domain name of the Active Directory Server has to be mentioned in the *user_name*. The format for the *user_name* should be 'DOMAIN_NAME\user_name' or "DOMAIN_NAME\\user_name".
 
     This option acts as a filter for all operations except creation.
 
@@ -78,7 +80,7 @@ Parameters
 
 
     thresholds_on (optional, str, None)
-      For SDK 9.0.0 the parameter include_overheads is deprecated and thresholds_on is used.
+      For SDK 9.0.0 the parameter *include_overheads* is deprecated and *thresholds_on* is used.
 
 
     advisory_limit_size (optional, float, None)
@@ -86,11 +88,11 @@ Parameters
 
 
     soft_limit_size (optional, float, None)
-      Threshold value after which the soft limit exceeded notification will be sent and the soft_grace period will start.
+      Threshold value after which the soft limit exceeded notification will be sent and the *soft_grace* period will start.
 
       Write access will be restricted after the grace period expires.
 
-      Both soft_grace_period and soft_limit_size are required to modify soft threshold for the quota.
+      Both *soft_grace_period* and *soft_limit_size* are required to modify soft threshold for the quota.
 
 
     soft_grace_period (optional, int, None)
@@ -98,15 +100,15 @@ Parameters
 
       After the grace period, the write access to the quota will be restricted.
 
-      Both soft_grace_period and soft_limit_size are required to modify soft threshold for the quota.
+      Both *soft_grace_period* and *soft_limit_size* are required to modify soft threshold for the quota.
 
 
     period_unit (optional, str, None)
-      Unit of the time period for soft_grace_period.
+      Unit of the time period for *soft_grace_period*.
 
       For months the number of days is assumed to be 30 days.
 
-      This parameter is required only if the soft_grace_period, is specified.
+      This parameter is required only if the *soft_grace_period*, is specified.
 
 
     hard_limit_size (optional, float, None)
@@ -122,16 +124,16 @@ Parameters
 
 
     container (optional, bool, False)
-      If true, SMB shares using the quota directory see the quota thresholds as share size.
+      If ``true``, SMB shares using the quota directory see the quota thresholds as share size.
 
 
 
   state (True, str, None)
     Define whether the Smart Quota should exist or not.
 
-    present - indicates that the Smart Quota should exist on the system.
+    ``present`` - indicates that the Smart Quota should exist on the system.
 
-    absent - indicates that the Smart Quota should not exist on the system.
+    ``absent`` - indicates that the Smart Quota should not exist on the system.
 
 
   onefs_host (True, str, None)
@@ -145,9 +147,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    True - indicates that the SSL certificate should be verified.
+    ``true`` - indicates that the SSL certificate should be verified.
 
-    False - indicates that the SSL certificate should not be verified.
+    ``false`` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -168,6 +170,7 @@ Notes
    - To perform any operation, path, quota_type and state are mandatory parameters.
    - There can be two quotas for each type per directory, one with snapshots included and one without snapshots included.
    - Once the limits are assigned, then the quota cannot be converted to accounting. Only modification to the threshold limits is permitted.
+   - The *check_mode* is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -179,8 +182,7 @@ Examples
 .. code-block:: yaml+jinja
 
     
-
-      - name: Create a Quota for a User excluding snapshot.
+      - name: Create a Quota for a User excluding snapshot
         dellemc.powerscale.smartquota:
           onefs_host: "{{onefs_host}}"
           verify_ssl: "{{verify_ssl}}"
@@ -192,7 +194,7 @@ Examples
           access_zone: "sample-zone"
           provider_type: "local"
           quota:
-            include_overheads: False
+            include_overheads: false
             advisory_limit_size: "{{advisory_limit_size}}"
             soft_limit_size: "{{soft_limit_size}}"
             soft_grace_period: "{{soft_grace_period}}"
@@ -201,7 +203,7 @@ Examples
             cap_unit: "{{cap_unit}}"
           state: "present"
 
-      - name: Create a Quota for a Directory for accounting includes snapshots and data protection overheads.
+      - name: Create a Quota for a Directory for accounting includes snapshots and data protection overheads
         dellemc.powerscale.smartquota:
           onefs_host: "{{onefs_host}}"
           verify_ssl: "{{verify_ssl}}"
@@ -210,8 +212,8 @@ Examples
           path: "<path>"
           quota_type: "directory"
           quota:
-            include_snapshots: "True"
-            include_overheads: True
+            include_snapshots: true
+            include_overheads: true
           state: "present"
 
       - name: Create default-user Quota for a Directory with snaps and overheads
@@ -223,8 +225,8 @@ Examples
           path: "<path>"
           quota_type: "default-user"
           quota:
-            include_snapshots: "True"
-            include_overheads: True
+            include_snapshots: true
+            include_overheads: true
           state: "present"
 
       - name: Get a Quota Details for a Group
@@ -239,7 +241,7 @@ Examples
           access_zone: "sample-zone"
           provider_type: "local"
           quota:
-            include_snapshots: "True"
+            include_snapshots: true
           state: "present"
 
       - name: Update Quota for a User
@@ -254,8 +256,8 @@ Examples
           access_zone: "sample-zone"
           provider_type: "local"
           quota:
-            include_snapshots: "True"
-            include_overheads: True
+            include_snapshots: true
+            include_overheads: true
             advisory_limit_size: "{{new_advisory_limit_size}}"
             hard_limit_size: "{{new_hard_limit_size}}"
             cap_unit: "{{cap_unit}}"
@@ -271,8 +273,8 @@ Examples
           quota_type: "default-user"
           access_zone: "sample-zone"
           quota:
-            include_snapshots: "True"
-            include_overheads: True
+            include_snapshots: true
+            include_overheads: true
             soft_limit_size: "{{soft_limit_size}}"
             cap_unit: "{{cap_unit}}"
             soft_grace_period: "{{soft_grace_period}}"
@@ -288,7 +290,7 @@ Examples
           path: "<path>"
           quota_type: "directory"
           quota:
-            include_snapshots: "True"
+            include_snapshots: true
           state: "absent"
 
       - name: Delete Quota for a default-group
@@ -300,7 +302,7 @@ Examples
           path: "<path>"
           quota_type: "default-group"
           quota:
-            include_snapshots: "True"
+            include_snapshots: true
           state: "absent"
 
 
@@ -325,11 +327,11 @@ quota_details (When Quota exists., complex, )
 
 
   container (, bool, True)
-    If true, SMB shares using the quota directory see the quota thresholds as share size.
+    If ``true``, SMB shares using the quota directory see the quota thresholds as share size.
 
 
   thresholds (, dict, {'advisory': 3221225472, 'advisory(GB)': '3.0', 'advisory_exceeded': False, 'advisory_last_exceeded': 0, 'hard': 6442450944, 'hard(GB)': '6.0', 'hard_exceeded': False, 'hard_last_exceeded': 0, 'soft': 5368709120, 'soft(GB)': '5.0', 'soft_exceeded': False, 'soft_grace': 3024000, 'soft_last_exceeded': 0})
-    Includes information about all the limits imposed on quota. The limits are mentioned in bytes and soft_grace is in seconds.
+    Includes information about all the limits imposed on quota. The limits are mentioned in bytes and *soft_grace* is in seconds.
 
 
   type (, str, directory)

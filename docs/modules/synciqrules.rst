@@ -1,8 +1,8 @@
 .. _synciqrules_module:
 
 
-synciqrules -- Manage SyncIQ performance rules on PowerScale Storage System.
-============================================================================
+synciqrules -- Manage SyncIQ performance rules on PowerScale Storage System
+===========================================================================
 
 .. contents::
    :local:
@@ -20,7 +20,9 @@ Requirements
 ------------
 The below requirements are needed on the host that executes this module.
 
-- A Dell PowerScale Storage system. Ansible 2.12, 2.13 or 2.14.
+- A Dell PowerScale Storage system.
+- Ansible-core 2.13 or later.
+- Python 3.9, 3.10 or 3.11.
 
 
 
@@ -38,7 +40,7 @@ Parameters
   sync_rule_id (optional, str, None)
     This is an auto generated ID at the time of creation of SyncIQ performance rule.
 
-    For get/modify/delete operations sync_rule_id is required.
+    For get/modify/delete operations *sync_rule_id* is required.
 
     The ID of a performance rule is not absolute to a particular existing rule configuration. The IDs are auto-sequenced during creation/deletion of a performance rule.
 
@@ -99,9 +101,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    True - indicates that the SSL certificate should be verified.
+    ``true`` - indicates that the SSL certificate should be verified.
 
-    False - indicates that the SSL certificate should not be verified.
+    ``false`` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -120,6 +122,7 @@ Notes
 
 .. note::
    - Operations performed in parallel from other interfaces apart from playbook cannot guarantee desirable results.
+   - The *check_mode* is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -138,14 +141,14 @@ Examples
           api_user: "{{api_user}}"
           api_password: "{{api_password}}"
           description: "Create a rule"
-          enabled: True
+          enabled: true
           schedule:
             begin: "00:00"
             end: "13:30"
             days_of_week:
-                - "monday"
-                - "tuesday"
-                - "sunday"
+              - "monday"
+              - "tuesday"
+              - "sunday"
           rule_type: "cpu"
           limit: "80"
           state: "present"
@@ -177,14 +180,14 @@ Examples
           api_password: "{{api_password}}"
           verify_ssl: "{{verify_ssl}}"
           sync_rule_id: "cpu-0"
-          enabled: True
+          enabled: true
           schedule:
             begin: "00:00"
             end: "13:30"
             days_of_week:
-                - "monday"
-                - "tuesday"
-                - "sunday"
+              - "monday"
+              - "tuesday"
+              - "sunday"
           rule_type: "bandwidth"
           limit: "85"
           state: "absent"

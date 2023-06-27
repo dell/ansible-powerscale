@@ -1,0 +1,49 @@
+---
+- name: Smartpool Settings Operations on PowerScale
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.**'
+    verify_ssl: false
+    api_user: 'root'
+    api_password: 'pancake'
+    state_present: 'present'
+
+  tasks:
+    - name: Get Smartpool settings
+      dellemc.powerscale.smartpoolsettings:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        state: "{{ state_present }}"
+
+    - name: Modify Smartpool settings
+      dellemc.powerscale.smartpoolsettings:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        virtual_hot_spare_limit_percent: 20
+        virtual_hot_spare_hide_spare: true
+        state: "{{ state_present }}"
+
+    - name: Modify Smartpool settings - Idempotency
+      dellemc.powerscale.smartpoolsettings:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        virtual_hot_spare_limit_percent: 20
+        virtual_hot_spare_hide_spare: true
+        state: "{{ state_present }}"
+
+    - name: Modify Smartpool settings
+      dellemc.powerscale.smartpoolsettings:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        virtual_hot_spare_limit_percent: 10
+        virtual_hot_spare_hide_spare: false
+        state: "{{ state_present }}"

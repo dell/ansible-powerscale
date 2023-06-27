@@ -1,0 +1,295 @@
+---
+- name: Group Module Operations on PowerScale
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.**'
+    port_no: '8080'
+    verify_ssl: false
+    api_user: 'user'
+    api_password: 'Password'
+    group_name: 'test_group_1'
+    access_zone: "System"
+    provider_type: "local"
+    user_name_1: "test_user_1"
+    user_name_2: "test_user_2"
+    empty_group_name: "sample_empty_group"
+
+  tasks:
+    - name: Create Empty Group
+      dellemc.powerscale.group:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "{{ provider_type }}"
+        access_zone: "{{ access_zone }}"
+        group_name: "{{ empty_group_name }}"
+        group_id: 1000
+        state: "present"
+
+    - name: Create Empty Group Idempotency check
+      dellemc.powerscale.group:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: ""
+        access_zone: "{{ access_zone }}"
+        group_name: "{{ empty_group_name }}"
+        group_id: 1000
+        state: "present"
+
+    - name: Create Group with Users
+      register: result
+      dellemc.powerscale.group:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "{{ provider_type }}"
+        access_zone: "{{ access_zone }}"
+        group_name: "{{ group_name }}"
+        users:
+          - user_name: "{{ user_name_1 }}"
+          - user_name: "{{ user_name_2 }}"
+        user_state: "present-in-group"
+        state: "present"
+
+    - name: Create Group with Users Idempotency check
+      register: result
+      dellemc.powerscale.group:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "{{ provider_type }}"
+        access_zone: "{{ access_zone }}"
+        group_name: "{{ group_name }}"
+        users:
+          - user_name: "{{ user_name_1 }}"
+          - user_name: "{{ user_name_2 }}"
+        user_state: "present-in-group"
+        state: "present"
+
+    - name: Setting group id
+      ansible.legacy.set_fact:
+        group_id: "{{ result.group_details.gid.id.split(':')[1] }}"
+
+    - name: Fetch user_id using user_name
+      register: result
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        access_zone: "{{ access_zone }}"
+        provider_type: "{{ provider_type }}"
+        user_name: "{{ user_name_1 }}"
+        state: "present"
+
+    - name: Setting group id
+      ansible.legacy.set_fact:
+        user_id_1: "{{ result.user_details.uid.id.split(':')[1] }}"
+
+    - name: Fetch user_id using user_name
+      register: result
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        access_zone: "{{ access_zone }}"
+        provider_type: "{{ provider_type }}"
+        user_name: "{{ user_name_2 }}"
+        state: "present"
+
+    - name: Setting group id
+      ansible.legacy.set_fact:
+        user_id_2: "{{ result.user_details.uid.id.split(':')[1] }}"
+
+    - name: Change the primary group of the user
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        access_zone: "{{ access_zone }}"
+        provider_type: "{{ provider_type }}"
+        user_name: "{{ user_name_2 }}"
+        primary_group: "{{ group_name }}"
+        state: "present"
+
+    - name: Change the primary group of the user idempotency check
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        access_zone: "{{ access_zone }}"
+        provider_type: "{{ provider_type }}"
+        user_name: "{{ user_name_2 }}"
+        primary_group: "{{ group_name }}"
+        state: "present"
+
+    - name: Get Details of the Group using Group Id
+      dellemc.powerscale.group:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "{{ provider_type }}"
+        access_zone: "{{ access_zone }}"
+        group_id: 1000
+        state: "present"
+
+    - name: Remove Users from a Group
+      dellemc.powerscale.group:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "{{ provider_type }}"
+        access_zone: "{{ access_zone }}"
+        group_id: "{{ group_id }}"
+        users:
+          - user_id: "{{ user_id_2 }}"
+          - user_id: "{{ user_id_1 }}"
+        user_state: "absent-in-group"
+        state: "present"
+
+    - name: Remove Users from a Group Idempotency check
+      dellemc.powerscale.group:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "{{ provider_type }}"
+        access_zone: "{{ access_zone }}"
+        group_id: "{{ group_id }}"
+        users:
+          - user_id: "{{ user_id_2 }}"
+          - user_id: "{{ user_id_1 }}"
+        user_state: "absent-in-group"
+        state: "present"
+
+    - name: Add Users to a Group
+      dellemc.powerscale.group:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "{{ provider_type }}"
+        access_zone: "{{ access_zone }}"
+        group_id: "{{ group_id }}"
+        users:
+          - user_name: "{{ user_name_1 }}"
+          - user_name: "{{ user_name_2 }}"
+        user_state: "present-in-group"
+        state: "present"
+
+    - name: Add Users to a Group Idempotency check
+      dellemc.powerscale.group:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "{{ provider_type }}"
+        access_zone: "{{ access_zone }}"
+        group_id: "{{ group_id }}"
+        users:
+          - user_name: "{{ user_name_1 }}"
+          - user_name: "{{ user_name_2 }}"
+        user_state: "present-in-group"
+        state: "present"
+
+    - name: Add Users to Empty Group
+      dellemc.powerscale.group:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "{{ provider_type }}"
+        access_zone: "{{ access_zone }}"
+        group_name: "{{ empty_group_name }}"
+        users:
+          - user_name: "{{ user_name_1 }}"
+          - user_name: "{{ user_name_2 }}"
+        user_state: "present-in-group"
+        state: "present"
+
+    - name: Add Users to Empty Group Idempotency check
+      dellemc.powerscale.group:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "{{ provider_type }}"
+        access_zone: "{{ access_zone }}"
+        group_name: "{{ empty_group_name }}"
+        users:
+          - user_name: "{{ user_name_1 }}"
+          - user_name: "{{ user_name_2 }}"
+        user_state: "present-in-group"
+        state: "present"
+
+    - name: Delete the Group using Group Name
+      dellemc.powerscale.group:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "{{ provider_type }}"
+        access_zone: "{{ access_zone }}"
+        group_name: "{{ group_name }}"
+        state: "absent"
+
+    - name: Delete the Group using Group Name Idempotency check
+      dellemc.powerscale.group:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "{{ provider_type }}"
+        access_zone: "{{ access_zone }}"
+        group_name: "{{ group_name }}"
+        state: "absent"
+
+    - name: Delete Empty Group
+      dellemc.powerscale.group:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "{{ provider_type }}"
+        access_zone: "{{ access_zone }}"
+        group_name: "{{ empty_group_name }}"
+        state: "absent"
+
+    - name: Get LDAP Group Details using group name in Sample Access Zone
+      dellemc.powerscale.group:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "ldap"
+        access_zone: "{{ access_zone }}"
+        group_name: "sample_ldap_group_2"
+        state: "present"
+
+    - name: Get AD group Details using group name in Sample Access Zone
+      dellemc.powerscale.group:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "ads"
+        access_zone: "{{ access_zone }}"
+        group_name: "devconad\\ad_group_odd_users"
+        state: "present"

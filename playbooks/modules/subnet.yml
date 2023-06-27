@@ -1,0 +1,142 @@
+---
+- name: Groupnet Operations on PowerScale
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.**'
+    verify_ssl: false
+    api_user: 'user'
+    api_password: 'Password'
+    groupnet_name: 'groupnet_test'
+    subnet_name: 'subnet_test'
+    new_subnet_name: 'subnet_test_rename'
+    state_present: 'present'
+    state_absent: 'absent'
+
+  tasks:
+    - name: Create a subnet
+      dellemc.powerscale.subnet:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        groupnet_name: "{{ groupnet_name }}"
+        subnet_name: "{{ subnet_name }}"
+        description: "Test subnet"
+        netmask: 255.255.**.0
+        gateway_priority: 3
+        subnet_params:
+          gateway: 10.**.**.20
+          mtu: 1500
+          sc_service_addrs:
+            - start_range: 10.**.**.1
+              end_range: 10.**.**.2
+            - start_range: 10.**.**.8
+              end_range: 10.**.**.9
+          sc_service_addrs_state: 'add'
+          vlan_enabled: false
+        state: "{{ state_present }}"
+
+    - name: Create a subnet Idempotency case
+      dellemc.powerscale.subnet:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        groupnet_name: "{{ groupnet_name }}"
+        subnet_name: "{{ subnet_name }}"
+        description: "Test subnet"
+        netmask: 255.255.**.0
+        gateway_priority: 3
+        subnet_params:
+          gateway: 10.**.**.20
+          mtu: 1500
+          sc_service_addrs:
+            - start_range: 10.**.**.1
+              end_range: 10.**.**.2
+            - start_range: 10.**.**.8
+              end_range: 10.**.**.9
+          sc_service_addrs_state: 'add'
+          vlan_enabled: false
+        state: "{{ state_present }}"
+
+    - name: Get subnet details
+      dellemc.powerscale.subnet:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        groupnet_name: "{{ groupnet_name }}"
+        subnet_name: "{{ subnet_name }}"
+        state: "{{ state_present }}"
+
+    - name: Modify subnet details
+      dellemc.powerscale.subnet:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        groupnet_name: "{{ groupnet_name }}"
+        subnet_name: "{{ subnet_name }}"
+        description: "Test Subnet desc"
+        netmask: 255.255.**.0
+        gateway_priority: 2
+        subnet_params:
+          sc_service_addrs:
+            - start_range: 10.**.**.1
+              end_range: 10.**.**.2
+          sc_service_addrs_state: 'remove'
+          vlan_enabled: true
+          vlan_id: 3
+        state: "{{ state_present }}"
+
+    - name: Modify subnet details Idempotency case
+      dellemc.powerscale.subnet:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        groupnet_name: "{{ groupnet_name }}"
+        subnet_name: "{{ subnet_name }}"
+        description: "Test Subnet desc"
+        netmask: 255.255.**.0
+        gateway_priority: 2
+        subnet_params:
+          sc_service_addrs:
+            - start_range: 10.**.**.1
+              end_range: 10.**.**.2
+          sc_service_addrs_state: 'remove'
+          vlan_enabled: true
+          vlan_id: 3
+        state: "{{ state_present }}"
+
+    - name: Rename a subnet
+      dellemc.powerscale.subnet:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        groupnet_name: "{{ groupnet_name }}"
+        subnet_name: "{{ subnet_name }}"
+        new_subnet_name: "{{ new_subnet_name }}"
+        state: "{{ state_present }}"
+
+    - name: Delete subnet details
+      dellemc.powerscale.subnet:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        groupnet_name: "{{ groupnet_name }}"
+        subnet_name: "{{ new_subnet_name }}"
+        state: "{{ state_absent }}"
+
+    - name: Delete subnet details Idempotency case
+      dellemc.powerscale.subnet:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        groupnet_name: "{{ groupnet_name }}"
+        subnet_name: "{{ new_subnet_name }}"
+        state: "{{ state_absent }}"

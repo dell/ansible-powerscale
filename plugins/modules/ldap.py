@@ -32,24 +32,24 @@ options:
     description:
     - Specifies the name of the LDAP provider.
     type: str
-    required: True
+    required: true
 
   server_uris:
     description:
     - Specifies the server URIs.
     - This parameter is mandatory during create.
-    - Server_uris should begin with ldap:// or ldaps:// if not validation
+    - I(server_uris) should begin with ldap:// or ldaps:// if not validation
       error will be displayed.
     type: list
     elements: str
 
   server_uri_state:
     description:
-    - Specifies if the server_uris need to be added or removed from the
+    - Specifies if the I(server_uris) need to be added or removed from the
       provider.
-    - This parameter is mandatory if server_uris is specified.
+    - This parameter is mandatory if I(server_uris) is specified.
     - While creating LDAP provider, this parameter value should be
-      specified as 'present-in-ldap'.
+      specified as C(present-in-ldap).
     choices: ['present-in-ldap', 'absent-in-ldap']
     type: str
 
@@ -82,89 +82,90 @@ options:
   state:
     description:
     - The state of the LDAP provider after the task is performed.
-    - present - indicates that the LDAP provider should exist on the system.
-    - absent - indicates that the LDAP provider should not exist on the system.
+    - C(present) - indicates that the LDAP provider should exist on the system.
+    - C(absent) - indicates that the LDAP provider should not exist on the system.
     choices: ['absent', 'present']
     type: str
-    required: True
+    required: true
 
 notes:
-- This module does not support modification of bind_password of LDAP provider.
-  The value specified for bind_password will be ignored during modify.
+- This module does not support modification of I(bind_password) of LDAP provider.
+- The value specified for I(bind_password) will be ignored during modify.
+- The I(check_mode) is not supported.
 '''
 
 EXAMPLES = r'''
 - name: Add an LDAP provider
   dellemc.powerscale.ldap:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      ldap_name: "ldap_test"
-      server_uris:
-        - "{{server_uri_1}}"
-        - "{{server_uri_2}}"
-      server_uri_state: 'present-in-ldap'
-      base_dn: "DC=ansildap,DC=com"
-      ldap_parameters:
-        groupnet: "groupnet_ansildap"
-        bind_dn: "cn=admin,dc=example,dc=com"
-        bind_password: "{{bind_password}}"
-      state: "present"
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    ldap_name: "ldap_test"
+    server_uris:
+      - "{{server_uri_1}}"
+      - "{{server_uri_2}}"
+    server_uri_state: 'present-in-ldap'
+    base_dn: "DC=ansildap,DC=com"
+    ldap_parameters:
+      groupnet: "groupnet_ansildap"
+      bind_dn: "cn=admin,dc=example,dc=com"
+      bind_password: "{{bind_password}}"
+    state: "present"
 
 - name: Add server_uris to an LDAP provider
   dellemc.powerscale.ldap:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      ldap_name: "ldap_test"
-      server_uris:
-        - "{{server_uri_1}}"
-      server_uri_state: "present-in-ldap"
-      state: "present"
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    ldap_name: "ldap_test"
+    server_uris:
+      - "{{server_uri_1}}"
+    server_uri_state: "present-in-ldap"
+    state: "present"
 
 - name: Remove server_uris from an LDAP provider
   dellemc.powerscale.ldap:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      ldap_name: "ldap_test"
-      server_uris:
-        - "{{server_uri_1}}"
-      server_uri_state: "absent-in-ldap"
-      state: "present"
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    ldap_name: "ldap_test"
+    server_uris:
+      - "{{server_uri_1}}"
+    server_uri_state: "absent-in-ldap"
+    state: "present"
 
 - name: Modify LDAP provider
   dellemc.powerscale.ldap:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      ldap_name: "ldap_test"
-      base_dn: "DC=ansi_ldap,DC=com"
-      ldap_parameters:
-        bind_dn: "cn=admin,dc=test,dc=com"
-      state: "present"
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    ldap_name: "ldap_test"
+    base_dn: "DC=ansi_ldap,DC=com"
+    ldap_parameters:
+      bind_dn: "cn=admin,dc=test,dc=com"
+    state: "present"
 
 - name: Get LDAP provider details
   dellemc.powerscale.ldap:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      ldap_name: "ldap_test"
-      state: "present"
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    ldap_name: "ldap_test"
+    state: "present"
 
 - name: Delete a LDAP provider
   dellemc.powerscale.ldap:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      ldap_name: "ldap_test"
-      state: "absent"
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    ldap_name: "ldap_test"
+    state: "absent"
 '''
 
 RETURN = r'''
@@ -398,7 +399,7 @@ class Ldap(object):
                     del input_ldap[key]
                 elif key.lower() == "bind_password":
                     del input_ldap[key]
-                elif input_ldap[key] and \
+                elif input_ldap[key] is None or \
                         input_ldap[key] == array_ldap[key]:
                     del input_ldap[key]
         else:

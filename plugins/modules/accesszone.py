@@ -32,7 +32,7 @@ options:
     description:
     - The name of the access zone.
     type: str
-    required: True
+    required: true
   path:
     description:
     - Specifies the access zone base directory path.
@@ -60,23 +60,23 @@ options:
         default: default acl
       directory_create_mask:
         description:
-        - Specifies the UNIX mask bits (octal) that are removed when a directory
+        - Specifies the C(UNIX) mask bits (octal) that are removed when a directory
           is created, restricting permissions.
         - Mask bits are applied before mode bits are applied.
         type: str
       directory_create_mode:
         description:
-        - Specifies the UNIX mode bits (octal) that are added when a directory is
+        - Specifies the C(UNIX) mode bits (octal) that are added when a directory is
           created, enabling permissions.
         type: str
       file_create_mask:
         description:
-        - Specifies the UNIX mask bits (octal) that are removed when a file is
+        - Specifies the C(UNIX) mask bits (octal) that are removed when a file is
           created, restricting permissions.
         type: str
       file_create_mode:
         description:
-        - Specifies the UNIX mode bits (octal) that are added when a file is
+        - Specifies the C(UNIX) mode bits (octal) that are added when a file is
           created, enabling permissions.
         type: str
       access_based_enumeration:
@@ -105,7 +105,7 @@ options:
     suboptions:
       commit_asynchronous:
         description:
-        - Set to True if NFS commit requests execute asynchronously.
+        - Set to C(true) if NFS commit requests execute asynchronously.
         type: bool
       nfsv4_domain:
         description:
@@ -114,34 +114,34 @@ options:
         type: str
       nfsv4_allow_numeric_ids:
         description:
-        - If true, sends owners and groups as UIDs and GIDs when look up
-          fails or if the 'nfsv4_no_name' property is set to 1.
+        - If C(true), sends owners and groups as UIDs and GIDs when look up
+          fails or if the I(nfsv4_no_name) property is set to 1.
         type: bool
       nfsv4_no_domain:
         description:
-        - If true, sends owners and groups without a domain name.
+        - If C(true), sends owners and groups without a domain name.
         type: bool
       nfsv4_no_domain_uids:
         description:
-        - If true, sends UIDs and GIDs without a domain name.
+        - If C(true), sends UIDs and GIDs without a domain name.
         type: bool
       nfsv4_no_names:
         description:
-        - If true, sends owners and groups as UIDs and GIDs.
+        - If C(true), sends owners and groups as UIDs and GIDs.
         type: bool
   provider_state:
     description:
     - Defines whether the auth providers should be added or removed from access zone.
-    - If auth_providers are given, then provider_state should also be specified.
-    - add - indicates that the auth providers should be added to the access zone.
-    - remove - indicates that auth providers should be removed from the access zone.
+    - If I(auth_providers) are given, then I(provider_state) should also be specified.
+    - C(add) - indicates that the auth providers should be added to the access zone.
+    - C(remove) - indicates that auth providers should be removed from the access zone.
     choices: [add, remove]
     type: str
-    required: False
+    required: false
   auth_providers:
     description:
     - Specifies the auth providers which need to be added or removed from access zone.
-    - If auth_providers are given, then provider_state should also be specified.
+    - If I(auth_providers) are given, then I(provider_state) should also be specified.
     type: list
     elements: dict
     suboptions:
@@ -149,111 +149,112 @@ options:
         description:
         - Specifies the auth provider name which needs to be added or removed from access zone.
         type: str
-        required: True
+        required: true
       provider_type:
         description:
         - Specifies the auth provider type which needs to be added or removed from access zone.
         choices: ['local', 'file', 'ldap', 'ads', 'nis']
         type: str
-        required: True
+        required: true
   state:
     description:
     - Defines whether the access zone should exist or not.
-    - present - indicates that the access zone should exist on the system.
-    - absent - indicates that the access zone should not exist on the system.
+    - C(present) - indicates that the access zone should exist on the system.
+    - C(absent) - indicates that the access zone should not exist on the system.
     choices: ['present', 'absent']
     type: str
-    required: True
+    required: true
 
 notes:
 - Deletion of access zone is not allowed through the Ansible module.
+- The I(check_mode) is not supported.
 '''
 
 EXAMPLES = r'''
 - name: Get details of access zone including smb and nfs settings
   dellemc.powerscale.accesszone:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      az_name: "{{access zone}}"
-      state: "present"
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    az_name: "{{access zone}}"
+    state: "present"
 
 - name: Modify smb settings of access zone
   dellemc.powerscale.accesszone:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      az_name: "{{access zone}}"
-      state: "present"
-      smb:
-        create_permissions: 'default acl'
-        directory_create_mask: '777'
-        directory_create_mode: '700'
-        file_create_mask: '700'
-        file_create_mode: '100'
-        access_based_enumeration: true
-        access_based_enumeration_root_only: false
-        ntfs_acl_support: true
-        oplocks: true
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    az_name: "{{access zone}}"
+    state: "present"
+    smb:
+      create_permissions: 'default acl'
+      directory_create_mask: '777'
+      directory_create_mode: '700'
+      file_create_mask: '700'
+      file_create_mode: '100'
+      access_based_enumeration: true
+      access_based_enumeration_root_only: false
+      ntfs_acl_support: true
+      oplocks: true
 
 - name: Modify nfs settings of access zone
   dellemc.powerscale.accesszone:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      az_name: "{{access zone}}"
-      state: "present"
-      nfs:
-        commit_asynchronous: false
-        nfsv4_allow_numeric_ids: false
-        nfsv4_domain: 'localhost'
-        nfsv4_no_domain: false
-        nfsv4_no_domain_uids: false
-        nfsv4_no_names: false
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    az_name: "{{access zone}}"
+    state: "present"
+    nfs:
+      commit_asynchronous: false
+      nfsv4_allow_numeric_ids: false
+      nfsv4_domain: 'localhost'
+      nfsv4_no_domain: false
+      nfsv4_no_domain_uids: false
+      nfsv4_no_names: false
 
 - name: Modify smb and nfs settings of access zone
   dellemc.powerscale.accesszone:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      az_name: "{{access zone}}"
-      state: "present"
-      smb:
-        create_permissions: 'default acl'
-        directory_create_mask: '777'
-        directory_create_mode: '700'
-        file_create_mask: '700'
-        file_create_mode: '100'
-        access_based_enumeration: true
-        access_based_enumeration_root_only: false
-        ntfs_acl_support: true
-        oplocks: true
-      nfs:
-        commit_asynchronous: false
-        nfsv4_allow_numeric_ids: false
-        nfsv4_domain: 'localhost'
-        nfsv4_no_domain: false
-        nfsv4_no_domain_uids: false
-        nfsv4_no_names: false
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    az_name: "{{access zone}}"
+    state: "present"
+    smb:
+      create_permissions: 'default acl'
+      directory_create_mask: '777'
+      directory_create_mode: '700'
+      file_create_mask: '700'
+      file_create_mode: '100'
+      access_based_enumeration: true
+      access_based_enumeration_root_only: false
+      ntfs_acl_support: true
+      oplocks: true
+    nfs:
+      commit_asynchronous: false
+      nfsv4_allow_numeric_ids: false
+      nfsv4_domain: 'localhost'
+      nfsv4_no_domain: false
+      nfsv4_no_domain_uids: false
+      nfsv4_no_names: false
 
 - name: Add Auth Providers to the  access zone
   dellemc.powerscale.accesszone:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      az_name: "{{access zone}}"
-      provider_state: "add"
-      auth_providers:
-         - provider_name: "System"
-           provider_type: "file"
-         - provider_name: "ldap-prashant"
-           provider_type: "ldap"
-      state: "present"
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    az_name: "{{access zone}}"
+    provider_state: "add"
+    auth_providers:
+       - provider_name: "System"
+         provider_type: "file"
+       - provider_name: "ldap-prashant"
+         provider_type: "ldap"
+    state: "present"
 
 - name: Remove Auth Providers from the  access zone
   dellemc.powerscale.accesszone:
@@ -270,19 +271,19 @@ EXAMPLES = r'''
 
 - name: Create New Access Zone
   dellemc.powerscale.accesszone:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      az_name: "{{access zone}}"
-      path: "/ifs/test_dir"
-      groupnet: "groupnet1"
-      create_path: True
-      provider_state: "add"
-      auth_providers:
-        - provider_name: "System"
-          provider_type: "file"
-      state: "present"
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    az_name: "{{access zone}}"
+    path: "/ifs/test_dir"
+    groupnet: "groupnet1"
+    create_path: true
+    provider_state: "add"
+    auth_providers:
+      - provider_name: "System"
+        provider_type: "file"
+    state: "present"
 '''
 
 RETURN = r'''
@@ -322,7 +323,7 @@ access_zone_details:
                     type: complex
                     contains:
                         commit_asynchronous:
-                            description: Set to True if NFS commit requests execute asynchronously
+                            description: Set to C(true) if NFS commit requests execute asynchronously
                             type: bool
                 zone_settings:
                     description: NFS server settings for this zone
@@ -333,18 +334,18 @@ access_zone_details:
                                          users and groups are associated
                             type: str
                         nfsv4_allow_numeric_ids:
-                            description: If true, sends owners and groups as UIDs and GIDs when
+                            description: If C(true), sends owners and groups as UIDs and GIDs when
                                          look up fails or if the 'nfsv4_no_name' property
                                          is set to 1
                             type: bool
                         nfsv4_no_domain:
-                            description: If true, sends owners and groups without a domain name
+                            description: If C(true), sends owners and groups without a domain name
                             type: bool
                         nfsv4_no_domain_uids:
-                            description: If true, sends UIDs and GIDs without a domain name
+                            description: If C(true), sends UIDs and GIDs without a domain name
                             type: bool
                         nfsv4_no_names:
-                            description: If true, sends owners and groups as UIDs and GIDs
+                            description: If C(true), sends owners and groups as UIDs and GIDs
                             type: bool
         smb_settings:
             description: SMB settings of access zone

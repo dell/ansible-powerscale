@@ -76,7 +76,8 @@ options:
         type: str
         choices: ['absent', 'present']
         required: true
-
+notes:
+- The I(check_mode) is not supported.
 '''
 
 EXAMPLES = r'''

@@ -41,6 +41,8 @@ description:
   Get list of node pools of PowerScale cluster.
   Get list of storage pool tiers of PowerScale cluster.
   Get list of smb open files of PowerScale cluster.
+  Get list of user mapping rules of PowerScale cluster.
+  Get list of ldap providers of the PowerScale cluster
 
 extends_documentation_fragment:
   - dellemc.powerscale.powerscale
@@ -49,18 +51,29 @@ author:
 - Ambuj Dubey (@AmbujDube) <ansible.team@dell.com>
 - Spandita Panigrahi(@panigs7) <ansible.team@dell.com>
 - Pavan Mudunuri(@Pavan-Mudunuri) <ansible.team@dell.com>
+- Ananthu S Kuttattu(@kuttattz) <ansible.team@dell.com>
 
 options:
   include_all_access_zones:
     description:
     - Specifies if requested component details need to be fetched from all access zones.
-    - It is mutually exclusive with access_zone.
+    - It is mutually exclusive with I(access_zone).
     type: bool
   access_zone:
     description:
     - The access zone. If no Access Zone is specified, the 'System' access
       zone would be taken by default.
     default: 'System'
+    type: str
+  scope:
+    description:
+    - The scope of ldap. If no scope is specified, the C(effective) scope
+      would be taken by default.
+    - If specified as C(effective) or not specified, all fields are returned.
+    - If specified as C(user), only fields with non-default values are shown.
+    - If specified as C(default), the original values are returned.
+    choices: ['effective', 'user', 'default']
+    default: 'effective'
     type: str
   gather_subset:
     description:
@@ -90,7 +103,9 @@ options:
     - node_pools
     - storagepool_tiers
     - smb_files
-    - The list of attributes, access_zones and nodes is for the entire PowerScale
+    - user_mapping_rules
+    - ldap
+    - The list of I(attributes), I(access_zones) and I(nodes) is for the entire PowerScale
       cluster
     - The list of providers for the entire PowerScale cluster
     - The list of users and groups is specific to the specified
@@ -102,17 +117,20 @@ options:
     - The list of network pools is specific to the specified access zone or for all access zones
     - The list of network groupnets, network subnets, network rules and network interfaces is for the entire PowerScale cluster
     - The list of smb open files for the entire PowerScale cluster
-    required: True
+    - The list of user mapping rules of PowerScale cluster
+    - The list of ldap providers of PowerScale cluster
+    required: true
     choices: [attributes, access_zones, nodes, providers, users, groups,
               smb_shares, nfs_exports, nfs_aliases, clients, synciq_reports, synciq_target_reports,
               synciq_policies, synciq_target_cluster_certificates, synciq_performance_rules,
               network_groupnets, network_subnets, network_pools, network_rules, network_interfaces,
-              node_pools, storagepool_tiers, smb_files]
+              node_pools, storagepool_tiers, smb_files, user_mapping_rules, ldap]
     type: list
     elements: str
 notes:
-- The parameters access_zone and include_all_access_zones are mutually exclusive.
+- The parameters I(access_zone) and I(include_all_access_zones) are mutually exclusive.
 - Listing of SyncIQ target cluster certificates is not supported by isi_sdk_8_1_1 version.
+- The I(check_mode) is supported.
 '''
 
 EXAMPLES = r'''
@@ -286,7 +304,7 @@ EXAMPLES = r'''
       onefs_host: "{{onefs_host}}"
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"
-      include_all_access_zones: True
+      include_all_access_zones: true
       gather_subset:
         - network_pools
 
@@ -345,6 +363,25 @@ EXAMPLES = r'''
       api_password: "{{api_password}}"
       gather_subset:
         - smb_files
+
+  - name: Get list of user mapping rule of the PowerScale cluster
+    dellemc.powerscale.info:
+      onefs_host: "{{onefs_host}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      gather_subset:
+        - user_mapping_rules
+
+  - name: Get list of ldap providers of the PowerScale cluster
+    dellemc.powerscale.info:
+      onefs_host: "{{onefs_host}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      gather_subset:
+        - ldap
+      scope: "effective"
 '''
 
 RETURN = r''' '''
@@ -451,11 +488,11 @@ class Info(object):
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
-    def get_providers_list(self):
+    def get_providers_list(self, access_zone):
         """Get the list of authentication providers for an access zone of a
         given PowerScale Storage"""
         try:
-            providers_list = (self.auth_api.get_providers_summary()).to_dict()
+            providers_list = (self.auth_api.get_providers_summary(zone=access_zone)).to_dict()
             LOG.info('Got authentication Providers from PowerScale cluster %s',
                      self.module.params['onefs_host'])
             return providers_list
@@ -853,6 +890,42 @@ class Info(object):
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
+    def get_ldap_providers(self, scope):
+        """Get the list of ldap providers given PowerScale Storage"""
+        try:
+            ldap_providers_details = (self.auth_api.list_providers_ldap(scope=scope))\
+                .to_dict()
+            ldap_details = ldap_providers_details['ldap']
+            LOG.info('Got ldap providers from PowerScale cluster  %s',
+                     self.module.params['onefs_host'])
+            return ldap_details
+        except Exception as e:
+            error_msg = (
+                'Getting list of ldap providers for PowerScale: {0} failed with'
+                ' error: {1}'.format(
+                    self.module.params['onefs_host'],
+                    utils.determine_error(e)))
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
+
+    def get_user_mapping_rules(self, access_zone):
+        """Get the list of user mapping rules of a given PowerScale Storage"""
+        try:
+            user_mapping_rules_list = []
+            user_mapping_rules_details = (self.auth_api.get_mapping_users_rules(zone=access_zone)).to_dict()
+            for count, rule in enumerate(user_mapping_rules_details['rules']['rules']):
+                rule['apply_order'] = count + 1
+                user_mapping_rules_list.append(rule)
+            return user_mapping_rules_list
+        except Exception as e:
+            error_msg = (
+                'Getting list of user mapping rules for PowerScale: %s failed with '
+                'error: %s' % (
+                    self.module.params['onefs_host'],
+                    utils.determine_error(e)))
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
+
     def perform_module_operation(self):
         """Perform different actions on Gatherfacts based on user parameter
         chosen in playbook
@@ -860,6 +933,7 @@ class Info(object):
         include_all_access_zones = self.module.params['include_all_access_zones']
         access_zone = self.module.params['access_zone']
         subset = self.module.params['gather_subset']
+        scope = self.module.params['scope']
         if not subset:
             self.module.fail_json(msg="Please specify gather_subset")
 
@@ -886,6 +960,8 @@ class Info(object):
         node_pools = []
         storagepool_tiers = []
         smb_files = []
+        user_mapping_rules = []
+        ldap = []
 
         if 'attributes' in str(subset):
             attributes = self.get_attributes_list()
@@ -894,7 +970,7 @@ class Info(object):
         if 'nodes' in str(subset):
             nodes = self.get_nodes_list()
         if 'providers' in str(subset):
-            providers = self.get_providers_list()
+            providers = self.get_providers_list(access_zone)
         if 'users' in str(subset):
             users = self.get_users_list(access_zone)
         if 'groups' in str(subset):
@@ -913,11 +989,8 @@ class Info(object):
             synciq_target_reports = self.get_synciq_target_reports()
         if 'synciq_policies' in str(subset):
             synciq_policies = self.get_syniq_policies_list()
-        if 'synciq_target_cluster_certificates' in str(subset) and utils.ISI_SDK_VERSION_9:
+        if 'synciq_target_cluster_certificates' in str(subset):
             synciq_target_cluster_certificates = self.get_synciq_target_cluster_certificates_list()
-        elif 'synciq_target_cluster_certificates' in str(subset) and not utils.ISI_SDK_VERSION_9:
-            self.module.fail_json("Listing of SyncIQ target cluster certificates is not supported by "
-                                  "isi_sdk_8_1_1 version.")
         if 'synciq_performance_rules' in str(subset):
             synciq_performance_rules = self.get_synciq_performance_rules()
         if 'network_groupnets' in str(subset):
@@ -936,6 +1009,10 @@ class Info(object):
             storagepool_tiers = self.get_storagepool_tiers()
         if 'smb_files' in str(subset):
             smb_files = self.get_smb_files()
+        if 'user_mapping_rules' in str(subset):
+            user_mapping_rules = self.get_user_mapping_rules(access_zone)
+        if 'ldap' in str(subset):
+            ldap = self.get_ldap_providers(scope)
 
         result = dict(
             Attributes=attributes,
@@ -959,11 +1036,12 @@ class Info(object):
             NetworkSubnets=network_subnets,
             NodePools=node_pools,
             StoragePoolTiers=storagepool_tiers,
-            SmbOpenFiles=smb_files
+            SmbOpenFiles=smb_files,
+            UserMappingRules=user_mapping_rules,
+            LdapProviders=ldap
         )
 
-        if utils.ISI_SDK_VERSION_9:
-            result.update(SynciqTargetClusterCertificate=synciq_target_cluster_certificates)
+        result.update(SynciqTargetClusterCertificate=synciq_target_cluster_certificates)
 
         self.module.exit_json(**result)
 
@@ -989,6 +1067,9 @@ def get_info_parameters():
         include_all_access_zones=dict(required=False, type='bool'),
         access_zone=dict(required=False, type='str',
                          default='System'),
+        scope=dict(required=False, type='str',
+                   choices=['effective', 'user', 'default'],
+                   default='effective'),
         gather_subset=dict(type='list', required=True, elements='str',
                            choices=['attributes',
                                     'access_zones',
@@ -1012,7 +1093,9 @@ def get_info_parameters():
                                     'network_subnets',
                                     'node_pools',
                                     'storagepool_tiers',
-                                    'smb_files'
+                                    'smb_files',
+                                    'user_mapping_rules',
+                                    'ldap'
                                     ]),
     )
 

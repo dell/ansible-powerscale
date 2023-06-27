@@ -1,0 +1,82 @@
+---
+- name: SyncIQ Job Operations on PowerScale
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.**'
+    verify_ssl: false
+    api_user: 'user'
+    api_password: 'password'
+    job_id: 'Test_SSL'
+    state_present: 'present'
+    state_absent: 'absent'
+
+  tasks:
+    - name: Get SyncIQ job details
+      dellemc.powerscale.synciqjob:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        job_id: "{{ job_id }}"
+        state: "{{ state_present }}"
+
+    - name: Resume a SyncIQ job when in paused state
+      dellemc.powerscale.synciqjob:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        job_id: "{{ job_id }}"
+        job_state: "run"
+        state: "{{ state_present }}"
+
+    - name: Resume a SyncIQ job when in paused state Idempotency case
+      dellemc.powerscale.synciqjob:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        job_id: "{{ job_id }}"
+        job_state: "run"
+        state: "{{ state_present }}"
+
+    - name: Pause a SyncIQ job when in running state
+      dellemc.powerscale.synciqjob:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        job_id: "{{ job_id }}"
+        job_state: "pause"
+        state: "{{ state_present }}"
+
+    - name: Pause a SyncIQ job when in running state Idempotency case
+      dellemc.powerscale.synciqjob:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        job_id: "{{ job_id }}"
+        job_state: "pause"
+        state: "{{ state_present }}"
+
+    - name: Cancel a SyncIQ job
+      dellemc.powerscale.synciqjob:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        job_id: "{{ job_id }}"
+        job_state: "cancel"
+        state: "{{ state_absent }}"
+
+    - name: Cancel a SyncIQ job Idempotency case
+      dellemc.powerscale.synciqjob:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        job_id: "{{ job_id }}"
+        job_state: "cancel"
+        state: "{{ state_absent }}"

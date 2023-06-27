@@ -13,37 +13,39 @@ class ModuleDocFragment(object):
             description:
             - IP address or FQDN of the PowerScale cluster.
             type: str
-            required: True
+            required: true
         port_no:
             description:
             - Port number of the PowerScale cluster.It defaults to 8080 if
               not specified.
             type: str
-            required: False
+            required: false
             default: '8080'
         verify_ssl:
             description:
             - boolean variable to specify whether to validate SSL
               certificate or not.
-            - True - indicates that the SSL certificate should be
+            - C(true) - indicates that the SSL certificate should be
               verified.
-            - False - indicates that the SSL certificate should not be
+            - C(false) - indicates that the SSL certificate should not be
               verified.
             type: bool
-            required: True
-            choices: [True, False]
+            required: true
+            choices: [true, false]
         api_user:
             type: str
             description:
             - username of the PowerScale cluster.
-            required: True
+            required: true
         api_password:
             type: str
             description:
             - the password of the PowerScale cluster.
-            required: True
+            required: true
     requirements:
-      - A Dell PowerScale Storage system. Ansible 2.12, 2.13 or 2.14.
+      - A Dell PowerScale Storage system.
+      - Ansible-core 2.13 or later.
+      - Python 3.9, 3.10 or 3.11.
     notes:
       - The modules present in this collection named as 'dellemc.powerscale'
         are built to support the Dell PowerScale storage platform.

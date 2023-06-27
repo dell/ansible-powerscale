@@ -1,0 +1,258 @@
+---
+- name: SyncIQ Policy Operations on PowerScale
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.**'
+    port_no: '8080'
+    verify_ssl: false
+    api_user: 'user'
+    api_password: 'password'
+    target_host_id: '10.**.**.157'
+    target_host_name: 'vpi1157-c1-1'
+    policy_name: "Policy_SP"
+    new_policy_name: "Renamed_Policy"
+
+  tasks:
+    - name: Create SyncIQ policy
+      register: result
+      dellemc.powerscale.synciqpolicy:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        action: 'copy'
+        description: 'Creating a policy'
+        enabled: false
+        policy_name: "{{ policy_name }}"
+        run_job: "when-source-modified"
+        job_delay: 10
+        job_delay_unit: "hours"
+        source_cluster:
+          source_root_path: '/ifs/source'
+          source_exclude_directories:
+            - '/ifs/source/exclude_1'
+            - '/ifs/source/exclude_2'
+          source_include_directories: '/ifs/source/include_directory'
+          source_network:
+            pool: 'pool0'
+            subnet: 'subnet0'
+        target_cluster:
+          target_host: "{{ target_host_name }}"
+          target_path: "/ifs/target"
+          target_certificate_id: "7a3c579ea8214818a417eb4af31b0c9fc2634852498430b919d93f9ae122d545"
+        target_snapshot:
+          target_snapshot_archive: true
+          target_snapshot_expiration: 90
+          exp_time_unit: 'days'
+        state: 'present'
+
+    - name: Create SyncIQ policy -- Idempotency
+      register: result
+      dellemc.powerscale.synciqpolicy:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        action: 'copy'
+        description: 'Creating a policy'
+        enabled: false
+        policy_name: "{{ policy_name }}"
+        run_job: "when-source-modified"
+        job_delay: 10
+        job_delay_unit: "hours"
+        source_cluster:
+          source_root_path: '/ifs/source'
+          source_exclude_directories:
+            - '/ifs/source/exclude_1'
+            - '/ifs/source/exclude_2'
+          source_include_directories: '/ifs/source/include_directory'
+          source_network:
+            pool: 'pool0'
+            subnet: 'subnet0'
+        target_cluster:
+          target_host: "{{ target_host_name }}"
+          target_path: "/ifs/target"
+          target_certificate_id: "7a3c579ea8214818a417eb4af31b0c9fc2634852498430b919d93f9ae122d545"
+        target_snapshot:
+          target_snapshot_archive: true
+          target_snapshot_expiration: 90
+          exp_time_unit: 'days'
+        state: 'present'
+
+    - name: Get SyncIQ policy details
+      dellemc.powerscale.synciqpolicy:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        policy_name: "{{ result.synciq_policy_details.name }}"
+        state: "present"
+
+    - name: Modify SyncIQ policy
+      dellemc.powerscale.synciqpolicy:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        policy_name: "{{ result.synciq_policy_details.name }}"
+        action: "sync"
+        description: 'Modifying a policy'
+        enabled: true
+        run_job: "on-schedule"
+        schedule: "every 1 days every 12 hours between 12:00 AM and 11:59 PM"
+        target_snapshot:
+          target_snapshot_archive: false
+        state: 'present'
+
+    - name: Modify SyncIQ policy -- Idempotency
+      dellemc.powerscale.synciqpolicy:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        policy_name: "{{ result.synciq_policy_details.name }}"
+        action: "sync"
+        description: 'Modifying a policy'
+        enabled: true
+        run_job: "on-schedule"
+        schedule: "every 1 days every 12 hours between 12:00 AM and 11:59 PM"
+        target_snapshot:
+          target_snapshot_archive: false
+        state: 'present'
+
+    - name: Rename a SyncIQ policy
+      dellemc.powerscale.synciqpolicy:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        policy_id: "{{ result.synciq_policy_details.id }}"
+        new_policy_name: "{{ new_policy_name }}"
+        state: "present"
+
+    - name: Create a job on SyncIQ policy
+      dellemc.powerscale.synciqpolicy:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        policy_name: "Test_SSL"
+        job_params:
+          action: "run"
+          source_snapshot: "TestSIQ-snapshot"
+          wait_for_completion: false
+        state: "present"
+
+    - name: Create a job on SyncIQ policy Idempotency case
+      dellemc.powerscale.synciqpolicy:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        policy_name: "Test_SSL"
+        job_params:
+          action: "run"
+          source_snapshot: "TestSIQ-snapshot"
+          wait_for_completion: false
+        state: "present"
+
+    - name: Create a resync_prep job on SyncIQ policy
+      dellemc.powerscale.synciqpolicy:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        policy_name: "Test_SSL"
+        job_params:
+          action: "resync_prep"
+          source_snapshot: "TestSIQ-snapshot"
+          wait_for_completion: false
+        state: "present"
+
+    - name: Create a resync_prep job on SyncIQ policy Idempotency case
+      dellemc.powerscale.synciqpolicy:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        policy_name: "Test_SSL"
+        job_params:
+          action: "resync_prep"
+          source_snapshot: "TestSIQ-snapshot"
+          wait_for_completion: false
+        state: "present"
+
+    - name: Allow writes on target of SyncIQ policy
+      dellemc.powerscale.synciqpolicy:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        policy_name: "Test_SSL"
+        job_params:
+          action: "allow_write"
+          source_snapshot: "TestSIQ-snapshot"
+          workers_per_node: 3
+          wait_for_completion: false
+        state: "present"
+
+    - name: Allow writes on target of SyncIQ policy Idempotency case
+      dellemc.powerscale.synciqpolicy:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        policy_name: "Test_SSL"
+        job_params:
+          action: "allow_write"
+          source_snapshot: "TestSIQ-snapshot"
+          workers_per_node: 3
+          wait_for_completion: false
+        state: "present"
+
+    - name: Disallow writes on target of SyncIQ policy
+      dellemc.powerscale.synciqpolicy:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        policy_name: "Test_SSL"
+        job_params:
+          action: "allow_write_revert"
+          source_snapshot: "TestSIQ-snapshot"
+          workers_per_node: 3
+          wait_for_completion: false
+        state: "present"
+
+    - name: Disallow writes on target of SyncIQ policy Idempotency case
+      dellemc.powerscale.synciqpolicy:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        policy_name: "Test_SSL"
+        job_params:
+          action: "allow_write_revert"
+          source_snapshot: "TestSIQ-snapshot"
+          workers_per_node: 3
+          wait_for_completion: false
+        state: "present"
+
+    - name: Delete a SyncIQ policy
+      dellemc.powerscale.synciqpolicy:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        policy_name: "{{ new_policy_name }}"
+        state: "absent"
+
+    - name: Delete a SyncIQ policy -- Idempotency
+      dellemc.powerscale.synciqpolicy:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        policy_name: "{{ new_policy_name }}"
+        state: "absent"

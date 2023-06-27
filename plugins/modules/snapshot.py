@@ -81,91 +81,93 @@ options:
     required: true
     choices: [absent, present]
     type: str
+notes:
+- The I(check_mode) is not supported.
 '''
 
 EXAMPLES = r'''
-    - name: Create a filesystem snapshot on PowerScale
-      dellemc.powerscale.snapshot:
-        onefs_host: "{{onefs_host}}"
-        verify_ssl: "{{verify_ssl}}"
-        api_user: "{{api_user}}"
-        api_password: "{{api_password}}"
-        path: "<path>"
-        access_zone: "{{access_zone}}"
-        snapshot_name: "{{snapshot_name}}"
-        desired_retention: "{{desired_retention}}"
-        retention_unit: "{{retention_unit_days}}"
-        alias: "{{ansible_snap_alias}}"
-        state: "{{present}}"
+- name: Create a filesystem snapshot on PowerScale
+  dellemc.powerscale.snapshot:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    access_zone: "{{access_zone}}"
+    snapshot_name: "{{snapshot_name}}"
+    desired_retention: "{{desired_retention}}"
+    retention_unit: "{{retention_unit_days}}"
+    alias: "{{ansible_snap_alias}}"
+    state: "{{present}}"
 
-    - name: Get details of a filesystem snapshot
-      dellemc.powerscale.snapshot:
-        onefs_host: "{{onefs_host}}"
-        verify_ssl: "{{verify_ssl}}"
-        api_user: "{{api_user}}"
-        api_password: "{{api_password}}"
-        snapshot_name: "{{snapshot_name}}"
-        state: "{{present}}"
+- name: Get details of a filesystem snapshot
+  dellemc.powerscale.snapshot:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    snapshot_name: "{{snapshot_name}}"
+    state: "{{present}}"
 
-    - name: Modify filesystem snapshot desired retention
-      dellemc.powerscale.snapshot:
-        onefs_host: "{{onefs_host}}"
-        verify_ssl: "{{verify_ssl}}"
-        api_user: "{{api_user}}"
-        api_password: "{{api_password}}"
-        snapshot_name: "{{snapshot_name}}"
-        desired_retention: "{{desired_retention_new}}"
-        retention_unit: "{{retention_unit_days}}"
-        state: "{{present}}"
+- name: Modify filesystem snapshot desired retention
+  dellemc.powerscale.snapshot:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    snapshot_name: "{{snapshot_name}}"
+    desired_retention: "{{desired_retention_new}}"
+    retention_unit: "{{retention_unit_days}}"
+    state: "{{present}}"
 
-    - name: Modify filesystem snapshot expiration timestamp
-      dellemc.powerscale.snapshot:
-        onefs_host: "{{onefs_host}}"
-        verify_ssl: "{{verify_ssl}}"
-        api_user: "{{api_user}}"
-        api_password: "{{api_password}}"
-        snapshot_name: "{{snapshot_name}}"
-        expiration_timestamp: "{{expiration_timestamp_new}}"
-        state: "{{present}}"
+- name: Modify filesystem snapshot expiration timestamp
+  dellemc.powerscale.snapshot:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    snapshot_name: "{{snapshot_name}}"
+    expiration_timestamp: "{{expiration_timestamp_new}}"
+    state: "{{present}}"
 
-    - name: Modify filesystem snapshot alias
-      dellemc.powerscale.snapshot:
-        onefs_host: "{{onefs_host}}"
-        verify_ssl: "{{verify_ssl}}"
-        api_user: "{{api_user}}"
-        api_password: "{{api_password}}"
-        snapshot_name: "{{snapshot_name}}"
-        alias: "{{ansible_snap_alias_new}}"
-        state: "{{present}}"
+- name: Modify filesystem snapshot alias
+  dellemc.powerscale.snapshot:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    snapshot_name: "{{snapshot_name}}"
+    alias: "{{ansible_snap_alias_new}}"
+    state: "{{present}}"
 
-    - name: Delete snapshot alias
-      dellemc.powerscale.snapshot:
-        onefs_host: "{{onefs_host}}"
-        verify_ssl: "{{verify_ssl}}"
-        api_user: "{{api_user}}"
-        api_password: "{{api_password}}"
-        snapshot_name: "{{snapshot_name}}"
-        alias: ""
-        state: "{{present}}"
+- name: Delete snapshot alias
+  dellemc.powerscale.snapshot:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    snapshot_name: "{{snapshot_name}}"
+    alias: ""
+    state: "{{present}}"
 
-    - name: Rename filesystem snapshot
-      dellemc.powerscale.snapshot:
-        onefs_host: "{{onefs_host}}"
-        verify_ssl: "{{verify_ssl}}"
-        api_user: "{{api_user}}"
-        api_password: "{{api_password}}"
-        snapshot_name: "{{snapshot_name}}"
-        new_snapshot_name: "{{new_snapshot_name}}"
-        state: "{{present}}"
+- name: Rename filesystem snapshot
+  dellemc.powerscale.snapshot:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    snapshot_name: "{{snapshot_name}}"
+    new_snapshot_name: "{{new_snapshot_name}}"
+    state: "{{present}}"
 
-    - name: Delete filesystem snapshot
-      dellemc.powerscale.snapshot:
-        onefs_host: "{{onefs_host}}"
-        verify_ssl: "{{verify_ssl}}"
-        api_user: "{{api_user}}"
-        api_password: "{{api_password}}"
-        snapshot_name: "{{new_snapshot_name}}"
-        state: "{{absent}}"
+- name: Delete filesystem snapshot
+  dellemc.powerscale.snapshot:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    snapshot_name: "{{new_snapshot_name}}"
+    state: "{{absent}}"
 '''
 
 RETURN = r'''
@@ -234,7 +236,6 @@ snapshot_details:
             sample: "ansible_target_snap"
 '''
 
-import logging
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils

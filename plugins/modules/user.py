@@ -28,8 +28,8 @@ options:
     type: str
   user_id:
     description:
-    - The user_id is auto generated or can be assigned at the time of creation.
-    - For all other operations either user_name or user_id is needed.
+    - The I(user_id) is auto generated or can be assigned at the time of creation.
+    - For all other operations either I(user_name) or I(user_id) is needed.
     type: int
   password:
     description:
@@ -40,8 +40,8 @@ options:
   access_zone:
     description:
     - This option mentions the zone in which a user is created.
-    - For creation, access_zone acts as an attribute for the user.
-    - For all other operations access_zone acts as a filter.
+    - For creation, I(access_zone) acts as an attribute for the user.
+    - For all other operations I(access_zone) acts as a filter.
     type: str
     default: 'system'
   provider_type:
@@ -52,9 +52,9 @@ options:
     - Adding and removing roles is allowed for all users of the
       system access zone.
     - Getting user details is allowed for all users.
-    - If the provider_type is 'ads' then domain name of the Active
-      Directory Server has to be mentioned in the user_name.
-      The format for the user_name should be 'DOMAIN_NAME\user_name'
+    - If the I(provider_type) is 'ads' then domain name of the Active
+      Directory Server has to be mentioned in the I(user_name).
+      The format for the I(user_name) should be 'DOMAIN_NAME\user_name'
       or "DOMAIN_NAME\\user_name".
     - This option acts as a filter for all operations except creation.
     type: str
@@ -101,7 +101,7 @@ options:
     - The state option is used to mention the existence of
       the user account.
     type: str
-    required: True
+    required: true
     choices: [ 'absent', 'present' ]
   role_name:
     description:
@@ -110,7 +110,7 @@ options:
     type: str
   role_state:
     description:
-    - The role_state option is used to mention the existence of the role
+    - The I(role_state) option is used to mention the existence of the role
       for a particular user.
     - It is required when a role is added or removed from user.
     type: str
@@ -126,6 +126,8 @@ options:
     choices: ['always', 'on_create']
     default: always
     type: str
+notes:
+- The I(check_mode) is not supported.
 '''
 
 EXAMPLES = r'''
@@ -208,7 +210,7 @@ EXAMPLES = r'''
       access_zone: "{{access_zone}}"
       provider_type: "{{provider_type}}"
       user_id: "{{id}}"
-      enabled: "False"
+      enabled: false
       state: "present"
 
   - name: Add user to a role using Username

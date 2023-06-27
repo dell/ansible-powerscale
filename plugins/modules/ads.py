@@ -41,7 +41,7 @@ options:
       name if it is not specified during the create operation.
     - Get, modify and delete operations can also be performed through
       instance_name.
-    - It is mutually exclusive with domain_name for get, modify and delete
+    - It is mutually exclusive with I(domain_name) for get, modify and delete
       operations.
     type: str
 
@@ -66,24 +66,24 @@ options:
       groupnet:
         description:
         - Groupnet identifier.
-        - This is an optional parameter and defaults to groupnet0.
+        - This is an optional parameter and defaults to C(groupnet0).
         type: str
       home_directory_template:
         description:
         - Specifies the path to the home directory template.
-        - This is an optional parameter and defaults to '/ifs/home/%D/%U'.
+        - This is an optional parameter and defaults to C(/ifs/home/%D/%U).
         type: str
       login_shell:
         description:
         - Specifies the login shell path.
-        - This is an optional parameter and defaults to '/bin/zsh'.
+        - This is an optional parameter and defaults to C(/bin/zsh).
         type: str
         choices: ['/bin/sh', '/bin/csh', '/bin/tcsh', '/bin/zsh', '/bin/bash',
                   '/bin/rbash', '/sbin/nologin']
       machine_account:
         description:
         - Specifies the machine account name when creating a SAM account with Active Directory.
-        - The default cluster name is called 'default'.
+        - The default cluster name is called C(default).
         type: str
       organizational_unit:
         description:
@@ -94,91 +94,93 @@ options:
   state:
     description:
     - The state of the ads provider after the task is performed.
-    - present - indicates that the ADS provider should exist on the system.
-    - absent - indicates that the ADS provider should not exist on the system.
+    - C(present) - indicates that the ADS provider should exist on the system.
+    - C(absent) - indicates that the ADS provider should not exist on the system.
     choices: ['absent', 'present']
     type: str
-    required: True
+    required: true
+notes:
+- The I(check_mode) is not supported.
 '''
 
 EXAMPLES = r'''
 - name: Add an Active Directory provider
   dellemc.powerscale.ads:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      domain_name: "ansibleneo.com"
-      instance_name: "ansibleneo.com"
-      ads_user: "administrator"
-      ads_password: "*****"
-      ads_parameters:
-        groupnet: "groupnet5"
-        home_directory_template: "/ifs/home/%D/%U"
-        login_shell: "/bin/zsh"
-        machine_account: "test_account"
-        organizational_unit: "org/sub_org"
-      state: "present"
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    domain_name: "ansibleneo.com"
+    instance_name: "ansibleneo.com"
+    ads_user: "administrator"
+    ads_password: "*****"
+    ads_parameters:
+      groupnet: "groupnet5"
+      home_directory_template: "/ifs/home/%D/%U"
+      login_shell: "/bin/zsh"
+      machine_account: "test_account"
+      organizational_unit: "org/sub_org"
+    state: "present"
 
 - name: Modify an Active Directory provider with domain name
   dellemc.powerscale.ads:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      domain_name: "ansibleneo.com"
-      ads_parameters:
-        home_directory_template: "/ifs/usr_home/%D/%U"
-        login_shell: "/bin/rbash"
-      state: "present"
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    domain_name: "ansibleneo.com"
+    ads_parameters:
+      home_directory_template: "/ifs/usr_home/%D/%U"
+      login_shell: "/bin/rbash"
+    state: "present"
 
 - name: Modify an Active Directory provider with instance name
   dellemc.powerscale.ads:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      instance_name: "ansibleneo.com"
-      ads_parameters:
-        home_directory_template: "/ifs/usr_home/%D/%U"
-        login_shell: "/bin/rbash"
-      state: "present"
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    instance_name: "ansibleneo.com"
+    ads_parameters:
+      home_directory_template: "/ifs/usr_home/%D/%U"
+      login_shell: "/bin/rbash"
+    state: "present"
 
 - name: Get Active Directory provider details with domain name
   dellemc.powerscale.ads:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      domain_name: "ansibleneo.com"
-      state: "present"
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    domain_name: "ansibleneo.com"
+    state: "present"
 
 - name: Get Active Directory provider details with instance name
   dellemc.powerscale.ads:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      instance_name: "ansibleneo.com"
-      state: "present"
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    instance_name: "ansibleneo.com"
+    state: "present"
 
 - name: Delete an Active Directory provider with domain name
   dellemc.powerscale.ads:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      domain_name: "ansibleneo.com"
-      state: "absent"
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    domain_name: "ansibleneo.com"
+    state: "absent"
 
 - name: Delete an Active Directory provider with instance name
   dellemc.powerscale.ads:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      instance_name: "ansibleneo.com"
-      state: "absent"
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    instance_name: "ansibleneo.com"
+    state: "absent"
 '''
 
 RETURN = r'''
@@ -244,7 +246,7 @@ class Ads(object):
 
         # result is a dictionary that contains changed status
         self.result = {"changed": False}
-        PREREQS_VALIDATE = utils.validate_module_pre_reqs(self.module.params)
+        PREREQS_VALIDATE = utils.validate_module_pre_reqs(self.module.params, "ads")
         if PREREQS_VALIDATE \
                 and not PREREQS_VALIDATE["all_packages_found"]:
             self.module.fail_json(
@@ -315,10 +317,7 @@ class Ads(object):
         if ads_parameters:
             for key in ads_parameters:
                 if ads_parameters[key]:
-                    if not utils.ISI_SDK_VERSION_9 and key == 'machine_account':
-                        ads_create_params['account'] = ads_parameters[key]
-                    else:
-                        ads_create_params[key] = ads_parameters[key]
+                    ads_create_params[key] = ads_parameters[key]
 
         ads_provider_obj = utils.isi_sdk.ProvidersAdsItem(**ads_create_params)
         try:
