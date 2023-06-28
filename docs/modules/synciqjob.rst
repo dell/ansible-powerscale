@@ -20,7 +20,9 @@ Requirements
 ------------
 The below requirements are needed on the host that executes this module.
 
-- A Dell PowerScale Storage system. Ansible 2.12, 2.13 or 2.14.
+- A Dell PowerScale Storage system.
+- Ansible-core 2.13 or later.
+- Python 3.9, 3.10 or 3.11.
 
 
 
@@ -38,9 +40,9 @@ Parameters
   state (True, str, None)
     The state of the SyncIQ job after the task is performed.
 
-    present - indicates that the SyncIQ job should exist on the system.
+    ``present`` - indicates that the SyncIQ job should exist on the system.
 
-    absent - indicates that the SyncIQ job should not exist on the system.
+    ``absent`` - indicates that the SyncIQ job should not exist on the system.
 
 
   onefs_host (True, str, None)
@@ -54,9 +56,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    True - indicates that the SSL certificate should be verified.
+    ``true`` - indicates that the SSL certificate should be verified.
 
-    False - indicates that the SSL certificate should not be verified.
+    ``false`` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -75,6 +77,7 @@ Notes
 
 .. note::
    - There is delay in the actual state change of the SyncIQ job. The state change of jobs in 'scheduled' state is not supported.
+   - The *check_mode* is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -88,42 +91,42 @@ Examples
     
     - name: Get SyncIQ job details
       dellemc.powerscale.synciqjob:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          job_id: "Test_SSL"
-          state: "present"
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        job_id: "Test_SSL"
+        state: "present"
 
     - name: Pause a SyncIQ job when in running state
       dellemc.powerscale.synciqjob:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          job_id: "Test_SSL"
-          job_state: "pause"
-          state: "present"
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        job_id: "Test_SSL"
+        job_state: "pause"
+        state: "present"
 
     - name: Resume a SyncIQ job when in paused state
       dellemc.powerscale.synciqjob:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          job_id: "Test_SSL"
-          job_state: "run"
-          state: "present"
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        job_id: "Test_SSL"
+        job_state: "run"
+        state: "present"
 
     - name: Cancel a SyncIQ job
       dellemc.powerscale.synciqjob:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          job_id: "Test_SSL"
-          job_state: "cancel"
-          state: "absent"
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        job_id: "Test_SSL"
+        job_state: "cancel"
+        state: "absent"
 
 
 

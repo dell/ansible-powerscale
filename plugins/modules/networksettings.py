@@ -36,33 +36,35 @@ options:
     type: str
     required: true
     choices: ["present"]
+notes:
+- The I(check_mode) is not supported.
 '''
 
 EXAMPLES = r'''
-    - name: Get Network settings
-      dellemc.powerscale.networksettings:
+  - name: Get Network settings
+    dellemc.powerscale.networksettings:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
       verify_ssl: "{{verify_ssl}}"
       state: "{{state_present}}"
 
-    - name: Enable source based routing
-      dellemc.powerscale.networksettings:
+  - name: Enable source based routing
+    dellemc.powerscale.networksettings:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
       verify_ssl: "{{verify_ssl}}"
-      enable_source_routing: True
+      enable_source_routing: true
       state: "{{state_present}}"
 
-    - name: Disable source based routing
-      dellemc.powerscale.networksettings:
+  - name: Disable source based routing
+    dellemc.powerscale.networksettings:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
       verify_ssl: "{{verify_ssl}}"
-      enable_source_routing: False
+      enable_source_routing: false
       state: "{{state_present}}"
 '''
 

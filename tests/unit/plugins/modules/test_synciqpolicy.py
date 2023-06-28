@@ -19,14 +19,11 @@ utils.ISI_SDK_VERSION_9 = MagicMock(return_value=True)
 from ansible.module_utils import basic
 basic.AnsibleModule = MagicMock()
 
-from ansible_collections.dellemc.powerscale.plugins.modules import synciqpolicy
 from ansible_collections.dellemc.powerscale.plugins.modules.synciqpolicy import SynciqPolicy
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_synciqpolicy_api \
     import MockSynciqpolicyApi
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_api_exception \
     import MockApiException
-from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_sdk_response \
-    import MockSDKResponse
 
 
 class TestSynciqPolicy():

@@ -1,0 +1,408 @@
+---
+- name: Filesystem operations on PowerScale
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.**'
+    verify_ssl: false
+    api_user: 'root'
+    api_password: 'pancake'
+    path_ansible: '/ifs/ATest'
+    new_path_ansible: '/ansible110'
+    new_path_ansible_1: '/ansible111'
+    path_system: '/ifs/ATest3'
+    new_path_system: '/ifs/ansible/ansible110'
+    new_path_system_1: '/ifs/ansible/ansible111'
+    access_zone: 'ansible'
+    access_zone_system: 'System'
+    owner: 'ansible_user'
+    group: 'ansible_group'
+    access_control: '0755'
+    access_control_new: '0700'
+    access_control_nonposix: 'private_read'
+    recursive: true
+    recursive_force_delete: true
+    state_present: 'present'
+    state_absent: 'absent'
+    cap_unit: 'GB'
+    container: true
+    desired_retention: 'None'
+    snapshot_name: 'filesystem_snapshot_details_test'
+    snapshot_name_1: 'filesystem_snapshot_details_test_1'
+
+  tasks:
+    - name: Create a filesystem without Quota and ACL in POSIX mode
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ new_path_ansible_1 }}"
+        access_zone: "{{ access_zone }}"
+        owner:
+          name: 'ldap_test_user_1'
+          provider_type: 'ldap'
+        group:
+          name: 'sample_ldap_group_2'
+          provider_type: 'ldap'
+        access_control: "{{ access_control }}"
+        recursive: "{{ recursive }}"
+        state: "{{ state_present }}"
+
+    - name: Create a filesystem Idempotency Check
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ new_path_ansible_1 }}"
+        access_zone: "{{ access_zone }}"
+        owner:
+          name: 'ldap_test_user_1'
+          provider_type: 'ldap'
+        group:
+          name: 'sample_ldap_group_2'
+          provider_type: 'ldap'
+        access_control: "{{ access_control }}"
+        recursive: "{{ recursive }}"
+        state: "{{ state_present }}"
+
+    - name: Create a filesystem in System Access Zone with non POSIX ACL
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ new_path_system }}"
+        owner:
+          name: 'ldap_test_user_1'
+          provider_type: 'ldap'
+        group:
+          name: 'sample_ldap_group_2'
+          provider_type: 'ldap'
+        access_control: "{{ access_control_nonposix }}"
+        recursive: "{{ recursive }}"
+        state: "{{ state_present }}"
+
+    - name: Create a filesystem snapshot
+      dellemc.powerscale.snapshot:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ new_path_ansible_1 }}"
+        access_zone: "{{ access_zone }}"
+        snapshot_name: "{{ snapshot_name }}"
+        desired_retention: "{{ desired_retention }}"
+        state: "{{ state_present }}"
+
+    - name: Create a filesystem snapshot
+      dellemc.powerscale.snapshot:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ new_path_ansible_1 }}"
+        access_zone: "{{ access_zone }}"
+        snapshot_name: "{{ snapshot_name_1 }}"
+        desired_retention: "{{ desired_retention }}"
+        state: "{{ state_present }}"
+
+    - name: Get filesystem details in non System Access Zone with snapshots
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ new_path_ansible_1 }}"
+        access_zone: "{{ access_zone }}"
+        list_snapshots: true
+        state: "{{ state_present }}"
+
+    - name: Get filesystem details in non System Access Zone without snapshots
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ new_path_ansible_1 }}"
+        access_zone: "{{ access_zone }}"
+        list_snapshots: false
+        state: "{{ state_present }}"
+
+    - name: Get filesystem details in System Access Zone
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ new_path_system }}"
+        state: "{{ state_present }}"
+
+    - name: Get filesystem details in System Access Zone with Snapshots
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ new_path_system_1 }}"
+        list_snapshots: true
+        state: "{{ state_present }}"
+
+    - name: Get filesystem details in System Access Zone without Snapshots
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ new_path_system_1 }}"
+        list_snapshots: false
+        state: "{{ state_present }}"
+
+    - name: Modify the access control
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ new_path_ansible_1 }}"
+        access_zone: "{{ access_zone }}"
+        access_control: "{{ access_control_new }}"
+        state: "{{ state_present }}"
+
+    - name: Create a filesystem with Quota and ACL in POSIX mode
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path_ansible }}"
+        access_zone: "{{ access_zone }}"
+        owner:
+          name: 'ldap_test_user_1'
+          provider_type: 'ldap'
+        group:
+          name: 'sample_ldap_group_2'
+          provider_type: 'ldap'
+        quota:
+          include_snap_data: false
+          thresholds_on: "fs_logical_size"
+          soft_limit_size: 5
+          hard_limit_size: 10
+          cap_unit: "GB"
+          container: "{{ container }}"
+          quota_state: "present"
+        access_control: "{{ access_control }}"
+        recursive: "{{ recursive }}"
+        state: "{{ state_present }}"
+
+    - name: Update Filesystem with Quota
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ new_path_ansible_1 }}"
+        access_zone: "{{ access_zone }}"
+        owner:
+          name: 'ldap_test_user_1'
+          provider_type: 'ldap'
+        group:
+          name: 'sample_ldap_group_2'
+          provider_type: 'ldap'
+        quota:
+          include_snap_data: false
+          thresholds_on: "fs_logical_size"
+          soft_limit_size: 5
+          hard_limit_size: 10
+          cap_unit: "GB"
+          container: "{{ container }}"
+          quota_state: "present"
+        access_control: "{{ access_control }}"
+        recursive: "{{ recursive }}"
+        state: "{{ state_present }}"
+
+    - name: Update Quota of the filesystem
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ new_path_ansible_1 }}"
+        access_zone: "{{ access_zone }}"
+        quota:
+          thresholds_on: "app_logical_size"
+          hard_limit_size: 15
+          cap_unit: "GB"
+          container: "{{ container }}"
+          quota_state: "present"
+        state: "{{ state_present }}"
+
+    - name: Remove Quota from FS
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ new_path_ansible_1 }}"
+        access_zone: "{{ access_zone }}"
+        quota:
+          quota_state: "absent"
+        state: "{{ state_present }}"
+
+    - name: Remove Quota from FS idempotency check
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ new_path_ansible_1 }}"
+        access_zone: "{{ access_zone }}"
+        quota:
+          quota_state: "absent"
+        state: "{{ state_present }}"
+
+    - name: Remove Quota from FS
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path_ansible }}"
+        access_zone: "{{ access_zone }}"
+        quota:
+          quota_state: "absent"
+        state: "{{ state_present }}"
+
+    - name: Delete filesystem snapshot
+      dellemc.powerscale.snapshot:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        snapshot_name: "{{ snapshot_name }}"
+        state: "{{ state_absent }}"
+
+    - name: Delete filesystem snapshot
+      dellemc.powerscale.snapshot:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        snapshot_name: "{{ snapshot_name_1 }}"
+        state: "{{ state_absent }}"
+
+    - name: Delete a filesystem in System Access Zone
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path_system }}"
+        recursive_force_delete: "{{ recursive_force_delete }}"
+        state: "{{ state_absent }}"
+
+    - name: Delete a filesystem in System Access Zone idempotency check
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path_system }}"
+        recursive_force_delete: "{{ recursive_force_delete }}"
+        state: "{{ state_absent }}"
+
+    - name: Delete a filesystem in System Access Zone
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ new_path_system }}"
+        recursive_force_delete: "{{ recursive_force_delete }}"
+        state: "{{ state_absent }}"
+
+    - name: Delete a filesystem in non System Access Zone
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ new_path_ansible_1 }}"
+        access_zone: "{{ access_zone }}"
+        recursive_force_delete: "{{ recursive_force_delete }}"
+        state: "{{ state_absent }}"
+
+    - name: Set access control rights of a filesystem in ACL mode
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "/ifs/test15"
+        access_control_rights:
+          access_type: "allow"
+          access_rights:
+            - "dir_gen_all"
+          inherit_flags:
+            - "container_inherit"
+          trustee:
+            name: 'ansible_test_user1'
+        access_control_rights_state: "add"
+        recursive: "{{ recursive }}"
+        state: "{{ state_present }}"
+
+    - name: Set access control rights of a filesystem in ACL mode - Idempotency
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "/ifs/test15"
+        owner:
+          name: 'ansible_test_user1'
+          provider_type: 'local'
+        group:
+          name: 'test_group_1'
+          provider_type: 'local'
+        access_control_rights:
+          access_type: "allow"
+          access_rights:
+            - "dir_gen_all"
+          inherit_flags:
+            - "container_inherit"
+          trustee:
+            name: 'ansible_test_user1'
+        access_control_rights_state: "add"
+        recursive: "{{ recursive }}"
+        state: "{{ state_present }}"
+
+    - name: Remove access control rights of a filesystem in ACL mode
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "/ifs/test15"
+        access_control_rights:
+          access_type: "allow"
+          trustee:
+            name: 'ansible_test_user1'
+        access_control_rights_state: "remove"
+        recursive: "{{ recursive }}"
+        state: "{{ state_present }}"
+
+    - name: Remove access control rights of a filesystem in ACL mode - Idempotency
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "/ifs/test15"
+        access_control_rights:
+          access_type: "allow"
+          trustee:
+            name: 'ansible_test_user1'
+        access_control_rights_state: "remove"
+        recursive: "{{ recursive }}"
+        state: "{{ state_present }}"

@@ -1,0 +1,128 @@
+---
+- name: Network Provisioning Rule Operations on PowerScale
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.195'
+    verify_ssl: false
+    api_user: 'user'
+    api_password: 'password'
+    rule_name: "test_rule"
+    iface: "ext-1"
+    groupnet: "groupnet0"
+    subnet: "subnet1"
+    pool: "pool1"
+    new_rule_name: "renamed_rule"
+    state_present: 'present'
+    state_absent: 'absent'
+
+  tasks:
+    - name: Create a network rule
+      dellemc.powerscale.networkrule:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        rule_name: "{{ rule_name }}"
+        iface: "{{ iface }}"
+        description: "New rule"
+        node_type: "storage"
+        groupnet_name: "{{ groupnet }}"
+        subnet_name: "{{ subnet }}"
+        pool_name: "{{ pool }}"
+        state: "{{ state_present }}"
+
+    - name: Create a network rule -- Idempotency
+      dellemc.powerscale.networkrule:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        rule_name: "{{ rule_name }}"
+        iface: "{{ iface }}"
+        description: "New rule"
+        node_type: "storage"
+        groupnet_name: "{{ groupnet }}"
+        subnet_name: "{{ subnet }}"
+        pool_name: "{{ pool }}"
+        state: "{{ state_present }}"
+
+    - name: Modify a network rule
+      dellemc.powerscale.networkrule:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        rule_name: "{{ rule_name }}"
+        iface: "ext-6"
+        description: "Modify rule"
+        node_type: "accelerator"
+        groupnet_name: "{{ groupnet }}"
+        subnet_name: "{{ subnet }}"
+        pool_name: "{{ pool }}"
+        state: "{{ state_present }}"
+
+    - name: Modify a network rule -- Idempotency
+      dellemc.powerscale.networkrule:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        rule_name: "{{ rule_name }}"
+        iface: "ext-6"
+        description: "Modify rule"
+        node_type: "accelerator"
+        groupnet_name: "{{ groupnet }}"
+        subnet_name: "{{ subnet }}"
+        pool_name: "{{ pool }}"
+        state: "{{ state_present }}"
+
+    - name: Rename a network rule
+      dellemc.powerscale.networkrule:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        rule_name: "{{ rule_name }}"
+        new_rule_name: "{{ new_rule_name }}"
+        groupnet_name: "{{ groupnet }}"
+        subnet_name: "{{ subnet }}"
+        pool_name: "{{ pool }}"
+        state: "{{ state_present }}"
+
+    - name: Delete a network rule
+      dellemc.powerscale.networkrule:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        rule_name: "{{ new_rule_name }}"
+        groupnet_name: "{{ groupnet }}"
+        subnet_name: "{{ subnet }}"
+        pool_name: "{{ pool }}"
+        state: "{{ state_absent }}"
+
+    - name: Delete a network rule -- Idempotency
+      dellemc.powerscale.networkrule:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        rule_name: "{{ new_rule_name }}"
+        groupnet_name: "{{ groupnet }}"
+        subnet_name: "{{ subnet }}"
+        pool_name: "{{ pool }}"
+        state: "{{ state_absent }}"
+
+
+    - name: Get details of a network rule
+      dellemc.powerscale.networkrule:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        groupnet_name: "{{ groupnet }}"
+        subnet_name: "{{ subnet }}"
+        pool_name: "{{ pool }}"
+        rule_name: "rule1"
+        state: "{{ state_present }}"

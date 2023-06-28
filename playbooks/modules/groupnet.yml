@@ -1,0 +1,119 @@
+---
+- name: Groupnet Operations on PowerScale
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.**'
+    verify_ssl: false
+    api_user: 'user'
+    api_password: 'password'
+    groupnet_name: 'groupnet_test'
+    new_groupnet_name: 'groupnet_test_rename'
+    state_present: 'present'
+    state_absent: 'absent'
+
+  tasks:
+    - name: Create a groupnet
+      dellemc.powerscale.groupnet:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        groupnet_name: "{{ groupnet_name }}"
+        description: "Test Groupnet"
+        dns_servers:
+          - '10.**.**.10'
+          - '10.**.**.11'
+        dns_server_state: 'add'
+        dns_search_suffix:
+          - test.com
+          - ansibleneo1.com
+        dns_search_suffix_state: 'add'
+        state: "{{ state_present }}"
+
+    - name: Create a groupnet Idempotency case
+      dellemc.powerscale.groupnet:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        groupnet_name: "{{ groupnet_name }}"
+        description: "Test Groupnet"
+        dns_servers:
+          - '10.**.**.10'
+          - '10.**.**.11'
+        dns_server_state: 'add'
+        dns_search_suffix:
+          - test.com
+          - ansibleneo1.com
+        dns_search_suffix_state: 'add'
+        state: "{{ state_present }}"
+
+    - name: Get groupnet details
+      dellemc.powerscale.groupnet:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        groupnet_name: "{{ groupnet_name }}"
+        state: "{{ state_present }}"
+
+    - name: Modify groupnet details
+      dellemc.powerscale.groupnet:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        groupnet_name: "{{ groupnet_name }}"
+        description: "Test Groupnet desc"
+        dns_servers:
+          - '10.**.**.12'
+        dns_server_state: 'add'
+        dns_search_suffix:
+          - ansibleneo1.com
+        dns_search_suffix_state: 'remove'
+        state: "{{ state_present }}"
+
+    - name: Modify groupnet details Idempotency case
+      dellemc.powerscale.groupnet:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        groupnet_name: "{{ groupnet_name }}"
+        description: "Test Groupnet desc"
+        dns_servers:
+          - '10.**.**.12'
+        dns_server_state: 'add'
+        dns_search_suffix:
+          - ansibleneo1.com
+        dns_search_suffix_state: 'remove'
+        state: "{{ state_present }}"
+
+    - name: Rename a groupnet
+      dellemc.powerscale.groupnet:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        groupnet_name: "{{ groupnet_name }}"
+        new_groupnet_name: "{{ new_groupnet_name }}"
+        state: "{{ state_present }}"
+
+    - name: Delete a groupnet
+      dellemc.powerscale.groupnet:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        groupnet_name: "{{ new_groupnet_name }}"
+        state: "{{ state_absent }}"
+
+    - name: Delete a groupnet Idempotency case
+      dellemc.powerscale.groupnet:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        groupnet_name: "{{ new_groupnet_name }}"
+        state: "{{ state_absent }}"

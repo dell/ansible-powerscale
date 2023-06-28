@@ -1,0 +1,197 @@
+---
+- name: Sample playbook for managing Snapshots on Dell PowerScale.
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.**'
+    verify_ssl: false
+    api_user: 'user'
+    api_password: 'password'
+    owner: 'ansible_owner'
+    group: 'ansible_group'
+    access_control: 'private_read'
+    recursive: true
+    path_ansible: '/ansible109'
+    new_path_ansible: '/ansible110'
+    new_path_ansible_1: '/ansible111'
+    path_system: '/ifs/ansible/ansible109'
+    new_path_system: '/ifs/ansible/ansible110'
+    new_path_system_1: '/ifs/ansible/ansible111'
+    access_zone: 'ansible'
+    access_zone_system: 'System'
+    snapshot_name: 'ansible_snapshot'
+    snapshot_name_1: 'ansible_snapshot_1'
+    snapshot_name_2: 'ansible_snapshot_2'
+    snapshot_name_3: 'ansible_snapshot_3'
+    new_snapshot_name: 'ansible_rename'
+    description: 'Snap created using Ansible'
+    desired_retention: '2'
+    desired_retention_new: '3'
+    retention_unit_days: 'days'
+    retention_unit_hours: 'hours'
+    expiration_timestamp: '2025-11-28T11:50:20Z'
+    expiration_timestamp_new: '2025-01-18T11:50:20Z'
+    ansible_snap_alias: "ansible_snap_aliasx100"
+    ansible_snap_alias_new: "ansible_snap_alias_newx100"
+    state_present: 'present'
+    state_absent: 'absent'
+
+  tasks:
+    - name: Create a filesystem without Quota and ACL in POSIX mode
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path_ansible }}"
+        access_zone: "{{ access_zone }}"
+        owner:
+          name: 'ldap_test_user_1'
+          provider_type: 'ldap'
+        group:
+          name: 'sample_ldap_group_2'
+          provider_type: 'ldap'
+        access_control: "{{ access_control }}"
+        recursive: "{{ recursive }}"
+        state: "{{ state_present }}"
+
+    - name: Create a filesystem snapshot on PowerScale with desired retention
+      dellemc.powerscale.snapshot:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path_ansible }}"
+        access_zone: "{{ access_zone }}"
+        snapshot_name: "{{ snapshot_name }}"
+        desired_retention: "{{ desired_retention }}"
+        retention_unit: "{{ retention_unit_days }}"
+        alias: "{{ ansible_snap_alias }}"
+        state: "{{ state_present }}"
+
+    - name: Create a filesystem snapshot on PowerScale idempotency check
+      dellemc.powerscale.snapshot:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path_ansible }}"
+        access_zone: "{{ access_zone }}"
+        snapshot_name: "{{ snapshot_name }}"
+        desired_retention: "{{ desired_retention }}"
+        retention_unit: "{{ retention_unit_days }}"
+        alias: "{{ ansible_snap_alias }}"
+        state: "{{ state_present }}"
+
+    - name: Create a filesystem snapshot with expiration timestamp
+      dellemc.powerscale.snapshot:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path_ansible }}"
+        access_zone: "{{ access_zone }}"
+        snapshot_name: "{{ snapshot_name_1 }}"
+        expiration_timestamp: "{{ expiration_timestamp }}"
+        alias: "{{ ansible_snap_alias }}"
+        state: "{{ state_present }}"
+
+    - name: Create a filesystem snapshot without any expiry
+      dellemc.powerscale.snapshot:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path_ansible }}"
+        access_zone: "{{ access_zone }}"
+        snapshot_name: "{{ snapshot_name_2 }}"
+        desired_retention: "None"
+        alias: "{{ ansible_snap_alias }}"
+        state: "{{ state_present }}"
+
+    - name: Create a filesystem snaphot on PowerScale with default retention and access zone
+      dellemc.powerscale.snapshot:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path_system }}"
+        snapshot_name: "{{ snapshot_name_3 }}"
+        desired_retention: "{{ desired_retention }}"
+        alias: "{{ ansible_snap_alias }}"
+        state: "{{ state_present }}"
+
+    - name: Get Filesystem snapshot details
+      dellemc.powerscale.snapshot:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        snapshot_name: "{{ snapshot_name }}"
+        state: "{{ state_present }}"
+
+    - name: Rename filesystem snapshot
+      dellemc.powerscale.snapshot:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        snapshot_name: "{{ snapshot_name }}"
+        new_snapshot_name: "{{ new_snapshot_name }}"
+        state: "{{ state_present }}"
+
+    - name: Modify filesystem expiration timestamp
+      dellemc.powerscale.snapshot:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        snapshot_name: "{{ new_snapshot_name }}"
+        expiration_timestamp: "{{ expiration_timestamp_new }}"
+        state: "{{ state_present }}"
+
+    - name: Delete filesystem snapshot in default access zone
+      dellemc.powerscale.snapshot:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        snapshot_name: "{{ new_snapshot_name }}"
+        state: "{{ state_absent }}"
+
+    - name: Delete filesystem snapshot idempotency
+      dellemc.powerscale.snapshot:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        snapshot_name: "{{ new_snapshot_name }}"
+        state: "{{ state_absent }}"
+
+    - name: Delete filesystem snapshot
+      dellemc.powerscale.snapshot:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        access_zone: "{{ access_zone }}"
+        snapshot_name: "{{ snapshot_name_1 }}"
+        state: "{{ state_absent }}"
+
+    - name: Delete filesystem snapshot
+      dellemc.powerscale.snapshot:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        snapshot_name: "{{ snapshot_name_2 }}"
+        state: "{{ state_absent }}"
+
+    - name: Delete filesystem snapshot
+      dellemc.powerscale.snapshot:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        snapshot_name: "{{ snapshot_name_3 }}"
+        state: "{{ state_absent }}"

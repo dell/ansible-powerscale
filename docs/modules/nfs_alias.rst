@@ -20,7 +20,9 @@ Requirements
 ------------
 The below requirements are needed on the host that executes this module.
 
-- A Dell PowerScale Storage system. Ansible 2.12, 2.13 or 2.14.
+- A Dell PowerScale Storage system.
+- Ansible-core 2.13 or later.
+- Python 3.9, 3.10 or 3.11.
 
 
 
@@ -48,9 +50,9 @@ Parameters
 
 
   scope (optional, str, effective)
-    When specified as 'effective', or not specified, all fields are returned.
+    When specified as ``effective``, or not specified, all fields are returned.
 
-    When specified as 'user', only fields with non-default values are shown.
+    When specified as ``user``, only fields with non-default values are shown.
 
 
   check (optional, bool, False)
@@ -64,9 +66,9 @@ Parameters
   state (optional, str, present)
     Defines whether the NFS alias should exist or not.
 
-    Present indicates that the NFS alias should exist in system.
+    ``present`` indicates that the NFS alias should exist in system.
 
-    Absent indicates that the NFS alias should not exist in system.
+    ``absent`` indicates that the NFS alias should not exist in system.
 
 
   onefs_host (True, str, None)
@@ -80,9 +82,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    True - indicates that the SSL certificate should be verified.
+    ``true`` - indicates that the SSL certificate should be verified.
 
-    False - indicates that the SSL certificate should not be verified.
+    ``false`` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -100,7 +102,7 @@ Notes
 -----
 
 .. note::
-   - The check_mode is supported.
+   - The *check_mode* is supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -112,7 +114,6 @@ Examples
 .. code-block:: yaml+jinja
 
     
-
       - name: Create NFS alias - check mode
         dellemc.powerscale.nfs_alias:
           onefs_host: "{{onefs_host}}"
@@ -123,7 +124,7 @@ Examples
           path: "/ifs"
           access_zone: 'System'
           state: "present"
-        check_mode: True
+        check_mode: true
 
       - name: Create NFS alias
         dellemc.powerscale.nfs_alias:
@@ -144,7 +145,7 @@ Examples
           api_password: "{{api_password}}"
           nfs_alias_name: "/sample_alias_2"
           scope: "effective"
-          check: True
+          check: true
 
       - name: Modify NFS alias - check mode
         dellemc.powerscale.nfs_alias:
@@ -156,7 +157,7 @@ Examples
           new_alias_name: "/Renamed_alias_2"
           path: "/ifs/Test"
           state: "present"
-        check_mode: True
+        check_mode: true
 
       - name: Modify NFS alias
         dellemc.powerscale.nfs_alias:
@@ -177,7 +178,7 @@ Examples
           api_password: "{{api_password}}"
           nfs_alias_name: "/Renamed_alias_2"
           state: "absent"
-        check_mode: True
+        check_mode: true
 
       - name: Delete NFS alias
         dellemc.powerscale.nfs_alias:
@@ -187,7 +188,6 @@ Examples
           api_password: "{{api_password}}"
           nfs_alias_name: "/Renamed_alias_2"
           state: "absent"
-
 
 
 

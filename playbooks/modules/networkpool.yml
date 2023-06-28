@@ -1,0 +1,121 @@
+---
+- name: Network pool Operations on PowerScale
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.**'
+    verify_ssl: false
+    api_user: 'user'
+    api_password: 'Password'
+    state_present: 'present'
+    state_absent: 'absent'
+    access_zone: 'System'
+    access_zone_modify: "test"
+    groupnet_name: 'groupnet0'
+    subnet_name: 'subnet0'
+    description: "pool Created by Ansible"
+    new_pool_name: "rename_Test_pool_1"
+    additional_pool_params_mod:
+      ranges:
+        - low: "10.**.**.176"
+          high: "10.**.**.178"
+      range_state: "add"
+      ifaces:
+        - iface: "ext-1"
+          lnn: 1
+        - iface: "ext-2"
+          lnn: 1
+      iface_state: "add"
+    sc_params_mod:
+      sc_dns_zone: "10.**.**.169"
+      sc_connect_policy: "round_robin"
+      sc_failover_policy: "round_robin"
+      rebalance_policy: "auto"
+      alloc_method: "static"
+      sc_auto_unsuspend_delay: 0
+      sc_ttl: 0
+      aggregation_mode: "roundrobin"
+
+  tasks:
+    - name: Create Network pool
+      dellemc.powerscale.networkpool:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        access_zone: "{{ access_zone }}"
+        groupnet_name: "{{ groupnet_name }}"
+        subnet_name: "{{ subnet_name }}"
+        pool_name: "Test_pool_1"
+        state: "{{ state_present }}"
+
+    - name: Create Network pool Idempotency case
+      dellemc.powerscale.networkpool:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        access_zone: "{{ access_zone }}"
+        groupnet_name: "{{ groupnet_name }}"
+        subnet_name: "{{ subnet_name }}"
+        pool_name: "Test_pool_1"
+        state: "{{ state_present }}"
+
+    - name: Get Network pool
+      dellemc.powerscale.networkpool:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        groupnet_name: "{{ groupnet_name }}"
+        subnet_name: "{{ subnet_name }}"
+        pool_name: "pool0"
+        state: "{{ state_present }}"
+
+    - name: Modify Network pool
+      dellemc.powerscale.networkpool:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        groupnet_name: "{{ groupnet_name }}"
+        subnet_name: "{{ subnet_name }}"
+        pool_name: "Test_pool_1"
+        sc_params: "{{ sc_params_mod }}"
+        description: "pool_name Created by Ansible Modify"
+        additional_pool_params: "{{ additional_pool_params_mod }}"
+        state: "{{ state_present }}"
+
+    - name: Rename a network Pool
+      dellemc.powerscale.networkpool:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        groupnet_name: "{{ groupnet_name }}"
+        subnet_name: "{{ subnet_name }}"
+        pool_name: "Test_Pool"
+        new_pool_name: "Test_Pool_Rename"
+        state: "{{ state_present }}"
+
+    - name: Delete Network pool
+      dellemc.powerscale.networkpool:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        groupnet_name: "{{ groupnet_name }}"
+        subnet_name: "{{ subnet_name }}"
+        pool_name: "Test_pool_1"
+        state: "{{ state_absent }}"
+
+    - name: Delete Network pool Idempotency case
+      dellemc.powerscale.networkpool:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        groupnet_name: "{{ groupnet_name }}"
+        subnet_name: "{{ subnet_name }}"
+        pool_name: "Test_pool_1"
+        state: "{{ state_absent }}"

@@ -12,7 +12,7 @@ info -- Gathering information about PowerScale Storage
 Synopsis
 --------
 
-Gathering information about PowerScale Storage System includes Get attributes of the PowerScale cluster, Get list of access zones in the PowerScale cluster, Get list of nodes in the PowerScale cluster, Get list of authentication providers for all access zones or a specific access zone, Get list of users and groups for an access zone. Get list of smb_shares in the PowerScale cluster, Get list of nfs_exports in the PowerScale cluster, Get list of nfs_aliases in the PowerScale cluster, Get list of active clients in the PowerScale cluster, Get list of SyncIQ reports in the PowerScale cluster, Get list of SyncIQ target reports in the PowerScale cluster, Get list of SyncIQ target cluster certificates in the PowerScale cluster, Get list of SyncIQ policies in the PowerScale cluster. Get list of SyncIQ performance rules in the PowerScale cluster. Get list of network groupnets of the PowerScale cluster. Get list of network pools for all access zones or a specific access zone of the PowerScale cluster. Get list of network rules of the PowerScale cluster. Get list of network subnets of the PowerScale cluster. Get list of network interfaces of the PowerScale cluster. Get list of node pools of PowerScale cluster. Get list of storage pool tiers of PowerScale cluster. Get list of smb open files of PowerScale cluster.
+Gathering information about PowerScale Storage System includes Get attributes of the PowerScale cluster, Get list of access zones in the PowerScale cluster, Get list of nodes in the PowerScale cluster, Get list of authentication providers for all access zones or a specific access zone, Get list of users and groups for an access zone. Get list of smb_shares in the PowerScale cluster, Get list of nfs_exports in the PowerScale cluster, Get list of nfs_aliases in the PowerScale cluster, Get list of active clients in the PowerScale cluster, Get list of SyncIQ reports in the PowerScale cluster, Get list of SyncIQ target reports in the PowerScale cluster, Get list of SyncIQ target cluster certificates in the PowerScale cluster, Get list of SyncIQ policies in the PowerScale cluster. Get list of SyncIQ performance rules in the PowerScale cluster. Get list of network groupnets of the PowerScale cluster. Get list of network pools for all access zones or a specific access zone of the PowerScale cluster. Get list of network rules of the PowerScale cluster. Get list of network subnets of the PowerScale cluster. Get list of network interfaces of the PowerScale cluster. Get list of node pools of PowerScale cluster. Get list of storage pool tiers of PowerScale cluster. Get list of smb open files of PowerScale cluster. Get list of user mapping rules of PowerScale cluster. Get list of ldap providers of the PowerScale cluster
 
 
 
@@ -20,7 +20,9 @@ Requirements
 ------------
 The below requirements are needed on the host that executes this module.
 
-- A Dell PowerScale Storage system. Ansible 2.12, 2.13 or 2.14.
+- A Dell PowerScale Storage system.
+- Ansible-core 2.13 or later.
+- Python 3.9, 3.10 or 3.11.
 
 
 
@@ -30,11 +32,21 @@ Parameters
   include_all_access_zones (optional, bool, None)
     Specifies if requested component details need to be fetched from all access zones.
 
-    It is mutually exclusive with access_zone.
+    It is mutually exclusive with *access_zone*.
 
 
   access_zone (optional, str, System)
     The access zone. If no Access Zone is specified, the 'System' access zone would be taken by default.
+
+
+  scope (optional, str, effective)
+    The scope of ldap. If no scope is specified, the ``effective`` scope would be taken by default.
+
+    If specified as ``effective`` or not specified, all fields are returned.
+
+    If specified as ``user``, only fields with non-default values are shown.
+
+    If specified as ``default``, the original values are returned.
 
 
   gather_subset (True, list, None)
@@ -88,7 +100,11 @@ Parameters
 
     smb_files
 
-    The list of attributes, access_zones and nodes is for the entire PowerScale cluster
+    user_mapping_rules
+
+    ldap
+
+    The list of *attributes*, *access_zones* and *nodes* is for the entire PowerScale cluster
 
     The list of providers for the entire PowerScale cluster
 
@@ -104,6 +120,10 @@ Parameters
 
     The list of smb open files for the entire PowerScale cluster
 
+    The list of user mapping rules of PowerScale cluster
+
+    The list of ldap providers of PowerScale cluster
+
 
   onefs_host (True, str, None)
     IP address or FQDN of the PowerScale cluster.
@@ -116,9 +136,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    True - indicates that the SSL certificate should be verified.
+    ``true`` - indicates that the SSL certificate should be verified.
 
-    False - indicates that the SSL certificate should not be verified.
+    ``false`` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -136,8 +156,9 @@ Notes
 -----
 
 .. note::
-   - The parameters access_zone and include_all_access_zones are mutually exclusive.
+   - The parameters *access_zone* and *include_all_access_zones* are mutually exclusive.
    - Listing of SyncIQ target cluster certificates is not supported by isi_sdk_8_1_1 version.
+   - The *check_mode* is supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -319,7 +340,7 @@ Examples
           onefs_host: "{{onefs_host}}"
           verify_ssl: "{{verify_ssl}}"
           api_user: "{{api_user}}"
-          include_all_access_zones: True
+          include_all_access_zones: true
           gather_subset:
             - network_pools
 
@@ -379,6 +400,25 @@ Examples
           gather_subset:
             - smb_files
 
+      - name: Get list of user mapping rule of the PowerScale cluster
+        dellemc.powerscale.info:
+          onefs_host: "{{onefs_host}}"
+          verify_ssl: "{{verify_ssl}}"
+          api_user: "{{api_user}}"
+          api_password: "{{api_password}}"
+          gather_subset:
+            - user_mapping_rules
+
+      - name: Get list of ldap providers of the PowerScale cluster
+        dellemc.powerscale.info:
+          onefs_host: "{{onefs_host}}"
+          verify_ssl: "{{verify_ssl}}"
+          api_user: "{{api_user}}"
+          api_password: "{{api_password}}"
+          gather_subset:
+            - ldap
+          scope: "effective"
+
 
 
 
@@ -396,4 +436,5 @@ Authors
 - Ambuj Dubey (@AmbujDube) <ansible.team@dell.com>
 - Spandita Panigrahi(@panigs7) <ansible.team@dell.com>
 - Pavan Mudunuri(@Pavan-Mudunuri) <ansible.team@dell.com>
+- Ananthu S Kuttattu(@kuttattz) <ansible.team@dell.com>
 

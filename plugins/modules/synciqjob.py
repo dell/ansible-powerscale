@@ -31,7 +31,7 @@ options:
     description:
     - Specifies the id or name of the policy job.
     type: str
-    required: True
+    required: true
 
   job_state:
     description:
@@ -42,57 +42,57 @@ options:
   state:
     description:
     - The state of the SyncIQ job after the task is performed.
-    - present - indicates that the SyncIQ job should exist on the system.
-    - absent - indicates that the SyncIQ job should not exist on the system.
+    - C(present) - indicates that the SyncIQ job should exist on the system.
+    - C(absent) - indicates that the SyncIQ job should not exist on the system.
     choices: ['absent', 'present']
     type: str
-    required: True
+    required: true
 
 notes:
 - There is delay in the actual state change of the SyncIQ job. The state
   change of jobs in 'scheduled' state is not supported.
-
+- The I(check_mode) is not supported.
 '''
 
 EXAMPLES = r'''
 - name: Get SyncIQ job details
   dellemc.powerscale.synciqjob:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      job_id: "Test_SSL"
-      state: "present"
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    job_id: "Test_SSL"
+    state: "present"
 
 - name: Pause a SyncIQ job when in running state
   dellemc.powerscale.synciqjob:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      job_id: "Test_SSL"
-      job_state: "pause"
-      state: "present"
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    job_id: "Test_SSL"
+    job_state: "pause"
+    state: "present"
 
 - name: Resume a SyncIQ job when in paused state
   dellemc.powerscale.synciqjob:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      job_id: "Test_SSL"
-      job_state: "run"
-      state: "present"
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    job_id: "Test_SSL"
+    job_state: "run"
+    state: "present"
 
 - name: Cancel a SyncIQ job
   dellemc.powerscale.synciqjob:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      job_id: "Test_SSL"
-      job_state: "cancel"
-      state: "absent"
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    job_id: "Test_SSL"
+    job_state: "cancel"
+    state: "absent"
 '''
 
 RETURN = r'''

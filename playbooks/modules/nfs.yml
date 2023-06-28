@@ -1,0 +1,266 @@
+---
+- name: Testing NFS Export operations
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.**'
+    api_user: 'user'
+    api_password: 'Password'
+    path: '/dir1'
+    path_system: '/ifs/ansible_nfs_test'
+    access_zone: 'DND-nfs-export-zone'
+    client1: '10.23.23.10'
+    client2: '10.23.23.11'
+    client3: '10.23.23.12'
+    client4: '10.23.23.13'
+
+  tasks:
+    - name: Create the filesystem in non-system access zone
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        access_zone: "{{ access_zone }}"
+        owner:
+          name: 'ldap_test_user_1'
+          provider_type: 'ldap'
+        state: 'present'
+
+    - name: Create the filesystem in System access zone
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path_system }}"
+        owner:
+          name: 'Sample_ansible_user_1'
+        state: 'present'
+
+    - name: Create NFS Export in non-system access zone
+      dellemc.powerscale.nfs:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: false
+        path: "{{ path }}"
+        access_zone: "{{ access_zone }}"
+        read_only_clients:
+          - "{{ client1 }}"
+          - "{{ client2 }}"
+        read_only: true
+        clients: ["{{ client3 }}"]
+        client_state: 'present-in-export'
+        ignore_unresolvable_hosts: true
+        state: 'present'
+
+    - name: Create NFS Export in non-system access zone - Idempotency
+      dellemc.powerscale.nfs:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: false
+        path: "{{ path }}"
+        access_zone: "{{ access_zone }}"
+        read_only_clients:
+          - "{{ client1 }}"
+          - "{{ client2 }}"
+        read_only: true
+        clients: ["{{ client3 }}"]
+        client_state: 'present-in-export'
+        state: 'present'
+
+    - name: Get NFS Export details
+      dellemc.powerscale.nfs:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: false
+        path: "{{ path }}"
+        access_zone: "{{ access_zone }}"
+        state: 'present'
+
+    - name: Create NFS Export in System access zone
+      dellemc.powerscale.nfs:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: false
+        path: "{{ path_system }}"
+        read_only_clients:
+          - "{{ client1 }}"
+        read_only: true
+        client_state: 'present-in-export'
+        security_flavors:
+          - "unix"
+          - "kerberos"
+        state: 'present'
+
+    - name: Get NFS Export details
+      dellemc.powerscale.nfs:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: false
+        path: "{{ path_system }}"
+        state: 'present'
+
+    - name: Add a root client
+      dellemc.powerscale.nfs:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: false
+        path: "{{ path }}"
+        access_zone: "{{ access_zone }}"
+        root_clients:
+          - "{{ client4 }}"
+        client_state: 'present-in-export'
+        state: 'present'
+
+    - name: Add a root client - idempotency check
+      dellemc.powerscale.nfs:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: false
+        path: "{{ path }}"
+        access_zone: "{{ access_zone }}"
+        root_clients:
+          - "{{ client4 }}"
+        client_state: 'present-in-export'
+        state: 'present'
+
+    - name: Set sub_directories_mountable flag to true
+      dellemc.powerscale.nfs:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: false
+        path: "{{ path }}"
+        access_zone: "{{ access_zone }}"
+        sub_directories_mountable: true
+        state: 'present'
+
+    - name: Set sub_directories_mountable flag to true - idempotency check
+      dellemc.powerscale.nfs:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: false
+        path: "{{ path }}"
+        access_zone: "{{ access_zone }}"
+        sub_directories_mountable: true
+        state: 'present'
+
+    - name: Remove a root client
+      dellemc.powerscale.nfs:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: false
+        path: "{{ path }}"
+        access_zone: "{{ access_zone }}"
+        root_clients:
+          - "{{ client4 }}"
+        client_state: 'absent-in-export'
+        state: 'present'
+
+    - name: Remove a root client - idempotency check
+      dellemc.powerscale.nfs:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: false
+        path: "{{ path }}"
+        access_zone: "{{ access_zone }}"
+        root_clients:
+          - "{{ client4 }}"
+        client_state: 'absent-in-export'
+        state: 'present'
+
+    - name: Modify description and security_flavors
+      dellemc.powerscale.nfs:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: false
+        path: "{{ path }}"
+        access_zone: "{{ access_zone }}"
+        description: "new description"
+        security_flavors:
+          - "kerberos_privacy"
+        ignore_unresolvable_hosts: false
+        state: 'present'
+
+    - name: Set read_only flag to false
+      dellemc.powerscale.nfs:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: false
+        path: "{{ path }}"
+        access_zone: "{{ access_zone }}"
+        read_only: false
+        state: 'present'
+
+    - name: Set read_only flag to false - Idempotency check
+      dellemc.powerscale.nfs:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: false
+        path: "{{ path }}"
+        access_zone: "{{ access_zone }}"
+        read_only: false
+        state: 'present'
+
+    - name: Delete NFS Export
+      dellemc.powerscale.nfs:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: false
+        path: "{{ path }}"
+        access_zone: "{{ access_zone }}"
+        state: 'absent'
+
+    - name: Delete NFS Export - Idempotency check
+      dellemc.powerscale.nfs:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: false
+        path: "{{ path }}"
+        access_zone: "{{ access_zone }}"
+        state: 'absent'
+
+    - name: Delete NFS Export in System access zone
+      dellemc.powerscale.nfs:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: false
+        path: "{{ path_system }}"
+        state: 'absent'
+
+    - name: Delete the Filesystem of non-system access zone
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: false
+        path: "{{ path }}"
+        access_zone: "{{ access_zone }}"
+        state: "absent"
+
+    - name: Delete the Filesystem of system access zone
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: false
+        path: "{{ path_system }}"
+        state: "absent"

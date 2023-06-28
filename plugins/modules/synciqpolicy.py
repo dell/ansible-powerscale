@@ -33,18 +33,18 @@ options:
     description:
     - The name of the policy.
     - Required at the time of policy creation, for the rest of the operations
-      either policy_name or policy_id is required.
+      either I(policy_name) or I(policy_id) is required.
     type: str
   policy_id:
     description:
-    - The policy_id is auto generated at the time of creation.
-    - For get/modify operations either policy_name or policy_id is needed.
-    - Parameters policy_name and policy_id are mutually exclusive.
+    - The I(policy_id) is auto generated at the time of creation.
+    - For get/modify operations either I(policy_name) or I(policy_id) is needed.
+    - Parameters I(policy_name) and I(policy_id) are mutually exclusive.
     type: str
   new_policy_name:
     description:
     - The new name of the policy while renaming an existing policy.
-    - policy_name or policy_id is required together with new_policy_name.
+    - I(policy_name) or I(policy_id) is required together with I(new_policy_name).
     type: str
   action:
     description:
@@ -56,7 +56,7 @@ options:
     - The state option is used to determine whether the policy
       exists or not.
     type: str
-    required: True
+    required: true
     choices: [ 'absent', 'present']
   description:
     description:
@@ -73,24 +73,24 @@ options:
     choices: ['on-schedule', 'when-source-modified', 'when-snapshot-taken']
   job_delay:
     description:
-    - If run_job is set to when-source-modified, job_delay is the
+    - If I(run_job) is set to when-source-modified, I(job_delay) is the
       duration to wait before triggering a job once there is modification on source.
     type: int
   job_delay_unit:
     description:
-    - Unit for job_delay.
+    - Unit for I(job_delay).
     type: str
     choices: ['seconds', 'minutes', 'hours', 'days']
     default: 'seconds'
   rpo_alert:
     description:
-    - If run_job is set to 'on-schedule' it is set to time/date,
+    - If I(run_job) is set to C(on-schedule) it is set to time/date,
       an alert is created if the specified RPO for this policy is exceeded.
     - The default value is 0, which will not generate RPO alerts.
     type: int
   rpo_alert_unit:
     description:
-    - Unit for rpo_alert.
+    - Unit for I(rpo_alert).
     type: str
     choices: ['minutes', 'hours', 'days', 'weeks', 'months', 'years']
     default: 'minutes'
@@ -104,17 +104,17 @@ options:
     - If true and schedule is set , the policy will not run if
       no changes have been made to the contents of the source
       directory since the last job successfully completed.
-    - Option modifiable when run_job is "on_schedule".
+    - Option modifiable when I(run_job) is C(on-schedule).
     type: bool
   schedule:
     description:
-    - Schedule set when run_policy is 'on-schedule'.
+    - Schedule set when I(run_policy) is C(on-schedule).
     - It must be in isidate format.
     - If the format is not proper an error will be thrown.
     type: str
   source_cluster:
     description:
-    - Defines the details of source_cluster.
+    - Defines the details of I(source_cluster).
     type: dict
     suboptions:
         source_root_path:
@@ -122,7 +122,7 @@ options:
             - The root directory on the source cluster where
               the files will be synced from.
             - Source root path should begin with /ifs. For example, if we want to create a synciq
-              policy for the directory 'source' in the base path /ifs, then the source_root_path
+              policy for the directory 'source' in the base path /ifs, then the I(source_root_path)
               will be '/ifs/source'.
             type: str
         source_exclude_directories:
@@ -130,7 +130,7 @@ options:
             - List of path to the directories that
               should be excluded while running a policy.
             - For example, if we want to exclude directory 'exclude1' at location '/ifs/source',
-              then the source_exclude_directories will be '/ifs/source/exclude1'.
+              then the I(source_exclude_directories) will be '/ifs/source/exclude1'.
             type: list
             elements: str
         source_include_directories:
@@ -138,7 +138,7 @@ options:
             -  List of path to the directories
                that should be included while running a policy
             - For example, if we want to include directory 'include1' at location '/ifs/source',
-              then the source_exclude_directories will be '/ifs/source/include1'.
+              then the I(source_exclude_directories) will be '/ifs/source/include1'.
             type: list
             elements: str
         source_network:
@@ -175,7 +175,7 @@ options:
         target_certificate_name:
             description:
             - The name of the target cluster certificate being used for encryption
-            - Parameters target_certficate_name and target_certificate_id are mutually exclusive
+            - Parameters I(target_certficate_name) and I(target_certificate_id) are mutually exclusive
             - This parameter is not supported by isi_sdk_8_1_1
             type: str
   target_snapshot:
@@ -194,7 +194,7 @@ options:
             type: int
         exp_time_unit:
             description:
-            - Unit of target_snapshot expiration time.
+            - Unit of I(target_snapshot) expiration time.
             type: str
             choices: ['years', 'months', 'weeks', 'days']
             default: 'years'
@@ -209,13 +209,13 @@ options:
             choices: ['run', 'resync_prep', 'allow_write',
                       'allow_write_revert']
             type: str
-            required: True
+            required: true
         wait_for_completion:
             description:
             - Specifies if the job should run synchronously or asynchronously.
               By default the job is created to run asynchronously.
             type: bool
-            default: False
+            default: false
         source_snapshot:
             description:
             - An optional snapshot to copy/sync from.
@@ -223,25 +223,25 @@ options:
         workers_per_node:
             description:
             - Specifies the desired workers per node. This parameter is valid
-              for allow_write, and allow_write_revert operation. This is an
+              for I(allow_write), and I(allow_write_revert) operation. This is an
               optional parameter and it defaults to 3.
             type: int
   accelerated_failback:
     description:
-    - If set to true, SyncIQ will perform failback configuration tasks during the next job run,
+    - If set to C(true), SyncIQ will perform failback configuration tasks during the next job run,
       rather than waiting to perform those tasks during the failback process.
       Performing these tasks ahead of time will increase the speed of failback operations.
-    - It defaults to True, if not specified.
+    - It defaults to C(true), if not specified.
     type: bool
   restrict_target_network:
     description:
-    - If set to true then replication policies will connect only to nodes in the specified SmartConnect zone.
-      If set to false, replication policies are not restricted to specific nodes on the target cluster.
+    - If set to C(true) then replication policies will connect only to nodes in the specified SmartConnect zone.
+      If set to C(false), replication policies are not restricted to specific nodes on the target cluster.
     type: bool
 
 notes:
 - There is a delay to view the jobs running on the policy.
-
+- The I(check_mode) is not supported.
 '''
 EXAMPLES = r'''
   - name: Create SyncIQ policy
@@ -252,29 +252,29 @@ EXAMPLES = r'''
       api_password: "{{api_password}}"
       action: "copy"
       description: "Creating a policy"
-      enabled: True
+      enabled: true
       policy_name: "New_policy"
       run_job: "on-schedule"
       schedule: "every 1 days at 12:00 PM"
-      skip_when_source_unmodified: True
+      skip_when_source_unmodified: true
       rpo_alert: 100
       source_cluster:
         source_root_path: "<path_to_source>"
         source_exclude_directories: "<path_to_exclude>"
         source_include_directories: "<path_to_include>"
         source_network:
-            pool: "pool0"
-            subnet: "subnet0"
+          pool: "pool0"
+          subnet: "subnet0"
       target_cluster:
         target_host: "198.10.xxx.xxx"
         target_path: "<path_to_target>"
         target_certificate_id: "7sdgvejkiau7629903048hdjdkljsbwgsuasj7169823kkckll"
       target_snapshot:
-        target_snapshot_archive: True
+        target_snapshot_archive: true
         target_snapshot_expiration: 90
         exp_time_unit: "day"
-      accelerated_failback: False
-      restrict_target_network: True
+      accelerated_failback: false
+      restrict_target_network: true
       state: "present"
 
   - name: Modify SyncIQ policy
@@ -286,7 +286,7 @@ EXAMPLES = r'''
       policy_name: "New_policy"
       action: "sync"
       description: "Creating a policy"
-      enabled: False
+      enabled: false
       run_job: "when-snapshot-taken"
       snapshot_sync_patten: "^snapshot\\-$latest"
       source_cluster:
@@ -294,16 +294,16 @@ EXAMPLES = r'''
         source_exclude_directories: "<path_to_exclude>"
         source_include_directories: "<path_to_include>"
         source_network:
-            pool: "pool1"
-            subnet: "subnet1"
+          pool: "pool1"
+          subnet: "subnet1"
       target_cluster:
         target_host: "198.10.xxx.xxx"
         target_path: "<path_to_target>"
         target_certificate_id: "7sdgvejkiau7629903048hdjdkljsbwgsuasj716iuhywthsjk"
       target_snapshot:
-        target_snapshot_archive: False
-      accelerated_failback: True
-      restrict_target_network: False
+        target_snapshot_archive: false
+      accelerated_failback: true
+      restrict_target_network: false
       state: "present"
 
   - name: Rename a SyncIQ policy
@@ -335,7 +335,7 @@ EXAMPLES = r'''
       job_params:
         action: "run"
         source_snapshot: "TestSIQ-snapshot"
-        wait_for_completion: False
+        wait_for_completion: false
       state: "present"
 
   - name: Create a resync_prep job on SyncIQ policy
@@ -348,7 +348,7 @@ EXAMPLES = r'''
       job_params:
         action: "resync_prep"
         source_snapshot: "TestSIQ-snapshot"
-        wait_for_completion: False
+        wait_for_completion: false
       state: "present"
 
   - name: Allow writes on target of SyncIQ policy
@@ -362,7 +362,7 @@ EXAMPLES = r'''
         action: "allow_write"
         source_snapshot: "TestSIQ-snapshot"
         workers_per_node: 3
-        wait_for_completion: False
+        wait_for_completion: false
       state: "present"
 
   - name: Disallow writes on target of SyncIQ policy
@@ -376,7 +376,7 @@ EXAMPLES = r'''
         action: "allow_write_revert"
         source_snapshot: "TestSIQ-snapshot"
         workers_per_node: 3
-        wait_for_completion: False
+        wait_for_completion: false
       state: "present"
 
   - name: Delete SyncIQ policy by policy name
@@ -872,12 +872,6 @@ class SynciqPolicy(object):
             if run_job == 'when-source-modified' or \
                     run_job == 'when-snapshot-taken':
                 schedule = run_job
-
-            if target_cluster and not utils.ISI_SDK_VERSION_9 \
-                    and (target_cluster['target_certificate_id']
-                         or target_cluster['target_certificate_name']):
-                self.module.fail_json(msg="Target certificate ID or name is "
-                                      "not supported by isi_sdk_8_1_1.")
 
             # Construct dictionary of policy parameters to be passed while creating policy
             policy_param = self.construct_policy_params(input_param, schedule,

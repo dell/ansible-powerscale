@@ -29,6 +29,7 @@ extends_documentation_fragment:
 
 author:
 - Prashant Rakheja (@prashant-dell) <ansible.team@dell.com>
+- Trisha Datta (@trisha-dell) <ansible.team@dell.com>
 
 options:
   path:
@@ -53,32 +54,32 @@ options:
     - The owner of the Filesystem.
     - This parameter is required when creating a Filesystem.
     - The following sub-options are supported for Owner.
-      - name(str),
-      - provider_type(str).
+      - I(name(str)),
+      - I(provider_type(str)).
     - If you specify owner, then the corresponding name is mandatory.
-    - The provider_type is optional and it defaults to 'local'.
-    - The supported values for provider_type are 'local', 'file',
-      'ldap' and 'ads'.
+    - The I(provider_type) is optional and it defaults to C(local).
+    - The supported values for I(provider_type) are C(local), C(file),
+      C(ldap) and C(ads).
     type: dict
   group:
     description:
     - The group of the Filesystem.
     - The following sub-options are supported for Group.
-      - name(str),
-      - provider_type(str).
+      - I(name(str)),
+      - I(provider_type(str)).
     - If you specify  a group, then the corresponding name is mandatory.
-    - The provider_type is optional, it defaults to 'local'.
-    - The supported values for provider_type are 'local', 'file',
-      'ldap' and 'ads'.
+    - The I(provider_type) is optional, it defaults to C(local).
+    - The supported values for I(provider_type) are C(local), C(file),
+      C(ldap) and C(ads).
     type: dict
   access_control:
     description:
     - The ACL value for the directory.
     - At the time of creation, users can either provide input
-      such as 'private_read' , 'private' , 'public_read', 'public_read_write',
-      'public' or in POSIX format (eg 0700).
-    - Modification of ACL is only supported from POSIX to POSIX mode.
-    - This field is mutually exclusive with access_control_rights.
+      such as C(private_read) , C(private) , C(public_read), C(public_read_write),
+      C(public) or in C(POSIX) format (eg 0700).
+    - Modification of ACL is only supported from C(POSIX) to C(POSIX) mode.
+    - This field is mutually exclusive with I(access_control_rights).
     type: str
   access_control_rights:
     description:
@@ -95,7 +96,7 @@ options:
         - Allows or denies access to the directory based on the access rights set for
           the trustee.
         type: str
-        required: True
+        required: true
         choices: ['allow', 'deny']
       inherit_flags:
         description:
@@ -106,42 +107,42 @@ options:
                   'no_prop_inherit', 'inherited_ace']
       trustee:
         description:
-        - Provides the trustee (user or group) name and trustee provider_type.
+        - Provides the trustee (user or group) name and trustee I(provider_type).
         type: dict
-        required: True
+        required: true
         suboptions:
           name:
             description:
             - Provides the trustee (user or group) name.
             type: str
-            required: True
+            required: true
           type:
             description:
             - Provides the trustee type.
             type: str
-            choices: ['user', 'group']
+            choices: ['user', 'group', 'wellknown']
             default: user
           provider_type:
             description:
-            - The provider_type is optional and it defaults to 'local'.
-            - The supported values for provider_type are 'local', 'file', 'ldap' and 'ads'.
+            - The I(provider_type) is optional and it defaults to C(local).
+            - The supported values for I(provider_type) are C(local), C(file), C(ldap) and C(ads).
             type: str
             default: local
   access_control_rights_state:
     description:
     - Specifies if the access rights are to be added or deleted for the trustee.
-    - It is required together with access_control_rights.
+    - It is required together with I(access_control_rights).
     type: str
     choices: ['add', 'remove']
   recursive:
     description:
-    - Creates intermediate folders recursively when set to true.
+    - Creates intermediate folders recursively when set to C(true).
     type: bool
     default: true
 
   recursive_force_delete:
     description:
-    - Deletes sub files and folders recursively when set to true even if the filesystem is not empty.
+    - Deletes sub files and folders recursively when set to C(true) even if the filesystem is not empty.
     type: bool
     default: false
 
@@ -155,7 +156,7 @@ options:
         description:
         - Whether to include the snapshots in the quota or not.
         type: bool
-        default: False
+        default: false
       include_data_protection_overhead:
         description:
         - Whether to include the data protection overheads
@@ -166,8 +167,8 @@ options:
         type: bool
       thresholds_on:
         description:
-        - For SDK 9.1.0 the parameter include_overheads is deprecated and
-          thresholds_on is used.
+        - For SDK 9.1.0 the parameter I(include_overheads) is deprecated and
+          I(thresholds_on) is used.
         type: str
         choices: [ 'app_logical_size', 'fs_logical_size', 'physical_size']
       advisory_limit_size:
@@ -178,9 +179,9 @@ options:
       soft_limit_size:
         description:
         - Threshold value after which the soft limit exceeded notification
-          will be sent and the soft_grace period will start.
+          will be sent and the I(soft_grace) period will start.
         - Write access will be restricted after the grace period expires.
-        - Both soft_grace_period and soft_limit_size are required to modify
+        - Both I(soft_grace_period) and I(soft_limit_size) are required to modify
           soft threshold for the quota.
         type: int
       hard_limit_size:
@@ -197,9 +198,9 @@ options:
         type: str
         choices: ['GB', 'TB']
       container:
-         description: If true, SMB shares using the quota directory see the quota thresholds as share size.
+         description: If C(true), SMB shares using the quota directory see the quota thresholds as share size.
          type: bool
-         default: False
+         default: false
       quota_state:
          description: Defines whether the quota should exist or not
          choices: [absent, present]
@@ -217,16 +218,16 @@ options:
 
   list_snapshots:
     description:
-    - If set to true, the filesystem's snapshots are returned.
+    - If set to C(true), the filesystem's snapshots are returned.
     type: bool
     default: false
 
 notes:
-- While deleting a filesystem when recursive_force_delete is set as True it deletes all sub files and folders
-  recursively. This is true even if the filesystem is not empty.
-- Modification of inherit_flags of filesystem ACL is successful only if access_rights is also specified in
-  the access_control_rights dictionary.
-- Check_mode is not supported.
+- While deleting a filesystem when recursive_force_delete is set as C(true) it deletes all sub files and folders
+  recursively. This is C(true) even if the filesystem is not empty.
+- Modification of I(inherit_flags) of filesystem ACL is successful only if I(access_rights) is also specified in
+  the I(access_control_rights) dictionary.
+- I(Check_mode) is not supported.
 '''
 
 EXAMPLES = r'''
@@ -247,14 +248,14 @@ EXAMPLES = r'''
         provider_type: 'ldap'
       access_control: "{{access_control}}"
       quota:
-        include_snap_data: False
-        include_data_protection_overhead: False
+        include_snap_data: false
+        include_data_protection_overhead: false
         advisory_limit_size: 2
         soft_limit_size: 5
         hard_limit_size: 10
         cap_unit: "GB"
         quota_state: "present"
-        container: True
+        container: true
       recursive: "{{recursive}}"
       state: "{{state_present}}"
 
@@ -307,7 +308,7 @@ EXAMPLES = r'''
         hard_limit_size: 15
         cap_unit: "GB"
         quota_state: "present"
-        container: True
+        container: true
       state: "{{state_present}}"
 
   - name: Modify Filesystem Owner, Group and ACL
@@ -340,12 +341,12 @@ EXAMPLES = r'''
       access_control_rights:
         access_type: "allow"
         access_rights:
-            - dir_gen_all
+          - dir_gen_all
         inherit_flags:
-            - container_inherit
+          - container_inherit
         trustee:
-            name: test_user
-            provider_type: "ldap"
+          name: test_user
+          provider_type: "ldap"
       access_control_rights_state: "add"
       state: "present"
 
@@ -361,12 +362,12 @@ EXAMPLES = r'''
       access_control_rights:
         access_type: "allow"
         access_rights:
-            - dir_gen_all
+          - dir_gen_all
         inherit_flags:
-            - container_inherit
+          - container_inherit
         trustee:
-            name: test_user
-            provider_type: "ldap"
+          name: test_user
+          provider_type: "ldap"
       access_control_rights_state: "remove"
       state: "present"
 
@@ -381,6 +382,27 @@ EXAMPLES = r'''
       quota:
         quota_state: "absent"
       state: "{{state_present}}"
+
+  - name: Create Filesystem with access control rights for everyone
+    dellemc.powerscale.filesystem:
+      onefs_host: "{{onefs_host}}"
+      port_no: "{{powerscaleport}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      path: "/ifs/test"
+      access_zone: "{{access_zone}}"
+      access_control_rights:
+        access_type: "allow"
+        access_rights:
+          - dir_gen_all
+        inherit_flags:
+          - container_inherit
+        trustee:
+          name: "everyone"
+          type: "wellknown"
+      access_control_rights_state: "add"
+      state: "present"
 
   - name: Delete filesystem
     dellemc.powerscale.filesystem:
@@ -476,7 +498,7 @@ quota_details:
             type: bool
             sample: true
         container:
-            description: If true, SMB shares using the quota directory see the quota thresholds as share size.
+            description: If (true), SMB shares using the quota directory see the quota thresholds as share size.
             type: bool
             sample: true
         type:
@@ -495,7 +517,7 @@ quota_details:
 filesystem_snapshots:
     description: The filesystem snapshot details.
     type: complex
-    returned: When list_snapshots is True.
+    returned: When I(list_snapshots) is true.
     contains:
         created:
             description: The creation timestamp.
@@ -872,7 +894,7 @@ class FileSystem(object):
 
                 quota_params = {'enforced': enforced,
                                 'container': container,
-                                utils.get_threshold_overhead_parameter():
+                                'thresholds_on':
                                 include_dp_overhead,
                                 'thresholds': threshold}
                 quota_update_param = self.isi_sdk.QuotaQuota(**quota_params)
@@ -979,12 +1001,8 @@ class FileSystem(object):
                 if THRESHOLD_PARAM in quota and \
                         quota[THRESHOLD_PARAM]:
                     quota_create_params[
-                        utils.get_threshold_overhead_parameter()] = \
+                        'thresholds_on'] = \
                         quota[THRESHOLD_PARAM]
-                else:
-                    if not utils.ISI_SDK_VERSION_9:
-                        quota_create_params[
-                            utils.get_threshold_overhead_parameter()] = False
 
                 quota_param = self.isi_sdk.QuotaQuotaCreateParams(
                     **quota_create_params)
@@ -1138,7 +1156,7 @@ class FileSystem(object):
                         quota[THRESHOLD_PARAM]
                     if include_data_protection_overhead != \
                             filesystem_quota['quotas'][0][
-                                utils.get_threshold_overhead_parameter()]:
+                                'thresholds_on']:
                         return True
                 if 'cap_unit' in quota and quota['cap_unit'] is not None:
                     cap_unit = quota['cap_unit']
@@ -1195,8 +1213,7 @@ class FileSystem(object):
             if VALIDATE_THRESHOLD and not \
                     VALIDATE_THRESHOLD["param_is_valid"]:
                 self.module.fail_json(msg=VALIDATE_THRESHOLD["error_message"])
-            THRESHOLD_PARAM = "thresholds_on" if utils.ISI_SDK_VERSION_9 \
-                else "include_data_protection_overhead"
+            THRESHOLD_PARAM = "thresholds_on"
 
         if self.module.params['path'] and not self.module.params['path'].startswith('/'):
             self.module.fail_json(msg='Invalid path. '
@@ -1219,10 +1236,12 @@ class FileSystem(object):
             return self.get_owner_id(name=trustee_name,
                                      zone=access_zone,
                                      provider=provider)['users'][0]['uid']['id']
-        else:
+        elif type == 'group':
             return self.get_group_id(name=trustee_name,
                                      zone=access_zone,
                                      provider=provider)['groups'][0]['gid']['id']
+        else:
+            return self.get_wellknown_id(name=trustee_name)['wellknowns'][0]['id']
 
     def get_acl_permissions(self, acl_rights):
         """Returns ACL permissions"""
@@ -1308,6 +1327,26 @@ class FileSystem(object):
                             'provider {2} due ' \
                             'to error {3}'.format(name, zone, provider,
                                                   str(error_msg))
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    def get_wellknown_id(self, name):
+        """Get the wellknown account details in PowerScale"""
+        try:
+            resp = self.auth_api.get_auth_wellknowns().to_dict()
+            for wellknown in resp['wellknowns']:
+                if wellknown['name'].lower() == name.lower():
+                    return self.auth_api.get_auth_wellknown(
+                        auth_wellknown_id=wellknown['id']).to_dict()
+            error_message = (f'Wellknown {name} does not exist. '
+                             f'Provide valid wellknown.')
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+        except Exception as e:
+            error_msg = self.determine_error(error_obj=e)
+            error_message = (f'Failed to get the wellknown id for wellknown '
+                             f'{name} due to error {str(error_msg)}.')
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
@@ -1562,7 +1601,7 @@ class FileSystem(object):
 
 def get_filesystem_parameters():
     return dict(
-        path=dict(required=True, type='str', no_log=True),
+        path=dict(required=True, type='str'),
         access_zone=dict(required=False, type='str',
                          default='System'),
         owner=dict(required=False, type='dict'),
@@ -1577,7 +1616,7 @@ def get_filesystem_parameters():
                                         'inherited_ace']),
             trustee=dict(required=True, type='dict',
                          options=dict(name=dict(type='str', required=True),
-                                      type=dict(type='str', choices=['user', 'group'], default='user'),
+                                      type=dict(type='str', choices=['user', 'group', 'wellknown'], default='user'),
                                       provider_type=dict(type='str', default='local'))))),
         access_control_rights_state=dict(required=False, type='str',
                                          choices=['add', 'remove']),

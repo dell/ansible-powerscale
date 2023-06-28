@@ -15,7 +15,7 @@ module: synciqrules
 
 version_added: "1.3.0"
 
-short_description: Manage SyncIQ performance rules on PowerScale Storage System.
+short_description: Manage SyncIQ performance rules on PowerScale Storage System
 description:
 - Managing SyncIQ performance rules on PowerScale includes
   create a SyncIQ performance rule,
@@ -39,7 +39,7 @@ options:
   sync_rule_id:
     description:
     - This is an auto generated ID at the time of creation of SyncIQ performance rule.
-    - For get/modify/delete operations sync_rule_id is required.
+    - For get/modify/delete operations I(sync_rule_id) is required.
     - The ID of a performance rule is not absolute to a particular existing rule configuration. The
       IDs are auto-sequenced during creation/deletion of a performance rule.
     type: str
@@ -86,12 +86,13 @@ options:
     - The state option is used to determine whether the performance rule
       exists or not.
     type: str
-    required: True
+    required: true
     choices: [ 'absent', 'present']
 
 notes:
 - Operations performed in parallel from other interfaces apart from
   playbook cannot guarantee desirable results.
+- The I(check_mode) is not supported.
 '''
 EXAMPLES = r'''
   - name: Create SyncIQ performance rule
@@ -101,14 +102,14 @@ EXAMPLES = r'''
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
       description: "Create a rule"
-      enabled: True
+      enabled: true
       schedule:
         begin: "00:00"
         end: "13:30"
         days_of_week:
-            - "monday"
-            - "tuesday"
-            - "sunday"
+          - "monday"
+          - "tuesday"
+          - "sunday"
       rule_type: "cpu"
       limit: "80"
       state: "present"
@@ -140,14 +141,14 @@ EXAMPLES = r'''
       api_password: "{{api_password}}"
       verify_ssl: "{{verify_ssl}}"
       sync_rule_id: "cpu-0"
-      enabled: True
+      enabled: true
       schedule:
         begin: "00:00"
         end: "13:30"
         days_of_week:
-            - "monday"
-            - "tuesday"
-            - "sunday"
+          - "monday"
+          - "tuesday"
+          - "sunday"
       rule_type: "bandwidth"
       limit: "85"
       state: "absent"

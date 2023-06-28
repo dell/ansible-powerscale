@@ -1,0 +1,359 @@
+---
+- name: User Operations on PowerScale
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.**'
+    port_no: '8080'
+    verify_ssl: false
+    api_user: 'user'
+    api_password: 'password'
+    account_name: 'test_user'
+    account_password: "1234567"
+    user_id: 7000
+    primary_group: "Isilon Users"
+    new_primary_group: "Admin"
+    access_zone: "sample-zone"
+    enabled: "False"
+    email: "test_user@dell.com"
+    new_email: "new_test_user@dell.com"
+    new_full_name: "Updated the full name of the user"
+    shell: "/usr/local/bin/zsh"
+    full_name: "For testing of user module this user is created"
+    provider_type: "local"
+    user_role_name: "auditadmin"
+    new_role_name: "securityadmin"
+
+  tasks:
+    - name: Create User in Sample Zone
+      register: result
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        access_zone: "{{ access_zone }}"
+        provider_type: "{{ provider_type }}"
+        user_name: "{{ account_name }}"
+        user_id: "{{ user_id }}"
+        password: "{{ account_password }}"
+        primary_group: "{{ primary_group }}"
+        enabled: "{{ enabled }}"
+        email: "{{ email }}"
+        full_name: "{{ full_name }}"
+        shell: "{{ shell }}"
+        state: "present"
+
+    - name: Create User in Sample Zone Idempotency check
+      register: result
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        access_zone: "{{ access_zone }}"
+        provider_type: "{{ provider_type }}"
+        user_name: "{{ account_name }}"
+        user_id: "{{ user_id }}"
+        password: "{{ account_password }}"
+        primary_group: "{{ primary_group }}"
+        enabled: "{{ enabled }}"
+        email: "{{ email }}"
+        full_name: "{{ full_name }}"
+        shell: "{{ shell }}"
+        state: "present"
+
+    - name: Setting user id`
+      ansible.legacy.set_fact:
+        sample_zone_user_id: "{{ result.user_details.uid.id.split(':')[1] }}"
+
+    - name: Create User in System Access Zone
+      register: result
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "{{ provider_type }}"
+        user_name: "{{ account_name }}"
+        password: "{{ account_password }}"
+        primary_group: "{{ primary_group }}"
+        enabled: "{{ enabled }}"
+        email: "{{ email }}"
+        full_name: "{{ full_name }}"
+        shell: "{{ shell }}"
+        role_name: "{{ user_role_name }}"
+        role_state: "present-for-user"
+        state: "present"
+
+    - name: Create User in System Access Zone Idempotency check
+      register: result
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "{{ provider_type }}"
+        user_name: "{{ account_name }}"
+        password: "{{ account_password }}"
+        primary_group: "{{ primary_group }}"
+        enabled: "{{ enabled }}"
+        email: "{{ email }}"
+        full_name: "{{ full_name }}"
+        shell: "{{ shell }}"
+        role_name: "{{ user_role_name }}"
+        role_state: "present-for-user"
+        state: "present"
+
+    - name: Setting user id`
+      ansible.legacy.set_fact:
+        system_zone_user_id: "{{ result.user_details.uid.id.split(':')[1] }}"
+
+    - name: Get User Details using User ID in Sample Access Zone
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        access_zone: "{{ access_zone }}"
+        provider_type: "{{ provider_type }}"
+        user_id: "{{ sample_zone_user_id }}"
+        state: "present"
+
+    - name: Get User Details using user name in System Access Zone
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "{{ provider_type }}"
+        user_name: "{{ account_name }}"
+        state: "present"
+
+    - name: Modify email and remove role from user in system access zone.
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "{{ provider_type }}"
+        user_name: "{{ account_name }}"
+        email: "{{ new_email }}"
+        role_name: "{{ user_role_name }}"
+        role_state: "absent-for-user"
+        state: "present"
+
+    - name: Modify email and remove role from user in system access zone idempotency check
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "{{ provider_type }}"
+        user_name: "{{ account_name }}"
+        email: "{{ new_email }}"
+        role_name: "{{ user_role_name }}"
+        role_state: "absent-for-user"
+        state: "present"
+
+    - name: Modify email of user using User Id in Sample Zone
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        access_zone: "{{ access_zone }}"
+        provider_type: "{{ provider_type }}"
+        user_id: "{{ sample_zone_user_id }}"
+        email: "{{ new_email }}"
+        state: "present"
+
+    - name: Modify email of user using User Id in Sample Zone Idempotency check
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        access_zone: "{{ access_zone }}"
+        provider_type: "{{ provider_type }}"
+        user_id: "{{ sample_zone_user_id }}"
+        email: "{{ new_email }}"
+        state: "present"
+
+    - name: Add user to a role using Username
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        user_name: "{{ account_name }}"
+        provider_type: "{{ provider_type }}"
+        role_name: "{{ new_role_name }}"
+        role_state: "present-for-user"
+        state: "present"
+
+    - name: Add user to a role using Username Idemptency check
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        user_name: "{{ account_name }}"
+        provider_type: "{{ provider_type }}"
+        role_name: "{{ new_role_name }}"
+        role_state: "present-for-user"
+        state: "present"
+
+    - name: Remove user from a role using Username
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        user_name: "{{ account_name }}"
+        provider_type: "{{ provider_type }}"
+        role_name: "{{ new_role_name }}"
+        role_state: "absent-for-user"
+        state: "present"
+
+    - name: Remove user from a role using Username idempotency check
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        user_name: "{{ account_name }}"
+        provider_type: "{{ provider_type }}"
+        role_name: "{{ new_role_name }}"
+        role_state: "absent-for-user"
+        state: "present"
+
+    - name: Add user to a role using User Id
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "{{ provider_type }}"
+        user_id: "{{ system_zone_user_id }}"
+        role_name: "{{ new_role_name }}"
+        role_state: "present-for-user"
+        state: "present"
+
+    - name: Add user to a role using User Id Idempotency check
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "{{ provider_type }}"
+        user_id: "{{ system_zone_user_id }}"
+        role_name: "{{ new_role_name }}"
+        role_state: "present-for-user"
+        state: "present"
+
+    - name: Remove user from a role using User id
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        user_id: "{{ system_zone_user_id }}"
+        role_name: "{{ new_role_name }}"
+        role_state: "absent-for-user"
+        state: "present"
+
+    - name: Remove user from a role using User id Idempotency check
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        user_id: "{{ system_zone_user_id }}"
+        role_name: "{{ new_role_name }}"
+        role_state: "absent-for-user"
+        state: "present"
+
+    - name: Delete User using user name in System Access Zone
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "{{ provider_type }}"
+        user_name: "{{ account_name }}"
+        state: "absent"
+
+    - name: Delete User using user name in System Access Zone idempotency check
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "{{ provider_type }}"
+        user_name: "{{ account_name }}"
+        state: "absent"
+
+    - name: Delete User using user id in Sample Zone
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        access_zone: "{{ access_zone }}"
+        provider_type: "{{ provider_type }}"
+        user_id: "{{ sample_zone_user_id }}"
+        state: "absent"
+
+    - name: Delete User using user id in Sample Zone Idempotency check
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        access_zone: "{{ access_zone }}"
+        provider_type: "{{ provider_type }}"
+        user_id: "{{ sample_zone_user_id }}"
+        state: "absent"
+
+    - name: Get LDAP User Details using user name in Sample Access Zone
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "ldap"
+        access_zone: "{{ access_zone }}"
+        user_name: "ldap_test_user_2"
+        state: "present"
+
+    - name: Get AD User Details using user name in Sample Access Zone
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "ads"
+        access_zone: "{{ access_zone }}"
+        user_name: "devconad\\ad_user_1"
+        state: "present"

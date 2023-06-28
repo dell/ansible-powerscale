@@ -14,6 +14,7 @@ SAMPLE_IP1 = "xx.xx.xx.xx"
 SAMPLE_IP2 = "xx.xx.xx.xy"
 SAMPLE_IP3 = "xx.xx.xx.xz"
 NFS_ID_1 = "205"
+NFS_ID_2 = "206"
 SYS_ZONE = "system"
 PATH_1 = "/ifs/test_sample_nfs"
 
@@ -29,6 +30,7 @@ NFS_COMMON_ARGS = {
     "read_only": None,
     "sub_directories_mountable": None,
     "security_flavors": None,
+    "ignore_unresolvable_hosts": None,
     "state": None
 }
 
@@ -42,6 +44,55 @@ NFS_1 = {"exports": [{
     ],
     "description": "description",
     "id": NFS_ID_1,
+    "name_max_size": 255,
+    "paths": "VALUE_SPECIFIED_IN_NO_LOG_PARAMETER",
+    "read_only": False,
+    "read_only_clients": [],
+    "read_write_clients": [],
+    "readdirplus": True,
+    "root_clients": [],
+    "security_flavors": [
+        "krb5"
+    ],
+    "snapshot": None,
+    "zone": SYS_ZONE}]}
+
+NFS_EMPTY = {"exports": [], "total": 0}
+
+ZONE = {'summary': {'path': '/ifs/sample_zone'}}
+
+NFS_MULTIPLE = {"exports": [{
+    "all_dirs": False,
+    "block_size": 8192,
+    "case_insensitive": False,
+    "case_preserving": True,
+    "clients": [
+        SAMPLE_IP1
+    ],
+    "description": "description",
+    "id": NFS_ID_1,
+    "name_max_size": 255,
+    "paths": "VALUE_SPECIFIED_IN_NO_LOG_PARAMETER",
+    "read_only": False,
+    "read_only_clients": [],
+    "read_write_clients": [],
+    "readdirplus": True,
+    "root_clients": [],
+    "security_flavors": [
+        "krb5"
+    ],
+    "snapshot": None,
+    "zone": SYS_ZONE},
+    {
+    "all_dirs": False,
+    "block_size": 8192,
+    "case_insensitive": False,
+    "case_preserving": True,
+    "clients": [
+        SAMPLE_IP1
+    ],
+    "description": "description",
+    "id": NFS_ID_2,
     "name_max_size": 255,
     "paths": "VALUE_SPECIFIED_IN_NO_LOG_PARAMETER",
     "read_only": False,

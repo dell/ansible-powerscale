@@ -1,0 +1,166 @@
+---
+- name: Collect set of facts in PowerScale
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.**'
+    verify_ssl: false
+    api_user: '**'
+    api_password: '**'
+    access_zone: 'System'
+    include_all_access_zones: true
+
+  tasks:
+    - name: Get attributes, access_zones and nodes of the PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - attributes
+          - access_zones
+          - nodes
+
+    - name: Get list of authentication providers, users and groups for an access zone of the PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        access_zone: "{{ access_zone }}"
+        gather_subset:
+          - providers
+          - users
+          - groups
+
+    - name: Get list of authentication providers, users and groups for System access zone of the PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - providers
+          - users
+          - groups
+
+    - name: Get list of smb shares, nfs exports, clients of the PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        access_zone: "{{ access_zone }}"
+        gather_subset:
+          - smb_shares
+          - nfs_exports
+          - clients
+
+    - name: Get list of synciq reports and synciq target reports of the PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        access_zone: "{{ access_zone }}"
+        gather_subset:
+          - synciq_reports
+          - synciq_target_reports
+
+    - name: Get list of SyncIQ Policies of a PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - synciq_policies
+
+    - name: Get list of SyncIQ target cluster certificates of a PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - synciq_target_cluster_certificates
+
+    - name: Get list of synciq performance rules of the PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - synciq_performance_rules
+
+    - name: Get list of network groupnets, subnets, pools, rules and interfaces of the PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - network_groupnets
+          - network_subnets
+          - network_pools
+          - network_rules
+          - network_interfaces
+
+    - name: Get list of network pools, authentication providers for all access zone of the PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        include_all_access_zones: "{{ include_all_access_zones }}"
+        gather_subset:
+          - providers
+          - network_pools
+
+    - name: Get list of node pools and storage tiers of the PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - storagepool_tiers
+          - node_pools
+
+    - name: Get list of NFS Aliases of the PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - nfs_aliases
+
+    - name: Get list of smb open files of the PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - smb_files
+
+    - name: Get list of user mapping rules of the PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - user_mapping_rules
+
+    - name: Get list of ldap providers of the PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - ldap

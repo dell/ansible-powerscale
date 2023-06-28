@@ -20,7 +20,9 @@ Requirements
 ------------
 The below requirements are needed on the host that executes this module.
 
-- A Dell PowerScale Storage system. Ansible 2.12, 2.13 or 2.14.
+- A Dell PowerScale Storage system.
+- Ansible-core 2.13 or later.
+- Python 3.9, 3.10 or 3.11.
 
 
 
@@ -40,7 +42,7 @@ Parameters
 
     Get, modify and delete operations can also be performed through instance_name.
 
-    It is mutually exclusive with domain_name for get, modify and delete operations.
+    It is mutually exclusive with *domain_name* for get, modify and delete operations.
 
 
   ads_user (optional, str, None)
@@ -62,25 +64,25 @@ Parameters
     groupnet (optional, str, None)
       Groupnet identifier.
 
-      This is an optional parameter and defaults to groupnet0.
+      This is an optional parameter and defaults to ``groupnet0``.
 
 
     home_directory_template (optional, str, None)
       Specifies the path to the home directory template.
 
-      This is an optional parameter and defaults to '/ifs/home/%D/%U'.
+      This is an optional parameter and defaults to ``/ifs/home/%D/%U``.
 
 
     login_shell (optional, str, None)
       Specifies the login shell path.
 
-      This is an optional parameter and defaults to '/bin/zsh'.
+      This is an optional parameter and defaults to ``/bin/zsh``.
 
 
     machine_account (optional, str, None)
       Specifies the machine account name when creating a SAM account with Active Directory.
 
-      The default cluster name is called 'default'.
+      The default cluster name is called ``default``.
 
 
     organizational_unit (optional, str, None)
@@ -91,9 +93,9 @@ Parameters
   state (True, str, None)
     The state of the ads provider after the task is performed.
 
-    present - indicates that the ADS provider should exist on the system.
+    ``present`` - indicates that the ADS provider should exist on the system.
 
-    absent - indicates that the ADS provider should not exist on the system.
+    ``absent`` - indicates that the ADS provider should not exist on the system.
 
 
   onefs_host (True, str, None)
@@ -107,9 +109,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    True - indicates that the SSL certificate should be verified.
+    ``true`` - indicates that the SSL certificate should be verified.
 
-    False - indicates that the SSL certificate should not be verified.
+    ``false`` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -127,6 +129,7 @@ Notes
 -----
 
 .. note::
+   - The *check_mode* is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -140,81 +143,81 @@ Examples
     
     - name: Add an Active Directory provider
       dellemc.powerscale.ads:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          domain_name: "ansibleneo.com"
-          instance_name: "ansibleneo.com"
-          ads_user: "administrator"
-          ads_password: "*****"
-          ads_parameters:
-            groupnet: "groupnet5"
-            home_directory_template: "/ifs/home/%D/%U"
-            login_shell: "/bin/zsh"
-            machine_account: "test_account"
-            organizational_unit: "org/sub_org"
-          state: "present"
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        domain_name: "ansibleneo.com"
+        instance_name: "ansibleneo.com"
+        ads_user: "administrator"
+        ads_password: "*****"
+        ads_parameters:
+          groupnet: "groupnet5"
+          home_directory_template: "/ifs/home/%D/%U"
+          login_shell: "/bin/zsh"
+          machine_account: "test_account"
+          organizational_unit: "org/sub_org"
+        state: "present"
 
     - name: Modify an Active Directory provider with domain name
       dellemc.powerscale.ads:
-          onefs_host: "{{onefs_host}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          domain_name: "ansibleneo.com"
-          ads_parameters:
-            home_directory_template: "/ifs/usr_home/%D/%U"
-            login_shell: "/bin/rbash"
-          state: "present"
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        domain_name: "ansibleneo.com"
+        ads_parameters:
+          home_directory_template: "/ifs/usr_home/%D/%U"
+          login_shell: "/bin/rbash"
+        state: "present"
 
     - name: Modify an Active Directory provider with instance name
       dellemc.powerscale.ads:
-          onefs_host: "{{onefs_host}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          instance_name: "ansibleneo.com"
-          ads_parameters:
-            home_directory_template: "/ifs/usr_home/%D/%U"
-            login_shell: "/bin/rbash"
-          state: "present"
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        instance_name: "ansibleneo.com"
+        ads_parameters:
+          home_directory_template: "/ifs/usr_home/%D/%U"
+          login_shell: "/bin/rbash"
+        state: "present"
 
     - name: Get Active Directory provider details with domain name
       dellemc.powerscale.ads:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          domain_name: "ansibleneo.com"
-          state: "present"
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        domain_name: "ansibleneo.com"
+        state: "present"
 
     - name: Get Active Directory provider details with instance name
       dellemc.powerscale.ads:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          instance_name: "ansibleneo.com"
-          state: "present"
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        instance_name: "ansibleneo.com"
+        state: "present"
 
     - name: Delete an Active Directory provider with domain name
       dellemc.powerscale.ads:
-          onefs_host: "{{onefs_host}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          domain_name: "ansibleneo.com"
-          state: "absent"
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        domain_name: "ansibleneo.com"
+        state: "absent"
 
     - name: Delete an Active Directory provider with instance name
       dellemc.powerscale.ads:
-          onefs_host: "{{onefs_host}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          instance_name: "ansibleneo.com"
-          state: "absent"
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        instance_name: "ansibleneo.com"
+        state: "absent"
 
 
 

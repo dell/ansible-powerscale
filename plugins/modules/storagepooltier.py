@@ -31,13 +31,13 @@ options:
   tier_id:
     description:
     - Unique Id of the storage pool tier.
-    - It is mutually exclusive with tier_name.
+    - It is mutually exclusive with I(tier_name).
     type: int
 
   tier_name:
     description:
     - Unique name of the storage pool tier.
-    - It is mutually exclusive with tier_id.
+    - It is mutually exclusive with I(tier_id).
     - Mandatory for storage pool tier creation.
     type: str
 
@@ -55,7 +55,7 @@ options:
     choices: [absent, present]
 notes:
 - Modifying a storage pool tier is not supported.
-- The check_mode is supported.
+- The I(check_mode) is supported.
 '''
 
 EXAMPLES = r'''

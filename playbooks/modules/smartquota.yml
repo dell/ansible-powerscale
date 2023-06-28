@@ -1,0 +1,453 @@
+---
+- name: Sample playbook for managing Smart Quota on Dell EMC PowerScale.
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.**'
+    verify_ssl: false
+    api_user: 'user'
+    api_password: 'password'
+    dir_quota_type: "directory"
+    user_quota_type: "user"
+    group_quota_type: "group"
+    default_user_quota_type: "default-user"
+    default_group_quota_type: "default-group"
+    path: "/ifs/Atest"
+    user_name: "sample_user_1"
+    group_name: "sample_group_1"
+    advisory_limit_size: 3
+    soft_limit_size: 5
+    soft_grace_period: 1
+    hard_limit_size: 7
+    cap_unit: "GB"
+    container: true
+    period_unit: "days"
+    include_snapshots: true
+    thresholds_on: "physical_size"
+    provider_type: "local"
+    access_zone: "System"
+
+  tasks:
+    - name: Create a Quota for a User
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        quota_type: "{{ user_quota_type }}"
+        user_name: "{{ user_name }}"
+        access_zone: "{{ access_zone }}"
+        provider_type: "{{ provider_type }}"
+        quota:
+          include_snapshots: "{{ include_snapshots }}"
+          thresholds_on: "{{ thresholds_on }}"
+          advisory_limit_size: "{{ advisory_limit_size }}"
+          soft_limit_size: "{{ soft_limit_size }}"
+          soft_grace_period: "{{ soft_grace_period }}"
+          period_unit: "{{ period_unit }}"
+          hard_limit_size: "{{ hard_limit_size }}"
+          cap_unit: "{{ cap_unit }}"
+        state: "present"
+
+    - name: Create a Quota for a User Idempotency Case
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        quota_type: "{{ user_quota_type }}"
+        user_name: "{{ user_name }}"
+        access_zone: "{{ access_zone }}"
+        provider_type: "{{ provider_type }}"
+        quota:
+          include_snapshots: "{{ include_snapshots }}"
+          thresholds_on: "{{ thresholds_on }}"
+          advisory_limit_size: "{{ advisory_limit_size }}"
+          soft_limit_size: "{{ soft_limit_size }}"
+          soft_grace_period: "{{ soft_grace_period }}"
+          period_unit: "{{ period_unit }}"
+          hard_limit_size: "{{ hard_limit_size }}"
+          cap_unit: "{{ cap_unit }}"
+        state: "present"
+
+    - name: Create a Quota for a Group excluding snapshots and overheads
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        quota_type: "{{ group_quota_type }}"
+        group_name: "{{ group_name }}"
+        access_zone: "{{ access_zone }}"
+        provider_type: "{{ provider_type }}"
+        quota:
+          advisory_limit_size: "{{ advisory_limit_size }}"
+          soft_limit_size: "{{ soft_limit_size }}"
+          soft_grace_period: "{{ soft_grace_period }}"
+          period_unit: "{{ period_unit }}"
+          hard_limit_size: "{{ hard_limit_size }}"
+          cap_unit: "{{ cap_unit }}"
+        state: "present"
+
+    - name: Create a Quota for a Group excluding snapshots and overheads Idempotency Case
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        quota_type: "{{ group_quota_type }}"
+        group_name: "{{ group_name }}"
+        access_zone: "{{ access_zone }}"
+        provider_type: "{{ provider_type }}"
+        quota:
+          advisory_limit_size: "{{ advisory_limit_size }}"
+          soft_limit_size: "{{ soft_limit_size }}"
+          soft_grace_period: "{{ soft_grace_period }}"
+          period_unit: "{{ period_unit }}"
+          hard_limit_size: "{{ hard_limit_size }}"
+          cap_unit: "{{ cap_unit }}"
+        state: "present"
+
+
+    - name: Create a Quota for a Directory
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        quota_type: "{{ dir_quota_type }}"
+        access_zone: "{{ access_zone }}"
+        quota:
+          include_snapshots: false
+          thresholds_on: "fs_logical_size"
+          advisory_limit_size: 3
+          soft_limit_size: 5
+          soft_grace_period: 5
+          period_unit: 'weeks'
+          hard_limit_size: 6
+          cap_unit: 'GB'
+          container: "{{ container }}"
+        state: "present"
+
+    - name: Create a Quota for a Directory Idempotency Case.
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        quota_type: "{{ dir_quota_type }}"
+        access_zone: "{{ access_zone }}"
+        quota:
+          advisory_limit_size: 3
+          soft_limit_size: 5
+          soft_grace_period: 5
+          period_unit: 'weeks'
+          hard_limit_size: 6
+          cap_unit: 'GB'
+          container: "{{ container }}"
+        state: "present"
+
+    - name: Create default-group quota for a directory
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        quota_type: "{{ default_group_quota_type }}"
+        access_zone: "{{ access_zone }}"
+        quota:
+          include_snapshots: false
+          thresholds_on: "fs_logical_size"
+          advisory_limit_size: 5
+          soft_limit_size: 7
+          soft_grace_period: 5
+          period_unit: 'weeks'
+          hard_limit_size: 10
+          cap_unit: 'GB'
+        state: "present"
+
+    - name: Create default-group quota for a directory idempotent case
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        quota_type: "{{ default_group_quota_type }}"
+        access_zone: "{{ access_zone }}"
+        quota:
+          include_snapshots: false
+          thresholds_on: "fs_logical_size"
+          advisory_limit_size: 5
+          soft_limit_size: 7
+          soft_grace_period: 5
+          period_unit: 'weeks'
+          hard_limit_size: 10
+          cap_unit: 'GB'
+        state: "present"
+
+    - name: Create default-user quota for a directory
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        quota_type: "{{ default_user_quota_type }}"
+        access_zone: "{{ access_zone }}"
+        quota:
+          include_snapshots: false
+          thresholds_on: "fs_logical_size"
+          advisory_limit_size: 3
+          soft_limit_size: 5
+          soft_grace_period: 5
+          period_unit: 'weeks'
+          hard_limit_size: 10
+          cap_unit: 'GB'
+        state: "present"
+
+    - name: Create default-user quota for a directory idempotent case
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        quota_type: "{{ default_user_quota_type }}"
+        access_zone: "{{ access_zone }}"
+        quota:
+          advisory_limit_size: 3
+          soft_limit_size: 5
+          soft_grace_period: 5
+          period_unit: 'weeks'
+          hard_limit_size: 10
+          cap_unit: 'GB'
+        state: "present"
+
+    - name: Modify Soft Limit and Grace period of User Quota
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        quota_type: "{{ user_quota_type }}"
+        user_name: "{{ user_name }}"
+        access_zone: "{{ access_zone }}"
+        provider_type: "{{ provider_type }}"
+        quota:
+          include_snapshots: "{{ include_snapshots }}"
+          thresholds_on: "fs_logical_size"
+          soft_limit_size: 6
+          cap_unit: "GB"
+          soft_grace_period: 3
+          period_unit: 'days'
+        state: "present"
+
+    - name: Modify Soft Limit and grace period of User Quota Idempotency Case
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        quota_type: "{{ user_quota_type }}"
+        user_name: "{{ user_name }}"
+        access_zone: "{{ access_zone }}"
+        provider_type: "{{ provider_type }}"
+        quota:
+          include_snapshots: "{{ include_snapshots }}"
+          thresholds_on: "fs_logical_size"
+          soft_limit_size: 6
+          cap_unit: "GB"
+          soft_grace_period: 3
+          period_unit: 'days'
+        state: "present"
+
+    - name: Modify Soft Limit and Grace period of default-group Quota
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        quota_type: "{{ default_group_quota_type }}"
+        access_zone: "{{ access_zone }}"
+        quota:
+          include_snapshots: false
+          thresholds_on: "fs_logical_size"
+          soft_limit_size: 6
+          cap_unit: "GB"
+          soft_grace_period: 3
+          period_unit: 'days'
+        state: "present"
+
+    - name: Modify Soft Limit and Grace period of default-group Quota idempotent case
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        quota_type: "{{ default_group_quota_type }}"
+        access_zone: "{{ access_zone }}"
+        quota:
+          include_snapshots: false
+          thresholds_on: "fs_logical_size"
+          soft_limit_size: 6
+          cap_unit: "GB"
+          soft_grace_period: 3
+          period_unit: 'days'
+        state: "present"
+
+    - name: Modify Soft Limit and Grace period of default-user Quota
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        quota_type: "{{ default_user_quota_type }}"
+        access_zone: "{{ access_zone }}"
+        quota:
+          include_snapshots: false
+          thresholds_on: "fs_logical_size"
+          soft_limit_size: 6
+          cap_unit: "GB"
+          soft_grace_period: 3
+          period_unit: 'days'
+        state: "present"
+
+    - name: Modify Soft Limit and Grace period of default-user Quota idempotent case
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        quota_type: "{{ default_user_quota_type }}"
+        access_zone: "{{ access_zone }}"
+        quota:
+          include_snapshots: false
+          thresholds_on: "fs_logical_size"
+          soft_limit_size: 6
+          cap_unit: "GB"
+          soft_grace_period: 3
+          period_unit: 'days'
+        state: "present"
+
+    - name: Get details of a Group Quota
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        quota_type: "{{ group_quota_type }}"
+        group_name: "{{ group_name }}"
+        access_zone: "{{ access_zone }}"
+        provider_type: "{{ provider_type }}"
+        state: "present"
+
+    - name: Delete Quota for the user
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        quota_type: "{{ user_quota_type }}"
+        user_name: "{{ user_name }}"
+        access_zone: "{{ access_zone }}"
+        provider_type: "{{ provider_type }}"
+        quota:
+          include_snapshots: "{{ include_snapshots }}"
+        state: "absent"
+
+    - name: Delete Quota for Group
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        quota_type: "{{ group_quota_type }}"
+        group_name: "{{ group_name }}"
+        access_zone: "{{ access_zone }}"
+        provider_type: "{{ provider_type }}"
+        state: "absent"
+
+    - name: Delete Quota for the directory
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        quota_type: "{{ dir_quota_type }}"
+        access_zone: "{{ access_zone }}"
+        state: "absent"
+
+    - name: Delete Quota for directory Idempotency Case
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        quota_type: "{{ dir_quota_type }}"
+        access_zone: "{{ access_zone }}"
+        quota:
+          include_snapshots: false
+        state: "absent"
+
+    - name: Delete default-user smart quota
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        quota_type: "{{ default_user_quota_type }}"
+        access_zone: "{{ access_zone }}"
+        state: "absent"
+
+    - name: Delete default-user smart quota idempotent case
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        quota_type: "{{ default_user_quota_type }}"
+        access_zone: "{{ access_zone }}"
+        state: "absent"
+
+    - name: Delete default-group smart quota
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        quota_type: "{{ default_group_quota_type }}"
+        access_zone: "{{ access_zone }}"
+        state: "absent"
+
+    - name: Delete default-group smart quota idempotent case
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        quota_type: "{{ default_group_quota_type }}"
+        access_zone: "{{ access_zone }}"
+        state: "absent"

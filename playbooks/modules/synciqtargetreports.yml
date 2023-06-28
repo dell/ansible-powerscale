@@ -1,0 +1,74 @@
+---
+- name: SyncIQ Target Reports on PowerScale
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.**'
+    port_no: '8080'
+    verify_ssl: false
+    api_user: 'user'
+    api_password: 'password'
+    state_present: 'present'
+    id: '2-sample_policy'
+    target_report_name: 'sample_policy'
+    sub_report_id: 1
+    include_sub_reports: true
+
+  tasks:
+    - name: Get a single SyncIQ target report with id
+      dellemc.powerscale.synciqtargetreports:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        id: "{{ id }}"
+        state: "{{ state_present }}"
+
+    - name: Get a single SyncIQ target report with name
+      dellemc.powerscale.synciqtargetreports:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        name: "{{ target_report_name }}"
+        state: "{{ state_present }}"
+
+    - name: Get all SyncIQ target sub-reports with report id
+      dellemc.powerscale.synciqtargetreports:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        id: "{{ id }}"
+        include_sub_reports: "{{ include_sub_reports }}"
+        state: "{{ state_present }}"
+
+    - name: Get all SyncIQ target sub-reports with report name
+      dellemc.powerscale.synciqtargetreports:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        name: "{{ target_report_name }}"
+        include_sub_reports: "{{ include_sub_reports }}"
+        state: "{{ state_present }}"
+
+    - name: Get a single SyncIQ target sub-report with sub-report id and report id
+      dellemc.powerscale.synciqtargetreports:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        id: "{{ id }}"
+        sub_report_id: "{{ sub_report_id }}"
+        state: "{{ state_present }}"
+
+    - name: Get a single SyncIQ target sub-report with sub-report id and report name
+      dellemc.powerscale.synciqtargetreports:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        name: "{{ target_report_name }}"
+        sub_report_id: "{{ sub_report_id }}"
+        state: "{{ state_present }}"

@@ -20,7 +20,9 @@ Requirements
 ------------
 The below requirements are needed on the host that executes this module.
 
-- A Dell PowerScale Storage system. Ansible 2.12, 2.13 or 2.14.
+- A Dell PowerScale Storage system.
+- Ansible-core 2.13 or later.
+- Python 3.9, 3.10 or 3.11.
 
 
 
@@ -131,7 +133,7 @@ Parameters
 
 
     aggregation_mode (optional, str, None)
-      OneFS supports the following NIC aggregation modes.
+      OneFS supports the following ``NIC`` aggregation modes.
 
 
 
@@ -146,9 +148,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    True - indicates that the SSL certificate should be verified.
+    ``true`` - indicates that the SSL certificate should be verified.
 
-    False - indicates that the SSL certificate should not be verified.
+    ``false`` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -166,6 +168,7 @@ Notes
 -----
 
 .. note::
+   - The *check_mode* is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -177,8 +180,8 @@ Examples
 .. code-block:: yaml+jinja
 
     
-        - name: Create Network Pool
-          dellemc.powerscale.networkpool:
+      - name: Create Network Pool
+        dellemc.powerscale.networkpool:
           onefs_host: "{{onefs_host}}"
           api_user: "{{api_user}}"
           api_password: "{{api_password}}"
@@ -189,8 +192,8 @@ Examples
           access_zone: "system"
           state: "present"
 
-        - name: Get Network Pool
-          dellemc.powerscale.networkpool:
+      - name: Get Network Pool
+        dellemc.powerscale.networkpool:
           onefs_host: "{{onefs_host}}"
           api_user: "{{api_user}}"
           api_password: "{{api_password}}"
@@ -200,8 +203,8 @@ Examples
           pool: "Test_Pool_2"
           state: "present"
 
-        - name: Modify Network Pool
-          dellemc.powerscale.networkpool:
+      - name: Modify Network Pool
+        dellemc.powerscale.networkpool:
           onefs_host: "{{onefs_host}}"
           api_user: "{{api_user}}"
           api_password: "{{api_password}}"
@@ -230,8 +233,8 @@ Examples
           description: "Pool Created by Ansible Modify"
           state: "present"
 
-        - name: Delete Network Pool
-          dellemc.powerscale.networkpool:
+      - name: Delete Network Pool
+        dellemc.powerscale.networkpool:
           onefs_host: "{{onefs_host}}"
           api_user: "{{api_user}}"
           api_password: "{{api_password}}"
@@ -241,8 +244,8 @@ Examples
           pool: "Test_Pool_2"
           state: "absent"
 
-        - name: Rename a network Pool
-          dellemc.powerscale.networkpool:
+      - name: Rename a network Pool
+        dellemc.powerscale.networkpool:
           onefs_host: "{{onefs_host}}"
           api_user: "{{api_user}}"
           api_password: "{{api_password}}"

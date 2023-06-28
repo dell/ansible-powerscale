@@ -1,0 +1,76 @@
+---
+- name: Manage user mapping rule Operations on PowerScale
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.**'
+    verify_ssl: false
+    api_user: '**'
+    api_password: '**'
+
+  tasks:
+    - name: Get a user mapping rule
+      dellemc.powerscale.user_mapping_rule:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        apply_order: 8
+
+    - name: Create a user mapping rule
+      dellemc.powerscale.user_mapping_rule:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        rule:
+          operator: "insert"
+          options:
+            break_on_match: true
+            group: true
+            groups: true
+            user: true
+          user1:
+            domain: "ansibleneo.com"
+            user: "test_ans_user"
+          user2:
+            user: "Test_userAnand"
+
+    - name: Apply a new order to the user mapping rule
+      dellemc.powerscale.user_mapping_rule:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        apply_order: 20
+        new_order: 0
+        state: 'present'
+
+    - name: Modify a user mapping rule
+      dellemc.powerscale.user_mapping_rule:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        apply_order: 7
+        rule:
+          operator: "insert"
+          options:
+            break_on_match: true
+            group: true
+            groups: true
+            user: true
+          user1:
+            user: "Test_userAnand"
+          user2:
+            user: "test_ans_user"
+        state: 'present'
+
+    - name: Delete a user mapping rule
+      dellemc.powerscale.user_mapping_rule:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        apply_order: 19
+        state: 'absent'

@@ -29,7 +29,7 @@ options:
   nfs_alias_name:
     description:
     - Name of an NFS alias.
-    required: True
+    required: true
     type: str
   path:
     description:
@@ -47,8 +47,8 @@ options:
     default: System
   scope:
     description:
-    - When specified as 'effective', or not specified, all fields are returned.
-    - When specified as 'user', only fields with non-default values are shown.
+    - When specified as C(effective), or not specified, all fields are returned.
+    - When specified as C(user), only fields with non-default values are shown.
     type: str
     default: 'effective'
     choices: [effective, user]
@@ -56,7 +56,7 @@ options:
     description:
     - Check for conflicts when viewing alias.
     type: bool
-    default: False
+    default: false
   new_alias_name:
     description:
     - New name of the alias.
@@ -64,19 +64,18 @@ options:
   state:
     description:
     - Defines whether the NFS alias should exist or not.
-    - Present indicates that the NFS alias should exist in system.
-    - Absent indicates that the NFS alias should not exist in system.
+    - C(present) indicates that the NFS alias should exist in system.
+    - C(absent) indicates that the NFS alias should not exist in system.
     default: "present"
     type: str
     choices: [absent, present]
 
 notes:
-- The check_mode is supported.
+- The I(check_mode) is supported.
 
 '''
 
 EXAMPLES = r'''
-
   - name: Create NFS alias - check mode
     dellemc.powerscale.nfs_alias:
       onefs_host: "{{onefs_host}}"
@@ -87,7 +86,7 @@ EXAMPLES = r'''
       path: "/ifs"
       access_zone: 'System'
       state: "present"
-    check_mode: True
+    check_mode: true
 
   - name: Create NFS alias
     dellemc.powerscale.nfs_alias:
@@ -108,7 +107,7 @@ EXAMPLES = r'''
       api_password: "{{api_password}}"
       nfs_alias_name: "/sample_alias_2"
       scope: "effective"
-      check: True
+      check: true
 
   - name: Modify NFS alias - check mode
     dellemc.powerscale.nfs_alias:
@@ -120,7 +119,7 @@ EXAMPLES = r'''
       new_alias_name: "/Renamed_alias_2"
       path: "/ifs/Test"
       state: "present"
-    check_mode: True
+    check_mode: true
 
   - name: Modify NFS alias
     dellemc.powerscale.nfs_alias:
@@ -141,7 +140,7 @@ EXAMPLES = r'''
       api_password: "{{api_password}}"
       nfs_alias_name: "/Renamed_alias_2"
       state: "absent"
-    check_mode: True
+    check_mode: true
 
   - name: Delete NFS alias
     dellemc.powerscale.nfs_alias:
@@ -151,7 +150,6 @@ EXAMPLES = r'''
       api_password: "{{api_password}}"
       nfs_alias_name: "/Renamed_alias_2"
       state: "absent"
-
 '''
 
 RETURN = r'''
@@ -195,8 +193,6 @@ nfs_alias_details:
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
-import logging
-import re
 
 LOG = utils.get_logger('nfs_alias')
 

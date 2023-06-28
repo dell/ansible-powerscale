@@ -31,13 +31,13 @@ options:
   policy_id:
     description:
     - Unique Id of the file pool policy.
-    - It is mutually exclusive with policy_name.
+    - It is mutually exclusive with I(policy_name).
     type: str
 
   policy_name:
     description:
     - Unique name of the file pool policy.
-    - It is mutually exclusive with policy_id.
+    - It is mutually exclusive with I(policy_id).
     - Mandatory for file pool policy creation.
     type: str
 
@@ -110,31 +110,31 @@ options:
         - Maximum of 3 criteria's is possible.
         type: list
         elements: dict
-        required: True
+        required: true
         suboptions:
           and_criteria:
             description:
-            - and criteria conditions for the file policy.
+            - The and criteria conditions for the file policy.
             - Maximum of 5 criteria is possible.
             type: list
             elements: dict
-            required: True
+            required: true
             suboptions:
               type:
                 description: The file criteria to be compared to a given value.
                 type: str
-                required: True
+                required: true
                 choices: ['file_name', 'file_type', 'file_path', 'file_attribute', 'accessed', 'created', 'modified', 'metadata_changed', 'size']
               condition:
                 description:
                 - The condition to use while comparing an attribute with its value.
-                - If 'type' is 'size' then the conditions are ['equal', 'not_equal', 'greater_than', 'greater_than_equal_to',
+                - If I(type) is C(size) then the conditions are ['equal', 'not_equal', 'greater_than', 'greater_than_equal_to',
                                                                'less_than', 'less_than_equal_to'].
-                - If 'type' is 'accessed' or 'created' or 'modified' or 'metadata_changed' then the conditions are
+                - If I(type) is C(accessed) or C(created) or C(modified) or C(metadata_changed) then the conditions are
                   ['after','before', 'is_newer_than', 'is_older_than'].
-                - If 'type' is 'file_attribute' then the conditions are ['matches','does_not_match', 'exists', 'does_not_exist'].
-                - If 'type' is 'file_path' then the conditions are ['matches','does_not_match', 'contains', 'does_not_contain'].
-                - If 'type' is 'file_type' or  'file_name' then the conditions are ['matches','does_not_match'].
+                - If I(type) is C(file_attribute) then the conditions are ['matches','does_not_match', 'exists', 'does_not_exist'].
+                - If I(type) is C(file_path) then the conditions are ['matches','does_not_match', 'contains', 'does_not_contain'].
+                - If I(type) is C(file_type) or  C(file_name) then the conditions are ['matches','does_not_match'].
                 type: str
                 choices: ['matches', 'does_not_match', 'contains', 'does_not_contain', 'after', 'before', 'is_newer_than', 'is_older_than',
                           'equal', 'not_equal', 'greater_than', 'greater_than_equal_to', 'less_than', 'less_than_equal_to', 'exists',
@@ -142,64 +142,64 @@ options:
               value:
                 description:
                 - The value to be compared against a file criteria.
-                - Required in case if 'type' is 'file_name' or 'file_path' or 'file_attribute'.
-                - If 'type' is 'file_name' then value wil have file name.
-                - If 'type' is 'file_path' then value wil have file path.
-                - If 'type' is 'file_attribute' then value wil have file attribute field value.
+                - Required in case if I(type) is C(file_name) or C(file_path) or C(file_attribute).
+                - If I(type) is C(file_name) then value wil have file name.
+                - If I(type) is C(file_path) then value wil have file path.
+                - If I(type) is C(file_attribute) then value wil have file attribute field value.
                 type: str
               field:
                 description:
                 - File attribute field name to be compared in a custom comparison.
-                - Required only if the 'type' is 'file_attribute'.
+                - Required only if the I(type) is C(file_attribute).
                 type: str
               case_sensitive:
                 description:
-                - True to indicate case sensitivity when comparing file attributes.
-                - Required only if the 'type' is 'file_name' or 'file_path'.
+                - C(true) to indicate case sensitivity when comparing file attributes.
+                - Required only if the I(type) is C(file_name) or C(file_path).
                 type: bool
               file_type_option:
                 description:
                 - File type option.
-                - Required only if the 'type' is 'file_type'.
+                - Required only if the I(type) is C(file_type).
                 type: str
                 choices: ['directory', 'file', 'other']
               size_info:
                 description:
                 - File size value and unit.
-                - Required only if the 'type' is 'size'.
+                - Required only if the I(type) is C(size).
                 type: dict
                 suboptions:
                   size_value:
                     description: Size value.
                     type: int
-                    required: True
+                    required: true
                   size_unit:
                     description: Unit for the size value
                     type: str
-                    required: True
+                    required: true
                     choices: ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
               datetime_value:
                 description:
                 - Date and Time value.
                 - Format is 'YYYY-MM-DD HOUR:MINUTE'
-                - Required only if the 'type' is 'accessed' or 'created' or 'modified' or 'metadata_changed' and \
-                  the 'condition' is 'after' or 'before'
+                - Required only if the I(type) is C(accessed) or C(created) or C(modified) or C(metadata_changed) and \
+                  the I(condition) is C(after) or C(before)
                 type: str
               relative_datetime_count:
                 description:
                 - A relative duration (e.g., 2 years, 3 weeks, 50 seconds).
-                - Required only if the 'type' is 'accessed' or 'created' or 'modified' or 'metadata_changed' and \
-                  the 'condition' is 'is_newer_than' or 'is_older_than'
+                - Required only if the I(type) is C(accessed) or C(created) or C(modified) or C(metadata_changed) and \
+                  the C(condition) is C(is_newer_than) or C(is_older_than)
                 type: dict
                 suboptions:
                   time_value:
                     description: Relative time count.
                     type: int
-                    required: True
+                    required: true
                   time_unit:
                     description: Unit for the relative time count
                     type: str
-                    required: True
+                    required: true
                     choices: ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds']
 
   state:
@@ -210,72 +210,72 @@ options:
     choices: [absent, present]
 notes:
 - Modifying a file pool policy is not supported.
-- The check_mode is supported.
+- The I(check_mode) is supported.
 '''
 
 EXAMPLES = r'''
 - name: Get a file pool policy
   dellemc.powerscale.filepoolpolicy:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      policy_name: "test_11"
-      state: 'present'
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    policy_name: "test_11"
+    state: 'present'
 
 - name: Delete a file pool policy
   dellemc.powerscale.filepoolpolicy:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      policy_name: "test_11"
-      state: 'absent'
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    policy_name: "test_11"
+    state: 'absent'
 
 - name: Create a file pool policy
   dellemc.powerscale.filepoolpolicy:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      policy_name: "test_policy_1"
-      description: 'Creating a policy'
-      apply_order: 1
-      apply_data_storage_policy:
-            ssd_strategy: "SSD_metadata_read_acceleration"
-            storagepool: "test_tier"
-      set_data_access_pattern: "concurrency"
-      set_requested_protection: "mirrored_over_3_nodes"
-      set_write_performance_optimization: "enable_smartcache"
-      file_matching_pattern:
-        or_criteria:
-            - and_criteria:
-              - type: "file_name"
-                condition: "does_not_match"
-                value: "file_name_test"
-                case_sensitive: True
-              - type: "accessed"
-                condition: "after"
-                datetime_value: "2022-04-04 23:30"
-              - type: "created"
-                condition: "is_newer_than"
-                relative_datetime_count:
-                  time_value: 12
-                  time_unit: "years"
-            - and_criteria:
-              - type: "size"
-                condition: "not_equal"
-                size_info:
-                  size_value: 60
-                  size_unit: "MB"
-              - type: "file_attribute"
-                condition: "does_not_match"
-                field: "test_field"
-                value: "uni"
-              - type: "file_attribute"
-                condition: "exists"
-                field: "test"
-      state: 'present'
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    policy_name: "test_policy_1"
+    description: 'Creating a policy'
+    apply_order: 1
+    apply_data_storage_policy:
+      ssd_strategy: "SSD_metadata_read_acceleration"
+      storagepool: "test_tier"
+    set_data_access_pattern: "concurrency"
+    set_requested_protection: "mirrored_over_3_nodes"
+    set_write_performance_optimization: "enable_smartcache"
+    file_matching_pattern:
+      or_criteria:
+        - and_criteria:
+          - type: "file_name"
+            condition: "does_not_match"
+            value: "file_name_test"
+            case_sensitive: true
+          - type: "accessed"
+            condition: "after"
+            datetime_value: "2022-04-04 23:30"
+          - type: "created"
+            condition: "is_newer_than"
+            relative_datetime_count:
+              time_value: 12
+              time_unit: "years"
+        - and_criteria:
+          - type: "size"
+            condition: "not_equal"
+            size_info:
+              size_value: 60
+              size_unit: "MB"
+          - type: "file_attribute"
+            condition: "does_not_match"
+            field: "test_field"
+            value: "uni"
+          - type: "file_attribute"
+            condition: "exists"
+            field: "test"
+    state: 'present'
 '''
 
 RETURN = r'''

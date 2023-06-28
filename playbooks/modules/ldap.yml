@@ -1,0 +1,140 @@
+---
+- name: LDAP Operations on PowerScale
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.**'
+    verify_ssl: false
+    api_user: 'root'
+    api_password: 'Password'
+    ldap_name: 'ldap_test'
+    server_uri_state_add: 'present-in-ldap'
+    server_uri_state_remove: 'absent-in-ldap'
+    state_present: 'present'
+    state_absent: 'absent'
+  tasks:
+    - name: Add an LDAP provider
+      dellemc.powerscale.ldap:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        ldap_name: "{{ ldap_name }}"
+        server_uris:
+          - 'ldap://10.**.**.11'
+          - 'ldap://10.**.**.12'
+        server_uri_state: '{{ server_uri_state_add }}'
+        base_dn: "DC=ansildap,DC=com"
+        ldap_parameters:
+          groupnet: "groupnet_ansildap"
+          bind_dn: "cn=admin,dc=example,dc=com"
+          bind_password: "Password"
+        state: "{{ state_present }}"
+
+    - name: Add an LDAP provider Idempotency case
+      dellemc.powerscale.ldap:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        ldap_name: "{{ ldap_name }}"
+        server_uris:
+          - 'ldap://10.**.**.11'
+          - 'ldap://10.**.**.12'
+        server_uri_state: '{{ server_uri_state_add }}'
+        base_dn: "DC=ansildap,DC=com"
+        ldap_parameters:
+          groupnet: "groupnet_ansildap"
+          bind_dn: "cn=admin,dc=example,dc=com"
+          bind_password: "Password"
+        state: "{{ state_present }}"
+
+    - name: Add server_uris to an LDAP provider
+      dellemc.powerscale.ldap:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        ldap_name: "{{ ldap_name }}"
+        server_uris:
+          - 'ldap://10.**.**.12'
+        server_uri_state: "{{ server_uri_state_add }}"
+        state: "{{ state_present }}"
+
+    - name: Add server_uris to an LDAP provider Idempotency case
+      dellemc.powerscale.ldap:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        ldap_name: "{{ ldap_name }}"
+        server_uris:
+          - 'ldap://10.**.**.12'
+        server_uri_state: "{{ server_uri_state_add }}"
+        state: "{{ state_present }}"
+
+    - name: Remove server_uris from an LDAP provider
+      dellemc.powerscale.ldap:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        ldap_name: "{{ ldap_name }}"
+        server_uris:
+          - 'ldap://10.**.**.12'
+        server_uri_state: "{{ server_uri_state_remove }}"
+        state: "{{ state_present }}"
+
+    - name: Remove server_uris from an LDAP provider Idempotency case
+      dellemc.powerscale.ldap:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        ldap_name: "{{ ldap_name }}"
+        server_uris:
+          - 'ldap://10.**.**.12'
+        server_uri_state: "{{ server_uri_state_remove }}"
+        state: "{{ state_present }}"
+
+    - name: Modify LDAP provider
+      dellemc.powerscale.ldap:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        ldap_name: "{{ ldap_name }}"
+        base_dn: "DC=ansi_ldap,DC=com"
+        ldap_parameters:
+          bind_dn: "cn=admin,dc=test,dc=com"
+        state: "{{ state_present }}"
+
+    - name: Modify LDAP provider Idempotency case
+      dellemc.powerscale.ldap:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        ldap_name: "{{ ldap_name }}"
+        base_dn: "DC=ansi_ldap,DC=com"
+        ldap_parameters:
+          bind_dn: "cn=admin,dc=test,dc=com"
+        state: "{{ state_present }}"
+
+    - name: Get LDAP provider details
+      dellemc.powerscale.ldap:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        ldap_name: "{{ ldap_name }}"
+        state: "{{ state_present }}"
+
+    - name: Delete a LDAP provider
+      dellemc.powerscale.ldap:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        ldap_name: "{{ ldap_name }}"
+        state: "{{ state_absent }}"

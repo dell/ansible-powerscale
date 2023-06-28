@@ -20,7 +20,9 @@ Requirements
 ------------
 The below requirements are needed on the host that executes this module.
 
-- A Dell PowerScale Storage system. Ansible 2.12, 2.13 or 2.14.
+- A Dell PowerScale Storage system.
+- Ansible-core 2.13 or later.
+- Python 3.9, 3.10 or 3.11.
 
 
 
@@ -32,9 +34,9 @@ Parameters
 
 
   user_id (optional, int, None)
-    The user_id is auto generated or can be assigned at the time of creation.
+    The *user_id* is auto generated or can be assigned at the time of creation.
 
-    For all other operations either user_name or user_id is needed.
+    For all other operations either *user_name* or *user_id* is needed.
 
 
   password (optional, str, None)
@@ -48,9 +50,9 @@ Parameters
   access_zone (optional, str, system)
     This option mentions the zone in which a user is created.
 
-    For creation, access_zone acts as an attribute for the user.
+    For creation, *access_zone* acts as an attribute for the user.
 
-    For all other operations access_zone acts as a filter.
+    For all other operations *access_zone* acts as a filter.
 
 
   provider_type (optional, str, local)
@@ -62,7 +64,7 @@ Parameters
 
     Getting user details is allowed for all users.
 
-    If the provider_type is 'ads' then domain name of the Active Directory Server has to be mentioned in the user_name. The format for the user_name should be 'DOMAIN_NAME\user_name' or "DOMAIN_NAME\\user_name".
+    If the *provider_type* is 'ads' then domain name of the Active Directory Server has to be mentioned in the *user_name*. The format for the *user_name* should be 'DOMAIN_NAME\user_name' or "DOMAIN_NAME\\user_name".
 
     This option acts as a filter for all operations except creation.
 
@@ -114,7 +116,7 @@ Parameters
 
 
   role_state (optional, str, None)
-    The role_state option is used to mention the existence of the role for a particular user.
+    The *role_state* option is used to mention the existence of the role for a particular user.
 
     It is required when a role is added or removed from user.
 
@@ -140,9 +142,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    True - indicates that the SSL certificate should be verified.
+    ``true`` - indicates that the SSL certificate should be verified.
 
-    False - indicates that the SSL certificate should not be verified.
+    ``false`` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -160,6 +162,7 @@ Notes
 -----
 
 .. note::
+   - The *check_mode* is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -250,7 +253,7 @@ Examples
           access_zone: "{{access_zone}}"
           provider_type: "{{provider_type}}"
           user_id: "{{id}}"
-          enabled: "False"
+          enabled: false
           state: "present"
 
       - name: Add user to a role using Username

@@ -30,7 +30,7 @@ options:
     description:
     - The Name of the pool.
     type: str
-    required: True
+    required: true
   new_pool_name:
     description:
     - Name of the pool when renaming an existing pool.
@@ -39,12 +39,12 @@ options:
     description:
     - The name of the groupnet.
     type: str
-    required: True
+    required: true
   subnet_name:
     description:
     - The name of the subnet.
     type: str
-    required:  True
+    required:  true
   description:
     description:
     - Description of the pool.
@@ -146,14 +146,16 @@ options:
             type: int
         aggregation_mode:
             description:
-            - OneFS supports the following NIC aggregation modes.
+            - OneFS supports the following C(NIC) aggregation modes.
             choices: ['roundrobin', 'failover', 'lacp', 'fec']
             type: str
+notes:
+- The I(check_mode) is not supported.
 '''
 
 EXAMPLES = r'''
-    - name: Create Network Pool
-      dellemc.powerscale.networkpool:
+  - name: Create Network Pool
+    dellemc.powerscale.networkpool:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -164,8 +166,8 @@ EXAMPLES = r'''
       access_zone: "system"
       state: "present"
 
-    - name: Get Network Pool
-      dellemc.powerscale.networkpool:
+  - name: Get Network Pool
+    dellemc.powerscale.networkpool:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -175,8 +177,8 @@ EXAMPLES = r'''
       pool: "Test_Pool_2"
       state: "present"
 
-    - name: Modify Network Pool
-      dellemc.powerscale.networkpool:
+  - name: Modify Network Pool
+    dellemc.powerscale.networkpool:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -205,8 +207,8 @@ EXAMPLES = r'''
       description: "Pool Created by Ansible Modify"
       state: "present"
 
-    - name: Delete Network Pool
-      dellemc.powerscale.networkpool:
+  - name: Delete Network Pool
+    dellemc.powerscale.networkpool:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
@@ -216,8 +218,8 @@ EXAMPLES = r'''
       pool: "Test_Pool_2"
       state: "absent"
 
-    - name: Rename a network Pool
-      dellemc.powerscale.networkpool:
+  - name: Rename a network Pool
+    dellemc.powerscale.networkpool:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"

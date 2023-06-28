@@ -33,12 +33,12 @@ options:
     - For system access zone, the path is absolute. For all other access
       zones, the path is a relative path from the base of the access zone.
     type: str
-    required: True
+    required: true
   quota_type:
     description:
     - The type of quota which will be imposed on the path.
     type: str
-    required: True
+    required: true
     choices: ['user', 'group', 'directory', 'default-user', 'default-group']
   user_name:
     description:
@@ -61,9 +61,9 @@ options:
     description:
     - This option defines the type which is used to
       authenticate the user/group.
-    - If the provider_type is 'ads' then the domain name of the Active
-      Directory Server has to be mentioned in the user_name.
-      The format for the user_name should be 'DOMAIN_NAME\user_name'
+    - If the I(provider_type) is 'ads' then the domain name of the Active
+      Directory Server has to be mentioned in the I(user_name).
+      The format for the I(user_name) should be 'DOMAIN_NAME\user_name'
       or "DOMAIN_NAME\\user_name".
     - This option acts as a filter for all operations except creation.
     type: str
@@ -89,8 +89,8 @@ options:
         type: bool
       thresholds_on:
         description:
-        - For SDK 9.0.0 the parameter include_overheads is deprecated and
-          thresholds_on is used.
+        - For SDK 9.0.0 the parameter I(include_overheads) is deprecated and
+          I(thresholds_on) is used.
         type: str
         choices: [ 'app_logical_size', 'fs_logical_size', 'physical_size']
       advisory_limit_size:
@@ -101,9 +101,9 @@ options:
       soft_limit_size:
         description:
         - Threshold value after which the soft limit exceeded notification
-          will be sent and the soft_grace period will start.
+          will be sent and the I(soft_grace) period will start.
         - Write access will be restricted after the grace period expires.
-        - Both soft_grace_period and soft_limit_size are required to modify
+        - Both I(soft_grace_period) and I(soft_limit_size) are required to modify
           soft threshold for the quota.
         type: float
       soft_grace_period:
@@ -111,14 +111,14 @@ options:
         - Grace Period after the soft limit for quota is exceeded.
         - After the grace period, the write access to the quota will be
           restricted.
-        - Both soft_grace_period and soft_limit_size are required to modify
+        - Both I(soft_grace_period) and I(soft_limit_size) are required to modify
           soft threshold for the quota.
         type: int
       period_unit:
         description:
-        - Unit of the time period for soft_grace_period.
+        - Unit of the time period for I(soft_grace_period).
         - For months the number of days is assumed to be 30 days.
-        - This parameter is required only if the soft_grace_period,
+        - This parameter is required only if the I(soft_grace_period),
           is specified.
         type: str
         choices: ['days', 'weeks', 'months']
@@ -136,17 +136,17 @@ options:
         type: str
         choices: ['GB', 'TB']
       container:
-         description: If true, SMB shares using the quota directory see the quota thresholds as share size.
+         description: If C(true), SMB shares using the quota directory see the quota thresholds as share size.
          type: bool
-         default: False
+         default: false
   state:
     description:
     - Define whether the Smart Quota should exist or not.
-    - present - indicates that the Smart Quota should exist on the system.
-    - absent - indicates that the Smart Quota should not exist on the system.
+    - C(present) - indicates that the Smart Quota should exist on the system.
+    - C(absent) - indicates that the Smart Quota should not exist on the system.
     choices: ['absent', 'present']
     type: str
-    required: True
+    required: true
 
 notes:
 - To perform any operation, path, quota_type and state are
@@ -155,10 +155,10 @@ notes:
   included and one without snapshots included.
 - Once the limits are assigned, then the quota cannot be converted to
   accounting. Only modification to the threshold limits is permitted.
+- The I(check_mode) is not supported.
 '''
 EXAMPLES = r'''
-
-  - name: Create a Quota for a User excluding snapshot.
+  - name: Create a Quota for a User excluding snapshot
     dellemc.powerscale.smartquota:
       onefs_host: "{{onefs_host}}"
       verify_ssl: "{{verify_ssl}}"
@@ -170,7 +170,7 @@ EXAMPLES = r'''
       access_zone: "sample-zone"
       provider_type: "local"
       quota:
-        include_overheads: False
+        include_overheads: false
         advisory_limit_size: "{{advisory_limit_size}}"
         soft_limit_size: "{{soft_limit_size}}"
         soft_grace_period: "{{soft_grace_period}}"
@@ -179,7 +179,7 @@ EXAMPLES = r'''
         cap_unit: "{{cap_unit}}"
       state: "present"
 
-  - name: Create a Quota for a Directory for accounting includes snapshots and data protection overheads.
+  - name: Create a Quota for a Directory for accounting includes snapshots and data protection overheads
     dellemc.powerscale.smartquota:
       onefs_host: "{{onefs_host}}"
       verify_ssl: "{{verify_ssl}}"
@@ -188,8 +188,8 @@ EXAMPLES = r'''
       path: "<path>"
       quota_type: "directory"
       quota:
-        include_snapshots: "True"
-        include_overheads: True
+        include_snapshots: true
+        include_overheads: true
       state: "present"
 
   - name: Create default-user Quota for a Directory with snaps and overheads
@@ -201,8 +201,8 @@ EXAMPLES = r'''
       path: "<path>"
       quota_type: "default-user"
       quota:
-        include_snapshots: "True"
-        include_overheads: True
+        include_snapshots: true
+        include_overheads: true
       state: "present"
 
   - name: Get a Quota Details for a Group
@@ -217,7 +217,7 @@ EXAMPLES = r'''
       access_zone: "sample-zone"
       provider_type: "local"
       quota:
-        include_snapshots: "True"
+        include_snapshots: true
       state: "present"
 
   - name: Update Quota for a User
@@ -232,8 +232,8 @@ EXAMPLES = r'''
       access_zone: "sample-zone"
       provider_type: "local"
       quota:
-        include_snapshots: "True"
-        include_overheads: True
+        include_snapshots: true
+        include_overheads: true
         advisory_limit_size: "{{new_advisory_limit_size}}"
         hard_limit_size: "{{new_hard_limit_size}}"
         cap_unit: "{{cap_unit}}"
@@ -249,8 +249,8 @@ EXAMPLES = r'''
       quota_type: "default-user"
       access_zone: "sample-zone"
       quota:
-        include_snapshots: "True"
-        include_overheads: True
+        include_snapshots: true
+        include_overheads: true
         soft_limit_size: "{{soft_limit_size}}"
         cap_unit: "{{cap_unit}}"
         soft_grace_period: "{{soft_grace_period}}"
@@ -266,7 +266,7 @@ EXAMPLES = r'''
       path: "<path>"
       quota_type: "directory"
       quota:
-        include_snapshots: "True"
+        include_snapshots: true
       state: "absent"
 
   - name: Delete Quota for a default-group
@@ -278,7 +278,7 @@ EXAMPLES = r'''
       path: "<path>"
       quota_type: "default-group"
       quota:
-        include_snapshots: "True"
+        include_snapshots: true
       state: "absent"
 '''
 RETURN = r'''
@@ -286,7 +286,7 @@ changed:
     description: Whether or not the resource has changed.
     returned: always
     type: bool
-    sample: True
+    sample: true
 
 quota_details:
     description: The quota details.
@@ -300,14 +300,14 @@ quota_details:
         enforced:
             description: Whether the limits are enforced on Quota or not.
             type: bool
-            sample: True
+            sample: true
         container:
-            description: If true, SMB shares using the quota directory see the quota thresholds as share size.
+            description: If C(true), SMB shares using the quota directory see the quota thresholds as share size.
             type: bool
-            sample: True
+            sample: true
         thresholds:
             description: Includes information about all the limits imposed on quota.
-                         The limits are mentioned in bytes and soft_grace is in seconds.
+                         The limits are mentioned in bytes and I(soft_grace) is in seconds.
             type: dict
             sample: {
                     "advisory": 3221225472,
@@ -447,13 +447,8 @@ class SmartQuota(object):
             'thresholds': threshold_obj,
             'container': container, 'type': quota_type
         }
-        if quota_dict is None or quota_dict[THRESHOLD_PARAM] is None \
-                and not utils.ISI_SDK_VERSION_9:
-            quota_create_params[utils.get_threshold_overhead_parameter()] = \
-                False
-        else:
-            quota_create_params[utils.get_threshold_overhead_parameter()] = \
-                quota_dict[THRESHOLD_PARAM]
+        if quota_dict is not None and quota_dict["thresholds_on"] is not None:
+            quota_create_params["thresholds_on"] = quota_dict["thresholds_on"]
         quota_params_obj = utils.isi_sdk.QuotaQuotaCreateParams(**quota_create_params)
         try:
             api_response = self.quota_api_instance.create_quota_quota(
@@ -482,8 +477,7 @@ class SmartQuota(object):
             soft=quota_dict['soft'], soft_grace=quota_dict['soft_grace'])
 
         get_quota_params = {'enforced': enforced,
-                            utils.get_threshold_overhead_parameter():
-                            quota_dict[THRESHOLD_PARAM],
+                            'thresholds_on': quota_dict["thresholds_on"],
                             'thresholds': threshold_obj}
         quota_params_obj = utils.isi_sdk.QuotaQuota(**get_quota_params)
         try:
@@ -678,7 +672,6 @@ class SmartQuota(object):
         Perform different actions on Smart Quota module based on parameters
         chosen in playbook
         """
-        global THRESHOLD_PARAM
         quota_type = self.module.params['quota_type']
         user_name = self.module.params['user_name']
         group_name = self.module.params['group_name']
@@ -701,8 +694,6 @@ class SmartQuota(object):
             quota, "include_overheads")
         if VALIDATE_THRESHOLD and not VALIDATE_THRESHOLD["param_is_valid"]:
             self.module.fail_json(msg=VALIDATE_THRESHOLD["error_message"])
-        THRESHOLD_PARAM = "thresholds_on" if utils.ISI_SDK_VERSION_9 \
-            else "include_overheads"
         # If Access_Zone is System then absolute path is required
         # else relative path is taken
         complete_path = self.effective_path(access_zone=access_zone, path=path)
@@ -745,7 +736,7 @@ class SmartQuota(object):
             if quota:
                 modify_flag = to_modify_quota(
                     quota, quota_details["thresholds"],
-                    quota_details[utils.get_threshold_overhead_parameter()])
+                    quota_details["thresholds_on"])
             enforce_limit = False
             if quota_details["enforced"] or quota['advisory'] or \
                     quota['hard'] or quota['soft']:
@@ -797,8 +788,8 @@ def to_modify_quota(input_quota, array_quota, array_include_overhead):
     :param array_include_overhead: Whether Quota Include Overheads or not.
     :return: True if the quota is to be modified else returns False.
     """
-    if input_quota[THRESHOLD_PARAM] is not None \
-            and input_quota[THRESHOLD_PARAM] != array_include_overhead:
+    if input_quota["thresholds_on"] is not None \
+            and input_quota["thresholds_on"] != array_include_overhead:
         return True
     for limit in input_quota:
         if limit in array_quota and input_quota[limit] is not None and\

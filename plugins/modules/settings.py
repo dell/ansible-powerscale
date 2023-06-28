@@ -59,6 +59,8 @@ options:
     description:
     - ID of NTP server.
     type: str
+notes:
+- The I(check_mode) is not supported.
 '''
 
 EXAMPLES = r'''
@@ -195,7 +197,7 @@ settings:
             description: Field id.
             type: str
         key:
-            description: Key value from key_file that maps to this server.
+            description: Key value from I(key_file) that maps to this server.
             type: str
         name:
             description: NTP server name.

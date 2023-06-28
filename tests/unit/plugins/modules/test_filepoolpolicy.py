@@ -18,7 +18,6 @@ utils.isi_sdk = MagicMock()
 from ansible.module_utils import basic
 basic.AnsibleModule = MagicMock()
 
-from ansible_collections.dellemc.powerscale.plugins.modules import filepoolpolicy
 from ansible_collections.dellemc.powerscale.plugins.modules.filepoolpolicy import FilePoolPolicy
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_filepoolpolicy_api \
     import MockFilepoolpolicyApi

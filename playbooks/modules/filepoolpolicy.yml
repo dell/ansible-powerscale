@@ -1,0 +1,131 @@
+---
+- name: Manage file pool policy Operations on PowerScale
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: 10.230.24.241
+    verify_ssl: false
+    api_user: root
+    api_password: pancake
+    state_present: present
+    state_absent: absent
+  tasks:
+    - name: Get a file pool policy
+      dellemc.powerscale.filepoolpolicy:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        policy_id: 26
+        policy_name: test_11
+        state: present
+    - name: Delete a file pool policy
+      dellemc.powerscale.filepoolpolicy:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        policy_name: test_11
+        state: absent
+    - name: Create a file pool policy
+      dellemc.powerscale.filepoolpolicy:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        policy_name: test_110
+        description: Creating a policy
+        apply_order: 2
+        apply_data_storage_policy:
+          ssd_strategy: SSD_metadata_read_acceleration
+          storagepool: esa_tier
+        set_data_access_pattern: concurrency
+        set_requested_protection: mirrored_over_3_nodes
+        set_write_performance_optimization: enable_smartcache
+        state: present
+        file_matching_pattern:
+          or_criteria:
+            - and_criteria:
+                - type: size
+                  condition: equal
+                  size_info:
+                    size_value: 60
+                    size_unit: GB
+                - type: size
+                  condition: greater_than_equal_to
+                  size_info:
+                    size_value: 60
+                    size_unit: KB
+            - and_criteria:
+                - type: size
+                  condition: not_equal
+                  size_info:
+                    size_value: 60
+                    size_unit: B
+                - type: size
+                  condition: greater_than
+                  size_info:
+                    size_value: 60
+                    size_unit: PB
+            - and_criteria:
+                - type: size
+                  condition: less_than
+                  size_info:
+                    size_value: 60
+                    size_unit: TB
+                - type: size
+                  condition: less_than_equal_to
+                  size_info:
+                    size_value: 60
+                    size_unit: MB
+    - name: Create a file pool policy -- Ideompotency
+      dellemc.powerscale.filepoolpolicy:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        policy_name: test_110
+        description: Creating a policy
+        apply_order: 2
+        apply_data_storage_policy:
+          ssd_strategy: SSD_metadata_read_acceleration
+          storagepool: esa_tier
+        set_data_access_pattern: concurrency
+        set_requested_protection: mirrored_over_3_nodes
+        set_write_performance_optimization: enable_smartcache
+        state: present
+        file_matching_pattern:
+          or_criteria:
+            - and_criteria:
+                - type: size
+                  condition: equal
+                  size_info:
+                    size_value: 60
+                    size_unit: GB
+                - type: size
+                  condition: greater_than_equal_to
+                  size_info:
+                    size_value: 60
+                    size_unit: KB
+            - and_criteria:
+                - type: size
+                  condition: not_equal
+                  size_info:
+                    size_value: 60
+                    size_unit: B
+                - type: size
+                  condition: greater_than
+                  size_info:
+                    size_value: 60
+                    size_unit: PB
+            - and_criteria:
+                - type: size
+                  condition: less_than
+                  size_info:
+                    size_value: 60
+                    size_unit: TB
+                - type: size
+                  condition: less_than_equal_to
+                  size_info:
+                    size_value: 60
+                    size_unit: MB

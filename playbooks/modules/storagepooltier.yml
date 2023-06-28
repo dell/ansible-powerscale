@@ -1,0 +1,52 @@
+---
+- name: Manage storage pool tier Operations on PowerScale
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.**'
+    verify_ssl: false
+    api_user: 'user'
+    api_password: 'password'
+    state_present: 'present'
+    state_absent: 'absent'
+
+  tasks:
+    - name: Create a storage pool tier
+      dellemc.powerscale.storagepooltier:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        tier_name: "test_tier"
+        nodepools:
+          - "test_nodepool"
+        state: 'present'
+
+    - name: Create a storage pool tier - Ideompotency
+      dellemc.powerscale.storagepooltier:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        tier_name: "test_tier"
+        nodepools:
+          - "test_nodepool"
+        state: 'present'
+
+    - name: Get storage pool tier details
+      dellemc.powerscale.storagepooltier:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        tier_name: "test_tier"
+        state: 'present'
+
+    - name: Delete a storage pool tier
+      dellemc.powerscale.storagepooltier:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        tier_name: "test_tier"
+        state: 'absent'

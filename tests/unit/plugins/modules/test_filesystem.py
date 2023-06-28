@@ -161,11 +161,15 @@ class TestFileSystem():
                                          "state": "present"})
         filesystem_module_mock.module.params = self.get_filesystem_args
         filesystem_module_mock.quota_api = MagicMock()
-        filesystem_module_mock.namespace_api.get_directory_metadata = MagicMock()
+        filesystem_module_mock.get_filesystem = MagicMock(
+            return_value=MockFileSystemApi.FILESYSTEM_DETAILS)
+        filesystem_module_mock.get_quota = MagicMock(
+            return_value=MockFileSystemApi.QUOTA_DETAILS)
         filesystem_module_mock.quota_api.list_quota_quotas = MagicMock()
         filesystem_module_mock.namespace_api.get_acl = MagicMock()
         utils.get_threshold_overhead_parameter = MagicMock()
         utils.get_size_bytes = MagicMock()
+        filesystem_module_mock.get_quota_param = MagicMock(return_value=None)
         filesystem_module_mock.quota_api.create_quota_quota = MagicMock(side_effect=MockApiException)
         filesystem_module_mock.determine_error = MagicMock(return_value=None)
         filesystem_module_mock.perform_module_operation()

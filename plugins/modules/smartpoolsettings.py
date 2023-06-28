@@ -40,25 +40,27 @@ options:
     type: str
     required: true
     choices: ["present"]
+notes:
+- The I(check_mode) is not supported.
 '''
 
 EXAMPLES = r'''
-    - name: Get SmartPool settings
-      dellemc.powerscale.smartpoolsettings:
+  - name: Get SmartPool settings
+    dellemc.powerscale.smartpoolsettings:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
       verify_ssl: "{{verify_ssl}}"
       state: "{{state_present}}"
 
-    - name: Modify SmartPool setting
-      dellemc.powerscale.smartpoolsettings:
+  - name: Modify SmartPool setting
+    dellemc.powerscale.smartpoolsettings:
       onefs_host: "{{onefs_host}}"
       api_user: "{{api_user}}"
       api_password: "{{api_password}}"
       verify_ssl: "{{verify_ssl}}"
       virtual_hot_spare_limit_percent: 10
-      virtual_hot_spare_hide_spare: True
+      virtual_hot_spare_hide_spare: true
       state: "present"
 '''
 
@@ -68,7 +70,7 @@ changed:
     returned: always
     type: bool
 smartpool_settings:
-    description: Details of the smartpool settings
+    description: Details of the smartpool settings.
     returned: always
     type: complex
     contains:

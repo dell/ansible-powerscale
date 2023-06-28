@@ -20,7 +20,9 @@ Requirements
 ------------
 The below requirements are needed on the host that executes this module.
 
-- A Dell PowerScale Storage system. Ansible 2.12, 2.13 or 2.14.
+- A Dell PowerScale Storage system.
+- Ansible-core 2.13 or later.
+- Python 3.9, 3.10 or 3.11.
 
 
 
@@ -64,16 +66,16 @@ Parameters
 
 
       start_range (True, str, None)
-        Specifies the start range for sc_service_addrs.
+        Specifies the start range for *sc_service_addrs*.
 
 
       end_range (True, str, None)
-        Specifies the end range for sc_service_addrs.
+        Specifies the end range for *sc_service_addrs*.
 
 
 
     sc_service_addrs_state (optional, str, None)
-      Specifies if the sc_service_addrs range need to be added or removed from the subnet.
+      Specifies if the *sc_service_addrs* range need to be added or removed from the subnet.
 
 
     mtu (optional, int, None)
@@ -92,9 +94,9 @@ Parameters
   state (True, str, None)
     The state of the subnet after the task is performed.
 
-    present - indicates that the subnet should exist on the system.
+    ``present`` - indicates that the subnet should exist on the system.
 
-    absent - indicates that the subnet should not exist on the system.
+    ``absent`` - indicates that the subnet should not exist on the system.
 
 
   onefs_host (True, str, None)
@@ -108,9 +110,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    True - indicates that the SSL certificate should be verified.
+    ``true`` - indicates that the SSL certificate should be verified.
 
-    False - indicates that the SSL certificate should not be verified.
+    ``false`` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -128,6 +130,7 @@ Notes
 -----
 
 .. note::
+   - The *check_mode* is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -141,99 +144,99 @@ Examples
     
     - name: Create a subnet
       dellemc.powerscale.subnet:
-          onefs_host: "{{onefs_host}}"
-          port_no: "{{port_no}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          groupnet_name: "groupnet_test"
-          subnet_name: "subnet_test"
-          description: "Test subnet"
-          netmask: '198.10.**.***'
-          gateway_priority: 1
-          subnet_params:
-            gateway: '198.10.**.***'
-            sc_service_addrs:
-              - start_range : '198.10.**.***'
-                end_range: '198.10.**.***'
-            sc_service_addrs_state: "add"
-            mtu: 1500
-            vlan_enabled: true
-            vlan_id: 22
-          state: 'present'
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{port_no}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        groupnet_name: "groupnet_test"
+        subnet_name: "subnet_test"
+        description: "Test subnet"
+        netmask: '198.10.**.***'
+        gateway_priority: 1
+        subnet_params:
+          gateway: '198.10.**.***'
+          sc_service_addrs:
+            - start_range : '198.10.**.***'
+              end_range: '198.10.**.***'
+          sc_service_addrs_state: "add"
+          mtu: 1500
+          vlan_enabled: true
+          vlan_id: 22
+        state: 'present'
 
     - name: Modify a subnet
       dellemc.powerscale.subnet:
-          onefs_host: "{{onefs_host}}"
-          port_no: "{{port_no}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          groupnet_name: "groupnet_test"
-          subnet_name: "subnet_test"
-          description: "Test subnet"
-          netmask: '198.10.**.***'
-          gateway_priority: 2
-          subnet_params:
-            gateway: '198.10.**.***'
-            mtu: 1500
-            vlan_enabled: true
-            vlan_id: 22
-          state: 'present'
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{port_no}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        groupnet_name: "groupnet_test"
+        subnet_name: "subnet_test"
+        description: "Test subnet"
+        netmask: '198.10.**.***'
+        gateway_priority: 2
+        subnet_params:
+          gateway: '198.10.**.***'
+          mtu: 1500
+          vlan_enabled: true
+          vlan_id: 22
+        state: 'present'
 
     - name: Rename a subnet
       dellemc.powerscale.subnet:
-          onefs_host: "{{onefs_host}}"
-          port_no: "{{port_no}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          groupnet_name: "groupnet_test"
-          subnet_name: "subnet_test"
-          new_subnet_name: "subnet_test_rename"
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{port_no}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        groupnet_name: "groupnet_test"
+        subnet_name: "subnet_test"
+        new_subnet_name: "subnet_test_rename"
 
     - name: Add smart connect service ip range to subnet
       dellemc.powerscale.subnet:
-          onefs_host: "{{onefs_host}}"
-          port_no: "{{port_no}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          groupnet_name: "groupnet_test"
-          subnet_name: "subnet_test"
-          subnet_params:
-            sc_service_addrs:
-              - start_range : '198.10.**.***'
-                end_range: '198.10.**.***'
-            sc_service_addrs_state: "add"
-          state: 'present'
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{port_no}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        groupnet_name: "groupnet_test"
+        subnet_name: "subnet_test"
+        subnet_params:
+          sc_service_addrs:
+            - start_range : '198.10.**.***'
+              end_range: '198.10.**.***'
+          sc_service_addrs_state: "add"
+        state: 'present'
 
     - name: Remove smart connect service ip range from subnet
       dellemc.powerscale.subnet:
-          onefs_host: "{{onefs_host}}"
-          port_no: "{{port_no}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          groupnet_name: "groupnet_test"
-          subnet_name: "subnet_test"
-          subnet_params:
-            sc_service_addrs:
-              - start_range : '198.10.**.***'
-                end_range: '198.10.**.***'
-            sc_service_addrs_state: "remove"
-          state: 'present'
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{port_no}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        groupnet_name: "groupnet_test"
+        subnet_name: "subnet_test"
+        subnet_params:
+          sc_service_addrs:
+            - start_range : '198.10.**.***'
+              end_range: '198.10.**.***'
+          sc_service_addrs_state: "remove"
+        state: 'present'
 
     - name: Delete a subnet
       dellemc.powerscale.subnet:
-          onefs_host: "{{onefs_host}}"
-          port_no: "{{port_no}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          groupnet_name: "groupnet_test"
-          subnet_name: "subnet_test"
-          state: 'absent'
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{port_no}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        groupnet_name: "groupnet_test"
+        subnet_name: "subnet_test"
+        state: 'absent'
 
 
 

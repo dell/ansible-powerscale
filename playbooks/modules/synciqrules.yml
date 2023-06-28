@@ -1,0 +1,124 @@
+---
+- name: SyncIQ Performance Rules Operations on PowerScale
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.**'
+    port_no: '8080'
+    verify_ssl: false
+    api_user: 'user'
+    api_password: 'password'
+
+  tasks:
+    - name: Create SyncIQ performance rule
+      register: result
+      dellemc.powerscale.synciqrules:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        enabled: true
+        description: "New Performance rule"
+        schedule:
+          end: '20:00'
+          begin: '10:00'
+          days_of_week:
+            - monday
+            - tuesday
+            - sunday
+            - friday
+        limit: 90
+        rule_type: 'worker'
+        state: 'present'
+
+    - name: Create SyncIQ performance rule -- Idempotency
+      dellemc.powerscale.synciqrules:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        enabled: true
+        schedule:
+          end: '20:00'
+          begin: '10:00'
+          days_of_week:
+            - monday
+            - tuesday
+            - sunday
+            - friday
+        limit: 90
+        rule_type: 'worker'
+        state: 'present'
+
+    - name: Get SyncIQ rule details
+      dellemc.powerscale.synciqrules:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        sync_rule_id: "{{ result.synciq_rule_details.id }}"
+        state: 'present'
+
+    - name: Modify a SyncIQ rule
+      dellemc.powerscale.synciqrules:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        sync_rule_id: "{{ result.synciq_rule_details.id }}"
+        limit: 95
+        description: "Modify rule"
+        enabled: false
+        state: 'present'
+
+    - name: Modify a SyncIQ rule -- Idempotency
+      dellemc.powerscale.synciqrules:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        sync_rule_id: "{{ result.synciq_rule_details.id }}"
+        limit: 95
+        description: "Modify rule"
+        enabled: false
+        state: 'present'
+
+    - name: Delete a SyncIQ rule
+      dellemc.powerscale.synciqrules:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        sync_rule_id: "{{ result.synciq_rule_details.id }}"
+        enabled: false
+        schedule:
+          end: '20:00'
+          begin: '10:00'
+          days_of_week:
+            - monday
+            - tuesday
+            - sunday
+            - friday
+        limit: 95
+        rule_type: "worker"
+        state: "absent"
+
+    - name: Delete a SyncIQ rule -- Idempotency
+      dellemc.powerscale.synciqrules:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        sync_rule_id: "{{ result.synciq_rule_details.id }}"
+        enabled: false
+        schedule:
+          end: '20:00'
+          begin: '10:00'
+          days_of_week:
+            - monday
+            - tuesday
+            - sunday
+            - friday
+        limit: 95
+        rule_type: "worker"
+        state: "absent"

@@ -28,7 +28,9 @@ Requirements
 ------------
 The below requirements are needed on the host that executes this module.
 
-- A Dell PowerScale Storage system. Ansible 2.12, 2.13 or 2.14.
+- A Dell PowerScale Storage system.
+- Ansible-core 2.13 or later.
+- Python 3.9, 3.10 or 3.11.
 
 
 
@@ -64,15 +66,15 @@ Parameters
 
     This is a list of dictionaries. Each dictionry entry has 3 mandatory values as listed below.
 
-    1)'user_name'/'group_name'/'wellknown' can have actual name of the trustee like 'user'/'group'/'wellknown'.
+    1)*user_name*/*group_name*/*wellknown* can have actual name of the trustee like ``user``/``group``/``wellknown``.
 
-    2)'permission' can be 'read'/''write'/'full'.
+    2)*permission* can be ``read``/'``write``/``full``.
 
-    3)'permission_type' can be 'allow'/'deny'.
+    3)*permission_type* can be ``allow``/``deny``.
 
-    The fourth entry 'provider_type' is optional (default is 'local').
+    The fourth entry *provider_type* is optional (default is ``local``).
 
-    4)'provider_type' can be 'local'/'file'/'ads'/'ldap'/'nis'.
+    4)*provider_type* can be ``local``/``file``/``ads``/``ldap``/``nis``.
 
 
   access_based_enumeration (optional, bool, None)
@@ -132,7 +134,7 @@ Parameters
 
 
     type (optional, str, deny)
-      Specifies if filter list is for deny or allow. Default is deny.
+      Specifies if filter list is for ``deny`` or ``allow``. Default is ``deny``.
 
 
     state (optional, str, None)
@@ -153,7 +155,7 @@ Parameters
 
 
     unit (optional, str, seconds)
-      Unit of the ca_timeout.
+      Unit of the *ca_timeout*.
 
 
 
@@ -213,9 +215,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    True - indicates that the SSL certificate should be verified.
+    ``true`` - indicates that the SSL certificate should be verified.
 
-    False - indicates that the SSL certificate should not be verified.
+    ``false`` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -233,7 +235,7 @@ Notes
 -----
 
 .. note::
-   - The check_mode is not supported.
+   - The *check_mode* is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -245,196 +247,195 @@ Examples
 .. code-block:: yaml+jinja
 
     
+    - name: Create SMB share for non system access zone
+      dellemc.powerscale.smb:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        share_name: "{{name}}"
+        path: "<path>"
+        access_zone: "{{non_system_access_zone}}"
+        state: "present"
 
-        - name: Create SMB share for non system access zone
-          dellemc.powerscale.smb:
-            onefs_host: "{{onefs_host}}"
-            verify_ssl: "{{verify_ssl}}"
-            api_user: "{{api_user}}"
-            api_password: "{{api_password}}"
-            share_name: "{{name}}"
-            path: "<path>"
-            access_zone: "{{non_system_access_zone}}"
-            state: "present"
+    - name: Create SMB share for system access zone
+      dellemc.powerscale.smb:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        share_name: "{{name}}"
+        path: "{{system_az_path}}"
+        description: "{{description}}"
+        create_path: false
+        allow_variable_expansion: true
+        auto_create_directory: true
+        continuously_available: true
+        file_filter_extension:
+          extensions:
+            - "sample_extension_1"
+          type: "allow"
+          state: "present-in-share"
+        file_filtering_enabled: true
+        ca_timeout:
+          value: 60
+          unit: "minutes"
+        strict_ca_lockout: true
+        smb3_encryption_enabled: true
+        ca_write_integrity: "write-read-coherent"
+        change_notify: "all"
+        oplocks: true
+        impersonate_guest: "never"
+        impersonate_user: "sample_user"
+        host_acls:
+        - name: "sample_host_acl_1"
+          access_type: "allow"
+        - name: "sample_host_acl_2"
+          access_type: "deny"
+        state: "present"
 
-        - name: Create SMB share for system access zone
-          dellemc.powerscale.smb:
-            onefs_host: "{{onefs_host}}"
-            verify_ssl: "{{verify_ssl}}"
-            api_user: "{{api_user}}"
-            api_password: "{{api_password}}"
-            share_name: "{{name}}"
-            path: "{{system_az_path}}"
-            description: "{{description}}"
-            create_path: False
-            allow_variable_expansion: True
-            auto_create_directory: True
-            continuously_available: True
-            file_filter_extension:
-              extensions:
-                - "sample_extension_1"
-              type: "allow"
-              state: "present-in-share"
-            file_filtering_enabled: True
-            ca_timeout:
-              value: 60
-              unit: "minutes"
-            strict_ca_lockout: True
-            smb3_encryption_enabled: True
-            ca_write_integrity: "write-read-coherent"
-            change_notify: "all"
-            oplocks: True
-            impersonate_guest: "never"
-            impersonate_user: "sample_user"
-            host_acls:
-            - name: "sample_host_acl_1"
-              access_type: "allow"
-            - name: "sample_host_acl_2"
-              access_type: "deny"
-            state: "present"
+    - name: Create SMB share for system access zone
+      dellemc.powerscale.smb:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        share_name: "{{name}}"
+        path: "<system_az_path>"
+        description: "{{description}}"
+        permissions:
+          - user_name: "{{system_az_user}}"
+            permission: "full"
+            permission_type: "allow"
+          - group_name: "{{system_az_group}}"
+            permission: "read"
+            permission_type: "allow"
+          - wellknown: "everyone"
+            permission: "read"
+            permission_type: "allow"
+        state: "present"
 
-        - name: Create SMB share for system access zone
-          dellemc.powerscale.smb:
-            onefs_host: "{{onefs_host}}"
-            verify_ssl: "{{verify_ssl}}"
-            api_user: "{{api_user}}"
-            api_password: "{{api_password}}"
-            share_name: "{{name}}"
-            path: "<system_az_path>"
-            description: "{{description}}"
-            permissions:
-              - user_name: "{{system_az_user}}"
-                permission: "full"
-                permission_type: "allow"
-              - group_name: "{{system_az_group}}"
-                permission: "read"
-                permission_type: "allow"
-              - wellknown: "everyone"
-                permission: "read"
-                permission_type: "allow"
-            state: "present"
+    - name: Modify multiple params for an existing  SMB share
+      dellemc.powerscale.smb:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        share_name: "{{name}}"
+        path: "/ifs"
+        allow_variable_expansion: false
+        auto_create_directory: false
+        file_filter_extension:
+          extensions:
+            - 'sample_extension_2'
+          type: "allow"
+          state: "absent-in-share"
+        file_filtering_enabled: true
+        ca_timeout:
+          value: 15
+          unit: "minutes"
+        strict_ca_lockout: false
+        change_notify: "norecurse"
+        oplocks: false
+        impersonate_guest: "always"
+        impersonate_user: "new_user_2"
+        host_acls:
+          - name: "sample_host_acl_1"
+            access_type: "deny"
+          - name: "sample_host_acl_2"
+            access_type: "allow"
+        state: "present"
 
-        - name: Modify multiple params for an existing  SMB share
-          dellemc.powerscale.smb:
-            onefs_host: "{{onefs_host}}"
-            verify_ssl: "{{verify_ssl}}"
-            api_user: "{{api_user}}"
-            api_password: "{{api_password}}"
-            share_name: "{{name}}"
-            path: "/ifs"
-            allow_variable_expansion: False
-            auto_create_directory: False
-            file_filter_extension:
-              extensions:
-                - 'sample_extension_2'
-              type: "allow"
-              state: "absent-in-share"
-            file_filtering_enabled: True
-            ca_timeout:
-              value: 15
-              unit: "minutes"
-            strict_ca_lockout: False
-            change_notify: "norecurse"
-            oplocks: False
-            impersonate_guest: "always"
-            impersonate_user: "new_user_2"
-            host_acls:
-              - name: "sample_host_acl_1"
-                access_type: "deny"
-              - name: "sample_host_acl_2"
-                access_type: "allow"
-            state: "present"
+    - name: Modify user permission for SMB share
+      dellemc.powerscale.smb:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        share_name: "{{name}}"
+        path: "<system_az_path>"
+        description: "{{description}}"
+        permissions:
+          - user_name: "{{system_az_user}}"
+            permission: "full"
+            permission_type: "allow"
+          - group_name: "{{system_az_group}}"
+            permission: "write"
+            permission_type: "allow"
+          - wellknown: "everyone"
+            permission: "write"
+            permission_type: "deny"
+        state: "present"
 
-        - name: Modify user permission for SMB share
-          dellemc.powerscale.smb:
-            onefs_host: "{{onefs_host}}"
-            verify_ssl: "{{verify_ssl}}"
-            api_user: "{{api_user}}"
-            api_password: "{{api_password}}"
-            share_name: "{{name}}"
-            path: "<system_az_path>"
-            description: "{{description}}"
-            permissions:
-              - user_name: "{{system_az_user}}"
-                permission: "full"
-                permission_type: "allow"
-              - group_name: "{{system_az_group}}"
-                permission: "write"
-                permission_type: "allow"
-              - wellknown: "everyone"
-                permission: "write"
-                permission_type: "deny"
-            state: "present"
+    - name: Delete system access zone SMB share
+      dellemc.powerscale.smb:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        share_name: "{{name}}"
+        state: "absent"
 
-        - name: Delete system access zone SMB share
-          dellemc.powerscale.smb:
-            onefs_host: "{{onefs_host}}"
-            verify_ssl: "{{verify_ssl}}"
-            api_user: "{{api_user}}"
-            api_password: "{{api_password}}"
-            share_name: "{{name}}"
-            state: "absent"
+    - name: Get SMB share details
+      dellemc.powerscale.smb:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        share_name: "{{name}}"
+        state: "present"
 
-        - name: Get SMB share details
-          dellemc.powerscale.smb:
-            onefs_host: "{{onefs_host}}"
-            verify_ssl: "{{verify_ssl}}"
-            api_user: "{{api_user}}"
-            api_password: "{{api_password}}"
-            share_name: "{{name}}"
-            state: "present"
+    - name: Create SMB share for non system access zone
+      dellemc.powerscale.smb:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        share_name: "{{name}}"
+        path: "<non_system_az_path>"
+        access_zone: "{{non_system_access_zone}}"
+        description: "{{description}}"
+        permissions:
+          - user_name: "{{non_system_az_user}}"
+            permission: "full"
+            permission_type: "allow"
+          - group_name: "{{non_system_az_group}}"
+            permission: "read"
+            permission_type: "allow"
+          - wellknown: "everyone"
+            permission: "read"
+            permission_type: "allow"
+        state: "present"
 
-        - name: Create SMB share for non system access zone
-          dellemc.powerscale.smb:
-            onefs_host: "{{onefs_host}}"
-            verify_ssl: "{{verify_ssl}}"
-            api_user: "{{api_user}}"
-            api_password: "{{api_password}}"
-            share_name: "{{name}}"
-            path: "<non_system_az_path>"
-            access_zone: "{{non_system_access_zone}}"
-            description: "{{description}}"
-            permissions:
-              - user_name: "{{non_system_az_user}}"
-                permission: "full"
-                permission_type: "allow"
-              - group_name: "{{non_system_az_group}}"
-                permission: "read"
-                permission_type: "allow"
-              - wellknown: "everyone"
-                permission: "read"
-                permission_type: "allow"
-            state: "present"
+    - name: Modify description for an non system access zone SMB share
+      dellemc.powerscale.smb:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        share_name: "{{name}}"
+        access_zone: "{{non_system_access_zone}}"
+        description: "new description"
+        state: "present"
 
-        - name: Modify description for an non system access zone SMB share
-          dellemc.powerscale.smb:
-            onefs_host: "{{onefs_host}}"
-            verify_ssl: "{{verify_ssl}}"
-            api_user: "{{api_user}}"
-            api_password: "{{api_password}}"
-            share_name: "{{name}}"
-            access_zone: "{{non_system_access_zone}}"
-            description: "new description"
-            state: "present"
-
-        - name: Modify name for an existing non system access zone SMB share
-          dellemc.powerscale.smb:
-            onefs_host: "{{onefs_host}}"
-            verify_ssl: "{{verify_ssl}}"
-            api_user: "{{api_user}}"
-            api_password: "{{api_password}}"
-            share_name: "{{name}}"
-            new_share_name: "{{new_name}}"
-            access_zone: "{{non_system_access_zone}}"
-            description: "new description"
-            state: "present"
+    - name: Modify name for an existing non system access zone SMB share
+      dellemc.powerscale.smb:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        share_name: "{{name}}"
+        new_share_name: "{{new_name}}"
+        access_zone: "{{non_system_access_zone}}"
+        description: "new description"
+        state: "present"
 
 
 
 Return Values
 -------------
 
-changed (always, bool, False)
+changed (always, bool, false)
   A boolean indicating if the task had to make changes.
 
 

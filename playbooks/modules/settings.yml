@@ -1,0 +1,75 @@
+---
+- name: Manage Setting Operations on PowerScale
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.**'
+    verify_ssl: false
+    api_user: 'user'
+    api_password: 'Password'
+    state_present: 'present'
+    state_absent: 'absent'
+    mail_relay: 'mailrelay.itp.dell.com'
+    mail_sender: 'lab-a2@dell.com'
+    mail_subject: 'alerts'
+    ntp_servers_add:
+      - '10.**.**.27'
+      - '10.**.**.28'
+      - '10.**.**.29'
+    ntp_servers_remove:
+      - '10.**.**.27'
+    ntp_server_id: "10.**.**.27"
+    email_settings: true
+
+  tasks:
+    - name: Update email settings and add NTP server
+      dellemc.powerscale.settings:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        state: "{{ state_present }}"
+        mail_relay: "{{ mail_relay }}"
+        mail_sender: "{{ mail_sender }}"
+        mail_subject: "{{ mail_subject }}"
+        ntp_servers: "{{ ntp_servers_add }}"
+
+    - name: Update email settings and add NTP server - Idempotency
+      dellemc.powerscale.settings:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        state: "{{ state_present }}"
+        mail_relay: "{{ mail_relay }}"
+        mail_sender: "{{ mail_sender }}"
+        mail_subject: "{{ mail_subject }}"
+        ntp_servers: "{{ ntp_servers_add }}"
+
+    - name: Get email settings and NTP Server Details
+      dellemc.powerscale.settings:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        email_settings: "{{ email_settings }}"
+        ntp_server_id: "{{ ntp_server_id }}"
+        state: "{{ state_present }}"
+
+    - name: Remove NTP server
+      dellemc.powerscale.settings:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        ntp_servers: "{{ ntp_servers_remove }}"
+        state: "{{ state_absent }}"
+
+    - name: Remove NTP server - Idempotency
+      dellemc.powerscale.settings:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        ntp_servers: "{{ ntp_servers_remove }}"
+        state: "{{ state_absent }}"

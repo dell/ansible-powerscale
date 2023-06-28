@@ -1,0 +1,134 @@
+---
+- name: ADS Operations on PowerScale
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.**'
+    verify_ssl: false
+    api_user: 'user'
+    api_password: 'password'
+    domain_name: 'ansibleneo.com'
+    instance_name: 'ansibleneo.com'
+    state_present: 'present'
+    state_absent: 'absent'
+
+  tasks:
+    - name: Add an Active Directory provider
+      dellemc.powerscale.ads:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        domain_name: "{{ domain_name }}"
+        instance_name: "{{ instance_name }}"
+        ads_user: "administrator"
+        ads_password: "Password"
+        ads_parameters:
+          groupnet: "groupnet_ad"
+          home_directory_template: "/ifs/home/%D/%U"
+          login_shell: "/bin/zsh"
+          machine_account: "test_account"
+          organizational_unit: "unit"
+        state: "{{ state_present }}"
+
+    - name: Add an Active Directory provider Idempotency case
+      dellemc.powerscale.ads:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        domain_name: "{{ domain_name }}"
+        instance_name: "{{ instance_name }}"
+        ads_user: "administrator"
+        ads_password: "Password"
+        ads_parameters:
+          groupnet: "groupnet_ad"
+          home_directory_template: "/ifs/home/%D/%U"
+          login_shell: "/bin/zsh"
+          machine_account: "test_account"
+          organizational_unit: "unit"
+        state: "{{ state_present }}"
+
+    - name: Modify an Active Directory provider with domain name
+      dellemc.powerscale.ads:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        domain_name: "{{ domain_name }}"
+        ads_parameters:
+          home_directory_template: "/ifs/usr_home/%D/%U"
+          login_shell: "/bin/rbash"
+        state: "{{ state_present }}"
+
+    - name: Modify an Active Directory provider with domain name Idempotency case
+      dellemc.powerscale.ads:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        domain_name: "{{ domain_name }}"
+        ads_parameters:
+          home_directory_template: "/ifs/usr_home/%D/%U"
+          login_shell: "/bin/rbash"
+        state: "{{ state_present }}"
+
+    - name: Modify an Active Directory provider with instance name
+      dellemc.powerscale.ads:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        instance_name: "{{ instance_name }}"
+        ads_parameters:
+          home_directory_template: "/ifs/usr_home/%D/%U"
+          login_shell: "/bin/rbash"
+        state: "{{ state_present }}"
+
+    - name: Modify an Active Directory provider with instance name Idempotency case
+      dellemc.powerscale.ads:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        instance_name: "{{ instance_name }}"
+        ads_parameters:
+          home_directory_template: "/ifs/usr_home/%D/%U"
+          login_shell: "/bin/rbash"
+        state: "{{ state_present }}"
+
+    - name: Get Active Directory provider details with domain name
+      dellemc.powerscale.ads:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        domain_name: "{{ domain_name }}"
+        state: "{{ state_present }}"
+
+    - name: Get Active Directory provider details with instance name
+      dellemc.powerscale.ads:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        instance_name: "{{ instance_name }}"
+        state: "{{ state_present }}"
+
+    - name: Delete an Active Directory provider with domain name
+      dellemc.powerscale.ads:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        domain_name: "{{ domain_name }}"
+        state: "{{ state_absent }}"
+
+    - name: Delete an Active Directory provider with instance name
+      dellemc.powerscale.ads:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        instance_name: "{{ instance_name }}"
+        state: "{{ state_absent }}"

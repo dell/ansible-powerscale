@@ -12,7 +12,7 @@ DOCUMENTATION = r'''
 module: node
 version_added: '1.2.0'
 
-short_description: Get node info of PowerScale Storage System.
+short_description: Get node info of PowerScale Storage System
 
 description:
 - Get information of a node belonging to the PowerScale cluster.
@@ -35,6 +35,8 @@ options:
     required: true
     choices: [absent, present]
     type: str
+notes:
+- The I(check_mode) is not supported.
 '''
 EXAMPLES = r'''
 - name: Get node info of the PowerScale cluster node
@@ -75,7 +77,6 @@ cluster_node_details:
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
-import re
 
 LOG = utils.get_logger('node')
 
