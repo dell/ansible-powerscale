@@ -69,7 +69,7 @@ EXAMPLES = r'''
       state: "absent"
 
   - name: Close smb file of the PowerScale cluster
-    smb_file:
+    dellemc.powerscale.smb_file:
       onefs_host: "{{onefs_host}}"
       verify_ssl: "{{verify_ssl}}"
       api_user: "{{api_user}}"

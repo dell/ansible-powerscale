@@ -1,6 +1,6 @@
 **Ansible Modules for Dell Technologies PowerScale** 
 =========================================
-### Release notes 1.9.0
+### Release notes 2.0.0
 
 >   © 2022 Dell Inc. or its subsidiaries. All rights reserved. Dell
 >   and other trademarks are trademarks of Dell Inc. or its
@@ -27,7 +27,7 @@ Table 1. Revision history
 
 | Revision | Date          | Description                                               |
 |----------|---------------|-----------------------------------------------------------|
-| 01       | March 2023    | Ansible Modules for Dell PowerScale 1.9.0                 |
+| 01       | June 2023    | Ansible Modules for Dell PowerScale 2.0.0                 |
 
 
 Product description
@@ -59,6 +59,7 @@ The Ansible Modules for Dell PowerScale support the following features:
 - Get, Create, modify and delete NFS aliases. 
 - Get attributes and entities of the array.
 - Get details and close open SMB files.
+- Create, modify, get details and delete a user mapping rule.
   
 The Ansible modules use playbooks, written in yaml syntax, to list, show, create, delete, and modify each of these entities.
 
@@ -66,16 +67,16 @@ New Features and Enhancements
 ---------------------------
 This section describes the features of the Ansible Modules for Dell PowerScale for this release.
 
-The Ansible Modules for Dell PowerScale release 1.9.0 supports the following features:
+The Ansible Modules for Dell PowerScale release 2.0.0 supports the following features:
 
-- The SMB file module supports this functionality:
-    - Get details and close open SMB files.
-- The User module supports this functionality:
-    - Added support for modifying the user password and creating user with user_id.
-- The Group module supports this functionality:
-    - Added support for creating group with group_id.
-- The Smart quota module supports this functionality:
-    - Added support for providing path of a non-system access zone to begin without slash.
+- The User mapping rule module supports this functionality:
+    - Create, modify, get details and delete a user mapping rule.
+- The Filesystem module supports this functionality:
+    - Added support for "everyone" user.
+- The NFS module supports this functionality:
+    - Added support for ignoring unresolvable hosts.
+- The Info module supports this functionality:
+    - Added support for listing LDAP auth providers and user mapping rules.
 
 Known issues
 ------------
@@ -99,10 +100,11 @@ This section lists the limitations in this release of Ansible Modules for Dell P
  
 - Users and Groups 
   - Only local users and groups can be created. 
-  -  Operations on users and groups with very long names may fail. 
+  - Operations on users and groups with very long names may fail.
+  - Modification of user password fails for OneFS version 9.5.
 
 - Access Zone
-  - Deletion of access zones is not supported. 
+  - Deletion of access zones is not supported.
  
 - Filesystems
   -  Only directory quotas are supported but not user or group quotas.
@@ -119,12 +121,13 @@ This section lists the limitations in this release of Ansible Modules for Dell P
   - Operations performed in parallel from other interfaces apart from playbook cannot guarantee desirable results.
     
 - No support for advanced PowerScale features
-  - Advanced PowerScale features include tiering, replication, and so on.  
+  - Advanced PowerScale features include tiering, replication, and so on.
+
 ----------------
 Software media, organization, and files 
 -----------
 The software package is available for download from the [Ansible Modules
-for PowerScale GitHub](https://github.com/dell/ansible-powerscale/tree/1.9.0) page.
+for PowerScale GitHub](https://github.com/dell/ansible-powerscale/tree/2.0.0) page.
 
 Additional resources
 --------------------

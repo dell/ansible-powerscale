@@ -20,7 +20,9 @@ Requirements
 ------------
 The below requirements are needed on the host that executes this module.
 
-- A Dell PowerScale Storage system. Ansible 2.12, 2.13 or 2.14.
+- A Dell PowerScale Storage system.
+- Ansible-core 2.13 or later.
+- Python 3.9, 3.10 or 3.11.
 
 
 
@@ -58,9 +60,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    True - indicates that the SSL certificate should be verified.
+    ``true`` - indicates that the SSL certificate should be verified.
 
-    False - indicates that the SSL certificate should not be verified.
+    ``false`` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -78,6 +80,7 @@ Notes
 -----
 
 .. note::
+   - The *check_mode* is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -90,7 +93,6 @@ Examples
 
     
       - name: Get a single SyncIQ report with id
-        register: result
         dellemc.powerscale.synciqreports:
           onefs_host: "{{onefs_host}}"
           api_user: "{{api_user}}"
@@ -100,7 +102,6 @@ Examples
           state: "present"
 
       - name: Get a single SyncIQ report with name
-        register: result
         dellemc.powerscale.synciqreports:
           onefs_host: "{{onefs_host}}"
           api_user: "{{api_user}}"
@@ -110,29 +111,26 @@ Examples
           state: "present"
 
       - name: Get all SyncIQ sub-reports with report id
-        register: result
         dellemc.powerscale.synciqreports:
           onefs_host: "{{onefs_host}}"
           api_user: "{{api_user}}"
           api_password: "{{api_password}}"
           verify_ssl: "{{verify_ssl}}"
           id: "1-Test_syncIQ_policy"
-          include_sub_reports: "True"
+          include_sub_reports: true
           state: "present"
 
       - name: Get all SyncIQ sub-reports with report name
-        register: result
         dellemc.powerscale.synciqreports:
           onefs_host: "{{onefs_host}}"
           api_user: "{{api_user}}"
           api_password: "{{api_password}}"
           verify_ssl: "{{verify_ssl}}"
           name: "Test_syncIQ_policy"
-          include_sub_reports: "True"
+          include_sub_reports: true
           state: "present"
 
       - name: Get a single SyncIQ sub-report with sub-report id
-        register: result
         dellemc.powerscale.synciqreports:
           onefs_host: "{{onefs_host}}"
           api_user: "{{api_user}}"

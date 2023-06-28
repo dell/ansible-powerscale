@@ -1,0 +1,257 @@
+---
+- name: Access zone Operations on PowerScale
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.**'
+    verify_ssl: false
+    api_user: 'user'
+    api_password: 'password'
+    zone_name: 'sample_zone'
+    zone_name_create: 'testaz'
+    state_present: 'present'
+    state_absent: 'absent'
+    provider_state_add: 'add'
+    provider_state_remove: 'remove'
+    path: '/ifs/test_dir'
+    create_path: true
+    groupnet: 'groupnet1'
+
+  tasks:
+    - name: Create New Access Zone
+      dellemc.powerscale.accesszone:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        az_name: "{{ zone_name_create }}"
+        path: "{{ path }}"
+        groupnet: "{{ groupnet }}"
+        create_path: "{{ create_path }}"
+        provider_state: "{{ provider_state_add }}"
+        auth_providers:
+          - provider_name: "System"
+            provider_type: "file"
+        state: "{{ state_present }}"
+
+    - name: Get Non-system Access Zone Details
+      dellemc.powerscale.accesszone:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        az_name: "{{ zone_name }}"
+        state: "{{ state_present }}"
+
+    - name: Get System Access Zone Details
+      dellemc.powerscale.accesszone:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        az_name: "System"
+        verify_ssl: "{{ verify_ssl }}"
+        state: "{{ state_present }}"
+
+    - name: Modify subset of SMB settings of PowerScale
+      dellemc.powerscale.accesszone:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        az_name: "{{ zone_name }}"
+        state: "{{ state_present }}"
+        smb:
+          create_permissions: 'use create mask and mode'
+          access_based_enumeration: false
+
+    - name: Modify subset of SMB settings of PowerScale - Idempotency
+      dellemc.powerscale.accesszone:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        az_name: "{{ zone_name }}"
+        state: "{{ state_present }}"
+        smb:
+          create_permissions: 'use create mask and mode'
+          access_based_enumeration: false
+
+    - name: Modify subset of NFS settings of PowerScale
+      dellemc.powerscale.accesszone:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        az_name: "{{ zone_name }}"
+        state: "{{ state_present }}"
+        nfs:
+          commit_asynchronous: true
+          nfsv4_allow_numeric_ids: true
+
+    - name: Modify subset of NFS settings of PowerScale - Idempotency
+      dellemc.powerscale.accesszone:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        az_name: "{{ zone_name }}"
+        state: "{{ state_present }}"
+        nfs:
+          commit_asynchronous: true
+          nfsv4_allow_numeric_ids: true
+
+    - name: Modify SMB settings of PowerScale
+      dellemc.powerscale.accesszone:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        az_name: "{{ zone_name }}"
+        state: "{{ state_present }}"
+        smb:
+          create_permissions: 'default acl'
+          directory_create_mask: '077'
+          directory_create_mode: '777'
+          file_create_mask: '700'
+          file_create_mode: '100'
+          access_based_enumeration: true
+          access_based_enumeration_root_only: false
+          ntfs_acl_support: true
+          oplocks: true
+
+    - name: Modify NFS settings of PowerScale
+      dellemc.powerscale.accesszone:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        az_name: "{{ zone_name }}"
+        state: "{{ state_present }}"
+        nfs:
+          commit_asynchronous: false
+          nfsv4_allow_numeric_ids: false
+          nfsv4_domain: 'localhost'
+          nfsv4_no_domain: true
+          nfsv4_no_domain_uids: false
+          nfsv4_no_names: false
+
+    - name: Modify NFS and SMB settings of PowerScale
+      dellemc.powerscale.accesszone:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        az_name: "{{ zone_name }}"
+        state: "{{ state_present }}"
+        smb:
+          create_permissions: 'default acl'
+          directory_create_mask: '100'
+          directory_create_mode: '777'
+          file_create_mask: '700'
+          file_create_mode: '100'
+          access_based_enumeration: true
+          access_based_enumeration_root_only: false
+          ntfs_acl_support: true
+          oplocks: true
+        nfs:
+          commit_asynchronous: true
+          nfsv4_allow_numeric_ids: true
+          nfsv4_domain: 'localhost'
+          nfsv4_no_domain: true
+          nfsv4_no_domain_uids: false
+          nfsv4_no_names: false
+
+    - name: Modify NFS and SMB settings of PowerScale - Idempotency
+      dellemc.powerscale.accesszone:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        az_name: "{{ zone_name }}"
+        state: "{{ state_present }}"
+        smb:
+          create_permissions: 'default acl'
+          directory_create_mask: '100'
+          directory_create_mode: '777'
+          file_create_mask: '700'
+          file_create_mode: '100'
+          access_based_enumeration: true
+          access_based_enumeration_root_only: false
+          ntfs_acl_support: true
+          oplocks: true
+        nfs:
+          commit_asynchronous: true
+          nfsv4_allow_numeric_ids: true
+          nfsv4_domain: 'localhost'
+          nfsv4_no_domain: true
+          nfsv4_no_domain_uids: false
+          nfsv4_no_names: false
+
+    - name: Delete Access Zone which is not present on PowerScale
+      dellemc.powerscale.accesszone:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        az_name: "fake_access_zone"
+        state: "{{ state_absent }}"
+
+    - name: Add Auth Provider to Access Zone of PowerScale
+      dellemc.powerscale.accesszone:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        az_name: "{{ zone_name }}"
+        provider_state: "{{ provider_state_add }}"
+        auth_providers:
+          - provider_name: "System"
+            provider_type: "file"
+          - provider_name: "ldap-prashant"
+            provider_type: "ldap"
+        state: "{{ state_present }}"
+      register: subset_result
+
+    - name: Add Auth Provider to Access Zone of PowerScale - Idempotency
+      dellemc.powerscale.accesszone:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        az_name: "{{ zone_name }}"
+        provider_state: "{{ provider_state_add }}"
+        auth_providers:
+          - provider_name: "System"
+            provider_type: "file"
+          - provider_name: "ldap-prashant"
+            provider_type: "ldap"
+        state: "{{ state_present }}"
+      register: subset_result
+
+    - name: Remove Auth Providers from Access Zone of PowerScale
+      dellemc.powerscale.accesszone:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        az_name: "{{ zone_name }}"
+        provider_state: "{{ provider_state_remove }}"
+        auth_providers:
+          - provider_name: "System"
+            provider_type: "file"
+        state: "{{ state_present }}"
+      register: subset_result
+
+    - name: Remove Auth Providers from Access Zone of PowerScale - Idempotency
+      dellemc.powerscale.accesszone:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        az_name: "{{ zone_name }}"
+        provider_state: "{{ provider_state_remove }}"
+        auth_providers:
+          - provider_name: "System"
+            provider_type: "file"
+        state: "{{ state_present }}"
+      register: subset_result

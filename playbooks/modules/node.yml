@@ -1,0 +1,20 @@
+---
+- name: Sample playbook to get Powerscale Cluster Node information
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.157'
+    verify_ssl: false
+    api_user: 'user'
+    api_password: 'Password'
+    node_id: '1'
+
+  tasks:
+    - name: Get node info of the PowerScale cluster node
+      dellemc.powerscale.node:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        node_id: "{{ node_id }}"
+        state: "present"

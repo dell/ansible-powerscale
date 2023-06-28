@@ -31,14 +31,14 @@ options:
     type: str
   group_id:
     description:
-    - The group_id is auto generated or can be assigned at the time of creation.
-    - For all other operations either group_name or group_id is needed.
+    - The I(group_id) is auto generated or can be assigned at the time of creation.
+    - For all other operations either I(group_name) or I(group_id) is needed.
     type: int
   access_zone:
     description:
     - This option mentions the zone in which a group is created.
-    - For creation, access_zone acts as an attribute for the group.
-    - For all other operations access_zone acts as a filter.
+    - For creation, I(access_zone) acts as an attribute for the group.
+    - For all other operations I(access_zone) acts as a filter.
     type: str
     default: 'system'
   provider_type:
@@ -47,7 +47,7 @@ options:
       authenticate the group members.
     - Creation, Deletion and Modification is allowed only for local group.
     - Details of groups of all provider types can be fetched.
-    - If the provider_type is 'ads' then the domain name of the Active
+    - If the I(provider_type) is C(ads) then the domain name of the Active
       Directory Server has to be mentioned in the group_name.
       The format for the group_name should be 'DOMAIN_NAME\group_name'
       or "DOMAIN_NAME\\group_name".
@@ -60,22 +60,24 @@ options:
     - The state option is used to determine whether the group
       will exist or not.
     type: str
-    required: True
+    required: true
     choices: [ 'absent', 'present']
   users:
     description:
-    - Either user_name or user_id is needed to add or remove the user
+    - Either I(user_name) or I(user_id) is needed to add or remove the user
       from the group.
     - Users can be part of multiple groups.
     type: list
     elements: dict
   user_state:
     description:
-    - The user_state option is used to  determine whether the users
+    - The I(user_state) option is used to  determine whether the users
       will exist for a particular group or not.
     - It is required when users are added or removed from a group.
     type: str
     choices: ['present-in-group', 'absent-in-group']
+notes:
+- The I(check_mode) is not supported.
 '''
 
 EXAMPLES = r'''
@@ -539,7 +541,7 @@ class Group(object):
                 changed = True
             else:
                 id_exists = self.check_if_id_exists(group_name, group_details)
-                if id_exists:
+                if id_exists and group_name is not None:
                     error_message = f'Group already exists with GID {group_id}'
                     LOG.error(error_message)
                     self.module.fail_json(msg=error_message)

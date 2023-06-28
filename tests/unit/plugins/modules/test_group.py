@@ -18,14 +18,11 @@ utils.isi_sdk = MagicMock()
 from ansible.module_utils import basic
 basic.AnsibleModule = MagicMock()
 
-from ansible_collections.dellemc.powerscale.plugins.modules import group
 from ansible_collections.dellemc.powerscale.plugins.modules.group import Group
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_group_api \
     import MockGroupApi
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_api_exception \
     import MockApiException
-from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_sdk_response \
-    import MockSDKResponse
 
 
 class TestGroup():

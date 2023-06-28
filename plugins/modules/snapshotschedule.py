@@ -92,101 +92,103 @@ options:
     type: str
     required: true
     choices: [absent, present]
+notes:
+- The I(check_mode) is not supported.
 '''
 
 EXAMPLES = r'''
 - name: Create snapshot schedule
   dellemc.powerscale.snapshotschedule:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      name: "{{name}}"
-      access_zone: '{{access_zone}}'
-      path: '<path>'
-      alias: "{{alias1}}"
-      desired_retention: "{{desired_retention1}}"
-      pattern: "{{pattern1}}"
-      schedule: "{{schedule1}}"
-      state: "{{state_present}}"
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    name: "{{name}}"
+    access_zone: '{{access_zone}}'
+    path: '<path>'
+    alias: "{{alias1}}"
+    desired_retention: "{{desired_retention1}}"
+    pattern: "{{pattern1}}"
+    schedule: "{{schedule1}}"
+    state: "{{state_present}}"
 
 - name: Get details of snapshot schedule
   dellemc.powerscale.snapshotschedule:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      name: "{{name}}"
-      state: "{{state_present}}"
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    name: "{{name}}"
+    state: "{{state_present}}"
 
 - name: Rename snapshot schedule
   dellemc.powerscale.snapshotschedule:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      name: "{{name}}"
-      new_name: "{{new_name}}"
-      state: "{{state_present}}"
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    name: "{{name}}"
+    new_name: "{{new_name}}"
+    state: "{{state_present}}"
 
 - name: Modify alias of snapshot schedule
   dellemc.powerscale.snapshotschedule:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      name: "{{new_name}}"
-      alias: "{{alias2}}"
-      state: "{{state_present}}"
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    name: "{{new_name}}"
+    alias: "{{alias2}}"
+    state: "{{state_present}}"
 
 - name: Modify pattern of snapshot schedule
   dellemc.powerscale.snapshotschedule:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      name: "{{new_name}}"
-      pattern: "{{pattern2}}"
-      state: "{{state_present}}"
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    name: "{{new_name}}"
+    pattern: "{{pattern2}}"
+    state: "{{state_present}}"
 
 - name: Modify schedule of snapshot schedule
   dellemc.powerscale.snapshotschedule:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      name: "{{new_name}}"
-      schedule: "{{schedule2}}"
-      state: "{{state_present}}"
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    name: "{{new_name}}"
+    schedule: "{{schedule2}}"
+    state: "{{state_present}}"
 
 - name: Modify retention of snapshot schedule
   dellemc.powerscale.snapshotschedule:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      name: "{{new_name}}"
-      desired_retention: 2
-      retention_unit: "{{retention_unit_days}}"
-      state: "{{state_present}}"
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    name: "{{new_name}}"
+    desired_retention: 2
+    retention_unit: "{{retention_unit_days}}"
+    state: "{{state_present}}"
 
 - name: Delete snapshot schedule
   dellemc.powerscale.snapshotschedule:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      name: "{{new_name}}"
-      state: "{{state_absent}}"
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    name: "{{new_name}}"
+    state: "{{state_absent}}"
 
 - name: Delete snapshot schedule - Idempotency
   dellemc.powerscale.snapshotschedule:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      name: "{{new_name}}"
-      state: "{{state_absent}}"
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    name: "{{new_name}}"
+    state: "{{state_absent}}"
 '''
 
 RETURN = r'''
@@ -248,7 +250,6 @@ snapshot_schedule_details:
                     type: int
 '''
 
-import logging
 import re
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \

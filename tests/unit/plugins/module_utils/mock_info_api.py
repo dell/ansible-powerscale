@@ -15,6 +15,7 @@ class MockGatherfactsApi:
     GATHERFACTS_COMMON_ARGS = {
         'onefs_host': '**.***.**.***',
         'access_zone': 'System',
+        'scope': 'effective',
         'include_all_access_zones': False
     }
     EMPTY_GATHERSUBSET_ERROR_MSG = "Please specify gather_subset"
@@ -64,6 +65,10 @@ class MockGatherfactsApi:
         'SmbOpenFiles': [
         ],
         'SynciqTargetClusterCertificate': [
+        ],
+        'UserMappingRules': [
+        ],
+        'LdapProviders': [
         ]
     }
 
@@ -694,4 +699,253 @@ class MockGatherfactsApi:
             ]
         else:
             return "Getting list of smb open files for PowerScale: %s failed with error: SDK Error message" % (
+                   MockGatherfactsApi.GATHERFACTS_COMMON_ARGS['onefs_host'])
+
+    @staticmethod
+    def get_user_mapping_rules_response(response_type):
+        if response_type == 'api':
+            return {
+                'rules': {
+                    'rules': [
+                        {
+                            'operator': 'trim',
+                            'options': {
+                                '_break': False,
+                                'default_user': None,
+                                'group': False,
+                                'groups': False,
+                                'user': False
+                            },
+                            'user1': {
+                                'domain': None,
+                                'user': 'test_ans_user'
+                            }
+                        }
+                    ]
+                }
+            }
+        elif response_type == 'module':
+            return [
+                {
+                    'operator': 'trim',
+                    'options': {
+                        '_break': False,
+                        'default_user': None,
+                        'group': False,
+                        'groups': False,
+                        'user': False
+                    },
+                    'user1': {
+                        'domain': None,
+                        'user': 'test_ans_user'
+                    },
+                    'apply_order': 1
+                }
+            ]
+        else:
+            return "Getting list of user mapping rules for PowerScale: %s failed with error: SDK Error message" % (
+                   MockGatherfactsApi.GATHERFACTS_COMMON_ARGS['onefs_host'])
+
+    @staticmethod
+    def get_ldap_details_response(response_type):
+        if response_type == 'api':
+            return {
+                "ldap": [
+                    {
+                        "alternate_security_identities_attribute": "altSecurityIdentities",
+                        "authentication": True,
+                        "balance_servers": True,
+                        "base_dn": "dc=ansildap,dc=com",
+                        "bind_dn": "cn=admin,dc=ansildap,dc=com",
+                        "bind_mechanism": "simple",
+                        "bind_timeout": 10,
+                        "certificate_authority_file": "",
+                        "check_online_interval": 180,
+                        "cn_attribute": "cn",
+                        "create_home_directory": False,
+                        "crypt_password_attribute": "",
+                        "email_attribute": "mail",
+                        "enabled": True,
+                        "enumerate_groups": True,
+                        "enumerate_users": True,
+                        "findable_groups": [],
+                        "findable_users": [],
+                        "gecos_attribute": "gecos",
+                        "gid_attribute": "gidNumber",
+                        "group_base_dn": "",
+                        "group_domain": "LDAP_GROUPS",
+                        "group_filter": "(objectClass=posixGroup)",
+                        "group_members_attribute": "memberUid",
+                        "group_search_scope": "default",
+                        "groupnet": "groupnet0",
+                        "home_directory_template": "",
+                        "homedir_attribute": "homeDirectory",
+                        "id": "ansildap1",
+                        "ignore_tls_errors": False,
+                        "listable_groups": [],
+                        "listable_users": [],
+                        "login_shell": "",
+                        "member_lookup_method": "default",
+                        "member_of_attribute": "",
+                        "name": "ansildap1",
+                        "name_attribute": "uid",
+                        "netgroup_base_dn": "",
+                        "netgroup_filter": "(objectClass=nisNetgroup)",
+                        "netgroup_members_attribute": "memberNisNetgroup",
+                        "netgroup_search_scope": "default",
+                        "netgroup_triple_attribute": "nisNetgroupTriple",
+                        "normalize_groups": False,
+                        "normalize_users": False,
+                        "nt_password_attribute": "",
+                        "ntlm_support": "all",
+                        "provider_domain": "",
+                        "require_secure_connection": False,
+                        "restrict_findable": True,
+                        "restrict_listable": False,
+                        "search_scope": "subtree",
+                        "search_timeout": 100,
+                        "server_uris": [
+                            "ldap://10.xx.xx.xx"
+                        ],
+                        "shadow_expire_attribute": "shadowExpire",
+                        "shadow_flag_attribute": "shadowFlag",
+                        "shadow_inactive_attribute": "shadowInactive",
+                        "shadow_last_change_attribute": "shadowLastChange",
+                        "shadow_max_attribute": "shadowMax",
+                        "shadow_min_attribute": "shadowMin",
+                        "shadow_user_filter": "(objectClass=shadowAccount)",
+                        "shadow_warning_attribute": "shadowWarning",
+                        "shell_attribute": "loginShell",
+                        "ssh_public_key_attribute": "sshPublicKey",
+                        "status": "online",
+                        "system": False,
+                        "tls_protocol_min": "1.2",
+                        "uid_attribute": "uidNumber",
+                        "unfindable_groups": [
+                            "wheel",
+                            "0",
+                            "insightiq",
+                            "15",
+                            "isdmgmt",
+                            "16"
+                        ],
+                        "unfindable_users": [
+                            "root",
+                            "0",
+                            "insightiq",
+                            "15",
+                            "isdmgmt",
+                            "16"
+                        ],
+                        "unique_group_members_attribute": "",
+                        "unlistable_groups": [],
+                        "unlistable_users": [],
+                        "user_base_dn": "",
+                        "user_domain": "LDAP_USERS",
+                        "user_filter": "(objectClass=posixAccount)",
+                        "user_search_scope": "default",
+                        "zone_name": "System"
+                    }
+                ]
+            }
+        elif response_type == 'module':
+            return [
+                {
+                    "alternate_security_identities_attribute": "altSecurityIdentities",
+                    "authentication": True,
+                    "balance_servers": True,
+                    "base_dn": "dc=ansildap,dc=com",
+                    "bind_dn": "cn=admin,dc=ansildap,dc=com",
+                    "bind_mechanism": "simple",
+                    "bind_timeout": 10,
+                    "certificate_authority_file": "",
+                    "check_online_interval": 180,
+                    "cn_attribute": "cn",
+                    "create_home_directory": False,
+                    "crypt_password_attribute": "",
+                    "email_attribute": "mail",
+                    "enabled": True,
+                    "enumerate_groups": True,
+                    "enumerate_users": True,
+                    "findable_groups": [],
+                    "findable_users": [],
+                    "gecos_attribute": "gecos",
+                    "gid_attribute": "gidNumber",
+                    "group_base_dn": "",
+                    "group_domain": "LDAP_GROUPS",
+                    "group_filter": "(objectClass=posixGroup)",
+                    "group_members_attribute": "memberUid",
+                    "group_search_scope": "default",
+                    "groupnet": "groupnet0",
+                    "home_directory_template": "",
+                    "homedir_attribute": "homeDirectory",
+                    "id": "ansildap1",
+                    "ignore_tls_errors": False,
+                    "listable_groups": [],
+                    "listable_users": [],
+                    "login_shell": "",
+                    "member_lookup_method": "default",
+                    "member_of_attribute": "",
+                    "name": "ansildap1",
+                    "name_attribute": "uid",
+                    "netgroup_base_dn": "",
+                    "netgroup_filter": "(objectClass=nisNetgroup)",
+                    "netgroup_members_attribute": "memberNisNetgroup",
+                    "netgroup_search_scope": "default",
+                    "netgroup_triple_attribute": "nisNetgroupTriple",
+                    "normalize_groups": False,
+                    "normalize_users": False,
+                    "nt_password_attribute": "",
+                    "ntlm_support": "all",
+                    "provider_domain": "",
+                    "require_secure_connection": False,
+                    "restrict_findable": True,
+                    "restrict_listable": False,
+                    "search_scope": "subtree",
+                    "search_timeout": 100,
+                    "server_uris": [
+                        "ldap://10.xx.xx.xx"
+                    ],
+                    "shadow_expire_attribute": "shadowExpire",
+                    "shadow_flag_attribute": "shadowFlag",
+                    "shadow_inactive_attribute": "shadowInactive",
+                    "shadow_last_change_attribute": "shadowLastChange",
+                    "shadow_max_attribute": "shadowMax",
+                    "shadow_min_attribute": "shadowMin",
+                    "shadow_user_filter": "(objectClass=shadowAccount)",
+                    "shadow_warning_attribute": "shadowWarning",
+                    "shell_attribute": "loginShell",
+                    "ssh_public_key_attribute": "sshPublicKey",
+                    "status": "online",
+                    "system": False,
+                    "tls_protocol_min": "1.2",
+                    "uid_attribute": "uidNumber",
+                    "unfindable_groups": [
+                        "wheel",
+                        "0",
+                        "insightiq",
+                        "15",
+                        "isdmgmt",
+                        "16"
+                    ],
+                    "unfindable_users": [
+                        "root",
+                        "0",
+                        "insightiq",
+                        "15",
+                        "isdmgmt",
+                        "16"
+                    ],
+                    "unique_group_members_attribute": "",
+                    "unlistable_groups": [],
+                    "unlistable_users": [],
+                    "user_base_dn": "",
+                    "user_domain": "LDAP_USERS",
+                    "user_filter": "(objectClass=posixAccount)",
+                    "user_search_scope": "default",
+                    "zone_name": "System"
+                }
+            ]
+        else:
+            return "Getting list of ldap providers for PowerScale: %s failed with error: SDK Error message" % (
                    MockGatherfactsApi.GATHERFACTS_COMMON_ARGS['onefs_host'])

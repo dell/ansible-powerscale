@@ -36,6 +36,7 @@ class TestInfo():
         gatherfacts_module_mock.module = MagicMock()
         gatherfacts_module_mock.network_api = MagicMock()
         gatherfacts_module_mock.protocol_api = MagicMock()
+        gatherfacts_module_mock.auth_api = MagicMock()
         utils.ISI_SDK_VERSION_9 = MagicMock(return_value=True)
         return gatherfacts_module_mock
 
@@ -236,3 +237,45 @@ class TestInfo():
         gatherfacts_module_mock.protocol_api.get_smb_openfiles = MagicMock(side_effect=MockApiException)
         gatherfacts_module_mock.perform_module_operation()
         assert MockGatherfactsApi.get_smb_files_response('error') == gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
+
+    def test_get_user_mapping_rule_api(self, gatherfacts_module_mock):
+        smb_files = MockGatherfactsApi.get_user_mapping_rules_response('api')
+        self.get_module_args.update({
+            'gather_subset': ['user_mapping_rules']
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        gatherfacts_module_mock.auth_api = MagicMock()
+        gatherfacts_module_mock.auth_api.get_mapping_users_rules = MagicMock(return_value=MockSDKResponse(smb_files))
+        gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_user_mapping_rules_response('module') == gatherfacts_module_mock.module.exit_json.call_args[1]['UserMappingRules']
+
+    def test_get_user_mapping_rule_api_exception(self, gatherfacts_module_mock):
+        self.get_module_args.update({
+            'gather_subset': ['user_mapping_rules']
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        gatherfacts_module_mock.auth_api = MagicMock()
+        gatherfacts_module_mock.auth_api.get_mapping_users_rules = MagicMock(side_effect=MockApiException)
+        gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_user_mapping_rules_response('error') == gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
+
+    def test_get_ldap_details_api(self, gatherfacts_module_mock):
+        ldap = MockGatherfactsApi.get_ldap_details_response('api')
+        self.get_module_args.update({
+            'gather_subset': ['ldap']
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        gatherfacts_module_mock.auth_api = MagicMock()
+        gatherfacts_module_mock.auth_api.list_providers_ldap = MagicMock(return_value=MockSDKResponse(ldap))
+        gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_ldap_details_response('module') == gatherfacts_module_mock.module.exit_json.call_args[1]['LdapProviders']
+
+    def test_get_ldap_details_api_exception(self, gatherfacts_module_mock):
+        self.get_module_args.update({
+            'gather_subset': ['ldap']
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        gatherfacts_module_mock.auth_api = MagicMock()
+        gatherfacts_module_mock.auth_api.list_providers_ldap = MagicMock(side_effect=MockApiException)
+        gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_ldap_details_response('error') == gatherfacts_module_mock.module.fail_json.call_args[1]['msg']

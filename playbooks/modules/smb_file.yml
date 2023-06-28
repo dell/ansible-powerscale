@@ -1,0 +1,36 @@
+---
+- name: SMB file operations on PowerScale array
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.**'
+    verify_ssl: false
+    api_user: 'user'
+    api_password: 'password'
+
+  tasks:
+    - name: Get list of smb open files of the PowerScale cluster
+      dellemc.powerscale.smb_file:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        state: "present"
+
+    - name: Close smb file of the PowerScale cluster
+      dellemc.powerscale.smb_file:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        file_path: "/ifs"
+        state: "absent"
+
+    - name: Close smb open file of the PowerScale cluster
+      dellemc.powerscale.smb_file:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        file_id: 2281
+        state: "absent"

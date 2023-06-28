@@ -20,7 +20,9 @@ Requirements
 ------------
 The below requirements are needed on the host that executes this module.
 
-- A Dell PowerScale Storage system. Ansible 2.12, 2.13 or 2.14.
+- A Dell PowerScale Storage system.
+- Ansible-core 2.13 or later.
+- Python 3.9, 3.10 or 3.11.
 
 
 
@@ -48,7 +50,7 @@ Parameters
 
 
   clients (optional, list, None)
-    Specifies the clients to the export. The type of access to clients in this list is determined by the 'read_only' parameter.
+    Specifies the clients to the export. The type of access to clients in this list is determined by the *read_only* parameter.
 
     This list can be changed anytime during the lifetime of the NFS export.
 
@@ -78,7 +80,7 @@ Parameters
 
 
   sub_directories_mountable (optional, bool, None)
-    True if all directories under the specified paths are mountable. If not set, sub-directories will not be mountable.
+    ``true`` if all directories under the specified paths are mountable. If not set, sub-directories will not be mountable.
 
     This setting can be modified any time.
 
@@ -92,17 +94,17 @@ Parameters
   state (True, str, None)
     Defines whether the NFS export should exist or not.
 
-    Value present indicates that the NFS export should exist in system.
+    Value ``present`` indicates that the NFS export should exist in system.
 
-    Value absent indicates that the NFS export should not exist in system.
+    Value ``absent`` indicates that the NFS export should not exist in system.
 
 
   client_state (optional, str, None)
     Defines whether the clients can access the NFS export.
 
-    Value present-in-export indicates that the clients can access the NFS export.
+    Value ``present-in-export`` indicates that the clients can access the NFS export.
 
-    Value absent-in-export indicates that the client cannot access the NFS export.
+    Value ``absent-in-export`` indicates that the client cannot access the NFS export.
 
     Required when adding or removing access of clients from the export.
 
@@ -111,6 +113,10 @@ Parameters
 
   security_flavors (optional, list, None)
     Specifies the authentication types that are supported for this export.
+
+
+  ignore_unresolvable_hosts (optional, bool, None)
+    Does not present an error condition on unresolvable hosts when creating or modifying an export.
 
 
   onefs_host (True, str, None)
@@ -124,9 +130,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    True - indicates that the SSL certificate should be verified.
+    ``true`` - indicates that the SSL certificate should be verified.
 
-    False - indicates that the SSL certificate should not be verified.
+    ``false`` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -144,7 +150,7 @@ Notes
 -----
 
 .. note::
-   - The check_mode is not supported.
+   - The *check_mode* is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -167,7 +173,7 @@ Examples
           read_only_clients:
           - "{{client1}}"
           - "{{client2}}"
-          read_only: True
+          read_only: true
           clients: ["{{client3}}"]
           client_state: 'present-in-export'
           state: 'present'
@@ -195,7 +201,7 @@ Examples
           client_state: 'present-in-export'
           state: 'present'
 
-      - name: Set sub_directories_mountable flag to True
+      - name: Set sub_directories_mountable flag to true
         dellemc.powerscale.nfs:
           onefs_host: "{{onefs_host}}"
           api_user: "{{api_user}}"
@@ -203,7 +209,7 @@ Examples
           verify_ssl: "{{verify_ssl}}"
           path: "<path>"
           access_zone: "{{access_zone}}"
-          sub_directories_mountable: True
+          sub_directories_mountable: true
           state: 'present'
 
       - name: Remove a root client
@@ -233,7 +239,7 @@ Examples
           - "kerberos"
           state: 'present'
 
-      - name: Set read_only flag to False
+      - name: Set read_only flag to false
         dellemc.powerscale.nfs:
           onefs_host: "{{onefs_host}}"
           api_user: "{{api_user}}"
@@ -241,7 +247,7 @@ Examples
           verify_ssl: "{{verify_ssl}}"
           path: "<path>"
           access_zone: "{{access_zone}}"
-          read_only: False
+          read_only: false
           state: 'present'
 
       - name: Delete NFS Export
@@ -268,7 +274,7 @@ NFS_export_details (always, complex, {'all_dir': 'false', 'block_size': 8192, 'c
 
 
   all_dirs (, bool, )
-    sub_directories_mountable flag value.
+    *sub_directories_mountable* flag value.
 
 
   id (, int, 12)
@@ -323,4 +329,5 @@ Authors
 
 - Manisha Agrawal(@agrawm3) <ansible.team@dell.com>
 - Bhavneet Sharma(@Bhavneet-Sharma) <ansible.team@dell.com>
+- Trisha Datta(@trisha-dell) <ansible.team@dell.com>
 

@@ -5,10 +5,7 @@ __metaclass__ = type
 ApiException = None
 HAS_POWERSCALE_SDK = False
 isi_sdk = None
-ISI_SDK_VERSION_9 = False
 IMPORT_PKGS_FAIL = []
-POWERSCALE_SDK_9_1_0 = "isi_sdk_9_1_0"
-POWERSCALE_SDK_8_1_1 = "isi_sdk_8_1_1"
 
 try:
     import urllib3
@@ -18,7 +15,7 @@ except ImportError:
     IMPORT_PKGS_FAIL.append("urllib3")
 
 try:
-    import dateutil.relativedelta
+    import dateutil.relativedelta  # noqa   # pylint: disable=unused-import
 except ImportError:
     IMPORT_PKGS_FAIL.append("python-dateutil")
 
@@ -61,18 +58,8 @@ Check if required PowerScale SDK version is installed
 def powerscale_sdk_version_check():
     try:
         supported_version = False
-        min_ver = '0.2.7'
-        curr_version = pkg_resources.require(isi_sdk.__name__)[0].version
-        unsupported_version_message =\
-            "PowerScale sdk {0} is not supported by this module. Minimum " \
-            "supported version is : {1} ".format(curr_version, min_ver)
-        supported_version = parse_version(curr_version) >= parse_version(
-            min_ver)
-
         isi_sdk_version = dict(
-            supported_version=supported_version,
-            unsupported_version_message=unsupported_version_message)
-
+            supported_version=supported_version)
         return isi_sdk_version
 
     except Exception as e:
@@ -134,7 +121,10 @@ returns configuration object
 
 def get_powerscale_connection(module_params):
     if HAS_POWERSCALE_SDK:
-        conn = isi_sdk.Configuration()
+        if isi_sdk.__name__ == "isilon_sdk":
+            conn = isi_sdk.v9_5_0.Configuration()
+        else:
+            conn = isi_sdk.Configuration()
         if module_params['port_no'] is not None:
             conn.host = module_params['onefs_host'] + ":" + module_params[
                 'port_no']
@@ -143,7 +133,10 @@ def get_powerscale_connection(module_params):
         conn.verify_ssl = module_params['verify_ssl']
         conn.username = module_params['api_user']
         conn.password = module_params['api_password']
-        api_client = isi_sdk.ApiClient(conn)
+        if isi_sdk.__name__ == "isilon_sdk":
+            api_client = isi_sdk.v9_5_0.ApiClient(conn)
+        else:
+            api_client = isi_sdk.ApiClient(conn)
         return api_client
 
 
@@ -234,7 +227,7 @@ Validates the package pre-requisites of invoking module
 '''
 
 
-def validate_module_pre_reqs(module_params):
+def validate_module_pre_reqs(module_params, module=None):
     error_message = ""
     cur_py_ver = "{0}.{1}.{2}".format(str(sys.version_info[0]),
                                       str(sys.version_info[1]),
@@ -255,7 +248,7 @@ def validate_module_pre_reqs(module_params):
         )
         return prereqs_check
 
-    POWERSCALE_SDK_IMPORT = find_compatible_powerscale_sdk(module_params)
+    POWERSCALE_SDK_IMPORT = find_compatible_powerscale_sdk(module_params, module)
     if POWERSCALE_SDK_IMPORT and \
             not POWERSCALE_SDK_IMPORT["powerscale_package_imported"]:
         if POWERSCALE_SDK_IMPORT['error_message']:
@@ -268,23 +261,12 @@ def validate_module_pre_reqs(module_params):
         )
         return prereqs_check
 
-    POWERSCALE_SDK_VERSION_CHECK = powerscale_sdk_version_check()
-    if POWERSCALE_SDK_VERSION_CHECK and \
-            not POWERSCALE_SDK_VERSION_CHECK['supported_version']:
-        if IMPORT_PKGS_FAIL:
-            error_message = get_missing_pkgs()
+    if IMPORT_PKGS_FAIL:
         prereqs_check = dict(
             all_packages_found=False,
-            error_message=error_message + POWERSCALE_SDK_VERSION_CHECK
-            ['unsupported_version_message'])
+            error_message=get_missing_pkgs()
+        )
         return prereqs_check
-    else:
-        if IMPORT_PKGS_FAIL:
-            prereqs_check = dict(
-                all_packages_found=False,
-                error_message=get_missing_pkgs()
-            )
-            return prereqs_check
 
     return dict(all_packages_found=True, error_message=None)
 
@@ -297,14 +279,10 @@ def import_powerscale_sdk(sdk):
         global isi_sdk
         global ApiException
         global HAS_POWERSCALE_SDK
-        global ISI_SDK_VERSION_9
-
         isi_sdk = importlib.import_module(sdk)
         ApiException = getattr(importlib.import_module(sdk + ".rest"),
                                'ApiException')
         HAS_POWERSCALE_SDK = True
-        ISI_SDK_VERSION_9 = True if isi_sdk.__name__ == POWERSCALE_SDK_9_1_0 \
-            else False
 
     except ImportError:
         HAS_POWERSCALE_SDK = False
@@ -313,27 +291,28 @@ def import_powerscale_sdk(sdk):
 ''' Find compatible powerscale sdk based on onefs version '''
 
 
-def find_compatible_powerscale_sdk(module_params):
+def find_compatible_powerscale_sdk(module_params, module=None):
     global HAS_POWERSCALE_SDK
     error_message = ""
-    targeted_onefs_version = "9.0.0.0"
 
     powerscale_packages = [pkg for pkg in pkg_resources.working_set
-                           if pkg.key.startswith("isi-sdk")]
+                           if pkg.key.startswith("isilon-sdk")]
     if powerscale_packages:
         powerscale_sdk = powerscale_packages[0].key.replace('-', '_')
-        import_powerscale_sdk(powerscale_sdk)
+        import_powerscale_sdk(powerscale_sdk + ".v9_5_0")
         try:
+            HAS_POWERSCALE_SDK = True
             api_client = get_powerscale_connection(module_params)
             cluster_api = isi_sdk.ClusterApi(api_client)
-            if parse_version(cluster_api.get_cluster_config()
-                             .to_dict()['onefs_version']['release']) \
-                    < parse_version(targeted_onefs_version):
-                compatible_powerscale_sdk = POWERSCALE_SDK_8_1_1
+            major = str(parse_version(cluster_api.get_cluster_config().to_dict()['onefs_version']['release'].split('.')[0]))
+            minor = str(parse_version(cluster_api.get_cluster_config().to_dict()['onefs_version']['release'].split('.')[1]))
+            array_version = major + "_" + minor + "_0"
+            if module == "ads":
+                # Adding a workaround for home_directory_template failure in later versions of SDK.
+                compatible_powerscale_sdk = "isilon_sdk.v9_1_0"
             else:
-                compatible_powerscale_sdk = POWERSCALE_SDK_9_1_0
-            if powerscale_sdk != compatible_powerscale_sdk:
-                import_powerscale_sdk(compatible_powerscale_sdk)
+                compatible_powerscale_sdk = "isilon_sdk.v" + array_version
+            import_powerscale_sdk(compatible_powerscale_sdk)
         except Exception as e:
             HAS_POWERSCALE_SDK = False
             error_message = 'Unable to fetch version of array {0}, ' \
@@ -343,22 +322,10 @@ def find_compatible_powerscale_sdk(module_params):
 
     if not HAS_POWERSCALE_SDK:
         IMPORT_PKGS_FAIL.append('PowerScale python library. Please install'
-                                ' isi-sdk-9-0-0 for OneFS version 9.0 and above'
-                                ' and isi-sdk-8-1-1 for OneFS version less'
-                                ' than 9.0')
+                                ' isilon-sdk')
 
     return dict(powerscale_package_imported=HAS_POWERSCALE_SDK,
                 error_message=error_message)
-
-
-''' Returns threshold overhead param name based on imported sdk version '''
-
-
-def get_threshold_overhead_parameter():
-    if ISI_SDK_VERSION_9:
-        return "thresholds_on"
-    else:
-        return "thresholds_include_overhead"
 
 
 ''' Validates python version being used is compatible '''
@@ -382,26 +349,19 @@ def validate_python_version(cur_py_ver):
 def validate_threshold_overhead_parameter(quota, threshold_overhead_param):
     error_msg = None
     key = 'thresholds_on'
-    if ISI_SDK_VERSION_9:
-        if quota and key in quota \
-                and quota[key]:
-            thresholds_on_value = quota[key]
-            if thresholds_on_value == 'physical_size':
-                quota[key] = 'physicalsize'
-            elif thresholds_on_value == 'fs_logical_size':
-                quota[key] = 'fslogicalsize'
-            elif thresholds_on_value == 'app_logical_size':
-                quota[key] = 'applogicalsize'
-            else:
-                error_msg = 'Invalid thresholds_on provided, ' \
-                            'only app_logical_size, fs_logical_size ' \
-                            'and physical_size are supported.'
-
-    else:
-        if quota and key in quota \
-                and quota[key]:
-            error_msg = "The parameter 'thresholds_on' is not supported. " \
-                        "Please use " + threshold_overhead_param + " option."
+    if quota and key in quota \
+            and quota[key]:
+        thresholds_on_value = quota[key]
+        if thresholds_on_value == 'physical_size':
+            quota[key] = 'physicalsize'
+        elif thresholds_on_value == 'fs_logical_size':
+            quota[key] = 'fslogicalsize'
+        elif thresholds_on_value == 'app_logical_size':
+            quota[key] = 'applogicalsize'
+        else:
+            error_msg = 'Invalid thresholds_on provided, ' \
+                        'only app_logical_size, fs_logical_size ' \
+                        'and physical_size are supported.'
 
     return dict(param_is_valid=error_msg is None,
                 error_message=error_msg)

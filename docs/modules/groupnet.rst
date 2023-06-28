@@ -20,7 +20,9 @@ Requirements
 ------------
 The below requirements are needed on the host that executes this module.
 
-- A Dell PowerScale Storage system. Ansible 2.12, 2.13 or 2.14.
+- A Dell PowerScale Storage system.
+- Ansible-core 2.13 or later.
+- Python 3.9, 3.10 or 3.11.
 
 
 
@@ -44,7 +46,7 @@ Parameters
 
 
   dns_server_state (optional, str, None)
-    Specifies if the dns_servers should be added or removed from the groupnet.
+    Specifies if the *dns_servers* should be added or removed from the groupnet.
 
 
   dns_search_suffix (optional, list, None)
@@ -58,9 +60,9 @@ Parameters
   state (True, str, None)
     The state of the groupnet after the task is performed.
 
-    present - indicates that the groupnet should exist on the system.
+    ``present`` - indicates that the groupnet should exist on the system.
 
-    absent - indicates that the groupnet should not exist on the system.
+    ``absent`` - indicates that the groupnet should not exist on the system.
 
 
   onefs_host (True, str, None)
@@ -74,9 +76,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    True - indicates that the SSL certificate should be verified.
+    ``true`` - indicates that the SSL certificate should be verified.
 
-    False - indicates that the SSL certificate should not be verified.
+    ``false`` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -94,6 +96,7 @@ Notes
 -----
 
 .. note::
+   - The *check_mode* is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -107,96 +110,96 @@ Examples
     
     - name: Create a groupnet
       dellemc.powerscale.groupnet:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          groupnet_name: "groupnet_test"
-          description: "Test Groupnet"
-          dns_servers:
-            - '198.10.**.***'
-          dns_server_state: 'add'
-          dns_search_suffix:
-            - 'samplesearch.com'
-          dns_search_suffix_state: 'add'
-          state: "present"
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        groupnet_name: "groupnet_test"
+        description: "Test Groupnet"
+        dns_servers:
+          - '198.10.**.***'
+        dns_server_state: 'add'
+        dns_search_suffix:
+          - 'samplesearch.com'
+        dns_search_suffix_state: 'add'
+        state: "present"
 
-    - name: Add dns_servers to a groupnet
+    - name: Add dns servers to a groupnet
       dellemc.powerscale.groupnet:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          groupnet_name: "groupnet_test"
-          dns_servers:
-            - '198.10.**.***'
-          dns_server_state: 'add'
-          state: "present"
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        groupnet_name: "groupnet_test"
+        dns_servers:
+          - '198.10.**.***'
+        dns_server_state: 'add'
+        state: "present"
 
-    - name: Remove dns_servers from a groupnet
+    - name: Remove dns servers from a groupnet
       dellemc.powerscale.groupnet:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          groupnet_name: "groupnet_test"
-          dns_servers:
-            - '198.10.**.***'
-          dns_server_state: 'remove'
-          state: "present"
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        groupnet_name: "groupnet_test"
+        dns_servers:
+          - '198.10.**.***'
+        dns_server_state: 'remove'
+        state: "present"
 
-    - name: Add dns_search_suffix to a groupnet
+    - name: Add dns search suffix to a groupnet
       dellemc.powerscale.groupnet:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          groupnet_name: "groupnet_test"
-          dns_search_suffix:
-            - 'samplesearch.com'
-          dns_search_suffix_state: 'add'
-          state: "present"
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        groupnet_name: "groupnet_test"
+        dns_search_suffix:
+          - 'samplesearch.com'
+        dns_search_suffix_state: 'add'
+        state: "present"
 
-    - name: Remove dns_search_suffix from a groupnet
+    - name: Remove dns search suffix from a groupnet
       dellemc.powerscale.groupnet:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          groupnet_name: "groupnet_test"
-          dns_search_suffix:
-            - 'samplesearch.com'
-          dns_search_suffix_state: 'remove'
-          state: "present"
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        groupnet_name: "groupnet_test"
+        dns_search_suffix:
+          - 'samplesearch.com'
+        dns_search_suffix_state: 'remove'
+        state: "present"
 
     - name: Rename a groupnet
       dellemc.powerscale.groupnet:
-          onefs_host: "{{onefs_host}}"
-          port_no: "{{port_no}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          groupnet_name: "groupnet_test"
-          new_groupnet_name: "groupnet_test_rename"
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{port_no}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        groupnet_name: "groupnet_test"
+        new_groupnet_name: "groupnet_test_rename"
 
     - name: Get groupnet details
       dellemc.powerscale.groupnet:
-          onefs_host: "{{onefs_host}}"
-          port_no: "{{port_no}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          groupnet_name: "groupnet_test"
-          state: "present"
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{port_no}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        groupnet_name: "groupnet_test"
+        state: "present"
 
     - name: Delete a groupnet
       dellemc.powerscale.groupnet:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          groupnet_name: "groupnet_test"
-          state: "absent"
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        groupnet_name: "groupnet_test"
+        state: "absent"
 
 
 

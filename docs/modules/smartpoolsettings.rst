@@ -20,7 +20,9 @@ Requirements
 ------------
 The below requirements are needed on the host that executes this module.
 
-- A Dell PowerScale Storage system. Ansible 2.12, 2.13 or 2.14.
+- A Dell PowerScale Storage system.
+- Ansible-core 2.13 or later.
+- Python 3.9, 3.10 or 3.11.
 
 
 
@@ -50,9 +52,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    True - indicates that the SSL certificate should be verified.
+    ``true`` - indicates that the SSL certificate should be verified.
 
-    False - indicates that the SSL certificate should not be verified.
+    ``false`` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -70,6 +72,7 @@ Notes
 -----
 
 .. note::
+   - The *check_mode* is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -81,22 +84,22 @@ Examples
 .. code-block:: yaml+jinja
 
     
-        - name: Get SmartPool settings
-          dellemc.powerscale.smartpoolsettings:
+      - name: Get SmartPool settings
+        dellemc.powerscale.smartpoolsettings:
           onefs_host: "{{onefs_host}}"
           api_user: "{{api_user}}"
           api_password: "{{api_password}}"
           verify_ssl: "{{verify_ssl}}"
           state: "{{state_present}}"
 
-        - name: Modify SmartPool setting
-          dellemc.powerscale.smartpoolsettings:
+      - name: Modify SmartPool setting
+        dellemc.powerscale.smartpoolsettings:
           onefs_host: "{{onefs_host}}"
           api_user: "{{api_user}}"
           api_password: "{{api_password}}"
           verify_ssl: "{{verify_ssl}}"
           virtual_hot_spare_limit_percent: 10
-          virtual_hot_spare_hide_spare: True
+          virtual_hot_spare_hide_spare: true
           state: "present"
 
 
@@ -109,7 +112,7 @@ changed (always, bool, )
 
 
 smartpool_settings (always, complex, )
-  Details of the smartpool settings
+  Details of the smartpool settings.
 
 
   automatically_manage_io_optimization (, str, )
