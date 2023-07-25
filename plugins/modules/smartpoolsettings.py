@@ -69,56 +69,87 @@ changed:
     description: Whether or not the resource has changed.
     returned: always
     type: bool
+    sample: "false"
+
 smartpool_settings:
     description: Details of the smartpool settings.
     returned: always
-    type: complex
+    type: dict
     contains:
-        automatically_manage_io_optimization:
-            description: Automatically manage IO optimization settings on files.
-            type: str
-        automatically_manage_protection:
-            description: Automatically manage protection settings on files.
-            type: str
-        global_namespace_acceleration_enabled:
-            description: Optimize namespace operations by storing metadata on SSDs.
-            type: bool
-        global_namespace_acceleration_state:
-            description: Whether or not namespace operation optimizations are currently in effect.
-            type: str
-        protect_directories_one_level_higher:
-            description: Automatically add additional protection level to all directories.
-            type: bool
-        spillover_enabled:
-            description: Spill writes into other pools as needed.
-            type: bool
-        spillover_target:
-            description: Target pool for spilled writes.
+        settings:
+            description: Details of the settings.
+            returned: Always
             type: dict
-        ssd_l3_cache_default_enabled:
-            description: The L3 Cache default enabled state. This specifies whether L3 Cache should be enabled on new node pools.
-            type: bool
-        ssd_qab_mirrors:
-            description: Controls number of mirrors of QAB blocks to place on SSDs.
-            type: str
-        ssd_system_btree_mirrors:
-            description: Controls number of mirrors of system B-tree blocks to place on SSDs.
-            type: str
-        ssd_system_delta_mirrors:
-            description: Controls number of mirrors of system delta blocks to place on SSDs.
-            type: str
-        virtual_hot_spare_deny_writes:
-            description: Deny writes into reserved virtual hot spare space.
-            type: bool
-        virtual_hot_spare_hide_spare:
-            description: Hide reserved virtual hot spare space from free space counts.
-            type: bool
-        virtual_hot_spare_limit_drives:
-            description: The number of drives to reserve for the virtual hot spare, from 0-4.
-            type: int
-        virtual_hot_spare_limit_percent:
-            description: The percent space to reserve for the virtual hot spare, from 0-20.
-            type: int
+            contains:
+                automatically_manage_io_optimization:
+                    description: Automatically manage IO optimization settings on files.
+                    type: str
+                automatically_manage_protection:
+                    description: Automatically manage protection settings on files.
+                    type: str
+                global_namespace_acceleration_enabled:
+                    description: Optimize namespace operations by storing metadata on SSDs.
+                    type: bool
+                global_namespace_acceleration_state:
+                    description: Whether or not namespace operation optimizations are currently in effect.
+                    type: str
+                protect_directories_one_level_higher:
+                    description: Automatically add additional protection level to all directories.
+                    type: bool
+                spillover_enabled:
+                    description: Spill writes into other pools as needed.
+                    type: bool
+                spillover_target:
+                    description: Target pool for spilled writes.
+                    type: dict
+                ssd_l3_cache_default_enabled:
+                    description: The L3 Cache default enabled state. This specifies whether L3 Cache should be enabled on new node pools.
+                    type: bool
+                ssd_qab_mirrors:
+                    description: Controls number of mirrors of QAB blocks to place on SSDs.
+                    type: str
+                ssd_system_btree_mirrors:
+                    description: Controls number of mirrors of system B-tree blocks to place on SSDs.
+                    type: str
+                ssd_system_delta_mirrors:
+                    description: Controls number of mirrors of system delta blocks to place on SSDs.
+                    type: str
+                virtual_hot_spare_deny_writes:
+                    description: Deny writes into reserved virtual hot spare space.
+                    type: bool
+                virtual_hot_spare_hide_spare:
+                    description: Hide reserved virtual hot spare space from free space counts.
+                    type: bool
+                virtual_hot_spare_limit_drives:
+                    description: The number of drives to reserve for the virtual hot spare, from 0-4.
+                    type: int
+                virtual_hot_spare_limit_percent:
+                    description: The percent space to reserve for the virtual hot spare, from 0-20.
+                    type: int
+    sample:
+        {
+            "settings": {
+                "automatically_manage_io_optimization": "files_at_default",
+                "automatically_manage_protection": "files_at_default",
+                "global_namespace_acceleration_enabled": false,
+                "global_namespace_acceleration_state": "inactive",
+                "protect_directories_one_level_higher": true,
+                "spillover_enabled": true,
+                "spillover_target": {
+                    "id": null,
+                    "name": null,
+                    "type": "anywhere"
+                },
+                "ssd_l3_cache_default_enabled": true,
+                "ssd_qab_mirrors": "one",
+                "ssd_system_btree_mirrors": "one",
+                "ssd_system_delta_mirrors": "one",
+                "virtual_hot_spare_deny_writes": false,
+                "virtual_hot_spare_hide_spare": true,
+                "virtual_hot_spare_limit_drives": 0,
+                "virtual_hot_spare_limit_percent": 20
+            }
+        }
 '''
 
 from ansible.module_utils.basic import AnsibleModule

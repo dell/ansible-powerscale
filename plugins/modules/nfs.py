@@ -335,7 +335,7 @@ class NfsExport(object):
         try:
             zone_path = (self.zone_summary_api.
                          get_zones_summary_zone(access_zone)).to_dict()
-            return zone_path['summary']['path']
+            return zone_path["summary"]["path"]
         except Exception as e:
             error_msg = self.determine_error(error_obj=e)
             error_message = 'Unable to fetch base path of Access Zone {0} ' \
@@ -351,6 +351,8 @@ class NfsExport(object):
         LOG.debug("Getting NFS export details for path: %s and access zone: "
                   "%s", path, access_zone)
         try:
+            if path.endswith("/"):
+                path = path[0:len(path) - 1]
             nfs_exports_extended_obj = self.protocol_api.list_nfs_exports(
                 path=path, zone=access_zone)
             if nfs_exports_extended_obj.total > 1:
@@ -681,15 +683,18 @@ class NfsExport(object):
             error = str(error_obj)
         return error
 
-    def determine_path(self):
-        path = self.module.params['path'].rstrip("/")
-        access_zone = self.module.params['access_zone']
-
-        if access_zone.lower() != 'system':
-            if not path.startswith('/'):
-                path = "/" + path
+    def effective_path(self, access_zone, path):
+        """Get the effective path for any access zone"""
+        if access_zone is not None and access_zone.lower() == "system":
+            if path is not None and not path.startswith('/'):
+                err_msg = (f"Invalid path {path}, Path must start "
+                           f"with '/'")
+                LOG.error(err_msg)
+                self.module.fail_json(msg=err_msg)
+        elif access_zone is not None and access_zone.lower() != "system":
+            if path is not None and not path.startswith('/'):
+                path = f"/{path}"
             path = self.get_zone_base_path(access_zone) + path
-
         return path
 
     def _validate_input(self):
@@ -713,11 +718,11 @@ class NfsExport(object):
         state = self.module.params['state']
         access_zone = self.module.params['access_zone']
         ignore_unresolvable_hosts = self.module.params['ignore_unresolvable_hosts']
-        path = self.determine_path()
+        path = self.effective_path(access_zone=access_zone, path=self.module.params['path'])
         changed = False
 
         self.result['NFS_export_details'] = self.get_nfs_export(
-            path, access_zone)
+            path=path, access_zone=access_zone)
 
         self._validate_input()
         if state == 'present' and self.result['NFS_export_details']:
@@ -726,7 +731,7 @@ class NfsExport(object):
 
         if state == 'present' and not self.result['NFS_export_details']:
             # create NFS export
-            changed = self.create_nfs_export(path, access_zone, ignore_unresolvable_hosts)
+            changed = self.create_nfs_export(path=path, access_zone=access_zone, ignore_unresolvable_hosts=ignore_unresolvable_hosts)
 
         if state == 'absent' and self.result['NFS_export_details']:
             # delete nfs export

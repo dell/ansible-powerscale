@@ -8,7 +8,7 @@
     verify_ssl: false
     api_user: 'user'
     api_password: 'password'
-    share_name: 'test_sample_smb'
+    name: 'test_sample_smb'
     new_name: "new_test_sample_smb"
     non_system_access_zone: 'NonSystemAz'
     system_access_zone: 'System'
@@ -36,7 +36,7 @@
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        share_name: "{{ share_name }}"
+        share_name: "{{ name }}"
         path: "{{ system_az_path }}"
         description: "{{ description }}"
         permissions:
@@ -58,7 +58,7 @@
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        share_name: "{{ share_name }}"
+        share_name: "{{ name }}"
         path: "{{ system_az_path }}"
         description: "{{ description }}"
         permissions:
@@ -79,7 +79,7 @@
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        share_name: "{{ share_name }}"
+        share_name: "{{ name }}"
         path: "/ifs"
         description: "{{ description }}"
         create_path: false
@@ -113,7 +113,7 @@
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        share_name: "{{ share_name }}"
+        share_name: "{{ name }}"
         path: "/ifs"
         description: "{{ description }}"
         create_path: false
@@ -147,7 +147,7 @@
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        share_name: "{{ share_name }}"
+        share_name: "{{ name }}"
         access_zone: "{{ system_access_zone }}"
         description: "new description"
         state: "{{ state_present }}"
@@ -158,7 +158,7 @@
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        share_name: "{{ share_name }}"
+        share_name: "{{ name }}"
         path: "{{ system_az_path }}"
         description: "{{ description }}"
         permissions:
@@ -173,7 +173,7 @@
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        share_name: "{{ share_name }}"
+        share_name: "{{ name }}"
         path: "/ifs"
         allow_variable_expansion: false
         auto_create_directory: false
@@ -204,7 +204,7 @@
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        share_name: "{{ share_name }}"
+        share_name: "{{ name }}"
         path: "/ifs"
         allow_variable_expansion: false
         auto_create_directory: false
@@ -235,7 +235,7 @@
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        share_name: "{{ share_name }}"
+        share_name: "{{ name }}"
         path: "{{ system_az_path }}"
         description: "{{ description }}"
         permissions:
@@ -250,7 +250,7 @@
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        share_name: "{{ share_name }}"
+        share_name: "{{ name }}"
         access_zone: "{{ system_access_zone }}"
         state: "{{ state_absent }}"
 
@@ -260,7 +260,7 @@
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        share_name: "{{ share_name }}"
+        share_name: "{{ name }}"
         path: "{{ non_system_az_path }}"
         access_zone: "{{ non_system_access_zone }}"
         description: "{{ description }}"
@@ -290,7 +290,7 @@
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        share_name: "{{ share_name }}"
+        share_name: "{{ name }}"
         path: "{{ non_system_az_path }}"
         description: "{{ description }}"
         permissions:
@@ -320,7 +320,7 @@
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        share_name: "{{ share_name }}"
+        share_name: "{{ name }}"
         access_zone: "{{ non_system_access_zone }}"
         description: "new description"
         state: "{{ state_present }}"
@@ -331,7 +331,7 @@
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        share_name: "{{ share_name }}"
+        share_name: "{{ name }}"
         access_zone: "{{ non_system_access_zone }}"
         path: "{{ non_system_az_path }}"
         description: "{{ description }}"
@@ -351,7 +351,7 @@
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        share_name: "{{ share_name }}"
+        share_name: "{{ name }}"
         access_zone: "{{ on_system_access_zone }}"
         permissions:
           - group_name: "{{ non_system_az_group }}"
@@ -369,7 +369,7 @@
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        share_name: "{{ share_name }}"
+        share_name: "{{ name }}"
         access_zone: "{{ non_system_access_zone }}"
         permissions:
           - user_name: '{{ non_system_az_ad_user }}'
@@ -388,7 +388,7 @@
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        share_name: "{{ share_name }}"
+        share_name: "{{ name }}"
         description: "{{ description }}"
         access_zone: "{{ non_system_access_zone }}"
         permissions:
@@ -408,7 +408,7 @@
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        share_name: "{{ share_name }}"
+        share_name: "{{ name }}"
         access_zone: "{{ non_system_access_zone }}"
         permissions:
           - user_name: '{{ non_system_az_ldap_user }}'
@@ -427,7 +427,7 @@
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        share_name: "{{ share_name }}"
+        share_name: "{{ name }}"
         access_zone: "{{ non_system_access_zone }}"
         permissions:
           - user_name: '{{ non_system_az_ldap_user }}'
@@ -446,7 +446,7 @@
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        share_name: "{{ share_name }}"
+        share_name: "{{ name }}"
         new_share_name: "{{ new_name }}"
         access_zone: "{{ non_system_access_zone }}"
         state: "{{ state_present }}"

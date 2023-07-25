@@ -1,3 +1,7 @@
+plugins/modules/accesszone.py import-2.7
+plugins/modules/accesszone.py import-3.5
+plugins/modules/accesszone.py compile-2.7
+plugins/modules/accesszone.py compile-3.5
 plugins/modules/accesszone.py validate-modules:missing-gplv3-license
 plugins/modules/ads.py validate-modules:missing-gplv3-license
 plugins/modules/filesystem.py validate-modules:missing-gplv3-license
@@ -5,9 +9,18 @@ plugins/modules/filesystem.py compile-2.7
 plugins/modules/filesystem.py compile-3.5
 plugins/modules/filesystem.py import-2.7
 plugins/modules/filesystem.py import-3.5
+plugins/modules/s3_bucket.py compile-2.7
+plugins/modules/s3_bucket.py compile-3.5
+plugins/modules/s3_bucket.py import-2.7
+plugins/modules/s3_bucket.py import-3.5
+plugins/modules/s3_bucket.py validate-modules:missing-gplv3-license
 plugins/modules/info.py validate-modules:missing-gplv3-license
 plugins/modules/group.py validate-modules:missing-gplv3-license
 plugins/modules/ldap.py validate-modules:missing-gplv3-license
+plugins/modules/nfs.py compile-2.7
+plugins/modules/nfs.py compile-3.5
+plugins/modules/nfs.py import-2.7
+plugins/modules/nfs.py import-3.5
 plugins/modules/nfs.py validate-modules:missing-gplv3-license
 plugins/modules/node.py validate-modules:missing-gplv3-license
 plugins/modules/smartquota.py validate-modules:missing-gplv3-license
@@ -25,10 +38,8 @@ plugins/modules/subnet.py validate-modules:missing-gplv3-license
 plugins/modules/subnet.py import-2.7
 plugins/modules/groupnet.py import-2.7
 plugins/modules/networkrule.py validate-modules:missing-gplv3-license
-plugins/modules/networkpool.py validate-modules:missing-gplv3-license
 plugins/modules/nfs_alias.py validate-modules:missing-gplv3-license
 plugins/modules/settings.py validate-modules:missing-gplv3-license
-plugins/modules/networkpool.py import-2.7
 plugins/modules/networksettings.py validate-modules:missing-gplv3-license
 plugins/modules/smartpoolsettings.py validate-modules:missing-gplv3-license
 plugins/modules/filepoolpolicy.py import-2.7
@@ -55,3 +66,8 @@ plugins/modules/user_mapping_rule.py import-3.5
 plugins/modules/user_mapping_rule.py compile-2.7
 plugins/modules/user_mapping_rule.py compile-3.5
 plugins/modules/user_mapping_rule.py validate-modules:missing-gplv3-license
+plugins/modules/networkpool.py import-2.7
+plugins/modules/networkpool.py import-3.5
+plugins/modules/networkpool.py compile-2.7
+plugins/modules/networkpool.py compile-3.5
+plugins/modules/networkpool.py validate-modules:missing-gplv3-license

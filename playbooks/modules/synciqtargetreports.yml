@@ -10,7 +10,7 @@
     api_password: 'password'
     state_present: 'present'
     id: '2-sample_policy'
-    target_report_name: 'sample_policy'
+    name: 'sample_policy'
     sub_report_id: 1
     include_sub_reports: true
 
@@ -30,7 +30,7 @@
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         verify_ssl: "{{ verify_ssl }}"
-        name: "{{ target_report_name }}"
+        name: "{{ name }}"
         state: "{{ state_present }}"
 
     - name: Get all SyncIQ target sub-reports with report id
@@ -49,7 +49,7 @@
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         verify_ssl: "{{ verify_ssl }}"
-        name: "{{ target_report_name }}"
+        name: "{{ name }}"
         include_sub_reports: "{{ include_sub_reports }}"
         state: "{{ state_present }}"
 
@@ -69,6 +69,6 @@
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         verify_ssl: "{{ verify_ssl }}"
-        name: "{{ target_report_name }}"
+        name: "{{ name }}"
         sub_report_id: "{{ sub_report_id }}"
         state: "{{ state_present }}"

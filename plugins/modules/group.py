@@ -180,6 +180,7 @@ changed:
     description: Whether or not the resource has changed.
     returned: always
     type: bool
+    sample: "false"
 group_details:
     description: Details of the group.
     returned: When group exists
@@ -225,6 +226,32 @@ group_details:
                             description: The resource's type is mentioned.
                             type: str
                             sample: "user"
+    sample:
+        {
+            "dn": "CN=group_11,CN=Groups,DC=VXXXXX-CX",
+            "dns_domain": null,
+            "domain": "VXXXXX-CX",
+            "generated_gid": false,
+            "gid": {
+                "id": "GID:2000",
+                "name": "group_11",
+                "type": "group"
+            },
+            "id": "group_11",
+            "member_of": null,
+            "members": [],
+            "name": "group_11",
+            "object_history": [],
+            "provider": "lsa-local-provider:System",
+            "sam_account_name": "group_11",
+            "sid": {
+                "id": "SID:S-1-0-11-1111111111-1111111111-1111111111-00000",
+                "name": "group_11",
+                "type": "group"
+            },
+            "type": "group"
+        }
+
 '''
 
 from ansible.module_utils.basic import AnsibleModule

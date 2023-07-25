@@ -111,11 +111,11 @@ Examples
 Return Values
 -------------
 
-changed (always, bool, )
+changed (always, bool, false)
   Whether or not the resource has changed.
 
 
-network_settings (always, complex, )
+network_settings (always, complex, {'settings': {'default_groupnet': 'groupnet0', 'sbr': 'false', 'sc_rebalance_delay': '0', 'tcp_ports': ['2049', '445']}})
   Details of the network settings.
 
 

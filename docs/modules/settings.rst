@@ -196,64 +196,79 @@ Examples
 Return Values
 -------------
 
-changed (Always, bool, )
+changed (Always, bool, false)
   Whether or not the resource has changed.
 
 
-settings (Always, complex, )
+email_settings (Always, dict, {'settings': {'batch_mode': 'none', 'mail_relay': '10.**.**.**', 'mail_sender': 'powerscale@dell.com', 'mail_subject': 'Powerscale Cluster notifications', 'smtp_auth_passwd_set': False, 'smtp_auth_security': 'none', 'smtp_auth_username': '', 'smtp_port': 25, 'use_smtp_auth': False, 'user_template': ''}})
   Details of the email settings.
 
 
-  batch_mode (, str, )
-    This setting determines how notifications will be batched together to be sent by email.
+  settings (Always, dict, )
+    Details of the settings.
 
 
-  mail_relay (, str, )
-    The address of the SMTP server to be used for relaying the notification messages.
+    batch_mode (, str, )
+      This setting determines how notifications will be batched together to be sent by email.
 
 
-  mail_sender (, str, )
-    The full email address that will appear as the sender of notification messages.
+    mail_relay (, str, )
+      The address of the SMTP server to be used for relaying the notification messages.
 
 
-  mail_subject (, str, )
-    The subject line for notification messages from this cluster.
+    mail_sender (, str, )
+      The full email address that will appear as the sender of notification messages.
 
 
-  smtp_auth_passwd_set (, bool, )
-    Indicates if an SMTP authentication password is set.
+    mail_subject (, str, )
+      The subject line for notification messages from this cluster.
 
 
-  smtp_auth_security (, str, )
-    The type of secure communication protocol to use if SMTP is being used.
+    smtp_auth_passwd_set (, bool, )
+      Indicates if an SMTP authentication password is set.
 
 
-  smtp_auth_username (, str, )
-    Username to authenticate with if SMTP authentication is being used.
+    smtp_auth_security (, str, )
+      The type of secure communication protocol to use if SMTP is being used.
 
 
-  smtp_port (, int, )
-    The port on the SMTP server to be used for relaying the notification messages.
+    smtp_auth_username (, str, )
+      Username to authenticate with if SMTP authentication is being used.
 
 
-  use_smtp_auth (, bool, )
-    If true, this cluster will send SMTP authentication credentials to the SMTP relay server in order to send its notification emails.
+    smtp_port (, int, )
+      The port on the SMTP server to be used for relaying the notification messages.
 
 
-  user_template (, str, )
-    Location of a custom template file that can be used to specify the layout of the notification emails.
+    use_smtp_auth (, bool, )
+      If true, this cluster will send SMTP authentication credentials to the SMTP relay server in order to send its notification emails.
 
 
-  id (, str, )
-    Field id.
+    user_template (, str, )
+      Location of a custom template file that can be used to specify the layout of the notification emails.
 
 
-  key (, str, )
-    Key value from *key_file* that maps to this server.
 
 
-  name (, str, )
-    NTP server name.
+ntp_server (Always, dict, {'servers': [{'id': '10.**.**.**', 'key': None, 'name': '10.**.**.**'}]})
+  List of NTP servers.
+
+
+  servers (, list, )
+    List of servers.
+
+
+    id (, str, )
+      Field id.
+
+
+    key (, str, )
+      Key value from *key_file* that maps to this server.
+
+
+    name (, str, )
+      NTP server name.
+
 
 
 

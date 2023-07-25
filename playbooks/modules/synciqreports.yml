@@ -10,7 +10,7 @@
     api_password: 'password'
     state_present: 'present'
     id: '1-Test_syncIQ_policy'
-    report_name: 'Test_snap_schedule_123'
+    name: 'Test_snap_schedule_123'
     name1: 'Test_syncIQ_policy'
     sub_report_id: 1
     include_sub_reports: true
@@ -33,7 +33,7 @@
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         verify_ssl: "{{ verify_ssl }}"
-        name: "{{ report_name }}"
+        name: "{{ name }}"
         state: "{{ state_present }}"
 
     - name: Get all SyncIQ sub-reports with report id
@@ -76,6 +76,6 @@
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         verify_ssl: "{{ verify_ssl }}"
-        name: "{{ report_name }}"
+        name: "{{ name }}"
         sub_report_id: "{{ sub_report_id }}"
         state: "{{ state_present }}"

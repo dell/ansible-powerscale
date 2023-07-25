@@ -1,7 +1,7 @@
 ### REQUIRED
 ---
 # The namespace of the collection.
-# This can be a company/brand/organization or product namespace under
+# This can be a company/brand/organization or product namespace under 
 # which all content lives.
 # May only contain alphanumeric lowercase characters and underscores.
 # Namespaces cannot start with
@@ -14,7 +14,7 @@ name: powerscale
 
 # The version of the collection.
 # Must be compatible with semantic versioning
-version: 2.0.0
+version: 2.1.0
 
 # The path to the Markdown (.md) readme file.
 # This path is relative to the root of the collection.
@@ -44,9 +44,9 @@ authors:
 # A short summary description of the collection
 description: Ansible modules for PowerScale
 
-# Either a single license or a list of licenses for content inside of
+# Either a single license or a list of licenses for content inside of 
 # a collection. Ansible Galaxy currently only accepts
-# L(SPDX,https://spdx.org/licenses/) licenses.
+# L(SPDX,https://spdx.org/licenses/) licenses. 
 # This key is mutually exclusive with 'license_file'
 license:
   - GPL-3.0-or-later
@@ -65,13 +65,13 @@ tags: [storage]
 dependencies: {}
 
 # The URL of the originating SCM repository
-repository: https://github.com/dell/ansible-powerscale/tree/2.0.0
+repository: https://github.com/dell/ansible-powerscale/tree/2.1.0
 
 # The URL to any online docs
-documentation: https://github.com/dell/ansible-powerscale/tree/2.0.0/docs
+documentation: https://github.com/dell/ansible-powerscale/tree/2.1.0/docs
 
 # The URL to the homepage of the collection/project
-homepage: https://github.com/dell/ansible-powerscale/tree/2.0.0
+homepage: https://github.com/dell/ansible-powerscale/tree/2.1.0
 
 # The URL to the collection issue tracker
 issues: https://www.dell.com/community/Automation/bd-p/Automation

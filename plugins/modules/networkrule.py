@@ -146,6 +146,7 @@ changed:
     description: Whether or not the resource has changed.
     returned: Always
     type: bool
+    sample: "false"
 
 network_rule_details:
     description: Network provisioning rule details.
@@ -187,6 +188,16 @@ network_rule_details:
         subnet:
             description: Name of subnet to which this rule belongs
             type: str
+    sample: {
+        "description": "description",
+        "groupnet": "groupnet0",
+        "id": "groupnet0.subnet0.pool0.test_rule",
+        "iface": "10gige-1",
+        "name": "test_rule",
+        "node_type": "any",
+        "pool": "pool0",
+        "subnet": "subnet0"
+    }
 '''
 
 from ansible.module_utils.basic import AnsibleModule

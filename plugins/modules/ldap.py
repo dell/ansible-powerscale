@@ -173,6 +173,7 @@ changed:
     description: Whether or not the resource has changed.
     returned: always
     type: bool
+    sample: "false"
 
 ldap_provider_details:
     description: The LDAP provider details.
@@ -203,6 +204,17 @@ ldap_provider_details:
        status:
            description: Specifies the status of the provider.
            type: str
+    sample: {
+        "linked_access_zones": [
+            "System"
+        ],
+        "base_dn": "dc=sample,dc=ldap,dc=domain,dc=com",
+        "bind_dn": "cn=administrator,dc=sample,dc=ldap,dc=domain,dc=com",
+        "groupnet": "groupnet",
+        "name": "sample-ldap",
+        "server_uris": "ldap://xx.xx.xx.xx",
+        "status": "online"
+    }
 '''
 
 from ansible.module_utils.basic import AnsibleModule

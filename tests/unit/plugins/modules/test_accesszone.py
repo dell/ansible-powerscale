@@ -115,3 +115,40 @@ class TestAccessZone():
         accesszone_module_mock.perform_module_operation()
         assert MockAccessZoneApi.create_accesszone_failed_msg(MockAccessZoneApi.ACCESS_ZONE['access_zone'][0]['az_name']) in \
             accesszone_module_mock.module.fail_json.call_args[1]['msg']
+
+    def test_delete_access_zone(self, accesszone_module_mock):
+        self.get_access_zone_args.update({"az_name": "testaz",
+                                          "groupnet": "groupnet1",
+                                          "path": "/ifs",
+                                          "smb": None,
+                                          "nfs": None,
+                                          "force_overlap": True,
+                                          "state": "absent",
+                                          "create_path": False,
+                                          "provider_state": "add",
+                                          "auth_providers": [{"provider_name": "System", "provider_type": "file"}]})
+        accesszone_module_mock.module.params = self.get_access_zone_args
+        accesszone_module_mock.get_details = MagicMock(return_value=MockAccessZoneApi.ACCESS_ZONE)
+        accesszone_module_mock.api_instance.delete_zone = MagicMock(return_value=None)
+        accesszone_module_mock.perform_module_operation()
+        accesszone_module_mock.api_instance.delete_zone.assert_called()
+        assert accesszone_module_mock.module.exit_json.call_args[1]['changed'] is True
+
+    def test_delete_access_zone_exception(self, accesszone_module_mock):
+        self.get_access_zone_args.update({"az_name": "testaz",
+                                          "groupnet": "groupnet1",
+                                          "path": "/ifs",
+                                          "smb": None,
+                                          "nfs": None,
+                                          "force_overlap": True,
+                                          "state": "absent",
+                                          "create_path": False,
+                                          "provider_state": "add",
+                                          "auth_providers": [{"provider_name": "System", "provider_type": "file"}]})
+        accesszone_module_mock.module.params = self.get_access_zone_args
+        accesszone_module_mock.get_details = MagicMock(return_value=MockAccessZoneApi.ACCESS_ZONE)
+        accesszone_module_mock.api_instance.delete_zone = MagicMock(side_effect=utils.ApiException)
+        accesszone_module_mock.perform_module_operation()
+        accesszone_module_mock.api_instance.delete_zone.assert_called()
+        assert MockAccessZoneApi.delete_accesszone_failed_msg() in \
+            accesszone_module_mock.module.fail_json.call_args[1]['msg']

@@ -72,7 +72,7 @@ NFS_MULTIPLE = {"exports": [{
     "description": "description",
     "id": NFS_ID_1,
     "name_max_size": 255,
-    "paths": "VALUE_SPECIFIED_IN_NO_LOG_PARAMETER",
+    "paths": [PATH_1],
     "read_only": False,
     "read_only_clients": [],
     "read_write_clients": [],
@@ -94,7 +94,7 @@ NFS_MULTIPLE = {"exports": [{
     "description": "description",
     "id": NFS_ID_2,
     "name_max_size": 255,
-    "paths": "VALUE_SPECIFIED_IN_NO_LOG_PARAMETER",
+    "paths": [PATH_1],
     "read_only": False,
     "read_only_clients": [],
     "read_write_clients": [],
@@ -104,7 +104,8 @@ NFS_MULTIPLE = {"exports": [{
         "krb5"
     ],
     "snapshot": None,
-    "zone": SYS_ZONE}]}
+    "zone": SYS_ZONE}],
+    "total": 2}
 
 NFS_2 = {"exports": [{
     "all_dirs": False,

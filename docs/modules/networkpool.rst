@@ -100,8 +100,29 @@ Parameters
     SmartConnect Parameters.
 
 
+    static_routes (optional, list, None)
+      List of static routes in the pool.
+
+
+      gateway (True, str, None)
+        Address of the gateway in the format yyy.yyy.yyy.yyy.
+
+
+      prefix_len (True, int, None)
+        The subnet mask length.
+
+
+      subnet (True, str, None)
+        Network address in the format xxx.xxx.xxx.xxx.
+
+
+
     sc_dns_zone (optional, str, None)
       SmartConnect zone name for the pool.
+
+
+    sc_dns_zone_aliases (optional, list, None)
+      List of SmartConnect zone aliases (DNS names) to the pool.
 
 
     sc_subnet (optional, str, None)
@@ -169,6 +190,7 @@ Notes
 
 .. note::
    - The *check_mode* is not supported.
+   - Removal of static routes and *sc_dns_zone_aliases* is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -188,6 +210,29 @@ Examples
           verify_ssl: "{{verify_ssl}}"
           groupnet: "groupnet0"
           subnet: "subnet0"
+          additional_pool_params:
+            ranges:
+            - low: "10.230.**.***"
+              high: "10.230.**.***"
+            range_state: "add"
+            ifaces:
+            - iface: "ext-1"
+              lnn: 1
+            iface_state: "add"
+          sc_params:
+            sc_dns_zone: "10.230.**.***"
+            sc_connect_policy: "throughput"
+            sc_failover_policy: "throughput"
+            rebalance_policy: "auto"
+            alloc_method: "static"
+            sc_auto_unsuspend_delay: 200
+            sc_ttl: 200
+            sc_dns_zone_aliases:
+            - "Test"
+            static_routes:
+            - gateway: "10.**.**.**"
+              prefix_len: 21
+              subnet: "10.**.**.**"
           pool: "Test_Pool_2"
           access_zone: "system"
           state: "present"
@@ -229,6 +274,12 @@ Examples
             alloc_method: "static"
             sc_auto_unsuspend_delay: 200
             sc_ttl: 200
+            sc_dns_zone_aliases:
+            - "Test"
+            static_routes:
+            - gateway: "10.**.**.**"
+              prefix_len: 21
+              subnet: "10.**.**.**"
           aggregation_mode: "fec"
           description: "Pool Created by Ansible Modify"
           state: "present"
@@ -261,11 +312,11 @@ Examples
 Return Values
 -------------
 
-changed (always, bool, )
+changed (always, bool, false)
   Whether or not the resource has changed.
 
 
-pools (always, complex, )
+pools (always, complex, {'pools': [{'access_zone': 'System', 'addr_family': 'ipv4', 'aggregation_mode': 'roundrobin', 'alloc_method': 'static', 'description': '', 'groupnet': 'groupnet0', 'id': 'groupnet0.subnet0.Test_10', 'ifaces': [], 'name': 'Test_10', 'nfsv3_rroce_only': False, 'ranges': [], 'rebalance_policy': 'auto', 'rules': [], 'sc_auto_unsuspend_delay': 0, 'sc_connect_policy': 'round_robin', 'sc_dns_zone': '10.**.**.**', 'sc_dns_zone_aliases': ['Testststst', 'tesrtdsb1'], 'sc_failover_policy': 'round_robin', 'sc_subnet': '', 'sc_suspended_nodes': [], 'sc_ttl': 0, 'static_routes': [{'gateway': '10.**.**.**', 'prefixlen': 21, 'subnet': '10.**.**.**'}], 'subnet': 'subnet0'}]})
   Details of the network pool.
 
 
@@ -346,7 +397,7 @@ pools (always, complex, )
 
 
   static_routes (, list, )
-    List of interface members in this pool.
+    List of static routes in the pool.
 
 
   subnet (, str, )
@@ -368,4 +419,5 @@ Authors
 ~~~~~~~
 
 - Meenakshi Dembi (@dembim) <ansible.team@dell.com>
+- Pavan Mudunuri(@Pavan-Mudunuri) <ansible.team@dell.com>
 

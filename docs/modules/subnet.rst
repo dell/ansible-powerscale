@@ -247,7 +247,7 @@ changed (always, bool, )
   Whether or not the resource has changed.
 
 
-subnet_details (When a subnet exists, complex, )
+subnet_details (When a subnet exists, complex, {'addr_family': 'ipv4', 'base_addr': '10.**.**.*', 'description': 'Initial subnet', 'dsr_addrs': [], 'gateway': '10.**.**.**', 'gateway_priority': 10, 'groupnet': 'groupnet0', 'id': 'groupnet0.subnet0', 'mtu': 1500, 'name': 'subnet0', 'pools': ['pool0'], 'prefixlen': 21, 'sc_service_addrs': [], 'sc_service_name': '', 'vlan_enabled': False, 'vlan_id': None})
   Subnet details.
 
 

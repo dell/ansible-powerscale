@@ -26,6 +26,8 @@ extends_documentation_fragment:
 
 author:
 - Akash Shendge (@shenda1) <ansible.team@dell.com>
+- Pavan Mudunuri (@Pavan-Mudunuri) <ansible.team@dell.com>
+- Trisha Datta (@trisha-dell) <ansible.team@dell.com>
 
 options:
   az_name:
@@ -156,6 +158,12 @@ options:
         choices: ['local', 'file', 'ldap', 'ads', 'nis']
         type: str
         required: true
+      priority:
+        description:
+        - Specifies the order of priority of the auth provider which needs to be added to access zone.
+        - C(1) denotes the topmost priority.
+        - If I(priority) is not provided, authentication provider will have lowest priority.
+        type: int
   state:
     description:
     - Defines whether the access zone should exist or not.
@@ -166,8 +174,12 @@ options:
     required: true
 
 notes:
-- Deletion of access zone is not allowed through the Ansible module.
 - The I(check_mode) is not supported.
+- Built-in System zone cannot be deleted.
+- When access zone is deleted, all associated authentication providers remain available to other zones,
+  the IP addresses are not reassigned to other zones.
+- When access zone is deleted, SMB shares, NFS exports, and HDFS data paths are deleted,
+  the directories and data still exist, and  new shares, exports, or paths can be mapped in another access zone.
 '''
 
 EXAMPLES = r'''
@@ -241,7 +253,7 @@ EXAMPLES = r'''
       nfsv4_no_domain_uids: false
       nfsv4_no_names: false
 
-- name: Add Auth Providers to the  access zone
+- name: Add Auth Providers to the access zone
   dellemc.powerscale.accesszone:
     onefs_host: "{{onefs_host}}"
     api_user: "{{api_user}}"
@@ -252,6 +264,7 @@ EXAMPLES = r'''
     auth_providers:
        - provider_name: "System"
          provider_type: "file"
+         priority: 3
        - provider_name: "ldap-prashant"
          provider_type: "ldap"
     state: "present"
@@ -284,6 +297,15 @@ EXAMPLES = r'''
       - provider_name: "System"
         provider_type: "file"
     state: "present"
+
+- name: Delete Access Zone
+  dellemc.powerscale.accesszone:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    az_name: "sample_name"
+    state: "absent"
 '''
 
 RETURN = r'''
@@ -291,29 +313,61 @@ changed:
     description: Whether or not the resource has changed.
     returned: always
     type: bool
+    sample: "false"
 
 smb_modify_flag:
     description: Whether or not the default SMB settings of access zone has
                  changed.
     returned: on success
     type: bool
+    sample: "false"
 
 nfs_modify_flag:
     description: Whether or not the default NFS settings of access zone has
                  changed.
     returned: on success
     type: bool
+    sample: "false"
 
 access_zone_modify_flag:
     description: Whether auth providers linked to access zone has changed.
     returned: on success
     type: bool
+    sample: "false"
 
 access_zone_details:
     description: The access zone details.
     returned: When access zone exists
     type: complex
     contains:
+        Zones:
+            description: Specifies the properties of Zone.
+            type: list
+            contains:
+                name:
+                    description: Specifies the access zone name.
+                    type: str
+                auth_providers:
+                    description: Specifies the list of authentication providers available on this access zone.
+                    type: list
+                ifs_restricted:
+                    description: Specifies a list of users and groups that have read and write access to /ifs.
+                    type: list
+                zone_id:
+                    description: Specifies the access zone ID on the system.
+                    type: int
+                groupnet:
+                    description: Groupnet identifier.
+                    type: str
+                user_mapping_rules:
+                    description: Specifies the current ID mapping rules.
+                    type: list
+                system_provider:
+                    description: Specifies the system provider for the access zone.
+                    type: str
+                alternate_system_provider:
+                    description: Specifies an alternate system provider.
+                    type: str
         nfs_settings:
             description: NFS settings of access zone
             type: complex
@@ -363,11 +417,163 @@ access_zone_details:
                 file_create_mode(octal):
                      description: UNIX mode bits for file in octal format
                      type: str
+    sample:
+        {"nfs_settings": {"export_settings": {
+                "all_dirs": false,
+                "block_size": 8192,
+                "can_set_time": true,
+                "case_insensitive": false,
+                "case_preserving": true,
+                "chown_restricted": false,
+                "commit_asynchronous": false,
+                "directory_transfer_size": 131072,
+                "encoding": "DEFAULT",
+                "link_max": 32767,
+                "map_all": null,
+                "map_failure": {
+                    "enabled": false,
+                    "primary_group": {
+                        "id": null,
+                        "name": null,
+                        "type": null
+                    },
+                    "secondary_groups": [],
+                    "user": {
+                        "id": "USER:nobody",
+                        "name": null,
+                        "type": null
+                    }
+                },
+                "map_full": true,
+                "map_lookup_uid": false,
+                "map_non_root": {
+                    "enabled": false,
+                    "primary_group": {
+                        "id": null,
+                        "name": null,
+                        "type": null
+                    },
+                    "secondary_groups": [],
+                    "user": {
+                        "id": "USER:nobody",
+                        "name": null,
+                        "type": null
+                    }
+                },
+                "map_retry": true,
+                "map_root": {
+                    "enabled": true,
+                    "primary_group": {
+                        "id": null,
+                        "name": null,
+                        "type": null
+                    },
+                    "secondary_groups": [],
+                    "user": {
+                        "id": "USER:nobody",
+                        "name": null,
+                        "type": null
+                    }
+                },
+                "max_file_size": 9223372036854775807,
+                "name_max_size": 255,
+                "no_truncate": false,
+                "read_only": false,
+                "read_transfer_max_size": 1048576,
+                "read_transfer_multiple": 512,
+                "read_transfer_size": 131072,
+                "readdirplus": true,
+                "readdirplus_prefetch": 10,
+                "return_32bit_file_ids": false,
+                "security_flavors": ["unix"],
+                "setattr_asynchronous": false,
+                "snapshot": "-",
+                "symlinks": true,
+                "time_delta": 1e-09,
+                "write_datasync_action": "DATASYNC",
+                "write_datasync_reply": "DATASYNC",
+                "write_filesync_action": "FILESYNC",
+                "write_filesync_reply": "FILESYNC",
+                "write_transfer_max_size": 1048576,
+                "write_transfer_multiple": 512,
+                "write_transfer_size": 524288,
+                "write_unstable_action": "UNSTABLE",
+                "write_unstable_reply": "UNSTABLE",
+                "zone": "System"},
+                "zone_settings": {
+                    "nfsv4_allow_numeric_ids": true,
+                    "nfsv4_domain": "localhost",
+                    "nfsv4_no_domain": false,
+                    "nfsv4_no_domain_uids": true,
+                    "nfsv4_no_names": false,
+                    "nfsv4_replace_domain": true,
+                    "zone": null
+                }},
+            "smb_settings": {
+                "access_based_enumeration": false,
+                "access_based_enumeration_root_only": false,
+                "allow_delete_readonly": false,
+                "allow_execute_always": false,
+                "ca_timeout": 120,
+                "ca_write_integrity": "write-read-coherent",
+                "change_notify": "norecurse",
+                "continuously_available": null,
+                "create_permissions": "default acl",
+                "csc_policy": null,
+                "directory_create_mask": 448,
+                "directory_create_mask(octal)": "700",
+                "directory_create_mode": 0,
+                "directory_create_mode(octal)": "0",
+                "file_create_mask": 448,
+                "file_create_mask(octal)": "700",
+                "file_create_mode": 64,
+                "file_create_mode(octal)": "100",
+                "file_filter_extensions": [],
+                "file_filter_type": "deny",
+                "file_filtering_enabled": false,
+                "hide_dot_files": false,
+                "host_acl": [],
+                "impersonate_guest": "never",
+                "impersonate_user": "",
+                "ntfs_acl_support": true,
+                "oplocks": true,
+                "smb3_encryption_enabled": false,
+                "sparse_file": false,
+                "strict_ca_lockout": true,
+                "strict_flush": true,
+                "strict_locking": false,
+                "zone": null
+                },
+            "zones": [{
+                "alternate_system_provider": "lsa-file-provider:System",
+                "auth_providers": ["lsa-ldap-provider:ansildap"],
+                "cache_entry_expiry": 14400,
+                "create_path": null,
+                "force_overlap": null,
+                "groupnet": "groupnet0",
+                "home_directory_umask": 63,
+                "id": "System",
+                "ifs_restricted": [],
+                "map_untrusted": "",
+                "name": "System",
+                "negative_cache_entry_expiry": 60,
+                "netbios_name": "",
+                "path": "/ifs",
+                "skeleton_directory": "/usr/share",
+                "system": true,
+                "system_provider": "lsa-file-provider:System",
+                "user_mapping_rules": [
+                    "test_user_13 ++ test_user_15 [user]",
+                    "test_user_14 => test_user []",
+                    "test_user_13 ++ test_user_15 [user]",
+                    "test_user_12 &= test_user_13 []"
+                ],
+                "zone_id": 1}]}
 '''
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
-
+import copy
 LOG = utils.get_logger('accesszone')
 
 
@@ -566,13 +772,49 @@ class AccessZone(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
+    def unique_auth_providers(self, existing_items, new_items):
+        final_list = copy.deepcopy(existing_items)
+        for key in new_items:
+            if new_items[key] not in existing_items:
+                final_list.append(new_items[key])
+        return final_list
+
+    def reorder_auth_providers(self, updated_auth_providers_list, new_auth_providers, no_priority_list):
+        final_auth_provider_list = []
+        for key in new_auth_providers:
+            if new_auth_providers[key] in updated_auth_providers_list and \
+                    key <= len(self.unique_auth_providers(existing_items=updated_auth_providers_list,
+                                                          new_items=new_auth_providers)) + len(no_priority_list):
+                updated_auth_providers_list.remove(new_auth_providers[key])
+        sorted_providers_by_priority = sorted(new_auth_providers.items(), key=lambda x: x[0])
+        index = 0
+        index1 = 0
+
+        for provider in no_priority_list:
+            if provider not in updated_auth_providers_list:
+                updated_auth_providers_list.append(provider)
+
+        for index in range(len(updated_auth_providers_list) + len(new_auth_providers)):
+            if index + 1 in new_auth_providers:
+                final_auth_provider_list.append(new_auth_providers[index + 1])
+            elif index + 1 not in new_auth_providers and index1 < len(updated_auth_providers_list):
+                final_auth_provider_list.append(updated_auth_providers_list[index1])
+                index1 = index1 + 1
+
+        for index in new_auth_providers:
+            if new_auth_providers[index] not in final_auth_provider_list:
+                final_auth_provider_list.append(new_auth_providers[index])
+        return final_auth_provider_list
+
     def add_auth_providers_to_access_zone(self, name, auth_providers, existing_auth_providers):
         """ Add auth providers to access zone """
         try:
-            updated_auth_providers_list = existing_auth_providers
+            updated_auth_providers_list = copy.deepcopy(existing_auth_providers)
             add_auth_providers_required = False
             provider_summary = self.api_auth.get_providers_summary()
             all_providers = provider_summary.provider_instances
+            new_auth_providers = {}
+            no_priority_list = []
             for i in range(len(auth_providers)):
                 provider = [provider.id for provider in all_providers
                             if provider.name == auth_providers[i]['provider_name'] and
@@ -582,12 +824,18 @@ class AccessZone(object):
                         auth_providers[i]['provider_name'], auth_providers[i]['provider_type'])
                     LOG.error(error_message)
                     self.module.fail_json(msg=error_message)
-                if provider[0] not in updated_auth_providers_list:
-                    add_auth_providers_required = True
-                    updated_auth_providers_list.append(provider[0])
+                if auth_providers[i]['priority'] is None and provider[0] not in no_priority_list:
+                    no_priority_list.append(provider[0])
+                else:
+                    new_auth_providers[auth_providers[i]['priority']] = provider[0]
+            final_provider_list = self.reorder_auth_providers(new_auth_providers=new_auth_providers,
+                                                              updated_auth_providers_list=existing_auth_providers,
+                                                              no_priority_list=no_priority_list)
+            if final_provider_list != updated_auth_providers_list:
+                add_auth_providers_required = True
             if not add_auth_providers_required:
                 return False
-            update_zone = utils.isi_sdk.Zone(auth_providers=updated_auth_providers_list)
+            update_zone = utils.isi_sdk.Zone(auth_providers=final_provider_list)
             self.api_instance.update_zone(zone=update_zone, zone_id=name)
             return True
         except Exception as e:
@@ -659,6 +907,15 @@ class AccessZone(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
+    def delete_access_zone(self, name=None):
+        try:
+            self.api_instance.delete_zone(zone_id=name)
+            return True
+        except Exception as e:
+            error_msg = f'Failed to delete access zone: {utils.determine_error(e)}'
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
+
     def validate_input(self, az_params):
         if not az_params['path']:
             error_message = 'Please provide a valid path to create an access zone'
@@ -692,6 +949,13 @@ class AccessZone(object):
         )
 
         access_zone_details = self.get_details(name)
+
+        if state == 'present' and not access_zone_details:
+            self.validate_input(az_params)
+            access_zone_params = self.construct_az_params(az_params)
+            result['changed'] = self.create_access_zone(access_zone_params)
+            access_zone_details = self.get_details(name)
+
         if state == 'present' and provider_state == 'add' and access_zone_details:
             existing_auth_providers = access_zone_details['zones'][0]['auth_providers']
             access_zone_modify_flag = self.add_auth_providers_to_access_zone(name, auth_providers, existing_auth_providers)
@@ -706,20 +970,8 @@ class AccessZone(object):
             LOG.info("removed auth providers from access zone")
             result['access_zone_modify_flag'] = access_zone_modify_flag
 
-        if state == 'present' and not access_zone_details:
-            self.validate_input(az_params)
-            access_zone_params = self.construct_az_params(az_params)
-            access_zone = self.create_access_zone(access_zone_params)
-            result['changed'] = access_zone
-            if result['changed']:
-                access_zone_details = self.get_details(name)
-                result['access_zone_details'] = self.get_details(name)
-
         if state == 'absent' and access_zone_details:
-            error_message = 'Deletion of access zone is not allowed through' \
-                            ' Ansible module'
-            LOG.error(error_message)
-            self.module.fail_json(msg=error_message)
+            result['changed'] = self.delete_access_zone(name)
 
         if state == 'present' and smb is not None:
             smb_modify_flag = self.is_smb_modification_required(
@@ -740,7 +992,7 @@ class AccessZone(object):
                     name, nfs, nfs_export_flag, nfs_zone_flag)
         result['access_zone_details'] = access_zone_details
         if result['smb_modify_flag'] or result['nfs_modify_flag'] or \
-                result['access_zone_modify_flag']:
+                result['access_zone_modify_flag'] or result['changed']:
             access_zone_details = self.get_details(name)
             result['access_zone_details'] = access_zone_details
             result['changed'] = True
@@ -760,7 +1012,8 @@ def get_accesszone_parameters():
         provider_state=dict(required=False, type='str', choices=['add', 'remove']),
         auth_providers=dict(required=False, type='list', elements='dict', options=dict(
             provider_name=dict(type='str', required=True),
-            provider_type=dict(type='str', required=True, choices=['local', 'file', 'ldap', 'ads', 'nis'])
+            provider_type=dict(type='str', required=True, choices=['local', 'file', 'ldap', 'ads', 'nis']),
+            priority=dict(type='int')
         )),
         state=dict(required=True, type='str', choices=['present', 'absent'])
     )

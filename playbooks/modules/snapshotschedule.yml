@@ -7,7 +7,7 @@
     verify_ssl: false
     api_user: 'user'
     api_password: 'password'
-    schedule_name: 'Ansible_Module'
+    name: 'Ansible_Module'
     new_name: 'Ansible_Module_Renamed'
     alias1: 'Ansible_alias'
     alias2: 'Ansible_alias_modified'
@@ -31,7 +31,7 @@
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        name: "{{ schedule_name }}"
+        name: "{{ name }}"
         access_zone: "{{ access_zone }}"
         path: "{{ path1 }}"
         alias: "{{ alias1 }}"
@@ -46,7 +46,7 @@
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        name: "{{ schedule_name }}"
+        name: "{{ name }}"
         access_zone: "{{ access_zone }}"
         path: "{{ path1 }}"
         alias: "{{ alias1 }}"
@@ -61,7 +61,7 @@
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        name: "{{ schedule_name }}"
+        name: "{{ name }}"
         state: "{{ state_present }}"
 
     - name: Rename snapshot schedule
@@ -70,7 +70,7 @@
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        name: "{{ schedule_name }}"
+        name: "{{ name }}"
         new_name: "{{ new_name }}"
         state: "{{ state_present }}"
 

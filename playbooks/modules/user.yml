@@ -21,7 +21,7 @@
     shell: "/usr/local/bin/zsh"
     full_name: "For testing of user module this user is created"
     provider_type: "local"
-    user_role_name: "auditadmin"
+    role_name: "auditadmin"
     new_role_name: "securityadmin"
 
   tasks:
@@ -82,7 +82,7 @@
         email: "{{ email }}"
         full_name: "{{ full_name }}"
         shell: "{{ shell }}"
-        role_name: "{{ user_role_name }}"
+        role_name: "{{ role_name }}"
         role_state: "present-for-user"
         state: "present"
 
@@ -101,7 +101,7 @@
         email: "{{ email }}"
         full_name: "{{ full_name }}"
         shell: "{{ shell }}"
-        role_name: "{{ user_role_name }}"
+        role_name: "{{ role_name }}"
         role_state: "present-for-user"
         state: "present"
 
@@ -142,7 +142,7 @@
         provider_type: "{{ provider_type }}"
         user_name: "{{ account_name }}"
         email: "{{ new_email }}"
-        role_name: "{{ user_role_name }}"
+        role_name: "{{ role_name }}"
         role_state: "absent-for-user"
         state: "present"
 
@@ -156,7 +156,7 @@
         provider_type: "{{ provider_type }}"
         user_name: "{{ account_name }}"
         email: "{{ new_email }}"
-        role_name: "{{ user_role_name }}"
+        role_name: "{{ role_name }}"
         role_state: "absent-for-user"
         state: "present"
 

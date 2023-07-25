@@ -26,6 +26,10 @@
         - iface: "ext-2"
           lnn: 1
       iface_state: "add"
+      static_routes:
+        - gateway: "10.**.**.**"
+          prefixlen: 21
+          subnet: "10.**.**.**"
     sc_params_mod:
       sc_dns_zone: "10.**.**.169"
       sc_connect_policy: "round_robin"
@@ -35,6 +39,8 @@
       sc_auto_unsuspend_delay: 0
       sc_ttl: 0
       aggregation_mode: "roundrobin"
+      sc_dns_zone_aliases: 
+        - "Test"
 
   tasks:
     - name: Create Network pool

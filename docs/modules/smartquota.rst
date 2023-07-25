@@ -314,7 +314,7 @@ changed (always, bool, True)
   Whether or not the resource has changed.
 
 
-quota_details (When Quota exists., complex, )
+quota_details (When Quota exists., complex, {'container': True, 'description': '', 'efficiency_ratio': None, 'enforced': False, 'id': 'iddd', 'include_snapshots': False, 'labels': '', 'linked': False, 'notifications': 'default', 'path': 'VALUE_SPECIFIED_IN_NO_LOG_PARAMETER', 'persona': {'id': 'UID:9355', 'name': 'test_user_12', 'type': 'user'}, 'ready': True, 'reduction_ratio': None, 'thresholds': {'advisory': None, 'advisory_exceeded': False, 'advisory_last_exceeded': None, 'hard': None, 'hard_exceeded': False, 'hard_last_exceeded': None, 'percent_advisory': None, 'percent_soft': None, 'soft': None, 'soft_exceeded': False, 'soft_grace': None, 'soft_last_exceeded': None}, 'thresholds_on': 'applogicalsize', 'type': 'user', 'usage': {'applogical': 0, 'applogical_ready': True, 'fslogical': 0, 'fslogical_ready': True, 'fsphysical': 0, 'fsphysical_ready': False, 'inodes': 0, 'inodes_ready': True, 'physical': 0, 'physical_data': 0, 'physical_data_ready': True, 'physical_protection': 0, 'physical_protection_ready': True, 'physical_ready': True, 'shadow_refs': 0, 'shadow_refs_ready': True}})
   The quota details.
 
 
