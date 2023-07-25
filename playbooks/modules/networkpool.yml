@@ -39,7 +39,7 @@
       sc_auto_unsuspend_delay: 0
       sc_ttl: 0
       aggregation_mode: "roundrobin"
-      sc_dns_zone_aliases: 
+      sc_dns_zone_aliases:
         - "Test"
 
   tasks:
