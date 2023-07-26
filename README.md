@@ -1,5 +1,8 @@
 # Ansible Modules for Dell Technologies PowerScale
+
 The Ansible Modules for Dell Technologies (Dell) PowerScale allow Data Center and IT administrators to use RedHat Ansible to automate and orchestrate the configuration and management of Dell PowerScale arrays.
+
+> **NOTE:** The Ansible Modules for Dell PowerScale are released on a monthly cadence starting July '23
 
 The Ansible Modules for Dell PowerScale support the following features:
 - Create user, groups, filesystem, NFS export, smart quotas, SMB share, snapshot and snapshot schedule of a filesystem.
