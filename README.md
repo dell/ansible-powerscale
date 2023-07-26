@@ -24,6 +24,7 @@ The Ansible Modules for Dell PowerScale support the following features:
 - Create, delete Filepool policy and Storagepool tiers.
 - Create, modify, get and delete NFS aliases.
 - Get attributes and entities of the array.
+- Find and close the SMB open files.
 - Create, modify, get details and delete a user mapping rule.
 - Create, modify, get details and delete an S3 bucket.
 

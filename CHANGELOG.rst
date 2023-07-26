@@ -34,7 +34,7 @@ Minor Changes
 New Modules
 -----------
 
-- dellemc.powerscale.user_mapping_rule - Create, modify get details and delete a user mapping rule.
+- dellemc.powerscale.user_mapping_rule - Create, modify, get details, and delete a user mapping rule.
 
 v1.9.0
 ======

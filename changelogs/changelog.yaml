@@ -185,7 +185,7 @@ releases:
       - Added support for PowerScale OneFS 9.5 Islander release.
       - For the execution of the PowerScale Ansible modules, python library "isilon-sdk" needs to be installed.
     modules:
-    - description: Create, modify, get details and delete a user mapping rule.
+    - description: Create, modify, get details, and delete a user mapping rule.
       name: user_mapping_rule
       namespace: ''
     release_date: '2023-06-30'

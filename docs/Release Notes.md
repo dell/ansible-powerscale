@@ -101,8 +101,8 @@ This section lists the limitations in this release of Ansible Modules for Dell P
  
 - Users and Groups 
   - Only local users and groups can be created. 
-  -  Operations on users and groups with very long names may fail.
-  - Modification of user may fail in some scenarios for OneFS version 9.5.
+  - Operations on users and groups with very long names may fail.
+  - Modification of user password fails for OneFS version 9.5.
 
 - Access Zone
   - Deletion of access zones is not supported.
@@ -123,9 +123,6 @@ This section lists the limitations in this release of Ansible Modules for Dell P
     
 - No support for advanced PowerScale features
   - Advanced PowerScale features include tiering, replication, and so on.
-
-- AD
-  - Operations may fail for some patterns of home directory template for version 9.4 and 9.5
 
 ----------------
 Software media, organization, and files 
