@@ -206,11 +206,11 @@ Examples
 Return Values
 -------------
 
-changed (always, bool, )
+changed (always, bool, false)
   Whether or not the resource has changed.
 
 
-groupnet_details (When a groupnet exists, complex, )
+groupnet_details (When a groupnet exists, complex, {'allow_wildcard_subdomains': True, 'description': 'Initial groupnet', 'dns_cache_enabled': True, 'dns_options': [], 'dns_search': ['ansible.com'], 'dns_servers': ['10.**.**.***'], 'id': 'groupnet0', 'name': 'groupnet0', 'server_side_dns_search': True, 'subnets': ['subnet0']})
   Groupnet details.
 
 

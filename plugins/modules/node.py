@@ -54,9 +54,11 @@ changed:
     description: Whether or not the resource has changed.
     returned: always
     type: bool
+    sample: "false"
+
 cluster_node_details:
     description: The cluster node details.
-    type: complex
+    type: dict
     returned: When cluster node exists
     contains:
         id:
@@ -72,6 +74,30 @@ cluster_node_details:
                 count:
                     description: Count of how many partitions are included.
                     type: int
+    sample:
+        {
+            "id": 1,
+            "lnn": 1,
+            "partitions": {
+                "count": 1,
+                "partitions": [
+                    {
+                        "block_size": 1024,
+                        "capacity": 1957516,
+                        "component_devices": "ada0p2",
+                        "mount_point": "/",
+                        "percent_used": "50%",
+                        "statfs": {
+                        "f_namemax": 255,
+                        "f_owner": 0,
+                        "f_type": 53,
+                        "f_version": 538182936
+                        },
+                        "used": 909066
+                    }
+                ]
+            }
+        }
 '''
 
 from ansible.module_utils.basic import AnsibleModule

@@ -180,11 +180,11 @@ Examples
 Return Values
 -------------
 
-changed (Always, bool, )
+changed (Always, bool, false)
   Whether or not the resource has changed.
 
 
-network_rule_details (When a network provisioning rule exists, complex, )
+network_rule_details (When a network provisioning rule exists, complex, {'description': 'description', 'groupnet': 'groupnet0', 'id': 'groupnet0.subnet0.pool0.test_rule', 'iface': '10gige-1', 'name': 'test_rule', 'node_type': 'any', 'pool': 'pool0', 'subnet': 'subnet0'})
   Network provisioning rule details.
 
 

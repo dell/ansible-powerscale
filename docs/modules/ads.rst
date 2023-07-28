@@ -12,7 +12,7 @@ ads -- Manages the ADS authentication provider on PowerScale
 Synopsis
 --------
 
-Manages the Active Directory authentication provider on the PowerScale storage system. This includes creating, modifying, deleting and retreiving the details of an ADS provider.
+Manages the Active Directory authentication provider on the PowerScale storage system. This includes adding spn, removing spn, fixing spn, checking spn, creating, modifying, deleting and retreiving the details of an ADS provider.
 
 
 
@@ -88,6 +88,31 @@ Parameters
     organizational_unit (optional, str, None)
       Specifies the organizational unit.
 
+
+
+  spns (optional, list, None)
+    List of SPN's to configure.
+
+
+    spn (True, str, None)
+      Service Principle Name(SPN).
+
+
+    state (optional, str, present)
+      The state of the SPN.
+
+      ``present`` - indicates that the SPN should exist on the machine account.
+
+      ``absent`` - indicates that the SPN should not exist on the machine account.
+
+
+
+  spn_command (optional, str, None)
+    Specify command of SPN.
+
+    ``check`` - Check for missing SPNs for an AD provider.
+
+    ``fix`` - Adds missing SPNs for an AD provider.
 
 
   state (True, str, None)
@@ -192,6 +217,49 @@ Examples
         domain_name: "ansibleneo.com"
         state: "present"
 
+    - name: Add an SPN
+      dellemc.powerscale.ads:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        domain_name: "ansibleneo.com"
+        spns:
+        - spn: "HOST/test1"
+        state: "present"
+
+    - name: Remove an SPN
+      dellemc.powerscale.ads:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        domain_name: "ansibleneo.com"
+        spns:
+        - spn: "HOST/test1"
+          state: "absent"
+        state: "present"
+
+    - name: Check an SPN
+      dellemc.powerscale.ads:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        domain_name: "ansibleneo.com"
+        spn_command: "check"
+        state: "present"
+
+    - name: Fix an SPN
+      dellemc.powerscale.ads:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        domain_name: "ansibleneo.com"
+        spn_command: "fix"
+        state: "present"
+
     - name: Get Active Directory provider details with instance name
       dellemc.powerscale.ads:
         onefs_host: "{{onefs_host}}"
@@ -224,11 +292,15 @@ Examples
 Return Values
 -------------
 
-changed (always, bool, )
+changed (always, bool, false)
   Whether or not the resource has changed.
 
 
-ads_provider_details (When Active Directory provider exists, complex, )
+spn_check (When check operation is done., list, ['host/test1'])
+  Missing SPNs for an AD provider.
+
+
+ads_provider_details (When Active Directory provider exists, complex, {'ads_provider_details': [{'forest': 'sample.com', 'groupnet': 'groupnet0', 'home_directory_template': '/ifs/home/%D/%U', 'hostname': 'v.sample.com', 'id': 'sample.com', 'linked_access_zones': [], 'login_shell': '/bin/abc', 'machine_account': 'm1', 'name': 'sample.com', 'extra_expected_spns': ['HOST/test5'], 'recommended_spns': ['HOST/test1', 'HOST/test2', 'HOST/test3', 'HOST/test4'], 'spns': ['HOST/test2', 'HOST/test3', 'HOST/test4', 'HOST/test5'], 'status': 'online'}]})
   The Active Directory provider details.
 
 

@@ -73,6 +73,7 @@ changed:
     description: Whether or not the resource has changed.
     returned: always
     type: bool
+    sample: "false"
 network_settings:
     description: Details of the network settings.
     returned: always
@@ -90,6 +91,17 @@ network_settings:
         tcp_ports:
             description: List of client TCP ports.
             type: list
+    sample: {
+        "settings": {
+            "default_groupnet": "groupnet0",
+            "sbr": "false",
+            "sc_rebalance_delay": "0",
+            "tcp_ports": [
+                "2049",
+                "445"
+            ]
+        }
+    }
 '''
 
 from ansible.module_utils.basic import AnsibleModule

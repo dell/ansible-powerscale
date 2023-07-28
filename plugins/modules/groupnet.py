@@ -179,6 +179,7 @@ changed:
     description: Whether or not the resource has changed.
     returned: always
     type: bool
+    sample: "false"
 
 groupnet_details:
     description: Groupnet details.
@@ -200,6 +201,25 @@ groupnet_details:
         subnets:
             description: List of names of the subnets in the groupnet
             type: list
+    sample:
+        {
+            "allow_wildcard_subdomains": true,
+            "description": "Initial groupnet",
+            "dns_cache_enabled": true,
+            "dns_options": [],
+            "dns_search": [
+                "ansible.com"
+            ],
+            "dns_servers": [
+                "10.**.**.***"
+            ],
+            "id": "groupnet0",
+            "name": "groupnet0",
+            "server_side_dns_search": true,
+            "subnets": [
+                "subnet0"
+            ]
+        }
 '''
 
 from ansible.module_utils.basic import AnsibleModule

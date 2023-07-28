@@ -94,11 +94,11 @@ Examples
 Return Values
 -------------
 
-changed (always, bool, )
+changed (always, bool, false)
   Whether or not the resource has changed.
 
 
-cluster_node_details (When cluster node exists, complex, )
+cluster_node_details (When cluster node exists, dict, {'id': 1, 'lnn': 1, 'partitions': {'count': 1, 'partitions': [{'block_size': 1024, 'capacity': 1957516, 'component_devices': 'ada0p2', 'mount_point': '/', 'percent_used': '50%', 'statfs': {'f_namemax': 255, 'f_owner': 0, 'f_type': 53, 'f_version': 538182936}, 'used': 909066}]}})
   The cluster node details.
 
 

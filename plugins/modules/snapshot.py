@@ -234,6 +234,27 @@ snapshot_details:
             description: target name of snapshot whose alias it is.
             type: str
             sample: "ansible_target_snap"
+    sample: {
+        "snapshots": [
+            {
+                "alias": null,
+                "created": 1628155527,
+                "expires": null,
+                "has_locks": false,
+                "id": 936,
+                "name": "Atest",
+                "path": "/ifs/test_src_01",
+                "pct_filesystem": 2.435778242215747e-06,
+                "pct_reserve": 0.0,
+                "schedule": null,
+                "shadow_bytes": 0,
+                "size": 4096,
+                "state": "active",
+                "target_id": null,
+                "target_name": null
+            }
+        ]
+    }
 '''
 
 from ansible.module_utils.basic import AnsibleModule

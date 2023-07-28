@@ -76,7 +76,7 @@ Triage helps ensure that issues resolve quickly by:
 
 If you don't have the knowledge or time to code, consider helping with _issue triage_. The Ansible modules for Dell PowerScale community will thank you for saving them time by spending some of yours.
 
-Read more about the ways you can [Triage issues](https://github.com/dell/ansible-powerscale/blob/2.0.0/docs/ISSUE_TRIAGE.md).
+Read more about the ways you can [Triage issues](https://github.com/dell/ansible-powerscale/blob/2.1.0/docs/ISSUE_TRIAGE.md).
 
 ## Your first contribution
 
@@ -89,7 +89,7 @@ When you're ready to contribute, it's time to create a pull request.
 
 ## Branching
 
-* [Branching Strategy for Ansible modules for Dell PowerScale](https://github.com/dell/ansible-powerscale/blob/2.0.0/docs/BRANCHING.md)
+* [Branching Strategy for Ansible modules for Dell PowerScale](https://github.com/dell/ansible-powerscale/blob/2.1.0/docs/BRANCHING.md)
 
 ## Signing your commits
 
@@ -144,7 +144,7 @@ Make sure that the title for your pull request uses the same format as the subje
 
 ### Quality gates for pull requests
 
-GitHub Actions are used to enforce quality gates when a pull request is created or when any commit is made to the pull request. These GitHub Actions enforce our minimum code quality requirement for any code that get checked into the repository. If any of the quality gates fail, it is expected that the contributor will look into the check log, understand the problem and resolve the issue. If help is needed, please feel free to reach out the maintainers of the project for [support](https://github.com/dell/ansible-powerscale/blob/2.0.0/docs/SUPPORT.md).
+GitHub Actions are used to enforce quality gates when a pull request is created or when any commit is made to the pull request. These GitHub Actions enforce our minimum code quality requirement for any code that get checked into the repository. If any of the quality gates fail, it is expected that the contributor will look into the check log, understand the problem and resolve the issue. If help is needed, please feel free to reach out the maintainers of the project for [support](https://github.com/dell/ansible-powerscale/blob/2.1.0/docs/SUPPORT.md).
 
 #### Code sanitization
 

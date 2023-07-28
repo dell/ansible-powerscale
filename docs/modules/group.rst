@@ -216,11 +216,11 @@ Examples
 Return Values
 -------------
 
-changed (always, bool, )
+changed (always, bool, false)
   Whether or not the resource has changed.
 
 
-group_details (When group exists, complex, )
+group_details (When group exists, complex, {'dn': 'CN=group_11,CN=Groups,DC=VXXXXX-CX', 'dns_domain': None, 'domain': 'VXXXXX-CX', 'generated_gid': False, 'gid': {'id': 'GID:2000', 'name': 'group_11', 'type': 'group'}, 'id': 'group_11', 'member_of': None, 'members': [], 'name': 'group_11', 'object_history': [], 'provider': 'lsa-local-provider:System', 'sam_account_name': 'group_11', 'sid': {'id': 'SID:S-1-0-11-1111111111-1111111111-1111111111-00000', 'name': 'group_11', 'type': 'group'}, 'type': 'group'})
   Details of the group.
 
 

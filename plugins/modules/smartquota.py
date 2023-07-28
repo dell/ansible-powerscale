@@ -336,6 +336,60 @@ quota_details:
                     "logical": 0,
                     "physical": 2048
                 }
+    sample:
+      {
+        "container": true,
+        "description": "",
+        "efficiency_ratio": null,
+        "enforced": false,
+        "id": "iddd",
+        "include_snapshots": false,
+        "labels": "",
+        "linked": false,
+        "notifications": "default",
+        "path": "VALUE_SPECIFIED_IN_NO_LOG_PARAMETER",
+        "persona": {
+          "id": "UID:9355",
+          "name": "test_user_12",
+          "type": "user"
+        },
+        "ready": true,
+        "reduction_ratio": null,
+        "thresholds": {
+          "advisory": null,
+          "advisory_exceeded": false,
+          "advisory_last_exceeded": null,
+          "hard": null,
+          "hard_exceeded": false,
+          "hard_last_exceeded": null,
+          "percent_advisory": null,
+          "percent_soft": null,
+          "soft": null,
+          "soft_exceeded": false,
+          "soft_grace": null,
+          "soft_last_exceeded": null
+        },
+        "thresholds_on": "applogicalsize",
+        "type": "user",
+        "usage": {
+          "applogical": 0,
+          "applogical_ready": true,
+          "fslogical": 0,
+          "fslogical_ready": true,
+          "fsphysical": 0,
+          "fsphysical_ready": false,
+          "inodes": 0,
+          "inodes_ready": true,
+          "physical": 0,
+          "physical_data": 0,
+          "physical_data_ready": true,
+          "physical_protection": 0,
+          "physical_protection_ready": true,
+          "physical_ready": true,
+          "shadow_refs": 0,
+          "shadow_refs_ready": true
+        }
+      }
 '''
 
 from ansible.module_utils.basic import AnsibleModule
@@ -436,7 +490,7 @@ class SmartQuota(object):
             include_snapshots = quota_dict['include_snapshots']
 
         container = False
-        if 'container' in quota_dict and quota_dict['container'] is not None \
+        if quota_dict and 'container' in quota_dict and quota_dict['container'] is not None \
                 and quota_type == "directory":
             container = quota_dict['container']
 

@@ -4,6 +4,21 @@ Dellemc.Powerscale Change Logs
 
 .. contents:: Topics
 
+v2.1.0
+======
+
+Minor Changes
+-------------
+
+- Added support for deleting an access zone and reordering the authentication providers in access zone module.
+- Added support for service principal names(SPN) in AD module.
+- Added support for SmartConnect zone alaises(DNS names) in network pool module.
+
+New Modules
+-----------
+
+- dellemc.powerscale.s3_bucket - Create, modify, get details and delete an S3 bucket.
+
 v2.0.0
 ======
 
@@ -11,7 +26,7 @@ Minor Changes
 -------------
 
 - Added support for ignoring unresolvable hosts for NFS Export.
-- Added support for "everyone" user in filesystem module.
+- Added support for everyone user in filesystem module.
 - Added support for listing LDAP auth providers and user mapping rules in Info module.
 - Added support for PowerScale OneFS 9.5 Islander release.
 - For the execution of the PowerScale Ansible modules, python library "isilon-sdk" needs to be installed.

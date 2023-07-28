@@ -1,0 +1,227 @@
+---
+- name: S3 Bucket Module Operations on PowerScale Storage
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: "**.**.**.**"
+    port_no: "0000"
+    api_user: "user"
+    api_password: "pass"
+    verify_ssl: false
+    bucket_name: "bhav1-s3-bucket6"
+    path1: "/ansible-S3-bucket-FS"
+
+  tasks:
+    - name: Create S3 bucket - Check_mode
+      dellemc.powerscale.s3_bucket:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        s3_bucket_name: "{{ bucket_name }}"
+        path: "{{ path1 }}"
+        create_path: true
+        owner: "Guest"
+        access_zone: "sample-zone"
+        object_acl_policy: "deny"
+        description: "created via module"
+        acl:
+          - grantee:
+              name: "DOMIAN_NAME\\USERNAME"
+              type: "user"
+              provider_type: "ads"
+            permission: "READ_ACP"
+        state: "present"
+      check_mode: true
+
+    - name: Create S3 bucket
+      dellemc.powerscale.s3_bucket:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        s3_bucket_name: "{{ bucket_name }}"
+        path: "{{ path1 }}"
+        create_path: true
+        owner: "Guest"
+        access_zone: "sample-zone"
+        object_acl_policy: "deny"
+        description: "created via module"
+        acl:
+          - grantee:
+              name: "DOMIAN_NAME\\USERNAME"
+              type: "user"
+              provider_type: "ads"
+            permission: "READ_ACP"
+        state: "present"
+
+    - name: Create S3 bucket - Idempotency
+      dellemc.powerscale.s3_bucket:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        s3_bucket_name: "{{ bucket_name }}"
+        path: "{{ path1 }}"
+        create_path: true
+        owner: "Guest"
+        access_zone: "sample-zone"
+        object_acl_policy: "deny"
+        description: "created via module"
+        acl:
+          - grantee:
+              name: "DOMIAN_NAME\\USERNAME"
+              type: "user"
+              provider_type: "ads"
+            permission: "READ_ACP"
+
+    - name: Get S3 bucket details
+      dellemc.powerscale.s3_bucket:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        s3_bucket_name: "{{ bucket_name }}"
+        access_zone: "sample-zone"
+
+    - name: Modify S3 bucket - Check_mode
+      dellemc.powerscale.s3_bucket:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        s3_bucket_name: "{{ bucket_name }}"
+        access_zone: "sample-zone"
+        object_acl_policy: "replace"
+        description: "Updated Description"
+        acl:
+          - permission: "WRITE_ACP"
+            grantee:
+              name: "ansible-QEsys-user1"
+              type: "user"
+      check_mode: true
+
+    - name: Modify S3 bucket
+      dellemc.powerscale.s3_bucket:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        s3_bucket_name: "{{ bucket_name }}"
+        access_zone: "sample-zone"
+        object_acl_policy: "replace"
+        description: "Updated Description"
+        acl:
+          - permission: "WRITE_ACP"
+            grantee:
+              name: "ansible-QEsys-user1"
+              type: "user"
+
+    - name: Modify S3 bucket - Idempotency
+      dellemc.powerscale.s3_bucket:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        s3_bucket_name: "{{ bucket_name }}"
+        access_zone: "sample-zone"
+        object_acl_policy: "replace"
+        description: "Updated Description"
+        acl:
+          - permission: "WRITE_ACP"
+            grantee:
+              name: "ansible-QEsys-user1"
+              type: "user"
+
+    - name: Remove grantee from S3 bucket - Check_mode
+      dellemc.powerscale.s3_bucket:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        s3_bucket_name: "{{ bucket_name }}"
+        access_zone: "sample-zone"
+        object_acl_policy: "deny"
+        acl:
+          - permission: "WRITE_ACP"
+            grantee:
+              name: "ansible-QEsys-user1"
+              type: "user"
+            acl_state: "remove"
+      check_mode: true
+
+    - name: Remove grantee from S3 bucket
+      dellemc.powerscale.s3_bucket:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        s3_bucket_name: "{{ bucket_name }}"
+        access_zone: "sample-zone"
+        object_acl_policy: "deny"
+        acl:
+          - permission: "WRITE_ACP"
+            grantee:
+              name: "ansible-QEsys-user1"
+              type: "user"
+            acl_state: "remove"
+
+    - name: Remove grantee from S3 bucket - Idempotency
+      dellemc.powerscale.s3_bucket:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        s3_bucket_name: "{{ bucket_name }}"
+        access_zone: "sample-zone"
+        object_acl_policy: "deny"
+        acl:
+          - permission: "WRITE_ACP"
+            grantee:
+              name: "ansible-QEsys-user1"
+              type: "user"
+            acl_state: "remove"
+
+    - name: Delete S3 bucket - Check_mode
+      dellemc.powerscale.s3_bucket:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        s3_bucket_name: "{{ bucket_name }}"
+        access_zone: "sample-zone"
+        state: "absent"
+      check_mode: true
+
+    - name: Delete S3 bucket
+      dellemc.powerscale.s3_bucket:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        s3_bucket_name: "{{ bucket_name }}"
+        access_zone: "sample-zone"
+        state: "absent"
+
+    - name: Delete S3 bucket - Idempotency
+      dellemc.powerscale.s3_bucket:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        s3_bucket_name: "{{ bucket_name }}"
+        access_zone: "sample-zone"
+        state: "absent"

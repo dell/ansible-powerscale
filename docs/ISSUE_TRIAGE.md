@@ -41,9 +41,9 @@ This section describes the various issue templates and the expected content.
 
 Should explain what happened, what was expected and how to reproduce it together with any additional information that may help giving a complete picture of what happened such as screenshots, output and any environment related information that's applicable and/or maybe related to the reported problem:
 
- - Ansible Version: [e.g. 2.13]
- - Python Version [e.g. 3.10]
- - Ansible modules for Dell PowerScale Version: [e.g. 2.0.0]
+ - Ansible Version: [e.g. 2.15]
+ - Python Version [e.g. 3.11]
+ - Ansible modules for Dell PowerScale Version: [e.g. 2.1.0]
  - PowerScale SDK version: [e.g. isilon-sdk]
  - Any other additional information...
 

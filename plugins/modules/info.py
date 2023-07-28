@@ -18,31 +18,16 @@ version_added: '1.2.0'
 short_description: Gathering information about PowerScale Storage
 
 description:
-- Gathering information about PowerScale Storage System includes
-  Get attributes of the PowerScale cluster,
-  Get list of access zones in the PowerScale cluster,
-  Get list of nodes in the PowerScale cluster,
-  Get list of authentication providers for all access zones or a specific access zone,
-  Get list of users and groups for an access zone.
-  Get list of smb_shares in the PowerScale cluster,
-  Get list of nfs_exports in the PowerScale cluster,
-  Get list of nfs_aliases in the PowerScale cluster,
-  Get list of active clients in the PowerScale cluster,
-  Get list of SyncIQ reports in the PowerScale cluster,
-  Get list of SyncIQ target reports in the PowerScale cluster,
-  Get list of SyncIQ target cluster certificates in the PowerScale cluster,
-  Get list of SyncIQ policies in the PowerScale cluster.
-  Get list of SyncIQ performance rules in the PowerScale cluster.
-  Get list of network groupnets of the PowerScale cluster.
-  Get list of network pools for all access zones or a specific access zone of the PowerScale cluster.
-  Get list of network rules of the PowerScale cluster.
-  Get list of network subnets of the PowerScale cluster.
-  Get list of network interfaces of the PowerScale cluster.
-  Get list of node pools of PowerScale cluster.
-  Get list of storage pool tiers of PowerScale cluster.
-  Get list of smb open files of PowerScale cluster.
-  Get list of user mapping rules of PowerScale cluster.
-  Get list of ldap providers of the PowerScale cluster
+- Gathering information about Specified PowerScale Storage entities, includes
+  attributes, access zones, nodes, authentication providers for all access
+  zones, users and groups for an access zone.
+- Get list of smb_shares, nfs_exports, nfs_aliases, active clients,
+  SyncIQ reports, SyncIQ target reports, SyncIQ target cluster certificates,
+  SyncIQ policies, SyncIQ performance rules.
+- Get list of network groupnets, network pools for all access zones or a
+  specific access zone, network rules, network subnets, network interfaces,
+  node pools, storage pool tiers, smb open files.
+- Get list of user mapping rules, ldap providers of the PowerScale cluster.
 
 extends_documentation_fragment:
   - dellemc.powerscale.powerscale
@@ -56,7 +41,8 @@ author:
 options:
   include_all_access_zones:
     description:
-    - Specifies if requested component details need to be fetched from all access zones.
+    - Specifies if requested component details need to be fetched from all
+      access zones.
     - It is mutually exclusive with I(access_zone).
     type: bool
   access_zone:
@@ -77,48 +63,50 @@ options:
     type: str
   gather_subset:
     description:
-    - List of string variables to specify the PowerScale Storage System entities
-      for which information is required.
-    - List of all PowerScale Storage System entities supported by the module -
-    - attributes
-    - access_zones
-    - nodes
-    - providers
-    - users
-    - groups
-    - smb_shares
-    - nfs_exports
-    - nfs_aliases
-    - clients
-    - synciq_reports
-    - synciq_target_reports
-    - synciq_policies
-    - synciq_target_cluster_certificates
-    - synciq_performance_rules
-    - network_groupnets
-    - network_pools
-    - network_rules
-    - network_interfaces
-    - network_subnets
-    - node_pools
-    - storagepool_tiers
-    - smb_files
-    - user_mapping_rules
-    - ldap
-    - The list of I(attributes), I(access_zones) and I(nodes) is for the entire PowerScale
-      cluster
-    - The list of providers for the entire PowerScale cluster
+    - List of string variables to specify the PowerScale Storage System
+      entities for which information is required.
+    - List of all PowerScale Storage System entities supported by the module.
+    - Attributes - C(attributes).
+    - Access zones - C(access_zones).
+    - Nodes - C(nodes).
+    - Providers - C(providers).
+    - Users - C(users).
+    - Groups - C(groups).
+    - Smb shares - C(smb_shares).
+    - Nfs exports - C(nfs_exports).
+    - Nfs aliases - C(nfs_aliases).
+    - Clients - C(clients).
+    - Synciq reports - C(synciq_reports).
+    - Synciq target reports - C(synciq_target_reports).
+    - Synciq policies - C(synciq_policies).
+    - Synciq target cluster certificates - C(synciq_target_cluster_certificates).
+    - Synciq performance rules - C(synciq_performance_rules).
+    - Network groupnets - C(network_groupnets).
+    - Network pools - C(network_pools).
+    - Network rules - C(network_rules).
+    - Network interfaces - C(network_interfaces).
+    - Network subnets - C(network_subnets).
+    - Node pools - C(node_pools).
+    - Storagepool tiers - C(storagepool_tiers).
+    - SMB files - C(smb_files).
+    - User mapping rules - C(user_mapping_rules).
+    - LDAPs - C(ldap).
+    - The list of I(attributes), I(access_zones) and I(nodes) is for the entire
+      PowerScale cluster.
+    - The list of providers for the entire PowerScale cluster.
     - The list of users and groups is specific to the specified
-      access zone
-    - The list of syncIQ reports and syncIQ target reports for the entire PowerScale
-      cluster
-    - The list of syncIQ policies, syncIQ target cluster certificates and syncIQ performance rules
-      for the entire PowerScale cluster
-    - The list of network pools is specific to the specified access zone or for all access zones
-    - The list of network groupnets, network subnets, network rules and network interfaces is for the entire PowerScale cluster
-    - The list of smb open files for the entire PowerScale cluster
-    - The list of user mapping rules of PowerScale cluster
-    - The list of ldap providers of PowerScale cluster
+      access zone.
+    - The list of syncIQ reports and syncIQ target reports for the entire
+      PowerScale cluster.
+    - The list of syncIQ policies, syncIQ target cluster certificates and
+      syncIQ performance rules for the entire PowerScale cluster.
+    - The list of network pools is specific to the specified access zone or for
+      all access zones.
+    - The list of network groupnets, network subnets, network rules and network
+      interfaces is for the entire PowerScale cluster.
+    - The list of smb open files for the entire PowerScale cluster.
+    - The list of user mapping rules of PowerScale cluster.
+    - The list of ldap providers of PowerScale cluster.
     required: true
     choices: [attributes, access_zones, nodes, providers, users, groups,
               smb_shares, nfs_exports, nfs_aliases, clients, synciq_reports, synciq_target_reports,
@@ -384,7 +372,782 @@ EXAMPLES = r'''
       scope: "effective"
 '''
 
-RETURN = r''' '''
+RETURN = r'''
+changed:
+    description: Shows Whether or not the resource has changed.
+    returned: always
+    type: bool
+    sample: "false"
+AccessZones:
+    description: Access zones of  the PowerScale storage system.
+    type: dict
+    returned: When C(access_zones) is in a given I(gather_subset)
+    contains:
+        zones:
+            description: List of different access zone.
+            type: list
+    sample: [
+        "zones": [
+            {
+                "alternate_system_provider": "lsa-file-provider:MinimumRequired",
+                "auth_providers": [
+                    "lsa-local-provider:sampe-az"
+                ],
+                "cache_entry_expiry": 14400,
+                "groupnet": "groupnet0",
+                "home_directory_umask": 63,
+                "id": "Bhavneet-SS",
+                "ifs_restricted": [],
+                "name": "Bhavneet-SS",
+                "negative_cache_entry_expiry": 60,
+                "netbios_name": "",
+                "path": "/ifs",
+                "skeleton_directory": "/usr/share/skel",
+                "system": false,
+                "system_provider": "lsa-file-provider:System",
+                "user_mapping_rules": [],
+                "zone_id": 18
+            }
+        ]
+    ]
+Attributes:
+    description: Different Attributes of the PowerScale storage system.
+    type: dict
+    returned: When C(attributes) is in a given I(gather_subset)
+    contains:
+        Cluster_Version:
+            description: Cluster version of the PowerScale storage system.
+            type: dict
+        Config:
+            description: Config details of the PowerScale storage system.
+            type: dict
+        Contact_Info:
+            description: Contact details of the PowerScale storage system.
+            type: dict
+        External_IP:
+            description: External IPs of the PowerScale storage system.
+            type: dict
+        Logon_msg:
+            description: Log-on messages of the PowerScale storage system.
+            type: dict
+    sample: {
+        "Cluster_Version": {
+            "errors": [],
+            "nodes": [
+                {
+                    "build": "B_9_5_0_005(RELEASE)",
+                    "id": 1,
+                    "release": "x.x.0.0",
+                    "revision": "124",
+                    "type": "Isilon OneFS",
+                    "version": "Isilon OneFS x.x.0.0"
+                }
+            ],
+            "total": 3
+        },
+        "Config": {
+            "description": "",
+            "devices": [
+                {
+                    "devid": 1,
+                    "guid": "000e1e84be90ac5e7d62df0dfc180d3d0ccb",
+                    "is_up": true,
+                    "lnn": 1
+                }
+            ],
+            "encoding": "utf-8",
+            "guid": "000e1e84be902f5f7d62ef254853667f0792",
+            "has_quorum": true,
+            "is_compliance": false,
+            "is_virtual": false,
+            "is_vonefs": false,
+            "join_mode": "Manual",
+            "local_devid": 1,
+            "local_lnn": 1,
+            "local_serial": "xxxx-xxxx-xxxxx",
+            "name": "LAB-IsilonS-xxxxx",
+            "onefs_version": {
+                "build": "B_x_x_0_005(RELEASE)",
+                "copyright": "Copyright (c) 2001-2022 Dell Inc. All Rights Reserved.",
+                "reldate": xxxx,
+                "release": "x.x.0.0",
+                "revision": "649926064822288389",
+                "type": "Isilon OneFS",
+                "version": "Isilon OneFS x.x.0.0"
+            },
+            "timezone": {
+                "abbreviation": "GMT",
+                "custom": "",
+                "name": "Greenwich Mean Time",
+                "path": "GMT"
+            },
+            "upgrade_type": null
+        },
+        "Contact_Info": {},
+        "External_IP": {},
+        "Logon_msg": {}
+    }
+Clients:
+    description: List all clients present in the PowerScale system.
+    type: list
+    returned: When C(clients) is in a given I(gather_subset)
+    contains:
+        local_address:
+            description: Local address of the client.
+            type: str
+        local_name:
+            description: Local name of the client.
+            type: str
+        node:
+            description: Node on which client exists.
+            type: int
+        protocol:
+            description: Protocol that client uses.
+            type: str
+        remote_address:
+            description: Remote address of the client.
+            type: str
+        remote_name:
+            description: Remote address of the client.
+            type: str
+    sample: [
+        {
+            "local_address": "x.x.x.x",
+            "local_name": "x.x.x.x",
+            "node": 1,
+            "protocol": "nfs4",
+            "remote_address": "x.x.x.x",
+            "remote_name": "x.x.x.x"
+        }
+    ]
+Groups:
+    description: List of all groups.
+    type: list
+    returned: When C(groups) is in a given I(gather_subset)
+    contains:
+        groups:
+            description: List of groups details.
+            type: list
+            contains:
+                id:
+                    description: ID of the groups.
+                    type: str
+                name:
+                    description: Name of the groups.
+                    type: str
+                provider:
+                    description: The provider of the groups.
+                    type: str
+    sample: [
+        "groups": [
+            {
+                "dn": "CN=Administrators,CN=Builtin,DC=PIE-ISILONS-xxx",
+                "dns_domain": null,
+                "domain": "BUILTIN",
+                "generated_gid": false,
+                "gid": {
+                    "id": "GID:1544",
+                    "name": null,
+                    "type": null
+                },
+                "id": "Administrators",
+                "member_of": null,
+                "name": "Administrators",
+                "object_history": [],
+                "provider": "lsa-local-provider:System",
+                "sam_account_name": "Administrators",
+                "sid": {
+                    "id": "SID:S-1-5-32-544",
+                    "name": null,
+                    "type": null
+                },
+                "type": "group"
+            }
+        ]
+    ]
+LdapProviders:
+    description: Provide details of LDAP providers.
+    type: list
+    returned: When C(ldap) is in a given I(gather_subset)
+    contains:
+        linked_access_zones:
+            description: List of access zones linked to the authentication
+                         provider.
+            type: list
+        base_dn:
+            description: Specifies the root of the tree in which to search
+                         identities.
+            type: str
+        bind_dn:
+            description: Specifies the distinguished name for binding to the
+                         LDAP server.
+            type: str
+        groupnet:
+            description: Groupnet identifier.
+            type: str
+        name:
+            description: Specifies the name of the LDAP provider.
+            type: str
+        server_uris:
+            description: Specifies the server URIs.
+            type: str
+        status:
+            description: Specifies the status of the provider.
+            type: str
+    sample: [
+        {
+            "linked_access_zones": [
+                "System"
+            ],
+            "base_dn": "dc=sample,dc=ldap,dc=domain,dc=com",
+            "bind_dn": "cn=administrator,dc=sample,dc=ldap,dc=domain,dc=com",
+            "groupnet": "groupnet",
+            "name": "sample-ldap",
+            "server_uris": "ldap://xx.xx.xx.xx",
+            "status": "online"
+        }
+    ]
+NetworkGroupnets:
+    description: List of Network Groupnets.
+    type: list
+    returned: When C(network_groupnets) is in a given I(gather_subset)
+    contains:
+        id:
+            description: ID of the groupnet.
+            type: str
+        name:
+            description: Name of the groupnet.
+            type: str
+    sample: [
+        {
+            "id": "sample",
+            "name": "groupnet0"
+        }
+    ]
+NetworkInterfaces:
+    description: List of Network interfaces.
+    type: list
+    returned: When C(network_interfaces) is in a given I(gather_subset)
+    contains:
+        id:
+            description: ID of the interface.
+            type: str
+        lnn:
+            description: Interface's lnn.
+            type: int
+        name:
+            description: Name of the interface.
+            type: str
+    sample: [
+        {
+            "id": "110gig1",
+            "lnn": 1,
+            "name": "10gig1"
+        }
+    ]
+NetworkPools:
+    description: List of Network Pools.
+    type: list
+    returned: When C(network_pools) is in a given I(gather_subset)
+    contains:
+        id:
+            description: ID of the Network Pool.
+            type: str
+        name:
+            description: Name of the Network Pool.
+            type: str
+    sample: [
+        {
+            "id": "groupnet0.subnet0.pool0",
+            "name": "pool0"
+        }
+    ]
+NetworkRules:
+    description: List of the Network rules.
+    type: list
+    returned: When C(network_rules) is in a given I(gather_subset)
+    contains:
+        id:
+            description: Name of the Network Pool.
+            type: str
+        name:
+            description: Name of the Network Pool.
+            type: str
+    sample: [
+        {
+            "id": "groupnet0.subnet0.pool0.test_rule",
+            "name": "test_rule"
+        }
+    ]
+NetworkSubnets:
+    description: List of the Network subnets.
+    type: list
+    returned: When C(network_subnets) is in a given I(gather_subset)
+    contains:
+        id:
+            description: Name of the Network Pool.
+            type: str
+        name:
+            description: Name of the Network Pool.
+            type: str
+    sample: [
+        {
+            "id": "groupnet0.subnet0.pool0.test_rule",
+            "name": "test_rule"
+        }
+    ]
+NfsAliases:
+    description: List of NFS Aliases.
+    type: list
+    returned: When C(nfs_aliases) is in a given I(gather_subset)
+    contains:
+        health:
+            description: Specifies the health of the NFS alias.
+            type: str
+        id:
+            description: ID of the NFS alias.
+            type: str
+        name:
+            description: Name of the NFS alias.
+            type: str
+        path:
+            description: Path of the NFS alias.
+            type: str
+        zone:
+            description: Access zone of the NFS alias.
+            type: str
+    sample: [
+        {
+            "health": "path not found",
+            "id": "/ifs_#$%^&*()",
+            "name": "/ifs_#$%^&*()",
+            "path": "/ifs/sample_alias_1",
+            "zone": "System"
+        }
+    ]
+NfsExports:
+    description: List of NFS exports.
+    type: list
+    returned: When C(nfs_exports) is in a given I(gather_subset)
+    contains:
+        id:
+            description: ID of the NFS exports.
+            type: str
+        path:
+            description: Path of the NFS exports.
+            type: list
+    sample: [
+        {
+            "id": 205,
+            "paths": [
+                "/ifs/data/sample/fs1"
+            ]
+        }
+    ]
+NodePools:
+    description: List of the Node pools.
+    type: list
+    returned: When C(node_pools) is in a given I(gather_subset)
+    contains:
+        id:
+            description: ID of the node pool.
+            type: str
+        lnns:
+            description: Node pool's lnns.
+            type: list
+        name:
+            description: Name of the node pool.
+            type: str
+        protection_policy:
+            description: Protection policy of the node pool.
+            type: str
+        usage:
+            description: Usage of the node pool.
+            type: dict
+    sample: [
+        {
+            "can_disable_l3": true,
+            "can_enable_l3": true,
+            "health_flags": [
+                "missing_drives"
+            ],
+            "id": 1,
+            "l3": true,
+            "l3_status": "l3",
+            "lnns": [
+                1
+            ],
+            "manual": false,
+            "name": "s210_6.9tb_1.6tb-ssd_64gb",
+            "node_type_ids": [
+                1
+            ],
+            "protection_policy": "+2d:1n",
+            "tier": null,
+            "transfer_limit_pct": 90,
+            "transfer_limit_state": "default",
+            "usage": {}
+        }
+    ]
+Nodes:
+    description: Contain the list of Nodes in the PowerScale cluster.
+    type: dict
+    returned: When C(nodes) is in a given I(gather_subset)
+    contains:
+        nodes:
+            description: Specifies the deatils of the node.
+            type: list
+        total:
+            description: Total number of nodes.
+            type: int
+    sample: {
+        "nodes": [],
+        "total": 1
+    }
+Providers:
+    description: Contains different type of providers in the PowerScale system.
+    type: list
+    returned: When C(providers) is in a given I(gather_subset)
+    contains:
+        provider_instances:
+            description: List of providers.
+            type: list
+            contains:
+                active_server:
+                    description: Active server of the provider.
+                    type: str
+                connections:
+                    description: Different connections of provider.
+                    type: str
+                groupnet:
+                    description: Groupnet of the provider.
+                    type: str
+                id:
+                    description: ID of the provider.
+                    type: str
+                name:
+                    description: Name of the provider.
+                    type: str
+                status:
+                    description: Status of the provider.
+                    type: str
+                type:
+                    description: Type of the provider
+                    type: str
+                zone_name:
+                    description: Access zone of the provider.
+                    type: str
+    sample: {
+        "provider_instances": [
+            {
+                "active_server": null,
+                "connections": [],
+                "groupnet": null,
+                "id": "lsa-local-provider:System",
+                "name": "System",
+                "status": "active",
+                "type": "local",
+                "zone_name": "System"
+            }
+        ]
+    }
+SmbOpenFiles:
+    description: List of SMB open files.
+    type: list
+    returned: When C(smb_files) is in a given I(gather_subset)
+    contains:
+        file:
+            description: Path of file within /ifs.
+            type: str
+        id:
+            description: The ID of the SMB open file.
+            type: int
+        locks:
+            description: The number of locks user holds on file.
+            type: int
+        permission:
+            description: The user's permissions on file.
+            type: list
+        user:
+            description: User holding file open.
+            type: str
+    sample: [
+        {
+            "file": "C:\\ifs",
+            "id": 1370,
+            "locks": 0,
+            "permissions": [
+                "read"
+            ],
+            "user": "admin"
+        }
+    ]
+SmbShares:
+    description: List of the SMB Shares.
+    type: list
+    returned: When C(smb_shares) is in a given I(gather_subset)
+    contains:
+        id:
+            description: ID of the SMB Share.
+            type: str
+        name:
+            description: Name of the SMB Share.
+            type: str
+    sample: [
+        {
+            "id": "Atest",
+            "name": "Atest"
+        }
+    ]
+StoragePoolTiers:
+    description: List of the storage pool tiers.
+    type: list
+    returned: When C(storagepool_tiers) is in a given I(gather_subset)
+    contains:
+        children:
+            description: Children in the storage pool tiers.
+            type: list
+        id:
+            description: ID of the storage pool tier.
+            type: str
+        lnns:
+            description: Storage pool tier's lnn.
+            type: list
+        name:
+            description: Name of the storage pool tier.
+            type: str
+        usage:
+            description: Usage of the storage pool tiers.
+            type: list
+    sample: [
+        {
+            "children": [],
+            "id": 984,
+            "lnns": [],
+            "name": "Ansible_Tier_1",
+            "usage": {}
+        }
+    ]
+SynciqPerformanceRules:
+    description: List of SyncIQ performance rules.
+    type: list
+    returned: When C(synciq_performance_rules) is in a given I(gather_subset)
+    contains:
+        enabled:
+            description: Whether SyncIQ performance rule enabled.
+            type: bool
+        id:
+            description: ID of the SyncIQ performance rule.
+            type: str
+        limit:
+            description: Limits of the SyncIQ performance rule.
+            type: str
+        schedule:
+            description: Schedule of the SyncIQ performance rule.
+            type: dict
+        type:
+            description: The type of the SyncIQ performance rule.
+            type: str
+    sample: [
+        {
+            "enabled": true,
+            "id": "fc-0",
+            "limit": "1files/sec",
+            "schedule": {},
+            "type": "file_count"
+        }
+    ]
+SynciqPolicies:
+    description: List of the SyncIQ policies.
+    type: list
+    returned: When C(synciq_policies) is in a given I(gather_subset)
+    contains:
+        enabled:
+            description: Whether SyncIQ policies enabled.
+            type: bool
+        id:
+            description: ID of the SyncIQ policies.
+            type: str
+        name:
+            description: Name of the SyncIQ policies.
+            type: str
+        schedule:
+            description: Schedule of the SyncIQ policies.
+            type: str
+        source_root_path:
+            description: Source path of the SyncIQ policies.
+            type: str
+        target_path:
+            description: Target path of the SyncIQ policies.
+            type: str
+    sample: [
+        {
+            "enabled": true,
+            "id": "1ee8ad74f6f147894d21e339d57c3d1b",
+            "name": "dk2-nginx-10-230-24-249-Five_Minutes",
+            "schedule": "when-source-modified",
+            "source_root_path": "/ifs/data/sample-x.x.x.x-Five_Minutes",
+            "target_path": "/ifs/data/dk2-nginx-x.x.x.x-Five_Minutes"
+        }
+    ]
+SynciqReports:
+    description: List of the SyncIQ reports.
+    type: list
+    returned: When C(synciq_reports) is in a given I(gather_subset)
+    contains:
+        id:
+            description: ID of the SyncIQ reports.
+            type: str
+        name:
+            description: Name of the SyncIQ reports.
+            type: str
+    sample: [
+        {
+            "id": "1ee8ad74f6f147894d21e339d57c3d1b",
+            "name": "dk2-nginx-10-230-24-249-Five_Minutes"
+        }
+    ]
+SynciqTargetClusterCertificate:
+    description: List of the SyncIQ Target cluster certificates.
+    type: list
+    returned: When C(synciq_target_cluster_certificates) is in a given I(gather_subset)
+    contains:
+        id:
+            description: ID of the SyncIQ Target cluster certificates.
+            type: str
+        name:
+            description: Name of the SyncIQ Target cluster certificates.
+            type: str
+    sample: [
+        {
+            "id": "077f119e54ec2c12c74f011433cd33ac5c",
+            "name": "sample"
+        }
+    ]
+SynciqTargetReports:
+    description: List of the SyncIQ Target reports.
+    type: list
+    returned: When C(synciq_target_reports) is in a given I(gather_subset)
+    contains:
+        id:
+            description: ID of the SyncIQ Target reports.
+            type: str
+        name:
+            description: Name of the SyncIQ Target reports.
+            type: str
+    sample: [
+        {
+            "id": "cicd-repctl-0419-t151741-10-247-100-10-Five_Minutes",
+            "name": "cicd-repctl-0419-t1741-10-247-100-10-Five_Minutes"
+        }
+    ]
+UserMappingRules:
+    description: List of the User mapping rules.
+    type: list
+    returned: When C(user_mapping_rules) is in a given I(gather_subset)
+    contains:
+        apply_order:
+            description: Current order of the rule.
+            type: int
+        operator:
+            description: The operation that a rule carries out.
+            type: str
+        options:
+            description: The operation that a rule carries out.
+            type: dict
+        user1:
+            description: A UNIX user or an Active Directory user.
+            type: dict
+        user2:
+            description: A UNIX user or an Active Directory user.
+            type: dict
+    sample: [
+        {
+            "apply_order": 1,
+            "operator": "append",
+            "options": {
+                "_break": false,
+                "default_user": null,
+                "group": true,
+                "groups": true,
+                "user": true
+            },
+            "user1": {
+                "domain": null,
+                "user": "test_user_2"
+            },
+            "user2": {
+                "domain": null,
+                "user": "test_user_1"
+            }
+        }
+    ]
+Users:
+    description: List of all Users.
+    type: list
+    returned: When C(users) is in a given I(gather_subset)
+    contains:
+        users:
+            description: List of users details.
+            type: list
+            contains:
+                id:
+                    description: ID of the user.
+                    type: str
+                name:
+                    description: Name of the user.
+                    type: str
+                provider:
+                    description: The provider of the user.
+                    type: str
+    sample: [
+        "users": [
+            {
+                "dn": "CN=test_ans_user,CN=Users,DC=X-ISILON-X",
+                "dns_domain": null,
+                "domain": "x-ISILON-X",
+                "email": "testuser_ans@dell.com",
+                "gid": {
+                    "id": "GID:1800",
+                    "name": null,
+                    "type": null
+                },
+                "home_directory": "/ifs/home/test_ans_user",
+                "id": "test_ans_user",
+                "name": "test_ans_user",
+                "on_disk_user_identity": {
+                    "id": "UID:2016",
+                    "name": null,
+                    "type": null
+                },
+                "password_expired": false,
+                "primary_group_sid": {
+                    "id": "SID:S-1-5-21-2193650305-1279797252-961391754-800",
+                    "name": null,
+                    "type": null
+                },
+                "prompt_password_change": false,
+                "provider": "lsa-local-provider:System",
+                "sam_account_name": "test_ans_user",
+                "shell": "/bin/zsh",
+                "sid": {
+                    "id": "SID:S-1-5-21-2193650305-1279797252-961391754-1025",
+                    "name": null,
+                    "type": null
+                },
+                "ssh_public_keys": [],
+                "type": "user",
+                "uid": {
+                    "id": "UID:2016",
+                    "name": null,
+                    "type": null
+                },
+                "upn": "test_ans_user@x-ISILON-X",
+                "user_can_change_password": true
+            }
+        ]
+    ]
+'''
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \

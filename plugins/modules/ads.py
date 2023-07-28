@@ -18,8 +18,8 @@ version_added: '1.2.0'
 short_description: Manages the ADS authentication provider on PowerScale
 description:
 - Manages the Active Directory authentication provider on the PowerScale storage
-  system. This includes creating, modifying, deleting and retreiving the details
-  of an ADS provider.
+  system. This includes adding spn, removing spn, fixing spn, checking spn, creating, modifying,
+  deleting and retreiving the details of an ADS provider.
 
 extends_documentation_fragment:
   - dellemc.powerscale.powerscale
@@ -89,8 +89,31 @@ options:
         description:
         - Specifies the organizational unit.
         type: str
-
-
+  spns:
+    description: List of SPN's to configure.
+    type: list
+    elements: dict
+    suboptions:
+        spn:
+          description:
+          - Service Principle Name(SPN).
+          type: str
+          required: true
+        state:
+          description:
+          - The state of the SPN.
+          - C(present) - indicates that the SPN should exist on the machine account.
+          - C(absent) - indicates that the SPN should not exist on the machine account.
+          type: str
+          choices: ['absent', 'present']
+          default: 'present'
+  spn_command:
+    description:
+    - Specify command of SPN.
+    - C(check) - Check for missing SPNs for an AD provider.
+    - C(fix) - Adds missing SPNs for an AD provider.
+    type: str
+    choices: ['check', 'fix']
   state:
     description:
     - The state of the ads provider after the task is performed.
@@ -155,6 +178,49 @@ EXAMPLES = r'''
     domain_name: "ansibleneo.com"
     state: "present"
 
+- name: Add an SPN
+  dellemc.powerscale.ads:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    domain_name: "ansibleneo.com"
+    spns:
+    - spn: "HOST/test1"
+    state: "present"
+
+- name: Remove an SPN
+  dellemc.powerscale.ads:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    domain_name: "ansibleneo.com"
+    spns:
+    - spn: "HOST/test1"
+      state: "absent"
+    state: "present"
+
+- name: Check an SPN
+  dellemc.powerscale.ads:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    domain_name: "ansibleneo.com"
+    spn_command: "check"
+    state: "present"
+
+- name: Fix an SPN
+  dellemc.powerscale.ads:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    domain_name: "ansibleneo.com"
+    spn_command: "fix"
+    state: "present"
+
 - name: Get Active Directory provider details with instance name
   dellemc.powerscale.ads:
     onefs_host: "{{onefs_host}}"
@@ -188,6 +254,13 @@ changed:
     description: Whether or not the resource has changed.
     returned: always
     type: bool
+    sample: "false"
+
+spn_check:
+    description: Missing SPNs for an AD provider.
+    returned: When check operation is done.
+    type: list
+    sample: ['host/test1']
 
 ads_provider_details:
     description: The Active Directory provider details.
@@ -218,6 +291,35 @@ ads_provider_details:
             description: Specifies the machine account name when creating a
                          SAM account with Active Directory.
             type: str
+    sample:
+        {"ads_provider_details": [{
+                "forest": "sample.com",
+                "groupnet": "groupnet0",
+                "home_directory_template": "/ifs/home/%D/%U",
+                "hostname": "v.sample.com",
+                "id": "sample.com",
+                "linked_access_zones": [],
+                "login_shell": "/bin/abc",
+                "machine_account": "m1",
+                "name": "sample.com",
+                "extra_expected_spns": [
+                    "HOST/test5"
+                ],
+                "recommended_spns": [
+                    "HOST/test1",
+                    "HOST/test2",
+                    "HOST/test3",
+                    "HOST/test4"
+                ],
+                "spns": [
+                    "HOST/test2",
+                    "HOST/test3",
+                    "HOST/test4",
+                    "HOST/test5"
+                ],
+                "status": "online"
+            }]
+        }
 '''
 
 import re
@@ -377,6 +479,56 @@ class Ads(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
+    def update_extra_expected_spns(self, operation, spn, extra_expected_spns, recommended_spns):
+        """
+        :param operation: Add or remove SPN.
+        :param spn: SPN
+        :param extra_expected_spns: Extra expected SPN's.
+        :param recommended_spns: Recommended SPN's.
+        :return: Extra expected SPN's.
+        """
+        if operation == 'add' and spn not in recommended_spns and spn not in extra_expected_spns:
+            extra_expected_spns.append(spn)
+        elif operation == 'remove' and spn in extra_expected_spns:
+            extra_expected_spns.remove(spn)
+        return extra_expected_spns
+
+    def get_spns_not_in_recommended_spns(self, spns, recommended_spns):
+        """
+        :param spns: List of SPN's
+        :param recommended_spns: Recommended SPN's.
+        :return: List of SPN's.
+        """
+        list_difference = [spn for spn in recommended_spns if spn not in spns]
+        return list_difference
+
+    def perform_spn_operation(self, array_ads):
+        """
+        :param array_ads: ADS dictionary returned from the PowerScale array.
+        :return: Whether ADS is modified, SPN's list and extra expected SPN's list.
+        """
+        spns = self.module.params['spns'] if self.module.params['spns'] else []
+        existing_spns = array_ads[0]['spns']
+        extra_expected_spns = array_ads[0]['extra_expected_spns']
+        recommended_spns = array_ads[0]['recommended_spns']
+        spn_command = self.module.params['spn_command']
+        modified = False
+        for spn in spns:
+            if spn['state'] == 'present' and spn['spn'] not in existing_spns:
+                existing_spns.append(spn['spn'])
+                extra_expected_spns = self.update_extra_expected_spns('add', spn['spn'], extra_expected_spns, recommended_spns)
+                modified = True
+            elif spn['state'] == 'absent' and spn['spn'] in existing_spns:
+                existing_spns.remove(spn['spn'])
+                extra_expected_spns = self.update_extra_expected_spns('remove', spn['spn'], extra_expected_spns, recommended_spns)
+                modified = True
+        if spn_command == 'fix':
+            spn_difference = self.get_spns_not_in_recommended_spns(existing_spns, recommended_spns)
+            if spn_difference != []:
+                existing_spns.extend(spn_difference)
+                modified = True
+        return modified, existing_spns, extra_expected_spns
+
     def get_modified_ads(self, input_ads, array_ads):
         """
         :param input_ads: ADS dictionary passed by the user.
@@ -493,6 +645,7 @@ class Ads(object):
         domain = self.module.params['domain_name']
         instance = self.module.params['instance_name']
         ads_parameters = self.module.params['ads_parameters']
+        spn_command = self.module.params['spn_command']
         ads_name = []
 
         if instance and not domain:
@@ -528,8 +681,15 @@ class Ads(object):
             changed = True
 
         # Modify an Active Directory provider
-        if state == "present" and ads_details and ads_parameters:
-            modified_ads = self.get_modified_ads(ads_parameters, ads_details)
+        check_modification = ads_parameters or self.module.params['spns'] or spn_command == 'fix'
+        if state == "present" and ads_details and check_modification:
+            modified_ads = {}
+            if ads_parameters:
+                modified_ads = self.get_modified_ads(ads_parameters, ads_details)
+            is_spn_modified, spns, extra_spns = self.perform_spn_operation(ads_details)
+            if is_spn_modified:
+                modified_ads['spns'] = spns
+                modified_ads['extra_expected_spns'] = extra_spns
             if modified_ads:
                 LOG.info('Modifying ADS provider..')
                 self.validate_input(ads_details, domain, instance)
@@ -547,6 +707,9 @@ class Ads(object):
             self.update_ads_access_zone_info(ads_name, ads_details)
         self.result["changed"] = changed
         self.result["ads_provider_details"] = ads_details
+        if spn_command == 'check' and ads_details:
+            self.result["spn_check"] = self.get_spns_not_in_recommended_spns(ads_details[0]['spns'],
+                                                                             ads_details[0]['recommended_spns'])
         self.module.exit_json(**self.result)
 
 
@@ -570,9 +733,16 @@ def get_ads_parameters():
                                                       '/bin/rbash',
                                                       '/sbin/nologin']),
                 machine_account=dict(type='str'),
-                organizational_unit=dict(type='str')
+                organizational_unit=dict(type='str'),
             )
         ),
+        spns=dict(
+            type='list', elements='dict', options=dict(
+                spn=dict(type='str', required=True),
+                state=dict(type='str', choices=['present', 'absent'], default='present')
+            )
+        ),
+        spn_command=dict(type='str', choices=['check', 'fix']),
         state=dict(required=True, type='str', choices=['present', 'absent'])
     )
 

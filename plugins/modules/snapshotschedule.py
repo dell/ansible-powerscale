@@ -248,6 +248,26 @@ snapshot_schedule_details:
                 total:
                     description: Total number of items available
                     type: int
+    sample: {
+        "schedules": [
+            {
+                "alias": null,
+                "duration": 604800,
+                "id": 1759,
+                "name": "Atest",
+                "next_run": 1687564800,
+                "next_snapshot": "ScheduleName_duration_2023-06-24_00:00",
+                "path": "/ifs",
+                "pattern": "ScheduleName_duration_%Y-%m-%d_%H:%M",
+                "schedule": "every 1 days at 12:00 AM"
+            }
+        ],
+        "snapshot_list": {
+            "resume": null,
+            "snapshots": [],
+            "total": 0
+        }
+    }
 '''
 
 import re

@@ -97,6 +97,49 @@
           login_shell: "/bin/rbash"
         state: "{{ state_present }}"
 
+    - name: Add an SPN
+      dellemc.powerscale.ads:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        domain_name: "{{ domain_name }}"
+        spns:
+          - spn: "HOST/test1"
+        state: "{{ state_present }}"
+
+    - name: Remove an SPN
+      dellemc.powerscale.ads:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        domain_name: "{{ domain_name }}"
+        spns:
+          - spn: "HOST/test1"
+            state: "absent"
+        state: "{{ state_present }}"
+
+    - name: Check an SPN
+      dellemc.powerscale.ads:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        domain_name: "{{ domain_name }}"
+        spn_command: "check"
+        state: "{{ state_present }}"
+
+    - name: Fix an SPN
+      dellemc.powerscale.ads:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        domain_name: "{{ domain_name }}"
+        spn_command: "fix"
+        state: "{{ state_present }}"
+
     - name: Get Active Directory provider details with domain name
       dellemc.powerscale.ads:
         onefs_host: "{{ onefs_host }}"

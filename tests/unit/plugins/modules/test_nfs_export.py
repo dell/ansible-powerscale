@@ -49,6 +49,16 @@ class TestNfsExport():
         nfs_module_mock.perform_module_operation()
         nfs_module_mock.protocol_api.list_nfs_exports.assert_called()
 
+    def test_get_nfs_root_response(self, nfs_module_mock):
+        self.get_nfs_args.update({"path": "/",
+                                  "access_zone": "sample-zone",
+                                  "state": "present"})
+        nfs_module_mock.module.params = self.get_nfs_args
+        nfs_module_mock.protocol_api.list_nfs_exports = MagicMock(
+            return_value=MockNFSApi.NFS_1)
+        nfs_module_mock.perform_module_operation()
+        nfs_module_mock.protocol_api.list_nfs_exports.assert_called()
+
     def test_get_nfs_response_using_id(self, nfs_module_mock):
         self.get_nfs_args.update({"path": MockNFSApi.PATH_1,
                                   "access_zone": MockNFSApi.SYS_ZONE,
@@ -58,6 +68,16 @@ class TestNfsExport():
             return_value=None)
         nfs_module_mock.protocol_api.get_nfs_export = MagicMock(
             side_effect=utils.ApiException)
+        nfs_module_mock.perform_module_operation()
+        nfs_module_mock.protocol_api.get_nfs_export.assert_called()
+
+    def test_get_nfs_response_multiple_path(self, nfs_module_mock):
+        self.get_nfs_args.update({"path": MockNFSApi.PATH_1,
+                                  "access_zone": MockNFSApi.SYS_ZONE,
+                                  "state": "present"})
+        nfs_module_mock.module.params = self.get_nfs_args
+        nfs_module_mock.protocol_api.list_nfs_exports.to_dict = MagicMock(
+            return_value=MockNFSApi.NFS_MULTIPLE)
         nfs_module_mock.perform_module_operation()
         nfs_module_mock.protocol_api.get_nfs_export.assert_called()
 
@@ -82,7 +102,7 @@ class TestNfsExport():
         nfs_module_mock.zone_summary_api.get_zones_summary_zone.to_dict = MagicMock(
             side_effect=utils.ApiException)
         nfs_module_mock.perform_module_operation()
-        nfs_module_mock.zone_summary_api.get_zones_summary_zone.assert_called()
+        nfs_module_mock.protocol_api.list_nfs_exports.assert_called()
 
     def test_get_nfs_404_exception(self, nfs_module_mock):
         self.get_nfs_args.update({"path": MockNFSApi.PATH_1,
