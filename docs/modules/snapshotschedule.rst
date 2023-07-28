@@ -242,7 +242,7 @@ changed (always, bool, )
   Whether or not the resource has changed.
 
 
-snapshot_schedule_details (When snapshot schedule exists, complex, )
+snapshot_schedule_details (When snapshot schedule exists, complex, {'schedules': [{'alias': None, 'duration': 604800, 'id': 1759, 'name': 'Atest', 'next_run': 1687564800, 'next_snapshot': 'ScheduleName_duration_2023-06-24_00:00', 'path': '/ifs', 'pattern': 'ScheduleName_duration_%Y-%m-%d_%H:%M', 'schedule': 'every 1 days at 12:00 AM'}], 'snapshot_list': {'resume': None, 'snapshots': [], 'total': 0}})
   Details of the snapshot schedule including snapshot details.
 
 

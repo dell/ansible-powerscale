@@ -24,6 +24,7 @@ extends_documentation_fragment:
 
 author:
 - Meenakshi Dembi (@dembim) <ansible.team@dell.com>
+- Pavan Mudunuri(@Pavan-Mudunuri) <ansible.team@dell.com>
 
 options:
   pool_name:
@@ -107,10 +108,36 @@ options:
     - SmartConnect Parameters.
     type: dict
     suboptions:
+        static_routes:
+            description:
+            - List of static routes in the pool.
+            type: list
+            elements: dict
+            suboptions:
+                gateway:
+                    description:
+                    - Address of the gateway in the format yyy.yyy.yyy.yyy.
+                    type: str
+                    required: true
+                prefix_len:
+                    description:
+                    - The subnet mask length.
+                    type: int
+                    required: true
+                subnet:
+                    description:
+                    - Network address in the format xxx.xxx.xxx.xxx.
+                    type: str
+                    required: true
         sc_dns_zone:
             description:
             - SmartConnect zone name for the pool.
             type: str
+        sc_dns_zone_aliases:
+            description:
+            - List of SmartConnect zone aliases (DNS names) to the pool.
+            type: list
+            elements: str
         sc_subnet:
             description:
             - Name of SmartConnect service subnet for this pool.
@@ -151,6 +178,7 @@ options:
             type: str
 notes:
 - The I(check_mode) is not supported.
+- Removal of static routes and I(sc_dns_zone_aliases) is not supported.
 '''
 
 EXAMPLES = r'''
@@ -162,6 +190,29 @@ EXAMPLES = r'''
       verify_ssl: "{{verify_ssl}}"
       groupnet: "groupnet0"
       subnet: "subnet0"
+      additional_pool_params:
+        ranges:
+        - low: "10.230.**.***"
+          high: "10.230.**.***"
+        range_state: "add"
+        ifaces:
+        - iface: "ext-1"
+          lnn: 1
+        iface_state: "add"
+      sc_params:
+        sc_dns_zone: "10.230.**.***"
+        sc_connect_policy: "throughput"
+        sc_failover_policy: "throughput"
+        rebalance_policy: "auto"
+        alloc_method: "static"
+        sc_auto_unsuspend_delay: 200
+        sc_ttl: 200
+        sc_dns_zone_aliases:
+        - "Test"
+        static_routes:
+        - gateway: "10.**.**.**"
+          prefix_len: 21
+          subnet: "10.**.**.**"
       pool: "Test_Pool_2"
       access_zone: "system"
       state: "present"
@@ -203,6 +254,12 @@ EXAMPLES = r'''
         alloc_method: "static"
         sc_auto_unsuspend_delay: 200
         sc_ttl: 200
+        sc_dns_zone_aliases:
+        - "Test"
+        static_routes:
+        - gateway: "10.**.**.**"
+          prefix_len: 21
+          subnet: "10.**.**.**"
       aggregation_mode: "fec"
       description: "Pool Created by Ansible Modify"
       state: "present"
@@ -236,6 +293,7 @@ changed:
     description: Whether or not the resource has changed.
     returned: always
     type: bool
+    sample: "false"
 pools:
     description: Details of the network pool.
     returned: always
@@ -301,11 +359,50 @@ pools:
             description: Time to live value for SmartConnect DNS query responses in seconds.
             type: int
         static_routes:
-            description: List of interface members in this pool.
+            description: List of static routes in the pool.
             type: list
         subnet:
             description: The name of the subnet.
             type: str
+    sample:
+        {
+        "pools": [
+            {
+                "access_zone": "System",
+                "addr_family": "ipv4",
+                "aggregation_mode": "roundrobin",
+                "alloc_method": "static",
+                "description": "",
+                "groupnet": "groupnet0",
+                "id": "groupnet0.subnet0.Test_10",
+                "ifaces": [],
+                "name": "Test_10",
+                "nfsv3_rroce_only": false,
+                "ranges": [],
+                "rebalance_policy": "auto",
+                "rules": [],
+                "sc_auto_unsuspend_delay": 0,
+                "sc_connect_policy": "round_robin",
+                "sc_dns_zone": "10.**.**.**",
+                "sc_dns_zone_aliases": [
+                    "Testststst",
+                    "tesrtdsb1"
+                ],
+                "sc_failover_policy": "round_robin",
+                "sc_subnet": "",
+                "sc_suspended_nodes": [],
+                "sc_ttl": 0,
+                "static_routes": [
+                    {
+                        "gateway": "10.**.**.**",
+                        "prefixlen": 21,
+                        "subnet": "10.**.**.**"
+                    }
+                ],
+                "subnet": "subnet0"
+            }
+        ]
+    }
 '''
 
 from ansible.module_utils.basic import AnsibleModule
@@ -452,10 +549,23 @@ class NetworkPool(object):
 
         if pool_params['sc_params']:
             sc_params_modify = pool_params['sc_params']
+            if sc_params_modify['sc_dns_zone_aliases']:
+                sc_params_modify['sc_dns_zone_aliases'] = \
+                    self.remove_duplicate_aliases(sc_params_modify['sc_dns_zone_aliases'])
+            if sc_params_modify['static_routes']:
+                sc_params_modify['static_routes'] = \
+                    self.remove_duplicate_static_routes(sc_params_modify['static_routes'])
+                self.replace_prefix_len(sc_params_modify['static_routes'])
             for key in sc_params_modify:
                 if sc_params_modify[key] is not None and sc_params_modify[key] != pool_details['pools'][0][key]:
                     modify_pool_dict[key] = sc_params_modify[key]
         return modify_pool_dict
+
+    def remove_duplicate_static_routes(self, routes):
+
+        route_dict = {(route["gateway"], route["prefix_len"], route["subnet"]): route for route in routes}
+        route_list = list(route_dict.values())
+        return route_list
 
     def modify_network_pool(self, modify_pool_param, pool, groupnet, subnet):
         """
@@ -475,6 +585,12 @@ class NetworkPool(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
+    def remove_duplicate_aliases(self, aliases):
+
+        aliases_list = []
+        [aliases_list.append(item) for item in aliases if item not in aliases_list]
+        return aliases_list
+
     def construct_pool_parameters(self, input_param):
         """
         Construct dictionary of parameters to be set for create network pool
@@ -491,6 +607,11 @@ class NetworkPool(object):
             network_pool_param['description'] = input_param['description']
         if input_param['sc_params']:
             sc_params = input_param['sc_params']
+            if sc_params['sc_dns_zone_aliases']:
+                sc_params['sc_dns_zone_aliases'] = self.remove_duplicate_aliases(sc_params['sc_dns_zone_aliases'])
+            if sc_params['static_routes']:
+                sc_params['static_routes'] = self.remove_duplicate_static_routes(sc_params['static_routes'])
+                network_pool_param["static_routes"] = self.replace_prefix_len(sc_params['static_routes'])
             for key in sc_params:
                 if sc_params[key]:
                     network_pool_param[key] = sc_params[key]
@@ -506,6 +627,13 @@ class NetworkPool(object):
                     network_pool_param['ranges'].append(ranges)
         return network_pool_param
 
+    def replace_prefix_len(self, routes):
+
+        for route in routes:
+            if "prefix_len" in route:
+                route["prefixlen"] = route.pop("prefix_len")
+        return routes
+
     def validate_input(self, pool_params):
 
         error_msg = utils.is_invalid_name(pool_params['pool_name'], 'pool_name')
@@ -519,6 +647,14 @@ class NetworkPool(object):
             error_msg = utils.is_invalid_name(pool_params['new_pool_name'], 'new_pool_name')
             if error_msg:
                 self.module.fail_json(msg=error_msg)
+
+        if pool_params['sc_params']:
+            if pool_params['sc_params']['static_routes']:
+                for index in pool_params['sc_params']['static_routes']:
+                    for value in index.values():
+                        if value == "" or value is None:
+                            msg = 'Invalid static route value'
+                            self.module.fail_json(msg=f'{msg}')
 
         if pool_params['additional_pool_params']:
             if pool_params['additional_pool_params']['ranges']:
@@ -607,6 +743,11 @@ def get_network_pool_parameters():
             aggregation_mode=dict(type='str', choices=['roundrobin', 'failover', 'lacp', 'fec']),
             sc_subnet=dict(type='str'),
             sc_auto_unsuspend_delay=dict(type='int'),
+            static_routes=dict(type='list', elements='dict', options=dict(
+                               gateway=dict(type='str', required=True),
+                               prefix_len=dict(type='int', required=True),
+                               subnet=dict(type='str', required=True))),
+            sc_dns_zone_aliases=dict(type='list', elements='str'),
             sc_ttl=dict(type='int'))),
         state=dict(required=True, type='str', choices=['absent', 'present']),
         subnet_name=dict(required=True, type='str'),

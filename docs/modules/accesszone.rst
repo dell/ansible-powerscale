@@ -141,6 +141,14 @@ Parameters
       Specifies the auth provider type which needs to be added or removed from access zone.
 
 
+    priority (optional, int, None)
+      Specifies the order of priority of the auth provider which needs to be added to access zone.
+
+      ``1`` denotes the topmost priority.
+
+      If *priority* is not provided, authentication provider will have lowest priority.
+
+
 
   state (True, str, None)
     Defines whether the access zone should exist or not.
@@ -181,8 +189,10 @@ Notes
 -----
 
 .. note::
-   - Deletion of access zone is not allowed through the Ansible module.
    - The *check_mode* is not supported.
+   - Built-in System zone cannot be deleted.
+   - When access zone is deleted, all associated authentication providers remain available to other zones, the IP addresses are not reassigned to other zones.
+   - When access zone is deleted, SMB shares, NFS exports, and HDFS data paths are deleted, the directories and data still exist, and  new shares, exports, or paths can be mapped in another access zone.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -264,7 +274,7 @@ Examples
           nfsv4_no_domain_uids: false
           nfsv4_no_names: false
 
-    - name: Add Auth Providers to the  access zone
+    - name: Add Auth Providers to the access zone
       dellemc.powerscale.accesszone:
         onefs_host: "{{onefs_host}}"
         api_user: "{{api_user}}"
@@ -275,6 +285,7 @@ Examples
         auth_providers:
            - provider_name: "System"
              provider_type: "file"
+             priority: 3
            - provider_name: "ldap-prashant"
              provider_type: "ldap"
         state: "present"
@@ -308,29 +319,75 @@ Examples
             provider_type: "file"
         state: "present"
 
+    - name: Delete Access Zone
+      dellemc.powerscale.accesszone:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        az_name: "sample_name"
+        state: "absent"
+
 
 
 Return Values
 -------------
 
-changed (always, bool, )
+changed (always, bool, false)
   Whether or not the resource has changed.
 
 
-smb_modify_flag (on success, bool, )
+smb_modify_flag (on success, bool, false)
   Whether or not the default SMB settings of access zone has changed.
 
 
-nfs_modify_flag (on success, bool, )
+nfs_modify_flag (on success, bool, false)
   Whether or not the default NFS settings of access zone has changed.
 
 
-access_zone_modify_flag (on success, bool, )
+access_zone_modify_flag (on success, bool, false)
   Whether auth providers linked to access zone has changed.
 
 
-access_zone_details (When access zone exists, complex, )
+access_zone_details (When access zone exists, complex, {'nfs_settings': {'export_settings': {'all_dirs': False, 'block_size': 8192, 'can_set_time': True, 'case_insensitive': False, 'case_preserving': True, 'chown_restricted': False, 'commit_asynchronous': False, 'directory_transfer_size': 131072, 'encoding': 'DEFAULT', 'link_max': 32767, 'map_all': None, 'map_failure': {'enabled': False, 'primary_group': {'id': None, 'name': None, 'type': None}, 'secondary_groups': [], 'user': {'id': 'USER:nobody', 'name': None, 'type': None}}, 'map_full': True, 'map_lookup_uid': False, 'map_non_root': {'enabled': False, 'primary_group': {'id': None, 'name': None, 'type': None}, 'secondary_groups': [], 'user': {'id': 'USER:nobody', 'name': None, 'type': None}}, 'map_retry': True, 'map_root': {'enabled': True, 'primary_group': {'id': None, 'name': None, 'type': None}, 'secondary_groups': [], 'user': {'id': 'USER:nobody', 'name': None, 'type': None}}, 'max_file_size': 9223372036854775807, 'name_max_size': 255, 'no_truncate': False, 'read_only': False, 'read_transfer_max_size': 1048576, 'read_transfer_multiple': 512, 'read_transfer_size': 131072, 'readdirplus': True, 'readdirplus_prefetch': 10, 'return_32bit_file_ids': False, 'security_flavors': ['unix'], 'setattr_asynchronous': False, 'snapshot': '-', 'symlinks': True, 'time_delta': '1e-09', 'write_datasync_action': 'DATASYNC', 'write_datasync_reply': 'DATASYNC', 'write_filesync_action': 'FILESYNC', 'write_filesync_reply': 'FILESYNC', 'write_transfer_max_size': 1048576, 'write_transfer_multiple': 512, 'write_transfer_size': 524288, 'write_unstable_action': 'UNSTABLE', 'write_unstable_reply': 'UNSTABLE', 'zone': 'System'}, 'zone_settings': {'nfsv4_allow_numeric_ids': True, 'nfsv4_domain': 'localhost', 'nfsv4_no_domain': False, 'nfsv4_no_domain_uids': True, 'nfsv4_no_names': False, 'nfsv4_replace_domain': True, 'zone': None}}, 'smb_settings': {'access_based_enumeration': False, 'access_based_enumeration_root_only': False, 'allow_delete_readonly': False, 'allow_execute_always': False, 'ca_timeout': 120, 'ca_write_integrity': 'write-read-coherent', 'change_notify': 'norecurse', 'continuously_available': None, 'create_permissions': 'default acl', 'csc_policy': None, 'directory_create_mask': 448, 'directory_create_mask(octal)': '700', 'directory_create_mode': 0, 'directory_create_mode(octal)': '0', 'file_create_mask': 448, 'file_create_mask(octal)': '700', 'file_create_mode': 64, 'file_create_mode(octal)': '100', 'file_filter_extensions': [], 'file_filter_type': 'deny', 'file_filtering_enabled': False, 'hide_dot_files': False, 'host_acl': [], 'impersonate_guest': 'never', 'impersonate_user': '', 'ntfs_acl_support': True, 'oplocks': True, 'smb3_encryption_enabled': False, 'sparse_file': False, 'strict_ca_lockout': True, 'strict_flush': True, 'strict_locking': False, 'zone': None}, 'zones': [{'alternate_system_provider': 'lsa-file-provider:System', 'auth_providers': ['lsa-ldap-provider:ansildap'], 'cache_entry_expiry': 14400, 'create_path': None, 'force_overlap': None, 'groupnet': 'groupnet0', 'home_directory_umask': 63, 'id': 'System', 'ifs_restricted': [], 'map_untrusted': '', 'name': 'System', 'negative_cache_entry_expiry': 60, 'netbios_name': '', 'path': '/ifs', 'skeleton_directory': '/usr/share', 'system': True, 'system_provider': 'lsa-file-provider:System', 'user_mapping_rules': ['test_user_13 ++ test_user_15 [user]', 'test_user_14 => test_user []', 'test_user_13 ++ test_user_15 [user]', 'test_user_12 &= test_user_13 []'], 'zone_id': 1}]})
   The access zone details.
+
+
+  Zones (, list, )
+    Specifies the properties of Zone.
+
+
+    name (, str, )
+      Specifies the access zone name.
+
+
+    auth_providers (, list, )
+      Specifies the list of authentication providers available on this access zone.
+
+
+    ifs_restricted (, list, )
+      Specifies a list of users and groups that have read and write access to /ifs.
+
+
+    zone_id (, int, )
+      Specifies the access zone ID on the system.
+
+
+    groupnet (, str, )
+      Groupnet identifier.
+
+
+    user_mapping_rules (, list, )
+      Specifies the current ID mapping rules.
+
+
+    system_provider (, str, )
+      Specifies the system provider for the access zone.
+
+
+    alternate_system_provider (, str, )
+      Specifies an alternate system provider.
+
 
 
   nfs_settings (, complex, )
@@ -408,4 +465,6 @@ Authors
 ~~~~~~~
 
 - Akash Shendge (@shenda1) <ansible.team@dell.com>
+- Pavan Mudunuri (@Pavan-Mudunuri) <ansible.team@dell.com>
+- Trisha Datta (@trisha-dell) <ansible.team@dell.com>
 

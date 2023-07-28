@@ -18,3 +18,31 @@ def get_ads_response():
 
 def create_ads_ex_msg():
     return "Add an Active Directory provider failed with"
+
+
+def get_ads_response_for_spn():
+    return [{
+        'id': 'ads_domain',
+        'spns': [
+            'abc',
+            'def',
+            'ghi',
+        ],
+        'recommended_spns': [
+            'abc',
+            'def',
+            'ghi',
+            'klm'
+        ],
+        'extra_expected_spns': []
+    }]
+
+
+def get_provider_summary():
+    provider_summary = MagicMock()
+    provider_summary.forest = 'ads_domain'
+    provider_summary.type = 'ads'
+    provider_summary.name = 'ads_domain'
+    return [
+        provider_summary
+    ]

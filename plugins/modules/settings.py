@@ -157,51 +157,93 @@ changed:
     description: Whether or not the resource has changed.
     returned: Always
     type: bool
-settings:
+    sample: "false"
+
+email_settings:
     description: Details of the email settings.
+    type: dict
     returned: Always
-    type: complex
     contains:
-        batch_mode:
-            description: This setting determines how notifications will be batched together to be sent by email.
-            type: str
-        mail_relay:
-            description: The address of the SMTP server to be used for relaying the notification messages.
-            type: str
-        mail_sender:
-            description: The full email address that will appear as the sender of notification messages.
-            type: str
-        mail_subject:
-            description: The subject line for notification messages from this cluster.
-            type: str
-        smtp_auth_passwd_set:
-            description: Indicates if an SMTP authentication password is set.
-            type: bool
-        smtp_auth_security:
-            description: The type of secure communication protocol to use if SMTP is being used.
-            type: str
-        smtp_auth_username:
-            description: Username to authenticate with if SMTP authentication is being used.
-            type: str
-        smtp_port:
-            description: The port on the SMTP server to be used for relaying the notification messages.
-            type: int
-        use_smtp_auth:
-            description: If true, this cluster will send SMTP authentication credentials to the
-                         SMTP relay server in order to send its notification emails.
-            type: bool
-        user_template:
-            description: Location of a custom template file that can be used to specify the layout of the notification emails.
-            type: str
-        id:
-            description: Field id.
-            type: str
-        key:
-            description: Key value from I(key_file) that maps to this server.
-            type: str
-        name:
-            description: NTP server name.
-            type: str
+        settings:
+            description: Details of the settings.
+            returned: Always
+            type: dict
+            contains:
+                batch_mode:
+                    description: This setting determines how notifications will be batched together to be sent by email.
+                    type: str
+                mail_relay:
+                    description: The address of the SMTP server to be used for relaying the notification messages.
+                    type: str
+                mail_sender:
+                    description: The full email address that will appear as the sender of notification messages.
+                    type: str
+                mail_subject:
+                    description: The subject line for notification messages from this cluster.
+                    type: str
+                smtp_auth_passwd_set:
+                    description: Indicates if an SMTP authentication password is set.
+                    type: bool
+                smtp_auth_security:
+                    description: The type of secure communication protocol to use if SMTP is being used.
+                    type: str
+                smtp_auth_username:
+                    description: Username to authenticate with if SMTP authentication is being used.
+                    type: str
+                smtp_port:
+                    description: The port on the SMTP server to be used for relaying the notification messages.
+                    type: int
+                use_smtp_auth:
+                    description: If true, this cluster will send SMTP authentication credentials to the
+                                SMTP relay server in order to send its notification emails.
+                    type: bool
+                user_template:
+                    description: Location of a custom template file that can be used to specify the layout of the notification emails.
+                    type: str
+    sample:
+        {
+            "settings": {
+                "batch_mode": "none",
+                "mail_relay": "10.**.**.**",
+                "mail_sender": "powerscale@dell.com",
+                "mail_subject": "Powerscale Cluster notifications",
+                "smtp_auth_passwd_set": false,
+                "smtp_auth_security": "none",
+                "smtp_auth_username": "",
+                "smtp_port": 25,
+                "use_smtp_auth": false,
+                "user_template": ""
+            }
+        }
+
+ntp_server:
+    description: List of NTP servers.
+    type: dict
+    returned: Always
+    contains:
+        servers:
+            description: List of servers.
+            type: list
+            contains:
+                id:
+                    description: Field id.
+                    type: str
+                key:
+                    description: Key value from I(key_file) that maps to this server.
+                    type: str
+                name:
+                    description: NTP server name.
+                    type: str
+    sample:
+        {
+            "servers": [
+                {
+                    "id": "10.**.**.**",
+                    "key": null,
+                    "name": "10.**.**.**"
+                }
+            ]
+        }
 '''
 
 from ansible.module_utils.basic import AnsibleModule

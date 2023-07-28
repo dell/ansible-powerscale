@@ -15,18 +15,23 @@ GET_NETWORK_POOLS = {"pools": [{"access_zone": "ansible-neo",
                                 "name": "Test_pool1",
                                 "subnet": "subnet0",
                                 "ranges": [""],
-                                "ifaces": [""]}]}
+                                "ifaces": [""],
+                                "static_routes": [],
+                                "sc_dns_zone_aliases": []}]}
 
 CREATE_NETWORK_POOL = {"pools": [{"access_zone": "ansible-neo",
                                   "groupnet": "groupnet0",
                                   "name": "Test_pool1",
                                   "subnet": "subnet0",
                                   "description": "Test_pool1",
-                                  "ranges": [{"low": "1.1.1.1",
-                                              "high": "1.1.1.3"}],
+                                  "ranges": [{"low": "1.*.*.*",
+                                              "high": "1.*.*.*"}],
                                   "ifaces": [{"iface": "ext-1",
                                               "lnn": 4}],
-                                  "sc_dns_zone": "1.1.1.5",
+                                  "static_routes": [{"gateway": "1.*.*.*",
+                                                     "prefixlen": 4,
+                                                     "subnetdict": "1.*.*.*"}],
+                                  "sc_dns_zone": "1.*.*.*",
                                   "sc_connect_policy": "throughput",
                                   "sc_failover_policy": "throughput",
                                   "rebalance_policy": "auto",
@@ -34,7 +39,8 @@ CREATE_NETWORK_POOL = {"pools": [{"access_zone": "ansible-neo",
                                   "sc_auto_unsuspend_delay": 200,
                                   "sc_ttl": 300,
                                   "aggregation_mode": "lacp",
-                                  "sc_subnet": "subnet_test"}]}
+                                  "sc_subnet": "subnet_test",
+                                  "sc_dns_zone_aliases": ["smartconn-zone"]}]}
 
 
 def get_networkpool_failed_msg(pool_name):

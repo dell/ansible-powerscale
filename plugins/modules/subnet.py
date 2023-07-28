@@ -238,6 +238,26 @@ subnet_details:
         pools:
             description: List of names of pools in the subnet.
             type: list
+    sample: {
+        "addr_family": "ipv4",
+        "base_addr": "10.**.**.*",
+        "description": "Initial subnet",
+        "dsr_addrs": [],
+        "gateway": "10.**.**.**",
+        "gateway_priority": 10,
+        "groupnet": "groupnet0",
+        "id": "groupnet0.subnet0",
+        "mtu": 1500,
+        "name": "subnet0",
+        "pools": [
+            "pool0"
+        ],
+        "prefixlen": 21,
+        "sc_service_addrs": [],
+        "sc_service_name": "",
+        "vlan_enabled": false,
+        "vlan_id": null
+    }
 '''
 
 from ansible.module_utils.basic import AnsibleModule

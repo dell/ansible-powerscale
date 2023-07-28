@@ -216,7 +216,7 @@ changed (always, bool, True)
   Whether or not the resource has changed.
 
 
-snapshot_details (When snapshot exists., complex, )
+snapshot_details (When snapshot exists., complex, {'snapshots': [{'alias': None, 'created': 1628155527, 'expires': None, 'has_locks': False, 'id': 936, 'name': 'Atest', 'path': '/ifs/test_src_01', 'pct_filesystem': 2.435778242215747e-06, 'pct_reserve': 0.0, 'schedule': None, 'shadow_bytes': 0, 'size': 4096, 'state': 'active', 'target_id': None, 'target_name': None}]})
   The snapshot details.
 
 

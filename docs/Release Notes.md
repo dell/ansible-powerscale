@@ -1,6 +1,6 @@
 **Ansible Modules for Dell Technologies PowerScale** 
 =========================================
-### Release notes 2.0.0
+### Release notes 2.1.0
 
 >   © 2022 Dell Inc. or its subsidiaries. All rights reserved. Dell
 >   and other trademarks are trademarks of Dell Inc. or its
@@ -27,7 +27,7 @@ Table 1. Revision history
 
 | Revision | Date          | Description                                               |
 |----------|---------------|-----------------------------------------------------------|
-| 01       | June 2023    | Ansible Modules for Dell PowerScale 2.0.0                 |
+| 01       | July 2023    | Ansible Modules for Dell PowerScale 2.1.0                 |
 
 
 Product description
@@ -60,6 +60,7 @@ The Ansible Modules for Dell PowerScale support the following features:
 - Get attributes and entities of the array.
 - Get details and close open SMB files.
 - Create, modify, get details and delete a user mapping rule.
+- Create, modify, get details and delete an S3 bucket.
   
 The Ansible modules use playbooks, written in yaml syntax, to list, show, create, delete, and modify each of these entities.
 
@@ -67,16 +68,16 @@ New Features and Enhancements
 ---------------------------
 This section describes the features of the Ansible Modules for Dell PowerScale for this release.
 
-The Ansible Modules for Dell PowerScale release 2.0.0 supports the following features:
+The Ansible Modules for Dell PowerScale release 2.1.0 supports the following features:
 
-- The User mapping rule module supports this functionality:
-    - Create, modify, get details and delete a user mapping rule.
-- The Filesystem module supports this functionality:
-    - Added support for "everyone" user.
-- The NFS module supports this functionality:
-    - Added support for ignoring unresolvable hosts.
-- The Info module supports this functionality:
-    - Added support for listing LDAP auth providers and user mapping rules.
+- The S3 bucket module supports this functionality:
+    - Create, modify, get details and delete an S3 bucket.
+- The Access zone module supports this functionality:
+    - Added support for deleting an access zone and reordering the authentication providers.
+- The AD module supports this functionality:
+    - Added support for service principal names (SPN).
+- The Network Pool module supports this functionality:
+    - Added support for SmartConnect zone alaises(DNS names)
 
 Known issues
 ------------
@@ -127,7 +128,7 @@ This section lists the limitations in this release of Ansible Modules for Dell P
 Software media, organization, and files 
 -----------
 The software package is available for download from the [Ansible Modules
-for PowerScale GitHub](https://github.com/dell/ansible-powerscale/tree/2.0.0) page.
+for PowerScale GitHub](https://github.com/dell/ansible-powerscale/tree/2.1.0) page.
 
 Additional resources
 --------------------

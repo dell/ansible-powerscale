@@ -3,19 +3,3 @@ version: 1
 dependencies:
   galaxy: requirements.yml
   python: requirements.txt
-additional_build_steps:
-  prepend: |
-    RUN yum install -y dnf wget
-    RUN cd /opt && wget https://www.python.org/ftp/python/3.9.10/Python-3.9.10.tgz
-    RUN cd /opt && tar -xf Python-3.9.10.tgz
-    RUN dnf install -y make gcc openssl-devel bzip2-devel libffi-devel
-    RUN cd /opt/Python-3.9.10 && ./configure --enable-optimizations
-    RUN cd /opt/Python-3.9.10 && make altinstall
-    RUN ln -s /usr/local/bin/python3.9 /usr/local/bin/python3
-    RUN ln -s /usr/local/bin/python3.9 /usr/local/bin/python3.8
-    RUN update-alternatives --install /usr/bin/python3 python3 /usr/local/bin/python3.9 2
-    RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 1
-    RUN pip3.9 install isilon-sdk
-    RUN pip3.9 install ansible-core
-    RUN pip3.9 install ansible-runner
-    RUN export ansible_python_interpreter=/usr/local/bin/python3.9

@@ -40,7 +40,8 @@ class TestNetworkPool():
                                                         "range_state": None,
                                                         "ifaces": [],
                                                         "iface_state": None},
-                             "sc_params": None}
+                             "sc_params": {"static_routes": [],
+                                           "sc_dns_zone_aliases": []}}
 
     @pytest.fixture
     def network_pool_module_mock(self, mocker):
@@ -80,13 +81,13 @@ class TestNetworkPool():
     def test_create_network_pool(self, network_pool_module_mock):
         self.get_network_pool_args.update({"state": "present",
                                            "description": "Test_pool1",
-                                           "additional_pool_params": {"ranges": [{"low": "1.1.1.1",
-                                                                                  "high": "1.1.1.3"}],
+                                           "additional_pool_params": {"ranges": [{"low": "1.*.*.*",
+                                                                                  "high": "1.*.*.*"}],
                                                                       "range_state": "add",
                                                                       "ifaces": [{"iface": "ext-1",
                                                                                   "lnn": 4}],
                                                                       "iface_state": "add"},
-                                           "sc_params": {"sc_dns_zone": "1.1.1.5",
+                                           "sc_params": {"sc_dns_zone": "1.*.*.*",
                                                          "sc_connect_policy": "throughput",
                                                          "sc_failover_policy": "throughput",
                                                          "rebalance_policy": "auto",
@@ -94,7 +95,11 @@ class TestNetworkPool():
                                                          "sc_auto_unsuspend_delay": 200,
                                                          "sc_ttl": 300,
                                                          "aggregation_mode": "lacp",
-                                                         "sc_subnet": "subnet_test"}})
+                                                         "sc_dns_zone_aliases": ["smartconn-zone"],
+                                                         "sc_subnet": "subnet_test",
+                                                         "static_routes": [{"gateway": "1.*.*.*",
+                                                                            "prefix_len": 4,
+                                                                            "subnet": "1.*.*.*"}]}})
         network_pool_module_mock.module.params = self.get_network_pool_args
         network_pool_module_mock.get_network_pool = MagicMock(return_value=None)
         network_pool_module_mock.network_groupnet_api.create_subnets_subnet_pool = MagicMock(
@@ -105,13 +110,13 @@ class TestNetworkPool():
     def test_create_network_pool_with_exception(self, network_pool_module_mock):
         self.get_network_pool_args.update({"state": "present",
                                            "description": "Test_pool1",
-                                           "additional_pool_params": {"ranges": [{"low": "1.1.1.1",
-                                                                                  "high": "1.1.1.3"}],
+                                           "additional_pool_params": {"ranges": [{"low": "1.*.*.*",
+                                                                                  "high": "1.*.*.*"}],
                                                                       "range_state": "add",
                                                                       "ifaces": [{"iface": "ext-1",
                                                                                   "lnn": 4}],
                                                                       "iface_state": "add"},
-                                           "sc_params": {"sc_dns_zone": "1.1.1.5",
+                                           "sc_params": {"sc_dns_zone": "1.*.*.*",
                                                          "sc_connect_policy": "throughput",
                                                          "sc_failover_policy": "throughput",
                                                          "rebalance_policy": "auto",
@@ -119,7 +124,11 @@ class TestNetworkPool():
                                                          "sc_auto_unsuspend_delay": 200,
                                                          "sc_ttl": 300,
                                                          "aggregation_mode": "lacp",
-                                                         "sc_subnet": "subnet_test"}})
+                                                         "sc_dns_zone_aliases": ["smartconn-zone"],
+                                                         "sc_subnet": "subnet_test",
+                                                         "static_routes": [{"gateway": "1.*.*.*",
+                                                                            "prefix_len": 4,
+                                                                            "subnet": "1.*.*.*"}]}})
         network_pool_module_mock.module.params = self.get_network_pool_args
         network_pool_module_mock.get_network_pool = MagicMock(return_value=None)
         network_pool_module_mock.network_groupnet_api.create_subnets_subnet_pool = MagicMock(side_effect=utils.ApiException)
@@ -144,7 +153,9 @@ class TestNetworkPool():
                                                           "sc_auto_unsuspend_delay": None,
                                                           "sc_ttl": None,
                                                           "aggregation_mode": "",
-                                                          "sc_subnet": ""}})
+                                                          "sc_dns_zone_aliases": "",
+                                                          "sc_subnet": "",
+                                                          "static_routes": None}})
         network_pool_module_mock.module.params = self.get_network_pool_args
         network_pool_module_mock.get_network_pool = MagicMock(return_value=None)
         network_pool_module_mock.network_groupnet_api.create_subnets_subnet_pool = MagicMock(side_effect=utils.ApiException)
@@ -171,25 +182,27 @@ class TestNetworkPool():
             network_pool_module_mock.module.fail_json.call_args[1]['msg']
 
     def test_modify_network_pool(self, network_pool_module_mock):
-        self.get_network_pool_args.update({"pool": "Test_pool1_modified",
-                                           "state": "present",
-                                           "description": "Test_pool1_modified_desciption",
-                                           "access_zone": "test_access_zone",
-                                           "additional_pool_params": {"ranges": [{"low": "1.1.1.1",
-                                                                                  "high": "1.1.1.3"}],
-                                                                      "range_state": "remove",
+        self.get_network_pool_args.update({"state": "present",
+                                           "description": "Test_pool1",
+                                           "additional_pool_params": {"ranges": [{"low": "1.*.*.*",
+                                                                                  "high": "1.*.*.*"}],
+                                                                      "range_state": "add",
                                                                       "ifaces": [{"iface": "ext-1",
                                                                                   "lnn": 4}],
-                                                                      "iface_state": "remove"},
-                                           "sc_params": {"sc_dns_zone": "1.1.1.5",
-                                                         "sc_connect_policy": "roundrobin",
-                                                         "sc_failover_policy": "roundrobin",
-                                                         "rebalance_policy": "manual",
-                                                         "alloc_method": "static",
-                                                         "sc_auto_unsuspend_delay": 300,
-                                                         "sc_ttl": 600,
-                                                         "aggregation_mode": "fec",
-                                                         "sc_subnet": "subnet_test_mod"}})
+                                                                      "iface_state": "add"},
+                                           "sc_params": {"sc_dns_zone": "1.*.*.*",
+                                                         "sc_connect_policy": "throughput",
+                                                         "sc_failover_policy": "throughput",
+                                                         "rebalance_policy": "auto",
+                                                         "alloc_method": "dynamic",
+                                                         "sc_auto_unsuspend_delay": 200,
+                                                         "sc_ttl": 300,
+                                                         "aggregation_mode": "lacp",
+                                                         "sc_dns_zone_aliases": ["smartconn-zone"],
+                                                         "sc_subnet": "subnet_test",
+                                                         "static_routes": [{"gateway": "1.*.*.*",
+                                                                            "prefix_len": 4,
+                                                                            "subnet": "1.*.*.*"}]}})
         network_pool_module_mock.module.params = self.get_network_pool_args
         network_pool_module_mock.network_groupnet_api.get_subnets_subnet_pool = MagicMock(
             return_value=MockSDKResponse(MockNetworkPoolApi.CREATE_NETWORK_POOL))
@@ -198,25 +211,27 @@ class TestNetworkPool():
         assert (network_pool_module_mock.module.exit_json.call_args[1]['changed'])
 
     def test_modify_network_pool_with_exception(self, network_pool_module_mock):
-        self.get_network_pool_args.update({"pool": "Test_pool1_modified",
-                                           "state": "present",
-                                           "description": "Test_pool1_modified_desciption",
-                                           "access_zone": "test_access_zone",
-                                           "additional_pool_params": {"ranges": [{"low": "1.1.1.1",
-                                                                                  "high": "1.1.1.3"}],
+        self.get_network_pool_args.update({"state": "present",
+                                           "description": "Test_pool1",
+                                           "additional_pool_params": {"ranges": [{"low": "1.*.*.*",
+                                                                                  "high": "1.*.*.*"}],
                                                                       "range_state": "add",
                                                                       "ifaces": [{"iface": "ext-1",
                                                                                   "lnn": 4}],
                                                                       "iface_state": "add"},
-                                           "sc_params": {"sc_dns_zone": "1.1.1.5",
-                                                         "sc_connect_policy": "roundrobin",
-                                                         "sc_failover_policy": "roundrobin",
-                                                         "rebalance_policy": "manual",
-                                                         "alloc_method": "static",
-                                                         "sc_auto_unsuspend_delay": 300,
-                                                         "sc_ttl": 600,
-                                                         "aggregation_mode": "fec",
-                                                         "sc_subnet": "subnet_test_mod"}})
+                                           "sc_params": {"sc_dns_zone": "1.*.*.*",
+                                                         "sc_connect_policy": "throughput",
+                                                         "sc_failover_policy": "throughput",
+                                                         "rebalance_policy": "auto",
+                                                         "alloc_method": "dynamic",
+                                                         "sc_auto_unsuspend_delay": 200,
+                                                         "sc_ttl": 300,
+                                                         "aggregation_mode": "lacp",
+                                                         "sc_dns_zone_aliases": ["smartconn-zone"],
+                                                         "sc_subnet": "subnet_test",
+                                                         "static_routes": [{"gateway": "1.*.*.*",
+                                                                            "prefix_len": 4,
+                                                                            "subnet": "1.*.*.*"}]}})
         network_pool_module_mock.module.params = self.get_network_pool_args
         network_pool_module_mock.network_groupnet_api.get_subnets_subnet_pool = MagicMock(
             return_value=MockSDKResponse(MockNetworkPoolApi.CREATE_NETWORK_POOL))
