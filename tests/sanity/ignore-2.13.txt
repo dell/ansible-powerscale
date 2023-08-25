@@ -90,8 +90,6 @@ plugins/modules/nfs_default_settings.py import-3.5
 plugins/modules/nfs_default_settings.py compile-2.7
 plugins/modules/nfs_default_settings.py compile-3.5
 plugins/modules/nfs_default_settings.py validate-modules:missing-gplv3-license
-plugins/modules/info.py import-2.7
-plugins/modules/info.py import-3.5
 plugins/module_utils/storage/dell/shared_library/auth.py compile-2.7
 plugins/module_utils/storage/dell/shared_library/auth.py compile-3.5
 plugins/module_utils/storage/dell/shared_library/auth.py import-2.7
