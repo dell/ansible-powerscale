@@ -23,6 +23,8 @@ NFS_COMMON_ARGS = {
     "access_zone": None,
     "clients": None,
     "root_clients": None,
+    "map_root": None,
+    "map_non_root": None,
     "read_only_clients": None,
     "read_write_clients": None,
     "client_state": None,
@@ -54,6 +56,34 @@ NFS_1 = {"exports": [{
     "security_flavors": [
         "krb5"
     ],
+    "map_root": {
+        "enabled": True,
+        "primary_group": {
+            "id": "GROUP:group1",
+            "name": None,
+            "type": None
+        },
+        "secondary_groups": [],
+        "user": {
+            "id": "USER:user",
+            "name": None,
+            "type": None
+        }
+    },
+    "map_non_root": {
+        "enabled": True,
+        "primary_group": {
+            "id": "GROUP:group1",
+            "name": None,
+            "type": None
+        },
+        "secondary_groups": [],
+        "user": {
+            "id": "USER:root",
+            "name": None,
+            "type": None
+        }
+    },
     "snapshot": None,
     "zone": SYS_ZONE}]}
 
@@ -140,7 +170,9 @@ CREATE_NFS_PARAMS = {
     "read_only_clients": [SAMPLE_IP1],
     "clients": [SAMPLE_IP1],
     "client_state": "present-in-export",
-    "security_flavors": ["kerberos"]
+    "security_flavors": ["kerberos"],
+    "map_root": {"user": "root", "primary_group": "root", "secondary_groups": [{"name": "group1"}, {"name": "group2"}]},
+    "map_non_root": {"user": "root", "primary_group": "root", "secondary_groups": [{"name": "group1"}, {"name": "group2"}]}
 }
 
 MODIFY_NFS_PARAMS = {
@@ -155,7 +187,30 @@ MODIFY_NFS_PARAMS = {
     "client_state": "present-in-export",
     "sub_directories_mountable": True,
     "security_flavors": ["unix", "kerberos_privacy"],
+    "map_root": {"user": "root", "primary_group": "root", "secondary_groups": [{"name": "group1", "state": "absent"}, {"name": "group2"}]},
+    "map_non_root": {"user": "root", "primary_group": "root", "secondary_groups": [{"name": "group1"}, {"name": "group2"}]}
 }
+
+
+class NFSTestExportObj:
+    export_obj = None
+
+    def __init__(self, obj):
+        self.export_obj = obj
+
+    @staticmethod
+    def to_dict():
+        return NFSTestExportObj.export_obj
+
+
+class NFSTestExport:
+    total = 0
+    exports = []
+
+    def __init__(self, total=0, export_obj=None):
+        self.total = total
+        if export_obj:
+            self.exports.append(NFSTestExportObj(export_obj))
 
 
 def get_nfs_failed_msg():

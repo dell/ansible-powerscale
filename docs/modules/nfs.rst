@@ -119,6 +119,66 @@ Parameters
     Does not present an error condition on unresolvable hosts when creating or modifying an export.
 
 
+  map_root (optional, dict, None)
+    Specifies the users and groups to which non-root and root clients are mapped.
+
+
+    enabled (optional, bool, True)
+      True if the user mapping is applied.
+
+
+    user (optional, str, None)
+      Specifies the persona name.
+
+
+    primary_group (optional, str, None)
+      Specifies the primary group name.
+
+
+    secondary_groups (optional, list, None)
+      Specifies the secondary groups.
+
+
+      name (True, str, None)
+        Specifies the group name.
+
+
+      state (optional, str, present)
+        Specifies the group state.
+
+
+
+
+  map_non_root (optional, dict, None)
+    Specifies the users and groups to which non-root and root clients are mapped.
+
+
+    enabled (optional, bool, True)
+      True if the user mapping is applied.
+
+
+    user (optional, str, None)
+      Specifies the persona name.
+
+
+    primary_group (optional, str, None)
+      Specifies the primary group name.
+
+
+    secondary_groups (optional, list, None)
+      Specifies the secondary groups.
+
+
+      name (True, str, None)
+        Specifies the group name.
+
+
+      state (optional, str, present)
+        Specifies the group state.
+
+
+
+
   onefs_host (True, str, None)
     IP address or FQDN of the PowerScale cluster.
 
@@ -250,6 +310,39 @@ Examples
           read_only: false
           state: 'present'
 
+      - name: Modify map_root and map_non_root
+        dellemc.powerscale.nfs:
+          onefs_host: "{{onefs_host}}"
+          api_user: "{{api_user}}"
+          api_password: "{{api_password}}"
+          verify_ssl: "{{verify_ssl}}"
+          path: "<path>"
+          access_zone: "{{access_zone}}"
+          map_root:
+            user: "root"
+            primary_group: "root"
+            secondary_groups:
+              - name: "group_test"
+          map_non_root:
+            user: "root"
+            primary_group: "root"
+            secondary_groups:
+              - name: "group_test"
+                state: "absent"
+          state: 'present'
+
+      - name: Disable map_root
+        dellemc.powerscale.nfs:
+          onefs_host: "{{onefs_host}}"
+          api_user: "{{api_user}}"
+          api_password: "{{api_password}}"
+          verify_ssl: "{{verify_ssl}}"
+          path: "<path>"
+          access_zone: "{{access_zone}}"
+          map_root:
+            enabled: false
+          state: 'present'
+
       - name: Delete NFS Export
         dellemc.powerscale.nfs:
           onefs_host: "{{onefs_host}}"
@@ -269,7 +362,7 @@ changed (always, bool, false)
   A boolean indicating if the task had to make changes.
 
 
-NFS_export_details (always, complex, {'all_dir': 'false', 'block_size': 8192, 'clients': 'None', 'id': 9324, 'read_only_client': ['x.x.x.x'], 'security_flavors': ['unix', 'krb5'], 'zone': 'System'})
+NFS_export_details (always, complex, {'all_dir': 'false', 'block_size': 8192, 'clients': 'None', 'id': 9324, 'read_only_client': ['x.x.x.x'], 'security_flavors': ['unix', 'krb5'], 'zone': 'System', 'map_root': {'enabled': True, 'primary_group': {'id': 'GROUP:group1', 'name': None, 'type': None}, 'secondary_groups': [], 'user': {'id': 'USER:user', 'name': None, 'type': None}}, 'map_non_root': {'enabled': False, 'primary_group': {'id': None, 'name': None, 'type': None}, 'secondary_groups': [], 'user': {'id': 'USER:nobody', 'name': None, 'type': None}}})
   The updated NFS Export details.
 
 
@@ -311,6 +404,68 @@ NFS_export_details (always, complex, {'all_dir': 'false', 'block_size': 8192, 'c
 
   description (, str, )
     Description for the export.
+
+
+  map_root (, complex, )
+    Specifies the users and groups to which non-root and root clients are mapped.
+
+
+    enabled (, bool, )
+      True if the user mapping is applied.
+
+
+    user (, complex, )
+      Specifies the persona name.
+
+
+      id (, str, )
+        Specifies the persona name.
+
+
+
+    primary_group (, complex, )
+      Specifies the primary group.
+
+
+      id (, str, )
+        Specifies the primary group name.
+
+
+
+    secondary_groups (, list, )
+      Specifies the secondary groups.
+
+
+
+  map_non_root (, complex, )
+    Specifies the users and groups to which non-root and root clients are mapped.
+
+
+    enabled (, bool, )
+      True if the user mapping is applied.
+
+
+    user (, complex, )
+      Specifies the persona details.
+
+
+      id (, str, )
+        Specifies the persona name.
+
+
+
+    primary_group (, complex, )
+      Specifies the primary group details.
+
+
+      id (, str, )
+        Specifies the primary group name.
+
+
+
+    secondary_groups (, list, )
+      Specifies the secondary groups details.
+
 
 
 

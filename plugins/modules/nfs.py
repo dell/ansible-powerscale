@@ -125,6 +125,76 @@ options:
     - Does not present an error condition on unresolvable hosts when creating
      or modifying an export.
     type: bool
+  map_root:
+    description:
+    - Specifies the users and groups to which non-root and root clients are mapped.
+    type: dict
+    suboptions:
+      enabled:
+        description:
+        - True if the user mapping is applied.
+        type: bool
+        default: true
+      user:
+        description:
+        - Specifies the persona name.
+        type: str
+      primary_group:
+        description:
+        - Specifies the primary group name.
+        type: str
+      secondary_groups:
+        description:
+        - Specifies the secondary groups.
+        type: list
+        elements: dict
+        suboptions:
+          name:
+            description:
+            - Specifies the group name.
+            type: str
+            required: true
+          state:
+            description:
+            - Specifies the group state.
+            type: str
+            choices: [absent, present]
+            default: present
+  map_non_root:
+    description:
+    - Specifies the users and groups to which non-root and root clients are mapped.
+    type: dict
+    suboptions:
+      enabled:
+        description:
+        - True if the user mapping is applied.
+        type: bool
+        default: true
+      user:
+        description:
+        - Specifies the persona name.
+        type: str
+      primary_group:
+        description:
+        - Specifies the primary group name.
+        type: str
+      secondary_groups:
+        description:
+        - Specifies the secondary groups.
+        type: list
+        elements: dict
+        suboptions:
+          name:
+            description:
+            - Specifies the group name.
+            type: str
+            required: true
+          state:
+            description:
+            - Specifies the group state.
+            type: str
+            choices: [absent, present]
+            default: present
 
 notes:
 - The I(check_mode) is not supported.
@@ -220,6 +290,39 @@ EXAMPLES = r'''
       read_only: false
       state: 'present'
 
+  - name: Modify map_root and map_non_root
+    dellemc.powerscale.nfs:
+      onefs_host: "{{onefs_host}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      path: "<path>"
+      access_zone: "{{access_zone}}"
+      map_root:
+        user: "root"
+        primary_group: "root"
+        secondary_groups:
+          - name: "group_test"
+      map_non_root:
+        user: "root"
+        primary_group: "root"
+        secondary_groups:
+          - name: "group_test"
+            state: "absent"
+      state: 'present'
+
+  - name: Disable map_root
+    dellemc.powerscale.nfs:
+      onefs_host: "{{onefs_host}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      verify_ssl: "{{verify_ssl}}"
+      path: "<path>"
+      access_zone: "{{access_zone}}"
+      map_root:
+        enabled: false
+      state: 'present'
+
   - name: Delete NFS Export
     dellemc.powerscale.nfs:
       onefs_host: "{{onefs_host}}"
@@ -279,6 +382,55 @@ NFS_export_details:
         description:
             description: Description for the export.
             type: str
+        map_root:
+            description: Specifies the users and groups to which non-root and root clients are mapped.
+            type: complex
+            contains:
+                enabled:
+                    description: True if the user mapping is applied.
+                    type: bool
+                user:
+                    description: Specifies the persona name.
+                    type: complex
+                    contains:
+                        id:
+                            description: Specifies the persona name.
+                            type: str
+                primary_group:
+                    description: Specifies the primary group.
+                    type: complex
+                    contains:
+                        id:
+                            description: Specifies the primary group name.
+                            type: str
+                secondary_groups:
+                    description: Specifies the secondary groups.
+                    type: list
+        map_non_root:
+            description: Specifies the users and groups to which non-root and root clients are mapped.
+            type: complex
+            contains:
+                enabled:
+                    description: True if the user mapping is applied.
+                    type: bool
+                user:
+                    description: Specifies the persona details.
+                    type: complex
+                    contains:
+                        id:
+                            description: Specifies the persona name.
+                            type: str
+                primary_group:
+                    description: Specifies the primary group details.
+                    type: complex
+                    contains:
+                        id:
+                            description: Specifies the primary group name.
+                            type: str
+                secondary_groups:
+                    description: Specifies the secondary groups details.
+                    type: list
+
     sample: {
         "all_dir": "false",
         "block_size": 8192,
@@ -286,14 +438,41 @@ NFS_export_details:
         "id": 9324,
         "read_only_client": ["x.x.x.x"],
         "security_flavors": ["unix", "krb5"],
-        "zone": "System"
+        "zone": "System",
+        "map_root": {
+            "enabled": true,
+            "primary_group": {
+                "id": GROUP:group1,
+                "name": null,
+                "type": null
+            },
+            "secondary_groups": [],
+            "user": {
+                "id": "USER:user",
+                "name": null,
+                "type": null
+            }
+        },
+        "map_non_root": {
+            "enabled": false,
+            "primary_group": {
+                "id": null,
+                "name": null,
+                "type": null
+            },
+            "secondary_groups": [],
+            "user": {
+                "id": "USER:nobody",
+                "name": null,
+                "type": null
+            }
+        }
     }
 '''
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
-import re
 
 LOG = utils.get_logger('nfs')
 
@@ -337,7 +516,7 @@ class NfsExport(object):
                          get_zones_summary_zone(access_zone)).to_dict()
             return zone_path["summary"]["path"]
         except Exception as e:
-            error_msg = self.determine_error(error_obj=e)
+            error_msg = utils.determine_error(error_obj=e)
             error_message = 'Unable to fetch base path of Access Zone {0} ' \
                             'failed with error: {1}'.format(access_zone,
                                                             str(error_msg))
@@ -373,7 +552,7 @@ class NfsExport(object):
             error_msg = (
                 "Got error {0} while getting NFS export details for path: "
                 "{1} and access zone: {2}" .format(
-                    self.determine_error(e),
+                    utils.determine_error(e),
                     path,
                     access_zone))
             LOG.error(error_msg)
@@ -403,7 +582,7 @@ class NfsExport(object):
             error_msg = (
                 "Got error {0} while getting NFS export details for ID: "
                 "{1} and access zone: {2}" .format(
-                    self.determine_error(e),
+                    utils.determine_error(e),
                     nfs_export_id,
                     access_zone))
             LOG.error(error_msg)
@@ -427,7 +606,7 @@ class NfsExport(object):
         except Exception as e:
             error_msg = 'Create NfsExportCreateParams object for path {0}' \
                 ' failed with error {1}'.format(
-                    path, self.determine_error(e))
+                    path, utils.determine_error(e))
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
@@ -436,6 +615,12 @@ class NfsExport(object):
         Create NFS export for given path and access_zone
         '''
         nfs_export = self._create_nfs_export_create_params_object(path)
+        nfs_map_root = set_nfs_map(self.module.params.get('map_root'), 'map_root')
+        if nfs_map_root:
+            nfs_export.map_root = nfs_map_root
+        nfs_map_non_root = set_nfs_map(self.module.params.get('map_non_root'), 'map_non_root')
+        if nfs_map_non_root:
+            nfs_export.map_non_root = nfs_map_non_root
         try:
             msg = ("Creating NFS export with parameters:nfs_export=%s",
                    nfs_export)
@@ -451,7 +636,7 @@ class NfsExport(object):
         except Exception as e:
             error_msg = 'Create NFS export for path: {0} and access zone: {1}' \
                 ' failed with error: {2}'.format(
-                    path, access_zone, self.determine_error(e))
+                    path, access_zone, utils.determine_error(e))
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
@@ -600,9 +785,16 @@ class NfsExport(object):
         Modify NFS export in system
         '''
         nfs_export = self.isi_sdk.NfsExport()
-        client_flag = False
+        client_flag = map_root_flag = map_non_root_flag = False
         client_flag, nfs_export = self._check_client_status(nfs_export)
-
+        map_root = set_nfs_map(self.module.params.get('map_root'), 'map_root', self.result.get('NFS_export_details'))
+        if map_root:
+            nfs_export.map_root = map_root
+            map_root_flag = True
+        map_non_root = set_nfs_map(self.module.params.get('map_non_root'), 'map_non_root', self.result.get('NFS_export_details'))
+        if map_non_root:
+            nfs_export.map_non_root = map_non_root
+            map_non_root_flag = True
         read_only_flag, read_only_value = self._check_mod_field(
             'read_only', 'read_only')
         all_dirs_flag, all_dirs_value = self._check_mod_field(
@@ -614,41 +806,42 @@ class NfsExport(object):
 
         if all(
             field_mod_flag is False for field_mod_flag in [
-                client_flag, read_only_flag, all_dirs_flag, description_flag,
-                security_flag]) and self.module.params['ignore_unresolvable_hosts'] is not True:
+                client_flag, read_only_flag, all_dirs_flag, description_flag, map_root_flag,
+                map_non_root_flag, security_flag]) and self.module.params['ignore_unresolvable_hosts'] is not True:
             LOG.info(
                 'No change detected for the NFS Export, returning changed = False')
             return False
         else:
-
             nfs_export.read_only = read_only_value if read_only_flag else None
             nfs_export.all_dirs = all_dirs_value if all_dirs_flag else None
             nfs_export.description = description_value if description_flag else None
             LOG.debug('Modifying NFS Export with  %s details', nfs_export)
+            return self.perform_modify_nfs_export(nfs_export, path, access_zone, ignore_unresolvable_hosts)
 
-            try:
-                if ignore_unresolvable_hosts is not True:
-                    self.protocol_api.update_nfs_export(
-                        nfs_export,
-                        self.result['NFS_export_details']['id'],
-                        zone=self.result['NFS_export_details']['zone'])
-                else:
-                    self.protocol_api.update_nfs_export(
-                        nfs_export,
-                        self.result['NFS_export_details']['id'],
-                        zone=self.result['NFS_export_details']['zone'],
-                        ignore_unresolvable_hosts=ignore_unresolvable_hosts)
-                # update result with updated details
-                self.result['NFS_export_details'] = self.get_nfs_export(
-                    path, access_zone)
-                return True
+    def perform_modify_nfs_export(self, nfs_export, path, access_zone, ignore_unresolvable_hosts):
+        try:
+            if ignore_unresolvable_hosts is not True:
+                self.protocol_api.update_nfs_export(
+                    nfs_export,
+                    self.result['NFS_export_details']['id'],
+                    zone=self.result['NFS_export_details']['zone'])
+            else:
+                self.protocol_api.update_nfs_export(
+                    nfs_export,
+                    self.result['NFS_export_details']['id'],
+                    zone=self.result['NFS_export_details']['zone'],
+                    ignore_unresolvable_hosts=ignore_unresolvable_hosts)
+            # update result with updated details
+            self.result['NFS_export_details'] = self.get_nfs_export(
+                path, access_zone)
+            return True
 
-            except Exception as e:
-                error_msg = 'Modify NFS export for path: {0} and access zone:' \
-                    ' {1} failed with error: {2}'.format(
-                        path, access_zone, self.determine_error(e))
-                LOG.error(error_msg)
-                self.module.fail_json(msg=error_msg)
+        except Exception as e:
+            error_msg = 'Modify NFS export for path: {0} and access zone:' \
+                ' {1} failed with error: {2}'.format(
+                    path, access_zone, utils.determine_error(e))
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
 
     def delete_nfs_export(self):
         '''
@@ -671,17 +864,9 @@ class NfsExport(object):
                     nfs_export['paths'][0],
                     nfs_export['zone'],
                     nfs_export['id'],
-                    self.determine_error(e)))
+                    utils.determine_error(e)))
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
-
-    def determine_error(self, error_obj):
-        '''Format the error object'''
-        if isinstance(error_obj, utils.ApiException):
-            error = re.sub("[\n \"]+", ' ', str(error_obj.body))
-        else:
-            error = str(error_obj)
-        return error
 
     def effective_path(self, access_zone, path):
         """Get the effective path for any access zone"""
@@ -761,6 +946,22 @@ class NfsExport(object):
                 type='list', elements='str',
                 choices=['unix', 'kerberos', 'kerberos_integrity',
                          'kerberos_privacy']),
+            map_root=dict(type='dict', options=dict(
+                enabled=dict(type='bool', default=True),
+                primary_group=dict(),
+                secondary_groups=dict(type='list', elements='dict', options=dict(
+                                      name=dict(required=True),
+                                      state=dict(choices=['present', 'absent'], default='present'))),
+                user=dict())
+            ),
+            map_non_root=dict(type='dict', options=dict(
+                enabled=dict(type='bool', default=True),
+                primary_group=dict(),
+                secondary_groups=dict(type='list', elements='dict', options=dict(
+                                      name=dict(required=True),
+                                      state=dict(choices=['present', 'absent'], default='present'))),
+                user=dict())
+            ),
             state=dict(required=True, type='str', choices=['present',
                                                            'absent'])
         )
@@ -780,6 +981,120 @@ def get_security_keys(security_flavors):
                 security_flavors[i] = "unix"
         return security_flavors
     return None
+
+
+def set_nfs_map(map_params, map_type, nfs_export_details=None):
+    """
+    Set the map root or non-root object based on input
+
+    Args:
+        map_params (dict): The map parameters
+        map_type (str): The type of map (root or non-root)
+        nfs_export_details (dict, optional): The NFS export details
+
+    Returns:
+        nfs_map_object (object): The modified NFS map object
+    """
+    if map_params is not None:
+        nfs_map_object = utils.get_nfs_map_object()
+        nfs_map_object = initialize_nfs_map(nfs_map_object, nfs_export_details, map_type)
+        nfs_map_object.enabled = map_params.get('enabled')
+        if nfs_map_object.enabled is not False:
+            nfs_map_object = set_nfs_map_object(nfs_map_object, map_params)
+
+        changed = is_nfs_map_modified(map_type, nfs_map_object, nfs_export_details, map_params)
+        if changed or not nfs_export_details:
+            return nfs_map_object
+
+
+def set_nfs_map_object(nfs_map_object, map_params):
+    if map_params['user']:
+        user = {'name': map_params.get('user')}
+        nfs_map_object.user = user
+
+    if map_params['primary_group']:
+        group = {'name': map_params.get('primary_group')}
+        nfs_map_object.primary_group = group
+
+    groups = nfs_map_object.secondary_groups.copy()
+    new_groups = []
+    secondary_groups = map_params.get('secondary_groups') or []
+    for secondary_group in secondary_groups:
+        group = [nfs_map for nfs_map in groups if nfs_map.get('id').split(':')[1] == secondary_group.get('name')]
+        if secondary_group.get('state') == 'absent' and group:
+            groups.remove(group[0])
+        elif secondary_group.get('state') != 'absent' and not group:
+            group = {'id': secondary_group.get('name')}
+            new_groups.append(group)
+    nfs_map_object.secondary_groups = groups + new_groups
+    return nfs_map_object
+
+
+def initialize_nfs_map(nfs_map_object, nfs_export_details, map_type):
+    """
+    Initialize the map object with details from nfs_export_details.
+
+    Args:
+        nfs_map_object (object): The map object to be initialized.
+        nfs_export_details (dict): The details of the NFS export.
+        map_type (str): The type of map to be initialized.
+
+    Returns:
+        object: The initialized map object.
+
+    """
+    if nfs_export_details and nfs_export_details[map_type]:
+        nfs_map_object.enabled = {'id': nfs_export_details[map_type].get('enabled')}
+        nfs_map_object.user = {'id': nfs_export_details[map_type].get('user').get('id')} \
+            if nfs_export_details[map_type].get('user').get('id') else None
+        nfs_map_object.primary_group = {'id': nfs_export_details[map_type].get('primary_group').get('id')} \
+            if nfs_export_details[map_type].get('primary_group').get('id') else None
+        nfs_map_object.secondary_groups = nfs_export_details[map_type]['secondary_groups']
+    else:
+        nfs_map_object.user = nfs_map_object.primary_group = None
+        nfs_map_object.secondary_groups = []
+    return nfs_map_object
+
+
+def is_nfs_map_modified(map_type, nfs_export_map, nfs_export_details, nfs_map_params):
+    """
+    Check if nfs map object is modified.
+
+    Args:
+        map_type (str): Type of the map.
+        nfs_export_map (NfsExportMap): The nfs export map object.
+        nfs_export_details (dict): A dictionary containing details of nfs export maps.
+        nfs_map_params (dict): A dictionary containing the parameters to compare with the export map object.
+
+    Returns:
+        bool: True if the nfs map object is modified, False otherwise.
+    """
+    if nfs_export_map is not None and nfs_export_details:
+        if nfs_map_params['enabled'] is not None and nfs_export_map.enabled != nfs_export_details[map_type]['enabled']:
+            return True
+        if nfs_map_params['enabled'] is not False:
+            if is_map_user_modified(nfs_map_params, nfs_export_details, nfs_export_map, map_type) or \
+                    is_map_primary_group_modified(nfs_map_params, nfs_export_details, nfs_export_map, map_type) or \
+                    is_map_secondary_groups_modified(nfs_map_params, nfs_export_details, nfs_export_map, map_type):
+                return True
+
+
+def is_map_user_modified(nfs_map_params, nfs_export_details, nfs_export_map, map_type):
+    if nfs_map_params['user'] is not None and \
+            nfs_export_map.user.get('name') != nfs_export_details[map_type]['user']['id'].split(':')[1]:
+        return True
+
+
+def is_map_primary_group_modified(nfs_map_params, nfs_export_details, nfs_export_map, map_type):
+    if nfs_map_params['primary_group'] is not None and \
+            nfs_export_map.primary_group.get('name') != nfs_export_details[map_type]['primary_group']['id'].split(':')[1]:
+        return True
+
+
+def is_map_secondary_groups_modified(nfs_map_params, nfs_export_details, nfs_export_map, map_type):
+    if nfs_map_params['secondary_groups'] is not None and \
+            nfs_export_map.secondary_groups != nfs_export_details[map_type]['secondary_groups']:
+        return True
 
 
 def main():
