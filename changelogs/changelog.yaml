@@ -169,7 +169,7 @@ releases:
       - Added support to create a user using user_id.
       - Added support to list SMB open files through Info module.
       - Added support to update the password of the user.
-      - Enabled the path paramter of Smart Quota module to be consistent with other
+      - Enabled the path parameter of Smart Quota module to be consistent with other
         modules.
     modules:
     - description: Find and close SMB open files on a PowerScale Storage system.
@@ -179,11 +179,13 @@ releases:
   2.0.0:
     changes:
       minor_changes:
-      - Added support for ignoring unresolvable hosts for NFS Export.
-      - Added support for everyone user in filesystem module.
-      - Added support for listing LDAP auth providers and user mapping rules in Info module.
       - Added support for PowerScale OneFS 9.5 Islander release.
-      - For the execution of the PowerScale Ansible modules, python library "isilon-sdk" needs to be installed.
+      - Added support for everyone user in filesystem module.
+      - Added support for ignoring unresolvable hosts for NFS Export.
+      - Added support for listing LDAP auth providers and user mapping rules in Info
+        module.
+      - For the execution of the PowerScale Ansible modules, python library "isilon-sdk"
+        needs to be installed.
     modules:
     - description: Create, modify, get details, and delete a user mapping rule.
       name: user_mapping_rule
@@ -192,11 +194,30 @@ releases:
   2.1.0:
     changes:
       minor_changes:
-      - Added support for deleting an access zone and reordering the authentication providers in access zone module.
-      - Added support for service principal names(SPN) in AD module.
       - Added support for SmartConnect zone alaises(DNS names) in network pool module.
+      - Added support for deleting an access zone and reordering the authentication
+        providers in access zone module.
+      - Added support for service principal names(SPN) in AD module.
     modules:
     - description: Create, modify, get details and delete an S3 bucket.
       name: s3_bucket
       namespace: ''
     release_date: '2023-07-31'
+  2.2.0:
+    changes:
+      minor_changes:
+      - Added support for listing NFS default settings, NFS global settings and NFS
+        zone settings in Info module.
+      - Added support for specifying the users and groups to which non-root and root
+        clients are mapped in nfs module.
+    modules:
+    - description: Get details and modify NFS default settings.
+      name: nfs_default_settings
+      namespace: ''
+    - description: Get details and modify NFS global settings.
+      name: nfs_global_settings
+      namespace: ''
+    - description: Get details and modify NFS zone settings.
+      name: nfs_zone_settings
+      namespace: ''
+    release_date: '2023-08-31'

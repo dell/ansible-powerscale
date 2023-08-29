@@ -1,6 +1,6 @@
 **Ansible Modules for Dell Technologies PowerScale** 
 =========================================
-### Release notes 2.1.0
+### Release notes 2.2.0
 
 >   © 2022 Dell Inc. or its subsidiaries. All rights reserved. Dell
 >   and other trademarks are trademarks of Dell Inc. or its
@@ -27,7 +27,7 @@ Table 1. Revision history
 
 | Revision | Date          | Description                                               |
 |----------|---------------|-----------------------------------------------------------|
-| 01       | July 2023    | Ansible Modules for Dell PowerScale 2.1.0                 |
+| 01       | August 2023    | Ansible Modules for Dell PowerScale 2.2.0                 |
 
 
 Product description
@@ -68,16 +68,18 @@ New Features and Enhancements
 ---------------------------
 This section describes the features of the Ansible Modules for Dell PowerScale for this release.
 
-The Ansible Modules for Dell PowerScale release 2.1.0 supports the following features:
+The Ansible Modules for Dell PowerScale release 2.2.0 supports the following features:
 
-- The S3 bucket module supports this functionality:
-    - Create, modify, get details and delete an S3 bucket.
-- The Access zone module supports this functionality:
-    - Added support for deleting an access zone and reordering the authentication providers.
-- The AD module supports this functionality:
-    - Added support for service principal names (SPN).
-- The Network Pool module supports this functionality:
-    - Added support for SmartConnect zone alaises(DNS names)
+- The NFS default settings module supports this functionality:
+    - Get details and modify NFS default settings.
+- The NFS global settings module supports this functionality:
+    - Get details and modify NFS global settings.
+- The NFS zone settings module supports this functionality:
+    - Get details and modify NFS zone settings.
+- The NFS module supports this functionality:
+    - Added support for specifying the users and groups to which non-root and root clients are mapped.
+- The Info module supports this functionality:
+    - Added support for getting details of NFS default settings, NFS global settings and NFS zone settings.
 
 Known issues
 ------------
@@ -109,7 +111,6 @@ This section lists the limitations in this release of Ansible Modules for Dell P
  
 - Filesystems
   -  Only directory quotas are supported but not user or group quotas.
-  -  Modification of include_snap_data flag is not supported.
      
 - NFS Export
   - If there are multiple exports present with the same path in an access zone, operations on such exports fail. 
@@ -128,7 +129,7 @@ This section lists the limitations in this release of Ansible Modules for Dell P
 Software media, organization, and files 
 -----------
 The software package is available for download from the [Ansible Modules
-for PowerScale GitHub](https://github.com/dell/ansible-powerscale/tree/2.1.0) page.
+for PowerScale GitHub](https://github.com/dell/ansible-powerscale/tree/2.2.0) page.
 
 Additional resources
 --------------------

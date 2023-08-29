@@ -1,0 +1,52 @@
+---
+- name: NFS zone settings module on PowerScale
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: "xx.xx.xx.xx"
+    port_no: "000"
+    api_user: "user"
+    api_password: "pass"
+    verify_ssl: false
+    access_zone: "sample-zone"
+
+  tasks:
+    - name: Get details of NFS zone settings
+      dellemc.powerscale.nfs_zone_settings:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        access_zone: "{{ access_zone }}"
+
+    - name: Update the NFS zone settings - check mode
+      dellemc.powerscale.nfs_zone_settings:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        access_zone: "{{ access_zone }}"
+        nfsv4_allow_numeric_ids: false
+        nfsv4_domain: "example.com"
+        nfsv4_no_domain: false
+        nfsv4_no_domain_uids: false
+        nfsv4_no_names: false
+        nfsv4_replace_domain: false
+      check_mode: true
+
+    - name: Update the NFS zone settings
+      dellemc.powerscale.nfs_zone_settings:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        access_zone: "{{ access_zone }}"
+        nfsv4_allow_numeric_ids: false
+        nfsv4_domain: "example.com"
+        nfsv4_no_domain: false
+        nfsv4_no_domain_uids: false
+        nfsv4_no_names: false
+        nfsv4_replace_domain: false

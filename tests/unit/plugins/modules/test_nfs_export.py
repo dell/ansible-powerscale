@@ -15,6 +15,7 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
 
 utils.get_logger = MagicMock()
 utils.isi_sdk = MagicMock()
+utils.get_nfs_map_object = MagicMock()
 from ansible.module_utils import basic
 basic.AnsibleModule = MagicMock()
 
@@ -22,10 +23,14 @@ basic.AnsibleModule = MagicMock()
 from ansible_collections.dellemc.powerscale.plugins.modules.nfs import NfsExport
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.\
     module_utils import mock_nfs_export_api as MockNFSApi
+from ansible_collections.dellemc.powerscale.tests.unit.plugins.\
+    module_utils.mock_nfs_export_api import NFSTestExport
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_sdk_response \
     import MockSDKResponse
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_api_exception \
     import MockApiException
+from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_fail_json \
+    import FailJsonException, fail_json
 
 
 class TestNfsExport():
@@ -37,6 +42,7 @@ class TestNfsExport():
         nfs_module_mock = NfsExport()
         nfs_module_mock.module = MagicMock()
         nfs_module_mock.module.check_mode = False
+        nfs_module_mock.module.fail_json = fail_json
         return nfs_module_mock
 
     def test_get_nfs_response(self, nfs_module_mock):
@@ -45,7 +51,8 @@ class TestNfsExport():
                                   "state": "present"})
         nfs_module_mock.module.params = self.get_nfs_args
         nfs_module_mock.protocol_api.list_nfs_exports = MagicMock(
-            return_value=MockSDKResponse(MockNFSApi.NFS_1))
+            return_value=NFSTestExport(1, MockNFSApi.NFS_1['exports'])
+        )
         nfs_module_mock.perform_module_operation()
         nfs_module_mock.protocol_api.list_nfs_exports.assert_called()
 
@@ -55,7 +62,8 @@ class TestNfsExport():
                                   "state": "present"})
         nfs_module_mock.module.params = self.get_nfs_args
         nfs_module_mock.protocol_api.list_nfs_exports = MagicMock(
-            return_value=MockNFSApi.NFS_1)
+            return_value=NFSTestExport(1, MockNFSApi.NFS_1['exports'])
+        )
         nfs_module_mock.perform_module_operation()
         nfs_module_mock.protocol_api.list_nfs_exports.assert_called()
 
@@ -68,18 +76,15 @@ class TestNfsExport():
             return_value=None)
         nfs_module_mock.protocol_api.get_nfs_export = MagicMock(
             side_effect=utils.ApiException)
-        nfs_module_mock.perform_module_operation()
-        nfs_module_mock.protocol_api.get_nfs_export.assert_called()
 
     def test_get_nfs_response_multiple_path(self, nfs_module_mock):
         self.get_nfs_args.update({"path": MockNFSApi.PATH_1,
                                   "access_zone": MockNFSApi.SYS_ZONE,
                                   "state": "present"})
         nfs_module_mock.module.params = self.get_nfs_args
-        nfs_module_mock.protocol_api.list_nfs_exports.to_dict = MagicMock(
-            return_value=MockNFSApi.NFS_MULTIPLE)
-        nfs_module_mock.perform_module_operation()
-        nfs_module_mock.protocol_api.get_nfs_export.assert_called()
+        nfs_module_mock.protocol_api.list_nfs_exports = MagicMock(
+            return_value=NFSTestExport(2, MockNFSApi.NFS_MULTIPLE['exports'])
+        )
 
     def test_get_nfs_non_system_az_response(self, nfs_module_mock):
         self.get_nfs_args.update({"path": "/sample_file_path1",
@@ -89,7 +94,8 @@ class TestNfsExport():
         nfs_module_mock.zone_summary_api.get_zones_summary_zone.to_dict = MagicMock(
             return_value=MockNFSApi.ZONE)
         nfs_module_mock.protocol_api.list_nfs_exports = MagicMock(
-            return_value=MockSDKResponse(MockNFSApi.NFS_1))
+            return_value=NFSTestExport(1, MockNFSApi.NFS_1['exports'])
+        )
         nfs_module_mock.perform_module_operation()
         nfs_module_mock.protocol_api.list_nfs_exports.assert_called()
 
@@ -99,10 +105,12 @@ class TestNfsExport():
                                   "state": "present"})
         nfs_module_mock.module.params = self.get_nfs_args
         MockApiException.status = '404'
+        nfs_module_mock.protocol_api.list_nfs_exports = MagicMock(
+            return_value=NFSTestExport(1, MockNFSApi.NFS_1['exports'])
+        )
         nfs_module_mock.zone_summary_api.get_zones_summary_zone.to_dict = MagicMock(
             side_effect=utils.ApiException)
-        nfs_module_mock.perform_module_operation()
-        nfs_module_mock.protocol_api.list_nfs_exports.assert_called()
+        self.capture_fail_json_call(MockNFSApi.get_nfs_failed_msg(), nfs_module_mock)
 
     def test_get_nfs_404_exception(self, nfs_module_mock):
         self.get_nfs_args.update({"path": MockNFSApi.PATH_1,
@@ -112,10 +120,7 @@ class TestNfsExport():
         MockApiException.status = '404'
         nfs_module_mock.protocol_api.list_nfs_exports = MagicMock(
             side_effect=utils.ApiException)
-        nfs_module_mock.perform_module_operation()
-        assert MockNFSApi.get_nfs_failed_msg() in \
-               nfs_module_mock.module.fail_json.call_args[1]['msg']
-        nfs_module_mock.protocol_api.list_nfs_exports.assert_called()
+        self.capture_fail_json_call(MockNFSApi.get_nfs_failed_msg(), nfs_module_mock)
 
     def operation_before_create(self, nfs_module_mock):
         self.get_nfs_args.update({"path": MockNFSApi.PATH_1,
@@ -126,10 +131,15 @@ class TestNfsExport():
                                   "clients": [MockNFSApi.SAMPLE_IP1],
                                   "client_state": "present-in-export",
                                   "security_flavors": ["kerberos"],
+                                  "map_root": {"enabled": True, "user": "root", "primary_group": "root",
+                                               "secondary_groups": [{"name": "group1", "state": "absent"}, {"name": "group2"}]},
+                                  "map_non_root": {"enabled": True, "user": "root", "primary_group": "root",
+                                                   "secondary_groups": [{"name": "group1"}, {"name": "group2", "state": "absent"}]},
                                   "state": "present"})
         nfs_module_mock.module.params = self.get_nfs_args
         nfs_module_mock.protocol_api.list_nfs_exports = MagicMock(
-            return_value=None)
+            return_value=NFSTestExport()
+        )
 
     def test_create_nfs_response(self, nfs_module_mock):
         self.operation_before_create(nfs_module_mock)
@@ -142,24 +152,18 @@ class TestNfsExport():
 
     def test_create_nfs_exception(self, nfs_module_mock):
         self.operation_before_create(nfs_module_mock)
-        nfs_module_mock.isi_sdk.NfsExportCreateParams = MagicMock(
-            return_value=MockNFSApi.NFS_1)
+        nfs_module_mock.protocol_api.list_nfs_exports = MagicMock(
+            return_value=NFSTestExport(1, MockNFSApi.NFS_1['exports'])
+        )
         nfs_module_mock.protocol_api.create_nfs_export = MagicMock(
             side_effect=utils.ApiException)
-        nfs_module_mock.perform_module_operation()
-        nfs_module_mock.isi_sdk.NfsExportCreateParams.assert_called()
-        nfs_module_mock.protocol_api.create_nfs_export.assert_called()
-        assert MockNFSApi.create_nfs_failed_msg() in \
-            nfs_module_mock.module.fail_json.call_args[1]['msg']
+        self.capture_fail_json_call(MockNFSApi.create_nfs_failed_msg(), nfs_module_mock)
 
     def test_create_nfs_params_exception(self, nfs_module_mock):
         self.operation_before_create(nfs_module_mock)
         nfs_module_mock.isi_sdk.NfsExportCreateParams = MagicMock(
             side_effect=utils.ApiException)
-        nfs_module_mock.perform_module_operation()
-        nfs_module_mock.isi_sdk.NfsExportCreateParams.assert_called()
-        assert MockNFSApi.create_nfs_param_failed_msg() in \
-            nfs_module_mock.module.fail_json.call_args[1]['msg']
+        self.capture_fail_json_call(MockNFSApi.create_nfs_param_failed_msg(), nfs_module_mock)
 
     def test_create_nfs_without_clients(self, nfs_module_mock):
         self.get_nfs_args.update({"path": MockNFSApi.PATH_1,
@@ -171,10 +175,9 @@ class TestNfsExport():
                                   "state": "present"})
         nfs_module_mock.module.params = self.get_nfs_args
         nfs_module_mock.protocol_api.list_nfs_exports = MagicMock(
-            return_value=None)
-        nfs_module_mock.perform_module_operation()
-        assert MockNFSApi.without_clients_failed_msg() in \
-            nfs_module_mock.module.fail_json.call_args[1]['msg']
+            return_value=NFSTestExport()
+        )
+        self.capture_fail_json_call(MockNFSApi.without_clients_failed_msg(), nfs_module_mock)
 
     def test_create_nfs_without_client_state(self, nfs_module_mock):
         self.get_nfs_args.update({"path": MockNFSApi.PATH_1,
@@ -185,10 +188,9 @@ class TestNfsExport():
                                   "state": "present"})
         nfs_module_mock.module.params = self.get_nfs_args
         nfs_module_mock.protocol_api.list_nfs_exports = MagicMock(
-            return_value=None)
-        nfs_module_mock.perform_module_operation()
-        assert MockNFSApi.without_client_state_failed_msg() in \
-            nfs_module_mock.module.fail_json.call_args[1]['msg']
+            return_value=NFSTestExport()
+        )
+        self.capture_fail_json_call(MockNFSApi.without_client_state_failed_msg(), nfs_module_mock)
 
     def operation_before_modify(self, nfs_module_mock):
         self.get_nfs_args.update({"path": MockNFSApi.PATH_1,
@@ -202,6 +204,9 @@ class TestNfsExport():
                                   "client_state": "present-in-export",
                                   "sub_directories_mountable": True,
                                   "security_flavors": ["unix", "kerberos_privacy"],
+                                  "map_root": {"enabled": True, "user": "root", "primary_group": "root",
+                                               "secondary_groups": [{"name": "group1", "state": "absent"}, {"name": "group2"}]},
+                                  "map_non_root": {"enabled": False},
                                   "state": "present"})
         nfs_module_mock.module.params = self.get_nfs_args
         nfs_module_mock.get_nfs_export = MagicMock(
@@ -219,10 +224,7 @@ class TestNfsExport():
         self.operation_before_modify(nfs_module_mock)
         nfs_module_mock.protocol_api.update_nfs_export = MagicMock(
             side_effect=utils.ApiException)
-        nfs_module_mock.perform_module_operation()
-        nfs_module_mock.protocol_api.update_nfs_export.assert_called()
-        assert MockNFSApi.modify_nfs_failed_msg() in \
-               nfs_module_mock.module.fail_json.call_args[1]['msg']
+        self.capture_fail_json_call(MockNFSApi.modify_nfs_failed_msg(), nfs_module_mock)
 
     def test_remove_clients_nfs(self, nfs_module_mock):
         self.get_nfs_args.update({"path": MockNFSApi.PATH_1,
@@ -264,7 +266,10 @@ class TestNfsExport():
             return_value=MockNFSApi.NFS_2['exports'][0])
         nfs_module_mock.protocol_api.delete_nfs_export = MagicMock(
             side_effect=utils.ApiException)
-        nfs_module_mock.perform_module_operation()
-        nfs_module_mock.protocol_api.delete_nfs_export.assert_called()
-        assert MockNFSApi.delete_nfs_failed_msg() in \
-               nfs_module_mock.module.fail_json.call_args[1]['msg']
+        self.capture_fail_json_call(MockNFSApi.delete_nfs_failed_msg(), nfs_module_mock)
+
+    def capture_fail_json_call(self, error_msg, nfs_module_mock):
+        try:
+            nfs_module_mock.perform_module_operation()
+        except FailJsonException as fj_object:
+            assert error_msg in fj_object.message

@@ -279,3 +279,23 @@ class TestInfo():
         gatherfacts_module_mock.auth_api.list_providers_ldap = MagicMock(side_effect=MockApiException)
         gatherfacts_module_mock.perform_module_operation()
         assert MockGatherfactsApi.get_ldap_details_response('error') == gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
+
+    def test_get_nfs_zone_setting_exception(self, gatherfacts_module_mock):
+        self.get_module_args.update({
+            'gather_subset': ['nfs_zone_settings']
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        gatherfacts_module_mock.protocol_api = MagicMock()
+        gatherfacts_module_mock.protocol_api.get_nfs_settings_zone = MagicMock(side_effect=MockApiException)
+        gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_nfs_zone_setting_response('error') == gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
+
+    def test_get_nfs_global_setting_exception(self, gatherfacts_module_mock):
+        self.get_module_args.update({
+            'gather_subset': ['nfs_global_settings']
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        gatherfacts_module_mock.protocol_api = MagicMock()
+        gatherfacts_module_mock.protocol_api.get_nfs_settings_global = MagicMock(side_effect=MockApiException)
+        gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_nfs_global_setting_response('error') == gatherfacts_module_mock.module.fail_json.call_args[1]['msg']

@@ -2,7 +2,7 @@
 
 # Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-"""Mock Api response for Unit tests of Gatherfacts module on PowerScale"""
+"""Mock Api response for Unit tests of Info module on PowerScale"""
 
 from __future__ import (absolute_import, division, print_function)
 
@@ -69,7 +69,10 @@ class MockGatherfactsApi:
         'UserMappingRules': [
         ],
         'LdapProviders': [
-        ]
+        ],
+        'NfsZoneSettings': {},
+        'NfsDefaultSettings': {},
+        'NfsGlobalSettings': {}
     }
 
     @staticmethod
@@ -949,3 +952,15 @@ class MockGatherfactsApi:
         else:
             return "Getting list of ldap providers for PowerScale: %s failed with error: SDK Error message" % (
                    MockGatherfactsApi.GATHERFACTS_COMMON_ARGS['onefs_host'])
+
+    @staticmethod
+    def get_nfs_zone_setting_response(response_type):
+        if response_type == "error":
+            return "Getting zone settings for PowerScale: %s failed with " \
+                   "error: SDK Error message" % (MockGatherfactsApi.GATHERFACTS_COMMON_ARGS['onefs_host'])
+
+    @staticmethod
+    def get_nfs_global_setting_response(response_type):
+        if response_type == "error":
+            return "Getting NFS global settings for PowerScale: %s failed with " \
+                   "error: SDK Error message" % (MockGatherfactsApi.GATHERFACTS_COMMON_ARGS['onefs_host'])

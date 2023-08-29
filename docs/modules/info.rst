@@ -20,6 +20,12 @@ Get list of network groupnets, network pools for all access zones or a specific 
 
 Get list of user mapping rules, ldap providers of the PowerScale cluster.
 
+Get NFS zone settings details of the PowerScale cluster.
+
+Get NFS default settings details of the PowerScale cluster.
+
+Get NFS global settings details of the PowerScale cluster.
+
 
 
 Requirements
@@ -109,6 +115,10 @@ Parameters
     User mapping rules - ``user_mapping_rules``.
 
     LDAPs - ``ldap``.
+
+    NFS zone settings - ``nfs_zone_settings``.
+
+    NFS default settings - ``nfs_default_settings``.
 
     The list of *attributes*, *access_zones* and *nodes* is for the entire PowerScale cluster.
 
@@ -425,6 +435,33 @@ Examples
             - ldap
           scope: "effective"
 
+      - name: Get the NFS zone settings of the PowerScale cluster
+        dellemc.powerscale.info:
+          onefs_host: "{{onefs_host}}"
+          verify_ssl: "{{verify_ssl}}"
+          api_user: "{{api_user}}"
+          api_password: "{{api_password}}"
+          gather_subset:
+            - nfs_zone_settings
+
+      - name: Get the NFS default settings of the PowerScale cluster
+        dellemc.powerscale.info:
+          onefs_host: "{{onefs_host}}"
+          verify_ssl: "{{verify_ssl}}"
+          api_user: "{{api_user}}"
+          api_password: "{{api_password}}"
+          gather_subset:
+            - nfs_default_settings
+
+      - name: Get the NFS global settings of the PowerScale cluster
+        dellemc.powerscale.info:
+          onefs_host: "{{onefs_host}}"
+          verify_ssl: "{{verify_ssl}}"
+          api_user: "{{api_user}}"
+          api_password: "{{api_password}}"
+          gather_subset:
+            - nfs_global_settings
+
 
 
 Return Values
@@ -656,6 +693,84 @@ NfsExports (When C(nfs_exports) is in a given I(gather_subset), list, [{'id': 20
 
   path (, list, )
     Path of the NFS exports.
+
+
+
+NfsZoneSettings (When C(nfs_zone_settings) is in a given I(gather_subset), dict, {'nfsv4_allow_numeric_ids': True, 'nfsv4_domain': 'sample.com', 'nfsv4_no_domain': True, 'nfsv4_no_domain_uids': True, 'nfsv4_no_names': True, 'nfsv4_replace_domain': True, 'zone': 'System'})
+  Details of NFS zone settings.
+
+
+  nfsv4_allow_numeric_ids (, bool, )
+    If ``true``, sends owners and groups as UIDs and GIDs when look up fails or if the *nfsv4_no_names* property is set to 1.
+
+
+  nfsv4_domain (, str, )
+    Specifies the domain through which users and groups are associated.
+
+
+  nfsv4_no_domain (, bool, )
+    If ``true``, sends owners and groups without a domain name.
+
+
+  nfsv4_no_domain_uids (, bool, )
+    If ``true``, sends UIDs and GIDs without a domain name.
+
+
+  nfsv4_no_names (, bool, )
+    If ``true``, sends owners and groups as UIDs and GIDs.
+
+
+  nfsv4_replace_domain (, bool, )
+    If ``true``, replaces the owner or group domain with an NFS domain name.
+
+
+  zone (, str, )
+    Specifies the access zone in which the NFS zone settings apply.
+
+
+
+NfsGlobalSettings (When C(nfs_global_settings) is in a given I(gather_subset), dict, {'nfsv3_enabled': False, 'nfsv3_rdma_enabled': True, 'nfsv40_enabled': True, 'nfsv41_enabled': True, 'nfsv42_enabled': False, 'nfsv4_enabled': True, 'rpc_maxthreads': 20, 'rpc_minthreads': 17, 'rquota_enabled': True, 'service': True})
+  Details of NFS global settings.
+
+
+  nfsv3_enabled (, bool, )
+    Whether NFSv3 protocol is enabled/disabled.
+
+
+  nfsv3_rdma_enabled (, bool, )
+    Whether rdma is enabled for NFSv3 protocol.
+
+
+  nfsv40_enabled (, bool, )
+    Whether version 0 of NFSv4 protocol is enabled/disabled.
+
+
+  nfsv41_enabled (, bool, )
+    Whether version 1 of NFSv4 protocol is enabled/disabled.
+
+
+  nfsv42_enabled (, bool, )
+    Whether version 2 of NFSv4 protocol is enabled/disabled.
+
+
+  nfsv4_enabled (, bool, )
+    Whether NFSv4 protocol is enabled/disabled.
+
+
+  rpc_maxthreads (, int, )
+    Specifies the maximum number of threads in the nfsd thread pool.
+
+
+  rpc_minhreads (, int, )
+    Specifies the minimum number of threads in the nfsd thread pool.
+
+
+  rquota_enabled (, bool, )
+    Whether the rquota protocol is enabled/disabled.
+
+
+  service (, bool, )
+    Whether the NFS service is enabled/disabled.
 
 
 
@@ -942,6 +1057,131 @@ Users (When C(users) is in a given I(gather_subset), list, [{'users': [{'dn': 'C
 
 
 
+nfs_default_settings (always, dict, {'map_root': {'enabled': True, 'primary_group': {'id': 'None', 'name': 'None', 'type': 'None'}, 'secondary_groups': [], 'user': {'id': 'USER:nobody', 'name': 'None', 'type': 'None'}}, 'map_non_root': {'enabled': False, 'primary_group': {'id': 'None', 'name': 'None', 'type': 'None'}, 'secondary_groups': [], 'user': {'id': 'USER:nobody', 'name': 'None', 'type': 'None'}}, 'map_failure': {'enabled': False, 'primary_group': {'id': 'None', 'name': 'None', 'type': 'None'}, 'secondary_groups': [], 'user': {'id': 'USER:nobody', 'name': 'None', 'type': 'None'}}, 'name_max_size': 255, 'block_size': 8192, 'commit_asynchronous': False, 'directory_transfer_size': 131072, 'read_transfer_max_size': 1048576, 'read_transfer_multiple': 512, 'read_transfer_size': 131072, 'setattr_asynchronous': False, 'write_datasync_action': 'DATASYNC', 'write_datasync_reply': 'DATASYNC', 'write_filesync_action': 'FILESYNC', 'write_filesync_reply': 'FILESYNC', 'write_transfer_max_size': 1048576, 'write_transfer_multiple': 512, 'write_transfer_size': 524288, 'write_unstable_action': 'UNSTABLE', 'write_unstable_reply': 'UNSTABLE', 'max_file_size': 9223372036854775807, 'readdirplus': True, 'return_32bit_file_ids': False, 'can_set_time': True, 'encoding': 'DEFAULT', 'map_lookup_uid': False, 'symlinks': True, 'time_delta': '1e-09', 'zone': 'sample-zone'})
+  The NFS default settings.
+
+
+  map_root (, dict, )
+    Mapping of incoming root users to a specific user and/or group ID.
+
+
+  map_non_root (, dict, )
+    Mapping of non-root users to a specific user and/or group ID.
+
+
+  map_failure (, dict, )
+    Mapping of users to a specific user and/or group ID after a failed auth attempt.
+
+
+  name_max_size (, dict, )
+    Specifies the reported maximum length of a file name. This parameter does not affect server behavior, but is included to accommodate legacy client requirements.
+
+
+  block_size (, dict, )
+    Specifies the block size returned by the NFS statfs procedure.
+
+
+  directory_transfer_size (, dict, )
+    Specifies the preferred size for directory read operations. This value is used to advise the client of optimal settings for the server, but is not enforced.
+
+
+  read_transfer_max_size (, dict, )
+    Specifies the maximum buffer size that clients should use on NFS read requests. This value is used to advise the client of optimal settings for the server, but is not enforced.
+
+
+  read_transfer_multiple (, dict, )
+    Specifies the preferred multiple size for NFS read requests. This value is used to advise the client of optimal settings for the server, but is not enforced.
+
+
+  read_transfer_size (, dict, )
+    Specifies the preferred size for NFS read requests. This value is used to advise the client of optimal settings for the server, but is not enforced.
+
+
+  write_transfer_max_size (, dict, )
+    Specifies the maximum buffer size that clients should use on NFS write requests. This value is used to advise the client of optimal settings for the server, but is not enforced.
+
+
+  write_transfer_multiple (, dict, )
+    Specifies the preferred multiple size for NFS write requests. This value is used to advise the client of optimal settings for the server, but is not enforced.
+
+
+  write_transfer_size (, dict, )
+    Specifies the preferred multiple size for NFS write requests. This value is used to advise the client of optimal settings for the server, but is not enforced.
+
+
+  max_file_size (, dict, )
+    Specifies the maximum file size for any file accessed from the export. This parameter does not affect server behavior, but is included to accommodate legacy client requirements.
+
+
+  security_flavors (, list, )
+    Specifies the authentication types that are supported for this export.
+
+
+  commit_asynchronous (, bool, )
+    True if NFS commit requests execute asynchronously.
+
+
+  setattr_asynchronous (, bool, )
+    True if set attribute operations execute asynchronously.
+
+
+  readdirplus (, bool, )
+    True if 'readdirplus' requests are enabled. Enabling this property might improve network performance and is only available for NFSv3.
+
+
+  return_32bit_file_ids (, bool, )
+    Limits the size of file identifiers returned by NFSv3+ to 32-bit values (may require remount).
+
+
+  can_set_time (, bool, )
+    True if the client can set file times through the NFS set attribute request. This parameter does not affect server behavior, but is included to accommodate legacy client requirements.
+
+
+  map_lookup_uid (, bool, )
+    True if incoming user IDs (UIDs) are mapped to users in the OneFS user database. When set to False, incoming UIDs are applied directly to file operations.
+
+
+  symlinks (, bool, )
+    True if symlinks are supported. This value is used to advise the client of optimal settings for the server, but is not enforced.
+
+
+  write_datasync_action (, str, )
+    Specifies the synchronization type for data sync action.
+
+
+  write_datasync_reply (, str, )
+    Specifies the synchronization type for data sync reply.
+
+
+  write_filesync_action (, str, )
+    Specifies the synchronization type for file sync action.
+
+
+  write_filesync_reply (, str, )
+    Specifies the synchronization type for file sync reply.
+
+
+  write_unstable_action (, str, )
+    Specifies the synchronization type for unstable action.
+
+
+  write_unstable_reply (, str, )
+    Specifies the synchronization type for unstable reply.
+
+
+  encoding (, str, )
+    Specifies the default character set encoding of the clients connecting to the export, unless otherwise specified.
+
+
+  time_delta (, dict, )
+    Specifies the resolution of all time values that are returned to the clients.
+
+
+  zone (, str, )
+    The zone to which the NFS default settings apply.
+
+
+
 
 
 
@@ -959,4 +1199,6 @@ Authors
 - Spandita Panigrahi(@panigs7) <ansible.team@dell.com>
 - Pavan Mudunuri(@Pavan-Mudunuri) <ansible.team@dell.com>
 - Ananthu S Kuttattu(@kuttattz) <ansible.team@dell.com>
+- Bhavneet Sharma(@Bhavneet-Sharma) <ansible.team@dell.com>
+- Trisha Datta(@trisha-dell) <ansible.team@dell.com>
 

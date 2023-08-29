@@ -217,6 +217,60 @@
         read_only: false
         state: 'present'
 
+    - name: Set map_root and map_non_root
+      dellemc.powerscale.nfs:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: false
+        path: "{{ path }}"
+        access_zone: "{{ access_zone }}"
+        map_root:
+          user: "test_user_1"
+          primary_group: group3
+          secondary_groups:
+            - name: group1
+            - name: group2
+              state: absent
+        map_non_root:
+          enabled: true
+          user: "test_user"
+          primary_group: group1
+        state: "present"
+
+    - name: Set map_root and map_non_root - Idempotency
+      dellemc.powerscale.nfs:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: false
+        path: "{{ path }}"
+        access_zone: "{{ access_zone }}"
+        map_root:
+          user: "test_user_1"
+          primary_group: group3
+          secondary_groups:
+            - name: group1
+            - name: group2
+              state: absent
+        map_non_root:
+          enabled: true
+          user: "test_user"
+          primary_group: group1
+        state: "present"
+
+    - name: Disable map_non_root
+      dellemc.powerscale.nfs:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: false
+        path: "{{ path }}"
+        access_zone: "{{ access_zone }}"
+        map_non_root:
+          enabled: false
+        state: "present"
+
     - name: Delete NFS Export
       dellemc.powerscale.nfs:
         onefs_host: "{{ onefs_host }}"

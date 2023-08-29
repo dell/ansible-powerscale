@@ -28,6 +28,9 @@ description:
   specific access zone, network rules, network subnets, network interfaces,
   node pools, storage pool tiers, smb open files.
 - Get list of user mapping rules, ldap providers of the PowerScale cluster.
+- Get NFS zone settings details of the PowerScale cluster.
+- Get NFS default settings details of the PowerScale cluster.
+- Get NFS global settings details of the PowerScale cluster.
 
 extends_documentation_fragment:
   - dellemc.powerscale.powerscale
@@ -37,6 +40,8 @@ author:
 - Spandita Panigrahi(@panigs7) <ansible.team@dell.com>
 - Pavan Mudunuri(@Pavan-Mudunuri) <ansible.team@dell.com>
 - Ananthu S Kuttattu(@kuttattz) <ansible.team@dell.com>
+- Bhavneet Sharma(@Bhavneet-Sharma) <ansible.team@dell.com>
+- Trisha Datta(@trisha-dell) <ansible.team@dell.com>
 
 options:
   include_all_access_zones:
@@ -91,6 +96,8 @@ options:
     - SMB files - C(smb_files).
     - User mapping rules - C(user_mapping_rules).
     - LDAPs - C(ldap).
+    - NFS zone settings - C(nfs_zone_settings).
+    - NFS default settings - C(nfs_default_settings).
     - The list of I(attributes), I(access_zones) and I(nodes) is for the entire
       PowerScale cluster.
     - The list of providers for the entire PowerScale cluster.
@@ -112,7 +119,8 @@ options:
               smb_shares, nfs_exports, nfs_aliases, clients, synciq_reports, synciq_target_reports,
               synciq_policies, synciq_target_cluster_certificates, synciq_performance_rules,
               network_groupnets, network_subnets, network_pools, network_rules, network_interfaces,
-              node_pools, storagepool_tiers, smb_files, user_mapping_rules, ldap]
+              node_pools, storagepool_tiers, smb_files, user_mapping_rules, ldap,
+              nfs_zone_settings, nfs_default_settings, nfs_global_settings]
     type: list
     elements: str
 notes:
@@ -370,6 +378,33 @@ EXAMPLES = r'''
       gather_subset:
         - ldap
       scope: "effective"
+
+  - name: Get the NFS zone settings of the PowerScale cluster
+    dellemc.powerscale.info:
+      onefs_host: "{{onefs_host}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      gather_subset:
+        - nfs_zone_settings
+
+  - name: Get the NFS default settings of the PowerScale cluster
+    dellemc.powerscale.info:
+      onefs_host: "{{onefs_host}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      gather_subset:
+        - nfs_default_settings
+
+  - name: Get the NFS global settings of the PowerScale cluster
+    dellemc.powerscale.info:
+      onefs_host: "{{onefs_host}}"
+      verify_ssl: "{{verify_ssl}}"
+      api_user: "{{api_user}}"
+      api_password: "{{api_password}}"
+      gather_subset:
+        - nfs_global_settings
 '''
 
 RETURN = r'''
@@ -744,6 +779,94 @@ NfsExports:
             ]
         }
     ]
+NfsZoneSettings:
+    description: Details of NFS zone settings.
+    type: dict
+    returned: When C(nfs_zone_settings) is in a given I(gather_subset)
+    contains:
+        nfsv4_allow_numeric_ids:
+            description: If C(true), sends owners and groups as UIDs and GIDs
+                         when look up fails or if the I(nfsv4_no_names)
+                         property is set to 1.
+            type: bool
+        nfsv4_domain:
+            description: Specifies the domain through which users and groups
+                         are associated.
+            type: str
+        nfsv4_no_domain:
+            description: If C(true), sends owners and groups without a domain
+                         name.
+            type: bool
+        nfsv4_no_domain_uids:
+            description: If C(true), sends UIDs and GIDs without a domain name.
+            type: bool
+        nfsv4_no_names:
+            description: If C(true), sends owners and groups as UIDs and GIDs.
+            type: bool
+        nfsv4_replace_domain:
+            description: If C(true), replaces the owner or group domain with an
+                         NFS domain name.
+            type: bool
+        zone:
+            description: Specifies the access zone in which the NFS zone
+                         settings apply.
+            type: str
+    sample: {
+        "nfsv4_allow_numeric_ids": true,
+        "nfsv4_domain": "sample.com",
+        "nfsv4_no_domain": true,
+        "nfsv4_no_domain_uids": true,
+        "nfsv4_no_names": true,
+        "nfsv4_replace_domain": true,
+        "zone": "System"
+    }
+NfsGlobalSettings:
+    description: Details of NFS global settings.
+    type: dict
+    returned: When C(nfs_global_settings) is in a given I(gather_subset)
+    contains:
+        nfsv3_enabled:
+            description: Whether NFSv3 protocol is enabled/disabled.
+            type: bool
+        nfsv3_rdma_enabled:
+            description: Whether rdma is enabled for NFSv3 protocol.
+            type: bool
+        nfsv40_enabled:
+            description: Whether version 0 of NFSv4 protocol is enabled/disabled.
+            type: bool
+        nfsv41_enabled:
+            description: Whether version 1 of NFSv4 protocol is enabled/disabled.
+            type: bool
+        nfsv42_enabled:
+            description: Whether version 2 of NFSv4 protocol is enabled/disabled.
+            type: bool
+        nfsv4_enabled:
+            description: Whether NFSv4 protocol is enabled/disabled.
+            type: bool
+        rpc_maxthreads:
+            description: Specifies the maximum number of threads in the nfsd thread pool.
+            type: int
+        rpc_minhreads:
+            description: Specifies the minimum number of threads in the nfsd thread pool.
+            type: int
+        rquota_enabled:
+            description: Whether the rquota protocol is enabled/disabled.
+            type: bool
+        service:
+            description: Whether the NFS service is enabled/disabled.
+            type: bool
+    sample: {
+        "nfsv3_enabled": false,
+        "nfsv3_rdma_enabled": true,
+        "nfsv40_enabled": true,
+        "nfsv41_enabled": true,
+        "nfsv42_enabled": false,
+        "nfsv4_enabled": true,
+        "rpc_maxthreads": 20,
+        "rpc_minthreads": 17,
+        "rquota_enabled": true,
+        "service": true
+    }
 NodePools:
     description: List of the Node pools.
     type: list
@@ -1147,9 +1270,202 @@ Users:
             }
         ]
     ]
+nfs_default_settings:
+    description: The NFS default settings.
+    type: dict
+    returned: always
+    contains:
+        map_root:
+            description: Mapping of incoming root users to a specific user and/or group ID.
+            type: dict
+        map_non_root:
+            description: Mapping of non-root users to a specific user and/or group ID.
+            type: dict
+        map_failure:
+            description: Mapping of users to a specific user and/or group ID after a failed auth attempt.
+            type: dict
+        name_max_size:
+            description: Specifies the reported maximum length of a file name. This parameter does
+                not affect server behavior, but is included to accommodate legacy client
+                requirements.
+            type: dict
+        block_size:
+            description: Specifies the block size returned by the NFS statfs procedure.
+            type: dict
+        directory_transfer_size:
+            description: Specifies the preferred size for directory read operations. This value is
+                used to advise the client of optimal settings for the server, but is not
+                enforced.
+            type: dict
+        read_transfer_max_size:
+            description: Specifies the maximum buffer size that clients should use on NFS read
+                requests. This value is used to advise the client of optimal settings for
+                the server, but is not enforced.
+            type: dict
+        read_transfer_multiple:
+            description: Specifies the preferred multiple size for NFS read requests. This value is
+                used to advise the client of optimal settings for the server, but is not
+                enforced.
+            type: dict
+        read_transfer_size:
+            description: Specifies the preferred size for NFS read requests. This value is used to
+                advise the client of optimal settings for the server, but is not enforced.
+            type: dict
+        write_transfer_max_size:
+            description: Specifies the maximum buffer size that clients should use on NFS write
+                requests. This value is used to advise the client of optimal settings for
+                the server, but is not enforced.
+            type: dict
+        write_transfer_multiple:
+            description: Specifies the preferred multiple size for NFS write requests. This value is
+                used to advise the client of optimal settings for the server, but is not
+                enforced.
+            type: dict
+        write_transfer_size:
+            description: Specifies the preferred multiple size for NFS write requests. This value is
+                used to advise the client of optimal settings for the server, but is not
+                enforced.
+            type: dict
+        max_file_size:
+            description: Specifies the maximum file size for any file accessed from the export. This
+                parameter does not affect server behavior, but is included to accommodate
+                legacy client requirements.
+            type: dict
+        security_flavors:
+            description: Specifies the authentication types that are supported for this export.
+            type: list
+        commit_asynchronous:
+            description: True if NFS commit requests execute asynchronously.
+            type: bool
+        setattr_asynchronous:
+            description: True if set attribute operations execute asynchronously.
+            type: bool
+        readdirplus:
+            description: True if 'readdirplus' requests are enabled. Enabling this property might
+                improve network performance and is only available for NFSv3.
+            type: bool
+        return_32bit_file_ids:
+            description: Limits the size of file identifiers returned by NFSv3+ to 32-bit values (may
+                require remount).
+            type: bool
+        can_set_time:
+            description: True if the client can set file times through the NFS set attribute
+                request. This parameter does not affect server behavior, but is included to
+                accommodate legacy client requirements.
+            type: bool
+        map_lookup_uid:
+            description: True if incoming user IDs (UIDs) are mapped to users in the OneFS user
+                database. When set to False, incoming UIDs are applied directly to file
+                operations.
+            type: bool
+        symlinks:
+            description: True if symlinks are supported. This value is used to advise the client of
+                optimal settings for the server, but is not enforced.
+            type: bool
+        write_datasync_action:
+            description: Specifies the synchronization type for data sync action.
+            type: str
+        write_datasync_reply:
+            description: Specifies the synchronization type for data sync reply.
+            type: str
+        write_filesync_action:
+            description: Specifies the synchronization type for file sync action.
+            type: str
+        write_filesync_reply:
+            description: Specifies the synchronization type for file sync reply.
+            type: str
+        write_unstable_action:
+            description: Specifies the synchronization type for unstable action.
+            type: str
+        write_unstable_reply:
+            description: Specifies the synchronization type for unstable reply.
+            type: str
+        encoding:
+            description: Specifies the default character set encoding of the clients connecting to
+                the export, unless otherwise specified.
+            type: str
+        time_delta:
+            description: Specifies the resolution of all time values that are returned to the
+                clients.
+            type: dict
+        zone:
+            description: The zone to which the NFS default settings apply.
+            type: str
+    sample: {
+                'map_root': {
+                    'enabled': True,
+                    'primary_group': {
+                        'id': None,
+                        'name': None,
+                        'type': None
+                    },
+                    'secondary_groups': [],
+                    'user': {
+                        'id': 'USER:nobody',
+                        'name': None,
+                        'type': None
+                    }
+                },
+                'map_non_root': {
+                    'enabled': False,
+                    'primary_group': {
+                        'id': None,
+                        'name': None,
+                        'type': None
+                    },
+                    'secondary_groups': [],
+                    'user': {
+                        'id': 'USER:nobody',
+                        'name': None,
+                        'type': None
+                    }
+                },
+                'map_failure': {
+                    'enabled': False,
+                    'primary_group': {
+                        'id': None,
+                        'name': None,
+                        'type': None
+                    },
+                    'secondary_groups': [],
+                    'user': {
+                        'id': 'USER:nobody',
+                        'name': None,
+                        'type': None
+                    }
+                },
+                'name_max_size': 255,
+                'block_size': 8192,
+                'commit_asynchronous': False,
+                'directory_transfer_size': 131072,
+                'read_transfer_max_size': 1048576,
+                'read_transfer_multiple': 512,
+                'read_transfer_size': 131072,
+                'setattr_asynchronous': False,
+                'write_datasync_action': 'DATASYNC',
+                'write_datasync_reply': 'DATASYNC',
+                'write_filesync_action': 'FILESYNC',
+                'write_filesync_reply': 'FILESYNC',
+                'write_transfer_max_size': 1048576,
+                'write_transfer_multiple': 512,
+                'write_transfer_size': 524288,
+                'write_unstable_action': 'UNSTABLE',
+                'write_unstable_reply': 'UNSTABLE',
+                'max_file_size': 9223372036854775807,
+                'readdirplus': True,
+                'return_32bit_file_ids': False,
+                'can_set_time': True,
+                'encoding': 'DEFAULT',
+                'map_lookup_uid': False,
+                'symlinks': True,
+                'time_delta': 1e-09,
+                'zone': 'sample-zone'
+            }
 '''
 
 from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.protocol \
+    import Protocol
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
 
@@ -1606,6 +1922,26 @@ class Info(object):
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
+    def get_zone_settings(self, access_zone):
+        """
+        Getting the details of NFS zone settings
+        :param access_zone: Access zone
+        :return: NFS zone settings
+        :rtype: dict
+        """
+        try:
+            zone_settings = (self.protocol_api.get_nfs_settings_zone(
+                zone=access_zone)).to_dict()
+            nfs_zone_settings = zone_settings["settings"]
+            nfs_zone_settings["zone"] = access_zone
+            return nfs_zone_settings
+        except Exception as e:
+            error_msg = (f"Getting zone settings for PowerScale:"
+                         f" {self.module.params['onefs_host']} failed with "
+                         f"error: {utils.determine_error(e)}")
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
+
     def get_node_pools(self):
         """Getting list of all the node pools of a given PowerScale Storage"""
         try:
@@ -1689,6 +2025,20 @@ class Info(object):
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
+    def get_nfs_global_settings(self):
+        """Get the NFS global setings of a given PowerScale Storage"""
+        try:
+            nfs_global_settings_details = self.protocol_api.get_nfs_settings_global().to_dict()
+            msg = f"Got NFS global settings from PowerScale cluster {self.module.params['onefs_host']}"
+            LOG.info(msg)
+            return nfs_global_settings_details['settings']
+        except Exception as e:
+            error_msg = (
+                f"Getting NFS global settings for PowerScale: {self.module.params['onefs_host']}" +
+                f" failed with error: {utils.determine_error(e)}")
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
+
     def perform_module_operation(self):
         """Perform different actions on Gatherfacts based on user parameter
         chosen in playbook
@@ -1725,6 +2075,9 @@ class Info(object):
         smb_files = []
         user_mapping_rules = []
         ldap = []
+        nfs_zone_settings = {}
+        nfs_default_settings = {}
+        nfs_global_settings = {}
 
         if 'attributes' in str(subset):
             attributes = self.get_attributes_list()
@@ -1776,6 +2129,12 @@ class Info(object):
             user_mapping_rules = self.get_user_mapping_rules(access_zone)
         if 'ldap' in str(subset):
             ldap = self.get_ldap_providers(scope)
+        if 'nfs_zone_settings' in str(subset):
+            nfs_zone_settings = self.get_zone_settings(access_zone)
+        if 'nfs_default_settings' in str(subset):
+            nfs_default_settings = Protocol(self.protocol_api, self.module).get_nfs_default_settings(access_zone)
+        if 'nfs_global_settings' in str(subset):
+            nfs_global_settings = self.get_nfs_global_settings()
 
         result = dict(
             Attributes=attributes,
@@ -1801,7 +2160,10 @@ class Info(object):
             StoragePoolTiers=storagepool_tiers,
             SmbOpenFiles=smb_files,
             UserMappingRules=user_mapping_rules,
-            LdapProviders=ldap
+            LdapProviders=ldap,
+            NfsZoneSettings=nfs_zone_settings,
+            NfsDefaultSettings=nfs_default_settings,
+            NfsGlobalSettings=nfs_global_settings
         )
 
         result.update(SynciqTargetClusterCertificate=synciq_target_cluster_certificates)
@@ -1858,7 +2220,10 @@ def get_info_parameters():
                                     'storagepool_tiers',
                                     'smb_files',
                                     'user_mapping_rules',
-                                    'ldap'
+                                    'ldap',
+                                    'nfs_zone_settings',
+                                    'nfs_default_settings',
+                                    'nfs_global_settings'
                                     ]),
     )
 

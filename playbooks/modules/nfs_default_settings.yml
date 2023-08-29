@@ -1,0 +1,48 @@
+---
+- name: NFS default settings module on PowerScale
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: "10.**.**.**"
+    api_user: "***"
+    api_password: "****"
+    verify_ssl: false
+    access_zone: "sample-zone"
+
+  tasks:
+    - name: Get details of NFS default settings
+      dellemc.powerscale.nfs_default_settings:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        access_zone: "{{ access_zone }}"
+
+    - name: Update the NFS default settings
+      dellemc.powerscale.nfs_default_settings:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        access_zone: "{{ access_zone }}"
+        block_size:
+          size_value: 5
+          size_unit: 'KB'
+        commit_asynchronous: false
+        encoding: 'UTF8'
+        map_root:
+          enabled: true
+          primary_group: 'group_1'
+          secondary_groups:
+            - name: 'group_2'
+            - name: 'group_3'
+              state: 'absent'
+          user: 'ntpd'
+        readdirplus: true
+        time_delta:
+          time_value: 5
+          time_unit: 'seconds'
+        write_filesync_action: 'DATASYNC'
+        security_flavors:
+          - unix
+          - kerberos
