@@ -386,6 +386,25 @@ def get_missing_pkgs():
         ". Please install the required package(s)."
 
 
+'''
+Convert to seconds from nanoseconds, microseconds, milliseconds
+'''
+
+
+def convert_to_seconds(value, units):
+    if value is not None and value > 0:
+        if units == 'nanoseconds':
+            return value / 1000000000
+        elif units == 'microseconds':
+            return value / 1000000
+        elif units == 'milliseconds':
+            return value / 1000
+        else:
+            return value
+    else:
+        return 0
+
+
 ''' Returns time in seconds '''
 
 
@@ -502,5 +521,23 @@ def get_acl_object():
         return getattr(importlib.import_module(isi_sdk.__name__ + ".models.acl_object"),
                        'AclObject')
 
+    except ImportError:
+        return None
+
+
+'''
+Checks whether parameter has spaces or empty
+'''
+
+
+def is_param_empty_spaces(param):
+    if param is not None and (param.count(" ") > 0 or len(param.strip()) == 0):
+        return True
+
+
+def get_nfs_map_object():
+    try:
+        import_obj = importlib.import_module(isi_sdk.__name__ + ".models")
+        return import_obj.NfsExportMapAll()
     except ImportError:
         return None
