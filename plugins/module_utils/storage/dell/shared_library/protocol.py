@@ -47,3 +47,20 @@ class Protocol:
             error_message = f'Fetching NFS default settings failed with error: {error_msg}'
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
+
+    def get_s3_bucket_list(self):
+        """
+        Get the list of S3 buckets of a given PowerScale Storage
+        :return: s3 bucket list
+        :rtype: dict
+        """
+        try:
+            s3_bucket_list = []
+            s3_bucket_details = (self.protocol_api.list_s3_buckets()).to_dict()
+            if s3_bucket_details:
+                return s3_bucket_details
+        except Exception as e:
+            error_msg = utils.determine_error(error_obj=e)
+            error_message = f'Fetching S3 bucket list failed with error: {error_msg}'
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)

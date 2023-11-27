@@ -95,63 +95,63 @@ notes:
 - The I(check_mode) is not supported.
 '''
 EXAMPLES = r'''
-  - name: Create SyncIQ performance rule
-    dellemc.powerscale.synciqrules:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      description: "Create a rule"
-      enabled: true
-      schedule:
-        begin: "00:00"
-        end: "13:30"
-        days_of_week:
-          - "monday"
-          - "tuesday"
-          - "sunday"
-      rule_type: "cpu"
-      limit: "80"
-      state: "present"
+- name: Create SyncIQ performance rule
+  dellemc.powerscale.synciqrules:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    description: "Create a rule"
+    enabled: true
+    schedule:
+    begin: "00:00"
+    end: "13:30"
+    days_of_week:
+      - "monday"
+      - "tuesday"
+      - "sunday"
+    rule_type: "cpu"
+    limit: "80"
+    state: "present"
 
-  - name: Modify SyncIQ performance rule
-    dellemc.powerscale.synciqrules:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      sync_rule_id: "cpu-0"
-      limit: "85"
-      description: "Modify the performance rule"
-      state: "present"
+- name: Modify SyncIQ performance rule
+  dellemc.powerscale.synciqrules:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    sync_rule_id: "cpu-0"
+    limit: "85"
+    description: "Modify the performance rule"
+    state: "present"
 
-  - name: Get SyncIQ performance rule details
-    dellemc.powerscale.synciqrules:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      sync_rule_id: "cpu-0"
-      state: "present"
+- name: Get SyncIQ performance rule details
+  dellemc.powerscale.synciqrules:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    sync_rule_id: "cpu-0"
+    state: "present"
 
-  - name: Delete SyncIQ performance rule
-    dellemc.powerscale.synciqrules:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      sync_rule_id: "cpu-0"
-      enabled: true
-      schedule:
-        begin: "00:00"
-        end: "13:30"
-        days_of_week:
-          - "monday"
-          - "tuesday"
-          - "sunday"
-      rule_type: "bandwidth"
-      limit: "85"
-      state: "absent"
+- name: Delete SyncIQ performance rule
+  dellemc.powerscale.synciqrules:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    sync_rule_id: "cpu-0"
+    enabled: true
+    schedule:
+    begin: "00:00"
+    end: "13:30"
+    days_of_week:
+      - "monday"
+      - "tuesday"
+      - "sunday"
+    rule_type: "bandwidth"
+    limit: "85"
+    state: "absent"
 '''
 
 RETURN = r'''

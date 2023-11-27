@@ -121,7 +121,7 @@ EXAMPLES = r'''
     subnet_params:
       gateway: '198.10.**.***'
       sc_service_addrs:
-        - start_range : '198.10.**.***'
+        - start_range: '198.10.**.***'
           end_range: '198.10.**.***'
       sc_service_addrs_state: "add"
       mtu: 1500
@@ -170,7 +170,7 @@ EXAMPLES = r'''
     subnet_name: "subnet_test"
     subnet_params:
       sc_service_addrs:
-        - start_range : '198.10.**.***'
+        - start_range: '198.10.**.***'
           end_range: '198.10.**.***'
       sc_service_addrs_state: "add"
     state: 'present'
@@ -186,7 +186,7 @@ EXAMPLES = r'''
     subnet_name: "subnet_test"
     subnet_params:
       sc_service_addrs:
-        - start_range : '198.10.**.***'
+        - start_range: '198.10.**.***'
           end_range: '198.10.**.***'
       sc_service_addrs_state: "remove"
     state: 'present'

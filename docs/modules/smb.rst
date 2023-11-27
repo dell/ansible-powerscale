@@ -29,7 +29,7 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.13 or later.
+- Ansible-core 2.14 or later.
 - Python 3.9, 3.10 or 3.11.
 
 
@@ -288,10 +288,10 @@ Examples
         impersonate_guest: "never"
         impersonate_user: "sample_user"
         host_acls:
-        - name: "sample_host_acl_1"
-          access_type: "allow"
-        - name: "sample_host_acl_2"
-          access_type: "deny"
+          - name: "sample_host_acl_1"
+            access_type: "allow"
+          - name: "sample_host_acl_2"
+            access_type: "deny"
         state: "present"
 
     - name: Create SMB share for system access zone

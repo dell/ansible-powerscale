@@ -158,135 +158,135 @@ notes:
 - The I(check_mode) is not supported.
 '''
 EXAMPLES = r'''
-  - name: Create a Quota for a User excluding snapshot
-    dellemc.powerscale.smartquota:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      path: "<path>"
-      quota_type: "user"
-      user_name: "{{user_name}}"
-      access_zone: "sample-zone"
-      provider_type: "local"
-      quota:
-        include_overheads: false
-        advisory_limit_size: "{{advisory_limit_size}}"
-        soft_limit_size: "{{soft_limit_size}}"
-        soft_grace_period: "{{soft_grace_period}}"
-        period_unit: "{{period_unit}}"
-        hard_limit_size: "{{hard_limit_size}}"
-        cap_unit: "{{cap_unit}}"
-      state: "present"
+- name: Create a Quota for a User excluding snapshot
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "user"
+    user_name: "{{user_name}}"
+    access_zone: "sample-zone"
+    provider_type: "local"
+    quota:
+      include_overheads: false
+      advisory_limit_size: "{{advisory_limit_size}}"
+      soft_limit_size: "{{soft_limit_size}}"
+      soft_grace_period: "{{soft_grace_period}}"
+      period_unit: "{{period_unit}}"
+      hard_limit_size: "{{hard_limit_size}}"
+      cap_unit: "{{cap_unit}}"
+    state: "present"
 
-  - name: Create a Quota for a Directory for accounting includes snapshots and data protection overheads
-    dellemc.powerscale.smartquota:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      path: "<path>"
-      quota_type: "directory"
-      quota:
-        include_snapshots: true
-        include_overheads: true
-      state: "present"
+- name: Create a Quota for a Directory for accounting includes snapshots and data protection overheads
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "directory"
+    quota:
+      include_snapshots: true
+      include_overheads: true
+    state: "present"
 
-  - name: Create default-user Quota for a Directory with snaps and overheads
-    dellemc.powerscale.smartquota:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      path: "<path>"
-      quota_type: "default-user"
-      quota:
-        include_snapshots: true
-        include_overheads: true
-      state: "present"
+- name: Create default-user Quota for a Directory with snaps and overheads
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "default-user"
+    quota:
+      include_snapshots: true
+      include_overheads: true
+    state: "present"
 
-  - name: Get a Quota Details for a Group
-    dellemc.powerscale.smartquota:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      path: "<path>"
-      quota_type: "group"
-      group_name: "{{user_name}}"
-      access_zone: "sample-zone"
-      provider_type: "local"
-      quota:
-        include_snapshots: true
-      state: "present"
+- name: Get a Quota Details for a Group
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "group"
+    group_name: "{{user_name}}"
+    access_zone: "sample-zone"
+    provider_type: "local"
+    quota:
+      include_snapshots: true
+    state: "present"
 
-  - name: Update Quota for a User
-    dellemc.powerscale.smartquota:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      path: "<path>"
-      quota_type: "user"
-      user_name: "{{user_name}}"
-      access_zone: "sample-zone"
-      provider_type: "local"
-      quota:
-        include_snapshots: true
-        include_overheads: true
-        advisory_limit_size: "{{new_advisory_limit_size}}"
-        hard_limit_size: "{{new_hard_limit_size}}"
-        cap_unit: "{{cap_unit}}"
-      state: "present"
+- name: Update Quota for a User
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "user"
+    user_name: "{{user_name}}"
+    access_zone: "sample-zone"
+    provider_type: "local"
+    quota:
+      include_snapshots: true
+      include_overheads: true
+      advisory_limit_size: "{{new_advisory_limit_size}}"
+      hard_limit_size: "{{new_hard_limit_size}}"
+      cap_unit: "{{cap_unit}}"
+    state: "present"
 
-  - name: Modify Soft Limit and Grace period of default-user Quota
-    dellemc.powerscale.smartquota:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      path: "<path>"
-      quota_type: "default-user"
-      access_zone: "sample-zone"
-      quota:
-        include_snapshots: true
-        include_overheads: true
-        soft_limit_size: "{{soft_limit_size}}"
-        cap_unit: "{{cap_unit}}"
-        soft_grace_period: "{{soft_grace_period}}"
-        period_unit: "{{period_unit}}"
-      state: "present"
+- name: Modify Soft Limit and Grace period of default-user Quota
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "default-user"
+    access_zone: "sample-zone"
+    quota:
+      include_snapshots: true
+      include_overheads: true
+      soft_limit_size: "{{soft_limit_size}}"
+      cap_unit: "{{cap_unit}}"
+      soft_grace_period: "{{soft_grace_period}}"
+      period_unit: "{{period_unit}}"
+    state: "present"
 
-  - name: Delete a Quota for a Directory
-    dellemc.powerscale.smartquota:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      path: "<path>"
-      quota_type: "directory"
-      quota:
-        include_snapshots: true
-      state: "absent"
+- name: Delete a Quota for a Directory
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "directory"
+    quota:
+      include_snapshots: true
+    state: "absent"
 
-  - name: Delete Quota for a default-group
-    dellemc.powerscale.smartquota:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      path: "<path>"
-      quota_type: "default-group"
-      quota:
-        include_snapshots: true
-      state: "absent"
+- name: Delete Quota for a default-group
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "default-group"
+    quota:
+      include_snapshots: true
+    state: "absent"
 '''
 RETURN = r'''
 changed:
     description: Whether or not the resource has changed.
     returned: always
     type: bool
-    sample: true
+    sample: "true"
 
 quota_details:
     description: The quota details.

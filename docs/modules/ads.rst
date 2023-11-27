@@ -21,7 +21,7 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.13 or later.
+- Ansible-core 2.14 or later.
 - Python 3.9, 3.10 or 3.11.
 
 
@@ -225,7 +225,7 @@ Examples
         verify_ssl: "{{verify_ssl}}"
         domain_name: "ansibleneo.com"
         spns:
-        - spn: "HOST/test1"
+          - spn: "HOST/test1"
         state: "present"
 
     - name: Remove an SPN
@@ -236,8 +236,8 @@ Examples
         verify_ssl: "{{verify_ssl}}"
         domain_name: "ansibleneo.com"
         spns:
-        - spn: "HOST/test1"
-          state: "absent"
+          - spn: "HOST/test1"
+            state: "absent"
         state: "present"
 
     - name: Check an SPN

@@ -50,33 +50,31 @@ notes:
 '''
 
 EXAMPLES = r'''
+- name: Get list of SMB files of the PowerScale cluster
+  dellemc.powerscale.smb_file:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    state: "present"
 
-  - name: Get list of SMB files of the PowerScale cluster
-    dellemc.powerscale.smb_file:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      state: "present"
+- name: Close SMB file of the PowerScale cluster
+  dellemc.powerscale.smb_file:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    file_id: xxx
+    state: "absent"
 
-  - name: Close SMB file of the PowerScale cluster
-    dellemc.powerscale.smb_file:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      file_id: xxx
-      state: "absent"
-
-  - name: Close smb file of the PowerScale cluster
-    dellemc.powerscale.smb_file:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      file_path: "/ifs/ATest"
-      state: "absent"
-
+- name: Close smb file of the PowerScale cluster
+  dellemc.powerscale.smb_file:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    file_path: "/ifs/ATest"
+    state: "absent"
 '''
 
 RETURN = r'''

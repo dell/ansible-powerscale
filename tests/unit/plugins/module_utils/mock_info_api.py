@@ -72,7 +72,9 @@ class MockGatherfactsApi:
         ],
         'NfsZoneSettings': {},
         'NfsDefaultSettings': {},
-        'NfsGlobalSettings': {}
+        'NfsGlobalSettings': {},
+        'SynciqGlobalSettings': {},
+        's3Buckets': {}
     }
 
     @staticmethod

@@ -105,7 +105,6 @@ EXAMPLES = r'''
     rpc_minthreads: 17
     rpc_maxthreads: 20
     rquota_enabled: true
-
 '''
 
 RETURN = r'''

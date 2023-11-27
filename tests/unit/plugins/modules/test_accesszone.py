@@ -9,15 +9,9 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 import pytest
-from mock.mock import MagicMock
-from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
+from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.initial_mock \
     import utils
-
-utils.get_logger = MagicMock()
-utils.isi_sdk = MagicMock()
-from ansible.module_utils import basic
-basic.AnsibleModule = MagicMock()
-
+from mock.mock import MagicMock
 
 from ansible_collections.dellemc.powerscale.plugins.modules.accesszone import AccessZone
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.\

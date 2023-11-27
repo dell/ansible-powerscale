@@ -21,7 +21,7 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.13 or later.
+- Ansible-core 2.14 or later.
 - Python 3.9, 3.10 or 3.11.
 
 
@@ -235,197 +235,197 @@ Examples
 .. code-block:: yaml+jinja
 
     
-      - name: Create Filesystem with Quota in given access zone
-        dellemc.powerscale.filesystem:
-          onefs_host: "{{onefs_host}}"
-          port_no: "{{powerscaleport}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          path: "<path>"
-          access_zone: "{{access_zone}}"
-          owner:
-            name: 'ansible_user'
-            provider_type: 'ldap'
-          group:
-            name: 'ansible_group'
-            provider_type: 'ldap'
+    - name: Create Filesystem with Quota in given access zone
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{powerscaleport}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "<path>"
+        access_zone: "{{access_zone}}"
+        owner:
+          name: 'ansible_user'
+          provider_type: 'ldap'
+        group:
+          name: 'ansible_group'
+          provider_type: 'ldap'
           access_control: "{{access_control}}"
-          quota:
-            include_snap_data: false
-            include_data_protection_overhead: false
-            advisory_limit_size: 2
-            soft_limit_size: 5
-            hard_limit_size: 10
-            cap_unit: "GB"
-            quota_state: "present"
-            container: true
+        quota:
+          include_snap_data: false
+          include_data_protection_overhead: false
+          advisory_limit_size: 2
+          soft_limit_size: 5
+          hard_limit_size: 10
+          cap_unit: "GB"
+          quota_state: "present"
+          container: true
           recursive: "{{recursive}}"
-          state: "{{state_present}}"
+        state: "{{state_present}}"
 
-      - name: Create Filesystem in default (system) access zone, without Quota
-        dellemc.powerscale.filesystem:
-          onefs_host: "{{onefs_host}}"
-          port_no: "{{powerscaleport}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          path: "<path>"
-          owner:
-            name: 'ansible_user'
-            provider_type: 'ldap'
-          state: "{{state_present}}"
+    - name: Create Filesystem in default (system) access zone, without Quota
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{powerscaleport}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "<path>"
+        owner:
+        name: 'ansible_user'
+        provider_type: 'ldap'
+        state: "{{state_present}}"
 
-      - name: Get filesystem details
-        dellemc.powerscale.filesystem:
-          onefs_host: "{{onefs_host}}"
-          port_no: "{{powerscaleport}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          access_zone: "{{access_zone}}"
-          path: "<path>"
-          state: "{{state_present}}"
+    - name: Get filesystem details
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{powerscaleport}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        access_zone: "{{access_zone}}"
+        path: "<path>"
+        state: "{{state_present}}"
 
-      - name: Get filesystem details with snapshots
-        dellemc.powerscale.filesystem:
-          onefs_host: "{{onefs_host}}"
-          port_no: "{{powerscaleport}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          access_zone: "{{access_zone}}"
-          path: "<path>"
-          list_snapshots: "{{list_snapshots_true}}"
-          state: "{{state_present}}"
+    - name: Get filesystem details with snapshots
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{powerscaleport}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        access_zone: "{{access_zone}}"
+        path: "<path>"
+        list_snapshots: "{{list_snapshots_true}}"
+        state: "{{state_present}}"
 
-      - name: Modify Filesystem Hard Quota
-        dellemc.powerscale.filesystem:
-          onefs_host: "{{onefs_host}}"
-          port_no: "{{powerscaleport}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          path: "<path>"
-          access_zone: "{{access_zone}}"
-          quota:
-            hard_limit_size: 15
-            cap_unit: "GB"
-            quota_state: "present"
-            container: true
-          state: "{{state_present}}"
+    - name: Modify Filesystem Hard Quota
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{powerscaleport}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "<path>"
+        access_zone: "{{access_zone}}"
+        quota:
+        hard_limit_size: 15
+        cap_unit: "GB"
+        quota_state: "present"
+        container: true
+        state: "{{state_present}}"
 
-      - name: Modify Filesystem Owner, Group and ACL
-        dellemc.powerscale.filesystem:
-          onefs_host: "{{onefs_host}}"
-          port_no: "{{powerscaleport}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          path: "<path>"
-          access_zone: "{{access_zone}}"
-          owner:
-            name: 'ansible_user'
-            provider_type: 'ldap'
-          group:
-            name: 'ansible_group'
-            provider_type: 'ldap'
+    - name: Modify Filesystem Owner, Group and ACL
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{powerscaleport}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "<path>"
+        access_zone: "{{access_zone}}"
+        owner:
+          name: 'ansible_user'
+          provider_type: 'ldap'
+        group:
+          name: 'ansible_group'
+          provider_type: 'ldap'
           access_control: "{{new_access_control}}"
-          state: "{{state_present}}"
+        state: "{{state_present}}"
 
-      - name: Modify Filesystem to add access control rights
-        dellemc.powerscale.filesystem:
-          onefs_host: "{{onefs_host}}"
-          port_no: "{{powerscaleport}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          path: "/ifs/test"
-          access_zone: "{{access_zone}}"
-          access_control_rights:
-            access_type: "allow"
-            access_rights:
-              - dir_gen_all
-            inherit_flags:
-              - container_inherit
-            trustee:
-              name: test_user
-              provider_type: "ldap"
-          access_control_rights_state: "add"
-          state: "present"
+    - name: Modify Filesystem to add access control rights
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{powerscaleport}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "/ifs/test"
+        access_zone: "{{access_zone}}"
+        access_control_rights:
+        access_type: "allow"
+        access_rights:
+          - dir_gen_all
+        inherit_flags:
+          - container_inherit
+        trustee:
+          name: test_user
+          provider_type: "ldap"
+        access_control_rights_state: "add"
+        state: "present"
 
-      - name: Modify Filesystem to remove access control rights
-        dellemc.powerscale.filesystem:
-          onefs_host: "{{onefs_host}}"
-          port_no: "{{powerscaleport}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          path: "/ifs/test"
-          access_zone: "{{access_zone}}"
-          access_control_rights:
-            access_type: "allow"
-            access_rights:
-              - dir_gen_all
-            inherit_flags:
-              - container_inherit
-            trustee:
-              name: test_user
-              provider_type: "ldap"
-          access_control_rights_state: "remove"
-          state: "present"
+    - name: Modify Filesystem to remove access control rights
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{powerscaleport}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "/ifs/test"
+        access_zone: "{{access_zone}}"
+        access_control_rights:
+        access_type: "allow"
+        access_rights:
+          - dir_gen_all
+        inherit_flags:
+          - container_inherit
+        trustee:
+          name: test_user
+          provider_type: "ldap"
+        access_control_rights_state: "remove"
+        state: "present"
 
-      - name: Remove Quota from FS
-        dellemc.powerscale.filesystem:
-          onefs_host: "{{onefs_host}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          path: "<path>"
-          access_zone: "{{access_zone}}"
-          quota:
-            quota_state: "absent"
-          state: "{{state_present}}"
+    - name: Remove Quota from FS
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "<path>"
+        access_zone: "{{access_zone}}"
+        quota:
+          quota_state: "absent"
+        state: "{{state_present}}"
 
-      - name: Create Filesystem with access control rights for everyone
-        dellemc.powerscale.filesystem:
-          onefs_host: "{{onefs_host}}"
-          port_no: "{{powerscaleport}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          path: "/ifs/test"
-          access_zone: "{{access_zone}}"
-          access_control_rights:
-            access_type: "allow"
-            access_rights:
-              - dir_gen_all
-            inherit_flags:
-              - container_inherit
-            trustee:
-              name: "everyone"
-              type: "wellknown"
-          access_control_rights_state: "add"
-          state: "present"
+    - name: Create Filesystem with access control rights for everyone
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{powerscaleport}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "/ifs/test"
+        access_zone: "{{access_zone}}"
+        access_control_rights:
+        access_type: "allow"
+        access_rights:
+          - dir_gen_all
+        inherit_flags:
+          - container_inherit
+        trustee:
+          name: "everyone"
+          type: "wellknown"
+        access_control_rights_state: "add"
+        state: "present"
 
-      - name: Delete filesystem
-        dellemc.powerscale.filesystem:
-          onefs_host: "{{onefs_host}}"
-          port_no: "{{powerscaleport}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{user}}"
-          api_password: "{{api_password}}"
-          access_zone: "{{access_zone}}"
-          path: "<path>"
-          recursive_force_delete: "{{recursive_force_delete}}"
-          state: "{{state_absent}}"
+    - name: Delete filesystem
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{powerscaleport}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{user}}"
+        api_password: "{{api_password}}"
+        access_zone: "{{access_zone}}"
+        path: "<path>"
+        recursive_force_delete: "{{recursive_force_delete}}"
+        state: "{{state_absent}}"
 
 
 
 Return Values
 -------------
 
-changed (always, bool, True)
+changed (always, bool, true)
   Whether or not the resource has changed.
 
 

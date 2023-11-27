@@ -10,14 +10,9 @@ __metaclass__ = type
 
 import pytest
 from mock.mock import MagicMock
-from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
+# pylint: disable=unused-import
+from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.initial_mock \
     import utils
-
-utils.get_logger = MagicMock()
-utils.isi_sdk = MagicMock()
-utils.ISI_SDK_VERSION_9 = MagicMock(return_value=True)
-from ansible.module_utils import basic
-basic.AnsibleModule = MagicMock()
 
 from ansible_collections.dellemc.powerscale.plugins.modules.synciqpolicy import SynciqPolicy
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_synciqpolicy_api \

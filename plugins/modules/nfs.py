@@ -202,136 +202,134 @@ notes:
 '''
 
 EXAMPLES = r'''
-  - name: Create NFS Export
-    dellemc.powerscale.nfs:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      path: "<path>"
-      access_zone: "{{access_zone}}"
-      read_only_clients:
+- name: Create NFS Export
+  dellemc.powerscale.nfs:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    path: "<path>"
+    access_zone: "{{access_zone}}"
+    read_only_clients:
       - "{{client1}}"
       - "{{client2}}"
-      read_only: true
-      clients: ["{{client3}}"]
-      client_state: 'present-in-export'
-      state: 'present'
+    read_only: true
+    clients: ["{{client3}}"]
+    client_state: 'present-in-export'
+    state: 'present'
 
-  - name: Get NFS Export
-    dellemc.powerscale.nfs:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      path: "<path>"
-      access_zone: "{{access_zone}}"
-      state: 'present'
+- name: Get NFS Export
+  dellemc.powerscale.nfs:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    path: "<path>"
+    access_zone: "{{access_zone}}"
+    state: 'present'
 
-  - name: Add a root client
-    dellemc.powerscale.nfs:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      path: "<path>"
-      access_zone: "{{access_zone}}"
-      root_clients:
+- name: Add a root client
+  dellemc.powerscale.nfs:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    path: "<path>"
+    access_zone: "{{access_zone}}"
+    root_clients:
       - "{{client4}}"
-      client_state: 'present-in-export'
-      state: 'present'
+    client_state: 'present-in-export'
+    state: 'present'
 
-  - name: Set sub_directories_mountable flag to true
-    dellemc.powerscale.nfs:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      path: "<path>"
-      access_zone: "{{access_zone}}"
-      sub_directories_mountable: true
-      state: 'present'
+- name: Set sub_directories_mountable flag to true
+  dellemc.powerscale.nfs:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    path: "<path>"
+    access_zone: "{{access_zone}}"
+    sub_directories_mountable: true
+    state: 'present'
 
-  - name: Remove a root client
-    dellemc.powerscale.nfs:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      path: "<path>"
-      access_zone: "{{access_zone}}"
-      root_clients:
+- name: Remove a root client
+  dellemc.powerscale.nfs:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    path: "<path>"
+    access_zone: "{{access_zone}}"
+    root_clients:
       - "{{client4}}"
-      client_state: 'absent-in-export'
-      state: 'present'
+    client_state: 'absent-in-export'
+    state: 'present'
 
-  - name: Modify NFS Export
-    dellemc.powerscale.nfs:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      path: "<path>"
-      access_zone: "{{access_zone}}"
-      description: "new description"
-      security_flavors:
+- name: Modify NFS Export
+  dellemc.powerscale.nfs:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    path: "<path>"
+    access_zone: "{{access_zone}}"
+    description: "new description"
+    security_flavors:
       - "kerberos_integrity"
       - "kerberos"
+    state: 'present'
+
+- name: Set read_only flag to false
+  dellemc.powerscale.nfs:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    path: "<path>"
+    access_zone: "{{access_zone}}"
+    read_only: false
+    state: 'present'
+
+- name: Modify map_root and map_non_root
+  dellemc.powerscale.nfs:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    path: "<path>"
+    access_zone: "{{access_zone}}"
+    map_root:
+      user: "root"
+      primary_group: "root"
+    map_non_root:
+      user: "root"
+      primary_group: "root"
+    secondary_groups:
+      - name: "group_test"
+        state: "absent"
+    state: 'present'
+
+- name: Disable map_root
+  dellemc.powerscale.nfs:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    path: "<path>"
+    access_zone: "{{access_zone}}"
+    map_root:
+      enabled: false
       state: 'present'
 
-  - name: Set read_only flag to false
-    dellemc.powerscale.nfs:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      path: "<path>"
-      access_zone: "{{access_zone}}"
-      read_only: false
-      state: 'present'
-
-  - name: Modify map_root and map_non_root
-    dellemc.powerscale.nfs:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      path: "<path>"
-      access_zone: "{{access_zone}}"
-      map_root:
-        user: "root"
-        primary_group: "root"
-        secondary_groups:
-          - name: "group_test"
-      map_non_root:
-        user: "root"
-        primary_group: "root"
-        secondary_groups:
-          - name: "group_test"
-            state: "absent"
-      state: 'present'
-
-  - name: Disable map_root
-    dellemc.powerscale.nfs:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      path: "<path>"
-      access_zone: "{{access_zone}}"
-      map_root:
-        enabled: false
-      state: 'present'
-
-  - name: Delete NFS Export
-    dellemc.powerscale.nfs:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      path: "<path>"
-      access_zone: "{{access_zone}}"
-      state: 'absent'
+- name: Delete NFS Export
+  dellemc.powerscale.nfs:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    path: "<path>"
+    access_zone: "{{access_zone}}"
+    state: 'absent'
 '''
 
 RETURN = r'''

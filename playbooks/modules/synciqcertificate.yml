@@ -1,0 +1,51 @@
+---
+- name: SyncIQ Target Cluster Certificates Operations on PowerScale
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.243'
+    port_no: '8080'
+    verify_ssl: false
+    api_user: '**'
+    api_password: '**'
+
+  tasks:
+    - name: Import SyncIQ certificate
+      dellemc.powerscale.synciqcertificate:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        certificate_file: "/ifs/server.crt"
+        description: "From Module"
+        alias_name: "Test_1"
+        state: 'present'
+
+    - name: Get SyncIQ certificate details
+      dellemc.powerscale.synciqcertificate:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        certificate_id: "xyz"
+        state: "present"
+
+    - name: Modify SyncIQ certificate details
+      dellemc.powerscale.synciqcertificate:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        certificate_id: "xyz"
+        description: "From python modify"
+        new_alias_name: "Test_1_modify"
+        state: "present"
+
+    - name: Delete SyncIQ certificate details
+      dellemc.powerscale.synciqcertificate:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        alias_name: "Test_1_modify"
+        state: "absent"
