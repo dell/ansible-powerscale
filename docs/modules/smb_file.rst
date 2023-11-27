@@ -21,7 +21,7 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.13 or later.
+- Ansible-core 2.14 or later.
 - Python 3.9, 3.10 or 3.11.
 
 
@@ -91,33 +91,31 @@ Examples
 .. code-block:: yaml+jinja
 
     
+    - name: Get list of SMB files of the PowerScale cluster
+      dellemc.powerscale.smb_file:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        state: "present"
 
-      - name: Get list of SMB files of the PowerScale cluster
-        dellemc.powerscale.smb_file:
-          onefs_host: "{{onefs_host}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          state: "present"
+    - name: Close SMB file of the PowerScale cluster
+      dellemc.powerscale.smb_file:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        file_id: xxx
+        state: "absent"
 
-      - name: Close SMB file of the PowerScale cluster
-        dellemc.powerscale.smb_file:
-          onefs_host: "{{onefs_host}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          file_id: xxx
-          state: "absent"
-
-      - name: Close smb file of the PowerScale cluster
-        dellemc.powerscale.smb_file:
-          onefs_host: "{{onefs_host}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          file_path: "/ifs/ATest"
-          state: "absent"
-
+    - name: Close smb file of the PowerScale cluster
+      dellemc.powerscale.smb_file:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        file_path: "/ifs/ATest"
+        state: "absent"
 
 
 

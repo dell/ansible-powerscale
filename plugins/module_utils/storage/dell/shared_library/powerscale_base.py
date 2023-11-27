@@ -48,6 +48,7 @@ class PowerScaleBase:
         # Using lazy property for accessing the isi_sdk instances
         self._protocol_api = None
         self._auth_api = None
+        self._synciq_api = None
 
     @property
     def protocol_api(self):
@@ -72,3 +73,15 @@ class PowerScaleBase:
         if self._auth_api is None:
             self._auth_api = self.isi_sdk.AuthApi(self.api_client)
         return self._auth_api
+
+    @property
+    def synciq_api(self):
+        """
+        Returns the sync API object.
+
+        :return: The sync API object.
+        :rtype: isi_sdk.AuthApi
+        """
+        if self._synciq_api is None:
+            self._synciq_api = self.isi_sdk.SyncApi(self.api_client)
+        return self._synciq_api

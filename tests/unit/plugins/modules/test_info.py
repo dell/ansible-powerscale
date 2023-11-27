@@ -16,7 +16,7 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock
     import MockSDKResponse
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_api_exception \
     import MockApiException
-from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
+from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.initial_mock \
     import utils
 
 utils.get_logger = MagicMock()

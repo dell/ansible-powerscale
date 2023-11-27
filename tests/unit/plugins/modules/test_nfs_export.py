@@ -10,14 +10,10 @@ __metaclass__ = type
 
 import pytest
 from mock.mock import MagicMock
-from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
-    import utils
 
-utils.get_logger = MagicMock()
-utils.isi_sdk = MagicMock()
+from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.initial_mock \
+    import utils
 utils.get_nfs_map_object = MagicMock()
-from ansible.module_utils import basic
-basic.AnsibleModule = MagicMock()
 
 
 from ansible_collections.dellemc.powerscale.plugins.modules.nfs import NfsExport

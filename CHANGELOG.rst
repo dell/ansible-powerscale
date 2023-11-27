@@ -5,6 +5,21 @@ Dellemc.Powerscale Change Logs
 .. contents:: Topics
 
 
+v2.3.0
+======
+
+Minor Changes
+-------------
+
+- Added support for listing SynciqGlobalSettings and S3 buckets in Info module.
+- Added support for manually running a SyncIQ policy.
+
+New Modules
+-----------
+
+- dellemc.powerscale.synciq_global_settings - Manage SyncIQ global settings on a PowerScale Storage System.
+- dellemc.powerscale.synciqcertificate - Manage SyncIQ target cluster certificate on a PowerScale Storage System.
+
 v2.2.0
 ======
 

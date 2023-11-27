@@ -21,7 +21,7 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.13 or later.
+- Ansible-core 2.14 or later.
 - Python 3.9, 3.10 or 3.11.
 
 
@@ -162,63 +162,63 @@ Examples
 .. code-block:: yaml+jinja
 
     
-      - name: Get a user mapping rule
-        dellemc.powerscale.user_mapping_rule:
-          onefs_host: "{{onefs_host}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          apply_order: 1
+    - name: Get a user mapping rule
+      dellemc.powerscale.user_mapping_rule:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        apply_order: 1
 
-      - name: Delete a user mapping rule
-        dellemc.powerscale.user_mapping_rule:
-          onefs_host: "{{onefs_host}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          apply_order: 1
-          state: 'absent'
+    - name: Delete a user mapping rule
+      dellemc.powerscale.user_mapping_rule:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        apply_order: 1
+        state: 'absent'
 
-      - name: Create a user mapping rule
-        dellemc.powerscale.user_mapping_rule:
-          onefs_host: "{{onefs_host}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          rule:
-            operator: "insert"
-            options:
-              break: false
-              group: true
-              groups: true
-              user: true
-            user1:
-              domain: "ansibleneo.com"
-              user: "test_user"
-            user2:
-              user: "ans_user"
-          state: 'present'
+    - name: Create a user mapping rule
+      dellemc.powerscale.user_mapping_rule:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        rule:
+        operator: "insert"
+        options:
+          break: false
+          group: true
+          groups: true
+          user: true
+        user1:
+          domain: "ansibleneo.com"
+          user: "test_user"
+        user2:
+          user: "ans_user"
+        state: 'present'
 
-      - name: Update a user mapping rule
-        dellemc.powerscale.user_mapping_rule:
-          onefs_host: "{{onefs_host}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          apply_order: 1
-          rule:
-            options:
-              break: true
-          state: 'present'
+    - name: Update a user mapping rule
+      dellemc.powerscale.user_mapping_rule:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        apply_order: 1
+        rule:
+        options:
+          break: true
+        state: 'present'
 
-      - name: Apply a new order to the user mapping rule
-        dellemc.powerscale.user_mapping_rule:
-          onefs_host: "{{onefs_host}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          apply_order: 1
-          new_order: 2
+    - name: Apply a new order to the user mapping rule
+      dellemc.powerscale.user_mapping_rule:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        apply_order: 1
+        new_order: 2
 
 
 
