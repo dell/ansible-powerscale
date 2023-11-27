@@ -52,9 +52,9 @@ jobs:
         python-version: ["3.9", "3.10", "3.11"]
         ansible-version: [stable-2.14, stable-2.15, stable-2.16]
         exclude:
-          # Ansible-core 2.16 is supported only from Python 3.10 onwards
-          - ansible-version: stable-2.16
-            python-version: '3.9'
+        # Ansible-core 2.16 is supported only from Python 3.10 onwards
+        - python-version: "3.9"
+          ansible-version: stable-2.16
 
     steps:
       - name: Set up Python ${{ matrix.python-version }}
@@ -94,9 +94,9 @@ jobs:
         python-version: ["3.9", "3.10", "3.11"]
         ansible-version: [stable-2.14, stable-2.15, stable-2.16]
         exclude:
-          # Ansible-core 2.16 is supported only from Python 3.10 onwards
-          - ansible-version: stable-2.16
-            python-version: '3.9'
+        # Ansible-core 2.16 is supported only from Python 3.10 onwards
+        - python-version: "3.9"
+          ansible-version: stable-2.16
 
     steps:
       - name: Set up Python 3.11
