@@ -15,15 +15,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ansible-version: [stable-2.13]
+        ansible-version: [stable-2.14]
     steps:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v1
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
         with:
-          python-version: 3.9
+          python-version: 3.11
 
       - name: Install ansible (${{ matrix.ansible-version }})
         run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible-version }}.tar.gz --disable-pip-version-check
@@ -50,15 +50,15 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.9", "3.10", "3.11"]
-        ansible-version: [stable-2.13, stable-2.14, stable-2.15]
+        ansible-version: [stable-2.14, stable-2.15, stable-2.16]
         exclude:
-        # Python 3.11 is supported only from ansible-core 2.14 onwards
-        - python-version: "3.11"
-          ansible-version: stable-2.13
+        # Ansible-core 2.16 is supported only from Python 3.10 onwards
+        - python-version: 3.9
+          ansible-version: stable-2.16
 
     steps:
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -91,11 +91,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ansible-version: [stable-2.13, stable-2.14, stable-2.15]
+        python-version: ["3.9", "3.10", "3.11"]
+        ansible-version: [stable-2.14, stable-2.15, stable-2.16]
+        exclude:
+        # Ansible-core 2.16 is supported only from Python 3.10 onwards
+        - python-version: "3.9"
+          ansible-version: stable-2.16
 
     steps:
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v1
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
         with:
           # it is just required to run that once as "ansible-test sanity" in the docker image
           # will run on all python versions it supports.
@@ -127,7 +132,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.9", "3.10", "3.11"]
-        ansible-version: [stable-2.13, stable-2.14, stable-2.15]
+        ansible-version: [stable-2.14, stable-2.15, stable-2.16]
 
     steps:
       # Important: This sets up your GITHUB_WORKSPACE environment variable
