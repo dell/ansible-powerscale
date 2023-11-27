@@ -133,6 +133,9 @@ jobs:
       matrix:
         python-version: ["3.9", "3.10", "3.11"]
         ansible-version: [stable-2.14, stable-2.15, stable-2.16]
+        exclude:
+          - ansible-version: stable-2.16
+            python-version: '3.9'
 
     steps:
       # Important: This sets up your GITHUB_WORKSPACE environment variable
