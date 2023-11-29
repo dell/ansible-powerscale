@@ -175,7 +175,7 @@ changed:
     description: Whether or not the resource has changed.
     returned: always
     type: bool
-    sample: true
+    sample: "true"
 
 snapshot_details:
     description: The snapshot details.

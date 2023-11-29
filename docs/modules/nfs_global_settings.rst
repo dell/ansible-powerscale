@@ -21,7 +21,7 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.13 or later.
+- Ansible-core 2.14 or later.
 - Python 3.9, 3.10 or 3.11.
 
 
@@ -147,7 +147,6 @@ Examples
         rpc_minthreads: 17
         rpc_maxthreads: 20
         rquota_enabled: true
-
 
 
 

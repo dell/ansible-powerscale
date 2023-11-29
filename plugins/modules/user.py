@@ -131,138 +131,138 @@ notes:
 '''
 
 EXAMPLES = r'''
-  - name: Get User Details using user name
-    dellemc.powerscale.user:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{port_no}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      access_zone: "{{access_zone}}"
-      provider_type: "{{provider_type}}"
-      user_name: "{{account_name}}"
-      state: "present"
+- name: Get User Details using user name
+  dellemc.powerscale.user:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{port_no}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    access_zone: "{{access_zone}}"
+    provider_type: "{{provider_type}}"
+    user_name: "{{account_name}}"
+    state: "present"
 
-  - name: Create User
-    dellemc.powerscale.user:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{port_no}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      access_zone: "{{access_zone}}"
-      provider_type: "{{provider_type}}"
-      user_name: "{{account_name}}"
-      password: "{{account_password}}"
-      primary_group: "{{primary_group}}"
-      enabled: "{{enabled}}"
-      email: "{{email}}"
-      full_name: "{{full_name}}"
-      home_directory: "{{home_directory}}"
-      shell: "{{shell}}"
-      role_name: "{{role_name}}"
-      role_state: "present-for-user"
-      state: "present"
+- name: Create User
+  dellemc.powerscale.user:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{port_no}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    access_zone: "{{access_zone}}"
+    provider_type: "{{provider_type}}"
+    user_name: "{{account_name}}"
+    password: "{{account_password}}"
+    primary_group: "{{primary_group}}"
+    enabled: "{{enabled}}"
+    email: "{{email}}"
+    full_name: "{{full_name}}"
+    home_directory: "{{home_directory}}"
+    shell: "{{shell}}"
+    role_name: "{{role_name}}"
+    role_state: "present-for-user"
+    state: "present"
 
-  - name: Create User with user id
-    dellemc.powerscale.user:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{port_no}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      access_zone: "{{access_zone}}"
-      provider_type: "{{provider_type}}"
-      user_name: "Test_User"
-      user_id: 7000
-      password: "{{account_password}}"
-      primary_group: "{{primary_group}}"
-      enabled: "{{enabled}}"
-      email: "{{email}}"
-      full_name: "{{full_name}}"
-      home_directory: "{{home_directory}}"
-      shell: "{{shell}}"
-      role_name: "{{role_name}}"
-      role_state: "present-for-user"
-      state: "present"
+- name: Create User with user id
+  dellemc.powerscale.user:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{port_no}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    access_zone: "{{access_zone}}"
+    provider_type: "{{provider_type}}"
+    user_name: "Test_User"
+    user_id: 7000
+    password: "{{account_password}}"
+    primary_group: "{{primary_group}}"
+    enabled: "{{enabled}}"
+    email: "{{email}}"
+    full_name: "{{full_name}}"
+    home_directory: "{{home_directory}}"
+    shell: "{{shell}}"
+    role_name: "{{role_name}}"
+    role_state: "present-for-user"
+    state: "present"
 
-  - name: Update User's Full Name and email using user name
-    dellemc.powerscale.user:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{port_no}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      access_zone: "{{access_zone}}"
-      provider_type: "{{provider_type}}"
-      user_name: "{{account_name}}"
-      email: "{{new_email}}"
-      full_name: "{{full_name}}"
-      state: "present"
+- name: Update User's Full Name and email using user name
+  dellemc.powerscale.user:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{port_no}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    access_zone: "{{access_zone}}"
+    provider_type: "{{provider_type}}"
+    user_name: "{{account_name}}"
+    email: "{{new_email}}"
+    full_name: "{{full_name}}"
+    state: "present"
 
-  - name: Disable User Account using User Id
-    dellemc.powerscale.user:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{port_no}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      access_zone: "{{access_zone}}"
-      provider_type: "{{provider_type}}"
-      user_id: "{{id}}"
-      enabled: false
-      state: "present"
+- name: Disable User Account using User Id
+  dellemc.powerscale.user:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{port_no}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    access_zone: "{{access_zone}}"
+    provider_type: "{{provider_type}}"
+    user_id: "{{id}}"
+    enabled: false
+    state: "present"
 
-  - name: Add user to a role using Username
-    dellemc.powerscale.user:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{port_no}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      user_name: "{{account_name}}"
-      provider_type: "{{provider_type}}"
-      role_name: "{{role_name}}"
-      role_state: "present-for-user"
-      state: "present"
+- name: Add user to a role using Username
+  dellemc.powerscale.user:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{port_no}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    user_name: "{{account_name}}"
+    provider_type: "{{provider_type}}"
+    role_name: "{{role_name}}"
+    role_state: "present-for-user"
+    state: "present"
 
-  - name: Remove user from a role using User id
-    dellemc.powerscale.user:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{port_no}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      user_id: "{{id}}"
-      role_name: "{{role_name}}"
-      role_state: "absent-for-user"
-      state: "present"
+- name: Remove user from a role using User id
+  dellemc.powerscale.user:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{port_no}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    user_id: "{{id}}"
+    role_name: "{{role_name}}"
+    role_state: "absent-for-user"
+    state: "present"
 
-  - name: Delete User using user name
-    dellemc.powerscale.user:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{port_no}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      access_zone: "{{access_zone}}"
-      provider_type: "{{provider_type}}"
-      user_name: "{{account_name}}"
-      state: "absent"
+- name: Delete User using user name
+  dellemc.powerscale.user:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{port_no}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    access_zone: "{{access_zone}}"
+    provider_type: "{{provider_type}}"
+    user_name: "{{account_name}}"
+    state: "absent"
 
-  - name: Modify password in non-system access zone update_password as "always"
-    dellemc.powerscale.user:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{port_no}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      access_zone: "{{access_zone}}"
-      provider_type: "{{provider_type}}"
-      user_name: "{{account_name}}"
-      password: "new_password"
-      update_password: "always"
-      state: "present"
+- name: Modify password in non-system access zone update_password as "always"
+  dellemc.powerscale.user:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{port_no}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    access_zone: "{{access_zone}}"
+    provider_type: "{{provider_type}}"
+    user_name: "{{account_name}}"
+    password: "new_password"
+    update_password: "always"
+    state: "present"
 '''
 
 RETURN = r'''

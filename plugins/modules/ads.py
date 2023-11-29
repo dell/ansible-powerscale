@@ -186,7 +186,7 @@ EXAMPLES = r'''
     verify_ssl: "{{verify_ssl}}"
     domain_name: "ansibleneo.com"
     spns:
-    - spn: "HOST/test1"
+      - spn: "HOST/test1"
     state: "present"
 
 - name: Remove an SPN
@@ -197,8 +197,8 @@ EXAMPLES = r'''
     verify_ssl: "{{verify_ssl}}"
     domain_name: "ansibleneo.com"
     spns:
-    - spn: "HOST/test1"
-      state: "absent"
+      - spn: "HOST/test1"
+        state: "absent"
     state: "present"
 
 - name: Check an SPN

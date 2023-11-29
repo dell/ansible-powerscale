@@ -182,110 +182,110 @@ notes:
 '''
 
 EXAMPLES = r'''
-  - name: Create Network Pool
-    dellemc.powerscale.networkpool:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      groupnet: "groupnet0"
-      subnet: "subnet0"
-      additional_pool_params:
-        ranges:
-        - low: "10.230.**.***"
-          high: "10.230.**.***"
-        range_state: "add"
-        ifaces:
-        - iface: "ext-1"
-          lnn: 1
-        iface_state: "add"
-      sc_params:
-        sc_dns_zone: "10.230.**.***"
-        sc_connect_policy: "throughput"
-        sc_failover_policy: "throughput"
-        rebalance_policy: "auto"
-        alloc_method: "static"
-        sc_auto_unsuspend_delay: 200
-        sc_ttl: 200
-        sc_dns_zone_aliases:
-        - "Test"
-        static_routes:
-        - gateway: "10.**.**.**"
-          prefix_len: 21
-          subnet: "10.**.**.**"
-      pool: "Test_Pool_2"
-      access_zone: "system"
-      state: "present"
+- name: Create Network Pool
+  dellemc.powerscale.networkpool:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    groupnet: "groupnet0"
+    subnet: "subnet0"
+    additional_pool_params:
+    ranges:
+      - low: "10.230.**.***"
+        high: "10.230.**.***"
+    range_state: "add"
+    ifaces:
+      - iface: "ext-1"
+        lnn: 1
+    iface_state: "add"
+    sc_params:
+    sc_dns_zone: "10.230.**.***"
+    sc_connect_policy: "throughput"
+    sc_failover_policy: "throughput"
+    rebalance_policy: "auto"
+    alloc_method: "static"
+    sc_auto_unsuspend_delay: 200
+    sc_ttl: 200
+    sc_dns_zone_aliases:
+      - "Test"
+    static_routes:
+      - gateway: "10.**.**.**"
+        prefix_len: 21
+        subnet: "10.**.**.**"
+    pool: "Test_Pool_2"
+    access_zone: "system"
+    state: "present"
 
-  - name: Get Network Pool
-    dellemc.powerscale.networkpool:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      groupnet: "groupnet0"
-      subnet: "subnet0"
-      pool: "Test_Pool_2"
-      state: "present"
+- name: Get Network Pool
+  dellemc.powerscale.networkpool:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    groupnet: "groupnet0"
+    subnet: "subnet0"
+    pool: "Test_Pool_2"
+    state: "present"
 
-  - name: Modify Network Pool
-    dellemc.powerscale.networkpool:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      groupnet: "groupnet0"
-      subnet: "subnet0"
-      pool: "Test_Pool_2"
-      additional_pool_params:
-        ranges:
-        - low: "10.230.**.***"
-          high: "10.230.**.***"
-        range_state: "add"
-        ifaces:
-        - iface: "ext-1"
-          lnn: 1
-        iface_state: "add"
-      sc_params:
-        sc_dns_zone: "10.230.**.***"
-        sc_connect_policy: "throughput"
-        sc_failover_policy: "throughput"
-        rebalance_policy: "auto"
-        alloc_method: "static"
-        sc_auto_unsuspend_delay: 200
-        sc_ttl: 200
-        sc_dns_zone_aliases:
-        - "Test"
-        static_routes:
-        - gateway: "10.**.**.**"
-          prefix_len: 21
-          subnet: "10.**.**.**"
-      aggregation_mode: "fec"
-      description: "Pool Created by Ansible Modify"
-      state: "present"
+- name: Modify Network Pool
+  dellemc.powerscale.networkpool:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    groupnet: "groupnet0"
+    subnet: "subnet0"
+    pool: "Test_Pool_2"
+    additional_pool_params:
+    ranges:
+      - low: "10.230.**.***"
+        high: "10.230.**.***"
+    range_state: "add"
+    ifaces:
+      - iface: "ext-1"
+        lnn: 1
+    iface_state: "add"
+    sc_params:
+    sc_dns_zone: "10.230.**.***"
+    sc_connect_policy: "throughput"
+    sc_failover_policy: "throughput"
+    rebalance_policy: "auto"
+    alloc_method: "static"
+    sc_auto_unsuspend_delay: 200
+    sc_ttl: 200
+    sc_dns_zone_aliases:
+      - "Test"
+    static_routes:
+      - gateway: "10.**.**.**"
+        prefix_len: 21
+        subnet: "10.**.**.**"
+    aggregation_mode: "fec"
+    description: "Pool Created by Ansible Modify"
+    state: "present"
 
-  - name: Delete Network Pool
-    dellemc.powerscale.networkpool:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      groupnet: "groupnet0"
-      subnet: "subnet0"
-      pool: "Test_Pool_2"
-      state: "absent"
+- name: Delete Network Pool
+  dellemc.powerscale.networkpool:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    groupnet: "groupnet0"
+    subnet: "subnet0"
+    pool: "Test_Pool_2"
+    state: "absent"
 
-  - name: Rename a network Pool
-    dellemc.powerscale.networkpool:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      groupnet_name: "groupnet0"
-      subnet_name: "subnet0"
-      pool_name: "Test_Pool"
-      new_pool_name: "Test_Pool_Rename"
-      state: "present"
+- name: Rename a network Pool
+  dellemc.powerscale.networkpool:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    groupnet_name: "groupnet0"
+    subnet_name: "subnet0"
+    pool_name: "Test_Pool"
+    new_pool_name: "Test_Pool_Rename"
+    state: "present"
 '''
 
 RETURN = r'''

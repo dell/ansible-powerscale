@@ -76,7 +76,7 @@ EXAMPLES = r'''
     api_password: "{{api_password}}"
     tier_name: "test_tier"
     nodepools:
-    - "test_nodepool"
+      - "test_nodepool"
     state: 'present'
 
 - name: Delete a storage pool tier

@@ -70,10 +70,10 @@ options:
     description:
     - Types of scheduling a job on the policy.
     type: str
-    choices: ['on-schedule', 'when-source-modified', 'when-snapshot-taken']
+    choices: ['on-schedule', 'when-source-modified', 'when-snapshot-taken', 'manual']
   job_delay:
     description:
-    - If I(run_job) is set to when-source-modified, I(job_delay) is the
+    - If I(run_job) is set to C(when-source-modified), I(job_delay) is the
       duration to wait before triggering a job once there is modification on source.
     type: int
   job_delay_unit:
@@ -97,7 +97,7 @@ options:
   snapshot_sync_pattern:
     description:
     - The naming pattern that a snapshot must match to trigger
-      a sync when the schedule is when-snapshot-taken.
+      a sync when the schedule is C(when-snapshot-taken).
     type: str
   skip_when_source_unmodified:
     description:
@@ -230,13 +230,13 @@ options:
     description:
     - If set to C(true), SyncIQ will perform failback configuration tasks during the next job run,
       rather than waiting to perform those tasks during the failback process.
-      Performing these tasks ahead of time will increase the speed of failback operations.
+    - Performing these tasks ahead of time will increase the speed of failback operations.
     - It defaults to C(true), if not specified.
     type: bool
   restrict_target_network:
     description:
     - If set to C(true) then replication policies will connect only to nodes in the specified SmartConnect zone.
-      If set to C(false), replication policies are not restricted to specific nodes on the target cluster.
+    - If set to C(false), replication policies are not restricted to specific nodes on the target cluster.
     type: bool
 
 notes:
@@ -244,158 +244,158 @@ notes:
 - The I(check_mode) is not supported.
 '''
 EXAMPLES = r'''
-  - name: Create SyncIQ policy
-    dellemc.powerscale.synciqpolicy:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      action: "copy"
-      description: "Creating a policy"
-      enabled: true
-      policy_name: "New_policy"
-      run_job: "on-schedule"
-      schedule: "every 1 days at 12:00 PM"
-      skip_when_source_unmodified: true
-      rpo_alert: 100
-      source_cluster:
-        source_root_path: "<path_to_source>"
-        source_exclude_directories: "<path_to_exclude>"
-        source_include_directories: "<path_to_include>"
-        source_network:
-          pool: "pool0"
-          subnet: "subnet0"
-      target_cluster:
-        target_host: "198.10.xxx.xxx"
-        target_path: "<path_to_target>"
-        target_certificate_id: "7sdgvejkiau7629903048hdjdkljsbwgsuasj7169823kkckll"
-      target_snapshot:
-        target_snapshot_archive: true
-        target_snapshot_expiration: 90
-        exp_time_unit: "day"
-      accelerated_failback: false
-      restrict_target_network: true
-      state: "present"
+- name: Create SyncIQ policy
+  dellemc.powerscale.synciqpolicy:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    action: "copy"
+    description: "Creating a policy"
+    enabled: true
+    policy_name: "New_policy"
+    run_job: "on-schedule"
+    schedule: "every 1 days at 12:00 PM"
+    skip_when_source_unmodified: true
+    rpo_alert: 100
+    source_cluster:
+      source_root_path: "<path_to_source>"
+      source_exclude_directories: "<path_to_exclude>"
+      source_include_directories: "<path_to_include>"
+      source_network:
+        pool: "pool0"
+        subnet: "subnet0"
+    target_cluster:
+      target_host: "198.10.xxx.xxx"
+      target_path: "<path_to_target>"
+      target_certificate_id: "7sdgvejkiau7629903048hdjdkljsbwgsuasj7169823kkckll"
+    target_snapshot:
+      target_snapshot_archive: true
+      target_snapshot_expiration: 90
+      exp_time_unit: "day"
+    accelerated_failback: false
+    restrict_target_network: true
+    state: "present"
 
-  - name: Modify SyncIQ policy
-    dellemc.powerscale.synciqpolicy:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      policy_name: "New_policy"
-      action: "sync"
-      description: "Creating a policy"
-      enabled: false
-      run_job: "when-snapshot-taken"
-      snapshot_sync_patten: "^snapshot\\-$latest"
-      source_cluster:
-        source_root_path: "<path_to_source>"
-        source_exclude_directories: "<path_to_exclude>"
-        source_include_directories: "<path_to_include>"
-        source_network:
-          pool: "pool1"
-          subnet: "subnet1"
-      target_cluster:
-        target_host: "198.10.xxx.xxx"
-        target_path: "<path_to_target>"
-        target_certificate_id: "7sdgvejkiau7629903048hdjdkljsbwgsuasj716iuhywthsjk"
-      target_snapshot:
-        target_snapshot_archive: false
-      accelerated_failback: true
-      restrict_target_network: false
-      state: "present"
+- name: Modify SyncIQ policy
+  dellemc.powerscale.synciqpolicy:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    policy_name: "New_policy"
+    action: "sync"
+    description: "Creating a policy"
+    enabled: false
+    run_job: "when-snapshot-taken"
+    snapshot_sync_patten: "^snapshot\\-$latest"
+    source_cluster:
+      source_root_path: "<path_to_source>"
+      source_exclude_directories: "<path_to_exclude>"
+      source_include_directories: "<path_to_include>"
+      source_network:
+        pool: "pool1"
+        subnet: "subnet1"
+    target_cluster:
+      target_host: "198.10.xxx.xxx"
+      target_path: "<path_to_target>"
+      target_certificate_id: "7sdgvejkiau7629903048hdjdkljsbwgsuasj716iuhywthsjk"
+    target_snapshot:
+      target_snapshot_archive: false
+    accelerated_failback: true
+    restrict_target_network: false
+    state: "present"
 
-  - name: Rename a SyncIQ policy
-    dellemc.powerscale.synciqpolicy:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      policy_id: "d63b079d34adf2d2ec3ce92f15bfc730"
-      new_policy_name: "Policy_Rename"
-      state: "present"
+- name: Rename a SyncIQ policy
+  dellemc.powerscale.synciqpolicy:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    policy_id: "d63b079d34adf2d2ec3ce92f15bfc730"
+    new_policy_name: "Policy_Rename"
+    state: "present"
 
-  - name: Get SyncIQ policy details
-    dellemc.powerscale.synciqpolicy:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      policy_name: "Policy_rename"
-      state: "present"
+- name: Get SyncIQ policy details
+  dellemc.powerscale.synciqpolicy:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    policy_name: "Policy_rename"
+    state: "present"
 
-  - name: Create a job on SyncIQ policy
-    dellemc.powerscale.synciqpolicy:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      policy_name: "Test_SSL"
-      job_params:
-        action: "run"
-        source_snapshot: "TestSIQ-snapshot"
-        wait_for_completion: false
-      state: "present"
+- name: Create a job on SyncIQ policy
+  dellemc.powerscale.synciqpolicy:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    policy_name: "Test_SSL"
+    job_params:
+      action: "run"
+      source_snapshot: "TestSIQ-snapshot"
+      wait_for_completion: false
+    state: "present"
 
-  - name: Create a resync_prep job on SyncIQ policy
-    dellemc.powerscale.synciqpolicy:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      policy_name: "Test_SSL"
-      job_params:
-        action: "resync_prep"
-        source_snapshot: "TestSIQ-snapshot"
-        wait_for_completion: false
-      state: "present"
+- name: Create a resync_prep job on SyncIQ policy
+  dellemc.powerscale.synciqpolicy:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    policy_name: "Test_SSL"
+    job_params:
+      action: "resync_prep"
+      source_snapshot: "TestSIQ-snapshot"
+      wait_for_completion: false
+    state: "present"
 
-  - name: Allow writes on target of SyncIQ policy
-    dellemc.powerscale.synciqpolicy:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      policy_name: "Test_SSL"
-      job_params:
-        action: "allow_write"
-        source_snapshot: "TestSIQ-snapshot"
-        workers_per_node: 3
-        wait_for_completion: false
-      state: "present"
+- name: Allow writes on target of SyncIQ policy
+  dellemc.powerscale.synciqpolicy:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    policy_name: "Test_SSL"
+    job_params:
+      action: "allow_write"
+      source_snapshot: "TestSIQ-snapshot"
+      workers_per_node: 3
+      wait_for_completion: false
+    state: "present"
 
-  - name: Disallow writes on target of SyncIQ policy
-    dellemc.powerscale.synciqpolicy:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      policy_name: "Test_SSL"
-      job_params:
-        action: "allow_write_revert"
-        source_snapshot: "TestSIQ-snapshot"
-        workers_per_node: 3
-        wait_for_completion: false
-      state: "present"
+- name: Disallow writes on target of SyncIQ policy
+  dellemc.powerscale.synciqpolicy:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    policy_name: "Test_SSL"
+    job_params:
+      action: "allow_write_revert"
+      source_snapshot: "TestSIQ-snapshot"
+      workers_per_node: 3
+      wait_for_completion: false
+    state: "present"
 
-  - name: Delete SyncIQ policy by policy name
-    dellemc.powerscale.synciqpolicy:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      policy_name: "Policy_rename"
-      state: "absent"
+- name: Delete SyncIQ policy by policy name
+  dellemc.powerscale.synciqpolicy:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    policy_name: "Policy_rename"
+    state: "absent"
 
-  - name: Delete SyncIQ policy by policy ID
-    dellemc.powerscale.synciqpolicy:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      policy_id: "d63b079d34adf2d2ec3ce92f15bfc730"
-      state: "absent"
+- name: Delete SyncIQ policy by policy ID
+  dellemc.powerscale.synciqpolicy:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    policy_id: "d63b079d34adf2d2ec3ce92f15bfc730"
+    state: "absent"
 '''
 
 RETURN = r'''
@@ -403,10 +403,11 @@ changed:
     description: Whether or not the resource has changed.
     returned: always
     type: bool
+    sample: "true"
 synciq_policy_details:
     description: Details of the SyncIQ policy.
     returned: When SyncIQ policy exists
-    type: complex
+    type: dict
     contains:
         name:
             description: The name of the policy.
@@ -435,10 +436,32 @@ synciq_policy_details:
         jobs:
             description: List of jobs running on the policy
             type: list
+    sample: {
+        "action": "copy",
+        "bandwidth": 100,
+        "description": "SyncIQ policy Description",
+        "enabled": true,
+        "encryption": false,
+        "file_matching_pattern": {
+            "or_criteria": null
+        },
+        "id": "d63b079d34adf2d2ec3ce92f15bfc730",
+        "job_delay": "1.0 days",
+        "job": [],
+        "name": "SyncIQ_Policy",
+        "next_run_time": "1700479390",
+        "schedule": "when-source-modified",
+        "source_root_path": "/ifs",
+        "target_certificate_id": "7sdgvejkiau7629903048hdjdkljsbwgsuasj7169823kkckll",
+        "target_certificate_name": "test",
+        "target_host": "192.10.xxx.xxx",
+        "target_path": "/ifs/synciq",
+        "target_snapshot_archive": false
+    }
 target_synciq_policy_details:
     description: Details of the target SyncIQ policy.
     returned: When failover/failback is performed on target cluster
-    type: complex
+    type: dict
     contains:
         name:
             description: The name of the policy.
@@ -450,6 +473,11 @@ target_synciq_policy_details:
             description: The state of the policy with respect to sync
                          failover/failback.
             type: str
+    sample: {
+        "name": "SyncIQ_Policy",
+        "id": "d63b079d34adf2d2ec3ce92f15bfc730",
+        "failover_failback_state": "enabled"
+    }
 '''
 
 from ansible.module_utils.basic import AnsibleModule
@@ -826,7 +854,6 @@ class SynciqPolicy(object):
         job_delay = self.module.params['job_delay']
         job_delay_unit = self.module.params['job_delay_unit']
         job_params = self.module.params['job_params']
-        target_cluster = self.module.params['target_cluster']
         state = self.module.params['state']
 
         # Dictionary of inputs from playbook
@@ -838,8 +865,8 @@ class SynciqPolicy(object):
         # policy details
         result = dict(
             changed=False,
-            synciq_policy_details='',
-            target_synciq_policy_details='',
+            synciq_policy_details={},
+            target_synciq_policy_details={},
             create_synciq_policy=False,
             modify_synciq_policy=False,
             create_job_synciq_policy=False,
@@ -872,6 +899,8 @@ class SynciqPolicy(object):
             if run_job == 'when-source-modified' or \
                     run_job == 'when-snapshot-taken':
                 schedule = run_job
+            elif run_job == 'manual':
+                schedule = ''
 
             # Construct dictionary of policy parameters to be passed while creating policy
             policy_param = self.construct_policy_params(input_param, schedule,
@@ -1016,7 +1045,8 @@ def get_synciqpolicy_parameters():
         action=dict(type='str', choices=['copy', 'sync']),
         schedule=dict(type='str'),
         run_job=dict(type='str', choices=['on-schedule',
-                                          'when-source-modified', 'when-snapshot-taken']),
+                                          'when-source-modified', 'when-snapshot-taken',
+                                          'manual']),
         skip_when_source_unmodified=dict(type='bool'),
         rpo_alert=dict(type='int'),
         rpo_alert_unit=dict(type='str', choices=['minutes', 'hours',

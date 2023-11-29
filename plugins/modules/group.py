@@ -81,98 +81,98 @@ notes:
 '''
 
 EXAMPLES = r'''
-  - name: Create a Group
-    dellemc.powerscale.group:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      access_zone: "{{access_zone}}"
-      provider_type: "{{provider_type}}"
-      group_name: "{{group_name}}"
-      state: "present"
+- name: Create a Group
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    access_zone: "{{access_zone}}"
+    provider_type: "{{provider_type}}"
+    group_name: "{{group_name}}"
+    state: "present"
 
-  - name: Create a Group with group id
-    dellemc.powerscale.group:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      access_zone: "{{access_zone}}"
-      provider_type: "{{provider_type}}"
-      group_name: "Test_group"
-      group_id: 7000
-      state: "present"
+- name: Create a Group with group id
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    access_zone: "{{access_zone}}"
+    provider_type: "{{provider_type}}"
+    group_name: "Test_group"
+    group_id: 7000
+    state: "present"
 
-  - name: Create Group with Users
-    dellemc.powerscale.group:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      provider_type: "{{provider_type}}"
-      access_zone: "{{access_zone}}"
-      group_name: "{{group_name}}"
-      users:
-        - user_name: "{{user_name}}"
-        - user_id: "{{user_id}}"
-        - user_name: "{{user_name_2}}"
-      user_state: "present-in-group"
-      state: "present"
+- name: Create Group with Users
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "{{provider_type}}"
+    access_zone: "{{access_zone}}"
+    group_name: "{{group_name}}"
+    users:
+      - user_name: "{{user_name}}"
+      - user_id: "{{user_id}}"
+      - user_name: "{{user_name_2}}"
+    user_state: "present-in-group"
+    state: "present"
 
-  - name: Get Details of the Group using Group Id
-    dellemc.powerscale.group:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      provider_type: "{{provider_type}}"
-      access_zone: "{{access_zone}}"
-      group_id: "{{group_id}}"
-      state: "present"
+- name: Get Details of the Group using Group Id
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "{{provider_type}}"
+    access_zone: "{{access_zone}}"
+    group_id: "{{group_id}}"
+    state: "present"
 
-  - name: Delete the Group using Group Name
-    dellemc.powerscale.group:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      provider_type: "{{provider_type}}"
-      access_zone: "{{access_zone}}"
-      group_name: "{{group_name}}"
-      state: "absent"
+- name: Delete the Group using Group Name
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "{{provider_type}}"
+    access_zone: "{{access_zone}}"
+    group_name: "{{group_name}}"
+    state: "absent"
 
-  - name: Add Users to a Group
-    dellemc.powerscale.group:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      provider_type: "{{provider_type}}"
-      access_zone: "{{access_zone}}"
-      group_id: "{{group_id}}"
-      users:
-        - user_name: "{{user_name}}"
-        - user_id: "{{user_id}}"
-        - user_name: "{{user_name_2}}"
-      user_state: "present-in-group"
-      state: "present"
+- name: Add Users to a Group
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "{{provider_type}}"
+    access_zone: "{{access_zone}}"
+    group_id: "{{group_id}}"
+    users:
+      - user_name: "{{user_name}}"
+      - user_id: "{{user_id}}"
+      - user_name: "{{user_name_2}}"
+    user_state: "present-in-group"
+    state: "present"
 
-  - name: Remove Users from a Group
-    dellemc.powerscale.group:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      provider_type: "{{provider_type}}"
-      access_zone: "{{access_zone}}"
-      group_id: "{{group_id}}"
-      users:
-        - user_name: "{{user_name_1}}"
-        - user_id: "{{user_id}}"
-        - user_name: "{{user_name_2}}"
-      user_state: "absent-in-group"
-      state: "present"
+- name: Remove Users from a Group
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "{{provider_type}}"
+    access_zone: "{{access_zone}}"
+    group_id: "{{group_id}}"
+    users:
+      - user_name: "{{user_name_1}}"
+      - user_id: "{{user_id}}"
+      - user_name: "{{user_name_2}}"
+    user_state: "absent-in-group"
+    state: "present"
 '''
 
 RETURN = r'''

@@ -27,7 +27,7 @@ If a candidate is approved, a Maintainer contacts the candidate to invite them t
 ## Maintainer policies
 
 * Lead by example
-* Follow the [Code of Conduct](https://github.com/dell/ansible-powerscale/blob/2.2.0/docs/CODE_OF_CONDUCT.md) and the guidelines in the [Contributing](https://github.com/dell/ansible-powerscale/blob/2.2.0/docs/CONTRIBUTING.md) and [Committer](https://github.com/dell/ansible-powerscale/blob/2.2.0/docs/COMMITTER_GUIDE.md) guides
+* Follow the [Code of Conduct](https://github.com/dell/ansible-powerscale/blob/2.3.0/docs/CODE_OF_CONDUCT.md) and the guidelines in the [Contributing](https://github.com/dell/ansible-powerscale/blob/2.3.0/docs/CONTRIBUTING.md) and [Committer](https://github.com/dell/ansible-powerscale/blob/2.3.0/docs/COMMITTER_GUIDE.md) guides
 * Promote a friendly and collaborative environment within our community
 * Be actively engaged in discussions, answering questions, updating defects, and reviewing pull requests
 * Criticize code, not people. Ideally, tell the contributor a better way to do what they need.

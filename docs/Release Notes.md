@@ -1,6 +1,6 @@
 **Ansible Modules for Dell Technologies PowerScale** 
 =========================================
-### Release notes 2.2.0
+### Release notes 2.3.0
 
 >   © 2022 Dell Inc. or its subsidiaries. All rights reserved. Dell
 >   and other trademarks are trademarks of Dell Inc. or its
@@ -27,7 +27,7 @@ Table 1. Revision history
 
 | Revision | Date          | Description                                               |
 |----------|---------------|-----------------------------------------------------------|
-| 01       | August 2023    | Ansible Modules for Dell PowerScale 2.2.0                 |
+| 01       | November 2023 | Ansible Modules for Dell PowerScale 2.3.0                 |
 
 
 Product description
@@ -61,6 +61,8 @@ The Ansible Modules for Dell PowerScale support the following features:
 - Get details and close open SMB files.
 - Create, modify, get details and delete a user mapping rule.
 - Create, modify, get details and delete an S3 bucket.
+- Get details and modify SyncIQ global settings.
+- Get details, modify, import, and delete SyncIQ certificates.
   
 The Ansible modules use playbooks, written in yaml syntax, to list, show, create, delete, and modify each of these entities.
 
@@ -68,18 +70,16 @@ New Features and Enhancements
 ---------------------------
 This section describes the features of the Ansible Modules for Dell PowerScale for this release.
 
-The Ansible Modules for Dell PowerScale release 2.2.0 supports the following features:
+The Ansible Modules for Dell PowerScale release 2.3.0 supports the following features:
 
-- The NFS default settings module supports this functionality:
-    - Get details and modify NFS default settings.
-- The NFS global settings module supports this functionality:
-    - Get details and modify NFS global settings.
-- The NFS zone settings module supports this functionality:
-    - Get details and modify NFS zone settings.
-- The NFS module supports this functionality:
-    - Added support for specifying the users and groups to which non-root and root clients are mapped.
-- The Info module supports this functionality:
-    - Added support for getting details of NFS default settings, NFS global settings and NFS zone settings.
+- The SyncIQ global settings module supports this functionality:
+    - Added support for getting and modifying SyncIQ global settings.
+- The SyncIQ target cluster certificate module supports this functionality:
+    -  Added support for getting, importing, modifying and deleting SyncIQ target cluster certificates.
+- The Info module supports this functionality.
+    - Added support for listing SyncIQ global settings and S3 buckets in Info module.
+- The SyncIQ policy module supports this functionality.
+    - Added support for manually running a SyncIQ policy.
 
 Known issues
 ------------
@@ -129,7 +129,7 @@ This section lists the limitations in this release of Ansible Modules for Dell P
 Software media, organization, and files 
 -----------
 The software package is available for download from the [Ansible Modules
-for PowerScale GitHub](https://github.com/dell/ansible-powerscale/tree/2.2.0) page.
+for PowerScale GitHub](https://github.com/dell/ansible-powerscale/tree/2.3.0) page.
 
 Additional resources
 --------------------
