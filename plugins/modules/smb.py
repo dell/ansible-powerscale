@@ -267,10 +267,10 @@ EXAMPLES = r'''
     impersonate_guest: "never"
     impersonate_user: "sample_user"
     host_acls:
-    - name: "sample_host_acl_1"
-      access_type: "allow"
-    - name: "sample_host_acl_2"
-      access_type: "deny"
+      - name: "sample_host_acl_1"
+        access_type: "allow"
+      - name: "sample_host_acl_2"
+        access_type: "deny"
     state: "present"
 
 - name: Create SMB share for system access zone

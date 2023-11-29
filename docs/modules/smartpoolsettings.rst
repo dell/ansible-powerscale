@@ -21,7 +21,7 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.13 or later.
+- Ansible-core 2.14 or later.
 - Python 3.9, 3.10 or 3.11.
 
 
@@ -84,23 +84,23 @@ Examples
 .. code-block:: yaml+jinja
 
     
-      - name: Get SmartPool settings
-        dellemc.powerscale.smartpoolsettings:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          state: "{{state_present}}"
+    - name: Get SmartPool settings
+      dellemc.powerscale.smartpoolsettings:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        state: "{{state_present}}"
 
-      - name: Modify SmartPool setting
-        dellemc.powerscale.smartpoolsettings:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          virtual_hot_spare_limit_percent: 10
-          virtual_hot_spare_hide_spare: true
-          state: "present"
+    - name: Modify SmartPool setting
+      dellemc.powerscale.smartpoolsettings:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        virtual_hot_spare_limit_percent: 10
+        virtual_hot_spare_hide_spare: true
+        state: "present"
 
 
 

@@ -21,7 +21,7 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.13 or later.
+- Ansible-core 2.14 or later.
 - Python 3.9, 3.10 or 3.11.
 
 
@@ -104,90 +104,90 @@ Examples
 .. code-block:: yaml+jinja
 
     
-      - name: Get email settings
-        dellemc.powerscale.settings:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          email_settings: "{{email_settings}}"
-          state: "{{state_present}}"
+    - name: Get email settings
+      dellemc.powerscale.settings:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        email_settings: "{{email_settings}}"
+        state: "{{state_present}}"
 
-      - name: Update email settings
-        dellemc.powerscale.settings:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          state: "{{state_present}}"
-          mail_relay: "mailrelay.itp.dell.com"
-          mail_sender: "lab-a2@dell.com"
-          mail_subject: "lab-a2-alerts"
+    - name: Update email settings
+      dellemc.powerscale.settings:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        state: "{{state_present}}"
+        mail_relay: "mailrelay.itp.dell.com"
+        mail_sender: "lab-a2@dell.com"
+        mail_subject: "lab-a2-alerts"
 
-      - name: Add NTP server
-        dellemc.powerscale.settings:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          ntp_servers:
+    - name: Add NTP server
+      dellemc.powerscale.settings:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        ntp_servers:
           - "10.106.**.***"
           - "10.106.**.***"
-          state: "{{state_present}}"
+        state: "{{state_present}}"
 
-      - name: Add NTP server - Idempotency
-        dellemc.powerscale.settings:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          ntp_servers:
+    - name: Add NTP server - Idempotency
+      dellemc.powerscale.settings:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        ntp_servers:
           - "10.106.**.***"
           - "10.106.**.***"
-          state: "{{state_present}}"
+        state: "{{state_present}}"
 
-      - name: Get NTP server
-        dellemc.powerscale.settings:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          ntp_server_id: "10.106.**.***"
-          state: "{{state_present}}"
+    - name: Get NTP server
+      dellemc.powerscale.settings:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        ntp_server_id: "10.106.**.***"
+        state: "{{state_present}}"
 
-      - name: Remove NTP server
-        dellemc.powerscale.settings:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          ntp_servers:
+    - name: Remove NTP server
+      dellemc.powerscale.settings:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        ntp_servers:
           - "10.106.**.***"
           - "10.106.**.***"
-          state: "{{state_absent}}"
+        state: "{{state_absent}}"
 
-      - name: Remove NTP server - Idempotency
-        dellemc.powerscale.settings:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          ntp_servers:
+    - name: Remove NTP server - Idempotency
+      dellemc.powerscale.settings:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        ntp_servers:
           - "10.106.**.***"
           - "10.106.**.***"
-          state: "{{state_absent}}"
+        state: "{{state_absent}}"
 
-      - name: Update email settings and add NTP server
-        dellemc.powerscale.settings:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          state: "{{state_present}}"
-          mail_relay: "mailrelay.itp.dell.com"
-          mail_sender: "lab-a2@dell.com"
-          mail_subject: "lab-a2-alerts"
-          ntp_servers:
+    - name: Update email settings and add NTP server
+      dellemc.powerscale.settings:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        state: "{{state_present}}"
+        mail_relay: "mailrelay.itp.dell.com"
+        mail_sender: "lab-a2@dell.com"
+        mail_subject: "lab-a2-alerts"
+        ntp_servers:
           - "10.106.**.***"
           - "10.106.**.***"
 

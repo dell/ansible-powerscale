@@ -31,6 +31,7 @@ description:
 - Get NFS zone settings details of the PowerScale cluster.
 - Get NFS default settings details of the PowerScale cluster.
 - Get NFS global settings details of the PowerScale cluster.
+- Get SyncIQ global settings details of the PowerScale cluster.
 
 extends_documentation_fragment:
   - dellemc.powerscale.powerscale
@@ -42,6 +43,7 @@ author:
 - Ananthu S Kuttattu(@kuttattz) <ansible.team@dell.com>
 - Bhavneet Sharma(@Bhavneet-Sharma) <ansible.team@dell.com>
 - Trisha Datta(@trisha-dell) <ansible.team@dell.com>
+- Meenakshi Dembi(@dembim) <ansible.team.dell.com>
 
 options:
   include_all_access_zones:
@@ -98,6 +100,8 @@ options:
     - LDAPs - C(ldap).
     - NFS zone settings - C(nfs_zone_settings).
     - NFS default settings - C(nfs_default_settings).
+    - SyncIQ global settings - C(synciq_global_settings).
+    - S3 buckets - C(s3_buckets)
     - The list of I(attributes), I(access_zones) and I(nodes) is for the entire
       PowerScale cluster.
     - The list of providers for the entire PowerScale cluster.
@@ -114,13 +118,14 @@ options:
     - The list of smb open files for the entire PowerScale cluster.
     - The list of user mapping rules of PowerScale cluster.
     - The list of ldap providers of PowerScale cluster.
+    - The list of S3 bucket for the entire PowerScale cluster.
     required: true
     choices: [attributes, access_zones, nodes, providers, users, groups,
               smb_shares, nfs_exports, nfs_aliases, clients, synciq_reports, synciq_target_reports,
               synciq_policies, synciq_target_cluster_certificates, synciq_performance_rules,
               network_groupnets, network_subnets, network_pools, network_rules, network_interfaces,
               node_pools, storagepool_tiers, smb_files, user_mapping_rules, ldap,
-              nfs_zone_settings, nfs_default_settings, nfs_global_settings]
+              nfs_zone_settings, nfs_default_settings, nfs_global_settings, synciq_global_settings, s3_buckets]
     type: list
     elements: str
 notes:
@@ -130,281 +135,298 @@ notes:
 '''
 
 EXAMPLES = r'''
-  - name: Get attributes of the PowerScale cluster
-    dellemc.powerscale.info:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - attributes
+- name: Get attributes of the PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    gather_subset:
+      - attributes
 
-  - name: Get access_zones of the PowerScale cluster
-    dellemc.powerscale.info:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - access_zones
+- name: Get access_zones of the PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    gather_subset:
+      - access_zones
 
-  - name: Get nodes of the PowerScale cluster
-    dellemc.powerscale.info:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - nodes
+- name: Get nodes of the PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    gather_subset:
+      - nodes
 
-  - name: Get list of authentication providers for all access zones of the
-          PowerScale cluster
-    dellemc.powerscale.info:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - providers
+- name: Get list of authentication providers for all access zones of the PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    gather_subset:
+      - providers
 
-  - name: Get list of users for an access zone of the PowerScale cluster
-    dellemc.powerscale.info:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      access_zone: "{{access_zone}}"
-      gather_subset:
-        - users
+- name: Get list of users for an access zone of the PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    access_zone: "{{access_zone}}"
+    gather_subset:
+      - users
 
-  - name: Get list of groups for an access zone of the PowerScale cluster
-    dellemc.powerscale.info:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      access_zone: "{{access_zone}}"
-      gather_subset:
-        - groups
+- name: Get list of groups for an access zone of the PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    access_zone: "{{access_zone}}"
+    gather_subset:
+      - groups
 
-  - name: Get list of smb shares in the PowerScale cluster
-    dellemc.powerscale.info:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      access_zone: "{{access_zone}}"
-      gather_subset:
-        - smb_shares
+- name: Get list of smb shares in the PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    access_zone: "{{access_zone}}"
+    gather_subset:
+      - smb_shares
 
-  - name: Get list of nfs exports in the PowerScale cluster
-    dellemc.powerscale.info:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      access_zone: "{{access_zone}}"
-      gather_subset:
-        - nfs_exports
+- name: Get list of nfs exports in the PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    access_zone: "{{access_zone}}"
+    gather_subset:
+      - nfs_exports
 
-  - name: Get list of nfs aliases in the PowerScale cluster
-    dellemc.powerscale.info:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      access_zone: "{{access_zone}}"
-      gather_subset:
-        - nfs_aliases
+- name: Get list of nfs aliases in the PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    access_zone: "{{access_zone}}"
+    gather_subset:
+      - nfs_aliases
 
-  - name: Get list of clients in the PowerScale cluster
-    dellemc.powerscale.info:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - clients
+- name: Get list of clients in the PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    gather_subset:
+      - clients
 
-  - name: Get list of SyncIQ reports and SyncIQ target Reports in the PowerScale cluster
-    dellemc.powerscale.info:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - synciq_reports
-        - synciq_target_reports
+- name: Get list of SyncIQ reports and SyncIQ target Reports in the PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    gather_subset:
+      - synciq_reports
+      - synciq_target_reports
 
-  - name: Get list of SyncIQ policies in the PowerScale cluster
-    dellemc.powerscale.info:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - synciq_policies
+- name: Get list of SyncIQ policies in the PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    gather_subset:
+      - synciq_policies
 
-  - name: Get list of SyncIQ target cluster certificates in the PowerScale cluster
-    dellemc.powerscale.info:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - synciq_target_cluster_certificates
+- name: Get list of SyncIQ target cluster certificates in the PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    gather_subset:
+      - synciq_target_cluster_certificates
 
-  - name: Get list of SyncIQ performance rules in the PowerScale cluster
-    dellemc.powerscale.info:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - synciq_performance_rules
+- name: Get list of SyncIQ performance rules in the PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    gather_subset:
+      - synciq_performance_rules
 
-  - name: Get list of network groupnets of the PowerScale cluster
-    dellemc.powerscale.info:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - network_groupnets
+- name: Get list of network groupnets of the PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    gather_subset:
+      - network_groupnets
 
-  - name: Get list of network pools of the PowerScale cluster
-    dellemc.powerscale.info:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - network_pools
+- name: Get list of network pools of the PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    gather_subset:
+      - network_pools
 
-  - name: Get list of network pools for all access zones of the PowerScale cluster
-    dellemc.powerscale.info:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      include_all_access_zones: true
-      gather_subset:
-        - network_pools
+- name: Get list of network pools for all access zones of the PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    include_all_access_zones: true
+    gather_subset:
+      - network_pools
 
-  - name: Get list of network rules of the PowerScale cluster
-    dellemc.powerscale.info:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - network_rules
+- name: Get list of network rules of the PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    gather_subset:
+      - network_rules
 
-  - name: Get list of network interfaces of the PowerScale cluster
-    dellemc.powerscale.info:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - network_interfaces
+- name: Get list of network interfaces of the PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    gather_subset:
+      - network_interfaces
 
-  - name: Get list of network subnets of the PowerScale cluster
-    dellemc.powerscale.info:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - network_subnets
+- name: Get list of network subnets of the PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    gather_subset:
+      - network_subnets
 
-  - name: Get list of node pools of the PowerScale cluster
-    dellemc.powerscale.info:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - node_pools
-    register: subset_result
+- name: Get list of node pools of the PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    gather_subset:
+      - node_pools
+  register: subset_result
 
-  - name: Get list of storage pool tiers of the PowerScale cluster
-    dellemc.powerscale.info:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - storagepool_tiers
-    register: subset_result
+- name: Get list of storage pool tiers of the PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    gather_subset:
+      - storagepool_tiers
+  register: subset_result
 
-  - name: Get list of smb open files of the PowerScale cluster
-    dellemc.powerscale.info:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - smb_files
+- name: Get list of smb open files of the PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    gather_subset:
+      - smb_files
 
-  - name: Get list of user mapping rule of the PowerScale cluster
-    dellemc.powerscale.info:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - user_mapping_rules
+- name: Get list of user mapping rule of the PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    gather_subset:
+      - user_mapping_rules
 
-  - name: Get list of ldap providers of the PowerScale cluster
-    dellemc.powerscale.info:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - ldap
-      scope: "effective"
+- name: Get list of ldap providers of the PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    gather_subset:
+      - ldap
+    scope: "effective"
 
-  - name: Get the NFS zone settings of the PowerScale cluster
-    dellemc.powerscale.info:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - nfs_zone_settings
+- name: Get the NFS zone settings of the PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    gather_subset:
+      - nfs_zone_settings
 
-  - name: Get the NFS default settings of the PowerScale cluster
-    dellemc.powerscale.info:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - nfs_default_settings
+- name: Get the NFS default settings of the PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    gather_subset:
+      - nfs_default_settings
 
-  - name: Get the NFS global settings of the PowerScale cluster
-    dellemc.powerscale.info:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      gather_subset:
-        - nfs_global_settings
+- name: Get the NFS global settings of the PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    gather_subset:
+      - nfs_global_settings
+
+- name: Get SyncIQ global settings details of the PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{ onefs_host }}"
+    verify_ssl: "{{ verify_ssl }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    gather_subset:
+      - synciq_global_settings
+
+- name: Get S3 bucket list for the PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{ onefs_host }}"
+    verify_ssl: "{{ verify_ssl }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    gather_subset:
+      - s3_buckets
 '''
 
 RETURN = r'''
@@ -1461,11 +1483,176 @@ nfs_default_settings:
                 'time_delta': 1e-09,
                 'zone': 'sample-zone'
             }
+SynciqGlobalSettings:
+    description: The SyncIQ global settings details.
+    type: dict
+    returned: always
+    contains:
+        bandwidth_reservation_reserve_absolute:
+            description: The absolute bandwidth reservation for SyncIQ.
+            type: int
+        bandwidth_reservation_reserve_percentage:
+            description: The percentage-based bandwidth reservation for SyncIQ.
+            type: int
+        cluster_certificate_id:
+            description: The ID of the cluster certificate used for SyncIQ.
+            type: str
+        encryption_cipher_list:
+            description: The list of encryption ciphers used for SyncIQ.
+            type: str
+        encryption_required:
+            description: Whether encryption is required or not for SyncIQ.
+            type: bool
+        force_interface:
+            description: Whether the force interface is enabled or not for SyncIQ.
+            type: bool
+        max_concurrent_jobs:
+            description: The maximum number of concurrent jobs for SyncIQ.
+            type: int
+        ocsp_address:
+            description: The address of the OCSP server used for SyncIQ certificate validation.
+            type: str
+        ocsp_issuer_certificate_id:
+            description: The ID of the issuer certificate used for OCSP validation in SyncIQ.
+            type: str
+        preferred_rpo_alert:
+            description: Whether the preferred RPO alert is enabled or not for SyncIQ.
+            type: bool
+        renegotiation_period:
+            description: The renegotiation period in seconds for SyncIQ.
+            type: int
+        report_email:
+            description: The email address to which SyncIQ reports are sent.
+            type: str
+        report_max_age:
+            description: The maximum age in days of reports that are retained by SyncIQ.
+            type: int
+        report_max_count:
+            description: The maximum number of reports that are retained by SyncIQ.
+            type: int
+        restrict_target_network:
+            description: Whether to restrict the target network in SyncIQ.
+            type: bool
+        rpo_alerts:
+            description: Whether RPO alerts are enabled or not in SyncIQ.
+            type: bool
+        service:
+            description: Specifies whether the SyncIQ service is currently on, off, or paused.
+            type: str
+        service_history_max_age:
+            description: The maximum age in days of service history that is retained by SyncIQ.
+            type: int
+        service_history_max_count:
+            description: The maximum number of service history records that are retained by SyncIQ.
+            type: int
+        source_network:
+            description: The source network used by SyncIQ.
+            type: str
+        tw_chkpt_interval:
+            description: The interval between checkpoints in seconds in SyncIQ.
+            type: int
+        use_workers_per_node:
+           description : Whether to use workers per node in SyncIQ or not.
+           type : bool
+    sample: {
+              "bandwidth_reservation_reserve_absolute": null,
+              "bandwidth_reservation_reserve_percentage": 1,
+              "cluster_certificate_id": "xxxx",
+              "encryption_cipher_list": "",
+              "encryption_required": true,
+              "force_interface": false,
+              "max_concurrent_jobs": 16,
+              "ocsp_address": "",
+              "ocsp_issuer_certificate_id": "",
+              "preferred_rpo_alert": 0,
+              "renegotiation_period": 28800,
+              "report_email": [],
+              "report_max_age": 31536000,
+              "report_max_count": 2000,
+              "restrict_target_network": false,
+              "rpo_alerts": true,
+              "service": "off",
+              "service_history_max_age": 31536000,
+              "service_history_max_count": 2000,
+              "source_network": null,
+              "tw_chkpt_interval": null,
+              "use_workers_per_node": false
+            }
+S3_bucket_details:
+    description: The updated S3 Bucket details.
+    type: dict
+    returned: When C(s3_buckets) is in a given I(gather_subset)
+    contains:
+        acl:
+            description: Specifies the properties of S3 access controls.
+            type: list
+            contains:
+                grantee:
+                    description: Specifies details of grantee.
+                    type: dict
+                    contains:
+                        id:
+                            description: ID of the grantee.
+                            type: str
+                        name:
+                            description: Name of the grantee.
+                            type: str
+                        type:
+                            description: Specifies the type of the grantee.
+                            type: str
+                permission:
+                    description: Specifies the S3 permission being allowed.
+                    type: str
+        description:
+            description: Specifies the description of the S3 bucket.
+            type: str
+        id:
+            description: S3 bucket ID.
+            type: str
+        name:
+            description: S3 bucket name.
+            type: str
+        object_acl_policy:
+            description: Set behaviour of object acls for a specified S3
+                         bucket.
+            type: str
+        owner:
+            description: Specifies the owner of the S3 bucket.
+            type: str
+        path:
+            description: Path of S3 bucket with in C('/ifs').
+            type: str
+        zid:
+            description: Zone id.
+            type: int
+        zone:
+            description: Access zone name.
+            type: str
+    sample: {
+        "access_zone": "System",
+        "acl": [{
+            "grantee": {
+                "id": "ID",
+                "name": "ansible-user",
+                "type": "user"
+                },
+            "permission": "READ"
+        }],
+        "description": "description",
+        "id": "ansible_S3_bucket",
+        "name": "ansible_S3_bucket",
+        "object_acl_policy": "replace",
+        "owner": "ansible-user",
+        "path": "/ifs/<sample-path>",
+        "zid": 1
+    }
 '''
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.protocol \
     import Protocol
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.synciq \
+    import SyncIQ
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
 
@@ -2078,6 +2265,8 @@ class Info(object):
         nfs_zone_settings = {}
         nfs_default_settings = {}
         nfs_global_settings = {}
+        synciq_global_settings = {}
+        s3_buckets = {}
 
         if 'attributes' in str(subset):
             attributes = self.get_attributes_list()
@@ -2135,6 +2324,10 @@ class Info(object):
             nfs_default_settings = Protocol(self.protocol_api, self.module).get_nfs_default_settings(access_zone)
         if 'nfs_global_settings' in str(subset):
             nfs_global_settings = self.get_nfs_global_settings()
+        if 'synciq_global_settings' in str(subset):
+            synciq_global_settings = SyncIQ(self.synciq_api, self.module).get_synciq_global_settings()
+        if 's3_buckets' in str(subset):
+            s3_buckets = Protocol(self.protocol_api, self.module).get_s3_bucket_list()
 
         result = dict(
             Attributes=attributes,
@@ -2163,7 +2356,9 @@ class Info(object):
             LdapProviders=ldap,
             NfsZoneSettings=nfs_zone_settings,
             NfsDefaultSettings=nfs_default_settings,
-            NfsGlobalSettings=nfs_global_settings
+            NfsGlobalSettings=nfs_global_settings,
+            SynciqGlobalSettings=synciq_global_settings,
+            s3Buckets=s3_buckets
         )
 
         result.update(SynciqTargetClusterCertificate=synciq_target_cluster_certificates)
@@ -2223,7 +2418,9 @@ def get_info_parameters():
                                     'ldap',
                                     'nfs_zone_settings',
                                     'nfs_default_settings',
-                                    'nfs_global_settings'
+                                    'nfs_global_settings',
+                                    'synciq_global_settings',
+                                    's3_buckets'
                                     ]),
     )
 

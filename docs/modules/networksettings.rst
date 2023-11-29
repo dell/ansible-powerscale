@@ -21,7 +21,7 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.13 or later.
+- Ansible-core 2.14 or later.
 - Python 3.9, 3.10 or 3.11.
 
 
@@ -80,31 +80,31 @@ Examples
 .. code-block:: yaml+jinja
 
     
-      - name: Get Network settings
-        dellemc.powerscale.networksettings:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          state: "{{state_present}}"
+    - name: Get Network settings
+      dellemc.powerscale.networksettings:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        state: "{{state_present}}"
 
-      - name: Enable source based routing
-        dellemc.powerscale.networksettings:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          enable_source_routing: true
-          state: "{{state_present}}"
+    - name: Enable source based routing
+      dellemc.powerscale.networksettings:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        enable_source_routing: true
+        state: "{{state_present}}"
 
-      - name: Disable source based routing
-        dellemc.powerscale.networksettings:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          enable_source_routing: false
-          state: "{{state_present}}"
+    - name: Disable source based routing
+      dellemc.powerscale.networksettings:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        enable_source_routing: false
+        state: "{{state_present}}"
 
 
 

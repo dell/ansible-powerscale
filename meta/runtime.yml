@@ -1,5 +1,5 @@
 ---
-requires_ansible: ">=2.12"
+requires_ansible: ">=2.14.0"
 plugin_routing:
     modules:
         dellemc_powerscale_accesszone:

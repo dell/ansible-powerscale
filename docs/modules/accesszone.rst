@@ -21,7 +21,7 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.13 or later.
+- Ansible-core 2.14 or later.
 - Python 3.9, 3.10 or 3.11.
 
 
@@ -283,25 +283,25 @@ Examples
         az_name: "{{access zone}}"
         provider_state: "add"
         auth_providers:
-           - provider_name: "System"
-             provider_type: "file"
-             priority: 3
-           - provider_name: "ldap-prashant"
-             provider_type: "ldap"
+          - provider_name: "System"
+            provider_type: "file"
+            priority: 3
+          - provider_name: "ldap-prashant"
+            provider_type: "ldap"
         state: "present"
 
     - name: Remove Auth Providers from the  access zone
       dellemc.powerscale.accesszone:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          az_name: "{{access zone}}"
-          provider_state: "remove"
-          auth_providers:
-             - provider_name: "System"
-               provider_type: "file"
-          state: "present"
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        az_name: "{{access zone}}"
+        provider_state: "remove"
+        auth_providers:
+          - provider_name: "System"
+            provider_type: "file"
+        state: "present"
 
     - name: Create New Access Zone
       dellemc.powerscale.accesszone:

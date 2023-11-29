@@ -41,31 +41,31 @@ notes:
 '''
 
 EXAMPLES = r'''
-  - name: Get Network settings
-    dellemc.powerscale.networksettings:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      state: "{{state_present}}"
+- name: Get Network settings
+  dellemc.powerscale.networksettings:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    state: "{{state_present}}"
 
-  - name: Enable source based routing
-    dellemc.powerscale.networksettings:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      enable_source_routing: true
-      state: "{{state_present}}"
+- name: Enable source based routing
+  dellemc.powerscale.networksettings:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    enable_source_routing: true
+    state: "{{state_present}}"
 
-  - name: Disable source based routing
-    dellemc.powerscale.networksettings:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      enable_source_routing: false
-      state: "{{state_present}}"
+- name: Disable source based routing
+  dellemc.powerscale.networksettings:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    enable_source_routing: false
+    state: "{{state_present}}"
 '''
 
 RETURN = r'''

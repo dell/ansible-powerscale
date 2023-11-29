@@ -21,7 +21,7 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.13 or later.
+- Ansible-core 2.14 or later.
 - Python 3.9, 3.10 or 3.11.
 
 
@@ -157,7 +157,7 @@ Examples
         subnet_params:
           gateway: '198.10.**.***'
           sc_service_addrs:
-            - start_range : '198.10.**.***'
+            - start_range: '198.10.**.***'
               end_range: '198.10.**.***'
           sc_service_addrs_state: "add"
           mtu: 1500
@@ -206,7 +206,7 @@ Examples
         subnet_name: "subnet_test"
         subnet_params:
           sc_service_addrs:
-            - start_range : '198.10.**.***'
+            - start_range: '198.10.**.***'
               end_range: '198.10.**.***'
           sc_service_addrs_state: "add"
         state: 'present'
@@ -222,7 +222,7 @@ Examples
         subnet_name: "subnet_test"
         subnet_params:
           sc_service_addrs:
-            - start_range : '198.10.**.***'
+            - start_range: '198.10.**.***'
               end_range: '198.10.**.***'
           sc_service_addrs_state: "remove"
         state: 'present'

@@ -191,3 +191,21 @@
         api_password: "{{ api_password }}"
         gather_subset:
           - nfs_global_settings
+
+    - name: Get SyncIQ global settings details of the PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - synciq_global_settings
+
+    - name: Get S3 bucket list for the PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - s3_buckets

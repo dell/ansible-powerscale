@@ -250,31 +250,31 @@ EXAMPLES = r'''
     file_matching_pattern:
       or_criteria:
         - and_criteria:
-          - type: "file_name"
-            condition: "does_not_match"
-            value: "file_name_test"
-            case_sensitive: true
-          - type: "accessed"
-            condition: "after"
-            datetime_value: "2022-04-04 23:30"
-          - type: "created"
-            condition: "is_newer_than"
-            relative_datetime_count:
-              time_value: 12
-              time_unit: "years"
+            - type: "file_name"
+              condition: "does_not_match"
+              value: "file_name_test"
+              case_sensitive: true
+            - type: "accessed"
+              condition: "after"
+              datetime_value: "2022-04-04 23:30"
+            - type: "created"
+              condition: "is_newer_than"
+              relative_datetime_count:
+                time_value: 12
+                time_unit: "years"
         - and_criteria:
-          - type: "size"
-            condition: "not_equal"
-            size_info:
-              size_value: 60
-              size_unit: "MB"
-          - type: "file_attribute"
-            condition: "does_not_match"
-            field: "test_field"
-            value: "uni"
-          - type: "file_attribute"
-            condition: "exists"
-            field: "test"
+            - type: "size"
+              condition: "not_equal"
+              size_info:
+                size_value: 60
+                size_unit: "MB"
+            - type: "file_attribute"
+              condition: "does_not_match"
+              field: "test_field"
+              value: "uni"
+            - type: "file_attribute"
+              condition: "exists"
+              field: "test"
     state: 'present'
 '''
 
