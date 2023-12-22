@@ -32,13 +32,13 @@ Parameters
   policy_id (optional, str, None)
     Unique Id of the file pool policy.
 
-    It is mutually exclusive with \ :emphasis:`policy\_name`\ .
+    It is mutually exclusive with *policy_name*.
 
 
   policy_name (optional, str, None)
     Unique name of the file pool policy.
 
-    It is mutually exclusive with \ :emphasis:`policy\_id`\ .
+    It is mutually exclusive with *policy_id*.
 
     Mandatory for file pool policy creation.
 
@@ -114,51 +114,51 @@ Parameters
         condition (optional, str, None)
           The condition to use while comparing an attribute with its value.
 
-          If \ :emphasis:`type`\  is \ :literal:`size`\  then the conditions are ['equal', 'not\_equal', 'greater\_than', 'greater\_than\_equal\_to', 'less\_than', 'less\_than\_equal\_to'].
+          If *type* is ``size`` then the conditions are ['equal', 'not_equal', 'greater_than', 'greater_than_equal_to', 'less_than', 'less_than_equal_to'].
 
-          If \ :emphasis:`type`\  is \ :literal:`accessed`\  or \ :literal:`created`\  or \ :literal:`modified`\  or \ :literal:`metadata\_changed`\  then the conditions are ['after','before', 'is\_newer\_than', 'is\_older\_than'].
+          If *type* is ``accessed`` or ``created`` or ``modified`` or ``metadata_changed`` then the conditions are ['after','before', 'is_newer_than', 'is_older_than'].
 
-          If \ :emphasis:`type`\  is \ :literal:`file\_attribute`\  then the conditions are ['matches','does\_not\_match', 'exists', 'does\_not\_exist'].
+          If *type* is ``file_attribute`` then the conditions are ['matches','does_not_match', 'exists', 'does_not_exist'].
 
-          If \ :emphasis:`type`\  is \ :literal:`file\_path`\  then the conditions are ['matches','does\_not\_match', 'contains', 'does\_not\_contain'].
+          If *type* is ``file_path`` then the conditions are ['matches','does_not_match', 'contains', 'does_not_contain'].
 
-          If \ :emphasis:`type`\  is \ :literal:`file\_type`\  or  \ :literal:`file\_name`\  then the conditions are ['matches','does\_not\_match'].
+          If *type* is ``file_type`` or  ``file_name`` then the conditions are ['matches','does_not_match'].
 
 
         value (optional, str, None)
           The value to be compared against a file criteria.
 
-          Required in case if \ :emphasis:`type`\  is \ :literal:`file\_name`\  or \ :literal:`file\_path`\  or \ :literal:`file\_attribute`\ .
+          Required in case if *type* is ``file_name`` or ``file_path`` or ``file_attribute``.
 
-          If \ :emphasis:`type`\  is \ :literal:`file\_name`\  then value wil have file name.
+          If *type* is ``file_name`` then value wil have file name.
 
-          If \ :emphasis:`type`\  is \ :literal:`file\_path`\  then value wil have file path.
+          If *type* is ``file_path`` then value wil have file path.
 
-          If \ :emphasis:`type`\  is \ :literal:`file\_attribute`\  then value wil have file attribute field value.
+          If *type* is ``file_attribute`` then value wil have file attribute field value.
 
 
         field (optional, str, None)
           File attribute field name to be compared in a custom comparison.
 
-          Required only if the \ :emphasis:`type`\  is \ :literal:`file\_attribute`\ .
+          Required only if the *type* is ``file_attribute``.
 
 
         case_sensitive (optional, bool, None)
-          \ :literal:`true`\  to indicate case sensitivity when comparing file attributes.
+          ``true`` to indicate case sensitivity when comparing file attributes.
 
-          Required only if the \ :emphasis:`type`\  is \ :literal:`file\_name`\  or \ :literal:`file\_path`\ .
+          Required only if the *type* is ``file_name`` or ``file_path``.
 
 
         file_type_option (optional, str, None)
           File type option.
 
-          Required only if the \ :emphasis:`type`\  is \ :literal:`file\_type`\ .
+          Required only if the *type* is ``file_type``.
 
 
         size_info (optional, dict, None)
           File size value and unit.
 
-          Required only if the \ :emphasis:`type`\  is \ :literal:`size`\ .
+          Required only if the *type* is ``size``.
 
 
           size_value (True, int, None)
@@ -175,13 +175,13 @@ Parameters
 
           Format is 'YYYY-MM-DD HOUR:MINUTE'
 
-          Required only if the \ :emphasis:`type`\  is \ :literal:`accessed`\  or \ :literal:`created`\  or \ :literal:`modified`\  or \ :literal:`metadata\_changed`\  and \\ the \ :emphasis:`condition`\  is \ :literal:`after`\  or \ :literal:`before`\ 
+          Required only if the *type* is ``accessed`` or ``created`` or ``modified`` or ``metadata_changed`` and \ the *condition* is ``after`` or ``before``
 
 
         relative_datetime_count (optional, dict, None)
           A relative duration (e.g., 2 years, 3 weeks, 50 seconds).
 
-          Required only if the \ :emphasis:`type`\  is \ :literal:`accessed`\  or \ :literal:`created`\  or \ :literal:`modified`\  or \ :literal:`metadata\_changed`\  and \\ the \ :literal:`condition`\  is \ :literal:`is\_newer\_than`\  or \ :literal:`is\_older\_than`\ 
+          Required only if the *type* is ``accessed`` or ``created`` or ``modified`` or ``metadata_changed`` and \ the ``condition`` is ``is_newer_than`` or ``is_older_than``
 
 
           time_value (True, int, None)
@@ -211,9 +211,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
+    ``true`` - indicates that the SSL certificate should be verified.
 
-    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
+    ``false`` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -232,7 +232,7 @@ Notes
 
 .. note::
    - Modifying a file pool policy is not supported.
-   - The \ :emphasis:`check\_mode`\  is supported.
+   - The *check_mode* is supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 

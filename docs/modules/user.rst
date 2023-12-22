@@ -34,9 +34,9 @@ Parameters
 
 
   user_id (optional, int, None)
-    The \ :emphasis:`user\_id`\  is auto generated or can be assigned at the time of creation.
+    The *user_id* is auto generated or can be assigned at the time of creation.
 
-    For all other operations either \ :emphasis:`user\_name`\  or \ :emphasis:`user\_id`\  is needed.
+    For all other operations either *user_name* or *user_id* is needed.
 
 
   password (optional, str, None)
@@ -50,9 +50,9 @@ Parameters
   access_zone (optional, str, system)
     This option mentions the zone in which a user is created.
 
-    For creation, \ :emphasis:`access\_zone`\  acts as an attribute for the user.
+    For creation, *access_zone* acts as an attribute for the user.
 
-    For all other operations \ :emphasis:`access\_zone`\  acts as a filter.
+    For all other operations *access_zone* acts as a filter.
 
 
   provider_type (optional, str, local)
@@ -64,7 +64,7 @@ Parameters
 
     Getting user details is allowed for all users.
 
-    If the \ :emphasis:`provider\_type`\  is 'ads' then domain name of the Active Directory Server has to be mentioned in the \ :emphasis:`user\_name`\ . The format for the \ :emphasis:`user\_name`\  should be 'DOMAIN\_NAME\\user\_name' or "DOMAIN\_NAME\\\\user\_name".
+    If the *provider_type* is 'ads' then domain name of the Active Directory Server has to be mentioned in the *user_name*. The format for the *user_name* should be 'DOMAIN_NAME\user_name' or "DOMAIN_NAME\\user_name".
 
     This option acts as a filter for all operations except creation.
 
@@ -96,7 +96,7 @@ Parameters
 
 
   full_name (optional, str, None)
-    The additional information about the user can be provided using full\_name option.
+    The additional information about the user can be provided using full_name option.
 
 
   email (optional, str, None)
@@ -116,19 +116,19 @@ Parameters
 
 
   role_state (optional, str, None)
-    The \ :emphasis:`role\_state`\  option is used to mention the existence of the role for a particular user.
+    The *role_state* option is used to mention the existence of the role for a particular user.
 
     It is required when a role is added or removed from user.
 
 
   update_password (optional, str, always)
-    This parameter controls the way the \ :emphasis:`password`\  is updated during the creation and modification of a user.
+    This parameter controls the way the *password* is updated during the creation and modification of a user.
 
-    \ :literal:`always`\  will update password for each execution.
+    ``always`` will update password for each execution.
 
-    \ :literal:`on\_create`\  will only set while creating a user.
+    ``on_create`` will only set while creating a user.
 
-    For modifying \ :emphasis:`password`\ , set the \ :emphasis:`update\_password`\  to \ :literal:`always`\ .
+    For modifying *password*, set the *update_password* to ``always``.
 
 
   onefs_host (True, str, None)
@@ -142,9 +142,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
+    ``true`` - indicates that the SSL certificate should be verified.
 
-    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
+    ``false`` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -162,7 +162,7 @@ Notes
 -----
 
 .. note::
-   - The \ :emphasis:`check\_mode`\  is not supported.
+   - The *check_mode* is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
