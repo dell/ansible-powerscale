@@ -212,15 +212,15 @@ EXAMPLES = r'''
     company: "Test company"
     location: "Test location"
     primary_contact:
-        name: "primary_name11"
-        phone1: "primary_phone11"
-        phone2: "primary_phone21"
-        email: "primary_email1@email.com"
+      name: "primary_name11"
+      phone1: "primary_phone11"
+      phone2: "primary_phone21"
+      email: "primary_email1@email.com"
     secondary_contact:
-        name: "secondary_name11"
-        phone1: "secondary_phone11"
-        phone2: "secondary_phone21"
-        email: "secondary_email1@email.com"
+      name: "secondary_name11"
+      phone1: "secondary_phone11"
+      phone2: "secondary_phone21"
+      email: "secondary_email1@email.com"
 
 - name: Update cluster identity details
   dellemc.powerscale.settings:
@@ -232,8 +232,8 @@ EXAMPLES = r'''
     name: "PIE-IsilonS-24241-Cluster"
     description: "This is new description for the cluster"
     logon_details:
-        message_title: "This is the new title"
-        description: "This is new description"
+      message_title: "This is the new title"
+      description: "This is new description"
 
 - name: Update all settings
   dellemc.powerscale.settings:
@@ -245,20 +245,20 @@ EXAMPLES = r'''
     name: "PIE-IsilonS-24241-Cluster"
     description: "This is new description for the cluster"
     logon_details:
-        message_title: "This is the new title"
-        description: "This is new description"
+      message_title: "This is the new title"
+      description: "This is new description"
     company: "Test company"
     location: "Test location"
     primary_contact:
-        name: "primary_name11"
-        phone1: "primary_phone11"
-        phone2: "primary_phone21"
-        email: "primary_email1@email.com"
+      name: "primary_name11"
+      phone1: "primary_phone11"
+      phone2: "primary_phone21"
+      email: "primary_email1@email.com"
     secondary_contact:
-        name: "secondary_name11"
-        phone1: "secondary_phone11"
-        phone2: "secondary_phone21"
-        email: "secondary_email1@email.com"
+      name: "secondary_name11"
+      phone1: "secondary_phone11"
+      phone2: "secondary_phone21"
+      email: "secondary_email1@email.com"
     mail_relay: "mailrelay.itp.dell.com"
     mail_sender: "lab-a2@dell.com"
     mail_subject: "lab-a2-alerts"
