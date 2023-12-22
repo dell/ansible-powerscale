@@ -84,9 +84,6 @@ plugins/modules/user_mapping_rule.py compile-2.7
 plugins/modules/user_mapping_rule.py compile-3.5
 plugins/modules/user_mapping_rule.py validate-modules:missing-gplv3-license
 plugins/modules/networkpool.py import-2.7
-plugins/modules/networkpool.py import-3.5
-plugins/modules/networkpool.py compile-2.7
-plugins/modules/networkpool.py compile-3.5
 plugins/modules/networkpool.py validate-modules:missing-gplv3-license
 plugins/modules/nfs_global_settings.py import-2.7
 plugins/modules/nfs_global_settings.py import-3.5
@@ -122,7 +119,11 @@ plugins/modules/synciqcertificate.py compile-2.7
 plugins/modules/synciqcertificate.py compile-3.5
 plugins/modules/smb_global_settings.py import-2.7
 plugins/modules/smb_global_settings.py compile-2.7
+plugins/modules/smb_global_settings.py import-3.5
+plugins/modules/smb_global_settings.py compile-3.5
 plugins/modules/smb_global_settings.py validate-modules:missing-gplv3-license
 plugins/modules/snmp_settings.py validate-modules:missing-gplv3-license
 plugins/modules/snmp_settings.py import-2.7
 plugins/modules/snmp_settings.py compile-2.7
+plugins/modules/snmp_settings.py import-3.5
+plugins/modules/snmp_settings.py compile-3.5
