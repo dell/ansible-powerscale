@@ -1,0 +1,55 @@
+---
+- name: SNMP Settings Module Operations on PowerScale Storage
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: "**.**.**.**"
+    port_no: "0000"
+    api_user: "user"
+    api_password: "pass"
+    verify_ssl: false
+
+  tasks:
+    - name: Get SNMP settings
+      dellemc.powerscale.snmp_settings:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+
+    - name: Update SNMP settings - Check_mode
+      dellemc.powerscale.snmp_settings:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        read_only_community: "community-name"
+        snmp_v3:
+        access: true
+        auth_protocol: "SHA"
+        privacy_password: "password"
+        password: "auth_password"
+        privacy_protocol: "AES"
+        security_level: "noAuthNoPriv"
+        read_only_user: "user"
+        system_contact: "contact@domain.com"
+        system_location: "Enabled SNMP"
+      check_mode: true
+
+    - name: Update SNMP settings
+      dellemc.powerscale.snmp_settings:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        read_only_community: "community-name"
+        snmp_v3:
+        access: true
+        auth_protocol: "SHA"
+        privacy_password: "password"
+        password: "auth_password"
+        privacy_protocol: "AES"
+        security_level: "noAuthNoPriv"
+        read_only_user: "user"
+        system_contact: "contact@domain.com"
+        system_location: "Enabled SNMP"

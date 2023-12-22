@@ -1,6 +1,6 @@
 **Ansible Modules for Dell Technologies PowerScale** 
 =========================================
-### Release notes 2.3.0
+### Release notes 2.4.0
 
 >   © 2022 Dell Inc. or its subsidiaries. All rights reserved. Dell
 >   and other trademarks are trademarks of Dell Inc. or its
@@ -27,7 +27,7 @@ Table 1. Revision history
 
 | Revision | Date          | Description                                               |
 |----------|---------------|-----------------------------------------------------------|
-| 01       | November 2023 | Ansible Modules for Dell PowerScale 2.3.0                 |
+| 01       | December 2023 | Ansible Modules for Dell PowerScale 2.4.0                 |
 
 
 Product description
@@ -63,6 +63,8 @@ The Ansible Modules for Dell PowerScale support the following features:
 - Create, modify, get details and delete an S3 bucket.
 - Get details and modify SyncIQ global settings.
 - Get details, modify, import, and delete SyncIQ certificates.
+- Get details and modify SMB global settings.
+- Get details and modify SNMP settings.
   
 The Ansible modules use playbooks, written in yaml syntax, to list, show, create, delete, and modify each of these entities.
 
@@ -70,16 +72,18 @@ New Features and Enhancements
 ---------------------------
 This section describes the features of the Ansible Modules for Dell PowerScale for this release.
 
-The Ansible Modules for Dell PowerScale release 2.3.0 supports the following features:
+The Ansible Modules for Dell PowerScale release 2.4.0 supports the following features:
 
-- The SyncIQ global settings module supports this functionality:
-    - Added support for getting and modifying SyncIQ global settings.
-- The SyncIQ target cluster certificate module supports this functionality:
-    -  Added support for getting, importing, modifying and deleting SyncIQ target cluster certificates.
-- The Info module supports this functionality.
-    - Added support for listing SyncIQ global settings and S3 buckets in Info module.
-- The SyncIQ policy module supports this functionality.
-    - Added support for manually running a SyncIQ policy.
+- The SMB global settings module supports this functionality:
+    - Added support for getting and modifying SMB global settings.
+- The SNMP settings module supports this functionality:
+    - Added support for getting and modifying SNMP settings.
+- The network pool module supports this functionality:
+    - Added support for removing the static route for IP address pool.
+- The settings module has been enhanced to support this functionality:
+    - Added support for getting and modifying cluster owner information and cluster identity information.
+- The Info module has been enhanced to support this functionality.
+    - Added support for listing SMB global settings, detailed network interfaces, NTP servers, email settings, cluster identity, cluster owner and SNMP settings through info module.
 
 Known issues
 ------------
@@ -87,7 +91,6 @@ Known problems in this release are listed.
 
 | **Issue**        | **Description**           | **Resolution**  |
 | ------------- |-------------| -----|
-| Snapshot schedule | If the playbook has a desired_retention field, running the same playbook again returns the changed as True (Idempotency does not work). | This is an issue in the supported OneFS versions. |
 | Filesystem creation | Creation of a filesystem can fail when api_user: "admin" is used because it is possible that the admin user may not have privileges to set an ACLs. | Assigning privileges ISI_PRIV_IFS_RESTORE and ISI_PRIV_NS_TRAVERSE to the user should enable the creation of filesystem with ACL permissions. |
 | Snapshot creation with alias name | Alias name attribute remains null in spite of creating snapshot with alias name | This is an issue with the PowerScale rest API. Alias name is not getting appended to the attribute in response. |
 | SyncIQ Job creation/modification/retrieval | When SyncIQ policy has any job of the type "resync_prep/allow_write/allow_write_revert" then creation, modification or retrieval of SyncIQ job will fail with an error saying "Invalid value for 'action', must be one of ['copy', 'sync']". | This is an issue in the supported OneFS versions. |
@@ -105,9 +108,6 @@ This section lists the limitations in this release of Ansible Modules for Dell P
   - Only local users and groups can be created. 
   - Operations on users and groups with very long names may fail.
   - Modification of user password fails for OneFS version 9.5.
-
-- Access Zone
-  - Deletion of access zones is not supported.
  
 - Filesystems
   -  Only directory quotas are supported but not user or group quotas.
@@ -129,7 +129,7 @@ This section lists the limitations in this release of Ansible Modules for Dell P
 Software media, organization, and files 
 -----------
 The software package is available for download from the [Ansible Modules
-for PowerScale GitHub](https://github.com/dell/ansible-powerscale/tree/2.3.0) page.
+for PowerScale GitHub](https://github.com/dell/ansible-powerscale/tree/2.4.0) page.
 
 Additional resources
 --------------------

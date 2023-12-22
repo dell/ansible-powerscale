@@ -40,9 +40,9 @@ Parameters
 
     This is an optional parameter during create, and defaults to the provider name if it is not specified during the create operation.
 
-    Get, modify and delete operations can also be performed through instance_name.
+    Get, modify and delete operations can also be performed through instance\_name.
 
-    It is mutually exclusive with *domain_name* for get, modify and delete operations.
+    It is mutually exclusive with \ :emphasis:`domain\_name`\  for get, modify and delete operations.
 
 
   ads_user (optional, str, None)
@@ -64,25 +64,25 @@ Parameters
     groupnet (optional, str, None)
       Groupnet identifier.
 
-      This is an optional parameter and defaults to ``groupnet0``.
+      This is an optional parameter and defaults to \ :literal:`groupnet0`\ .
 
 
     home_directory_template (optional, str, None)
       Specifies the path to the home directory template.
 
-      This is an optional parameter and defaults to ``/ifs/home/%D/%U``.
+      This is an optional parameter and defaults to \ :literal:`/ifs/home/%D/%U`\ .
 
 
     login_shell (optional, str, None)
       Specifies the login shell path.
 
-      This is an optional parameter and defaults to ``/bin/zsh``.
+      This is an optional parameter and defaults to \ :literal:`/bin/zsh`\ .
 
 
     machine_account (optional, str, None)
       Specifies the machine account name when creating a SAM account with Active Directory.
 
-      The default cluster name is called ``default``.
+      The default cluster name is called \ :literal:`default`\ .
 
 
     organizational_unit (optional, str, None)
@@ -101,26 +101,26 @@ Parameters
     state (optional, str, present)
       The state of the SPN.
 
-      ``present`` - indicates that the SPN should exist on the machine account.
+      \ :literal:`present`\  - indicates that the SPN should exist on the machine account.
 
-      ``absent`` - indicates that the SPN should not exist on the machine account.
+      \ :literal:`absent`\  - indicates that the SPN should not exist on the machine account.
 
 
 
   spn_command (optional, str, None)
     Specify command of SPN.
 
-    ``check`` - Check for missing SPNs for an AD provider.
+    \ :literal:`check`\  - Check for missing SPNs for an AD provider.
 
-    ``fix`` - Adds missing SPNs for an AD provider.
+    \ :literal:`fix`\  - Adds missing SPNs for an AD provider.
 
 
   state (True, str, None)
     The state of the ads provider after the task is performed.
 
-    ``present`` - indicates that the ADS provider should exist on the system.
+    \ :literal:`present`\  - indicates that the ADS provider should exist on the system.
 
-    ``absent`` - indicates that the ADS provider should not exist on the system.
+    \ :literal:`absent`\  - indicates that the ADS provider should not exist on the system.
 
 
   onefs_host (True, str, None)
@@ -134,9 +134,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    ``true`` - indicates that the SSL certificate should be verified.
+    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
 
-    ``false`` - indicates that the SSL certificate should not be verified.
+    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -154,7 +154,7 @@ Notes
 -----
 
 .. note::
-   - The *check_mode* is not supported.
+   - The \ :emphasis:`check\_mode`\  is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 

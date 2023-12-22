@@ -209,3 +209,24 @@
         api_password: "{{ api_password }}"
         gather_subset:
           - s3_buckets
+
+    - name: Get SMB global settings from PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - smb_global_settings
+
+    - name: Get attributes, access_zones and nodes of the PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - ntp_servers
+          - email_settings
+          - cluster_identity
+          - cluster_owner

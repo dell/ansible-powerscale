@@ -541,3 +541,8 @@ def get_nfs_map_object():
         return import_obj.NfsExportMapAll()
     except ImportError:
         return None
+
+
+def is_email_address_valid(address):
+    if address is not None and re.search(r'^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$', address) is None:
+        return True

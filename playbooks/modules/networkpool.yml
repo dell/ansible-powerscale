@@ -15,47 +15,9 @@
     subnet_name: 'subnet0'
     description: "pool Created by Ansible"
     new_pool_name: "rename_Test_pool_1"
-    additional_pool_params_mod:
-      ranges:
-        - low: "10.**.**.176"
-          high: "10.**.**.178"
-      range_state: "add"
-      ifaces:
-        - iface: "ext-1"
-          lnn: 1
-        - iface: "ext-2"
-          lnn: 1
-      iface_state: "add"
-      static_routes:
-        - gateway: "10.**.**.**"
-          prefixlen: 21
-          subnet: "10.**.**.**"
-    sc_params_mod:
-      sc_dns_zone: "10.**.**.169"
-      sc_connect_policy: "round_robin"
-      sc_failover_policy: "round_robin"
-      rebalance_policy: "auto"
-      alloc_method: "static"
-      sc_auto_unsuspend_delay: 0
-      sc_ttl: 0
-      aggregation_mode: "roundrobin"
-      sc_dns_zone_aliases:
-        - "Test"
 
   tasks:
     - name: Create Network pool
-      dellemc.powerscale.networkpool:
-        onefs_host: "{{ onefs_host }}"
-        api_user: "{{ api_user }}"
-        api_password: "{{ api_password }}"
-        verify_ssl: "{{ verify_ssl }}"
-        access_zone: "{{ access_zone }}"
-        groupnet_name: "{{ groupnet_name }}"
-        subnet_name: "{{ subnet_name }}"
-        pool_name: "Test_pool_1"
-        state: "{{ state_present }}"
-
-    - name: Create Network pool Idempotency case
       dellemc.powerscale.networkpool:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
@@ -87,9 +49,38 @@
         groupnet_name: "{{ groupnet_name }}"
         subnet_name: "{{ subnet_name }}"
         pool_name: "Test_pool_1"
-        sc_params: "{{ sc_params_mod }}"
+        sc_params:
+          sc_dns_zone: "10.**.**.169"
+          sc_connect_policy: "round_robin"
+          sc_failover_policy: "round_robin"
+          rebalance_policy: "auto"
+          alloc_method: "static"
+          sc_auto_unsuspend_delay: 0
+          sc_ttl: 0
+          aggregation_mode: "roundrobin"
+          sc_dns_zone_aliases:
+            - "Test"
+          static_routes:
+            - gateway: "10.**.**.**"
+              prefix_len: 21
+              subnet: "10.**.**.**"
+              route_state: "add"
+            - gateway: "11.**.**.**"
+              prefix_len: 24
+              subnet: "11.**.**.**"
+              route_state: "add"
         description: "pool_name Created by Ansible Modify"
-        additional_pool_params: "{{ additional_pool_params_mod }}"
+        additional_pool_params:
+          ranges:
+            - low: "10.**.**.176"
+              high: "10.**.**.178"
+          range_state: "add"
+          ifaces:
+            - iface: "ext-1"
+              lnn: 1
+            - iface: "ext-2"
+              lnn: 1
+          iface_state: "add"
         state: "{{ state_present }}"
 
     - name: Rename a network Pool
@@ -105,17 +96,6 @@
         state: "{{ state_present }}"
 
     - name: Delete Network pool
-      dellemc.powerscale.networkpool:
-        onefs_host: "{{ onefs_host }}"
-        api_user: "{{ api_user }}"
-        api_password: "{{ api_password }}"
-        verify_ssl: "{{ verify_ssl }}"
-        groupnet_name: "{{ groupnet_name }}"
-        subnet_name: "{{ subnet_name }}"
-        pool_name: "Test_pool_1"
-        state: "{{ state_absent }}"
-
-    - name: Delete Network pool Idempotency case
       dellemc.powerscale.networkpool:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
