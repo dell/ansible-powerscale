@@ -77,6 +77,10 @@ class MockGatherfactsApi:
         's3Buckets': {},
         'SmbGlobalSettings': {},
         'SnmpSettings': {},
+        'NTPServers': {},
+        'EmailSettings': {},
+        'ClusterIdentity': {},
+        'ClusterOwner': {}
     }
     API = "api"
     MODULE = "module"
