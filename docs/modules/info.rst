@@ -14,9 +14,9 @@ Synopsis
 
 Gathering information about Specified PowerScale Storage entities, includes attributes, access zones, nodes, authentication providers for all access zones, users and groups for an access zone.
 
-Get list of smb\_shares, nfs\_exports, nfs\_aliases, active clients, SyncIQ reports, SyncIQ target reports, SyncIQ target cluster certificates, SyncIQ policies, SyncIQ performance rules.
+Get list of smb_shares, nfs_exports, nfs_aliases, active clients, SyncIQ reports, SyncIQ target reports, SyncIQ target cluster certificates, SyncIQ policies, SyncIQ performance rules.
 
-Get list of network groupnets, network pools for all access zones or a specific access zone, network rules, network subnets, network interfaces, node pools, storage pool tiers, smb open files, s3 buckets, ntp\_servers.
+Get list of network groupnets, network pools for all access zones or a specific access zone, network rules, network subnets, network interfaces, node pools, storage pool tiers, smb open files, s3 buckets, ntp_servers.
 
 Get list of user mapping rules, ldap providers of the PowerScale cluster.
 
@@ -52,7 +52,7 @@ Parameters
   include_all_access_zones (optional, bool, None)
     Specifies if requested component details need to be fetched from all access zones.
 
-    It is mutually exclusive with \ :emphasis:`access\_zone`\ .
+    It is mutually exclusive with *access_zone*.
 
 
   access_zone (optional, str, System)
@@ -60,13 +60,13 @@ Parameters
 
 
   scope (optional, str, effective)
-    The scope of ldap. If no scope is specified, the \ :literal:`effective`\  scope would be taken by default.
+    The scope of ldap. If no scope is specified, the ``effective`` scope would be taken by default.
 
-    If specified as \ :literal:`effective`\  or not specified, all fields are returned.
+    If specified as ``effective`` or not specified, all fields are returned.
 
-    If specified as \ :literal:`user`\ , only fields with non-default values are shown.
+    If specified as ``user``, only fields with non-default values are shown.
 
-    If specified as \ :literal:`default`\ , the original values are returned.
+    If specified as ``default``, the original values are returned.
 
 
   gather_subset (True, list, None)
@@ -74,65 +74,65 @@ Parameters
 
     List of all PowerScale Storage System entities supported by the module.
 
-    Attributes - \ :literal:`attributes`\ .
+    Attributes - ``attributes``.
 
-    Access zones - \ :literal:`access\_zones`\ .
+    Access zones - ``access_zones``.
 
-    Nodes - \ :literal:`nodes`\ .
+    Nodes - ``nodes``.
 
-    Providers - \ :literal:`providers`\ .
+    Providers - ``providers``.
 
-    Users - \ :literal:`users`\ .
+    Users - ``users``.
 
-    Groups - \ :literal:`groups`\ .
+    Groups - ``groups``.
 
-    Smb shares - \ :literal:`smb\_shares`\ .
+    Smb shares - ``smb_shares``.
 
-    Nfs exports - \ :literal:`nfs\_exports`\ .
+    Nfs exports - ``nfs_exports``.
 
-    Nfs aliases - \ :literal:`nfs\_aliases`\ .
+    Nfs aliases - ``nfs_aliases``.
 
-    Clients - \ :literal:`clients`\ .
+    Clients - ``clients``.
 
-    Synciq reports - \ :literal:`synciq\_reports`\ .
+    Synciq reports - ``synciq_reports``.
 
-    Synciq target reports - \ :literal:`synciq\_target\_reports`\ .
+    Synciq target reports - ``synciq_target_reports``.
 
-    Synciq policies - \ :literal:`synciq\_policies`\ .
+    Synciq policies - ``synciq_policies``.
 
-    Synciq target cluster certificates - \ :literal:`synciq\_target\_cluster\_certificates`\ .
+    Synciq target cluster certificates - ``synciq_target_cluster_certificates``.
 
-    Synciq performance rules - \ :literal:`synciq\_performance\_rules`\ .
+    Synciq performance rules - ``synciq_performance_rules``.
 
-    Network groupnets - \ :literal:`network\_groupnets`\ .
+    Network groupnets - ``network_groupnets``.
 
-    Network pools - \ :literal:`network\_pools`\ .
+    Network pools - ``network_pools``.
 
-    Network rules - \ :literal:`network\_rules`\ .
+    Network rules - ``network_rules``.
 
-    Network interfaces - \ :literal:`network\_interfaces`\ .
+    Network interfaces - ``network_interfaces``.
 
-    Network subnets - \ :literal:`network\_subnets`\ .
+    Network subnets - ``network_subnets``.
 
-    Node pools - \ :literal:`node\_pools`\ .
+    Node pools - ``node_pools``.
 
-    Storagepool tiers - \ :literal:`storagepool\_tiers`\ .
+    Storagepool tiers - ``storagepool_tiers``.
 
-    SMB files - \ :literal:`smb\_files`\ .
+    SMB files - ``smb_files``.
 
-    User mapping rules - \ :literal:`user\_mapping\_rules`\ .
+    User mapping rules - ``user_mapping_rules``.
 
-    LDAPs - \ :literal:`ldap`\ .
+    LDAPs - ``ldap``.
 
-    NFS zone settings - \ :literal:`nfs\_zone\_settings`\ .
+    NFS zone settings - ``nfs_zone_settings``.
 
-    NFS default settings - \ :literal:`nfs\_default\_settings`\ .
+    NFS default settings - ``nfs_default_settings``.
 
-    SyncIQ global settings - \ :literal:`synciq\_global\_settings`\ .
+    SyncIQ global settings - ``synciq_global_settings``.
 
-    S3 buckets - \ :literal:`s3\_buckets`\ .
+    S3 buckets - ``s3_buckets``.
 
-    The list of \ :emphasis:`attributes`\ , \ :emphasis:`access\_zones`\  and \ :emphasis:`nodes`\  is for the entire PowerScale cluster.
+    The list of *attributes*, *access_zones* and *nodes* is for the entire PowerScale cluster.
 
     The list of providers for the entire PowerScale cluster.
 
@@ -152,17 +152,17 @@ Parameters
 
     The list of ldap providers of PowerScale cluster.
 
-    SMB global settings - \ :literal:`smb\_global\_settings`\ .
+    SMB global settings - ``smb_global_settings``.
 
-    NTP servers \ :literal:`ntp\_servers`\ 
+    NTP servers ``ntp_servers``
 
-    Email settings \ :literal:`email\_settings`\ 
+    Email settings ``email_settings``
 
-    Cluster identity \ :literal:`cluster\_identity`\ 
+    Cluster identity ``cluster_identity``
 
-    Cluster owner \ :literal:`cluster\_owner`\ 
+    Cluster owner ``cluster_owner``
 
-    SNMP settings - \ :literal:`snmp\_settings`\ .
+    SNMP settings - ``snmp_settings``.
 
 
   onefs_host (True, str, None)
@@ -176,9 +176,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
+    ``true`` - indicates that the SSL certificate should be verified.
 
-    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
+    ``false`` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -196,9 +196,9 @@ Notes
 -----
 
 .. note::
-   - The parameters \ :emphasis:`access\_zone`\  and \ :emphasis:`include\_all\_access\_zones`\  are mutually exclusive.
-   - Listing of SyncIQ target cluster certificates is not supported by isi\_sdk\_8\_1\_1 version.
-   - The \ :emphasis:`check\_mode`\  is supported.
+   - The parameters *access_zone* and *include_all_access_zones* are mutually exclusive.
+   - Listing of SyncIQ target cluster certificates is not supported by isi_sdk_8_1_1 version.
+   - The *check_mode* is supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -840,7 +840,7 @@ NfsZoneSettings (When C(nfs_zone_settings) is in a given I(gather_subset), dict,
 
 
   nfsv4_allow_numeric_ids (, bool, )
-    If \ :literal:`true`\ , sends owners and groups as UIDs and GIDs when look up fails or if the \ :emphasis:`nfsv4\_no\_names`\  property is set to 1.
+    If ``true``, sends owners and groups as UIDs and GIDs when look up fails or if the *nfsv4_no_names* property is set to 1.
 
 
   nfsv4_domain (, str, )
@@ -848,19 +848,19 @@ NfsZoneSettings (When C(nfs_zone_settings) is in a given I(gather_subset), dict,
 
 
   nfsv4_no_domain (, bool, )
-    If \ :literal:`true`\ , sends owners and groups without a domain name.
+    If ``true``, sends owners and groups without a domain name.
 
 
   nfsv4_no_domain_uids (, bool, )
-    If \ :literal:`true`\ , sends UIDs and GIDs without a domain name.
+    If ``true``, sends UIDs and GIDs without a domain name.
 
 
   nfsv4_no_names (, bool, )
-    If \ :literal:`true`\ , sends owners and groups as UIDs and GIDs.
+    If ``true``, sends owners and groups as UIDs and GIDs.
 
 
   nfsv4_replace_domain (, bool, )
-    If \ :literal:`true`\ , replaces the owner or group domain with an NFS domain name.
+    If ``true``, replaces the owner or group domain with an NFS domain name.
 
 
   zone (, str, )
@@ -1465,7 +1465,7 @@ S3_bucket_details (When C(s3_buckets) is in a given I(gather_subset), dict, {'ac
 
 
   path (, str, )
-    Path of S3 bucket with in \ :literal:`'/ifs'`\ .
+    Path of S3 bucket with in ``'/ifs'``.
 
 
   zid (, int, )
@@ -1637,7 +1637,7 @@ ntp_servers (Always, dict, {'servers': [{'id': '10.**.**.**', 'key': None, 'name
 
 
     key (, str, )
-      Key value from \ :emphasis:`key\_file`\  that maps to this server.
+      Key value from *key_file* that maps to this server.
 
 
     name (, str, )
@@ -1668,7 +1668,7 @@ cluster_identity (Always, dict, {'cluster_identity': {'description': 'asdadasdas
 
 
   mttdl_level_msg (, str, )
-    mttdl\_level\_msg.
+    mttdl_level_msg.
 
 
   name (, str, )
