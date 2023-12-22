@@ -13,11 +13,11 @@ class MockSettingsApi:
 
     MODULE_UTILS_PATH = 'ansible_collections.dellemc.powerscale.plugins.modules.settings.utils'
 
-    IP_ADDRESS = "**.***.**.***."
+    IP_ADDRESS = "**.***.**.***"
 
     SETTINGS_COMMON_ARGS = {
-        "onefs_host": "**.***.**.***",
-        "ntp_servers": "**.***.**.***",
+        "onefs_host": IP_ADDRESS,
+        "ntp_servers": IP_ADDRESS,
         "mail_relay": "mailrelay.itp.xyz.net",
         "mail_sender": "lab-a2@dell.com",
         "mail_subject": "lab-alerts",

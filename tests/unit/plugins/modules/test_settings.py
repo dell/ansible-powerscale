@@ -140,21 +140,21 @@ class TestSettings(PowerScaleUnitBase):
             powerscale_module_mock, SettingsHandler)
 
     def test_delete_ntp_server(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock, self.settings_args, {"state": "absent", "ntp_servers": ['**.***.**.***']})
+        self.set_module_params(powerscale_module_mock, self.settings_args, {"state": "absent", "ntp_servers": [MockSettingsApi.IP_ADDRESS]})
         powerscale_module_mock.get_ntp_servers = MagicMock(return_value=MockSettingsApi.SETTINGS['NTP_servers'][0])
         powerscale_module_mock.protocol_api.delete_ntp_server = MagicMock(return_value=True)
         SettingsHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
     def test_add_ntp_server(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock, self.settings_args, {"ntp_servers": ['**.***.**.***']})
+        self.set_module_params(powerscale_module_mock, self.settings_args, {"ntp_servers": [MockSettingsApi.IP_ADDRESS]})
         powerscale_module_mock.get_ntp_servers = MagicMock(return_value=MockSettingsApi.SETTINGS['NTP_servers'][0])
         powerscale_module_mock.protocol_api.create_ntp_server = MagicMock(return_value=(MockSettingsApi.SETTINGS['NTP_server'][0]))
         SettingsHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
     def test_add_ntp_server_with_invalid_value(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock, self.settings_args, {"ntp_servers": ["**.***.**.***"]})
+        self.set_module_params(powerscale_module_mock, self.settings_args, {"ntp_servers": [MockSettingsApi.IP_ADDRESS]})
         powerscale_module_mock.get_ntp_servers = MagicMock(return_value=MockSettingsApi.SETTINGS['NTP_servers'][0])
         powerscale_module_mock.protocol_api.create_ntp_server = MagicMock(side_effect=MockApiException)
         self.capture_fail_json_call(
@@ -162,7 +162,7 @@ class TestSettings(PowerScaleUnitBase):
             powerscale_module_mock, SettingsHandler)
 
     def test_delete_ntp_server_with_invalid_value(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock, self.settings_args, {"state": "absent", "ntp_servers": ["**.***.**.***"]})
+        self.set_module_params(powerscale_module_mock, self.settings_args, {"state": "absent", "ntp_servers": [MockSettingsApi.IP_ADDRESS]})
         powerscale_module_mock.get_ntp_servers = MagicMock(return_value=MockSettingsApi.SETTINGS['NTP_servers'][0])
         powerscale_module_mock.protocol_api.delete_ntp_server = MagicMock(side_effect=MockApiException)
         self.capture_fail_json_call(
