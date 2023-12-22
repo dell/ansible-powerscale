@@ -34,7 +34,7 @@ Parameters
 
 
   nfsv4_allow_numeric_ids (optional, bool, None)
-    If ``true``, send owner and groups as UIDs and GIDs when look up fails or *nfsv4_no_names* is set ``rue``.
+    If \ :literal:`true`\ , send owner and groups as UIDs and GIDs when look up fails or \ :emphasis:`nfsv4\_no\_names`\  is set \ :literal:`rue`\ .
 
 
   nfsv4_domain (optional, str, None)
@@ -42,19 +42,19 @@ Parameters
 
 
   nfsv4_no_domain (optional, bool, None)
-    If ``true``, sends owners and groups without a domain name.
+    If \ :literal:`true`\ , sends owners and groups without a domain name.
 
 
   nfsv4_no_domain_uids (optional, bool, None)
-    If ``true``, sends UIDs and GIDs without a domain name.
+    If \ :literal:`true`\ , sends UIDs and GIDs without a domain name.
 
 
   nfsv4_no_names (optional, bool, None)
-    If ``true``, sends owners and groups as UIDs and GIDs.
+    If \ :literal:`true`\ , sends owners and groups as UIDs and GIDs.
 
 
   nfsv4_replace_domain (optional, bool, None)
-    If ``true``, replaces the owner or group domain with an NFS domain name.
+    If \ :literal:`true`\ , replaces the owner or group domain with an NFS domain name.
 
 
   onefs_host (True, str, None)
@@ -68,9 +68,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    ``true`` - indicates that the SSL certificate should be verified.
+    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
 
-    ``false`` - indicates that the SSL certificate should not be verified.
+    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -88,7 +88,7 @@ Notes
 -----
 
 .. note::
-   - The *check_mode* is supported.
+   - The \ :emphasis:`check\_mode`\  is supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -134,7 +134,7 @@ nfs_zone_settings_details (always, dict, {'nfsv4_allow_numeric_ids': False, 'nfs
 
 
   nfsv4_allow_numeric_ids (, bool, )
-    If ``true``, sends owners and groups as UIDs and GIDs when look up fails or if the *nfsv4_no_names* property is set to 1.
+    If \ :literal:`true`\ , sends owners and groups as UIDs and GIDs when look up fails or if the \ :emphasis:`nfsv4\_no\_names`\  property is set to 1.
 
 
   nfsv4_domain (, str, )
@@ -142,19 +142,19 @@ nfs_zone_settings_details (always, dict, {'nfsv4_allow_numeric_ids': False, 'nfs
 
 
   nfsv4_no_domain (, bool, )
-    If ``true``, sends owners and groups without a domain name.
+    If \ :literal:`true`\ , sends owners and groups without a domain name.
 
 
   nfsv4_no_domain_uids (, bool, )
-    If ``true``, sends UIDs and GIDs without a domain name.
+    If \ :literal:`true`\ , sends UIDs and GIDs without a domain name.
 
 
   nfsv4_no_names (, bool, )
-    If ``true``, sends owners and groups as UIDs and GIDs.
+    If \ :literal:`true`\ , sends owners and groups as UIDs and GIDs.
 
 
   nfsv4_replace_domain (, bool, )
-    If ``true``, replaces the owner or group domain with an NFS domain name.
+    If \ :literal:`true`\ , replaces the owner or group domain with an NFS domain name.
 
 
   zone (, str, )

@@ -14,9 +14,9 @@ Synopsis
 
 Gathering information about Specified PowerScale Storage entities, includes attributes, access zones, nodes, authentication providers for all access zones, users and groups for an access zone.
 
-Get list of smb_shares, nfs_exports, nfs_aliases, active clients, SyncIQ reports, SyncIQ target reports, SyncIQ target cluster certificates, SyncIQ policies, SyncIQ performance rules.
+Get list of smb\_shares, nfs\_exports, nfs\_aliases, active clients, SyncIQ reports, SyncIQ target reports, SyncIQ target cluster certificates, SyncIQ policies, SyncIQ performance rules.
 
-Get list of network groupnets, network pools for all access zones or a specific access zone, network rules, network subnets, network interfaces, node pools, storage pool tiers, smb open files.
+Get list of network groupnets, network pools for all access zones or a specific access zone, network rules, network subnets, network interfaces, node pools, storage pool tiers, smb open files, s3 buckets, ntp\_servers.
 
 Get list of user mapping rules, ldap providers of the PowerScale cluster.
 
@@ -27,6 +27,12 @@ Get NFS default settings details of the PowerScale cluster.
 Get NFS global settings details of the PowerScale cluster.
 
 Get SyncIQ global settings details of the PowerScale cluster.
+
+Get SMB Global Settings details of the PowerScale cluster.
+
+Get cluster owner, cluster identity and email settings details of the PowerScale cluster.
+
+Get SNMP settings details of the PowerScale cluster.
 
 
 
@@ -46,7 +52,7 @@ Parameters
   include_all_access_zones (optional, bool, None)
     Specifies if requested component details need to be fetched from all access zones.
 
-    It is mutually exclusive with *access_zone*.
+    It is mutually exclusive with \ :emphasis:`access\_zone`\ .
 
 
   access_zone (optional, str, System)
@@ -54,13 +60,13 @@ Parameters
 
 
   scope (optional, str, effective)
-    The scope of ldap. If no scope is specified, the ``effective`` scope would be taken by default.
+    The scope of ldap. If no scope is specified, the \ :literal:`effective`\  scope would be taken by default.
 
-    If specified as ``effective`` or not specified, all fields are returned.
+    If specified as \ :literal:`effective`\  or not specified, all fields are returned.
 
-    If specified as ``user``, only fields with non-default values are shown.
+    If specified as \ :literal:`user`\ , only fields with non-default values are shown.
 
-    If specified as ``default``, the original values are returned.
+    If specified as \ :literal:`default`\ , the original values are returned.
 
 
   gather_subset (True, list, None)
@@ -68,65 +74,65 @@ Parameters
 
     List of all PowerScale Storage System entities supported by the module.
 
-    Attributes - ``attributes``.
+    Attributes - \ :literal:`attributes`\ .
 
-    Access zones - ``access_zones``.
+    Access zones - \ :literal:`access\_zones`\ .
 
-    Nodes - ``nodes``.
+    Nodes - \ :literal:`nodes`\ .
 
-    Providers - ``providers``.
+    Providers - \ :literal:`providers`\ .
 
-    Users - ``users``.
+    Users - \ :literal:`users`\ .
 
-    Groups - ``groups``.
+    Groups - \ :literal:`groups`\ .
 
-    Smb shares - ``smb_shares``.
+    Smb shares - \ :literal:`smb\_shares`\ .
 
-    Nfs exports - ``nfs_exports``.
+    Nfs exports - \ :literal:`nfs\_exports`\ .
 
-    Nfs aliases - ``nfs_aliases``.
+    Nfs aliases - \ :literal:`nfs\_aliases`\ .
 
-    Clients - ``clients``.
+    Clients - \ :literal:`clients`\ .
 
-    Synciq reports - ``synciq_reports``.
+    Synciq reports - \ :literal:`synciq\_reports`\ .
 
-    Synciq target reports - ``synciq_target_reports``.
+    Synciq target reports - \ :literal:`synciq\_target\_reports`\ .
 
-    Synciq policies - ``synciq_policies``.
+    Synciq policies - \ :literal:`synciq\_policies`\ .
 
-    Synciq target cluster certificates - ``synciq_target_cluster_certificates``.
+    Synciq target cluster certificates - \ :literal:`synciq\_target\_cluster\_certificates`\ .
 
-    Synciq performance rules - ``synciq_performance_rules``.
+    Synciq performance rules - \ :literal:`synciq\_performance\_rules`\ .
 
-    Network groupnets - ``network_groupnets``.
+    Network groupnets - \ :literal:`network\_groupnets`\ .
 
-    Network pools - ``network_pools``.
+    Network pools - \ :literal:`network\_pools`\ .
 
-    Network rules - ``network_rules``.
+    Network rules - \ :literal:`network\_rules`\ .
 
-    Network interfaces - ``network_interfaces``.
+    Network interfaces - \ :literal:`network\_interfaces`\ .
 
-    Network subnets - ``network_subnets``.
+    Network subnets - \ :literal:`network\_subnets`\ .
 
-    Node pools - ``node_pools``.
+    Node pools - \ :literal:`node\_pools`\ .
 
-    Storagepool tiers - ``storagepool_tiers``.
+    Storagepool tiers - \ :literal:`storagepool\_tiers`\ .
 
-    SMB files - ``smb_files``.
+    SMB files - \ :literal:`smb\_files`\ .
 
-    User mapping rules - ``user_mapping_rules``.
+    User mapping rules - \ :literal:`user\_mapping\_rules`\ .
 
-    LDAPs - ``ldap``.
+    LDAPs - \ :literal:`ldap`\ .
 
-    NFS zone settings - ``nfs_zone_settings``.
+    NFS zone settings - \ :literal:`nfs\_zone\_settings`\ .
 
-    NFS default settings - ``nfs_default_settings``.
+    NFS default settings - \ :literal:`nfs\_default\_settings`\ .
 
-    SyncIQ global settings - ``synciq_global_settings``.
+    SyncIQ global settings - \ :literal:`synciq\_global\_settings`\ .
 
-    S3 buckets - ``s3_buckets``
+    S3 buckets - \ :literal:`s3\_buckets`\ .
 
-    The list of *attributes*, *access_zones* and *nodes* is for the entire PowerScale cluster.
+    The list of \ :emphasis:`attributes`\ , \ :emphasis:`access\_zones`\  and \ :emphasis:`nodes`\  is for the entire PowerScale cluster.
 
     The list of providers for the entire PowerScale cluster.
 
@@ -146,7 +152,17 @@ Parameters
 
     The list of ldap providers of PowerScale cluster.
 
-    The list of S3 bucket for the entire PowerScale cluster.
+    SMB global settings - \ :literal:`smb\_global\_settings`\ .
+
+    NTP servers \ :literal:`ntp\_servers`\ 
+
+    Email settings \ :literal:`email\_settings`\ 
+
+    Cluster identity \ :literal:`cluster\_identity`\ 
+
+    Cluster owner \ :literal:`cluster\_owner`\ 
+
+    SNMP settings - \ :literal:`snmp\_settings`\ .
 
 
   onefs_host (True, str, None)
@@ -160,9 +176,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    ``true`` - indicates that the SSL certificate should be verified.
+    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
 
-    ``false`` - indicates that the SSL certificate should not be verified.
+    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -180,9 +196,9 @@ Notes
 -----
 
 .. note::
-   - The parameters *access_zone* and *include_all_access_zones* are mutually exclusive.
-   - Listing of SyncIQ target cluster certificates is not supported by isi_sdk_8_1_1 version.
-   - The *check_mode* is supported.
+   - The parameters \ :emphasis:`access\_zone`\  and \ :emphasis:`include\_all\_access\_zones`\  are mutually exclusive.
+   - Listing of SyncIQ target cluster certificates is not supported by isi\_sdk\_8\_1\_1 version.
+   - The \ :emphasis:`check\_mode`\  is supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -487,6 +503,60 @@ Examples
         gather_subset:
           - s3_buckets
 
+    - name: Get SMB global settings from PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - smb_global_settings
+
+    - name: Get NTP servers from PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - ntp_servers
+
+    - name: Get SNMP settings from PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - snmp_settings
+
+    - name: Get email settings details from PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - email_settings
+
+    - name: Get cluster identity details from PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - cluster_identity
+
+    - name: Get cluster owner details from PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - cluster_owner
+
 
 
 Return Values
@@ -627,20 +697,64 @@ NetworkGroupnets (When C(network_groupnets) is in a given I(gather_subset), list
 
 
 
-NetworkInterfaces (When C(network_interfaces) is in a given I(gather_subset), list, [{'id': '110gig1', 'lnn': 1, 'name': '10gig1'}])
+NetworkInterfaces (When C(network_interfaces) is in a given I(gather_subset), list, [{'flags': [], 'id': '3:ext-agg', 'ip_addrs': [], 'ipv4_gateway': None, 'ipv6_gateway': None, 'lnn': 3, 'mtu': 0, 'name': 'ext-agg', 'nic_name': 'lagg0', 'owners': [], 'speed': None, 'status': 'inactive', 'type': 'aggregated', 'vlans': []}])
   List of Network interfaces.
+
+
+  flags (, list, )
+    List of interface flags.
 
 
   id (, str, )
     ID of the interface.
 
 
+  ip_addrs (, list, )
+    List of IP addresses.
+
+
+  ipv4_gateway (, str, )
+    Address of the default IPv4 gateway.
+
+
+  ipv6_gateway (, str, )
+    Address of the default IPv6 gateway.
+
+
   lnn (, int, )
     Interface's lnn.
 
 
+  mtu (, int, )
+    The mtu the interface.
+
+
   name (, str, )
     Name of the interface.
+
+
+  nic_name (, str, )
+    NIC name.
+
+
+  owners (, list, )
+    List of owners.
+
+
+  speed (, int, )
+    Interface's speed.
+
+
+  status (, str, )
+    Status of the interface.
+
+
+  type (, str, )
+    Type of the interface.
+
+
+  vlans (, list, )
+    List of VLANs.
 
 
 
@@ -726,7 +840,7 @@ NfsZoneSettings (When C(nfs_zone_settings) is in a given I(gather_subset), dict,
 
 
   nfsv4_allow_numeric_ids (, bool, )
-    If ``true``, sends owners and groups as UIDs and GIDs when look up fails or if the *nfsv4_no_names* property is set to 1.
+    If \ :literal:`true`\ , sends owners and groups as UIDs and GIDs when look up fails or if the \ :emphasis:`nfsv4\_no\_names`\  property is set to 1.
 
 
   nfsv4_domain (, str, )
@@ -734,19 +848,19 @@ NfsZoneSettings (When C(nfs_zone_settings) is in a given I(gather_subset), dict,
 
 
   nfsv4_no_domain (, bool, )
-    If ``true``, sends owners and groups without a domain name.
+    If \ :literal:`true`\ , sends owners and groups without a domain name.
 
 
   nfsv4_no_domain_uids (, bool, )
-    If ``true``, sends UIDs and GIDs without a domain name.
+    If \ :literal:`true`\ , sends UIDs and GIDs without a domain name.
 
 
   nfsv4_no_names (, bool, )
-    If ``true``, sends owners and groups as UIDs and GIDs.
+    If \ :literal:`true`\ , sends owners and groups as UIDs and GIDs.
 
 
   nfsv4_replace_domain (, bool, )
-    If ``true``, replaces the owner or group domain with an NFS domain name.
+    If \ :literal:`true`\ , replaces the owner or group domain with an NFS domain name.
 
 
   zone (, str, )
@@ -1351,7 +1465,7 @@ S3_bucket_details (When C(s3_buckets) is in a given I(gather_subset), dict, {'ac
 
 
   path (, str, )
-    Path of S3 bucket with in ``'/ifs'``.
+    Path of S3 bucket with in \ :literal:`'/ifs'`\ .
 
 
   zid (, int, )
@@ -1360,6 +1474,295 @@ S3_bucket_details (When C(s3_buckets) is in a given I(gather_subset), dict, {'ac
 
   zone (, str, )
     Access zone name.
+
+
+
+SmbGlobalSettings (always, dict, {'access_based_share_enum': False, 'audit_fileshare': None, 'audit_logon': None, 'dot_snap_accessible_child': True, 'dot_snap_accessible_root': True, 'dot_snap_visible_child': False, 'dot_snap_visible_root': True, 'enable_security_signatures': False, 'guest_user': 'nobody', 'ignore_eas': False, 'onefs_cpu_multiplier': 4, 'onefs_num_workers': 0, 'reject_unencrypted_access': False, 'require_security_signatures': False, 'server_side_copy': False, 'server_string': 'PowerScale Server', 'service': True, 'srv_cpu_multiplier': None, 'srv_num_workers': None, 'support_multichannel': True, 'support_netbios': False, 'support_smb2': True, 'support_smb3_encryption': True})
+  The updated SMB global settings details.
+
+
+  access_based_share_enum (, bool, )
+    Only enumerate files and folders the requesting user has access to.
+
+
+  audit_fileshare (, str, )
+    Specify level of file share audit events to log.
+
+
+  audit_logon (, str, )
+    Specify the level of logon audit events to log.
+
+
+  dot_snap_accessible_child (, bool, )
+    Allow access to .snapshot directories in share subdirectories.
+
+
+  dot_snap_accessible_root (, bool, )
+    Allow access to the .snapshot directory in the root of the share.
+
+
+  dot_snap_visible_child (, bool, )
+    Show .snapshot directories in share subdirectories.
+
+
+  dot_snap_visible_root (, bool, )
+    Show the .snapshot directory in the root of a share.
+
+
+  enable_security_signatures (, bool, )
+    Indicates whether the server supports signed SMB packets.
+
+
+  guest_user (, str, )
+    Specifies the fully-qualified user to use for guest access.
+
+
+  ignore_eas (, bool, )
+    Specify whether to ignore EAs on files.
+
+
+  onefs_cpu_multiplier (, int, )
+    Specify the number of OneFS driver worker threads per CPU.
+
+
+  onefs_num_workers (, int, )
+    Set the maximum number of OneFS driver worker threads.
+
+
+  reject_unencrypted_access (, bool, )
+    If SMB3 encryption is enabled, reject unencrypted access from clients.
+
+
+  require_security_signatures (, bool, )
+    Indicates whether the server requires signed SMB packets.
+
+
+  server_side_copy (, bool, )
+    Enable Server Side Copy.
+
+
+  server_string (, str, )
+    Provides a description of the server.
+
+
+  service (, bool, )
+    Specify whether service is enabled.
+
+
+  srv_cpu_multiplier (, int, )
+    Specify the number of SRV service worker threads per CPU.
+
+
+  srv_num_workers (, int, )
+    Set the maximum number of SRV service worker threads.
+
+
+  support_multichannel (, bool, )
+    Support multichannel.
+
+
+  support_netbios (, bool, )
+    Support NetBIOS.
+
+
+  support_smb2 (, bool, )
+    The support SMB2 attribute.
+
+
+  support_smb3_encryption (, bool, )
+    Support the SMB3 encryption on the server.
+
+
+
+email_settings (Always, dict, {'settings': {'batch_mode': 'none', 'mail_relay': '10.**.**.**', 'mail_sender': 'powerscale@dell.com', 'mail_subject': 'Powerscale Cluster notifications', 'smtp_auth_passwd_set': False, 'smtp_auth_security': 'none', 'smtp_auth_username': '', 'smtp_port': 25, 'use_smtp_auth': False, 'user_template': ''}})
+  Details of the email settings.
+
+
+  settings (Always, dict, )
+    Details of the settings.
+
+
+    batch_mode (, str, )
+      This setting determines how notifications will be batched together to be sent by email.
+
+
+    mail_relay (, str, )
+      The address of the SMTP server to be used for relaying the notification messages.
+
+
+    mail_sender (, str, )
+      The full email address that will appear as the sender of notification messages.
+
+
+    mail_subject (, str, )
+      The subject line for notification messages from this cluster.
+
+
+    smtp_auth_passwd_set (, bool, )
+      Indicates if an SMTP authentication password is set.
+
+
+    smtp_auth_security (, str, )
+      The type of secure communication protocol to use if SMTP is being used.
+
+
+    smtp_auth_username (, str, )
+      Username to authenticate with if SMTP authentication is being used.
+
+
+    smtp_port (, int, )
+      The port on the SMTP server to be used for relaying the notification messages.
+
+
+    use_smtp_auth (, bool, )
+      If true, this cluster will send SMTP authentication credentials to the SMTP relay server in order to send its notification emails.
+
+
+    user_template (, str, )
+      Location of a custom template file that can be used to specify the layout of the notification emails.
+
+
+
+
+ntp_servers (Always, dict, {'servers': [{'id': '10.**.**.**', 'key': None, 'name': '10.**.**.**'}]})
+  List of NTP servers.
+
+
+  servers (, list, )
+    List of servers.
+
+
+    id (, str, )
+      Field id.
+
+
+    key (, str, )
+      Key value from \ :emphasis:`key\_file`\  that maps to this server.
+
+
+    name (, str, )
+      NTP server name.
+
+
+
+
+cluster_identity (Always, dict, {'cluster_identity': {'description': 'asdadasdasdasdadadadds', 'logon': {'motd': 'This is new description', 'motd_header': 'This is the new title'}, 'mttdl_level_msg': 'none', 'name': 'PIE-IsilonS-24241-Clusterwrerwerwrewr'}})
+  Details related to cluster identity.
+
+
+  description (, str, )
+    Description of PowerScale cluster.
+
+
+  logon (, dict, )
+    Details of logon message shown on Powerscale login screen.
+
+
+    motd (, str, )
+      Details of logon message.
+
+
+    motd_header (, str, )
+      Details of logon message title.
+
+
+
+  mttdl_level_msg (, str, )
+    mttdl\_level\_msg.
+
+
+  name (, str, )
+    Name of PowerScale cluster.
+
+
+
+cluster_owner (Always, dict, {'cluster_owner': {'company': 'Test company', 'location': 'Test location', 'primary_email': 'primary_email@email.com', 'primary_name': 'primary_name', 'primary_phone1': 'primary_phone1', 'primary_phone2': 'primary_phone2', 'secondary_email': 'secondary_email@email.com', 'secondary_name': 'secondary_name', 'secondary_phone1': 'secondary_phone1', 'secondary_phone2': 'secondary_phone2'}})
+  Details related to cluster identity.
+
+
+  company (, str, )
+    Name of the company.
+
+
+  location (, str, )
+    Location of the company.
+
+
+  primary_email (, str, )
+    Email of primary system admin.
+
+
+  primary_name (, str, )
+    Name of primary system admin.
+
+
+  primary_phone1 (, str, )
+    Phone1 of primary system admin.
+
+
+  primary_phone2 (, str, )
+    Phone2 of primary system admin.
+
+
+  secondary_email (, str, )
+    Email of secondary system admin.
+
+
+  secondary_name (, str, )
+    Name of secondary system admin.
+
+
+  secondary_phone1 (, str, )
+    Phone1 of secondary system admin.
+
+
+  secondary_phone2 (, str, )
+    Phone2 of secondary system admin.
+
+
+
+SnmpSettings (When C(snmp_settings) is in a given I(gather_subset), dict, {'read_only_community': 'public', 'service': True, 'snmp_v1_v2c_access': True, 'snmp_v3_access': True, 'snmp_v3_auth_protocol': 'MD5', 'snmp_v3_priv_protocol': 'DES', 'snmp_v3_security_level': 'authPriv', 'snmp_v3_read_only_user': 'general', 'system_contact': 'system', 'system_location': 'cluster'})
+  The SNMP settings details.
+
+
+  read_only_community (, str, )
+    SNMP Read-only community name.
+
+
+  service (, bool, )
+    Whether the SNMP Service is enabled.
+
+
+  snmp_v1_v2c_access (, bool, )
+    Whether the SNMP v2c access is enabled.
+
+
+  snmp_v3_access (, bool, )
+    Whether the SNMP v3 access is enabled.
+
+
+  snmp_v3_auth_protocol (, str, )
+    SNMP v3 authentication protocol.
+
+
+  snmp_v3_priv_protocol (, str, )
+    SNMP v3 privacy protocol.
+
+
+  snmp_v3_security_level (, str, )
+    SNMP v3 security level.
+
+
+  snmp_v3_read_only_user (, str, )
+    SNMP v3 read-only user.
+
+
+  system_contact (, str, )
+    SNMP system owner contact information.
+
+
+  system_location (, str, )
+    The cluster description of the SNMP system.
 
 
 
@@ -1383,4 +1786,5 @@ Authors
 - Bhavneet Sharma(@Bhavneet-Sharma) <ansible.team@dell.com>
 - Trisha Datta(@trisha-dell) <ansible.team@dell.com>
 - Meenakshi Dembi(@dembim) <ansible.team.dell.com>
+- Sachin Apagundi(@sachin-apa) <ansible.team.dell.com>
 

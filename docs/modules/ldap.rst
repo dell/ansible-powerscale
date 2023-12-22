@@ -38,15 +38,15 @@ Parameters
 
     This parameter is mandatory during create.
 
-    *server_uris* should begin with ldap:// or ldaps:// if not validation error will be displayed.
+    \ :emphasis:`server\_uris`\  should begin with ldap:// or ldaps:// if not validation error will be displayed.
 
 
   server_uri_state (optional, str, None)
-    Specifies if the *server_uris* need to be added or removed from the provider.
+    Specifies if the \ :emphasis:`server\_uris`\  need to be added or removed from the provider.
 
-    This parameter is mandatory if *server_uris* is specified.
+    This parameter is mandatory if \ :emphasis:`server\_uris`\  is specified.
 
-    While creating LDAP provider, this parameter value should be specified as ``present-in-ldap``.
+    While creating LDAP provider, this parameter value should be specified as \ :literal:`present-in-ldap`\ .
 
 
   base_dn (optional, str, None)
@@ -77,9 +77,9 @@ Parameters
   state (True, str, None)
     The state of the LDAP provider after the task is performed.
 
-    ``present`` - indicates that the LDAP provider should exist on the system.
+    \ :literal:`present`\  - indicates that the LDAP provider should exist on the system.
 
-    ``absent`` - indicates that the LDAP provider should not exist on the system.
+    \ :literal:`absent`\  - indicates that the LDAP provider should not exist on the system.
 
 
   onefs_host (True, str, None)
@@ -93,9 +93,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    ``true`` - indicates that the SSL certificate should be verified.
+    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
 
-    ``false`` - indicates that the SSL certificate should not be verified.
+    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -113,9 +113,9 @@ Notes
 -----
 
 .. note::
-   - This module does not support modification of *bind_password* of LDAP provider.
-   - The value specified for *bind_password* will be ignored during modify.
-   - The *check_mode* is not supported.
+   - This module does not support modification of \ :emphasis:`bind\_password`\  of LDAP provider.
+   - The value specified for \ :emphasis:`bind\_password`\  will be ignored during modify.
+   - The \ :emphasis:`check\_mode`\  is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
