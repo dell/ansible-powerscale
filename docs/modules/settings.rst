@@ -153,9 +153,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
+    ``true`` - indicates that the SSL certificate should be verified.
 
-    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
+    ``false`` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -173,7 +173,7 @@ Notes
 -----
 
 .. note::
-   - The \ :emphasis:`check\_mode`\  is supported.
+   - The *check_mode* is supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -258,15 +258,15 @@ Examples
         company: "Test company"
         location: "Test location"
         primary_contact:
-            name: "primary_name11"
-            phone1: "primary_phone11"
-            phone2: "primary_phone21"
-            email: "primary_email1@email.com"
+          name: "primary_name11"
+          phone1: "primary_phone11"
+          phone2: "primary_phone21"
+          email: "primary_email1@email.com"
         secondary_contact:
-            name: "secondary_name11"
-            phone1: "secondary_phone11"
-            phone2: "secondary_phone21"
-            email: "secondary_email1@email.com"
+          name: "secondary_name11"
+          phone1: "secondary_phone11"
+          phone2: "secondary_phone21"
+          email: "secondary_email1@email.com"
 
     - name: Update cluster identity details
       dellemc.powerscale.settings:
@@ -278,8 +278,8 @@ Examples
         name: "PIE-IsilonS-24241-Cluster"
         description: "This is new description for the cluster"
         logon_details:
-            message_title: "This is the new title"
-            description: "This is new description"
+          message_title: "This is the new title"
+          description: "This is new description"
 
     - name: Update all settings
       dellemc.powerscale.settings:
@@ -291,20 +291,20 @@ Examples
         name: "PIE-IsilonS-24241-Cluster"
         description: "This is new description for the cluster"
         logon_details:
-            message_title: "This is the new title"
-            description: "This is new description"
+          message_title: "This is the new title"
+          description: "This is new description"
         company: "Test company"
         location: "Test location"
         primary_contact:
-            name: "primary_name11"
-            phone1: "primary_phone11"
-            phone2: "primary_phone21"
-            email: "primary_email1@email.com"
+          name: "primary_name11"
+          phone1: "primary_phone11"
+          phone2: "primary_phone21"
+          email: "primary_email1@email.com"
         secondary_contact:
-            name: "secondary_name11"
-            phone1: "secondary_phone11"
-            phone2: "secondary_phone21"
-            email: "secondary_email1@email.com"
+          name: "secondary_name11"
+          phone1: "secondary_phone11"
+          phone2: "secondary_phone21"
+          email: "secondary_email1@email.com"
         mail_relay: "mailrelay.itp.dell.com"
         mail_sender: "lab-a2@dell.com"
         mail_subject: "lab-a2-alerts"
@@ -384,7 +384,7 @@ ntp_servers (Always, dict, {'servers': [{'id': '10.**.**.**', 'key': None, 'name
 
 
     key (, str, )
-      Key value from \ :emphasis:`key\_file`\  that maps to this server.
+      Key value from *key_file* that maps to this server.
 
 
     name (, str, )
@@ -415,7 +415,7 @@ cluster_identity (Always, dict, {'cluster_identity': {'description': 'asdadasdas
 
 
   mttdl_level_msg (, str, )
-    mttdl\_level\_msg.
+    mttdl_level_msg.
 
 
   name (, str, )
