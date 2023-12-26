@@ -49,6 +49,7 @@ class PowerScaleBase:
         self._protocol_api = None
         self._auth_api = None
         self._synciq_api = None
+        self._cluster_api = None
 
     @property
     def protocol_api(self):
@@ -85,3 +86,15 @@ class PowerScaleBase:
         if self._synciq_api is None:
             self._synciq_api = self.isi_sdk.SyncApi(self.api_client)
         return self._synciq_api
+
+    @property
+    def cluster_api(self):
+        """
+        Returns the cluster API object.
+
+        :return: The cluster API object.
+        :rtype: isi_sdk.ClusterApi
+        """
+        if self._cluster_api is None:
+            self._cluster_api = self.isi_sdk.ClusterApi(self.api_client)
+        return self._cluster_api

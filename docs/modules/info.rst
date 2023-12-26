@@ -16,7 +16,7 @@ Gathering information about Specified PowerScale Storage entities, includes attr
 
 Get list of smb_shares, nfs_exports, nfs_aliases, active clients, SyncIQ reports, SyncIQ target reports, SyncIQ target cluster certificates, SyncIQ policies, SyncIQ performance rules.
 
-Get list of network groupnets, network pools for all access zones or a specific access zone, network rules, network subnets, network interfaces, node pools, storage pool tiers, smb open files.
+Get list of network groupnets, network pools for all access zones or a specific access zone, network rules, network subnets, network interfaces, node pools, storage pool tiers, smb open files, s3 buckets, ntp_servers.
 
 Get list of user mapping rules, ldap providers of the PowerScale cluster.
 
@@ -27,6 +27,12 @@ Get NFS default settings details of the PowerScale cluster.
 Get NFS global settings details of the PowerScale cluster.
 
 Get SyncIQ global settings details of the PowerScale cluster.
+
+Get SMB Global Settings details of the PowerScale cluster.
+
+Get cluster owner, cluster identity and email settings details of the PowerScale cluster.
+
+Get SNMP settings details of the PowerScale cluster.
 
 
 
@@ -124,7 +130,7 @@ Parameters
 
     SyncIQ global settings - ``synciq_global_settings``.
 
-    S3 buckets - ``s3_buckets``
+    S3 buckets - ``s3_buckets``.
 
     The list of *attributes*, *access_zones* and *nodes* is for the entire PowerScale cluster.
 
@@ -146,7 +152,17 @@ Parameters
 
     The list of ldap providers of PowerScale cluster.
 
-    The list of S3 bucket for the entire PowerScale cluster.
+    SMB global settings - ``smb_global_settings``.
+
+    NTP servers ``ntp_servers``
+
+    Email settings ``email_settings``
+
+    Cluster identity ``cluster_identity``
+
+    Cluster owner ``cluster_owner``
+
+    SNMP settings - ``snmp_settings``.
 
 
   onefs_host (True, str, None)
@@ -487,6 +503,60 @@ Examples
         gather_subset:
           - s3_buckets
 
+    - name: Get SMB global settings from PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - smb_global_settings
+
+    - name: Get NTP servers from PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - ntp_servers
+
+    - name: Get SNMP settings from PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - snmp_settings
+
+    - name: Get email settings details from PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - email_settings
+
+    - name: Get cluster identity details from PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - cluster_identity
+
+    - name: Get cluster owner details from PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - cluster_owner
+
 
 
 Return Values
@@ -627,20 +697,64 @@ NetworkGroupnets (When C(network_groupnets) is in a given I(gather_subset), list
 
 
 
-NetworkInterfaces (When C(network_interfaces) is in a given I(gather_subset), list, [{'id': '110gig1', 'lnn': 1, 'name': '10gig1'}])
+NetworkInterfaces (When C(network_interfaces) is in a given I(gather_subset), list, [{'flags': [], 'id': '3:ext-agg', 'ip_addrs': [], 'ipv4_gateway': None, 'ipv6_gateway': None, 'lnn': 3, 'mtu': 0, 'name': 'ext-agg', 'nic_name': 'lagg0', 'owners': [], 'speed': None, 'status': 'inactive', 'type': 'aggregated', 'vlans': []}])
   List of Network interfaces.
+
+
+  flags (, list, )
+    List of interface flags.
 
 
   id (, str, )
     ID of the interface.
 
 
+  ip_addrs (, list, )
+    List of IP addresses.
+
+
+  ipv4_gateway (, str, )
+    Address of the default IPv4 gateway.
+
+
+  ipv6_gateway (, str, )
+    Address of the default IPv6 gateway.
+
+
   lnn (, int, )
     Interface's lnn.
 
 
+  mtu (, int, )
+    The mtu the interface.
+
+
   name (, str, )
     Name of the interface.
+
+
+  nic_name (, str, )
+    NIC name.
+
+
+  owners (, list, )
+    List of owners.
+
+
+  speed (, int, )
+    Interface's speed.
+
+
+  status (, str, )
+    Status of the interface.
+
+
+  type (, str, )
+    Type of the interface.
+
+
+  vlans (, list, )
+    List of VLANs.
 
 
 
@@ -1363,6 +1477,295 @@ S3_bucket_details (When C(s3_buckets) is in a given I(gather_subset), dict, {'ac
 
 
 
+SmbGlobalSettings (always, dict, {'access_based_share_enum': False, 'audit_fileshare': None, 'audit_logon': None, 'dot_snap_accessible_child': True, 'dot_snap_accessible_root': True, 'dot_snap_visible_child': False, 'dot_snap_visible_root': True, 'enable_security_signatures': False, 'guest_user': 'nobody', 'ignore_eas': False, 'onefs_cpu_multiplier': 4, 'onefs_num_workers': 0, 'reject_unencrypted_access': False, 'require_security_signatures': False, 'server_side_copy': False, 'server_string': 'PowerScale Server', 'service': True, 'srv_cpu_multiplier': None, 'srv_num_workers': None, 'support_multichannel': True, 'support_netbios': False, 'support_smb2': True, 'support_smb3_encryption': True})
+  The updated SMB global settings details.
+
+
+  access_based_share_enum (, bool, )
+    Only enumerate files and folders the requesting user has access to.
+
+
+  audit_fileshare (, str, )
+    Specify level of file share audit events to log.
+
+
+  audit_logon (, str, )
+    Specify the level of logon audit events to log.
+
+
+  dot_snap_accessible_child (, bool, )
+    Allow access to .snapshot directories in share subdirectories.
+
+
+  dot_snap_accessible_root (, bool, )
+    Allow access to the .snapshot directory in the root of the share.
+
+
+  dot_snap_visible_child (, bool, )
+    Show .snapshot directories in share subdirectories.
+
+
+  dot_snap_visible_root (, bool, )
+    Show the .snapshot directory in the root of a share.
+
+
+  enable_security_signatures (, bool, )
+    Indicates whether the server supports signed SMB packets.
+
+
+  guest_user (, str, )
+    Specifies the fully-qualified user to use for guest access.
+
+
+  ignore_eas (, bool, )
+    Specify whether to ignore EAs on files.
+
+
+  onefs_cpu_multiplier (, int, )
+    Specify the number of OneFS driver worker threads per CPU.
+
+
+  onefs_num_workers (, int, )
+    Set the maximum number of OneFS driver worker threads.
+
+
+  reject_unencrypted_access (, bool, )
+    If SMB3 encryption is enabled, reject unencrypted access from clients.
+
+
+  require_security_signatures (, bool, )
+    Indicates whether the server requires signed SMB packets.
+
+
+  server_side_copy (, bool, )
+    Enable Server Side Copy.
+
+
+  server_string (, str, )
+    Provides a description of the server.
+
+
+  service (, bool, )
+    Specify whether service is enabled.
+
+
+  srv_cpu_multiplier (, int, )
+    Specify the number of SRV service worker threads per CPU.
+
+
+  srv_num_workers (, int, )
+    Set the maximum number of SRV service worker threads.
+
+
+  support_multichannel (, bool, )
+    Support multichannel.
+
+
+  support_netbios (, bool, )
+    Support NetBIOS.
+
+
+  support_smb2 (, bool, )
+    The support SMB2 attribute.
+
+
+  support_smb3_encryption (, bool, )
+    Support the SMB3 encryption on the server.
+
+
+
+email_settings (Always, dict, {'settings': {'batch_mode': 'none', 'mail_relay': '10.**.**.**', 'mail_sender': 'powerscale@dell.com', 'mail_subject': 'Powerscale Cluster notifications', 'smtp_auth_passwd_set': False, 'smtp_auth_security': 'none', 'smtp_auth_username': '', 'smtp_port': 25, 'use_smtp_auth': False, 'user_template': ''}})
+  Details of the email settings.
+
+
+  settings (Always, dict, )
+    Details of the settings.
+
+
+    batch_mode (, str, )
+      This setting determines how notifications will be batched together to be sent by email.
+
+
+    mail_relay (, str, )
+      The address of the SMTP server to be used for relaying the notification messages.
+
+
+    mail_sender (, str, )
+      The full email address that will appear as the sender of notification messages.
+
+
+    mail_subject (, str, )
+      The subject line for notification messages from this cluster.
+
+
+    smtp_auth_passwd_set (, bool, )
+      Indicates if an SMTP authentication password is set.
+
+
+    smtp_auth_security (, str, )
+      The type of secure communication protocol to use if SMTP is being used.
+
+
+    smtp_auth_username (, str, )
+      Username to authenticate with if SMTP authentication is being used.
+
+
+    smtp_port (, int, )
+      The port on the SMTP server to be used for relaying the notification messages.
+
+
+    use_smtp_auth (, bool, )
+      If true, this cluster will send SMTP authentication credentials to the SMTP relay server in order to send its notification emails.
+
+
+    user_template (, str, )
+      Location of a custom template file that can be used to specify the layout of the notification emails.
+
+
+
+
+ntp_servers (Always, dict, {'servers': [{'id': '10.**.**.**', 'key': None, 'name': '10.**.**.**'}]})
+  List of NTP servers.
+
+
+  servers (, list, )
+    List of servers.
+
+
+    id (, str, )
+      Field id.
+
+
+    key (, str, )
+      Key value from *key_file* that maps to this server.
+
+
+    name (, str, )
+      NTP server name.
+
+
+
+
+cluster_identity (Always, dict, {'cluster_identity': {'description': 'asdadasdasdasdadadadds', 'logon': {'motd': 'This is new description', 'motd_header': 'This is the new title'}, 'mttdl_level_msg': 'none', 'name': 'PIE-IsilonS-24241-Clusterwrerwerwrewr'}})
+  Details related to cluster identity.
+
+
+  description (, str, )
+    Description of PowerScale cluster.
+
+
+  logon (, dict, )
+    Details of logon message shown on Powerscale login screen.
+
+
+    motd (, str, )
+      Details of logon message.
+
+
+    motd_header (, str, )
+      Details of logon message title.
+
+
+
+  mttdl_level_msg (, str, )
+    mttdl_level_msg.
+
+
+  name (, str, )
+    Name of PowerScale cluster.
+
+
+
+cluster_owner (Always, dict, {'cluster_owner': {'company': 'Test company', 'location': 'Test location', 'primary_email': 'primary_email@email.com', 'primary_name': 'primary_name', 'primary_phone1': 'primary_phone1', 'primary_phone2': 'primary_phone2', 'secondary_email': 'secondary_email@email.com', 'secondary_name': 'secondary_name', 'secondary_phone1': 'secondary_phone1', 'secondary_phone2': 'secondary_phone2'}})
+  Details related to cluster identity.
+
+
+  company (, str, )
+    Name of the company.
+
+
+  location (, str, )
+    Location of the company.
+
+
+  primary_email (, str, )
+    Email of primary system admin.
+
+
+  primary_name (, str, )
+    Name of primary system admin.
+
+
+  primary_phone1 (, str, )
+    Phone1 of primary system admin.
+
+
+  primary_phone2 (, str, )
+    Phone2 of primary system admin.
+
+
+  secondary_email (, str, )
+    Email of secondary system admin.
+
+
+  secondary_name (, str, )
+    Name of secondary system admin.
+
+
+  secondary_phone1 (, str, )
+    Phone1 of secondary system admin.
+
+
+  secondary_phone2 (, str, )
+    Phone2 of secondary system admin.
+
+
+
+SnmpSettings (When C(snmp_settings) is in a given I(gather_subset), dict, {'read_only_community': 'public', 'service': True, 'snmp_v1_v2c_access': True, 'snmp_v3_access': True, 'snmp_v3_auth_protocol': 'MD5', 'snmp_v3_priv_protocol': 'DES', 'snmp_v3_security_level': 'authPriv', 'snmp_v3_read_only_user': 'general', 'system_contact': 'system', 'system_location': 'cluster'})
+  The SNMP settings details.
+
+
+  read_only_community (, str, )
+    SNMP Read-only community name.
+
+
+  service (, bool, )
+    Whether the SNMP Service is enabled.
+
+
+  snmp_v1_v2c_access (, bool, )
+    Whether the SNMP v2c access is enabled.
+
+
+  snmp_v3_access (, bool, )
+    Whether the SNMP v3 access is enabled.
+
+
+  snmp_v3_auth_protocol (, str, )
+    SNMP v3 authentication protocol.
+
+
+  snmp_v3_priv_protocol (, str, )
+    SNMP v3 privacy protocol.
+
+
+  snmp_v3_security_level (, str, )
+    SNMP v3 security level.
+
+
+  snmp_v3_read_only_user (, str, )
+    SNMP v3 read-only user.
+
+
+  system_contact (, str, )
+    SNMP system owner contact information.
+
+
+  system_location (, str, )
+    The cluster description of the SNMP system.
+
+
+
 
 
 
@@ -1383,4 +1786,5 @@ Authors
 - Bhavneet Sharma(@Bhavneet-Sharma) <ansible.team@dell.com>
 - Trisha Datta(@trisha-dell) <ansible.team@dell.com>
 - Meenakshi Dembi(@dembim) <ansible.team.dell.com>
+- Sachin Apagundi(@sachin-apa) <ansible.team.dell.com>
 

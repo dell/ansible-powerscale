@@ -37,6 +37,10 @@ plugins/modules/groupnet.py import-2.7
 plugins/modules/networkrule.py validate-modules:missing-gplv3-license
 plugins/modules/nfs_alias.py validate-modules:missing-gplv3-license
 plugins/modules/settings.py validate-modules:missing-gplv3-license
+plugins/modules/settings.py import-2.7
+plugins/modules/settings.py compile-2.7
+plugins/module_utils/storage/dell/shared_library/cluster.py compile-2.7
+plugins/module_utils/storage/dell/shared_library/cluster.py import-2.7
 plugins/modules/networksettings.py validate-modules:missing-gplv3-license
 plugins/modules/smartpoolsettings.py validate-modules:missing-gplv3-license
 plugins/modules/filepoolpolicy.py import-2.7
@@ -54,7 +58,6 @@ plugins/modules/user_mapping_rule.py import-2.7
 plugins/modules/user_mapping_rule.py compile-2.7
 plugins/modules/user_mapping_rule.py validate-modules:missing-gplv3-license
 plugins/modules/networkpool.py import-2.7
-plugins/modules/networkpool.py compile-2.7
 plugins/modules/networkpool.py validate-modules:missing-gplv3-license
 plugins/modules/nfs_global_settings.py import-2.7
 plugins/modules/nfs_global_settings.py compile-2.7
@@ -74,3 +77,9 @@ plugins/module_utils/storage/dell/shared_library/synciq.py import-2.7
 plugins/modules/synciqcertificate.py validate-modules:missing-gplv3-license
 plugins/modules/synciqcertificate.py import-2.7
 plugins/modules/synciqcertificate.py compile-2.7
+plugins/modules/smb_global_settings.py import-2.7
+plugins/modules/smb_global_settings.py compile-2.7
+plugins/modules/smb_global_settings.py validate-modules:missing-gplv3-license
+plugins/modules/snmp_settings.py validate-modules:missing-gplv3-license
+plugins/modules/snmp_settings.py import-2.7
+plugins/modules/snmp_settings.py compile-2.7

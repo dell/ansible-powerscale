@@ -74,8 +74,16 @@ class MockGatherfactsApi:
         'NfsDefaultSettings': {},
         'NfsGlobalSettings': {},
         'SynciqGlobalSettings': {},
-        's3Buckets': {}
+        's3Buckets': {},
+        'SmbGlobalSettings': {},
+        'SnmpSettings': {},
+        'NTPServers': {},
+        'EmailSettings': {},
+        'ClusterIdentity': {},
+        'ClusterOwner': {}
     }
+    API = "api"
+    MODULE = "module"
 
     @staticmethod
     def get_network_groupnets_response(response_type):
@@ -224,135 +232,40 @@ class MockGatherfactsApi:
             return {
                 "interfaces": [
                     {
-                        "id": "1.ext-1",
-                        "ip_addrs": [
-                            "VALUE_SPECIFIED_IN_NO_LOG_PARAMETER"
-                        ],
-                        "lnn": 1,
-                        "name": "ext-1",
-                        "nic_name": "em1",
-                        "owners": [
-                            {
-                                "groupnet": "groupnet0",
-                                "ip_addrs": [
-                                    "VALUE_SPECIFIED_IN_NO_LOG_PARAMETER"
-                                ],
-                                "pool": "pool0",
-                                "subnet": "subnet0"
-                            }
-                        ],
-                        "status": "up",
-                        "type": "gige"
-                    },
-                    {
-                        "id": "1.ext-2",
+                        "flags": [],
+                        "id": "3:ext-agg",
                         "ip_addrs": [],
-                        "lnn": 1,
-                        "name": "ext-2",
-                        "nic_name": "em3",
+                        "ipv4_gateway": None,
+                        "ipv6_gateway": None,
+                        "lnn": 3,
+                        "mtu": 0,
+                        "name": "ext-agg",
+                        "nic_name": "lagg0",
                         "owners": [],
+                        "speed": None,
                         "status": "inactive",
-                        "type": "gige"
-                    },
-                    {
-                        "id": "1.ext-3",
-                        "ip_addrs": [],
-                        "lnn": 1,
-                        "name": "ext-3",
-                        "nic_name": "em4",
-                        "owners": [],
-                        "status": "inactive",
-                        "type": "gige"
-                    },
-                    {
-                        "id": "1.ext-4",
-                        "ip_addrs": [],
-                        "lnn": 1,
-                        "name": "ext-4",
-                        "nic_name": "em5",
-                        "owners": [],
-                        "status": "inactive",
-                        "type": "gige"
-                    },
-                    {
-                        "id": "1.ext-5",
-                        "ip_addrs": [],
-                        "lnn": 1,
-                        "name": "ext-5",
-                        "nic_name": "em6",
-                        "owners": [],
-                        "status": "inactive",
-                        "type": "gige"
-                    },
-                    {
-                        "id": "1.ext-6",
-                        "ip_addrs": [],
-                        "lnn": 1,
-                        "name": "ext-6",
-                        "nic_name": "em7",
-                        "owners": [],
-                        "status": "inactive",
-                        "type": "gige"
-                    },
-                    {
-                        "id": "1.int-a",
-                        "ip_addrs": [
-                            "1.1.1.31"
-                        ],
-                        "lnn": 1,
-                        "name": "int-a",
-                        "nic_name": "em0",
-                        "owners": [
-                            {
-                                "groupnet": "internal",
-                                "ip_addrs": [
-                                    "1.1.1.1"
-                                ],
-                                "pool": "int-a-pool",
-                                "subnet": "int-a-subnet"
-                            }
-                        ],
-                        "status": "up",
-                        "type": "gige"
+                        "type": "aggregated",
+                        "vlans": []
                     }
                 ]
             }
         elif response_type == 'module':
             return [
                 {
-                    'id': '1.ext-1',
-                    'name': 'ext-1',
-                    'lnn': 1
-                },
-                {
-                    'id': '1.ext-2',
-                    'name': 'ext-2',
-                    'lnn': 1
-                },
-                {
-                    'id': '1.ext-3',
-                    'name': 'ext-3',
-                    'lnn': 1
-                },
-                {
-                    'id': '1.ext-4',
-                    'name': 'ext-4',
-                    'lnn': 1
-                },
-                {
-                    'id': '1.ext-5',
-                    'name': 'ext-5',
-                    'lnn': 1
-                },
-                {
-                    'id': '1.ext-6',
-                    'name': 'ext-6',
-                    'lnn': 1
-                },
-                {
-                    'id': '1.int-a',
-                    'name': 'int-a',
-                    'lnn': 1
+                    "flags": [],
+                    "id": "3:ext-agg",
+                    "ip_addrs": [],
+                    "ipv4_gateway": None,
+                    "ipv6_gateway": None,
+                    "lnn": 3,
+                    "mtu": 0,
+                    "name": "ext-agg",
+                    "nic_name": "lagg0",
+                    "owners": [],
+                    "speed": None,
+                    "status": "inactive",
+                    "type": "aggregated",
+                    "vlans": []
                 }
             ]
         else:
@@ -956,13 +869,580 @@ class MockGatherfactsApi:
                    MockGatherfactsApi.GATHERFACTS_COMMON_ARGS['onefs_host'])
 
     @staticmethod
-    def get_nfs_zone_setting_response(response_type):
-        if response_type == "error":
-            return "Getting zone settings for PowerScale: %s failed with " \
-                   "error: SDK Error message" % (MockGatherfactsApi.GATHERFACTS_COMMON_ARGS['onefs_host'])
+    def get_smb_global_settings(response_type):
+        if response_type == "api":
+            return {
+                "settings": {
+                    'access_based_share_enum': False,
+                    'dot_snap_accessible_child': True,
+                    'dot_snap_accessible_root': True,
+                    'dot_snap_visible_child': False,
+                    'dot_snap_visible_root': True,
+                }
+            }
+        elif response_type == "module":
+            return {
+                'access_based_share_enum': False,
+                'dot_snap_accessible_child': True,
+                'dot_snap_accessible_root': True,
+                'dot_snap_visible_child': False,
+                'dot_snap_visible_root': True,
+            }
+        else:
+            return "Got error SDK Error message while getting SMB global setings details "
 
     @staticmethod
-    def get_nfs_global_setting_response(response_type):
+    def get_nfsglobal_settings(response_type):
+        if response_type == "api":
+            return {
+                "settings": {
+                    "service": True
+                }
+            }
+        elif response_type == "module":
+            return {
+                "service": True
+            }
+        else:
+            return "Getting NFS global settings for PowerScale: **.***.**.*** failed with error: SDK Error message"
+
+    @staticmethod
+    def get_snmp_settings_response(response_type):
+        if response_type == "api":
+            return {
+                "settings": {
+                    "service": True,
+                    "snmp_v1_v2c_access": True,
+                    "snmp_v3_access": True,
+                    "snmp_v3_auth_protocol": "MD5",
+                    "snmp_v3_priv_protocol": "DES",
+                    "read_only_community": "readonly"
+                }
+            }
+        elif response_type == "module":
+            return {
+                "service": True,
+                "snmp_v1_v2c_access": True,
+                "snmp_v3_access": True,
+                "snmp_v3_auth_protocol": "MD5",
+                "snmp_v3_priv_protocol": "DES",
+                "read_only_community": "readonly"
+            }
+        else:
+            return "Fetching SNMP settings failed with error: SDK Error message"
+
+    @staticmethod
+    def get_nfs_zone_settings(response_type):
+        if response_type == "api":
+            return {
+                "settings": {
+                    "nfsv4_replace_domain": False,
+                    "zone": "System"
+                }
+            }
+        elif response_type == "module":
+            return {
+                "nfsv4_replace_domain": False,
+                "zone": "System"
+            }
+        else:
+            return "Getting zone settings for PowerScale: **.***.**.*** failed with error: SDK Error message"
+
+    @staticmethod
+    def get_nfs_default_settings_response(response_type):
+        if response_type == "api":
+            return {
+                "settings": {
+                    'write_datasync_action': 'DATASYNC',
+                    'write_datasync_reply': 'DATASYNC',
+                }
+            }
+        elif response_type == "module":
+            return {
+                'write_datasync_action': 'DATASYNC',
+                'write_datasync_reply': 'DATASYNC',
+            }
+        else:
+            return "Fetching NFS default settings failed with error: SDK Error message"
+
+    @staticmethod
+    def get_providers_response(response_type):
+        resp = [{
+                "name": "ansildap1",
+                }, {
+                "name": "ansildap2",
+                }]
         if response_type == "error":
-            return "Getting NFS global settings for PowerScale: %s failed with " \
-                   "error: SDK Error message" % (MockGatherfactsApi.GATHERFACTS_COMMON_ARGS['onefs_host'])
+            return "Get authentication Providers List for PowerScale cluster: **.***.**.*** failed with error: SDK Error message"
+        else:
+            return resp
+
+    @staticmethod
+    def get_users_response(response_type):
+        resp = [{
+                "name": "testuser",
+                }, {
+                "name": "testuser1",
+                }]
+        if response_type == "error":
+            return "Get Users List for PowerScale cluster: **.***.**.*** and access zone: System failed with error: SDK Error message"
+        else:
+            return resp
+
+    @staticmethod
+    def get_groups_response(response_type):
+        resp = [{
+                "name": "testgroup",
+                }, {
+                "name": "testgroup1",
+                }]
+        if response_type == "error":
+            return "Get Group List for PowerScale cluster: **.***.**.*** andaccess zone: System failed with error: SDK Error message"
+        else:
+            return resp
+
+    @staticmethod
+    def get_s3_buckets_response(response_type):
+        resp = [{
+                "name": "testuser",
+                }, {
+                "name": "testuser1",
+                }]
+        if response_type == "error":
+            return "Fetching S3 bucket list failed with error: SDK Error message"
+        else:
+            return resp
+
+    @staticmethod
+    def get_smb_shares_response(response_type):
+        if response_type == "module":
+            return [{"id": "1", "name": "testuser"}, {
+                "id": "2", "name": "testuser1",
+            }]
+        elif response_type == "api":
+            return {"shares": [{"id": "1", "name": "testuser"}, {
+                "id": "2", "name": "testuser1",
+            }]}
+        else:
+            return "Get smb_shares list for PowerScale cluster: **.***.**.*** failed witherror: SDK Error message"
+
+    @staticmethod
+    def get_nfs_exports_response(response_type):
+        if response_type == "module":
+            return [{"id": "1", "paths": "testuser"}, {
+                "id": "2", "paths": "testuser1",
+            }]
+        elif response_type == "api":
+            return {"exports": [{"id": "1", "paths": "testuser"}, {
+                "id": "2", "paths": "testuser1",
+            }]}
+        else:
+            return "Get nfs_exports list for PowerScale cluster: **.***.**.*** failed witherror: SDK Error message"
+
+    @staticmethod
+    def get_attributes_response(response_type):
+        cluster_config = {"name": "cluster"}
+        external_ips = ["*.**.***.*", "*.**.***.*"]
+        logon_msg = "logon msg"
+        contact_info = "Contact Info"
+        cluster_version = "9.5"
+        if response_type == "error":
+            return "Get Attributes List for PowerScale cluster: **.***.**.*** failed with error: SDK Error message"
+        elif response_type == "module":
+            return cluster_config, external_ips, logon_msg, contact_info, cluster_version
+        else:
+            return {"Config": cluster_config, "Contact_Info": contact_info,
+                    "External_IP": {"External IPs": ','.join(external_ips)},
+                    "Logon_msg": logon_msg,
+                    "Cluster_Version": cluster_version}
+
+    @staticmethod
+    def get_nodes_response(response_type):
+        if response_type == "error":
+            return "Get Nodes List for PowerScale cluster: **.***.**.*** failed witherror: SDK Error message"
+        return [{"node_name": "node1"}, {"node_name": "node2"}]
+
+    @staticmethod
+    def get_synciq_reports_response(response_type):
+        if response_type == "error":
+            return "Get SyncIQ Report list for PowerScale cluster: **.***.**.*** failed witherror: SDK Error message"
+        elif response_type == "api":
+            return {"total": 2,
+                    "reports": [
+                        {
+                            "id": "rep1",
+                            "policy_name": "Policy1"
+                        },
+                        {
+                            "id": "rep2",
+                            "policy_name": "Policy2"
+                        },
+                    ]
+                    }
+        elif response_type == "module":
+            return [
+                {
+                    "id": "rep1",
+                    "name": "Policy1"
+                },
+                {
+                    "id": "rep2",
+                    "name": "Policy2"
+                },
+            ]
+
+    @staticmethod
+    def get_synciq_target_reports_response(response_type):
+        if response_type == "error":
+            return "Get SyncIQ Target Report list for PowerScale cluster: **.***.**.*** failed witherror: SDK Error message"
+        elif response_type == "api":
+            return {"total": 2,
+                    "reports": [
+                        {
+                            "id": "rep1",
+                            "policy_name": "Policy1"
+                        },
+                        {
+                            "id": "rep2",
+                            "policy_name": "Policy2"
+                        },
+                    ]
+                    }
+        elif response_type == "module":
+            return [
+                {
+                    "id": "rep1",
+                    "name": "Policy1"
+                },
+                {
+                    "id": "rep2",
+                    "name": "Policy2"
+                },
+            ]
+
+    @staticmethod
+    def get_synciq_performance_rules_response(response_type):
+        if response_type == "error":
+            return "Get SyncIQ performance rules list for PowerScale cluster: **.***.**.*** failed witherror: SDK Error message"
+        elif response_type == "api":
+            return {
+                "rules": [
+                    {
+                        "id": "rep1",
+                        "schedule": "schedule",
+                        "enabled": True,
+                        "type": "bandwidth",
+                        "limit": 2
+                    },
+                    {
+                        "id": "rep1",
+                        "schedule": "schedule",
+                        "enabled": True,
+                        "type": "cpu",
+                        "limit": 4
+                    },
+                    {
+                        "id": "rep1",
+                        "schedule": "schedule",
+                        "enabled": True,
+                        "type": "file_count",
+                        "limit": 1
+                    },
+                    {
+                        "id": "rep1",
+                        "schedule": "schedule",
+                        "enabled": True,
+                        "type": "worker",
+                        "limit": 3
+                    },
+                ]
+            }
+        elif response_type == "module":
+            return [
+                {
+                    "id": "rep1",
+                    "schedule": "schedule",
+                    "enabled": True,
+                    "type": "bandwidth",
+                    "limit": "2kb/s"
+                },
+                {
+                    "id": "rep1",
+                    "schedule": "schedule",
+                    "enabled": True,
+                    "type": "cpu",
+                    "limit": "4%"
+                },
+                {
+                    "id": "rep1",
+                    "schedule": "schedule",
+                    "enabled": True,
+                    "type": "file_count",
+                    "limit": "1files/sec"
+                },
+                {
+                    "id": "rep1",
+                    "schedule": "schedule",
+                    "enabled": True,
+                    "type": "worker",
+                    "limit": "3%"
+                },
+            ]
+
+    @staticmethod
+    def get_synciq_policies_response(response_type):
+        resp = [
+            {
+                "id": "p1",
+                "name": "Policy1",
+                "source_root_path": "path",
+                "target_path": "target_path",
+                "action": "action",
+                "schedule": "schedule",
+                            "enabled": True
+            },
+            {
+                "id": "p2",
+                "name": "Policy2",
+                "source_root_path": "path",
+                "target_path": "target_path",
+                "action": "action",
+                "schedule": "schedule",
+                            "enabled": False
+            },
+        ]
+        if response_type == "error":
+            return "Get list of SyncIQ Policies for PowerScale: **.***.**.*** failed witherror: SDK Error message"
+        if response_type == "api":
+            return {
+                "policies": resp
+            }
+        elif response_type == "module":
+            return resp
+
+    @staticmethod
+    def get_synciq_target_cluster_certificates_response(response_type):
+        resp = [
+            {
+                "id": "c1",
+                "name": "cert1",
+            },
+            {
+                "id": "c2",
+                "name": "cert2",
+            }
+        ]
+        if response_type == "error":
+            return "Get list of SyncIQ target cluster certificates for PowerScale: **.***.**.*** failed witherror: SDK Error message"
+        elif response_type == "api":
+            return {
+                "certificates": resp
+            }
+        else:
+            return resp
+
+    @staticmethod
+    def get_access_zones_response(response_type):
+        if response_type == "error":
+            return "Get Access zone List for PowerScale cluster: **.***.**.*** failedwith error: SDK Error message"
+        return [{"id": "1"}, {"id": "2"}]
+
+    @staticmethod
+    def get_clients_response(response_type):
+        if response_type == "error":
+            return "Get active clients list for PowerScale cluster: **.***.**.*** failed witherror: SDK Error message"
+        elif response_type == "api":
+            return {
+                "client": [
+                    {
+                        "local_addr": "local_address1",
+                        "local_name": "local_name1",
+                        "remote_addr": "remote_address1",
+                        "remote_name": "remote_name1",
+                        "node": "node1",
+                        "protocol": "protocol1",
+                    },
+                    {
+                        "local_addr": "local_address2",
+                        "local_name": "local_name2",
+                        "remote_addr": "remote_address2",
+                        "remote_name": "remote_name2",
+                        "node": "node2",
+                        "protocol": "protocol2",
+                    }
+                ]
+            }
+        elif response_type == "module":
+            return [
+                {
+                    "local_address": "local_address1",
+                    "local_name": "local_name1",
+                    "remote_address": "remote_address1",
+                    "remote_name": "remote_name1",
+                    "node": "node1",
+                    "protocol": "protocol1",
+                },
+                {
+                    "local_address": "local_address2",
+                    "local_name": "local_name2",
+                    "remote_address": "remote_address2",
+                    "remote_name": "remote_name2",
+                    "node": "node2",
+                    "protocol": "protocol2",
+                }
+            ]
+
+    @staticmethod
+    def get_gather_facts_module_response(gather_subset):
+        param = "module"
+        subset_error_dict = {
+            "nfs_global_settings": MockGatherfactsApi.get_nfsglobal_settings(param),
+            "smb_global_settings": MockGatherfactsApi.get_smb_global_settings(param),
+            "nfs_zone_settings": MockGatherfactsApi.get_nfs_zone_settings(param),
+            "ldap": MockGatherfactsApi.get_ldap_details_response(param),
+            "user_mapping_rules": MockGatherfactsApi.get_user_mapping_rules_response(param),
+            "smb_files": MockGatherfactsApi.get_smb_files_response(param),
+            "storagepool_tiers": MockGatherfactsApi.get_storage_tier_response('api')['tiers'],
+            "node_pools": MockGatherfactsApi.get_node_pool_response('api')['nodepools'],
+            "network_subnets": MockGatherfactsApi.get_network_subnets_response(param),
+            "nfs_aliases": MockGatherfactsApi.get_nfs_aliases_response(param),
+            "network_interfaces": MockGatherfactsApi.get_network_interfaces_response(param),
+            "network_rules": MockGatherfactsApi.get_network_rules_response(param),
+            "network_pools": MockGatherfactsApi.get_network_pools_response(param),
+            "network_groupnets": MockGatherfactsApi.get_network_groupnets_response(param),
+            "providers": MockGatherfactsApi.get_providers_response(param),
+            "users": MockGatherfactsApi.get_users_response(param),
+            "groups": MockGatherfactsApi.get_groups_response(param),
+            "smb_shares": MockGatherfactsApi.get_smb_shares_response(param),
+            "nfs_exports": MockGatherfactsApi.get_nfs_exports_response(param),
+            "nfs_default_settings": MockGatherfactsApi.get_nfs_default_settings_response(param),
+            "s3_buckets": MockGatherfactsApi.get_s3_buckets_response(param),
+            "nodes": MockGatherfactsApi.get_nodes_response(param),
+            "synciq_reports": MockGatherfactsApi.get_synciq_reports_response(param),
+            "synciq_target_reports": MockGatherfactsApi.get_synciq_target_reports_response(param),
+            "synciq_policies": MockGatherfactsApi.get_synciq_policies_response(param),
+            "synciq_performance_rules": MockGatherfactsApi.get_synciq_performance_rules_response(param),
+            "synciq_target_cluster_certificates": MockGatherfactsApi.get_synciq_target_cluster_certificates_response(param),
+            "access_zones": MockGatherfactsApi.get_access_zones_response(param),
+            "clients": MockGatherfactsApi.get_clients_response(param),
+            "snmp_settings": MockGatherfactsApi.get_snmp_settings_response(param),
+        }
+        return subset_error_dict.get(gather_subset)
+
+    @staticmethod
+    def get_gather_facts_api_response(gather_subset):
+        param = "api"
+        subset_error_dict = {
+            "nfs_global_settings": MockGatherfactsApi.get_nfsglobal_settings(param),
+            "smb_global_settings": MockGatherfactsApi.get_smb_global_settings(param),
+            "nfs_zone_settings": MockGatherfactsApi.get_nfs_zone_settings(param),
+            "ldap": MockGatherfactsApi.get_ldap_details_response(param),
+            "user_mapping_rules": MockGatherfactsApi.get_user_mapping_rules_response(param),
+            "smb_files": MockGatherfactsApi.get_smb_files_response(param),
+            "storagepool_tiers": MockGatherfactsApi.get_storage_tier_response(param),
+            "node_pools": MockGatherfactsApi.get_node_pool_response(param),
+            "network_subnets": MockGatherfactsApi.get_network_subnets_response(param),
+            "nfs_aliases": MockGatherfactsApi.get_nfs_aliases_response(param),
+            "network_interfaces": MockGatherfactsApi.get_network_interfaces_response(param),
+            "network_rules": MockGatherfactsApi.get_network_rules_response(param),
+            "network_pools": MockGatherfactsApi.get_network_pools_response(param),
+            "network_groupnets": MockGatherfactsApi.get_network_groupnets_response(param),
+            "providers": MockGatherfactsApi.get_providers_response(param),
+            "users": MockGatherfactsApi.get_users_response(param),
+            "groups": MockGatherfactsApi.get_groups_response(param),
+            "smb_shares": MockGatherfactsApi.get_smb_shares_response(param),
+            "nfs_exports": MockGatherfactsApi.get_nfs_exports_response(param),
+            "nfs_default_settings": MockGatherfactsApi.get_nfs_default_settings_response(param),
+            "s3_buckets": MockGatherfactsApi.get_s3_buckets_response(param),
+            "nodes": MockGatherfactsApi.get_nodes_response(param),
+            "synciq_reports": MockGatherfactsApi.get_synciq_reports_response(param),
+            "synciq_target_reports": MockGatherfactsApi.get_synciq_target_reports_response(param),
+            "synciq_policies": MockGatherfactsApi.get_synciq_policies_response(param),
+            "synciq_performance_rules": MockGatherfactsApi.get_synciq_performance_rules_response(param),
+            "synciq_target_cluster_certificates": MockGatherfactsApi.get_synciq_target_cluster_certificates_response(param),
+            "access_zones": MockGatherfactsApi.get_access_zones_response(param),
+            "clients": MockGatherfactsApi.get_clients_response(param),
+            "snmp_settings": MockGatherfactsApi.get_snmp_settings_response(param),
+        }
+        return subset_error_dict.get(gather_subset)
+
+    @staticmethod
+    def get_gather_facts_error_response(gather_subset):
+        param = "error"
+        subset_error_dict = {
+            "nfs_global_settings": MockGatherfactsApi.get_nfsglobal_settings(param),
+            "smb_global_settings": MockGatherfactsApi.get_smb_global_settings(param),
+            "nfs_zone_settings": MockGatherfactsApi.get_nfs_zone_settings(param),
+            "ldap": MockGatherfactsApi.get_ldap_details_response(param),
+            "user_mapping_rules": MockGatherfactsApi.get_user_mapping_rules_response(param),
+            "smb_files": MockGatherfactsApi.get_smb_files_response(param),
+            "storagepool_tiers": MockGatherfactsApi.get_storage_tier_response(param),
+            "node_pools": MockGatherfactsApi.get_node_pool_response(param),
+            "network_subnets": MockGatherfactsApi.get_network_subnets_response(param),
+            "nfs_aliases": MockGatherfactsApi.get_nfs_aliases_response(param),
+            "network_interfaces": MockGatherfactsApi.get_network_interfaces_response(param),
+            "network_rules": MockGatherfactsApi.get_network_rules_response(param),
+            "network_pools": MockGatherfactsApi.get_network_pools_response(param),
+            "network_groupnets": MockGatherfactsApi.get_network_groupnets_response(param),
+            "providers": MockGatherfactsApi.get_providers_response(param),
+            "users": MockGatherfactsApi.get_users_response(param),
+            "groups": MockGatherfactsApi.get_groups_response(param),
+            "smb_shares": MockGatherfactsApi.get_smb_shares_response(param),
+            "nfs_exports": MockGatherfactsApi.get_nfs_exports_response(param),
+            "nfs_default_settings": MockGatherfactsApi.get_nfs_default_settings_response(param),
+            "s3_buckets": MockGatherfactsApi.get_s3_buckets_response(param),
+            "attributes": MockGatherfactsApi.get_attributes_response(param),
+            "nodes": MockGatherfactsApi.get_nodes_response(param),
+            "synciq_reports": MockGatherfactsApi.get_synciq_reports_response(param),
+            "synciq_target_reports": MockGatherfactsApi.get_synciq_target_reports_response(param),
+            "synciq_policies": MockGatherfactsApi.get_synciq_policies_response(param),
+            "synciq_performance_rules": MockGatherfactsApi.get_synciq_performance_rules_response(param),
+            "synciq_target_cluster_certificates": MockGatherfactsApi.get_synciq_target_cluster_certificates_response(param),
+            "access_zones": MockGatherfactsApi.get_access_zones_response(param),
+            "clients": MockGatherfactsApi.get_clients_response(param),
+            "snmp_settings": MockGatherfactsApi.get_snmp_settings_response(param),
+        }
+        return subset_error_dict.get(gather_subset)
+
+    @staticmethod
+    def get_gather_facts_error_method(gather_subset):
+        subset_method_dict = {
+            "nfs_global_settings": "get_nfs_settings_global",
+            "smb_global_settings": "get_smb_settings_global",
+            "nfs_zone_settings": "get_nfs_settings_zone",
+            "nfs_aliases": "list_nfs_aliases",
+            "smb_shares": "list_smb_shares",
+            "nfs_exports": "list_nfs_exports",
+            "nfs_default_settings": "get_nfs_settings_export",
+            "s3_buckets": "list_s3_buckets",
+            "snmp_settings": "get_snmp_settings",
+
+            "ldap": "list_providers_ldap",
+            "user_mapping_rules": "get_mapping_users_rules",
+            "smb_files": "get_smb_openfiles",
+            "providers": "get_providers_summary",
+            "users": "list_auth_users",
+            "groups": "list_auth_groups",
+
+            "storagepool_tiers": "list_storagepool_tiers",
+            "node_pools": "list_storagepool_nodepools",
+
+            "network_subnets": "get_network_subnets",
+            "network_interfaces": "get_network_interfaces",
+            "network_rules": "get_network_rules",
+            "network_pools": "get_network_pools",
+            "network_groupnets": "list_network_groupnets",
+
+            "attributes": "get_cluster_config",
+            "nodes": "get_cluster_nodes",
+
+            "synciq_reports": "get_sync_reports",
+            "synciq_target_reports": "get_target_reports",
+            "synciq_policies": "list_sync_policies",
+            "synciq_performance_rules": "list_sync_rules",
+            "synciq_target_cluster_certificates": "list_certificates_peer",
+
+            "access_zones": "list_zones",
+            "clients": "get_summary_client"
+        }
+        return subset_method_dict.get(gather_subset)
