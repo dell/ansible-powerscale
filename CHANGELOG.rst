@@ -4,6 +4,24 @@ Dellemc.Powerscale Change Logs
 
 .. contents:: Topics
 
+v2.4.0
+======
+
+Minor Changes
+-------------
+
+- Added support for listing SMB global settings, detailed network interfaces, NTP servers, email settings,
+    cluster identity, cluster owner and SNMP settings through info module.
+- Added support for getting and modifying cluster owner information and cluster identity information
+    through settings module.
+- Added support for removing the static route for IP address pool through network pool module.
+
+New Modules
+-----------
+
+- dellemc.powerscale.smb_global_settings - Manage SMB global settings on a PowerScale Storage System.
+- dellemc.powerscale.snmp_settings - Manage SNMP settings on a PowerScale Storage System.
+
 
 v2.3.0
 ======

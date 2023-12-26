@@ -12,7 +12,15 @@ settings -- Manages general settings for PowerScale storage system
 Synopsis
 --------
 
-Managing general settings on the PowerScale storage system which includes get and update operations for email settings and add, remove and get operations for NTP servers.
+Managing general settings on the PowerScale storage system which includes the following.
+
+Get and update operations for email settings.
+
+Add remove and get operations for NTP servers.
+
+Get and update operation for cluster identity.
+
+Get and update operation for cluster owner.
 
 
 
@@ -46,19 +54,92 @@ Parameters
 
 
   email_settings (optional, bool, None)
-    This is an addition flag to view the email settings.
+    (deprecated) This is an addition flag to view the email settings.
+
+    This option is deprecated and will be removed in the later version.
 
 
   ntp_servers (optional, list, None)
     List of NTP servers which need to be configured.
 
 
-  state (True, str, None)
+  state (optional, str, present)
     The state option is used to mention the existence of pool.
 
 
   ntp_server_id (optional, str, None)
     ID of NTP server.
+
+
+  name (optional, str, None)
+    Name of PowerScale Cluster.
+
+
+  description (optional, str, None)
+    Description of PowerScale Cluster.
+
+
+  logon_details (optional, dict, None)
+    Details related to login to the Powerscale Cluster.
+
+
+    message_title (optional, str, None)
+      Message to be shown on the login screen.
+
+
+    description (optional, str, None)
+      Message description to be shown on the login screen.
+
+
+
+  company (optional, str, None)
+    Name of the company.
+
+
+  location (optional, str, None)
+    Location of the company.
+
+
+  primary_contact (optional, dict, None)
+    Contact details of primary system admin.
+
+
+    name (optional, str, None)
+      Name of primary system admin.
+
+
+    phone1 (optional, str, None)
+      Phone1 of primary system admin.
+
+
+    phone2 (optional, str, None)
+      Phone2 of primary system admin.
+
+
+    email (optional, str, None)
+      Email of primary system admin.
+
+
+
+  secondary_contact (optional, dict, None)
+    Contact details of secondary system admin.
+
+
+    name (optional, str, None)
+      Name of secondary system admin.
+
+
+    phone1 (optional, str, None)
+      Phone1 of secondary system admin.
+
+
+    phone2 (optional, str, None)
+      Phone2 of secondary system admin.
+
+
+    email (optional, str, None)
+      Email of secondary system admin.
+
 
 
   onefs_host (True, str, None)
@@ -92,7 +173,7 @@ Notes
 -----
 
 .. note::
-   - The *check_mode* is not supported.
+   - The *check_mode* is supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -110,8 +191,6 @@ Examples
         api_user: "{{api_user}}"
         api_password: "{{api_password}}"
         verify_ssl: "{{verify_ssl}}"
-        email_settings: "{{email_settings}}"
-        state: "{{state_present}}"
 
     - name: Update email settings
       dellemc.powerscale.settings:
@@ -125,17 +204,6 @@ Examples
         mail_subject: "lab-a2-alerts"
 
     - name: Add NTP server
-      dellemc.powerscale.settings:
-        onefs_host: "{{onefs_host}}"
-        api_user: "{{api_user}}"
-        api_password: "{{api_password}}"
-        verify_ssl: "{{verify_ssl}}"
-        ntp_servers:
-          - "10.106.**.***"
-          - "10.106.**.***"
-        state: "{{state_present}}"
-
-    - name: Add NTP server - Idempotency
       dellemc.powerscale.settings:
         onefs_host: "{{onefs_host}}"
         api_user: "{{api_user}}"
@@ -166,17 +234,6 @@ Examples
           - "10.106.**.***"
         state: "{{state_absent}}"
 
-    - name: Remove NTP server - Idempotency
-      dellemc.powerscale.settings:
-        onefs_host: "{{onefs_host}}"
-        api_user: "{{api_user}}"
-        api_password: "{{api_password}}"
-        verify_ssl: "{{verify_ssl}}"
-        ntp_servers:
-          - "10.106.**.***"
-          - "10.106.**.***"
-        state: "{{state_absent}}"
-
     - name: Update email settings and add NTP server
       dellemc.powerscale.settings:
         onefs_host: "{{onefs_host}}"
@@ -184,6 +241,70 @@ Examples
         api_password: "{{api_password}}"
         verify_ssl: "{{verify_ssl}}"
         state: "{{state_present}}"
+        mail_relay: "mailrelay.itp.dell.com"
+        mail_sender: "lab-a2@dell.com"
+        mail_subject: "lab-a2-alerts"
+        ntp_servers:
+          - "10.106.**.***"
+          - "10.106.**.***"
+
+    - name: Update cluster owner details
+      dellemc.powerscale.settings:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        state: "{{state_present}}"
+        company: "Test company"
+        location: "Test location"
+        primary_contact:
+          name: "primary_name11"
+          phone1: "primary_phone11"
+          phone2: "primary_phone21"
+          email: "primary_email1@email.com"
+        secondary_contact:
+          name: "secondary_name11"
+          phone1: "secondary_phone11"
+          phone2: "secondary_phone21"
+          email: "secondary_email1@email.com"
+
+    - name: Update cluster identity details
+      dellemc.powerscale.settings:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        state: "{{state_present}}"
+        name: "PIE-IsilonS-24241-Cluster"
+        description: "This is new description for the cluster"
+        logon_details:
+          message_title: "This is the new title"
+          description: "This is new description"
+
+    - name: Update all settings
+      dellemc.powerscale.settings:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        state: "{{state_present}}"
+        name: "PIE-IsilonS-24241-Cluster"
+        description: "This is new description for the cluster"
+        logon_details:
+          message_title: "This is the new title"
+          description: "This is new description"
+        company: "Test company"
+        location: "Test location"
+        primary_contact:
+          name: "primary_name11"
+          phone1: "primary_phone11"
+          phone2: "primary_phone21"
+          email: "primary_email1@email.com"
+        secondary_contact:
+          name: "secondary_name11"
+          phone1: "secondary_phone11"
+          phone2: "secondary_phone21"
+          email: "secondary_email1@email.com"
         mail_relay: "mailrelay.itp.dell.com"
         mail_sender: "lab-a2@dell.com"
         mail_subject: "lab-a2-alerts"
@@ -250,7 +371,7 @@ email_settings (Always, dict, {'settings': {'batch_mode': 'none', 'mail_relay': 
 
 
 
-ntp_server (Always, dict, {'servers': [{'id': '10.**.**.**', 'key': None, 'name': '10.**.**.**'}]})
+ntp_servers (Always, dict, {'servers': [{'id': '10.**.**.**', 'key': None, 'name': '10.**.**.**'}]})
   List of NTP servers.
 
 
@@ -269,6 +390,81 @@ ntp_server (Always, dict, {'servers': [{'id': '10.**.**.**', 'key': None, 'name'
     name (, str, )
       NTP server name.
 
+
+
+
+cluster_identity (Always, dict, {'cluster_identity': {'description': 'asdadasdasdasdadadadds', 'logon': {'motd': 'This is new description', 'motd_header': 'This is the new title'}, 'mttdl_level_msg': 'none', 'name': 'PIE-IsilonS-24241-Clusterwrerwerwrewr'}})
+  Details related to cluster identity.
+
+
+  description (, str, )
+    Description of PowerScale cluster.
+
+
+  logon (, dict, )
+    Details of logon message shown on Powerscale login screen.
+
+
+    motd (, str, )
+      Details of logon message.
+
+
+    motd_header (, str, )
+      Details of logon message title.
+
+
+
+  mttdl_level_msg (, str, )
+    mttdl_level_msg.
+
+
+  name (, str, )
+    Name of PowerScale cluster.
+
+
+
+cluster_owner (Always, dict, {'cluster_owner': {'company': 'Test company', 'location': 'Test location', 'primary_email': 'primary_email@email.com', 'primary_name': 'primary_name', 'primary_phone1': 'primary_phone1', 'primary_phone2': 'primary_phone2', 'secondary_email': 'secondary_email@email.com', 'secondary_name': 'secondary_name', 'secondary_phone1': 'secondary_phone1', 'secondary_phone2': 'secondary_phone2'}})
+  Details related to cluster identity.
+
+
+  company (, str, )
+    Name of the company.
+
+
+  location (, str, )
+    Location of the company.
+
+
+  primary_email (, str, )
+    Email of primary system admin.
+
+
+  primary_name (, str, )
+    Name of primary system admin.
+
+
+  primary_phone1 (, str, )
+    Phone1 of primary system admin.
+
+
+  primary_phone2 (, str, )
+    Phone2 of primary system admin.
+
+
+  secondary_email (, str, )
+    Email of secondary system admin.
+
+
+  secondary_name (, str, )
+    Name of secondary system admin.
+
+
+  secondary_phone1 (, str, )
+    Phone1 of secondary system admin.
+
+
+  secondary_phone2 (, str, )
+    Phone2 of secondary system admin.
 
 
 

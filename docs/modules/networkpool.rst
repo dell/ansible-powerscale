@@ -116,6 +116,10 @@ Parameters
         Network address in the format xxx.xxx.xxx.xxx.
 
 
+      route_state (optional, str, add)
+        This signifies if route needs to be added or removed.
+
+
 
     sc_dns_zone (optional, str, None)
       SmartConnect zone name for the pool.
@@ -190,7 +194,7 @@ Notes
 
 .. note::
    - The *check_mode* is not supported.
-   - Removal of static routes and *sc_dns_zone_aliases* is not supported.
+   - Removal of *sc_dns_zone_aliases* is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -220,19 +224,20 @@ Examples
             lnn: 1
         iface_state: "add"
         sc_params:
-        sc_dns_zone: "10.230.**.***"
-        sc_connect_policy: "throughput"
-        sc_failover_policy: "throughput"
-        rebalance_policy: "auto"
-        alloc_method: "static"
-        sc_auto_unsuspend_delay: 200
-        sc_ttl: 200
-        sc_dns_zone_aliases:
-          - "Test"
-        static_routes:
-          - gateway: "10.**.**.**"
-            prefix_len: 21
-            subnet: "10.**.**.**"
+          sc_dns_zone: "10.230.**.***"
+          sc_connect_policy: "throughput"
+          sc_failover_policy: "throughput"
+          rebalance_policy: "auto"
+          alloc_method: "static"
+          sc_auto_unsuspend_delay: 200
+          sc_ttl: 200
+          sc_dns_zone_aliases:
+            - "Test"
+          static_routes:
+            - gateway: "10.**.**.**"
+              prefix_len: 21
+              subnet: "10.**.**.**"
+              route_state: "add"
         pool: "Test_Pool_2"
         access_zone: "system"
         state: "present"
@@ -258,29 +263,34 @@ Examples
         subnet: "subnet0"
         pool: "Test_Pool_2"
         additional_pool_params:
-        ranges:
-          - low: "10.230.**.***"
-            high: "10.230.**.***"
-        range_state: "add"
-        ifaces:
-          - iface: "ext-1"
-            lnn: 1
-        iface_state: "add"
+          ranges:
+            - low: "10.230.**.***"
+              high: "10.230.**.***"
+          range_state: "add"
+          ifaces:
+            - iface: "ext-1"
+              lnn: 1
+          iface_state: "add"
         sc_params:
-        sc_dns_zone: "10.230.**.***"
-        sc_connect_policy: "throughput"
-        sc_failover_policy: "throughput"
-        rebalance_policy: "auto"
-        alloc_method: "static"
-        sc_auto_unsuspend_delay: 200
-        sc_ttl: 200
-        sc_dns_zone_aliases:
-          - "Test"
-        static_routes:
-          - gateway: "10.**.**.**"
-            prefix_len: 21
-            subnet: "10.**.**.**"
-        aggregation_mode: "fec"
+          sc_dns_zone: "10.230.**.***"
+          sc_connect_policy: "throughput"
+          sc_failover_policy: "throughput"
+          rebalance_policy: "auto"
+          alloc_method: "static"
+          sc_auto_unsuspend_delay: 200
+          sc_ttl: 200
+          sc_dns_zone_aliases:
+            - "Test"
+          static_routes:
+            - gateway: "10.**.**.**"
+              prefix_len: 21
+              subnet: "10.**.**.**"
+              route_state: "remove"
+            - gateway: "10.**.**.**"
+              prefix_len: 24
+              subnet: "10.**.**.**"
+              route_state: "add"
+          aggregation_mode: "fec"
         description: "Pool Created by Ansible Modify"
         state: "present"
 
@@ -419,5 +429,6 @@ Authors
 ~~~~~~~
 
 - Meenakshi Dembi (@dembim) <ansible.team@dell.com>
-- Pavan Mudunuri(@Pavan-Mudunuri) <ansible.team@dell.com>
+- Pavan Mudunuri (@Pavan-Mudunuri) <ansible.team@dell.com>
+- Bhavneet Sharma (@Bhavneet-Sharma) <ansible.team@dell.com>
 
