@@ -14,7 +14,7 @@ name: powerscale
 
 # The version of the collection.
 # Must be compatible with semantic versioning
-version: 2.4.0
+version: 2.4.1
 
 # The path to the Markdown (.md) readme file.
 # This path is relative to the root of the collection.
@@ -66,13 +66,13 @@ tags: [storage]
 dependencies: {}
 
 # The URL of the originating SCM repository
-repository: https://github.com/dell/ansible-powerscale/tree/2.4.0
+repository: https://github.com/dell/ansible-powerscale/tree/2.4.1
 
 # The URL to any online docs
-documentation: https://github.com/dell/ansible-powerscale/tree/2.4.0/docs
+documentation: https://github.com/dell/ansible-powerscale/tree/2.4.1/docs
 
 # The URL to the homepage of the collection/project
-homepage: https://github.com/dell/ansible-powerscale/tree/2.4.0
+homepage: https://github.com/dell/ansible-powerscale/tree/2.4.1
 
 # The URL to the collection issue tracker
 issues: https://www.dell.com/community/Automation/bd-p/Automation
