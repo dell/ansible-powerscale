@@ -1,6 +1,6 @@
 **Ansible Modules for Dell Technologies PowerScale** 
 =========================================
-### Release notes 2.4.0
+### Release notes 2.4.1
 
 >   © 2022 Dell Inc. or its subsidiaries. All rights reserved. Dell
 >   and other trademarks are trademarks of Dell Inc. or its
@@ -27,7 +27,7 @@ Table 1. Revision history
 
 | Revision | Date          | Description                                               |
 |----------|---------------|-----------------------------------------------------------|
-| 01       | December 2023 | Ansible Modules for Dell PowerScale 2.4.0                 |
+| 01       | December 2023 | Ansible Modules for Dell PowerScale 2.4.1                 |
 
 
 Product description
@@ -72,7 +72,7 @@ New Features and Enhancements
 ---------------------------
 This section describes the features of the Ansible Modules for Dell PowerScale for this release.
 
-The Ansible Modules for Dell PowerScale release 2.4.0 supports the following features:
+The Ansible Modules for Dell PowerScale release 2.4.1 supports the following features:
 
 - The SMB global settings module supports this functionality:
     - Added support for getting and modifying SMB global settings.
@@ -129,7 +129,7 @@ This section lists the limitations in this release of Ansible Modules for Dell P
 Software media, organization, and files 
 -----------
 The software package is available for download from the [Ansible Modules
-for PowerScale GitHub](https://github.com/dell/ansible-powerscale/tree/2.4.0) page.
+for PowerScale GitHub](https://github.com/dell/ansible-powerscale/tree/2.4.1) page.
 
 Additional resources
 --------------------
