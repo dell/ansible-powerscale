@@ -43,7 +43,7 @@ Should explain what happened, what was expected and how to reproduce it together
 
  - Ansible Version: [e.g. 2.15]
  - Python Version [e.g. 3.11]
- - Ansible modules for Dell PowerScale Version: [e.g. 2.4.0]
+ - Ansible modules for Dell PowerScale Version: [e.g. 2.4.1]
  - PowerScale SDK version: [e.g. isilon-sdk]
  - Any other additional information...
 
