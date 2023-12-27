@@ -250,3 +250,8 @@ releases:
         name: snmp_settings
         namespace: ''
     release_date: '2023-12-29'
+  2.4.1:
+    changes:
+      minor_changes:
+        - Document link fixes in README.
+    release_date: '2023-12-29'
