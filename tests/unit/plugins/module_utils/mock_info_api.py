@@ -80,7 +80,8 @@ class MockGatherfactsApi:
         'NTPServers': {},
         'EmailSettings': {},
         'ClusterIdentity': {},
-        'ClusterOwner': {}
+        'ClusterOwner': {},
+        'ServerCertificate': []
     }
     API = "api"
     MODULE = "module"

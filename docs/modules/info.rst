@@ -34,6 +34,8 @@ Get cluster owner, cluster identity and email settings details of the PowerScale
 
 Get SNMP settings details of the PowerScale cluster.
 
+Retrieve a list of server certificate details.
+
 
 
 Requirements
@@ -163,6 +165,8 @@ Parameters
     Cluster owner ``cluster_owner``
 
     SNMP settings - ``snmp_settings``.
+
+    Server certificate - ``server_certificate``.
 
 
   onefs_host (True, str, None)
@@ -511,6 +515,15 @@ Examples
         api_password: "{{ api_password }}"
         gather_subset:
           - smb_global_settings
+
+    - name: Get the list of server certificate.
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - server_certificate
 
     - name: Get NTP servers from PowerScale cluster
       dellemc.powerscale.info:
@@ -1763,6 +1776,59 @@ SnmpSettings (When C(snmp_settings) is in a given I(gather_subset), dict, {'read
 
   system_location (, str, )
     The cluster description of the SNMP system.
+
+
+
+ServerCertificate (When C(server_certificate) is in a given I(gather_subset), list, [{'certificate_monitor_enabled': True, 'certificate_pre_expiration_threshold': 4294, 'description': 'This the example test description', 'dnsnames': ['powerscale'], 'fingerprints': [{'type': 'SHA1', 'value': '68:b2:d5:5d:cc:b0:70:f1:f0:39:3a:bb:e0:44:49:70:6e:05:c3:ed'}, {'type': 'SHA256', 'value': '69:99:b9:c0:29:49:c9:62:e8:4b:60:05:60:a8:fa:f0:01:ab:24:43:8a:47:4c:2f:66:2c:95:a1:7c:d8:10:34'}], 'id': '6999b9c02949c962e84b600560a8faf001ab24438a474c2f662c95a17cd81034', 'issuer': 'C=IN, ST=Karnataka, L=Bangalore, O=Dell, OU=ISG, CN=powerscale, emailAddress=contact@dell.com', 'name': 'test', 'not_after': 1769586969, 'not_before': 1706514969, 'status': 'valid', 'subject': 'C=IN, ST=Karnataka, L=Bangalore, O=Dell, OU=ISG, CN=powerscale, emailAddress=contact@dell.com'}])
+  The Server certificate details.
+
+
+  description (, str, )
+    Description of the certificate.
+
+
+  id (, str, )
+    System assigned certificate id.
+
+
+  issuer (, str, )
+    Name of the certificate issuer.
+
+
+  name (, str, )
+    Name for the certificate.
+
+
+  not_after (, str, )
+    The date and time from which the certificate becomes valid and can be used for authentication and encryption.
+
+
+  not_before (, str, )
+    The date and time until which the certificate is valid and can be used for authentication and encryption.
+
+
+  status (, str, )
+    Status of the certificate.
+
+
+  fingerprints (, str, )
+    Fingerprint details of the certificate.
+
+
+  dnsnames (, list, )
+    Subject alternative names of the certificate.
+
+
+  subject (, str, )
+    Subject of the certificate.
+
+
+  certificate_monitor_enabled (, bool, )
+    Boolean value indicating whether certificate expiration monitoring is enabled.
+
+
+  certificate_pre_expiration_threshold (, int, )
+    The number of seconds before certificate expiration that the certificate expiration monitor will start raising alerts.
 
 
 

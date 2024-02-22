@@ -35,6 +35,7 @@ description:
 - Get SMB Global Settings details of the PowerScale cluster.
 - Get cluster owner, cluster identity and email settings details of the PowerScale cluster.
 - Get SNMP settings details of the PowerScale cluster.
+- Retrieve a list of server certificate details.
 
 extends_documentation_fragment:
   - dellemc.powerscale.powerscale
@@ -128,6 +129,7 @@ options:
     - Cluster identity C(cluster_identity)
     - Cluster owner C(cluster_owner)
     - SNMP settings - C(snmp_settings).
+    - Server certificate - C(server_certificate).
     required: true
     choices: [attributes, access_zones, nodes, providers, users, groups,
               smb_shares, nfs_exports, nfs_aliases, clients, synciq_reports, synciq_target_reports,
@@ -135,7 +137,8 @@ options:
               network_groupnets, network_subnets, network_pools, network_rules, network_interfaces,
               node_pools, storagepool_tiers, smb_files, user_mapping_rules, ldap,
               nfs_zone_settings, nfs_default_settings, nfs_global_settings, synciq_global_settings, s3_buckets,
-              smb_global_settings, ntp_servers, email_settings, cluster_identity, cluster_owner, snmp_settings]
+              smb_global_settings, ntp_servers, email_settings, cluster_identity, cluster_owner, snmp_settings,
+              server_certificate]
     type: list
     elements: str
 notes:
@@ -446,6 +449,15 @@ EXAMPLES = r'''
     api_password: "{{ api_password }}"
     gather_subset:
       - smb_global_settings
+
+- name: Get the list of server certificate.
+  dellemc.powerscale.info:
+    onefs_host: "{{ onefs_host }}"
+    verify_ssl: "{{ verify_ssl }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    gather_subset:
+      - server_certificate
 
 - name: Get NTP servers from PowerScale cluster
   dellemc.powerscale.info:
@@ -2074,6 +2086,73 @@ SnmpSettings:
         "system_contact": "system",
         "system_location": "cluster"
     }
+ServerCertificate:
+    description: The Server certificate details.
+    type: list
+    returned: When C(server_certificate) is in a given I(gather_subset)
+    contains:
+        description:
+            description: Description of the certificate.
+            type: str
+        id:
+            description: System assigned certificate id.
+            type: str
+        issuer:
+            description: Name of the certificate issuer.
+            type: str
+        name:
+            description: Name for the certificate.
+            type: str
+        not_after:
+            description: The date and time from which the certificate becomes valid and
+                can be used for authentication and encryption.
+            type: str
+        not_before:
+            description: The date and time until which the certificate is valid and
+                can be used for authentication and encryption.
+            type: str
+        status:
+            description: Status of the certificate.
+            type: str
+        fingerprints:
+            description: Fingerprint details of the certificate.
+            type: str
+        dnsnames:
+            description: Subject alternative names of the certificate.
+            type: list
+        subject:
+            description: Subject of the certificate.
+            type: str
+        certificate_monitor_enabled:
+            description: Boolean value indicating whether certificate expiration monitoring is enabled.
+            type: bool
+        certificate_pre_expiration_threshold:
+            description: The number of seconds before certificate expiration that the certificate expiration
+                monitor will start raising alerts.
+            type: int
+    sample:
+        [{
+            "certificate_monitor_enabled": true,
+            "certificate_pre_expiration_threshold": 4294,
+            "description": "This the example test description",
+            "dnsnames": ["powerscale"],
+            "fingerprints": [
+                {
+                    "type": "SHA1",
+                    "value": "68:b2:d5:5d:cc:b0:70:f1:f0:39:3a:bb:e0:44:49:70:6e:05:c3:ed"
+                },
+                {
+                    "type": "SHA256",
+                    "value": "69:99:b9:c0:29:49:c9:62:e8:4b:60:05:60:a8:fa:f0:01:ab:24:43:8a:47:4c:2f:66:2c:95:a1:7c:d8:10:34"
+                }],
+            "id": "6999b9c02949c962e84b600560a8faf001ab24438a474c2f662c95a17cd81034",
+            "issuer": "C=IN, ST=Karnataka, L=Bangalore, O=Dell, OU=ISG, CN=powerscale, emailAddress=contact@dell.com",
+            "name": "test",
+            "not_after": 1769586969,
+            "not_before": 1706514969,
+            "status": "valid",
+            "subject": "C=IN, ST=Karnataka, L=Bangalore, O=Dell, OU=ISG, CN=powerscale, emailAddress=contact@dell.com"
+        }]
 '''
 
 from ansible.module_utils.basic import AnsibleModule
@@ -2083,6 +2162,8 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.sh
     import SyncIQ
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.cluster \
     import Cluster
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.certificate \
+    import Certificate
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
 
@@ -2124,6 +2205,7 @@ class Info(object):
         self.synciq_api = self.isi_sdk.SyncApi(self.api_client)
         self.network_api = self.isi_sdk.NetworkApi(self.api_client)
         self.storagepool_api = self.isi_sdk.StoragepoolApi(self.api_client)
+        self.certificate_api = self.isi_sdk.CertificateApi(self.api_client)
 
     def get_attributes_list(self):
         """Get the list of attributes of a given PowerScale Storage"""
@@ -2692,6 +2774,7 @@ class Info(object):
         cluster_identity = {}
         cluster_owner = {}
         snmp_settings = {}
+        server_certificate = []
 
         if 'attributes' in str(subset):
             attributes = self.get_attributes_list()
@@ -2767,6 +2850,8 @@ class Info(object):
         if 'snmp_settings' in str(subset):
             snmp_settings = Protocol(
                 self.protocol_api, self.module).get_snmp_settings()
+        if 'server_certificate' in str(subset):
+            server_certificate = Certificate(self.certificate_api, self.module).get_server_certificate_with_default()
 
         result = dict(
             Attributes=attributes,
@@ -2803,7 +2888,8 @@ class Info(object):
             EmailSettings=email_settings,
             ClusterIdentity=cluster_identity,
             ClusterOwner=cluster_owner,
-            SnmpSettings=snmp_settings
+            SnmpSettings=snmp_settings,
+            ServerCertificate=server_certificate
         )
 
         result.update(SynciqTargetClusterCertificate=synciq_target_cluster_certificates)
@@ -2872,6 +2958,7 @@ def get_info_parameters():
                                     'cluster_identity',
                                     'cluster_owner',
                                     'snmp_settings',
+                                    'server_certificate',
                                     ]),
     )
 
