@@ -1,8 +1,8 @@
 **Ansible Modules for Dell Technologies PowerScale** 
 =========================================
-### Release notes 2.4.1
+### Release notes 2.5.0
 
->   © 2022 Dell Inc. or its subsidiaries. All rights reserved. Dell
+>   © 2024 Dell Inc. or its subsidiaries. All rights reserved. Dell
 >   and other trademarks are trademarks of Dell Inc. or its
 >   subsidiaries. Other trademarks may be trademarks of their respective
 >   owners.
@@ -27,7 +27,7 @@ Table 1. Revision history
 
 | Revision | Date          | Description                                               |
 |----------|---------------|-----------------------------------------------------------|
-| 01       | December 2023 | Ansible Modules for Dell PowerScale 2.4.1                 |
+| 01       | February 2024 | Ansible Modules for Dell PowerScale 2.5.0                 |
 
 
 Product description
@@ -65,6 +65,7 @@ The Ansible Modules for Dell PowerScale support the following features:
 - Get details, modify, import, and delete SyncIQ certificates.
 - Get details and modify SMB global settings.
 - Get details and modify SNMP settings.
+- Import, modify, setting default, and delete a server certificate.
   
 The Ansible modules use playbooks, written in yaml syntax, to list, show, create, delete, and modify each of these entities.
 
@@ -72,18 +73,12 @@ New Features and Enhancements
 ---------------------------
 This section describes the features of the Ansible Modules for Dell PowerScale for this release.
 
-The Ansible Modules for Dell PowerScale release 2.4.1 supports the following features:
+The Ansible Modules for Dell PowerScale release 2.5.0 supports the following features:
 
-- The SMB global settings module supports this functionality:
-    - Added support for getting and modifying SMB global settings.
-- The SNMP settings module supports this functionality:
-    - Added support for getting and modifying SNMP settings.
-- The network pool module supports this functionality:
-    - Added support for removing the static route for IP address pool.
-- The settings module has been enhanced to support this functionality:
-    - Added support for getting and modifying cluster owner information and cluster identity information.
+- The server certificate module supports this functionality:
+    - Added support for importing, modifying, setting defaults, and deleting server certificates.
 - The Info module has been enhanced to support this functionality.
-    - Added support for listing SMB global settings, detailed network interfaces, NTP servers, email settings, cluster identity, cluster owner and SNMP settings through info module.
+    - Added support for listing server certificates.
 
 Known issues
 ------------

@@ -83,3 +83,8 @@ plugins/modules/smb_global_settings.py validate-modules:missing-gplv3-license
 plugins/modules/snmp_settings.py validate-modules:missing-gplv3-license
 plugins/modules/snmp_settings.py import-2.7
 plugins/modules/snmp_settings.py compile-2.7
+plugins/modules/server_certificate.py import-2.7
+plugins/modules/server_certificate.py compile-2.7
+plugins/module_utils/storage/dell/shared_library/certificate.py compile-2.7
+plugins/module_utils/storage/dell/shared_library/certificate.py import-2.7
+plugins/modules/server_certificate.py validate-modules:missing-gplv3-license

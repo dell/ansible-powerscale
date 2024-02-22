@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2022 Dell Inc., or its subsidiaries. All Rights Reserved.
+Copyright (c) 2024 Dell Inc., or its subsidiaries. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ Should explain what happened, what was expected and how to reproduce it together
 
  - Ansible Version: [e.g. 2.15]
  - Python Version [e.g. 3.11]
- - Ansible modules for Dell PowerScale Version: [e.g. 2.4.1]
+ - Ansible modules for Dell PowerScale Version: [e.g. 2.5.0]
  - PowerScale SDK version: [e.g. isilon-sdk]
  - Any other additional information...
 

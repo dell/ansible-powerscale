@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: (c) 2021, Dell Technologies
+# Copyright: (c) 2024, Dell Technologies
 
 # Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -51,6 +51,7 @@ options:
 notes:
 - There is delay in the actual state change of the SyncIQ job. The state
   change of jobs in 'scheduled' state is not supported.
+- To start the SyncIQ job use the M(synciqpolicy) module.
 - The I(check_mode) is not supported.
 '''
 

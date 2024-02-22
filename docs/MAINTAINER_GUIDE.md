@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2022 Dell Inc., or its subsidiaries. All Rights Reserved.
+Copyright (c) 2024 Dell Inc., or its subsidiaries. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ If a candidate is approved, a Maintainer contacts the candidate to invite them t
 ## Maintainer policies
 
 * Lead by example
-* Follow the [Code of Conduct](https://github.com/dell/ansible-powerscale/blob/2.4.1/docs/CODE_OF_CONDUCT.md) and the guidelines in the [Contributing](https://github.com/dell/ansible-powerscale/blob/2.4.1/docs/CONTRIBUTING.md) and [Committer](https://github.com/dell/ansible-powerscale/blob/2.4.1/docs/COMMITTER_GUIDE.md) guides
+* Follow the [Code of Conduct](https://github.com/dell/ansible-powerscale/blob/2.5.0/docs/CODE_OF_CONDUCT.md) and the guidelines in the [Contributing](https://github.com/dell/ansible-powerscale/blob/2.5.0/docs/CONTRIBUTING.md) and [Committer](https://github.com/dell/ansible-powerscale/blob/2.5.0/docs/COMMITTER_GUIDE.md) guides
 * Promote a friendly and collaborative environment within our community
 * Be actively engaged in discussions, answering questions, updating defects, and reviewing pull requests
 * Criticize code, not people. Ideally, tell the contributor a better way to do what they need.

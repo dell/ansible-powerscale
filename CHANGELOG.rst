@@ -4,6 +4,20 @@ Dellemc.Powerscale Change Logs
 
 .. contents:: Topics
 
+
+v2.5.0
+======
+
+Minor Changes
+-------------
+
+- Added support for listing server certificates in Info module.
+
+New Modules
+-----------
+
+- dellemc.powerscale.server_certificate - Manage server certificates on a PowerScale Storage System.
+
 v2.4.1
 ======
 
