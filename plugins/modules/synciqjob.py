@@ -51,7 +51,7 @@ options:
 notes:
 - There is delay in the actual state change of the SyncIQ job. The state
   change of jobs in 'scheduled' state is not supported.
-- To start the SyncIQ job use the M(synciqpolicy) module.
+- To start the SyncIQ job use the M(dellemc.powerscale.synciqpolicy) module.
 - The I(check_mode) is not supported.
 '''
 
