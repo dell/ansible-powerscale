@@ -102,7 +102,7 @@
             verify_ssl: "{{ verify_ssl }}"
             state: absent
             alias_name: certificate_name
-        
+
         - name: To import the new server certificate
           dellemc.powerscale.server_certificate:
             onefs_host: "{{ onefs_host }}"
