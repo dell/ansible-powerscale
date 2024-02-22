@@ -1,2 +1,2 @@
 fixes:
-  - "/ansible_collections/dellemc/powerstore/::"
+  - "/ansible_collections/dellemc/powerscale/::"
