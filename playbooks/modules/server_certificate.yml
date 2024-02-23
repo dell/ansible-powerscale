@@ -24,7 +24,7 @@
         certificate_key_path: "/ifs/certificates/server.key"
         certificate_key_password: "Secret@123"
 
-    - name: To import the new server certificate and set the certificate as default
+    - name: Import and set the new server certificate as default
       dellemc.powerscale.server_certificate:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"

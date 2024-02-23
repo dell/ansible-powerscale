@@ -27,20 +27,20 @@ class MockServerCertificateApi:
                 "fingerprints": [
                     {
                         "type": "SHA1",
-                        "value": "68:b2:d5:5d:cc:b0:70:f1:f0:39:3a:bb:e0:44:49:70:6e:05:c3:ed",
+                        "value": "68:b2:d5:5d:cc:b0:70:f1:f0:39:3a:bb:e0:44:49:70:6e:05:c3",
                     },
                     {
                         "type": "SHA256",
-                        "value": "69:99:b9:c0:29:49:c9:62:e8:4b:60:05:60:a8:fa:f0:01:ab:24:43:8a:47:4c:2f:66:2c:95:a1:7c:d8:10:34",
+                        "value": "69:99:b9:c0:29:49:c9:62:e8:4b:60:05:60:a8:fa:f0:01:ab:24:43:8a:47:4c:2f:66:2c:95:a1:7c:d8:10",
                     },
                 ],
                 "id": "6999b9c02949c962e84b600560a8faf001ab24438a474c2f662c95a17cd81034",
-                "issuer": "C=IN, ST=Karnataka, L=Bangalore, O=Dell, OU=ISG, CN=powerscale, emailAddress=contact@dell.com",
+                "issuer": "C=IN, ST=Karnataka, L=Bangalore, O=Dell, OU=ISG, CN=powerscale, emailAddress=info@dell.com",
                 "name": "test",
                 "not_after": 1769586969,
                 "not_before": 1706514969,
                 "status": "valid",
-                "subject": "C=IN, ST=Karnataka, L=Bangalore, O=Dell, OU=ISG, CN=powerscale, emailAddress=contact@dell.com",
+                "subject": "C=IN, ST=Karnataka, L=Bangalore, O=Dell, OU=ESG, CN=powerscale, emailAddress=info@dell.com",
             },
             {
                 "description": "This the example new_test description",
@@ -56,12 +56,12 @@ class MockServerCertificateApi:
                     },
                 ],
                 "id": "6999b9c02949c962e84b600560a8faf001ab24438a474c2f662c95a17cd81035",
-                "issuer": "C=IN, ST=Karnataka, L=Bangalore, O=Dell, OU=ISG, CN=powerscale, emailAddress=contact@dell.com",
+                "issuer": "C=IN, ST=Karnataka, L=Bangalore, O=Dell, OU=ISG, CN=powerscale, emailAddress=mail@dell.com",
                 "name": "new_test",
                 "not_after": 1769586969,
                 "not_before": 1706514969,
                 "status": "valid",
-                "subject": "C=IN, ST=Karnataka, L=Bangalore, O=Dell, OU=ISG, CN=powerscale, emailAddress=contact@dell.com",
+                "subject": "C=IN, ST=Karnataka, L=Bangalore, O=Dell, OU=ESG, CN=powerscale, emailAddress=mail@dell.com",
             },
         ]
     }
