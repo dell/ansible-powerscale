@@ -68,7 +68,7 @@ This table provides information about the software prerequisites for the Ansible
 
 | **Ansible Modules** | **OneFS Version** | **Python version** | **Python SDK version** | **Ansible**              |
 |---------------------|-----------------------|--------------------|----------------------------|--------------------------|
-| v2.5.0 | 9.3.x <br> 9.4.x <br> 9.5.x | 3.9 <br> 3.10 <br> 3.11 | 9.3.0 <br> 9.4.0 <br> 9.5.0 | 2.14 <br> 2.15 <br> 2.16 |
+| v2.5.0 | 9.3.x <br> 9.4.x <br> 9.5.x | 3.9 <br> 3.10 <br> 3.11 | 0.3.0.1 <br> 0.3.0.1 <br> 0.3.0.1 | 2.14 <br> 2.15 <br> 2.16 |
 
 # List of Ansible modules for Dell PowerScale
   * [File System Module](https://github.com/dell/ansible-powerscale/blob/2.5.0/docs/modules/filesystem.rst)
@@ -76,10 +76,10 @@ This table provides information about the software prerequisites for the Ansible
   * [User Module](https://github.com/dell/ansible-powerscale/blob/2.5.0/docs/modules/user.rst)
   * [Group Module](https://github.com/dell/ansible-powerscale/blob/2.5.0/docs/modules/group.rst)
   * [Snapshot Module](https://github.com/dell/ansible-powerscale/blob/2.5.0/docs/modules/snapshot.rst)
-  * [Snapshot Schedule Module](https://github.com/dell/ansible-powerscale/blob/2.5./docs/modules/snapshotschedule.rst)
-  * [NFS Module](https://github.com/dell/ansible-powerscale/blob/2.5./docs/modules/nfs.rst)
-  * [SMB Module](https://github.com/dell/ansible-powerscale/blob/2.5./docs/modules/smb.rst)
-  * [Smart Quota Module](https://github.com/dell/ansible-powerscale/blob/2.5./docs/modules/smartquota.rst)
+  * [Snapshot Schedule Module](https://github.com/dell/ansible-powerscale/blob/2.5.0/docs/modules/snapshotschedule.rst)
+  * [NFS Module](https://github.com/dell/ansible-powerscale/blob/2.5.0/docs/modules/nfs.rst)
+  * [SMB Module](https://github.com/dell/ansible-powerscale/blob/2.5.0/docs/modules/smb.rst)
+  * [Smart Quota Module](https://github.com/dell/ansible-powerscale/blob/2.5.0/docs/modules/smartquota.rst)
   * [Info Module](https://github.com/dell/ansible-powerscale/blob/2.5.0/docs/modules/info.rst)
   * [Active Directory Module](https://github.com/dell/ansible-powerscale/blob/2.5.0/docs/modules/ads.rst)
   * [LDAP Module](https://github.com/dell/ansible-powerscale/blob/2.5.0/docs/modules/ldap.rst)
