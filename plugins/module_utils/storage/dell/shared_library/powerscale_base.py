@@ -1,4 +1,4 @@
-# Copyright: (c) 2023, Dell Technologies
+# Copyright: (c) 2024, Dell Technologies
 
 # Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -50,6 +50,7 @@ class PowerScaleBase:
         self._auth_api = None
         self._synciq_api = None
         self._cluster_api = None
+        self._certificate_api = None
 
     @property
     def protocol_api(self):
@@ -98,3 +99,13 @@ class PowerScaleBase:
         if self._cluster_api is None:
             self._cluster_api = self.isi_sdk.ClusterApi(self.api_client)
         return self._cluster_api
+
+    @property
+    def certificate_api(self):
+        """Returns the certificate API object.
+        :return: The certificate API object.
+        :rtype: isi_sdk.CertificateApi
+        """
+        if self._certificate_api is None:
+            self._certificate_api = self.isi_sdk.CertificateApi(self.api_client)
+        return self._certificate_api
