@@ -124,7 +124,7 @@ This section lists the limitations in this release of Ansible Modules for Dell P
 Software media, organization, and files 
 -----------
 The software package is available for download from the [Ansible Modules
-for PowerScale GitHub](https://github.com/dell/ansible-powerscale/tree/2.4.1) page.
+for PowerScale GitHub](https://github.com/dell/ansible-powerscale/tree/2.5.0) page.
 
 Additional resources
 --------------------
