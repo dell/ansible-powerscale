@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2022 Dell Inc., or its subsidiaries. All Rights Reserved.
+Copyright (c) 2024 Dell Inc., or its subsidiaries. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@ You may obtain a copy of the License at
 
 The Ansible modules for Dell PowerScale repository is inspected for security vulnerabilities via blackduck scans and static code analysis.
 
-In addition to this, there are various security checks that get executed against a branch when a pull request is created/updated.  Please refer to [pull request](https://github.com/dell/ansible-powerscale/blob/2.4.1/docs/CONTRIBUTING.md#Pull-requests) for more information.
+In addition to this, there are various security checks that get executed against a branch when a pull request is created/updated.  Please refer to [pull request](https://github.com/dell/ansible-powerscale/blob/2.5.0/docs/CONTRIBUTING.md#Pull-requests) for more information.
 
 ## Reporting a vulnerability
 

@@ -77,6 +77,7 @@ Notes
 
 .. note::
    - There is delay in the actual state change of the SyncIQ job. The state change of jobs in 'scheduled' state is not supported.
+   - To start the SyncIQ job use the :ref:`dellemc.powerscale.synciqpolicy <dellemc.powerscale.synciqpolicy_module>` module.
    - The *check_mode* is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 

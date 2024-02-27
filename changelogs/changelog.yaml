@@ -255,3 +255,12 @@ releases:
       minor_changes:
         - Document link fixes in README.
     release_date: '2023-12-29'
+  2.5.0:
+    changes:
+      minor_changes:
+        - Added support for listing server certificates in Info module.
+    modules:
+      - description: Manage server certificates on a PowerScale Storage System.
+        name: server_certificate
+        namespace: ''
+    release_date: '2024-02-29'
