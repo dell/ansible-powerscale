@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: (c) 2023, Dell Technologies
+# Copyright: (c) 2024, Dell Technologies
 
 # Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -368,7 +368,7 @@ class UserMappingRule(object):
                 rule_object_payload['options'] = options_object
             rule_object_payload['user1'] = utils.isi_sdk.MappingUsersRulesRuleUser1(**rule['user1'])
             if rule['user2']:
-                rule_object_payload['user2'] = utils.isi_sdk.MappingUsersRulesRuleUser2Extended(**rule['user2'])
+                rule_object_payload['user2'] = utils.isi_sdk.MappingUsersRulesRuleUser2(**rule['user2'])
             rule_object = utils.isi_sdk.MappingUsersRulesRuleExtended(
                 **rule_object_payload
             )

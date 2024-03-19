@@ -494,7 +494,9 @@ class ServerCertificate(PowerScaleBase):
         updated, updated_cert, updated_new_cert, updated_default_cert = \
             self.get_updated_diff(module_params, certificate_details)
 
-        if (self.module.check_mode) or not updated:
+        if self.module.check_mode and (updated or not updated):
+            return updated, certificate_details
+        elif not updated:
             return updated, certificate_details
 
         updated_values = {}
@@ -571,6 +573,8 @@ class ServerCertificateCreateHandler:
             None
         """
         state = module_params['state']
+        certificate_id = module_params.get('certificate_id')
+        alias_name = module_params.get('alias_name')
         details = {}
         if state == 'present' and not certificate_details:
             changed, details = certificate_obj.import_certificate(module_params)
