@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: (c) 2019, Dell Technologies
+# Copyright: (c) 2024, Dell Technologies
 
 # Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -333,6 +333,7 @@ user_details:
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
+from pkg_resources import parse_version
 import re
 
 LOG = utils.get_logger('user')
@@ -367,6 +368,10 @@ class User(object):
 
         self.api_client = utils.get_powerscale_connection(self.module.params)
         self.api_instance = utils.isi_sdk.AuthApi(self.api_client)
+        cluster_api = utils.isi_sdk.ClusterApi(self.api_client)
+        major = str(parse_version(cluster_api.get_cluster_config().to_dict()['onefs_version']['release'].split('.')[0]))
+        minor = str(parse_version(cluster_api.get_cluster_config().to_dict()['onefs_version']['release'].split('.')[1]))
+        self.array_version = major + "." + minor
         self.role_api_instance = utils.isi_sdk.AuthRolesApi(
             self.api_client)
         self.zone_summary_api = utils.isi_sdk.ZonesSummaryApi(self.api_client)
@@ -720,7 +725,9 @@ class User(object):
                 auth_user_id, access_zone, provider_type, enabled,
                 primary_group, home_directory, shell, full_name, email)
 
-        password_changed = self.modify_password(auth_user_id, access_zone)
+        password_changed = False
+        if float(self.array_version) < 9.5:
+            password_changed = self.modify_password(auth_user_id, access_zone)
         return user_details_changed or role_changed or password_changed
 
     def delete_existing_user(self, provider_type, auth_user_id, access_zone,

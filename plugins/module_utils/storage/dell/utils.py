@@ -311,7 +311,10 @@ def find_compatible_powerscale_sdk(module_params, module=None):
                 # Adding a workaround for home_directory_template failure in later versions of SDK.
                 compatible_powerscale_sdk = "isilon_sdk.v9_1_0"
             else:
-                compatible_powerscale_sdk = "isilon_sdk.v" + array_version
+                if int(minor) >= 5:
+                    compatible_powerscale_sdk = "isilon_sdk.v9_5_0"
+                else:
+                    compatible_powerscale_sdk = "isilon_sdk.v" + array_version
             import_powerscale_sdk(compatible_powerscale_sdk)
         except Exception as e:
             HAS_POWERSCALE_SDK = False
