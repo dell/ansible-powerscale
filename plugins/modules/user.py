@@ -333,7 +333,6 @@ user_details:
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
-from pkg_resources import parse_version
 import re
 
 LOG = utils.get_logger('user')
@@ -369,8 +368,8 @@ class User(object):
         self.api_client = utils.get_powerscale_connection(self.module.params)
         self.api_instance = utils.isi_sdk.AuthApi(self.api_client)
         cluster_api = utils.isi_sdk.ClusterApi(self.api_client)
-        major = str(parse_version(cluster_api.get_cluster_config().to_dict()['onefs_version']['release'].split('.')[0]))
-        minor = str(parse_version(cluster_api.get_cluster_config().to_dict()['onefs_version']['release'].split('.')[1]))
+        major = str(cluster_api.get_cluster_config().to_dict()['onefs_version']['release'].split('.')[0])
+        minor = str(cluster_api.get_cluster_config().to_dict()['onefs_version']['release'].split('.')[1])
         self.array_version = major + "." + minor
         self.role_api_instance = utils.isi_sdk.AuthRolesApi(
             self.api_client)
