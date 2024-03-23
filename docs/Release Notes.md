@@ -1,6 +1,6 @@
 **Ansible Modules for Dell Technologies PowerScale** 
 =========================================
-### Release notes 2.5.0
+### Release notes 3.0.0
 
 >   © 2024 Dell Inc. or its subsidiaries. All rights reserved. Dell
 >   and other trademarks are trademarks of Dell Inc. or its
@@ -27,7 +27,7 @@ Table 1. Revision history
 
 | Revision | Date          | Description                                               |
 |----------|---------------|-----------------------------------------------------------|
-| 01       | February 2024 | Ansible Modules for Dell PowerScale 2.5.0                 |
+| 01       | March 2024    | Ansible Modules for Dell PowerScale 3.0.0                 |
 
 
 Product description
@@ -73,12 +73,9 @@ New Features and Enhancements
 ---------------------------
 This section describes the features of the Ansible Modules for Dell PowerScale for this release.
 
-The Ansible Modules for Dell PowerScale release 2.5.0 supports the following features:
+The Ansible Modules for Dell PowerScale release 3.0.0 supports the following features:
 
-- The server certificate module supports this functionality:
-    - Added support for importing, modifying, setting defaults, and deleting server certificates.
-- The Info module has been enhanced to support this functionality.
-    - Added support for listing server certificates.
+- Added support for OneFS version 9.7.x (Key West version).
 
 Known issues
 ------------
@@ -102,7 +99,7 @@ This section lists the limitations in this release of Ansible Modules for Dell P
 - Users and Groups 
   - Only local users and groups can be created. 
   - Operations on users and groups with very long names may fail.
-  - Modification of user password fails for OneFS version 9.5.
+  - Modification of user password is not supported for OneFS version 9.5 and above.
  
 - Filesystems
   -  Only directory quotas are supported but not user or group quotas.
@@ -124,7 +121,7 @@ This section lists the limitations in this release of Ansible Modules for Dell P
 Software media, organization, and files 
 -----------
 The software package is available for download from the [Ansible Modules
-for PowerScale GitHub](https://github.com/dell/ansible-powerscale/tree/2.5.0) page.
+for PowerScale GitHub](https://github.com/dell/ansible-powerscale/tree/3.0.0) page.
 
 Additional resources
 --------------------

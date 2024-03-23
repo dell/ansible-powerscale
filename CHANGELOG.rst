@@ -4,6 +4,13 @@ Dellemc.Powerscale Change Logs
 
 .. contents:: Topics
 
+v3.0.0
+======
+
+Minor Changes
+-------------
+
+- Added support for OneFS 9.7 Key West release.
 
 v2.5.0
 ======
