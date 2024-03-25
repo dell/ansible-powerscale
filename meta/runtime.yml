@@ -4,97 +4,97 @@ plugin_routing:
     modules:
         dellemc_powerscale_accesszone:
             tombstone:
-                removal_date: "2024-03-31"
+                removal_date: "2024-03-25"
                 warning_text: Use accesszone instead.
         dellemc_powerscale_ads:
             tombstone:
-                removal_date: "2024-03-31"
+                removal_date: "2024-03-25"
                 warning_text: Use ads instead.
         dellemc_powerscale_filesystem:
             tombstone:
-                removal_date: "2024-03-31"
+                removal_date: "2024-03-25"
                 warning_text: Use filesystem instead.
         dellemc_powerscale_group:
             tombstone:
-                removal_date: "2024-03-31"
+                removal_date: "2024-03-25"
                 warning_text: Use group instead.
         dellemc_powerscale_groupnet:
             tombstone:
-                removal_date: "2024-03-31"
+                removal_date: "2024-03-25"
                 warning_text: Use groupnet instead.
         dellemc_powerscale_gatherfacts:
             tombstone:
-                removal_date: "2024-03-31"
+                removal_date: "2024-03-25"
                 warning_text: Use info instead.
         dellemc_powerscale_ldap:
             tombstone:
-                removal_date: "2024-03-31"
+                removal_date: "2024-03-25"
                 warning_text: Use ldap instead.
         dellemc_powerscale_networkpool:
             tombstone:
-                removal_date: "2024-03-31"
+                removal_date: "2024-03-25"
                 warning_text: Use networkpool instead.
         dellemc_powerscale_networkrule:
             tombstone:
-                removal_date: "2024-03-31"
+                removal_date: "2024-03-25"
                 warning_text: Use networkrule instead.
         dellemc_powerscale_networksettings:
             tombstone:
-                removal_date: "2024-03-31"
+                removal_date: "2024-03-25"
                 warning_text: Use networksettings instead.
         dellemc_powerscale_nfs:
             tombstone:
-                removal_date: "2024-03-31"
+                removal_date: "2024-03-25"
                 warning_text: Use nfs instead.
         dellemc_powerscale_node:
             tombstone:
-                removal_date: "2024-03-31"
+                removal_date: "2024-03-25"
                 warning_text: Use node instead.
         dellemc_powerscale_settings:
             tombstone:
-                removal_date: "2024-03-31"
+                removal_date: "2024-03-25"
                 warning_text: Use settings instead.
         dellemc_powerscale_smartquota:
             tombstone:
-                removal_date: "2024-03-31"
+                removal_date: "2024-03-25"
                 warning_text: Use smartquota instead.
         dellemc_powerscale_smb:
             tombstone:
-                removal_date: "2024-03-31"
+                removal_date: "2024-03-25"
                 warning_text: Use smb instead.
         dellemc_powerscale_snapshot:
             tombstone:
-                removal_date: "2024-03-31"
+                removal_date: "2024-03-25"
                 warning_text: Use snapshot instead.
         dellemc_powerscale_snapshotschedule:
             tombstone:
-                removal_date: "2024-03-31"
+                removal_date: "2024-03-25"
                 warning_text: Use snapshotschedule instead.
         dellemc_powerscale_subnet:
             tombstone:
-                removal_date: "2024-03-31"
+                removal_date: "2024-03-25"
                 warning_text: Use subnet instead.
         dellemc_powerscale_synciqjob:
             tombstone:
-                removal_date: "2024-03-31"
+                removal_date: "2024-03-25"
                 warning_text: Use synciqjob instead.
         dellemc_powerscale_synciqpolicy:
             tombstone:
-                removal_date: "2024-03-31"
+                removal_date: "2024-03-25"
                 warning_text: Use synciqpolicy instead.
         dellemc_powerscale_synciqreports:
             tombstone:
-                removal_date: "2024-03-31"
+                removal_date: "2024-03-25"
                 warning_text: Use synciqreports instead.
         dellemc_powerscale_synciqtargetreports:
             tombstone:
-                removal_date: "2024-03-31"
+                removal_date: "2024-03-25"
                 warning_text: Use synciqtargetreports instead.
         dellemc_powerscale_user:
             tombstone:
-                removal_date: "2024-03-31"
+                removal_date: "2024-03-25"
                 warning_text: Use user instead.
         dellemc_powerscale_synciqrules:
             tombstone:
-                removal_date: "2024-03-31"
+                removal_date: "2024-03-25"
                 warning_text: Use synciqrules instead.
