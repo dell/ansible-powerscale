@@ -3,122 +3,98 @@ requires_ansible: ">=2.14.0"
 plugin_routing:
     modules:
         dellemc_powerscale_accesszone:
-            redirect: dellemc.powerscale.accesszone
-            deprecation:
-                removal_date: "2024-03-31"
+            tombstone:
+                removal_date: "2024-03-25"
                 warning_text: Use accesszone instead.
         dellemc_powerscale_ads:
-            redirect: dellemc.powerscale.ads
-            deprecation:
-                removal_date: "2024-03-31"
+            tombstone:
+                removal_date: "2024-03-25"
                 warning_text: Use ads instead.
         dellemc_powerscale_filesystem:
-            redirect: dellemc.powerscale.filesystem
-            deprecation:
-                removal_date: "2024-03-31"
+            tombstone:
+                removal_date: "2024-03-25"
                 warning_text: Use filesystem instead.
         dellemc_powerscale_group:
-            redirect: dellemc.powerscale.group
-            deprecation:
-                removal_date: "2024-03-31"
+            tombstone:
+                removal_date: "2024-03-25"
                 warning_text: Use group instead.
         dellemc_powerscale_groupnet:
-            redirect: dellemc.powerscale.groupnet
-            deprecation:
-                removal_date: "2024-03-31"
+            tombstone:
+                removal_date: "2024-03-25"
                 warning_text: Use groupnet instead.
         dellemc_powerscale_gatherfacts:
-            redirect: dellemc.powerscale.info
-            deprecation:
-                removal_date: "2024-03-31"
+            tombstone:
+                removal_date: "2024-03-25"
                 warning_text: Use info instead.
         dellemc_powerscale_ldap:
-            redirect: dellemc.powerscale.ldap
-            deprecation:
-                removal_date: "2024-03-31"
+            tombstone:
+                removal_date: "2024-03-25"
                 warning_text: Use ldap instead.
         dellemc_powerscale_networkpool:
-            redirect: dellemc.powerscale.networkpool
-            deprecation:
-                removal_date: "2024-03-31"
+            tombstone:
+                removal_date: "2024-03-25"
                 warning_text: Use networkpool instead.
         dellemc_powerscale_networkrule:
-            redirect: dellemc.powerscale.networkrule
-            deprecation:
-                removal_date: "2024-03-31"
+            tombstone:
+                removal_date: "2024-03-25"
                 warning_text: Use networkrule instead.
         dellemc_powerscale_networksettings:
-            redirect: dellemc.powerscale.networksettings
-            deprecation:
-                removal_date: "2024-03-31"
+            tombstone:
+                removal_date: "2024-03-25"
                 warning_text: Use networksettings instead.
         dellemc_powerscale_nfs:
-            redirect: dellemc.powerscale.nfs
-            deprecation:
-                removal_date: "2024-03-31"
+            tombstone:
+                removal_date: "2024-03-25"
                 warning_text: Use nfs instead.
         dellemc_powerscale_node:
-            redirect: dellemc.powerscale.node
-            deprecation:
-                removal_date: "2024-03-31"
+            tombstone:
+                removal_date: "2024-03-25"
                 warning_text: Use node instead.
         dellemc_powerscale_settings:
-            redirect: dellemc.powerscale.settings
-            deprecation:
-                removal_date: "2024-03-31"
+            tombstone:
+                removal_date: "2024-03-25"
                 warning_text: Use settings instead.
         dellemc_powerscale_smartquota:
-            redirect: dellemc.powerscale.smartquota
-            deprecation:
-                removal_date: "2024-03-31"
+            tombstone:
+                removal_date: "2024-03-25"
                 warning_text: Use smartquota instead.
         dellemc_powerscale_smb:
-            redirect: dellemc.powerscale.smb
-            deprecation:
-                removal_date: "2024-03-31"
+            tombstone:
+                removal_date: "2024-03-25"
                 warning_text: Use smb instead.
         dellemc_powerscale_snapshot:
-            redirect: dellemc.powerscale.snapshot
-            deprecation:
-                removal_date: "2024-03-31"
+            tombstone:
+                removal_date: "2024-03-25"
                 warning_text: Use snapshot instead.
         dellemc_powerscale_snapshotschedule:
-            redirect: dellemc.powerscale.snapshotschedule
-            deprecation:
-                removal_date: "2024-03-31"
+            tombstone:
+                removal_date: "2024-03-25"
                 warning_text: Use snapshotschedule instead.
         dellemc_powerscale_subnet:
-            redirect: dellemc.powerscale.subnet
-            deprecation:
-                removal_date: "2024-03-31"
+            tombstone:
+                removal_date: "2024-03-25"
                 warning_text: Use subnet instead.
         dellemc_powerscale_synciqjob:
-            redirect: dellemc.powerscale.synciqjob
-            deprecation:
-                removal_date: "2024-03-31"
+            tombstone:
+                removal_date: "2024-03-25"
                 warning_text: Use synciqjob instead.
         dellemc_powerscale_synciqpolicy:
-            redirect: dellemc.powerscale.synciqpolicy
-            deprecation:
-                removal_date: "2024-03-31"
+            tombstone:
+                removal_date: "2024-03-25"
                 warning_text: Use synciqpolicy instead.
         dellemc_powerscale_synciqreports:
-            redirect: dellemc.powerscale.synciqreports
-            deprecation:
-                removal_date: "2024-03-31"
+            tombstone:
+                removal_date: "2024-03-25"
                 warning_text: Use synciqreports instead.
         dellemc_powerscale_synciqtargetreports:
-            redirect: dellemc.powerscale.synciqtargetreports
-            deprecation:
-                removal_date: "2024-03-31"
+            tombstone:
+                removal_date: "2024-03-25"
                 warning_text: Use synciqtargetreports instead.
         dellemc_powerscale_user:
-            redirect: dellemc.powerscale.user
-            deprecation:
-                removal_date: "2024-03-31"
+            tombstone:
+                removal_date: "2024-03-25"
                 warning_text: Use user instead.
         dellemc_powerscale_synciqrules:
-            redirect: dellemc.powerscale.synciqrules
-            deprecation:
-                removal_date: "2024-03-31"
+            tombstone:
+                removal_date: "2024-03-25"
                 warning_text: Use synciqrules instead.
