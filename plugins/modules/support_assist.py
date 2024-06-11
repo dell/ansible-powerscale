@@ -467,7 +467,7 @@ class SupportAssist(PowerScaleBase):
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
-    def add_or_modify_gateway_endpoint(self, settings_params, settings_details, modify_dict):
+    def add_or_modify_gateway_endpoint(self, settings_params, settings_details, connection_dict):
         """
         Add a gateway_endpoint to the gateway_endpoints dictionary in the connection dictionary if it doesn't already exist,
         or modify it if it does by gateway_host
@@ -491,12 +491,9 @@ class SupportAssist(PowerScaleBase):
                 gateway_list.append(new_endpoint)
                 modify = True
         if modify == True:
-            if 'connection' not in modify_dict:
-                modify_dict['connection'] = {"gateway_endpoints": gateway_list}
-            else:
-                modify_dict['connection']['gateway_endpoints'] = gateway_list
+            connection_dict['gateway_endpoints'] = gateway_list
 
-        return modify_dict
+        return connection_dict
 
     def prepare_existing_network_pool_list(self, settings_details):
         """
@@ -509,7 +506,7 @@ class SupportAssist(PowerScaleBase):
             pool_list.append(pool_name)
         return pool_list
 
-    def add_or_remove_network_pools(self, settings_params, settings_details, modify_dict):
+    def add_or_remove_network_pools(self, settings_params, settings_details, connection_dict):
         """
         Add or remove a network pool parameter to/from the connection
         """
@@ -524,24 +521,26 @@ class SupportAssist(PowerScaleBase):
                     connection.get('network_pools')[pool]['pool_name'] in existing_network_pools:
                 pool_list.remove(connection.get('network_pools')[pool]['pool_name'])
         if set(existing_network_pools) != set(pool_list):
-            modify_dict['connection'] = {'network_pools': pool_list}
-        return modify_dict
+            connection_dict['connection'] = {'network_pools': pool_list}
+        return connection_dict
 
     def is_support_assist_connection_modify_required(self, settings_params, settings_details, modify_dict):
         """
         Check whether modification is required in support assist connection settings
         """
+        connection_dict  = {}
         if settings_params.get('connection'):
             connection = settings_params['connection']
             if connection.get('gateway_endpoints'):
-                modify_dict = self.add_or_modify_gateway_endpoint(settings_params=settings_params,
+                connection_dict = self.add_or_modify_gateway_endpoint(settings_params=settings_params,
                                                                   settings_details=settings_details,
-                                                                  modify_dict=modify_dict)
-            if connection.get('mode') and settings_params['connection']['mode'] != settings_details['connection'][
-                'mode']:
-                modify_dict["connection"]["mode"] = settings_params['connection']['mode']
+                                                                  connection_dict=connection_dict)
+            if connection.get('mode') and settings_params['connection']['mode'] != settings_details['connection']['mode']:
+                connection_dict['mode'] = settings_params['connection']['mode']
             if connection.get('network_pools'):
-                modify_dict = self.add_or_remove_network_pools(settings_params, settings_details, modify_dict)
+                connection_dict = self.add_or_remove_network_pools(settings_params, settings_details, connection_dict)
+            if connection_dict != {}:
+                modify_dict['connection'] = connection_dict
             return modify_dict
 
     def is_support_assist_telemetry_modify_required(self, settings_params, settings_details, modify_dict):
