@@ -3,7 +3,7 @@
 
 # Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-"""Ansible module for managing SMB global settings on PowerScale"""
+"""Ansible module for managing support assist settings on PowerScale"""
 
 from __future__ import absolute_import, division, print_function
 
@@ -30,12 +30,12 @@ options:
   connection:
     description: Allow access to .snapshot directories in share subdirectories.
     type: dict
-    contains:
+    suboptions:
       gateway_endpoints:
         description: List of gateway endpoints.
         type: list
         elements: dict
-        contains:
+        suboptions:
           gateway_host:
             description: Hostname or IP address of the gateway endpoint.
             type: str
@@ -61,28 +61,30 @@ options:
       network_pools:
         description: List of network pools.
         type: list
-        elements: dict
-        contains:
+        elements:dict
+        suboptions:
           pool_name:
             description: Name of the network pool.
             type: str
           state:
             description: State of the network pool.
             type: str
-            choices: ['absent', 'present']   
+            choices: ['absent', 'present']
+            default: 'present'
   connection_state:
     description: Set connectivity state.
     type: str
     choices: ['enabled', 'disabled']
+    default: 'enabled'
   contact:
     description: Information on the remote support contact
     type: dict
     elements: dict
-    contains:
+    suboptions:
       primary:
         description: Primary contact details.
         type: dict
-        contains:
+        suboptions:
           first_name:
             description: First name of the primary contact.
             type: str
@@ -98,7 +100,7 @@ options:
       secondary:
         description: Secondary contact details.
         type: dict
-        contains:
+        suboptions:
           first_name:
             description: First name of the secondary contact.
             type: str
@@ -110,11 +112,11 @@ options:
             type: str
           phone:
             description: Phone number of the secondary contact.
-            type: str          
+            type: str
   telemetry:
     description: Enable telemetry.
     type: dict
-    contains:
+    suboptions:
       offline_collection_period:
         description:
         - Change the offline collection period for when the connection to gateway is down.
@@ -191,7 +193,7 @@ EXAMPLES = r'''
         first_name: "Jane"
         last_name: "Doe"
         email: "jane.doe@example.com"
-        phone: "1234567891"              
+        phone: "1234567891"
     telemetry:
       offline_collection_period: 60
       telemetry_enabled: true
@@ -217,7 +219,7 @@ support_assist_details:
       connection:
         description: The server connections.
         type: complex
-        contains:
+        suboptions:
           gateway_endpoints:
             description: List of gateway endpoints.
             type: list
@@ -256,6 +258,8 @@ support_assist_details:
       connection_state:
         description: Specify the connection state.
         type: str
+        choices: ['enabled', 'disabled']
+        default: 'enabled'
       contact:
         description: Specify the contact details.
         type: complex
@@ -291,7 +295,7 @@ support_assist_details:
                 type: str
               phone:
                 description: Phone number of the secondary contact.
-                type: str            
+                type: str
       enable_download:
         description: True indicates downloads are enabled.
         type: bool
@@ -313,7 +317,7 @@ support_assist_details:
             type: int
           telemetry_enabled:
             description: Specify whether telemetry is enabled.
-            type: bool  
+            type: bool
           telemetry_persist:
             description: Specify whether telemetry is persisted.
             type: bool
@@ -487,10 +491,10 @@ class SupportAssist(PowerScaleBase):
                             new_endpoint:
                         gateway_list[endpoints] = new_endpoint
                         modify = True
-            if flag == False:
+            if flag is False:
                 gateway_list.append(new_endpoint)
                 modify = True
-        if modify == True:
+        if modify is True:
             connection_dict['gateway_endpoints'] = gateway_list
 
         return connection_dict
@@ -502,7 +506,7 @@ class SupportAssist(PowerScaleBase):
         pool_list = []
         for pool in range(len(settings_details['connection']['network_pools'])):
             pool_name = settings_details['connection']['network_pools'][pool]['subnet'] + ":" \
-                        + settings_details['connection']['network_pools'][pool]['pool']
+                + settings_details['connection']['network_pools'][pool]['pool']
             pool_list.append(pool_name)
         return pool_list
 
@@ -528,13 +532,13 @@ class SupportAssist(PowerScaleBase):
         """
         Check whether modification is required in support assist connection settings
         """
-        connection_dict  = {}
+        connection_dict = {}
         if settings_params.get('connection'):
             connection = settings_params['connection']
             if connection.get('gateway_endpoints'):
                 connection_dict = self.add_or_modify_gateway_endpoint(settings_params=settings_params,
-                                                                  settings_details=settings_details,
-                                                                  connection_dict=connection_dict)
+                                                                      settings_details=settings_details,
+                                                                      connection_dict=connection_dict)
             if connection.get('mode') and settings_params['connection']['mode'] != settings_details['connection']['mode']:
                 connection_dict['mode'] = settings_params['connection']['mode']
             if connection.get('network_pools'):
@@ -667,15 +671,15 @@ class SupportAssistModifyHandler:
     def handle(self, support_assist_obj, support_assist_params, support_assist_details):
         modify_params = support_assist_obj.is_support_assist_modify_required(settings_params=support_assist_params,
                                                                              settings_details=support_assist_details)
-        modify_params = support_assist_obj.is_support_assist_telemetry_modify_required(support_assist_params,
-                                                                                       support_assist_details,
-                                                                                       modify_params)
-        modify_params = support_assist_obj.is_support_assist_connection_modify_required(support_assist_params,
-                                                                                        support_assist_details,
-                                                                                        modify_params)
-        modify_params = support_assist_obj.is_support_assist_contact_modify_required(support_assist_params,
-                                                                                     support_assist_details,
-                                                                                     modify_params)
+        modify_params = support_assist_obj.is_support_assist_telemetry_modify_required(settings_params=support_assist_params,
+                                                                                       settings_details=support_assist_details,
+                                                                                       modify_dict=modify_params)
+        modify_params = support_assist_obj.is_support_assist_connection_modify_required(settings_params=support_assist_params,
+                                                                                        settings_details=support_assist_details,
+                                                                                        modify_dict=modify_params)
+        modify_params = support_assist_obj.is_support_assist_contact_modify_required(settings_params=support_assist_params,
+                                                                                     settings_details=support_assist_details,
+                                                                                     modify_dict=modify_params)
         if modify_params:
             changed = support_assist_obj.modify_support_assist(
                 modify_dict=modify_params)

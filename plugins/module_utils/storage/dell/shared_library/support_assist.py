@@ -25,7 +25,6 @@ class SupportAssist:
         self.support_assist_api = support_assist_api
         self.module = module
 
-
     def get_support_assist_settings(self):
         """
         Get details of support assist settings
