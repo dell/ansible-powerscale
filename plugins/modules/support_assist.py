@@ -61,7 +61,7 @@ options:
       network_pools:
         description: List of network pools.
         type: list
-        elements:dict
+        elements: dict
         suboptions:
           pool_name:
             description: Name of the network pool.
@@ -79,7 +79,6 @@ options:
   contact:
     description: Information on the remote support contact
     type: dict
-    elements: dict
     suboptions:
       primary:
         description: Primary contact details.
@@ -145,7 +144,6 @@ options:
   accepted_terms:
     description: Whether to accept or reject the terms and conditions for remote support.
     type: bool
-
 notes:
 - The I(check_mode) and idempotency is supported.
 - This module is supported for PowerScale One FS version 9.5 and above.
@@ -219,7 +217,7 @@ support_assist_details:
       connection:
         description: The server connections.
         type: complex
-        suboptions:
+        contains:
           gateway_endpoints:
             description: List of gateway endpoints.
             type: list
@@ -258,8 +256,6 @@ support_assist_details:
       connection_state:
         description: Specify the connection state.
         type: str
-        choices: ['enabled', 'disabled']
-        default: 'enabled'
       contact:
         description: Specify the contact details.
         type: complex
@@ -379,7 +375,6 @@ support_assist_details:
           "telemetry_threads": 10
         }
     }
-}
 '''
 
 from ansible.module_utils.basic import AnsibleModule
@@ -606,7 +601,7 @@ class SupportAssist(PowerScaleBase):
             connection=dict(
                 type='dict', options=dict(
                     gateway_endpoints=dict(
-                        type='list', required=False, elements='dict', options=dict(
+                        type='list', elements='dict', options=dict(
                             enabled=dict(type='bool'),
                             gateway_host=dict(type='str'),
                             gateway_port=dict(type='int'),
@@ -614,7 +609,7 @@ class SupportAssist(PowerScaleBase):
                             use_proxy=dict(type='bool'),
                             validate_ssl=dict(type='bool'))
                     ),
-                    mode=dict(type='str'),
+                    mode=dict(type='str', choices=['direct', 'gateway']),
                     network_pools=dict(type='list', elements='dict', options=dict(
                         pool_name=dict(type='str'),
                         state=dict(type='str', choices=['present', 'absent'], default='present')))
