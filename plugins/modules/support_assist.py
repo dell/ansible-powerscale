@@ -541,7 +541,7 @@ class SupportAssist(PowerScaleBase):
                 connection_dict = self.add_or_remove_network_pools(settings_params, settings_details, connection_dict)
             if connection_dict != {}:
                 modify_dict['connection'] = connection_dict
-            return modify_dict
+        return modify_dict
 
     def is_support_assist_telemetry_modify_required(self, settings_params, settings_details, modify_dict):
         """
@@ -558,7 +558,6 @@ class SupportAssist(PowerScaleBase):
                     telemetry_dict[key] = telemetry[key]
         if telemetry_dict != {}:
             modify_dict["telemetry"] = telemetry_dict
-
         return modify_dict
 
     def is_support_assist_modify_required(self, settings_params, settings_details):
@@ -666,8 +665,8 @@ class SupportAssistAcceptTermsHandler:
 
 class SupportAssistModifyHandler:
     def handle(self, support_assist_obj, support_assist_params, support_assist_details):
-        modify_params = support_assist_obj.is_support_assist_modify_required(support_assist_params,
-                                                                             support_assist_details)
+        modify_params = support_assist_obj.is_support_assist_modify_required(settings_params=support_assist_params,
+                                                                             settings_details=support_assist_details)
         modify_params = support_assist_obj.is_support_assist_telemetry_modify_required(support_assist_params,
                                                                                        support_assist_details,
                                                                                        modify_params)
