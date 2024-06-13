@@ -42,18 +42,23 @@ options:
           gateway_port:
             description: Port number of the gateway endpoint.
             type: int
+            default: 9443
           priority:
             description: Priority of the gateway endpoint.
             type: int
+            default: 1
           use_proxy:
             description: Use proxy.
             type: bool
+            default: false
           validate_ssl:
             description: Validate SSL.
             type: bool
+            default: false
           enabled:
             description: Enable the gateway endpoint.
             type: bool
+            default: true
       mode:
         description: Connection mode.
         type: str
@@ -384,6 +389,7 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.support_assist \
     import SupportAssist
+import copy
 
 LOG = utils.get_logger('support_assist')
 
@@ -466,33 +472,38 @@ class SupportAssist(PowerScaleBase):
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
-    def add_or_modify_gateway_endpoint(self, settings_params, settings_details, connection_dict):
+    def add_or_modify_gateway_endpoint(self, settings_params, settings_details, new_endpoint, gateway_list):
         """
         Add a gateway_endpoint to the gateway_endpoints dictionary in the connection dictionary if it doesn't already exist,
         or modify it if it does by gateway_host
         """
-        modify = False
-        gateway_list = settings_details['connection']['gateway_endpoints']
-        for new_endpoint in settings_params['connection']['gateway_endpoints']:
-            new_endpoint['host'] = new_endpoint['gateway_host']
-            new_endpoint['port'] = new_endpoint['gateway_port']
-            del new_endpoint['gateway_host'], new_endpoint['gateway_port']
-            flag = False
-            for endpoints in range(len(settings_details['connection']['gateway_endpoints'])):
-                if settings_details['connection']['gateway_endpoints'][endpoints]['host'] == \
-                        new_endpoint['host']:
-                    flag = True
-                    if settings_details['connection']['gateway_endpoints'][endpoints] != \
-                            new_endpoint:
-                        gateway_list[endpoints] = new_endpoint
-                        modify = True
-            if flag is False:
-                gateway_list.append(new_endpoint)
-                modify = True
-        if modify is True:
-            connection_dict['gateway_endpoints'] = gateway_list
+        new_endpoint['host'] = new_endpoint['gateway_host']
+        new_endpoint['port'] = new_endpoint['gateway_port']
+        del new_endpoint['gateway_host'], new_endpoint['gateway_port'], new_endpoint['state']
+        flag = False
+        for endpoints in range(len(settings_details['connection']['gateway_endpoints'])):
+            if settings_details['connection']['gateway_endpoints'][endpoints]['host'] == \
+                    new_endpoint['host']:
+                flag = True
+                if settings_details['connection']['gateway_endpoints'][endpoints] != \
+                        new_endpoint:
+                    gateway_list[endpoints] = new_endpoint
+        if flag is False:
+            gateway_list.append(new_endpoint)
+        return gateway_list
 
-        return connection_dict
+    def remove_gateway_endpoint(self, settings_params, new_endpoint, gateway_list):
+        """
+        Remove a gateway_endpoint from the gateway_endpoints list in the connection dictionary
+        """
+        new_endpoint['host'] = new_endpoint['gateway_host']
+        new_endpoint['port'] = new_endpoint['gateway_port']
+        del new_endpoint['gateway_host'], new_endpoint['gateway_port'], new_endpoint['state']
+        remainder_list = copy.deepcopy(gateway_list)
+        for endpoints in range(len(gateway_list)):
+            if gateway_list[endpoints] == new_endpoint:
+                remainder_list.remove(new_endpoint)
+        return remainder_list
 
     def prepare_existing_network_pool_list(self, settings_details):
         """
@@ -520,9 +531,29 @@ class SupportAssist(PowerScaleBase):
                     connection.get('network_pools')[pool]['pool_name'] in existing_network_pools:
                 pool_list.remove(connection.get('network_pools')[pool]['pool_name'])
         if set(existing_network_pools) != set(pool_list):
-            connection_dict['connection'] = {'network_pools': pool_list}
+            connection_dict['network_pools'] = pool_list
         return connection_dict
 
+    def update_gateway_endpoints(self, settings_params, settings_details, connection_dict):
+        """
+        Update the gateway_endpoints list in the connection dictionary
+        """
+        gateway_list = copy.deepcopy(settings_details['connection']['gateway_endpoints'])
+        for new_endpoint in settings_params['connection']['gateway_endpoints']:
+            if new_endpoint.get('state') == 'present':
+                gateway_list = self.add_or_modify_gateway_endpoint(settings_params=settings_params,
+                                                                   settings_details=settings_details,
+                                                                   new_endpoint=new_endpoint,
+                                                                   gateway_list=gateway_list)
+            elif new_endpoint.get('state') == 'absent':
+                gateway_list = self.remove_gateway_endpoint(settings_params=settings_params,
+                                                            new_endpoint=new_endpoint,
+                                                            gateway_list=gateway_list)
+
+        if gateway_list != settings_details['connection']['gateway_endpoints']:
+            connection_dict['gateway_endpoints'] = gateway_list
+        return connection_dict
+  
     def is_support_assist_connection_modify_required(self, settings_params, settings_details, modify_dict):
         """
         Check whether modification is required in support assist connection settings
@@ -531,9 +562,9 @@ class SupportAssist(PowerScaleBase):
         if settings_params.get('connection'):
             connection = settings_params['connection']
             if connection.get('gateway_endpoints'):
-                connection_dict = self.add_or_modify_gateway_endpoint(settings_params=settings_params,
-                                                                      settings_details=settings_details,
-                                                                      connection_dict=connection_dict)
+                connection_dict = self.update_gateway_endpoints(settings_params=settings_params,
+                                                                settings_details=settings_details,
+                                                                connection_dict=connection_dict)
             if connection.get('mode') and settings_params['connection']['mode'] != settings_details['connection']['mode']:
                 connection_dict['mode'] = settings_params['connection']['mode']
             if connection.get('network_pools'):
@@ -565,7 +596,7 @@ class SupportAssist(PowerScaleBase):
         """
         modify_dict = {}
         support_assist_keys = ["enable_download", "enable_remote_support",
-                               "automatic_case_creation"]
+                               "automatic_case_creation", "connection_state"]
         for key in support_assist_keys:
             if settings_params.get(key) is not None and \
                     settings_details[key] != settings_params[key]:
@@ -602,19 +633,19 @@ class SupportAssist(PowerScaleBase):
                 type='dict', options=dict(
                     gateway_endpoints=dict(
                         type='list', elements='dict', options=dict(
-                            enabled=dict(type='bool'),
+                            enabled=dict(type='bool', default=True),
                             gateway_host=dict(type='str'),
-                            gateway_port=dict(type='int'),
-                            priority=dict(type='int'),
-                            use_proxy=dict(type='bool'),
-                            validate_ssl=dict(type='bool'))
+                            gateway_port=dict(type='int', default=9443),
+                            priority=dict(type='int', default=1),
+                            use_proxy=dict(type='bool', default=False),
+                            validate_ssl=dict(type='bool', default=False),
+                            state=dict(type="str", choices=['present', 'absent'], default='present'))
                     ),
                     mode=dict(type='str', choices=['direct', 'gateway']),
                     network_pools=dict(type='list', elements='dict', options=dict(
                         pool_name=dict(type='str'),
                         state=dict(type='str', choices=['present', 'absent'], default='present')))
-                )
-            ),
+            )),
             connection_state=dict(type='str', choices=['enabled', 'disabled'], default='enabled'),
             enable_download=dict(type='bool'),
             enable_remote_support=dict(type='bool'),
@@ -634,6 +665,7 @@ class SupportAssist(PowerScaleBase):
                             first_name=dict(type='str'),
                             last_name=dict(type='str'),
                             phone=dict(type='str'))
+
                     )
                 )
             ),
@@ -669,12 +701,15 @@ class SupportAssistModifyHandler:
         modify_params = support_assist_obj.is_support_assist_telemetry_modify_required(settings_params=support_assist_params,
                                                                                        settings_details=support_assist_details,
                                                                                        modify_dict=modify_params)
+
         modify_params = support_assist_obj.is_support_assist_connection_modify_required(settings_params=support_assist_params,
                                                                                         settings_details=support_assist_details,
                                                                                         modify_dict=modify_params)
+
         modify_params = support_assist_obj.is_support_assist_contact_modify_required(settings_params=support_assist_params,
                                                                                      settings_details=support_assist_details,
                                                                                      modify_dict=modify_params)
+
         if modify_params:
             changed = support_assist_obj.modify_support_assist(
                 modify_dict=modify_params)
