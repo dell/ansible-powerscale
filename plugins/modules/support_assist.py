@@ -28,7 +28,7 @@ options:
     description: True indicates automatic case creation is enabled.
     type: bool
   connection:
-    description: Allow access to .snapshot directories in share subdirectories.
+    description: Support assist connection details.
     type: dict
     suboptions:
       gateway_endpoints:
@@ -59,6 +59,11 @@ options:
             description: Enable the gateway endpoint.
             type: bool
             default: true
+          state:
+            description: State of the gateway endpoint.
+            type: str
+            choices: ['absent', 'present']
+            default: 'present'
       mode:
         description: Connection mode.
         type: str
@@ -175,12 +180,13 @@ EXAMPLES = r'''
     automatic_case_creation: false
     connection:
       gateway_endpoints:
-      - enabled: true
-        gateway_host: "XX.XX.XX.XX"
-        gateway_port: 9443
-        priority: 1
-        use_proxy: false
-        validate_ssl: false
+        - enabled: true
+          gateway_host: "XX.XX.XX.XX"
+          gateway_port: 9443
+          priority: 1
+          use_proxy: false
+          validate_ssl: false
+          state: present
       network_pools:
         - pool_name: "subnet0:pool0"
           state: absent
@@ -202,6 +208,14 @@ EXAMPLES = r'''
       telemetry_enabled: true
       telemetry_persist: true
       telemetry_threads: 10
+
+- name: Accept support assist terms
+  dellemc.powerscale.support_assist:
+    onefs_host: "{{ onefs_host }}"
+    port_no: "{{ port_no }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    verify_ssl: "{{ verify_ssl }}"
     accepted_terms: true
 '''
 
@@ -553,7 +567,7 @@ class SupportAssist(PowerScaleBase):
         if gateway_list != settings_details['connection']['gateway_endpoints']:
             connection_dict['gateway_endpoints'] = gateway_list
         return connection_dict
-  
+
     def is_support_assist_connection_modify_required(self, settings_params, settings_details, modify_dict):
         """
         Check whether modification is required in support assist connection settings
@@ -581,11 +595,16 @@ class SupportAssist(PowerScaleBase):
                           "telemetry_persist", "telemetry_threads"]
         telemetry = settings_params.get('telemetry')
         telemetry_dict = {}
+
         if telemetry is not None:
-            for key in telemetry_keys:
-                if telemetry.get(key) is not None and \
-                        settings_details['telemetry'].get(key) != telemetry[key]:
-                    telemetry_dict[key] = telemetry[key]
+            if telemetry['telemetry_enabled'] is True:
+                for key in telemetry_keys:
+                    if telemetry.get(key) is not None and \
+                            settings_details['telemetry'].get(key) != telemetry[key]:
+                        telemetry_dict[key] = telemetry[key]
+            if telemetry['telemetry_enabled'] is False and \
+                    settings_details['telemetry']['telemetry_enabled'] is not False:
+                telemetry_dict['telemetry_enabled'] = telemetry['telemetry_enabled']
         if telemetry_dict != {}:
             modify_dict["telemetry"] = telemetry_dict
         return modify_dict
@@ -639,13 +658,14 @@ class SupportAssist(PowerScaleBase):
                             priority=dict(type='int', default=1),
                             use_proxy=dict(type='bool', default=False),
                             validate_ssl=dict(type='bool', default=False),
-                            state=dict(type="str", choices=['present', 'absent'], default='present'))
+                            state=dict(type='str', choices=['present', 'absent'], default='present'))
                     ),
                     mode=dict(type='str', choices=['direct', 'gateway']),
                     network_pools=dict(type='list', elements='dict', options=dict(
                         pool_name=dict(type='str'),
                         state=dict(type='str', choices=['present', 'absent'], default='present')))
-            )),
+                )
+            ),
             connection_state=dict(type='str', choices=['enabled', 'disabled'], default='enabled'),
             enable_download=dict(type='bool'),
             enable_remote_support=dict(type='bool'),

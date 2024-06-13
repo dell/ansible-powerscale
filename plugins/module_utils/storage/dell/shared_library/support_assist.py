@@ -40,6 +40,6 @@ class SupportAssist:
 
         except Exception as e:
             error_msg = f"Got error {utils.determine_error(e)} while getting" \
-                        f" support assist setings details "
+                        f" support assist settings details "
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
