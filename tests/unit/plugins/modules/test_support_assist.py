@@ -49,7 +49,32 @@ class TestSupportAssist(PowerScaleUnitBase):
             MockSupportAssistApi.get_support_assist_settings_exception_response('get_details_exception'),
             powerscale_module_mock, SupportAssistHandler)
 
-    def test_modify_support_assist_connection_response(self, powerscale_module_mock):
+    def test_modify_support_assist_network_pool_response(self, powerscale_module_mock):
+        self.set_module_params(
+            powerscale_module_mock, self.support_assist_args,
+            {
+                "connection": {
+                    "network_pools": [
+                        {
+                            "pool_name": "subnet0:pool1",
+                            "state": "absent"
+                        },
+                        {
+                            "pool_name": "subnet0:pool5",
+                            "state": "present"
+                        }
+                    ]
+                }
+            })
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
+        powerscale_module_mock.module.check_mode = False
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        powerscale_module_mock.support_assist_api.update_supportassist_settings.assert_called()
+
+    def test_modify_support_assist_gateway_endpoints_response(self, powerscale_module_mock):
         self.set_module_params(
             powerscale_module_mock, self.support_assist_args,
             {
@@ -57,38 +82,38 @@ class TestSupportAssist(PowerScaleUnitBase):
                     "gateway_endpoints": [
                         {
                             "enabled": True,
-                            "host": "XX.XX.XX.XX",
-                            "port": 9443,
+                            "gateway_host": "XX.XX.XX.XX",
+                            "gateway_port": 9443,
                             "priority": 2,
                             "use_proxy": False,
-                            "validate_ssl": False
+                            "validate_ssl": False,
+                            "state": "present"
                         },
                         {
                             "enabled": True,
-                            "host": "XX.XX.XX.XZ",
-                            "port": 9443,
+                            "gateway_host": "XX.XX.XX.XZ",
+                            "gateway_port": 9443,
                             "priority": 1,
                             "use_proxy": False,
-                            "validate_ssl": False
+                            "validate_ssl": False,
+                            "state": "present"
+                        },
+                        {
+                            "enabled": True,
+                            "gateway_host": "XX.XX.XX.XY",
+                            "gateway_port": 9443,
+                            "priority": 2,
+                            "use_proxy": False,
+                            "validate_ssl": False,
+                            "state": "absent"
                         }
                     ],
-                    "mode": "gateway",
-                    "network_pools": [
-                        {
-                            "pool_name": "subnet0:pool2",
-                            "state": "present"
-                        }
-                    ]
-                },
-                "connection_state": "enabled"
+                    "mode": "gateway"
+                }
             })
         powerscale_module_mock.get_support_assist_details = MagicMock(
             return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
         powerscale_module_mock.module.check_mode = False
-        powerscale_module_mock.is_support_assist_connection_modify_required = MagicMock()
-        powerscale_module_mock.add_or_modify_gateway_endpoint = MagicMock()
-        powerscale_module_mock.prepare_existing_network_pool_list = MagicMock()
-        powerscale_module_mock.add_or_remove_network_pools = MagicMock()
         SupportAssistHandler().handle(powerscale_module_mock,
                                       powerscale_module_mock.module.params)
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
@@ -116,7 +141,6 @@ class TestSupportAssist(PowerScaleUnitBase):
         powerscale_module_mock.get_support_assist_details = MagicMock(
             return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
         powerscale_module_mock.module.check_mode = False
-        powerscale_module_mock.is_support_assist_contact_modify_required = MagicMock()
         SupportAssistHandler().handle(powerscale_module_mock,
                                       powerscale_module_mock.module.params)
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
@@ -128,7 +152,7 @@ class TestSupportAssist(PowerScaleUnitBase):
             {
                 "telemetry": {
                     "offline_collection_period": 61,
-                    "telemetry_enabled": False,
+                    "telemetry_enabled": True,
                     "telemetry_persist": False,
                     "telemetry_threads": 11
                 }
@@ -136,7 +160,22 @@ class TestSupportAssist(PowerScaleUnitBase):
         powerscale_module_mock.get_support_assist_details = MagicMock(
             return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
         powerscale_module_mock.module.check_mode = False
-        powerscale_module_mock.is_support_assist_telemetry_modify_required = MagicMock()
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        powerscale_module_mock.support_assist_api.update_supportassist_settings.assert_called()
+
+    def test_disable_support_assist_telemetry_response(self, powerscale_module_mock):
+        self.set_module_params(
+            powerscale_module_mock, self.support_assist_args,
+            {
+                "telemetry": {
+                    "telemetry_enabled": False
+                }
+            })
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
+        powerscale_module_mock.module.check_mode = False
         SupportAssistHandler().handle(powerscale_module_mock,
                                       powerscale_module_mock.module.params)
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
@@ -154,7 +193,6 @@ class TestSupportAssist(PowerScaleUnitBase):
         powerscale_module_mock.get_support_assist_details = MagicMock(
             return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
         powerscale_module_mock.module.check_mode = False
-        powerscale_module_mock.is_support_assist_modify_required = MagicMock()
         SupportAssistHandler().handle(powerscale_module_mock,
                                       powerscale_module_mock.module.params)
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True

@@ -401,7 +401,8 @@ class TestInfo():
         "nfs_default_settings",
         "s3_buckets",
         "snmp_settings"
-        ])
+    ]
+    )
     def test_get_facts_protocols_api_exception(self, gatherfacts_module_mock, gather_subset):
         """Test the get_facts that uses the protocols api endpoint to get the exception"""
         self.get_module_args.update({
@@ -439,7 +440,8 @@ class TestInfo():
 
     @pytest.mark.parametrize("gather_subset", [
         "support_assist_settings"
-        ])
+    ]
+    )
     def test_get_facts_support_assist_api_exception(self, gatherfacts_module_mock, gather_subset):
         """Test the get_facts that uses the support assist api endpoint to get the exception"""
         self.get_module_args.update({

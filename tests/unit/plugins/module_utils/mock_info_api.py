@@ -1395,7 +1395,6 @@ class MockGatherfactsApi:
         else:
             return "Got error SDK Error message while getting support assist settings details "
 
-
     @staticmethod
     def get_gather_facts_module_response(gather_subset):
         param = "module"
