@@ -145,4 +145,3 @@ plugins/module_utils/storage/dell/shared_library/support_assist.py import-2.7
 plugins/module_utils/storage/dell/shared_library/support_assist.py compile-3.5
 plugins/module_utils/storage/dell/shared_library/support_assist.py import-3.5
 plugins/modules/support_assist.py validate-modules:missing-gplv3-license
-
