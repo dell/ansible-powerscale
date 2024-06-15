@@ -248,4 +248,3 @@
         api_password: "{{ api_password }}"
         gather_subset:
           - support_assist_settings
-
