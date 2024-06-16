@@ -716,13 +716,14 @@ class SMB(PowerScaleBase):
         return ZonesSummary(self.zones_summary_api, self.module).get_zone_base_path(access_zone)
 
     def ca_timeout_value(self):
-        if self.module.params['ca_timeout']:
-            if self.module.params['ca_timeout']['unit']:
+        if self.module.params.get('ca_timeout'):
+            ca_value = self.module.params['ca_timeout'].get('value')
+            ca_unit = self.module.params['ca_timeout'].get('unit')
+            if ca_unit:
                 ca_timeout_value = utils.get_time_in_seconds(
-                    self.module.params['ca_timeout']['value'],
-                    self.module.params['ca_timeout']['unit'])
+                    ca_value, ca_unit)
             else:
-                ca_timeout_value = self.module.params['ca_timeout']['value']
+                ca_timeout_value = ca_value
             return ca_timeout_value
         return None
 
@@ -785,11 +786,11 @@ class SMB(PowerScaleBase):
         """arrange persona dict"""
         if persona['type'] == "user" or persona['type'] == "group":
             sid = self.get_sid(name=persona['name'], type=persona['type'].upper(),
-                               provider=persona['provider_type'])
+                               provider=persona.get('provider_type'))
             tmp_dict = self.prepare_persona_dict_persona(sid, persona)
 
         else:
-            sid = Auth(self.auth_api_instance,
+            sid = Auth(self.auth_api,
                        self.module).get_wellknown_details(name=persona['name'])['id']
             tmp_dict = self.prepare_persona_dict_persona(sid, persona)
 
@@ -914,9 +915,9 @@ class SMB(PowerScaleBase):
                 'oplocks', 'impersonate_guest', 'impersonate_user',
                 'smb3_encryption_enabled', 'ca_write_integrity',
                 'host_acls', 'allow_delete_readonly', 'allow_execute_always',
-                'inhertiable_acl_path']
+                'inheritable_path_acl']
             for param in params_list:
-                if self.module.params[param]:
+                if self.module.params.get(param):
                     setattr(smb_share, param, self.module.params[param])
 
             smb_share.file_filter_extensions, smb_share.file_filter_type, \
@@ -1153,7 +1154,7 @@ class SMB(PowerScaleBase):
             zone = self.module.params['access_zone']
             if type == 'USER':
                 api_response = Auth(
-                    self.auth_api_instance,
+                    self.auth_api,
                     self.module).get_user_details(name=name, zone=zone,
                                                   provider=provider)
                 return api_response['users'][0]['sid']['id']
@@ -1292,7 +1293,7 @@ class SMB(PowerScaleBase):
         if self.module.params['path'] and \
                 self.module.params['path'] != smb_params['path']:
             error_message = "Modifying path for a SMB Share is not allowed" \
-                            "through Ansible Module"
+                            " through Ansible Module"
             self.module.fail_json(msg=error_message)
 
     def is_file_filter_param_modified(self, smb_params):
@@ -1333,9 +1334,7 @@ class SMB(PowerScaleBase):
 
         to_modify = False
         for param in smb_share_params:
-            if self.module.params[param] and \
-                    self.module.params[param] != \
-                    smb_params[param]:
+            if self.module.params.get(param) and self.module.params.get(param) != smb_params[param]:
                 to_modify = True
 
         if self.module.params['file_filter_extension'] is not None and \
@@ -1431,29 +1430,32 @@ class SMB(PowerScaleBase):
 
             smb_share = self.isi_sdk.SmbShare(
                 permissions=permissions,
-                description=self.module.params['description'],
-                ntfs_acl_support=self.module.params['ntfs_acl_support'],
-                access_based_enumeration=self.module.params[
-                    'access_based_enumeration'],
-                access_based_enumeration_root_only=self.module.params[
-                    'access_based_enumeration_root_only'],
-                browsable=self.module.params['browsable'],
-                name=self.module.params['new_share_name'],
-                allow_variable_expansion=self.module.params['allow_variable_expansion'],
-                auto_create_directory=self.module.params['auto_create_directory'],
+                description=self.module.params.get('description'),
+                ntfs_acl_support=self.module.params.get('ntfs_acl_support'),
+                access_based_enumeration=self.module.params.get(
+                    'access_based_enumeration'),
+                access_based_enumeration_root_only=self.module.params.get(
+                    'access_based_enumeration_root_only'),
+                browsable=self.module.params.get('browsable'),
+                name=self.module.params.get('new_share_name'),
+                allow_variable_expansion=self.module.params.get('allow_variable_expansion'),
+                auto_create_directory=self.module.params.get('auto_create_directory'),
                 file_filter_extensions=modify_list,
                 file_filter_type=file_filter_type,
-                file_filtering_enabled=self.module.params['file_filtering_enabled'],
+                file_filtering_enabled=self.module.params.get('file_filtering_enabled'),
                 ca_timeout=self.ca_timeout_value(),
-                strict_ca_lockout=self.module.params['strict_ca_lockout'],
-                smb3_encryption_enabled=self.module.params['smb3_encryption_enabled'],
-                ca_write_integrity=self.module.params['ca_write_integrity'],
-                change_notify=self.module.params['change_notify'],
-                oplocks=self.module.params['oplocks'],
-                impersonate_guest=self.module.params['impersonate_guest'],
-                impersonate_user=self.module.params['impersonate_user'],
+                strict_ca_lockout=self.module.params.get('strict_ca_lockout'),
+                smb3_encryption_enabled=self.module.params.get('smb3_encryption_enabled'),
+                ca_write_integrity=self.module.params.get('ca_write_integrity'),
+                change_notify=self.module.params.get('change_notify'),
+                oplocks=self.module.params.get('oplocks'),
+                impersonate_guest=self.module.params.get('impersonate_guest'),
+                impersonate_user=self.module.params.get('impersonate_user'),
                 host_acl=host_acl_list,
-                run_as_root=updated_rar)
+                run_as_root=updated_rar,
+                allow_execute_always=self.module.params.get('allow_execute_always'),
+                allow_delete_readonly=self.module.params.get('allow_delete_readonly'),
+                inheritable_path_acl=self.module.params.get('inheritable_path_acl'))
 
             smb_share = self.octal_param_update(smb_share)
 
@@ -1539,21 +1541,19 @@ class SMB(PowerScaleBase):
                     access_zone) + path
             self.module.params['path'] = effective_path
 
+    def validate_path(self, path):
+        """Validate the path"""
+        if not path or utils.is_param_empty_spaces(path):
+            self.module.fail_json(msg="Invalid path. Valid path is "
+                                  "required to create a smb share")
+
     def format_output(self, smb_details):
         """Format the output"""
-        octal_dict = "{0:o}"
-        info_msg = f"Getting Details for SMB : {self.module.params['share_name']}"
-        LOG.info(info_msg)
-        smb_details['shares'][0]['directory_create_mask(octal)'] = \
-            octal_dict.format(smb_details['shares'][0]['directory_create_mask'])
-        smb_details['shares'][0]['directory_create_mode(octal)'] = \
-            octal_dict.format(smb_details['shares'][0]['directory_create_mode'])
-        smb_details['shares'][0]['file_create_mask(octal)'] = \
-            octal_dict.format(smb_details['shares'][0]['file_create_mask'])
-        smb_details['shares'][0]['file_create_mode(octal)'] = \
-            octal_dict.format(smb_details['shares'][0]['file_create_mode'])
+        for key in ('directory_create_mask', 'directory_create_mode', 'file_create_mask', 'file_create_mode'):
+            if smb_details['shares'][0].get(key):
+                smb_details['shares'][0][f"{key}(octal)"] = "{0:o}".format(int(smb_details['shares'][0][key]))
 
-        LOG.debug('SMB Details : %s ', smb_details)
+        LOG.debug('SMB Details : %s', smb_details)
         return smb_details
 
 
@@ -1651,7 +1651,7 @@ class SMBModifyHandler:
 
             if to_modify or to_rar_modified:
                 LOG.info("Modify the SMB share details")
-                smb_obj.update_smb_details(smb_params['share_name'], smb_params, updated_rar_list)
+                smb_obj.update_smb_details(smb_params['share_name'], all_smb_params, updated_rar_list)
                 if smb_params['new_share_name']:
                     smb_details = smb_obj.get_smb_details(
                         smb_params['new_share_name'],
@@ -1670,9 +1670,7 @@ class SMBCreateHandler:
         access_zone = smb_params['access_zone']
         if state == 'present' and not smb_details:
             LOG.info(f"Creating a new SMB share {0}".format(smb_params['share_name']))
-            if not path or utils.is_param_empty_spaces(path):
-                self.module.fail_json(msg="Invalid path. Valid path is "
-                                          "required to create a smb share")
+            smb_obj.validate_path(path)
             smb_details = smb_obj.create_smb_share()
             if smb_details:
                 share_name = smb_details['id']
