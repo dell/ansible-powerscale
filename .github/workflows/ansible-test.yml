@@ -61,8 +61,8 @@ jobs:
             python: '3.9'
           - ansible: devel
             python: '3.9'
-          - ansible-version: devel
-            python-version: '3.10'
+          - ansible: devel
+            python: '3.10'
 
     steps:
       - name: Perform unit testing with ansible-test
@@ -99,8 +99,8 @@ jobs:
             python: '3.9'
           - ansible: devel
             python: '3.9'
-          - ansible-version: devel
-            python-version: '3.10'
+          - ansible: devel
+            python: '3.10'
 
     steps:
       - name: Perform sanity testing
