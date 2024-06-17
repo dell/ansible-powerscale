@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ansible-version: [stable-2.14, stable-2.15, stable-2.16, devel]
+        ansible-version: [stable-2.15, stable-2.16, stable-2.17, devel]
     steps:
       - name: Check out code
         uses: actions/checkout@v3
@@ -38,7 +38,7 @@ jobs:
 
   ###
   # Unit tests (OPTIONAL)
-  # 
+  #
   # https://docs.ansible.com/ansible/latest/dev_guide/testing_units.html
 
   unit:
@@ -50,12 +50,14 @@ jobs:
       matrix:
         python: ['3.9', '3.10', '3.11']
         ansible:
-          - stable-2.14
           - stable-2.15
           - stable-2.16
+          - stable-2.17
           - devel
         exclude:
           - ansible: stable-2.16
+            python: '3.9'
+          - ansible: stable-2.17
             python: '3.9'
           - ansible: devel
             python: '3.9'
@@ -84,12 +86,14 @@ jobs:
       matrix:
         python: ['3.9', '3.10', '3.11']
         ansible:
-          - stable-2.14
           - stable-2.15
           - stable-2.16
+          - stable-2.17
           - devel
         exclude:
           - ansible: stable-2.16
+            python: '3.9'
+          - ansible: stable-2.17
             python: '3.9'
           - ansible: devel
             python: '3.9'
@@ -112,9 +116,11 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.9", "3.10", "3.11"]
-        ansible-version: [stable-2.14, stable-2.15, stable-2.16, devel]
+        ansible-version: [stable-2.15, stable-2.16, stable-2.17, devel]
         exclude:
           - ansible-version: stable-2.16
+            python-version: '3.9'
+          - ansible-version: stable-2.17
             python-version: '3.9'
           - ansible-version: devel
             python-version: '3.9'
