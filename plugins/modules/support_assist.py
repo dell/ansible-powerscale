@@ -468,7 +468,7 @@ class SupportAssist(PowerScaleBase):
     def accept_support_assist_terms(self, support_assist_params):
         """
         Accept or reject the support assist terms
-        :param modify_dict: dict containing parameters to be modfied
+        :param support_assist_params: dict containing input parameters
         """
         try:
             msg = "Accept or reject support assist terms"
@@ -515,20 +515,20 @@ class SupportAssist(PowerScaleBase):
         del new_endpoint['gateway_host'], new_endpoint['gateway_port'], new_endpoint['state']
         remainder_list = copy.deepcopy(gateway_list)
         for endpoints in range(len(gateway_list)):
-            if gateway_list[endpoints] == new_endpoint:
-                remainder_list.remove(new_endpoint)
+            if gateway_list[endpoints]['host'] == new_endpoint['host']:
+                remainder_list.remove(gateway_list[endpoints])
         return remainder_list
 
     def prepare_existing_network_pool_list(self, settings_details):
         """
         Prepare a list of existing network pools
         """
-        pool_list = []
+        existing_pool_list = []
         for pool in range(len(settings_details['connection']['network_pools'])):
             pool_name = settings_details['connection']['network_pools'][pool]['subnet'] + ":" \
                 + settings_details['connection']['network_pools'][pool]['pool']
-            pool_list.append(pool_name)
-        return pool_list
+            existing_pool_list.append(pool_name)
+        return existing_pool_list
 
     def add_or_remove_network_pools(self, settings_params, settings_details, connection_dict):
         """
@@ -536,7 +536,7 @@ class SupportAssist(PowerScaleBase):
         """
         pool_list = self.prepare_existing_network_pool_list(settings_details=settings_details)
         connection = settings_params['connection']
-        existing_network_pools = self.prepare_existing_network_pool_list(settings_details=settings_details)
+        existing_network_pools = copy.deepcopy(pool_list)
         for pool in range(len(settings_params['connection']['network_pools'])):
             if connection.get('network_pools')[pool]['state'] == 'present' and \
                     connection.get('network_pools')[pool]['pool_name'] not in existing_network_pools:
@@ -545,6 +545,10 @@ class SupportAssist(PowerScaleBase):
                     connection.get('network_pools')[pool]['pool_name'] in existing_network_pools:
                 pool_list.remove(connection.get('network_pools')[pool]['pool_name'])
         if set(existing_network_pools) != set(pool_list):
+            if pool_list == []:
+                error_msg = "Network pool list cannot be empty."
+                LOG.error(error_msg)
+                self.module.fail_json(msg=error_msg)
             connection_dict['network_pools'] = pool_list
         return connection_dict
 
@@ -563,7 +567,6 @@ class SupportAssist(PowerScaleBase):
                 gateway_list = self.remove_gateway_endpoint(settings_params=settings_params,
                                                             new_endpoint=new_endpoint,
                                                             gateway_list=gateway_list)
-
         if gateway_list != settings_details['connection']['gateway_endpoints']:
             connection_dict['gateway_endpoints'] = gateway_list
         return connection_dict
@@ -582,7 +585,9 @@ class SupportAssist(PowerScaleBase):
             if connection.get('mode') and settings_params['connection']['mode'] != settings_details['connection']['mode']:
                 connection_dict['mode'] = settings_params['connection']['mode']
             if connection.get('network_pools'):
-                connection_dict = self.add_or_remove_network_pools(settings_params, settings_details, connection_dict)
+                connection_dict = self.add_or_remove_network_pools(settings_params=settings_params,
+                                                                   settings_details=settings_details,
+                                                                   connection_dict=connection_dict)
             if connection_dict != {}:
                 modify_dict['connection'] = connection_dict
         return modify_dict
@@ -627,6 +632,12 @@ class SupportAssist(PowerScaleBase):
 
         return modify_dict
 
+    def validate_phone(self, phone):
+      if phone is not None and not phone.isnumeric():
+          error_msg = "The contact phone is invalid"
+          LOG.error(error_msg)
+          self.module.fail_json(msg=error_msg)
+
     def is_support_assist_contact_modify_required(self, settings_params, settings_details, modify_dict):
         """
         Check whether modification is required in support assist settings
@@ -635,9 +646,11 @@ class SupportAssist(PowerScaleBase):
         if settings_params['contact']:
             if settings_params['contact']['primary']:
                 if settings_params['contact']['primary'] != settings_details['contact']['primary']:
+                    self.validate_phone(phone=settings_params['contact']['primary']['phone'])
                     contact['primary'] = settings_params['contact']['primary']
             if settings_params['contact']['secondary']:
                 if settings_params['contact']['secondary'] != settings_details['contact']['secondary']:
+                    self.validate_phone(phone=settings_params['contact']['secondary']['phone'])
                     contact['secondary'] = settings_params['contact']['secondary']
         if contact != {}:
             modify_dict['contact'] = contact
