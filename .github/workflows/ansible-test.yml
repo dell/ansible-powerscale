@@ -133,7 +133,7 @@ jobs:
           fetch-depth: 0 # needed for progressive mode to work
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
