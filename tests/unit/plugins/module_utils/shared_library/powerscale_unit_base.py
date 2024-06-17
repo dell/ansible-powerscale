@@ -37,6 +37,14 @@ class PowerScaleUnitBase:
             if error_msg not in fj_object.message:
                 raise AssertionError(fj_object.message)
 
+    def capture_fail_json_method(self, error_msg, module_mock, function_name, *args, **kwargs):
+        try:
+            func = getattr(module_mock, function_name)
+            func(*args, **kwargs)
+        except FailJsonException as fj_object:
+            if error_msg not in fj_object.message:
+                raise AssertionError(fj_object.message)
+
     def set_module_params(self, module_mock, get_module_args, params):
         get_module_args.update(params)
         module_mock.module.params = get_module_args

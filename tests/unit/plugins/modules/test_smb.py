@@ -10,6 +10,7 @@ __metaclass__ = type
 
 import pytest
 from mock.mock import MagicMock
+# pylint: disable=unused-import
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.initial_mock \
     import utils
 
@@ -340,3 +341,25 @@ class TestSMB(PowerScaleUnitBase):
             return_value=MockSMBApi.SMB)
         SMBHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
         powerscale_module_mock.protocol_api.update_smb_share.assert_called()
+
+    def test_get_smb_permissions_dict(self, powerscale_module_mock):
+        permission = MockSMBApi.PERMISSIONS
+        resp = powerscale_module_mock.get_smb_permissions_dict(permission)
+        assert resp is not None
+
+    def test_is_sid_in_permission(self, powerscale_module_mock):
+        permission_list = MockSMBApi.USER_PERM
+        sid = MockSMBApi.PERMISSIONS[0]['trustee']['id']
+        index = 0
+        smb_perm = MockSMBApi.SMB["shares"][0]["permissions"][0]
+        resp = powerscale_module_mock.is_sid_in_permission_list(permission_list, index, sid, smb_perm)
+        assert resp is True
+
+    def test_arrange_persona_dict_exp(self, powerscale_module_mock):
+        persona = {"name": "root", "type": "wellknown",
+                   "state": MockSMBApi.DENY_TYPE}
+        powerscale_module_mock.auth_api.get_auth_wellknowns.to_dict = MagicMock(return_value=MockSMBApi.WELLKNOWN)
+        self.capture_fail_json_method(
+            MockSMBApi.get_smb_exception_response("welknown_err"),
+            powerscale_module_mock, "arrange_persona_dict",
+            persona)

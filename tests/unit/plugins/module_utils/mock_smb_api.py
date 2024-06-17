@@ -54,14 +54,48 @@ class MockSMBApi:
         "allow_delete_readonly": None,
         "inheritable_path_acl": None
     }
-    WELLKNOWN_DETAILS = {
-        "wellknowns": [
-            {
-                "name": "everyone",
-                "id": "WID:123"
+
+    WELLKNOWN = [{
+        "wellknowns": {
+            "name": "root",
+            "type": "wellknown",
+            "state": DENY_TYPE
+        }
+    }]
+
+    PERMISSIONS = [
+        {
+            "permission": "read",
+            "permission_type": "allow",
+            "trustee": {
+                "id": "SID:S-1-1-0",
+                "name": "Everyone",
+                "type": "wellknown"}
+        },
+        {
+            "permission": "write",
+            "permission_type": "allow",
+            "trustee": {
+                "id": "SID:S-1-1-1",
+                "name": "Administrators",
+                "type": "user"
             }
-        ]
-    }
+        },
+        {
+            "permission": "read",
+            "permission_type": "allow",
+            "trustee": {
+                "id": "SID:S-1-1-2",
+                "name": "Guest",
+                "type": "group"
+            }
+        }]
+
+    USER_PERM = [{
+        "SID:S-1-1-0": {
+            "permission": "write",
+            "permission_type": "allow",
+        }}]
 
     SMB = {"shares": [{
         "access_based_enumeration": False,
@@ -141,5 +175,7 @@ class MockSMBApi:
             'delete_err': "Failed to delete a SMB share: test_sample_smb with error: SDK Error message",
             'modify_path_err': "Modifying path for a SMB Share is not allowed through Ansible Module",
             'sid_err': "Failed to get the user details for root in zone None and provider None due to error",
+            'smb_parm_err': "Failed to get SMB params from details",
+            'welknown_err': "Failed to get the wellknown id for wellknown root"
         }
         return err_msg_dict.get(response_type)
