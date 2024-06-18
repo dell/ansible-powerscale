@@ -655,16 +655,13 @@ class SupportAssist(PowerScaleBase):
         Check whether modification is required in support assist settings
         """
         contact = {}
-        if settings_params['contact']:
-            if settings_params['contact']['primary']:
-                if settings_params['contact']['primary'] != settings_details['contact']['primary']:
-                    self.validate_phone(phone=settings_params['contact']['primary']['phone'])
-                    contact['primary'] = settings_params['contact']['primary']
-            if settings_params['contact']['secondary']:
-                if settings_params['contact']['secondary'] != settings_details['contact']['secondary']:
-                    self.validate_phone(phone=settings_params['contact']['secondary']['phone'])
-                    contact['secondary'] = settings_params['contact']['secondary']
-        if contact != {}:
+        for contact_type in ['primary', 'secondary']:
+            contact_value = settings_params['contact'].get(contact_type)
+            if contact_value:
+                if contact_value != settings_details['contact'].get(contact_type):
+                    self.validate_phone(phone=contact_value['phone'])
+                    contact[contact_type] = contact_value
+        if contact:
             modify_dict['contact'] = contact
 
         return modify_dict

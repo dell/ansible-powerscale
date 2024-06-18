@@ -22,8 +22,6 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock
     import MockApiException
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.powerscale_unit_base \
     import PowerScaleUnitBase
-from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_sdk_response \
-    import MockSDKResponse
 
 
 class TestSupportAssist(PowerScaleUnitBase):
