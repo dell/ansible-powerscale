@@ -20,6 +20,8 @@ class MockSMBApi:
     DENY_TYPE = "deny"
     USER1 = "user"
     SYS_AZ = "system"
+    SID1 = "SID:S-1-1-0"
+    WELKNOWN = "wellknown"
     SMB_COMMON_ARGS = {
         "share_name": None,
         "path": None,
@@ -58,7 +60,7 @@ class MockSMBApi:
     WELLKNOWN = [{
         "wellknowns": {
             "name": "root",
-            "type": "wellknown",
+            "type": WELKNOWN,
             "state": DENY_TYPE
         }
     }]
@@ -66,15 +68,15 @@ class MockSMBApi:
     PERMISSIONS = [
         {
             "permission": "read",
-            "permission_type": "allow",
+            "permission_type": ALLOW_TYPE,
             "trustee": {
-                "id": "SID:S-1-1-0",
+                "id": SID1,
                 "name": "Everyone",
-                "type": "wellknown"}
+                "type": WELKNOWN}
         },
         {
             "permission": "write",
-            "permission_type": "allow",
+            "permission_type": ALLOW_TYPE,
             "trustee": {
                 "id": "SID:S-1-1-1",
                 "name": "Administrators",
@@ -83,7 +85,7 @@ class MockSMBApi:
         },
         {
             "permission": "read",
-            "permission_type": "allow",
+            "permission_type": ALLOW_TYPE,
             "trustee": {
                 "id": "SID:S-1-1-2",
                 "name": "Guest",
@@ -92,9 +94,9 @@ class MockSMBApi:
         }]
 
     USER_PERM = [{
-        "SID:S-1-1-0": {
+        SID1: {
             "permission": "write",
-            "permission_type": "allow",
+            "permission_type": ALLOW_TYPE,
         }}]
 
     SMB = {"shares": [{
@@ -121,7 +123,7 @@ class MockSMBApi:
         "file_create_mode": 64,
         "file_create_mode(octal)": "100",
         "file_filter_extensions": ["sample_extension_1"],
-        "file_filter_type": "allow",
+        "file_filter_type": ALLOW_TYPE,
         "file_filtering_enabled": True,
         "hide_dot_files": False,
         "host_acl": ["allow: root"],
@@ -145,11 +147,11 @@ class MockSMBApi:
         "path": "VALUE_SPECIFIED_IN_NO_LOG_PARAMETER",
         "permissions": [{
             "permission": "read",
-            "permission_type": "allow",
+            "permission_type": ALLOW_TYPE,
             "trustee": {
-                "id": "SID:S-1-1-0",
+                "id": SID1,
                 "name": "Everyone",
-                "type": "wellknown"}}],
+                "type": WELKNOWN}}],
         "run_as_root": [],
         "smb3_encryption_enabled": False,
         "sparse_file": False,
