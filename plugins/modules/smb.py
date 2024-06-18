@@ -17,7 +17,7 @@ version_added: '1.2.0'
 
 short_description: Manage SMB shares on PowerScale Storage System
 description:
-- Managing SMB share on PowerScale which includes
+- Managing SMB share on PowerScale which includes.
 - Create a new SMB share.
 - Modify an existing SMB share.
 - Get details of an existing SMB share.
