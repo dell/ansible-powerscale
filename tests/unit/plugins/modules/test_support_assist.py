@@ -246,6 +246,53 @@ class TestSupportAssist(PowerScaleUnitBase):
             MockSupportAssistApi.get_support_assist_settings_exception_response('update_exception'),
             powerscale_module_mock, SupportAssistHandler)
 
+    def test_empty_gateway_endpoints_exception(self, powerscale_module_mock):
+        self.support_assist_args.update(
+            {
+                "connection": {
+                    "gateway_endpoints": [
+                        {
+                            "gateway_host": "XX.XX.XX.XX",
+                            "state": "absent"
+                        },
+                        {
+                            "gateway_host": "XX.XX.XX.XY",
+                            "state": "absent"
+                        }
+                    ],
+                    "mode": "gateway"
+                }
+            })
+        self.set_module_params(powerscale_module_mock,
+                               self.support_assist_args, {})
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
+        self.capture_fail_json_call(
+            MockSupportAssistApi.get_support_assist_settings_exception_response('empty_gateway_exception'),
+            powerscale_module_mock, SupportAssistHandler)
+
+    def test_empty_network_pools_exception(self, powerscale_module_mock):
+        self.support_assist_args.update(
+            {
+                "connection": {
+                    "network_pools": [
+                        {
+                            "pool_name": "subnet0:pool1",
+                            "state": "absent"
+                        }
+                    ],
+                    "mode": "gateway"
+                }
+            })
+        self.set_module_params(powerscale_module_mock,
+                               self.support_assist_args, {})
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
+        self.capture_fail_json_call(
+            MockSupportAssistApi.get_support_assist_settings_exception_response('empty_network_pools_exception'),
+            powerscale_module_mock, SupportAssistHandler)
+
+
     def test_accept_support_assist_terms_exception(self, powerscale_module_mock):
         self.support_assist_args.update({"accepted_terms": True})
         self.set_module_params(powerscale_module_mock,

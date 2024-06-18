@@ -1296,55 +1296,7 @@ class MockGatherfactsApi:
 
     @staticmethod
     def get_support_assist_settings(response_type):
-        if response_type == "api":
-            return {
-                "automatic_case_creation": False,
-                "connection": {
-                    "gateway_endpoints": [
-                        {
-                            "enabled": True,
-                            "host": "XX.XX.XX.XX",
-                            "port": 9443,
-                            "priority": 1,
-                            "use_proxy": False,
-                            "validate_ssl": False
-                        }
-                    ],
-                    "mode": "gateway",
-                    "network_pools": [
-                        {
-                            "pool": "pool2",
-                            "subnet": "subnet0"
-                        }
-                    ]
-                },
-                "connection_state": "enabled",
-                "contact": {
-                    "primary": {
-                        "email": "abc.def@sample.com",
-                        "first_name": "abc",
-                        "last_name": "def",
-                        "phone": "1234567890"
-                    },
-                    "secondary": {
-                        "email": "kangD@example.com",
-                        "first_name": "Daniel",
-                        "last_name": "Kang",
-                        "phone": "1234567891"
-                    }
-                },
-                "enable_download": False,
-                "enable_remote_support": False,
-                "onefs_software_id": "ELMISL1019H4GY",
-                "supportassist_enabled": True,
-                "telemetry": {
-                    "offline_collection_period": 60,
-                    "telemetry_enabled": True,
-                    "telemetry_persist": True,
-                    "telemetry_threads": 10
-                }
-            }
-        elif response_type == "module":
+        if response_type == "api" or response_type == "module":
             return {
                 "automatic_case_creation": False,
                 "connection": {

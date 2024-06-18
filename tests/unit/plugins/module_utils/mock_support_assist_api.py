@@ -111,3 +111,7 @@ class MockSupportAssistApi:
             return "Modify support assist settings failed with error: SDK Error message"
         elif response_type == 'accept_terms_exception':
             return 'Accept or reject support assist terms failed with error: SDK Error message'
+        elif response_type == 'empty_gateway_exception':
+            return 'Gateway endpoints cannot be empty when the mode is gateway.'
+        elif response_type == 'empty_network_pools_exception':
+            return 'Network pool list cannot be empty.'

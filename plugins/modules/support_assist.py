@@ -509,12 +509,10 @@ class SupportAssist(PowerScaleBase):
         """
         Remove a gateway_endpoint from the gateway_endpoints list in the connection dictionary
         """
-        new_endpoint['host'] = new_endpoint['gateway_host']
-        new_endpoint['port'] = new_endpoint['gateway_port']
-        del new_endpoint['gateway_host'], new_endpoint['gateway_port'], new_endpoint['state']
+
         remainder_list = copy.deepcopy(gateway_list)
         for endpoints in range(len(gateway_list)):
-            if gateway_list[endpoints]['host'] == new_endpoint['host']:
+            if gateway_list[endpoints]['host'] == new_endpoint['gateway_host']:
                 remainder_list.remove(gateway_list[endpoints])
         return remainder_list
 
@@ -571,6 +569,18 @@ class SupportAssist(PowerScaleBase):
             connection_dict['gateway_endpoints'] = gateway_list
         return connection_dict
 
+    def validate_gateway_connections(self, settings_details, connection_dict):
+        """
+        Validate gateway connections
+        """
+        if ('mode' in connection_dict and connection_dict['mode'] == 'gateway') or (
+                settings_details['connection']['mode'] == 'gateway'):
+            if ('gateway_endpoints' in connection_dict and connection_dict['gateway_endpoints'] == []) or (
+                    settings_details['connection']['gateway_endpoints'] == []):
+                error_msg = "Gateway endpoints cannot be empty when the mode is gateway."
+                LOG.error(error_msg)
+                self.module.fail_json(msg=error_msg)
+
     def is_support_assist_connection_modify_required(self, settings_params, settings_details, modify_dict):
         """
         Check whether modification is required in support assist connection settings
@@ -588,6 +598,7 @@ class SupportAssist(PowerScaleBase):
                 connection_dict = self.add_or_remove_network_pools(settings_params=settings_params,
                                                                    settings_details=settings_details,
                                                                    connection_dict=connection_dict)
+            self.validate_gateway_connections(settings_details=settings_details, connection_dict=connection_dict)
             if connection_dict != {}:
                 modify_dict['connection'] = connection_dict
         return modify_dict
