@@ -39,6 +39,7 @@ options:
           gateway_host:
             description: Hostname or IP address of the gateway endpoint.
             type: str
+            required: true
           gateway_port:
             description: Port number of the gateway endpoint.
             type: int
@@ -677,7 +678,7 @@ class SupportAssist(PowerScaleBase):
                     gateway_endpoints=dict(
                         type='list', elements='dict', options=dict(
                             enabled=dict(type='bool', default=True),
-                            gateway_host=dict(type='str'),
+                            gateway_host=dict(type='str', required=True),
                             gateway_port=dict(type='int', default=9443),
                             priority=dict(type='int', default=1),
                             use_proxy=dict(type='bool', default=False),

@@ -292,7 +292,6 @@ class TestSupportAssist(PowerScaleUnitBase):
             MockSupportAssistApi.get_support_assist_settings_exception_response('empty_network_pools_exception'),
             powerscale_module_mock, SupportAssistHandler)
 
-
     def test_accept_support_assist_terms_exception(self, powerscale_module_mock):
         self.support_assist_args.update({"accepted_terms": True})
         self.set_module_params(powerscale_module_mock,
