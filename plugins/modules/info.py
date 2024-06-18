@@ -2170,7 +2170,7 @@ SupportAssistSettings:
     returned: always
     contains:
         automatic_case_creation:
-            description: True indicates automatic case creation is enabled.
+            description: C(True) indicates automatic case creation is enabled.
             type: bool
         connection:
             description: Support assist connection details.
@@ -2211,13 +2211,13 @@ SupportAssistSettings:
                             description: Name of the network pool.
                             type: str
                         subnet:
-                            description: The network pool subnet.
+                            description: Name of the subnet of the network pool.
                             type: str
         connection_state:
             description: Set connectivity state.
             type: str
         contact:
-            description: Information on the remote support contact
+            description: Information on the remote support contact.
             type: dict
             contains:
                 primary:
@@ -2273,7 +2273,7 @@ SupportAssistSettings:
                     - The range is 1 to 64.
                     type: int
         enable_download:
-            description: True indicates downloads are enabled
+            description: C(True) indicates downloads are enabled.
             type: bool
         enable_remote_support:
             description: Allow remote support.

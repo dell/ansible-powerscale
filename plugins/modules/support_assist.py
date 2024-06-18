@@ -25,7 +25,7 @@ author:
   - Trisha Datta (@trisha-dell) <ansible.team@dell.com>
 options:
   automatic_case_creation:
-    description: True indicates automatic case creation is enabled.
+    description: C(True) indicates automatic case creation is enabled.
     type: bool
   connection:
     description: Support assist connection details.
@@ -87,7 +87,7 @@ options:
     type: str
     choices: ['enabled', 'disabled']
   contact:
-    description: Information on the remote support contact
+    description: Information on the remote support contact.
     type: dict
     suboptions:
       primary:
@@ -143,7 +143,7 @@ options:
         - The range is 1 to 64.
         type: int
   enable_download:
-    description: True indicates downloads are enabled
+    description: C(True) indicates downloads are enabled.
     type: bool
   enable_remote_support:
     description: Allow remote support.
