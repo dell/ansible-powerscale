@@ -632,10 +632,10 @@ class SupportAssist(PowerScaleBase):
         return modify_dict
 
     def validate_phone(self, phone):
-      if phone is not None and not phone.isnumeric():
-          error_msg = "The contact phone is invalid"
-          LOG.error(error_msg)
-          self.module.fail_json(msg=error_msg)
+        if phone is not None and not phone.isnumeric():
+            error_msg = "The contact phone is invalid"
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
 
     def is_support_assist_contact_modify_required(self, settings_params, settings_details, modify_dict):
         """
