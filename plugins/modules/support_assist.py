@@ -85,7 +85,6 @@ options:
     description: Set connectivity state.
     type: str
     choices: ['enabled', 'disabled']
-    default: 'enabled'
   contact:
     description: Information on the remote support contact
     type: dict
@@ -679,7 +678,7 @@ class SupportAssist(PowerScaleBase):
                         state=dict(type='str', choices=['present', 'absent'], default='present')))
                 )
             ),
-            connection_state=dict(type='str', choices=['enabled', 'disabled'], default='enabled'),
+            connection_state=dict(type='str', choices=['enabled', 'disabled']),
             enable_download=dict(type='bool'),
             enable_remote_support=dict(type='bool'),
             enable_service=dict(type='bool'),
