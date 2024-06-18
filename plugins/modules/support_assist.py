@@ -555,8 +555,9 @@ class SupportAssist(PowerScaleBase):
         """
         Update the gateway_endpoints list in the connection dictionary
         """
+        gateway_params = copy.deepcopy(settings_params['connection']['gateway_endpoints'])
         gateway_list = copy.deepcopy(settings_details['connection']['gateway_endpoints'])
-        for new_endpoint in settings_params['connection']['gateway_endpoints']:
+        for new_endpoint in gateway_params:
             if new_endpoint.get('state') == 'present':
                 gateway_list = self.add_or_modify_gateway_endpoint(settings_params=settings_params,
                                                                    settings_details=settings_details,
@@ -697,7 +698,6 @@ class SupportAssist(PowerScaleBase):
                             first_name=dict(type='str'),
                             last_name=dict(type='str'),
                             phone=dict(type='str'))
-
                     )
                 )
             ),

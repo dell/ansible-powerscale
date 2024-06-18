@@ -2199,9 +2199,6 @@ SupportAssistSettings:
                         enabled:
                             description: Enable the gateway endpoint.
                             type: bool
-                        state:
-                            description: State of the gateway endpoint.
-                            type: str
                 mode:
                     description: Connection mode.
                     type: str
@@ -2210,11 +2207,11 @@ SupportAssistSettings:
                     type: list
                     elements: dict
                     contains:
-                        pool_name:
+                        pool:
                             description: Name of the network pool.
                             type: str
-                        state:
-                            description: State of the network pool.
+                        subnet:
+                            description: The network pool subnet.
                             type: str
         connection_state:
             description: Set connectivity state.
