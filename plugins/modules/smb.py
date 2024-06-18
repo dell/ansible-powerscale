@@ -516,7 +516,7 @@ smb_details:
             description: permission on the of the SMB Share for user/group/wellknown/
             type: list
         file_create_mask:
-            description: File create mask bit for SMB Share/
+            description: File create mask bit for SMB Share.
             type: int
         file_create_mode:
             description: File create mode bit for SMB Share.
@@ -712,7 +712,8 @@ class SMB(PowerScaleBase):
 
     def get_zone_base_path(self, access_zone):
         """Returns the base path of the Access Zone."""
-        return ZonesSummary(self.zones_summary_api, self.module).get_zone_base_path(access_zone)
+        return ZonesSummary(self.zones_summary_api,
+                            self.module).get_zone_base_path(access_zone)
 
     def ca_timeout_value(self):
         if self.module.params.get('ca_timeout'):
@@ -1333,7 +1334,8 @@ class SMB(PowerScaleBase):
 
         to_modify = False
         for param in smb_share_params:
-            if self.module.params.get(param) and self.module.params.get(param) != smb_params[param]:
+            if self.module.params.get(param) and \
+                    self.module.params.get(param) != smb_params[param]:
                 to_modify = True
 
         if self.module.params['file_filter_extension'] is not None and \
@@ -1650,7 +1652,8 @@ class SMBModifyHandler:
 
             if to_modify or to_rar_modified:
                 LOG.info("Modify the SMB share details")
-                smb_obj.update_smb_details(smb_params['share_name'], all_smb_params, updated_rar_list)
+                smb_obj.update_smb_details(smb_params['share_name'],
+                                           all_smb_params, updated_rar_list)
                 if smb_params['new_share_name']:
                     smb_details = smb_obj.get_smb_details(
                         smb_params['new_share_name'],

@@ -178,6 +178,6 @@ class MockSMBApi:
             'modify_path_err': "Modifying path for a SMB Share is not allowed through Ansible Module",
             'sid_err': "Failed to get the user details for root in zone None and provider None due to error",
             'smb_parm_err': "Failed to get SMB params from details",
-            'welknown_err': "Failed to get the wellknown id for wellknown root"
+            'wellknown_err': "Failed to get the wellknown id for wellknown root"
         }
         return err_msg_dict.get(response_type)
