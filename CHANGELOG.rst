@@ -4,6 +4,15 @@ Dellemc.Powerscale Change Logs
 
 .. contents:: Topics
 
+
+v3.1.0
+======
+
+Minor Changes
+-------------
+
+- Added support for running as root, along with other boolean flags such as allow_delete_readonly, allow_execute_always, and inheritable_path_acl.
+
 v3.0.0
 ======
 
