@@ -269,3 +269,15 @@ releases:
       minor_changes:
         - Added support for OneFS 9.7 Key West release.
     release_date: '2024-03-29'
+  3.1.0:
+    changes:
+      minor_changes:
+        - Added support for running as root, along with other boolean flags such
+          as allow_delete_readonly, allow_execute_always, and inheritable_path_acl.
+      modules:
+        - description: Managing auth roles on a PowerScale system involves
+          retrieving details of auth roles, as well as creating, modifying,
+          and deleting them.
+          name: roles
+          namespace: ''
+    release_date: '2024-06-28'
