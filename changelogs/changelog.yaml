@@ -274,8 +274,8 @@ releases:
       minor_changes:
         - Added support for running as root, along with other boolean flags such
           as allow_delete_readonly, allow_execute_always, and inheritable_path_acl.
-      modules:
-        - description: Manage auth roles on a PowerScale Storage System.
-          name: roles
-          namespace: ''
+    modules:
+      - description: Manage auth roles on a PowerScale Storage System.
+        name: roles
+        namespace: ''
     release_date: '2024-06-28'
