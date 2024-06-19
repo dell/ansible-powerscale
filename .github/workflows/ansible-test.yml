@@ -124,7 +124,7 @@ jobs:
         exclude:
           - ansible-version: stable-2.16
             python-version: '3.9'
-          - python-version: "3.9"
+          - python-version: '3.9'
             ansible-version: stable-2.17
           - ansible-version: devel
             python-version: '3.10'
