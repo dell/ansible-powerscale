@@ -814,7 +814,6 @@ class SMB(PowerScaleBase):
         """set deny list"""
         remove_deny_list = list()
         if deny_rar_list and len(deny_rar_list) != 0:
-            LOG.info("Deny list is not empty")
             for deny in deny_rar_list:
                 if all_smb_rar_list and deny in all_smb_rar_list:
                     remove_deny_list.append(deny)
@@ -842,9 +841,9 @@ class SMB(PowerScaleBase):
         if tmp_all_list:
 
             for item2 in tmp_all_list:
-                LOG.info("item2 : %s", item2)
+
                 if item2 not in remove_list:
-                    LOG.info("item2 not in remove_list")
+
                     final_rar_list.append(item2)
 
         if final_rar_list != smb_root_list:
@@ -862,7 +861,6 @@ class SMB(PowerScaleBase):
             root_list = self.remove_duplicates(root_list)
 
             for persona in root_list:
-                LOG.debug("run as root persona : %s", persona)
 
                 if persona['state'] == "allow":
                     add_dict = self.arrange_persona_dict(persona)
@@ -1334,7 +1332,7 @@ class SMB(PowerScaleBase):
 
         to_modify = False
         for param in smb_share_params:
-            if self.module.params.get(param) and \
+            if self.module.params.get(param) is not None and \
                     self.module.params.get(param) != smb_params[param]:
                 to_modify = True
 
