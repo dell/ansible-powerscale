@@ -13,6 +13,11 @@ Minor Changes
 
 - Added support for running as root, along with other boolean flags such as allow_delete_readonly, allow_execute_always, and inheritable_path_acl.
 
+New Modules
+-----------
+
+- dellemc.powerscale.roles - Manage auth roles on a PowerScale Storage System.
+
 v3.0.0
 ======
 
