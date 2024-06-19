@@ -1,5 +1,13 @@
 # Ansible Modules for Dell Technologies PowerScale
 
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](https://github.com/dell/ansible-powerscale/blob/main/docs/CODE_OF_CONDUCT.md)
+[![License](https://img.shields.io/github/license/dell/ansible-powerscale)](https://github.com/dell/ansible-powerscale/blob/main/LICENSE)
+[![Python version](https://img.shields.io/badge/python-3.9.6+-blue.svg)](https://www.python.org/downloads/)
+[![Ansible version](https://img.shields.io/badge/ansible-2.15.6+-blue.svg)](https://pypi.org/project/ansible/)
+[![Pypowerscale](https://img.shields.io/github/v/release/dell/python-powerscale?include_prereleases&label=Pypowerscale&style=flat-square)](https://github.com/dell/python-powerscale/releases)
+[![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/dell/ansible-powerscale?include_prereleases&label=latest&style=flat-square)](https://github.com/dell/ansible-powerscale/releases)
+[![codecov](https://codecov.io/gh/dell/ansible-powerscale/branch/main/graph/badge.svg)](https://app.codecov.io/gh/dell/ansible-powerscale)
+
 The Ansible Modules for Dell Technologies (Dell) PowerScale allow Data Center and IT administrators to use RedHat Ansible to automate and orchestrate the configuration and management of Dell PowerScale arrays.
 
 The Ansible Modules for Dell PowerScale support the following features:
