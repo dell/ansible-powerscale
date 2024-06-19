@@ -132,7 +132,9 @@ options:
         - The range is 0 to 86400.
         type: int
       telemetry_enabled:
-        description: Change the status of telemetry.
+        description:
+        - Change the status of telemetry.
+        - When set to C(False), modification of other telemetry suboptions will be idempotent.
         type: bool
       telemetry_persist:
         description: Change if files are kept after upload.

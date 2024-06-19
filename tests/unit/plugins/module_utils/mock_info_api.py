@@ -82,7 +82,7 @@ class MockGatherfactsApi:
         'ClusterIdentity': {},
         'ClusterOwner': {},
         'ServerCertificate': [],
-        'SupportAssistSettings': {}
+        'support_assist_settings': {}
     }
     API = "api"
     MODULE = "module"

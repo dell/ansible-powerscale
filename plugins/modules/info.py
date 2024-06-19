@@ -2164,7 +2164,7 @@ ServerCertificate:
             "status": "valid",
             "subject": "C=IN, ST=Karnataka, L=Bangalore, O=Dell, OU=ISG, CN=powerscale, emailAddress=contact@dell.com"
         }]
-SupportAssistSettings:
+support_assist_settings:
     description: The support assist settings details.
     type: dict
     returned: always
@@ -2279,7 +2279,7 @@ SupportAssistSettings:
             description: Allow remote support.
             type: bool
         enable_service:
-            description: Enable/disable SupportAssist service.
+            description: Enable/disable Support Assist service.
             type: bool
         accepted_terms:
             description: Whether to accept or reject the terms and conditions for remote support.
@@ -3083,7 +3083,7 @@ class Info(object):
             ClusterOwner=cluster_owner,
             SnmpSettings=snmp_settings,
             ServerCertificate=server_certificate,
-            SupportAssistSettings=support_assist_settings
+            support_assist_settings=support_assist_settings
         )
 
         result.update(SynciqTargetClusterCertificate=synciq_target_cluster_certificates)

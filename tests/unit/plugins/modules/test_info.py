@@ -417,7 +417,7 @@ class TestInfo():
             gather_subset) == gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
 
     @pytest.mark.parametrize("input_params", [
-        {"gather_subset": "support_assist_settings", "return_key": "SupportAssistSettings"}
+        {"gather_subset": "support_assist_settings", "return_key": "support_assist_settings"}
     ]
     )
     def test_get_facts_support_assist_api_module(self, gatherfacts_module_mock, input_params):
