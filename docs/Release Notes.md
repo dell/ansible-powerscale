@@ -67,6 +67,7 @@ The Ansible Modules for Dell PowerScale support the following features:
 - Get details and modify SNMP settings.
 - Import, modify, setting default, and delete a server certificate.
 - Get details, create, modify, delete of auth roles.
+- Get details, and modify support assist settings.
   
 The Ansible modules use playbooks, written in yaml syntax, to list, show, create, delete, and modify each of these entities.
 
@@ -77,6 +78,7 @@ This section describes the features of the Ansible Modules for Dell PowerScale f
 The Ansible Modules for Dell PowerScale release 3.1.0 supports the following features:
 
 - Added support for Get, create, modify, delete auth roles.
+- Added support for Get, and modify support assist settings.
 - Added support for running as root, allow_delete_readonly, allow_execute_always, inheritable_path_acl.
 
 Known issues
