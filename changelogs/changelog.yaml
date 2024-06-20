@@ -279,4 +279,7 @@ releases:
       - description: Manage auth roles on a PowerScale Storage System.
         name: roles
         namespace: ''
+      - description: Manage support assist settings on a PowerScale Storage System.
+        name: support_assist
+        namespace: ''
     release_date: '2024-06-28'

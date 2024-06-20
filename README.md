@@ -44,6 +44,8 @@ The Ansible Modules for Dell PowerScale support the following features:
 - Get details and modify SMB global settings.
 - Get details and modify SNMP settings.
 - Get details, import, modify, setting default and delete server certificates.
+- Get details, create, modify, delete auth roles.
+- Get details, modify support assist settings.
 
 The tasks can be executed by running simple playbooks written in yaml syntax.
 
@@ -119,6 +121,7 @@ This table provides information about the software prerequisites for the Ansible
   * [SNMP Settings Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/snmp_settings.rst)
   * [Server Certificate Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/server_certificate.rst)
   * [Roles](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/roles.rst)
+  * [Roles](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/support_assist.rst)
 
 
 ## Installation and execution of Ansible modules for Dell PowerScale
