@@ -616,7 +616,8 @@ class SupportAssist(PowerScaleBase):
         telemetry_dict = {}
 
         if telemetry is not None:
-            if telemetry['telemetry_enabled'] is True:
+            if telemetry['telemetry_enabled'] is True or \
+                    (telemetry['telemetry_enabled'] is None and settings_details['telemetry']['telemetry_enabled'] is True):
                 for key in telemetry_keys:
                     if telemetry.get(key) is not None and \
                             settings_details['telemetry'].get(key) != telemetry[key]:
