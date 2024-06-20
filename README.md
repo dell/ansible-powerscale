@@ -44,8 +44,8 @@ The Ansible Modules for Dell PowerScale support the following features:
 - Get details and modify SMB global settings.
 - Get details and modify SNMP settings.
 - Get details, import, modify, setting default and delete server certificates.
-- Get details, create, modify, delete auth roles.
-- Get details, modify support assist settings.
+- Get details, create, modify, and delete auth roles.
+- Get details, and modify support assist settings.
 
 The tasks can be executed by running simple playbooks written in yaml syntax.
 
