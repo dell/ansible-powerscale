@@ -51,6 +51,7 @@ class PowerScaleBase:
         self._synciq_api = None
         self._cluster_api = None
         self._certificate_api = None
+        self._support_assist_api = None
 
     @property
     def protocol_api(self):
@@ -109,3 +110,15 @@ class PowerScaleBase:
         if self._certificate_api is None:
             self._certificate_api = self.isi_sdk.CertificateApi(self.api_client)
         return self._certificate_api
+
+    @property
+    def support_assist_api(self):
+        """
+        Returns the support assist API object.
+
+        :return: The support assist API object.
+        :rtype: isi_sdk.SupportassistApi
+        """
+        if self._support_assist_api is None:
+            self._support_assist_api = self.isi_sdk.SupportassistApi(self.api_client)
+        return self._support_assist_api

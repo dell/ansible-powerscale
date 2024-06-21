@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: (c) 2019, Dell Technologies
+# Copyright: (c) 2019-2024, Dell Technologies
 
 # Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -36,6 +36,7 @@ description:
 - Get cluster owner, cluster identity and email settings details of the PowerScale cluster.
 - Get SNMP settings details of the PowerScale cluster.
 - Retrieve a list of server certificate details.
+- Get support assist settings details of the PowerScale cluster.
 
 extends_documentation_fragment:
   - dellemc.powerscale.powerscale
@@ -130,6 +131,7 @@ options:
     - Cluster owner C(cluster_owner)
     - SNMP settings - C(snmp_settings).
     - Server certificate - C(server_certificate).
+    - Support assist settings- C(support_assist_settings).
     required: true
     choices: [attributes, access_zones, nodes, providers, users, groups,
               smb_shares, nfs_exports, nfs_aliases, clients, synciq_reports, synciq_target_reports,
@@ -138,7 +140,7 @@ options:
               node_pools, storagepool_tiers, smb_files, user_mapping_rules, ldap,
               nfs_zone_settings, nfs_default_settings, nfs_global_settings, synciq_global_settings, s3_buckets,
               smb_global_settings, ntp_servers, email_settings, cluster_identity, cluster_owner, snmp_settings,
-              server_certificate]
+              server_certificate, support_assist_settings]
     type: list
     elements: str
 notes:
@@ -503,6 +505,15 @@ EXAMPLES = r'''
     api_password: "{{ api_password }}"
     gather_subset:
       - cluster_owner
+
+- name: Get support assist settings from PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{ onefs_host }}"
+    verify_ssl: "{{ verify_ssl }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    gather_subset:
+      - support_assist_settings
 '''
 
 RETURN = r'''
@@ -2153,6 +2164,181 @@ ServerCertificate:
             "status": "valid",
             "subject": "C=IN, ST=Karnataka, L=Bangalore, O=Dell, OU=ISG, CN=powerscale, emailAddress=contact@dell.com"
         }]
+support_assist_settings:
+    description: The support assist settings details.
+    type: dict
+    returned: always
+    contains:
+        automatic_case_creation:
+            description: C(True) indicates automatic case creation is enabled.
+            type: bool
+        connection:
+            description: Support assist connection details.
+            type: dict
+            contains:
+                gateway_endpoints:
+                    description: List of gateway endpoints.
+                    type: list
+                    elements: dict
+                    contains:
+                        gateway_host:
+                            description: Hostname or IP address of the gateway endpoint.
+                            type: str
+                        gateway_port:
+                            description: Port number of the gateway endpoint.
+                            type: int
+                        priority:
+                            description: Priority of the gateway endpoint.
+                            type: int
+                        use_proxy:
+                            description: Use proxy.
+                            type: bool
+                        validate_ssl:
+                            description: Validate SSL.
+                            type: bool
+                        enabled:
+                            description: Enable the gateway endpoint.
+                            type: bool
+                mode:
+                    description: Connection mode.
+                    type: str
+                network_pools:
+                    description: List of network pools.
+                    type: list
+                    elements: dict
+                    contains:
+                        pool:
+                            description: Name of the network pool.
+                            type: str
+                        subnet:
+                            description: Name of the subnet of the network pool.
+                            type: str
+        connection_state:
+            description: Set connectivity state.
+            type: str
+        contact:
+            description: Information on the remote support contact.
+            type: dict
+            contains:
+                primary:
+                    description: Primary contact details.
+                    type: dict
+                    contains:
+                        first_name:
+                            description: First name of the primary contact.
+                            type: str
+                        last_name:
+                            description: Last name of the primary contact.
+                            type: str
+                        email:
+                            description: Email address of the primary contact.
+                            type: str
+                        phone:
+                            description: Phone number of the primary contact.
+                            type: str
+                secondary:
+                    description: Secondary contact details.
+                    type: dict
+                    contains:
+                        first_name:
+                            description: First name of the secondary contact.
+                            type: str
+                        last_name:
+                            description: Last name of the secondary contact.
+                            type: str
+                        email:
+                            description: Email address of the secondary contact.
+                            type: str
+                        phone:
+                            description: Phone number of the secondary contact.
+                            type: str
+        telemetry:
+            description: Enable telemetry.
+            type: dict
+            contains:
+                offline_collection_period:
+                    description:
+                    - Change the offline collection period for when the connection to gateway is down.
+                    - The range is 0 to 86400.
+                    type: int
+                telemetry_enabled:
+                    description: Change the status of telemetry.
+                    type: bool
+                telemetry_persist:
+                    description: Change if files are kept after upload.
+                    type: bool
+                telemetry_threads:
+                    description:
+                    - Change the number of threads for telemetry gathers.
+                    - The range is 1 to 64.
+                    type: int
+        enable_download:
+            description: C(True) indicates downloads are enabled.
+            type: bool
+        enable_remote_support:
+            description: Allow remote support.
+            type: bool
+        enable_service:
+            description: Enable/disable Support Assist service.
+            type: bool
+        accepted_terms:
+            description: Whether to accept or reject the terms and conditions for remote support.
+            type: bool
+    sample: {
+      "automatic_case_creation": false,
+      "connection": {
+          "gateway_endpoints": [
+                {
+                    "enabled": true,
+                    "host": "XX.XX.XX.XX",
+                    "port": 9443,
+                    "priority": 1,
+                    "use_proxy": false,
+                    "validate_ssl": false
+                },
+                {
+                    "enabled": true,
+                    "host": "XX.XX.XX.XY",
+                    "port": 9443,
+                    "priority": 2,
+                    "use_proxy": false,
+                    "validate_ssl": false
+                }
+            ],
+            "mode": "gateway",
+            "network_pools": [
+                {
+                    "pool": "pool1",
+                    "subnet": "subnet0"
+                }
+            ]
+        },
+      "connection_state": "disabled",
+      "contact": {
+          "primary": {
+              "email": "p7VYg@example.com",
+              "first_name": "Eric",
+              "last_name": "Nam",
+              "phone": "1234567890"
+           },
+           "secondary": {
+              "email": "kangD@example.com",
+              "first_name": "Daniel",
+              "last_name": "Kang",
+              "phone": "1234567891"
+            }
+        },
+      "enable_download": false,
+      "enable_remote_support": false,
+      "onefs_software_id": "ELMISL1019H4GY",
+      "supportassist_enabled": true,
+      "telemetry": {
+          "offline_collection_period": 60,
+          "telemetry_enabled": true,
+          "telemetry_persist": true,
+          "telemetry_threads": 10
+        }
+    }
 '''
 
 from ansible.module_utils.basic import AnsibleModule
@@ -2164,6 +2350,8 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.sh
     import Cluster
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.certificate \
     import Certificate
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.support_assist \
+    import SupportAssist
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
 
@@ -2206,6 +2394,7 @@ class Info(object):
         self.network_api = self.isi_sdk.NetworkApi(self.api_client)
         self.storagepool_api = self.isi_sdk.StoragepoolApi(self.api_client)
         self.certificate_api = self.isi_sdk.CertificateApi(self.api_client)
+        self.support_assist_api = self.isi_sdk.SupportassistApi(self.api_client)
 
     def get_attributes_list(self):
         """Get the list of attributes of a given PowerScale Storage"""
@@ -2775,6 +2964,7 @@ class Info(object):
         cluster_owner = {}
         snmp_settings = {}
         server_certificate = []
+        support_assist_settings = {}
 
         if 'attributes' in str(subset):
             attributes = self.get_attributes_list()
@@ -2852,6 +3042,9 @@ class Info(object):
                 self.protocol_api, self.module).get_snmp_settings()
         if 'server_certificate' in str(subset):
             server_certificate = Certificate(self.certificate_api, self.module).get_server_certificate_with_default()
+        if 'support_assist_settings' in str(subset):
+            support_assist_settings = SupportAssist(
+                self.support_assist_api, self.module).get_support_assist_settings()
 
         result = dict(
             Attributes=attributes,
@@ -2889,7 +3082,8 @@ class Info(object):
             ClusterIdentity=cluster_identity,
             ClusterOwner=cluster_owner,
             SnmpSettings=snmp_settings,
-            ServerCertificate=server_certificate
+            ServerCertificate=server_certificate,
+            support_assist_settings=support_assist_settings
         )
 
         result.update(SynciqTargetClusterCertificate=synciq_target_cluster_certificates)
@@ -2959,6 +3153,7 @@ def get_info_parameters():
                                     'cluster_owner',
                                     'snmp_settings',
                                     'server_certificate',
+                                    'support_assist_settings'
                                     ]),
     )
 
