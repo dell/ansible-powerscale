@@ -77,6 +77,7 @@ This section describes the features of the Ansible Modules for Dell PowerScale f
 
 The Ansible Modules for Dell PowerScale release 3.1.0 supports the following features:
 
+- Added support for OneFS 9.8 Lonestar release.
 - Added support for Get, create, modify, delete auth roles.
 - Added support for Get, and modify support assist settings.
 - Added support for running as root, allow_delete_readonly, allow_execute_always, inheritable_path_acl.
