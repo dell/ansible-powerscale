@@ -121,6 +121,7 @@ class PowerScaleBase:
         if self._zones_summary_api is None:
             self._zones_summary_api = self.isi_sdk.ZonesSummaryApi(self.api_client)
         return self._zones_summary_api
+
     @property
     def support_assist_api(self):
         """
