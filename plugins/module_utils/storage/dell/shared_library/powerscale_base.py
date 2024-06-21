@@ -51,6 +51,7 @@ class PowerScaleBase:
         self._synciq_api = None
         self._cluster_api = None
         self._certificate_api = None
+        self._zones_summary_api = None
         self._support_assist_api = None
 
     @property
@@ -110,6 +111,16 @@ class PowerScaleBase:
         if self._certificate_api is None:
             self._certificate_api = self.isi_sdk.CertificateApi(self.api_client)
         return self._certificate_api
+
+    @property
+    def zones_summary_api(self):
+        """Returns the zones summary API object.
+        :return: The zones summary API object.
+        :rtype: isi_sdk.ZonesSummaryApi
+        """
+        if self._zones_summary_api is None:
+            self._zones_summary_api = self.isi_sdk.ZonesSummaryApi(self.api_client)
+        return self._zones_summary_api
 
     @property
     def support_assist_api(self):

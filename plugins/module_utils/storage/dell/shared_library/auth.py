@@ -1,4 +1,4 @@
-# Copyright: (c) 2023, Dell Technologies
+# Copyright: (c) 2023-2024, Dell Technologies
 
 # Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -64,6 +64,28 @@ class Auth:
             error_message = f'Failed to get the user details for {name} in zone ' \
                             f'{zone} and provider {provider} due to error ' \
                             f'{error_msg}.'
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    def get_wellknown_details(self, name):
+        """
+        Get details of the well known
+        :param name: name of the well known
+        """
+        LOG.info("Getting well known user details.")
+        try:
+            resp = self.auth_api.get_auth_wellknowns().to_dict()
+            for wellknown in resp['wellknowns']:
+                if wellknown['name'].lower() == name.lower():
+                    return wellknown
+            error_message = (f'Wellknown {name} does not exist. '
+                             f'Provide valid wellknown.')
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+        except Exception as e:
+            error_msg = utils.determine_error(error_obj=e)
+            error_message = (f'Failed to get the wellknown id for wellknown '
+                             f'{name} due to error {str(error_msg)}.')
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
