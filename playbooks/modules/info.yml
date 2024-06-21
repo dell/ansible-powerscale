@@ -248,3 +248,12 @@
         api_password: "{{ api_password }}"
         gather_subset:
           - support_assist_settings
+
+- name: Get the support assist settings from PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - roles

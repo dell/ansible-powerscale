@@ -82,6 +82,7 @@ class MockGatherfactsApi:
         'ClusterIdentity': {},
         'ClusterOwner': {},
         'ServerCertificate': [],
+        'roles': {},
         'support_assist_settings': {}
     }
     API = "api"
@@ -1295,6 +1296,52 @@ class MockGatherfactsApi:
             ]
 
     @staticmethod
+    def get_auth_roles(response_type):
+        if response_type == "api":
+            return [{
+                    "description" : "Test_Description",
+                    "id" : "Test_Role",
+                    "members" :
+                        [
+                            {
+                                "id" : "UID:2008",
+                                "name" : "esa",
+                                "type" : "user"
+                            }
+                        ],
+                    "name" : "Test_Role",
+                    "privileges" :
+                        [
+                            {
+                                "id" : "ISI_PRIV_LOGIN_PAPI",
+                                "name" : "Platform API",
+                                "permission" : "r"
+                            }
+                        ]
+                    }]
+        elif response_type == "module":
+            return [
+                {
+                    "description" : "Test_Description",
+                    "id" : "Test_Role",
+                    "members" : [
+                        {
+                            "id" : "UID:2008",
+                            "name" : "esa",
+                            "type" : "user"
+                        }
+                    ],
+                    "name" : "Test_Role",
+                    "privileges" : [
+                        {
+                            "id" : "ISI_PRIV_LOGIN_PAPI",
+                            "name" : "Platform API",
+                            "permission" : "r"
+                        }
+                    ]
+                }]
+        else:
+            return "Failed to get the auth role list due to error SDK Error message."
     def get_support_assist_settings(response_type):
         if response_type == "api" or response_type == "module":
             return {
@@ -1381,6 +1428,7 @@ class MockGatherfactsApi:
             "access_zones": MockGatherfactsApi.get_access_zones_response(param),
             "clients": MockGatherfactsApi.get_clients_response(param),
             "snmp_settings": MockGatherfactsApi.get_snmp_settings_response(param),
+            "roles": MockGatherfactsApi.get_auth_roles(param),
             "support_assist_settings": MockGatherfactsApi.get_support_assist_settings(param)
         }
         return subset_error_dict.get(gather_subset)
@@ -1419,6 +1467,7 @@ class MockGatherfactsApi:
             "access_zones": MockGatherfactsApi.get_access_zones_response(param),
             "clients": MockGatherfactsApi.get_clients_response(param),
             "snmp_settings": MockGatherfactsApi.get_snmp_settings_response(param),
+            "roles": MockGatherfactsApi.get_auth_roles(param),
             "support_assist_settings": MockGatherfactsApi.get_support_assist_settings(param)
         }
         return subset_error_dict.get(gather_subset)
@@ -1458,6 +1507,7 @@ class MockGatherfactsApi:
             "access_zones": MockGatherfactsApi.get_access_zones_response(param),
             "clients": MockGatherfactsApi.get_clients_response(param),
             "snmp_settings": MockGatherfactsApi.get_snmp_settings_response(param),
+            "roles": MockGatherfactsApi.get_auth_roles(param),
             "support_assist_settings": MockGatherfactsApi.get_support_assist_settings(param)
         }
         return subset_error_dict.get(gather_subset)
@@ -1502,6 +1552,7 @@ class MockGatherfactsApi:
 
             "access_zones": "list_zones",
             "clients": "get_summary_client",
+            "roles": "list_auth_roles",
             "support_assist_settings": "get_supportassist_settings"
         }
         return subset_method_dict.get(gather_subset)
