@@ -249,7 +249,7 @@
         gather_subset:
           - support_assist_settings
 
-- name: Get the support assist settings from PowerScale cluster
+    - name: Get auth roles from PowerScale cluster
       dellemc.powerscale.info:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"

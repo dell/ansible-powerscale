@@ -69,7 +69,7 @@
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         verify_ssl: "{{ verify_ssl }}"
-        role_name: "Test_Role" 
+        role_name: "Test_Role"
         new_role_name: "Test_Copy_Modify"
         description: "Test_Description_Modify12"
         access_zone: "System"

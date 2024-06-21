@@ -1342,6 +1342,7 @@ class MockGatherfactsApi:
                 }]
         else:
             return "Failed to get the auth role list due to error SDK Error message."
+    
     def get_support_assist_settings(response_type):
         if response_type == "api" or response_type == "module":
             return {
