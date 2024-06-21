@@ -73,7 +73,6 @@ jobs:
           ansible-core-version: ${{ matrix.ansible }}
           target-python-version: ${{ matrix.python }}
 
-
   ###
   # Sanity tests (REQUIRED)
   #
@@ -81,10 +80,8 @@ jobs:
 
   sanity:
     name: Sanity (Ⓐ${{ matrix.ansible }} with ${{ matrix.python }} python)
-    runs-on: ubuntu-latest
     needs: [build]
     strategy:
-      fail-fast: false
       matrix:
         python: ['3.9', '3.10', '3.11']
         ansible:
@@ -102,6 +99,7 @@ jobs:
           - ansible: devel
             python: '3.10'
 
+    runs-on: ubuntu-latest
     steps:
       - name: Perform sanity testing
         uses: ansible-community/ansible-test-gh-action@release/v1
@@ -122,12 +120,13 @@ jobs:
         python-version: ["3.9", "3.10", "3.11"]
         ansible-version: [stable-2.15, stable-2.16, stable-2.17, devel]
         exclude:
-          - ansible-version: stable-2.16
-            python-version: '3.9'
-          - ansible-version: stable-2.17
-            python-version: '3.9'
-          - ansible-version: devel
-            python-version: '3.9'
+        # Ansible-core 2.16 is supported only from Python 3.10 onwards
+          - python-version: "3.9"
+            ansible-version: stable-2.16
+          - python-version: "3.9"
+            ansible-version: stable-2.17
+          - python-version: "3.9"
+            ansible-version: devel
           - ansible-version: devel
             python-version: '3.10'
 

@@ -52,6 +52,7 @@ class PowerScaleBase:
         self._cluster_api = None
         self._certificate_api = None
         self._zones_summary_api = None
+        self._support_assist_api = None
 
     @property
     def protocol_api(self):
@@ -120,3 +121,14 @@ class PowerScaleBase:
         if self._zones_summary_api is None:
             self._zones_summary_api = self.isi_sdk.ZonesSummaryApi(self.api_client)
         return self._zones_summary_api
+    @property
+    def support_assist_api(self):
+        """
+        Returns the support assist API object.
+
+        :return: The support assist API object.
+        :rtype: isi_sdk.SupportassistApi
+        """
+        if self._support_assist_api is None:
+            self._support_assist_api = self.isi_sdk.SupportassistApi(self.api_client)
+        return self._support_assist_api
