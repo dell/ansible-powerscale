@@ -364,10 +364,10 @@ class Role(PowerScaleBase):
         for item in new_privilege_dict['privileges']:
             if item['name'] == privilege_dict['name']:
                 is_name_found = True
-                id = item['id']
+                privilege_id = item['id']
 
         if is_name_found:
-            new_privilege_dict_new['id'] = id
+            new_privilege_dict_new['id'] = privilege_id
             new_privilege_dict_new['name'] = privilege_dict['name']
             new_privilege_dict_new['permission'] = privilege_dict['permission']
         else:
@@ -526,6 +526,20 @@ class Role(PowerScaleBase):
         privileges_to_remove_names = [p['name'] for p in privileges_to_remove]
         return [p for p in role_details['privileges'] if p['name'] in privileges_to_remove_names]
 
+    def get_privileges_to_update(self, existing_privileges, role_params, role_details_draft, existing_privileges_to_update):
+        for item in role_params['privileges']:
+            privilege = [p for p in existing_privileges if p['name'] == item['name'] and p['permission'] != item['permission']]
+            if len(privilege) > 0:
+                item['id'] = privilege[0]['id']
+                existing_privileges_to_update.append(item)
+
+        for item in existing_privileges_to_update:
+            item.pop('state')
+            permission = [p for p in role_details_draft['privileges'] if p['name'] == item['name']]
+            if len(permission) > 0:
+                role_details_draft['privileges'].remove(permission[0])
+                role_details_draft['privileges'].append(item)
+
     def modify_privileges_list(self, role_params, role_details, role_details_draft, modify_role_dict):
         existing_privileges_names = [privileges['name'] for privileges in role_details['privileges']]
         new_privileges_to_add = self.get_new_privileges_to_add(role_params, existing_privileges_names)
@@ -539,25 +553,16 @@ class Role(PowerScaleBase):
 
         existing_privileges_to_update = []
         if len(existing_privileges) > 0:
-            for item in role_params['privileges']:
-                privilege = [p for p in existing_privileges if p['name'] == item['name'] and p['permission'] != item['permission']]
-                if len(privilege) > 0:
-                    item['id'] = privilege[0]['id']
-                    existing_privileges_to_update.append(item)
-            for item in existing_privileges_to_update:
-                item.pop('state')
-                permission = [p for p in role_details_draft['privileges'] if p['name'] == item['name']]
-                if len(permission) > 0:
-                    role_details_draft['privileges'].remove(permission[0])
-                    role_details_draft['privileges'].append(item)
+            self.get_privileges_to_update(existing_privileges, role_params, role_details_draft, existing_privileges_to_update)
 
-        if len(new_privileges_to_add) > 0 or len(privileges_to_remove) > 0 or len(existing_privileges_to_update) > 0:
-            temp = self.remove_duplicate_entries(role_details_draft['privileges'])
-            target_privileges_list = []
-            for item in temp:
-                temp1 = self.update_privileges(item)
-                target_privileges_list.append(temp1)
-            modify_role_dict['privileges'] = target_privileges_list
+        if len(existing_privileges_to_update) > 0 or len(new_privileges_to_add) > 0 or len(privileges_to_remove) > 0:
+            if len(new_privileges_to_add) > 0 or len(privileges_to_remove) > 0 or len(existing_privileges_to_update) > 0:
+                temp = self.remove_duplicate_entries(role_details_draft['privileges'])
+                target_privileges_list = []
+                for item in temp:
+                    temp1 = self.update_privileges(item)
+                    target_privileges_list.append(temp1)
+                modify_role_dict['privileges'] = target_privileges_list
         return modify_role_dict
 
     def is_role_modify_required(self, role_params, role_details):
@@ -594,29 +599,7 @@ class Role(PowerScaleBase):
     def do_update(self, source, target):
         return source != target
 
-    def validate_create_role_params(self, role_params):
-        """validate the input parameter for creating the Role"""
-        if utils.is_input_empty(role_params["role_name"]):
-            err_msg = "Role name cannot be empty"
-            LOG.error(err_msg)
-            self.module.fail_json(msg=err_msg)
-
-        params = ['role_name', 'description', 'new_role_name']
-
-        for item in params:
-            if role_params[item]:
-                if not utils.is_param_length_valid(role_params.get(item)):
-                    err_msg = item + " must be less than or equal to 255 characters."
-                    LOG.error(err_msg)
-                    self.module.fail_json(msg=err_msg)
-
-        for item in params:
-            if role_params[item]:
-                if not utils.is_param_length_valid(role_params.get(item)):
-                    err_msg = item + " must be less than or equal to 255 characters."
-                    LOG.error(err_msg)
-                    self.module.fail_json(msg=err_msg)
-
+    def validate_privileges(self, role_params):
         if role_params.get('privileges'):
             existing_privileges_names = set(p['name'] for p in role_params['privileges'])
             duplicate_privileges = [privilege for privilege in role_params['privileges']
@@ -628,6 +611,22 @@ class Role(PowerScaleBase):
                 err_msg = "Duplicate privileges with different permissions are not allowed."
                 LOG.error(err_msg)
                 self.module.fail_json(msg=err_msg)
+
+    def validate_create_role_params(self, role_params):
+        """validate the input parameter for creating the Role"""
+        if utils.is_input_empty(role_params["role_name"]):
+            err_msg = "Role name cannot be empty"
+            LOG.error(err_msg)
+            self.module.fail_json(msg=err_msg)
+
+        for item in ['role_name', 'description', 'new_role_name']:
+            if role_params[item]:
+                if not utils.is_param_length_valid(role_params.get(item)):
+                    err_msg = item + " must be less than or equal to 255 characters."
+                    LOG.error(err_msg)
+                    self.module.fail_json(msg=err_msg)
+
+        self.validate_privileges(role_params)
 
     def create_copy_params(self, new_name, role_params, role_details):
         """Create payload for copying the role"""
