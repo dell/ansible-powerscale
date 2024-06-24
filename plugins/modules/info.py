@@ -131,6 +131,7 @@ options:
     - Cluster owner C(cluster_owner)
     - SNMP settings - C(snmp_settings).
     - Server certificate - C(server_certificate).
+    - roles - C(roles).
     - Support assist settings- C(support_assist_settings).
     required: true
     choices: [attributes, access_zones, nodes, providers, users, groups,
@@ -140,7 +141,7 @@ options:
               node_pools, storagepool_tiers, smb_files, user_mapping_rules, ldap,
               nfs_zone_settings, nfs_default_settings, nfs_global_settings, synciq_global_settings, s3_buckets,
               smb_global_settings, ntp_servers, email_settings, cluster_identity, cluster_owner, snmp_settings,
-              server_certificate, support_assist_settings]
+              server_certificate, roles, support_assist_settings]
     type: list
     elements: str
 notes:
@@ -2164,6 +2165,65 @@ ServerCertificate:
             "status": "valid",
             "subject": "C=IN, ST=Karnataka, L=Bangalore, O=Dell, OU=ISG, CN=powerscale, emailAddress=contact@dell.com"
         }]
+roles:
+    description: List of auth roles.
+    type: dict
+    returned: Always
+    contains:
+        description:
+            description: Description of the auth role.
+            type: str
+        id:
+            description: id of the auth role.
+            type: str
+        name:
+            description: Name of the auth role.
+            type: str
+        members:
+            description: Specifies the members of auth role.
+            type: list
+            contains:
+                id:
+                    description: ID of the member.
+                    type: str
+                name:
+                    description: Name of the member.
+                    type: str
+                type:
+                    description: Specifies the type of the member.
+                    type: str
+        privileges:
+            description: Specifies the privileges of auth role.
+            type: list
+            contains:
+                id:
+                    description: ID of the privilege.
+                    type: str
+                name:
+                    description: Name of the privilege.
+                    type: str
+                permission:
+                    description: Specifies the permission of the privilege.
+                    type: str
+    sample:
+        {
+           "roles":
+           [{
+                "description" : "Test_Description",
+                "id" : "Test_Role",
+                "members" : [{
+                    "id" : "UID:2008",
+                    "name" : "esa",
+                    "type" : "user"
+                }],
+                "name" : "Test_Role",
+                "privileges" : [{
+                    "id" : "ISI_PRIV_LOGIN_PAPI",
+                    "name" : "Platform API",
+                    "permission" : "r"
+                }]
+            }]
+        }
 support_assist_settings:
     description: The support assist settings details.
     type: dict
@@ -2350,6 +2410,8 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.sh
     import Cluster
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.certificate \
     import Certificate
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.auth \
+    import Auth
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.support_assist \
     import SupportAssist
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
@@ -2964,6 +3026,7 @@ class Info(object):
         cluster_owner = {}
         snmp_settings = {}
         server_certificate = []
+        roles = {}
         support_assist_settings = {}
 
         if 'attributes' in str(subset):
@@ -3042,6 +3105,8 @@ class Info(object):
                 self.protocol_api, self.module).get_snmp_settings()
         if 'server_certificate' in str(subset):
             server_certificate = Certificate(self.certificate_api, self.module).get_server_certificate_with_default()
+        if 'roles' in str(subset):
+            roles = Auth(self.auth_api, self.module).get_auth_roles(access_zone)
         if 'support_assist_settings' in str(subset):
             support_assist_settings = SupportAssist(
                 self.support_assist_api, self.module).get_support_assist_settings()
@@ -3083,6 +3148,7 @@ class Info(object):
             ClusterOwner=cluster_owner,
             SnmpSettings=snmp_settings,
             ServerCertificate=server_certificate,
+            roles=roles,
             support_assist_settings=support_assist_settings
         )
 
@@ -3153,6 +3219,7 @@ def get_info_parameters():
                                     'cluster_owner',
                                     'snmp_settings',
                                     'server_certificate',
+                                    'roles',
                                     'support_assist_settings'
                                     ]),
     )
