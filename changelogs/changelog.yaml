@@ -273,7 +273,8 @@ releases:
     changes:
       minor_changes:
         - Added support for running as root, along with other boolean flags such
-          as allow_delete_readonly, allow_execute_always, and inheritable_path_acl.
+          as allow_delete_readonly, allow_execute_always, and inheritable_path_acl
+          in SMB module.
         - Added support for OneFS 9.8 Lonestar release.
     modules:
       - description: Manage auth roles on a PowerScale Storage System.

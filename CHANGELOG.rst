@@ -12,7 +12,7 @@ Minor Changes
 -------------
 
 - Added support for OneFS 9.8 Lonestar release.
-- Added support for running as root, along with other boolean flags such as allow_delete_readonly, allow_execute_always, and inheritable_path_acl.
+- Added support for running as root, along with other boolean flags such as allow_delete_readonly, allow_execute_always, and inheritable_path_acl in SMB module.
 
 New Modules
 -----------
