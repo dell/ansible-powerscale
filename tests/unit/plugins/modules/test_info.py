@@ -1,4 +1,4 @@
-# Copyright: (c) 2021, Dell Technologies
+# Copyright: (c) 2021-2024, Dell Technologies
 
 # Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -44,6 +44,7 @@ class TestInfo():
         gatherfacts_module_mock.zone_api = MagicMock()
         gatherfacts_module_mock.synciq_api = MagicMock()
         gatherfacts_module_mock.statistics_api = MagicMock()
+        gatherfacts_module_mock.support_assist_api = MagicMock()
         utils.ISI_SDK_VERSION_9 = MagicMock(return_value=True)
         return gatherfacts_module_mock
 
@@ -368,7 +369,7 @@ class TestInfo():
         {"gather_subset": "nfs_exports", "return_key": "NfsExports"},
         {"gather_subset": "nfs_default_settings", "return_key": "NfsDefaultSettings"},
         {"gather_subset": "s3_buckets", "return_key": "s3Buckets"},
-        {"gather_subset": "snmp_settings", "return_key": "SnmpSettings"},
+        {"gather_subset": "snmp_settings", "return_key": "SnmpSettings"}
     ]
     )
     def test_get_facts_protocols_api_module(self, gatherfacts_module_mock, input_params):
@@ -399,7 +400,9 @@ class TestInfo():
         "nfs_exports",
         "nfs_default_settings",
         "s3_buckets",
-        "snmp_settings"])
+        "snmp_settings"
+    ]
+    )
     def test_get_facts_protocols_api_exception(self, gatherfacts_module_mock, gather_subset):
         """Test the get_facts that uses the protocols api endpoint to get the exception"""
         self.get_module_args.update({
@@ -408,6 +411,45 @@ class TestInfo():
         })
         gatherfacts_module_mock.module.params = self.get_module_args
         with patch.object(gatherfacts_module_mock.protocol_api, MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
+            mock_method.side_effect = MagicMock(side_effect=MockApiException)
+            gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_gather_facts_error_response(
+            gather_subset) == gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
+
+    @pytest.mark.parametrize("input_params", [
+        {"gather_subset": "support_assist_settings", "return_key": "support_assist_settings"}
+    ]
+    )
+    def test_get_facts_support_assist_api_module(self, gatherfacts_module_mock, input_params):
+        """Test the get_facts that uses the support assist api endpoint to get the module response"""
+
+        gather_subset = input_params.get('gather_subset')
+        return_key = input_params.get('return_key')
+        api_response = MockGatherfactsApi.get_gather_facts_api_response(
+            gather_subset)
+        self.get_module_args.update({
+            'gather_subset': ['support_assist_settings'],
+            'zone': "System",
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        with patch.object(gatherfacts_module_mock.support_assist_api, MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
+            mock_method.return_value = MockSDKResponse(api_response)
+            gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_gather_facts_module_response(
+            gather_subset) == gatherfacts_module_mock.module.exit_json.call_args[1][return_key]
+
+    @pytest.mark.parametrize("gather_subset", [
+        "support_assist_settings"
+    ]
+    )
+    def test_get_facts_support_assist_api_exception(self, gatherfacts_module_mock, gather_subset):
+        """Test the get_facts that uses the support assist api endpoint to get the exception"""
+        self.get_module_args.update({
+            'gather_subset': [gather_subset],
+            'zone': "System",
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        with patch.object(gatherfacts_module_mock.support_assist_api, MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
             mock_method.side_effect = MagicMock(side_effect=MockApiException)
             gatherfacts_module_mock.perform_module_operation()
         assert MockGatherfactsApi.get_gather_facts_error_response(
