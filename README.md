@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/github/license/dell/ansible-powerscale)](https://github.com/dell/ansible-powerscale/blob/main/LICENSE)
 [![Python version](https://img.shields.io/badge/python-3.9.6+-blue.svg)](https://www.python.org/downloads/)
 [![Ansible version](https://img.shields.io/badge/ansible-2.15.6+-blue.svg)](https://pypi.org/project/ansible/)
-[![Pypowerscale](https://img.shields.io/github/v/release/dell/python-powerscale?include_prereleases&label=Pypowerscale&style=flat-square)](https://github.com/Isilon/isilon_sdk_python)
+[![isilon-sdk](https://img.shields.io/github/v/release/dell/python-powerscale?include_prereleases&label=isilon-sdk&style=flat-square)](https://github.com/Isilon/isilon_sdk_python)
 [![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/dell/ansible-powerscale?include_prereleases&label=latest&style=flat-square)](https://github.com/dell/ansible-powerscale/releases)
 [![codecov](https://codecov.io/gh/dell/ansible-powerscale/branch/main/graph/badge.svg)](https://app.codecov.io/gh/dell/ansible-powerscale)
 
