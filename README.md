@@ -78,7 +78,7 @@ This table provides information about the software prerequisites for the Ansible
 
 | **Ansible Modules** | **OneFS Version** | **Python version** | **Python SDK version** | **Ansible**              |
 |---------------------|-----------------------|--------------------|----------------------------|--------------------------|
-| main | 9.4.x <br> 9.5.x <br> 9.7.x <br> 9.8.x | 3.9 <br> 3.10 <br> 3.11 <br> 3.11 | 0.3.0.1 | 2.14 <br> 2.15 <br> 2.16 <br> 2.16 |
+| main | 9.4.x <br> 9.5.x <br> 9.7.x <br> 9.8.x | 3.9 <br> 3.10 <br> 3.11 <br> 3.12 | 0.3.0.1 | 2.14 <br> 2.15 <br> 2.16 <br> 2.17 |
 
 # List of Ansible modules for Dell PowerScale
   * [File System Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/filesystem.rst)
@@ -121,7 +121,7 @@ This table provides information about the software prerequisites for the Ansible
   * [SNMP Settings Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/snmp_settings.rst)
   * [Server Certificate Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/server_certificate.rst)
   * [Roles](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/roles.rst)
-  * [Roles](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/support_assist.rst)
+  * [Support Assist](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/support_assist.rst)
 
 
 ## Installation and execution of Ansible modules for Dell PowerScale
