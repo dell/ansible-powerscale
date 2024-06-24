@@ -326,6 +326,7 @@ class TestInfo():
         {"gather_subset": "providers", "return_key": "Providers"},
         {"gather_subset": "users", "return_key": "Users"},
         {"gather_subset": "groups", "return_key": "Groups"},
+        {"gather_subset": "roles", "return_key": "roles"},
     ]
     )
     def test_get_facts_auth_api_module(self, gatherfacts_module_mock, input_params):
@@ -345,7 +346,7 @@ class TestInfo():
         assert MockGatherfactsApi.get_gather_facts_module_response(
             gather_subset) == gatherfacts_module_mock.module.exit_json.call_args[1][return_key]
 
-    @pytest.mark.parametrize("gather_subset", ["ldap", "user_mapping_rules", "providers", "users", "groups"])
+    @pytest.mark.parametrize("gather_subset", ["ldap", "user_mapping_rules", "providers", "users", "groups", "roles"])
     def test_get_facts_auth_api_exception(self, gatherfacts_module_mock, gather_subset):
         """Test the get_facts that uses the auth api endpoint to get the exception"""
 
