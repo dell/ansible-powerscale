@@ -4,6 +4,22 @@ Dellemc.Powerscale Change Logs
 
 .. contents:: Topics
 
+
+v3.1.0
+======
+
+Minor Changes
+-------------
+
+- Added support for OneFS 9.8 Lonestar release.
+- Added support for running as root, along with other boolean flags such as allow_delete_readonly, allow_execute_always, and inheritable_path_acl in SMB module.
+
+New Modules
+-----------
+
+- dellemc.powerscale.roles - Manage auth roles on a PowerScale Storage System.
+- dellemc.powerscale.support_assist - Manage support assist settings on a PowerScale Storage System.
+
 v3.0.0
 ======
 

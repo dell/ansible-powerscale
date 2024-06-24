@@ -14,9 +14,9 @@ Synopsis
 
 Gathering information about Specified PowerScale Storage entities, includes attributes, access zones, nodes, authentication providers for all access zones, users and groups for an access zone.
 
-Get list of smb_shares, nfs_exports, nfs_aliases, active clients, SyncIQ reports, SyncIQ target reports, SyncIQ target cluster certificates, SyncIQ policies, SyncIQ performance rules.
+Get list of smb\_shares, nfs\_exports, nfs\_aliases, active clients, SyncIQ reports, SyncIQ target reports, SyncIQ target cluster certificates, SyncIQ policies, SyncIQ performance rules.
 
-Get list of network groupnets, network pools for all access zones or a specific access zone, network rules, network subnets, network interfaces, node pools, storage pool tiers, smb open files, s3 buckets, ntp_servers.
+Get list of network groupnets, network pools for all access zones or a specific access zone, network rules, network subnets, network interfaces, node pools, storage pool tiers, smb open files, s3 buckets, ntp\_servers.
 
 Get list of user mapping rules, ldap providers of the PowerScale cluster.
 
@@ -36,6 +36,8 @@ Get SNMP settings details of the PowerScale cluster.
 
 Retrieve a list of server certificate details.
 
+Get support assist settings details of the PowerScale cluster.
+
 
 
 Requirements
@@ -43,8 +45,8 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.14 or later.
-- Python 3.9, 3.10 or 3.11.
+- Ansible-core 2.15 or later.
+- Python 3.10, 3.11 or 3.12.
 
 
 
@@ -54,7 +56,7 @@ Parameters
   include_all_access_zones (optional, bool, None)
     Specifies if requested component details need to be fetched from all access zones.
 
-    It is mutually exclusive with *access_zone*.
+    It is mutually exclusive with \ :emphasis:`access\_zone`\ .
 
 
   access_zone (optional, str, System)
@@ -62,13 +64,13 @@ Parameters
 
 
   scope (optional, str, effective)
-    The scope of ldap. If no scope is specified, the ``effective`` scope would be taken by default.
+    The scope of ldap. If no scope is specified, the \ :literal:`effective`\  scope would be taken by default.
 
-    If specified as ``effective`` or not specified, all fields are returned.
+    If specified as \ :literal:`effective`\  or not specified, all fields are returned.
 
-    If specified as ``user``, only fields with non-default values are shown.
+    If specified as \ :literal:`user`\ , only fields with non-default values are shown.
 
-    If specified as ``default``, the original values are returned.
+    If specified as \ :literal:`default`\ , the original values are returned.
 
 
   gather_subset (True, list, None)
@@ -76,65 +78,65 @@ Parameters
 
     List of all PowerScale Storage System entities supported by the module.
 
-    Attributes - ``attributes``.
+    Attributes - \ :literal:`attributes`\ .
 
-    Access zones - ``access_zones``.
+    Access zones - \ :literal:`access\_zones`\ .
 
-    Nodes - ``nodes``.
+    Nodes - \ :literal:`nodes`\ .
 
-    Providers - ``providers``.
+    Providers - \ :literal:`providers`\ .
 
-    Users - ``users``.
+    Users - \ :literal:`users`\ .
 
-    Groups - ``groups``.
+    Groups - \ :literal:`groups`\ .
 
-    Smb shares - ``smb_shares``.
+    Smb shares - \ :literal:`smb\_shares`\ .
 
-    Nfs exports - ``nfs_exports``.
+    Nfs exports - \ :literal:`nfs\_exports`\ .
 
-    Nfs aliases - ``nfs_aliases``.
+    Nfs aliases - \ :literal:`nfs\_aliases`\ .
 
-    Clients - ``clients``.
+    Clients - \ :literal:`clients`\ .
 
-    Synciq reports - ``synciq_reports``.
+    Synciq reports - \ :literal:`synciq\_reports`\ .
 
-    Synciq target reports - ``synciq_target_reports``.
+    Synciq target reports - \ :literal:`synciq\_target\_reports`\ .
 
-    Synciq policies - ``synciq_policies``.
+    Synciq policies - \ :literal:`synciq\_policies`\ .
 
-    Synciq target cluster certificates - ``synciq_target_cluster_certificates``.
+    Synciq target cluster certificates - \ :literal:`synciq\_target\_cluster\_certificates`\ .
 
-    Synciq performance rules - ``synciq_performance_rules``.
+    Synciq performance rules - \ :literal:`synciq\_performance\_rules`\ .
 
-    Network groupnets - ``network_groupnets``.
+    Network groupnets - \ :literal:`network\_groupnets`\ .
 
-    Network pools - ``network_pools``.
+    Network pools - \ :literal:`network\_pools`\ .
 
-    Network rules - ``network_rules``.
+    Network rules - \ :literal:`network\_rules`\ .
 
-    Network interfaces - ``network_interfaces``.
+    Network interfaces - \ :literal:`network\_interfaces`\ .
 
-    Network subnets - ``network_subnets``.
+    Network subnets - \ :literal:`network\_subnets`\ .
 
-    Node pools - ``node_pools``.
+    Node pools - \ :literal:`node\_pools`\ .
 
-    Storagepool tiers - ``storagepool_tiers``.
+    Storagepool tiers - \ :literal:`storagepool\_tiers`\ .
 
-    SMB files - ``smb_files``.
+    SMB files - \ :literal:`smb\_files`\ .
 
-    User mapping rules - ``user_mapping_rules``.
+    User mapping rules - \ :literal:`user\_mapping\_rules`\ .
 
-    LDAPs - ``ldap``.
+    LDAPs - \ :literal:`ldap`\ .
 
-    NFS zone settings - ``nfs_zone_settings``.
+    NFS zone settings - \ :literal:`nfs\_zone\_settings`\ .
 
-    NFS default settings - ``nfs_default_settings``.
+    NFS default settings - \ :literal:`nfs\_default\_settings`\ .
 
-    SyncIQ global settings - ``synciq_global_settings``.
+    SyncIQ global settings - \ :literal:`synciq\_global\_settings`\ .
 
-    S3 buckets - ``s3_buckets``.
+    S3 buckets - \ :literal:`s3\_buckets`\ .
 
-    The list of *attributes*, *access_zones* and *nodes* is for the entire PowerScale cluster.
+    The list of \ :emphasis:`attributes`\ , \ :emphasis:`access\_zones`\  and \ :emphasis:`nodes`\  is for the entire PowerScale cluster.
 
     The list of providers for the entire PowerScale cluster.
 
@@ -154,19 +156,23 @@ Parameters
 
     The list of ldap providers of PowerScale cluster.
 
-    SMB global settings - ``smb_global_settings``.
+    SMB global settings - \ :literal:`smb\_global\_settings`\ .
 
-    NTP servers ``ntp_servers``
+    NTP servers \ :literal:`ntp\_servers`\ 
 
-    Email settings ``email_settings``
+    Email settings \ :literal:`email\_settings`\ 
 
-    Cluster identity ``cluster_identity``
+    Cluster identity \ :literal:`cluster\_identity`\ 
 
-    Cluster owner ``cluster_owner``
+    Cluster owner \ :literal:`cluster\_owner`\ 
 
-    SNMP settings - ``snmp_settings``.
+    SNMP settings - \ :literal:`snmp\_settings`\ .
 
-    Server certificate - ``server_certificate``.
+    Server certificate - \ :literal:`server\_certificate`\ .
+
+    roles - \ :literal:`roles`\ .
+
+    Support assist settings- \ :literal:`support\_assist\_settings`\ .
 
 
   onefs_host (True, str, None)
@@ -180,9 +186,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    ``true`` - indicates that the SSL certificate should be verified.
+    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
 
-    ``false`` - indicates that the SSL certificate should not be verified.
+    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -200,9 +206,9 @@ Notes
 -----
 
 .. note::
-   - The parameters *access_zone* and *include_all_access_zones* are mutually exclusive.
-   - Listing of SyncIQ target cluster certificates is not supported by isi_sdk_8_1_1 version.
-   - The *check_mode* is supported.
+   - The parameters \ :emphasis:`access\_zone`\  and \ :emphasis:`include\_all\_access\_zones`\  are mutually exclusive.
+   - Listing of SyncIQ target cluster certificates is not supported by isi\_sdk\_8\_1\_1 version.
+   - The \ :emphasis:`check\_mode`\  is supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -570,6 +576,15 @@ Examples
         gather_subset:
           - cluster_owner
 
+    - name: Get support assist settings from PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - support_assist_settings
+
 
 
 Return Values
@@ -853,7 +868,7 @@ NfsZoneSettings (When C(nfs_zone_settings) is in a given I(gather_subset), dict,
 
 
   nfsv4_allow_numeric_ids (, bool, )
-    If ``true``, sends owners and groups as UIDs and GIDs when look up fails or if the *nfsv4_no_names* property is set to 1.
+    If \ :literal:`true`\ , sends owners and groups as UIDs and GIDs when look up fails or if the \ :emphasis:`nfsv4\_no\_names`\  property is set to 1.
 
 
   nfsv4_domain (, str, )
@@ -861,19 +876,19 @@ NfsZoneSettings (When C(nfs_zone_settings) is in a given I(gather_subset), dict,
 
 
   nfsv4_no_domain (, bool, )
-    If ``true``, sends owners and groups without a domain name.
+    If \ :literal:`true`\ , sends owners and groups without a domain name.
 
 
   nfsv4_no_domain_uids (, bool, )
-    If ``true``, sends UIDs and GIDs without a domain name.
+    If \ :literal:`true`\ , sends UIDs and GIDs without a domain name.
 
 
   nfsv4_no_names (, bool, )
-    If ``true``, sends owners and groups as UIDs and GIDs.
+    If \ :literal:`true`\ , sends owners and groups as UIDs and GIDs.
 
 
   nfsv4_replace_domain (, bool, )
-    If ``true``, replaces the owner or group domain with an NFS domain name.
+    If \ :literal:`true`\ , replaces the owner or group domain with an NFS domain name.
 
 
   zone (, str, )
@@ -1478,7 +1493,7 @@ S3_bucket_details (When C(s3_buckets) is in a given I(gather_subset), dict, {'ac
 
 
   path (, str, )
-    Path of S3 bucket with in ``'/ifs'``.
+    Path of S3 bucket with in \ :literal:`'/ifs'`\ .
 
 
   zid (, int, )
@@ -1650,7 +1665,7 @@ ntp_servers (Always, dict, {'servers': [{'id': '10.**.**.**', 'key': None, 'name
 
 
     key (, str, )
-      Key value from *key_file* that maps to this server.
+      Key value from \ :emphasis:`key\_file`\  that maps to this server.
 
 
     name (, str, )
@@ -1681,7 +1696,7 @@ cluster_identity (Always, dict, {'cluster_identity': {'description': 'asdadasdas
 
 
   mttdl_level_msg (, str, )
-    mttdl_level_msg.
+    mttdl\_level\_msg.
 
 
   name (, str, )
@@ -1829,6 +1844,209 @@ ServerCertificate (When C(server_certificate) is in a given I(gather_subset), li
 
   certificate_pre_expiration_threshold (, int, )
     The number of seconds before certificate expiration that the certificate expiration monitor will start raising alerts.
+
+
+
+roles (Always, dict, {'roles': [{'description': 'Test_Description', 'id': 'Test_Role', 'members': [{'id': 'UID:2008', 'name': 'esa', 'type': 'user'}], 'name': 'Test_Role', 'privileges': [{'id': 'ISI_PRIV_LOGIN_PAPI', 'name': 'Platform API', 'permission': 'r'}]}]})
+  List of auth roles.
+
+
+  description (, str, )
+    Description of the auth role.
+
+
+  id (, str, )
+    id of the auth role.
+
+
+  name (, str, )
+    Name of the auth role.
+
+
+  members (, list, )
+    Specifies the members of auth role.
+
+
+    id (, str, )
+      ID of the member.
+
+
+    name (, str, )
+      Name of the member.
+
+
+    type (, str, )
+      Specifies the type of the member.
+
+
+
+  privileges (, list, )
+    Specifies the privileges of auth role.
+
+
+    id (, str, )
+      ID of the privilege.
+
+
+    name (, str, )
+      Name of the privilege.
+
+
+    permission (, str, )
+      Specifies the permission of the privilege.
+
+
+
+
+support_assist_settings (always, dict, {'automatic_case_creation': False, 'connection': {'gateway_endpoints': [{'enabled': True, 'host': 'XX.XX.XX.XX', 'port': 9443, 'priority': 1, 'use_proxy': False, 'validate_ssl': False}, {'enabled': True, 'host': 'XX.XX.XX.XY', 'port': 9443, 'priority': 2, 'use_proxy': False, 'validate_ssl': False}], 'mode': 'gateway', 'network_pools': [{'pool': 'pool1', 'subnet': 'subnet0'}]}, 'connection_state': 'disabled', 'contact': {'primary': {'email': 'p7VYg@example.com', 'first_name': 'Eric', 'last_name': 'Nam', 'phone': '1234567890'}, 'secondary': {'email': 'kangD@example.com', 'first_name': 'Daniel', 'last_name': 'Kang', 'phone': '1234567891'}}, 'enable_download': False, 'enable_remote_support': False, 'onefs_software_id': 'ELMISL1019H4GY', 'supportassist_enabled': True, 'telemetry': {'offline_collection_period': 60, 'telemetry_enabled': True, 'telemetry_persist': True, 'telemetry_threads': 10}})
+  The support assist settings details.
+
+
+  automatic_case_creation (, bool, )
+    \ :literal:`True`\  indicates automatic case creation is enabled.
+
+
+  connection (, dict, )
+    Support assist connection details.
+
+
+    gateway_endpoints (, list, )
+      List of gateway endpoints.
+
+
+      gateway_host (, str, )
+        Hostname or IP address of the gateway endpoint.
+
+
+      gateway_port (, int, )
+        Port number of the gateway endpoint.
+
+
+      priority (, int, )
+        Priority of the gateway endpoint.
+
+
+      use_proxy (, bool, )
+        Use proxy.
+
+
+      validate_ssl (, bool, )
+        Validate SSL.
+
+
+      enabled (, bool, )
+        Enable the gateway endpoint.
+
+
+
+    mode (, str, )
+      Connection mode.
+
+
+    network_pools (, list, )
+      List of network pools.
+
+
+      pool (, str, )
+        Name of the network pool.
+
+
+      subnet (, str, )
+        Name of the subnet of the network pool.
+
+
+
+
+  connection_state (, str, )
+    Set connectivity state.
+
+
+  contact (, dict, )
+    Information on the remote support contact.
+
+
+    primary (, dict, )
+      Primary contact details.
+
+
+      first_name (, str, )
+        First name of the primary contact.
+
+
+      last_name (, str, )
+        Last name of the primary contact.
+
+
+      email (, str, )
+        Email address of the primary contact.
+
+
+      phone (, str, )
+        Phone number of the primary contact.
+
+
+
+    secondary (, dict, )
+      Secondary contact details.
+
+
+      first_name (, str, )
+        First name of the secondary contact.
+
+
+      last_name (, str, )
+        Last name of the secondary contact.
+
+
+      email (, str, )
+        Email address of the secondary contact.
+
+
+      phone (, str, )
+        Phone number of the secondary contact.
+
+
+
+
+  telemetry (, dict, )
+    Enable telemetry.
+
+
+    offline_collection_period (, int, )
+      Change the offline collection period for when the connection to gateway is down.
+
+      The range is 0 to 86400.
+
+
+    telemetry_enabled (, bool, )
+      Change the status of telemetry.
+
+
+    telemetry_persist (, bool, )
+      Change if files are kept after upload.
+
+
+    telemetry_threads (, int, )
+      Change the number of threads for telemetry gathers.
+
+      The range is 1 to 64.
+
+
+
+  enable_download (, bool, )
+    \ :literal:`True`\  indicates downloads are enabled.
+
+
+  enable_remote_support (, bool, )
+    Allow remote support.
+
+
+  enable_service (, bool, )
+    Enable/disable Support Assist service.
+
+
+  accepted_terms (, bool, )
+    Whether to accept or reject the terms and conditions for remote support.
 
 
 
