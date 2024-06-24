@@ -1,0 +1,95 @@
+---
+- name: Role Module Operations on PowerScale Storage
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: "10.**.**.**"
+    port_no: "8080"
+    api_user: "******"
+    api_password: "p******"
+    verify_ssl: false
+    access_zone: "System"
+
+  tasks:
+    - name: Create Role
+      dellemc.powerscale.role:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        role_name: "Test_Role"
+        description: "Description"
+        access_zone: "System"
+        privileges:
+          - name: "Audit"
+            permission: "w"
+            state: "present"
+          - name: "Backup"
+            permission: "r"
+            state: "present"
+        members:
+          - name: "Everyone"
+            type: "wellknown"
+            state: "present"
+        state: "present"
+
+    - name: Copy Role
+      dellemc.powerscale.role:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        role_name: "Test_Role"
+        description: "Copy Role via Ansible"
+        copy_role: true
+        new_role_name: ""
+        access_zone: "{{ access_zone }}"
+        privileges:
+          - name: "Cluster"
+            permission: "r"
+            state: "present"
+        state: "present"
+
+    - name: Get role details
+      dellemc.powerscale.role:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        role_name: "Test_Role"
+        access_zone: "{{ access_zone }}"
+
+    - name: Modify Role
+      dellemc.powerscale.role:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        role_name: "Test_Role"
+        new_role_name: "Test_Copy_Modify"
+        description: "Test_Description_Modify12"
+        access_zone: "System"
+        privileges:
+          - name: "Audit"
+            permission: "w"
+            state: "present"
+        members:
+          - name: "esa"
+            provider_type: "local"
+            type: "user"
+            state: "absent"
+        state: "present"
+
+    - name: Delete Role
+      dellemc.powerscale.role:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        role_name: "Test_Role"
+        state: "absent"
+        access_zone: "{{ access_zone }}"

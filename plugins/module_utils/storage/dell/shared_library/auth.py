@@ -109,3 +109,18 @@ class Auth:
                 zone=zone,
                 provider=persona['provider_type'])['groups'][0]['gid']
         return details
+
+    def get_auth_roles(self, zone):
+        """
+        Get details of the auth role
+        """
+        LOG.info("Getting auth role details.")
+        try:
+            resp = self.auth_api.list_auth_roles(zone=zone).to_dict()
+            return resp
+        except Exception as e:
+            error_msg = utils.determine_error(error_obj=e)
+            error_message = f'Failed to get the auth role list ' \
+                            f'due to error {error_msg}.'
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
