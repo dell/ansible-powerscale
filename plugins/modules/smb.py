@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: (c) 2019, Dell Technologies
+# Copyright: (c) 2019-2024, Dell Technologies
 
 # Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -15,9 +15,9 @@ module: smb
 
 version_added: '1.2.0'
 
-short_description: Manage SMB shares on PowerScale Storage System. You can perform these operations
+short_description: Manage SMB shares on PowerScale Storage System
 description:
-- Managing SMB share on PowerScale.
+- Managing SMB share on PowerScale which includes.
 - Create a new SMB share.
 - Modify an existing SMB share.
 - Get details of an existing SMB share.
@@ -29,6 +29,7 @@ extends_documentation_fragment:
 author:
 - Arindam Datta (@dattaarindam) <ansible.team@dell.com>
 - Trisha Datta (@Trisha-Datta) <ansible.team@dell.com>
+- Bhavneet Sharma (@Bhavneet-Sharma) <ansible.team@dell.com>
 
 options:
   share_name:
@@ -39,8 +40,8 @@ options:
   path:
     description:
     - The path of the SMB share. This parameter will be mandatory only
-      for the create operation. This is the absolute path for System Access Zone and
-      the relative path for non-System Access Zone.
+      for the create operation. This is the absolute path for System Access
+      Zone and the relative path for non-System Access Zone.
     type: str
   access_zone:
     description:
@@ -93,13 +94,13 @@ options:
     type: bool
   directory_create_mask:
     description:
-    - Directory creates mask bits. Octal value for owner, group, and others against
-      read, write, and execute.
+    - Directory creates mask bits. Octal value for owner, group, and others
+      against read, write, and execute.
     type: str
   directory_create_mode:
     description:
-    - Directory creates mode bits. Octal value for owner, group, and others against
-      read, write, and execute.
+    - Directory creates mode bits. Octal value for owner, group, and others
+      against read, write, and execute.
     type: str
   file_create_mask:
     description:
@@ -200,7 +201,8 @@ options:
     type: str
   host_acls:
     description:
-    - An ACL expressing which hosts are allowed access. A deny clause must be the final entry.
+    - An ACL expressing which hosts are allowed access. A deny clause must be
+      the final entry.
     type: list
     elements: dict
     suboptions:
@@ -214,6 +216,55 @@ options:
         - The access type of the host ACL.
         type: str
         required: true
+  run_as_root:
+    description:
+    - Allow account to run as root.
+    type: list
+    elements: dict
+    suboptions:
+      name:
+        description:
+        - Specifies the name of persona.
+        type: str
+        required: true
+        version_added: '3.1.0'
+      type:
+        description:
+        - Specifies the type of persona.
+        type: str
+        choices: ['user', 'group', 'wellknown']
+        required: true
+        version_added: '3.1.0'
+      provider_type:
+        description:
+        - Specifies the provider type of persona.
+        - The supported values for I(provider_type) are C(local), C(file),
+          C(ldap), C(nis) and C(ads).
+        type: str
+        default: local
+        version_added: '3.1.0'
+      state:
+        description:
+        - Specifies whether to add or remove the persona.
+        type: str
+        choices: ['allow', 'deny']
+        default: allow
+        version_added: '3.1.0'
+  allow_delete_readonly:
+    description:
+    - Allow deletion of read-only files in the share.
+    type: bool
+    version_added: '3.1.0'
+  allow_execute_always:
+    description:
+    - Allow users to execute files they have rigths for.
+    type: bool
+    version_added: '3.1.0'
+  inheritable_path_acl:
+    description:
+    - Set inheritable acl on share path.
+    type: bool
+    version_added: '3.1.0'
   state:
     description:
     - Defines whether the SMB share should exist or not.
@@ -235,6 +286,15 @@ EXAMPLES = r'''
     share_name: "{{name}}"
     path: "<path>"
     access_zone: "{{non_system_access_zone}}"
+    run_as_root:
+      - name: "sample_user"
+        type: "user"
+        provider_type: "local"
+        state: "present"
+      - name: "sample_group"
+        type: "group"
+        provider_type: "nis"
+        state: "present"
     state: "present"
 
 - name: Create SMB share for system access zone
@@ -344,6 +404,18 @@ EXAMPLES = r'''
       - wellknown: "everyone"
         permission: "write"
         permission_type: "deny"
+    run_as_root:
+      - name: "ldap_user"
+        type: "user"
+        provider_type: "ldap"
+        state: "absent"
+      - name: "weknown_group"
+        type: "wellknown"
+        provider_type: "local"
+        state: "present"
+    allow_delete_readonly: true
+    allow_execute_always: false
+    inheritable_path_acl: true
     state: "present"
 
 - name: Delete system access zone SMB share
@@ -422,48 +494,70 @@ smb_details:
     returned: always
     type: complex
     contains:
+        allow_delete_readonly:
+            description: Allow deletion of read-only files in the SMB Share.
+            type: bool
+        allow_execute_always:
+            description: Allow user to execute files they have rights for.
+            type: bool
         name:
-            description: Name of the SMB Share
+            description: Name of the SMB Share.
             type: str
         id:
-            description: Id of the SMB Share
+            description: Id of the SMB Share.
             type: str
         description:
-            description: Description of the SMB Share
+            description: Description of the SMB Share.
             type: str
         path:
-            description: Path of the SMB Share
+            description: Path of the SMB Share.
             type: str
         permission:
-            description: permission on the of the SMB Share for user/group/wellknown
+            description: permission on the of the SMB Share for user/group/wellknown/
             type: list
         file_create_mask:
-            description: File create mask bit for SMB Share
+            description: File create mask bit for SMB Share.
             type: int
         file_create_mode:
-            description: File create mode bit for SMB Share
+            description: File create mode bit for SMB Share.
             type: int
         directory_create_mask:
-            description: Directory create mask bit for SMB Share
+            description: Directory create mask bit for SMB Share.
             type: int
         directory_create_mode:
-            description: Directory create mode bit for SMB Share
+            description: Directory create mode bit for SMB Share.
             type: int
         browsable:
-            description: Share is visible in net view and the browse list
+            description: Share is visible in net view and the browse list.
             type: bool
         file_create_mask(octal):
-            description: File create mask bit for SMB Share in octal format
+            description: File create mask bit for SMB Share in octal format.
             type: str
         file_create_mode(octal):
-            description: File create mode bit for SMB Share in octal format
+            description: File create mode bit for SMB Share in octal format.
             type: str
         directory_create_mask(octal):
-            description: Directory create mask bit for SMB Share in octal format
+            description: Directory create mask bit for SMB Share in octal format.
             type: str
         directory_create_mode(octal):
-            description: Directory create mode bit for SMB Share in octal format
+            description: Directory create mode bit for SMB Share in octal format.
             type: str
+        inheritable_path_acl:
+            description: Inheritable ACL on share path.
+            type: bool
+        run_as_root:
+            description: Allow the account to run as root.
+            type: list
+            contains:
+                name:
+                    description: Name of the persona.
+                    type: str
+                id:
+                    description: Id of the persona.
+                    type: str
+                type:
+                    description: Type of the persona.
+                    type: str
     sample: {
         "shares": [
             {
@@ -529,7 +623,18 @@ smb_details:
                         }
                     }
                 ],
-                "run_as_root": [],
+                "run_as_root": [
+                    {
+                        "id": "SID:S-1-1-0",
+                        "name": "Everyone",
+                        "type": "wellknown"
+                    },
+                    {
+                        "id": "SID:S-1-5-32-545",
+                        "name": "sample_user",
+                        "type": "user"
+                    }
+                ],
                 "smb3_encryption_enabled": false,
                 "sparse_file": false,
                 "strict_ca_lockout": false,
@@ -543,45 +648,36 @@ smb_details:
 
 '''
 
+from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.powerscale_base \
+    import PowerScaleBase
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.auth \
+    import Auth
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.zones_summary \
+    import ZonesSummary
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
-from ansible.module_utils.basic import AnsibleModule
 
 LOG = utils.get_logger('smb')
 
 
-class SMB(object):
+class SMB(PowerScaleBase):
     """Class with SMB share operations"""
 
     def __init__(self):
         """Define all the parameters required by this module"""
 
-        self.module_params = utils \
-            .get_powerscale_management_host_parameters()
-        self.module_params.update(get_smb_parameters())
+        ansible_module_params = {
+            'argument_spec': get_smb_parameters(),
+            'supports_check_mode': False
+        }
 
-        # initialize the Ansible module
-        self.module = AnsibleModule(
-            argument_spec=self.module_params,
-            supports_check_mode=False)
+        super().__init__(AnsibleModule, ansible_module_params)
 
-        PREREQS_VALIDATE = utils.validate_module_pre_reqs(self.module.params)
-        if PREREQS_VALIDATE \
-                and not PREREQS_VALIDATE["all_packages_found"]:
-            self.module.fail_json(
-                msg=PREREQS_VALIDATE["error_message"])
-
-        self.api_client = utils.get_powerscale_connection(
-            self.module.params)
-        self.isi_sdk = utils.get_powerscale_sdk()
-        LOG.info('Got python SDK instance for provisioning on PowerScale ')
-        self.protocol_api = self.isi_sdk.ProtocolsApi(
-            self.api_client)
-        LOG.info('Got instance for ProtocolsApi on PowerScale ')
-        self.zone_summary_api = self.isi_sdk.ZonesSummaryApi(self.api_client)
-        LOG.info('Got instance for ZonesSummaryApi on PowerScale ')
-        self.auth_api_instance = utils.isi_sdk.AuthApi(self.api_client)
-        LOG.info('Got instance for AuthApi on PowerScale')
+        self.result = {
+            'changed': False,
+            'smb_details': {}
+        }
 
     def get_smb_details(self, share_name, access_zone):
         """Returns details of a SMB share"""
@@ -616,29 +712,18 @@ class SMB(object):
 
     def get_zone_base_path(self, access_zone):
         """Returns the base path of the Access Zone."""
-        try:
-            LOG.info("Attempting to get access zone base path for %s",
-                     access_zone)
-            zone_path = (self.zone_summary_api.
-                         get_zones_summary_zone(access_zone)).to_dict()
-            zone_base_path = zone_path['summary']['path']
-            LOG.debug("Successfully got zone_base_path for %s is %s",
-                      access_zone, zone_base_path)
-            return zone_base_path
-        except Exception as e:
-            error_message = "Unable to fetch base path of Access Zone {0} ," \
-                            " failed with error: {1}" \
-                .format(access_zone, utils.determine_error(e))
-            LOG.error(error_message)
-            self.module.fail_json(msg=error_message)
+        return ZonesSummary(self.zones_summary_api,
+                            self.module).get_zone_base_path(access_zone)
 
     def ca_timeout_value(self):
-        if self.module.params['ca_timeout']:
-            if self.module.params['ca_timeout']['unit']:
-                ca_timeout_value = utils.get_time_in_seconds(self.module.params['ca_timeout']['value'],
-                                                             self.module.params['ca_timeout']['unit'])
+        if self.module.params.get('ca_timeout'):
+            ca_value = self.module.params['ca_timeout'].get('value')
+            ca_unit = self.module.params['ca_timeout'].get('unit')
+            if ca_unit:
+                ca_timeout_value = utils.get_time_in_seconds(
+                    ca_value, ca_unit)
             else:
-                ca_timeout_value = self.module.params['ca_timeout']['value']
+                ca_timeout_value = ca_value
             return ca_timeout_value
         return None
 
@@ -678,6 +763,122 @@ class SMB(object):
 
         return smb_share
 
+    def remove_duplicates(self, root_list):
+        """remove duplicates"""
+        unique_list = []
+        if root_list:
+            unique_list = [item for item in root_list if item not in unique_list]
+            return unique_list
+
+    def prepare_persona_dict_persona(self, sid, persona):
+        """add persona"""
+        try:
+            persona_dict = self.isi_sdk.AuthAccessAccessItemFileGroup(
+                name=persona['name'], id=sid, type=persona['type'])
+            return persona_dict.to_dict()
+        except Exception as e:
+            error_message = f'Failed to create persona dict ' \
+                            f'with error {utils.determine_error(e)}'
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    def arrange_persona_dict(self, persona):
+        """arrange persona dict"""
+        if persona['type'] == "user" or persona['type'] == "group":
+            sid = self.get_sid(name=persona['name'], type=persona['type'].upper(),
+                               provider=persona.get('provider_type'))
+            tmp_dict = self.prepare_persona_dict_persona(sid, persona)
+
+        else:
+            sid = Auth(self.auth_api,
+                       self.module).get_wellknown_details(name=persona['name'])['id']
+            tmp_dict = self.prepare_persona_dict_persona(sid, persona)
+
+        return tmp_dict
+
+    def set_allow_list(self, allow_rar_list, smb_rar_list):
+        """set allow list"""
+        add_allow_list = list()
+
+        if allow_rar_list and len(allow_rar_list) != 0:
+
+            for allow in allow_rar_list:
+
+                if (len(smb_rar_list) == 0 or len(smb_rar_list) > 0) and \
+                        allow not in smb_rar_list:
+
+                    add_allow_list.append(allow)
+        return add_allow_list
+
+    def set_deny_list(self, deny_rar_list, all_smb_rar_list):
+        """set deny list"""
+        remove_deny_list = list()
+        if deny_rar_list and len(deny_rar_list) != 0:
+            for deny in deny_rar_list:
+                if all_smb_rar_list and deny in all_smb_rar_list:
+                    remove_deny_list.append(deny)
+        return remove_deny_list
+
+    def preare_unique_rar(self, allow_list, deny_list, smb_root_list):
+        """prepare run as root list"""
+        tmp_all_list = list()
+        tmp_all_list.extend(smb_root_list)
+
+        tmp_allow_list = self.set_allow_list(allow_list, smb_root_list)
+
+        if tmp_allow_list:
+
+            tmp_all_list.extend(tmp_allow_list)
+        tmp_all_list = self.remove_duplicates(tmp_all_list)
+
+        remove_list = list()
+        tmp_deny_list = self.set_deny_list(deny_list, tmp_all_list)
+
+        if tmp_deny_list:
+            remove_list.extend(tmp_deny_list)
+
+        final_rar_list = list()
+        if tmp_all_list:
+
+            for item2 in tmp_all_list:
+
+                if item2 not in remove_list:
+
+                    final_rar_list.append(item2)
+
+        if final_rar_list != smb_root_list:
+            return True, final_rar_list
+        return False, None
+
+    def prepare_run_as_root_list(self, root_list, smb_root_list):
+        """prepare run as root list"""
+
+        if root_list:
+            allow_list = []
+            deny_list = []
+
+            # remove duplicate dict from root_list
+            root_list = self.remove_duplicates(root_list)
+
+            for persona in root_list:
+
+                if persona['state'] == "allow":
+                    add_dict = self.arrange_persona_dict(persona)
+                    allow_list.append(add_dict)
+
+                elif persona['state'] == "deny":
+                    remove_dict = self.arrange_persona_dict(persona)
+                    deny_list.append(remove_dict)
+
+            allow_list = self.remove_duplicates(allow_list)
+            deny_list = self.remove_duplicates(deny_list)
+
+            tmp_flag, temp_list = self.preare_unique_rar(allow_list, deny_list,
+                                                         smb_root_list)
+            if tmp_flag:
+                return True, temp_list
+        return False, None
+
     def create_smb_share(self):
         """Creates  a new SMB share & return the Share ID"""
 
@@ -694,74 +895,28 @@ class SMB(object):
                 name=self.module.params['share_name'],
                 path=self.module.params['path'])
 
-            smb_share.permissions = permissions
+            run_root_list = self.module.params['run_as_root'] \
+                if 'run_as_root' in self.module.params else None
+            rar_flag, run_root_list = self.prepare_run_as_root_list(run_root_list, [])
 
-            if self.module.params['description']:
-                smb_share.description = self.module.params['description']
+            smb_share.permissions = permissions
+            if rar_flag:
+                smb_share.run_as_root = run_root_list
 
             smb_share = self.octal_param_update(smb_share)
 
-            if self.module.params['ntfs_acl_support']:
-                smb_share.ntfs_acl_support = \
-                    self.module.params['ntfs_acl_support']
-
-            if self.module.params['access_based_enumeration']:
-                smb_share.access_based_enumeration = \
-                    self.module.params['access_based_enumeration']
-
-            if self.module.params['access_based_enumeration_root_only']:
-                smb_share.access_based_enumeration_root_only = \
-                    self.module.params['access_based_enumeration_root_only']
-
-            if self.module.params['browsable']:
-                smb_share.browsable = self.module.params['browsable']
-
-            if self.module.params['create_path']:
-                smb_share.create_path = self.module.params['create_path']
-
-            if self.module.params['allow_variable_expansion']:
-                smb_share.allow_variable_expansion = \
-                    self.module.params['allow_variable_expansion']
-
-            if self.module.params['auto_create_directory']:
-                smb_share.auto_create_directory = \
-                    self.module.params['auto_create_directory']
-
-            if self.module.params['continuously_available']:
-                smb_share.continuously_available = \
-                    self.module.params['continuously_available']
-
-            if self.module.params['strict_ca_lockout']:
-                smb_share.strict_ca_lockout = \
-                    self.module.params['strict_ca_lockout']
-
-            if self.module.params['change_notify']:
-                smb_share.change_notify = self.module.params['change_notify']
-
-            if self.module.params['oplocks']:
-                smb_share.oplocks = self.module.params['oplocks']
-
-            if self.module.params['impersonate_guest']:
-                smb_share.impersonate_guest = \
-                    self.module.params['impersonate_guest']
-
-            if self.module.params['impersonate_user']:
-                smb_share.impersonate_user = \
-                    self.module.params['impersonate_user']
-
-            if self.module.params['smb3_encryption_enabled']:
-                smb_share.smb3_encryption_enabled = \
-                    self.module.params['smb3_encryption_enabled']
-
-            if self.module.params['ca_write_integrity']:
-                smb_share.ca_write_integrity = \
-                    self.module.params['ca_write_integrity']
-
-            if self.module.params['host_acls']:
-                host_acl_list = []
-                for host_acl in self.module.params['host_acls']:
-                    host_acl_list.append(host_acl['access_type'] + ": " + host_acl['name'])
-                smb_share.host_acl = host_acl_list
+            params_list = [
+                'description', 'ntfs_acl_support', 'access_based_enumeration',
+                'access_based_enumeration_root_only', 'browsable', 'create_path',
+                'allow_variable_expansion', 'auto_create_directory',
+                'continuously_available', 'strict_ca_lockout', 'change_notify',
+                'oplocks', 'impersonate_guest', 'impersonate_user',
+                'smb3_encryption_enabled', 'ca_write_integrity',
+                'host_acls', 'allow_delete_readonly', 'allow_execute_always',
+                'inheritable_path_acl']
+            for param in params_list:
+                if self.module.params.get(param):
+                    setattr(smb_share, param, self.module.params[param])
 
             smb_share.file_filter_extensions, smb_share.file_filter_type, \
                 smb_share.file_filtering_enabled = self.file_filter_details()
@@ -830,8 +985,8 @@ class SMB(object):
 
         try:
             LOG.info("making permissions")
-            user_smb_permissions, group_smb_permissions, \
-                wellknown_smb_permissions = self.get_smb_permissions_dict(smb_permissions)
+            user_smb_permissions, group_smb_permissions, wellknown_smb_permissions = \
+                self.get_smb_permissions_dict(smb_permissions)
 
             user_params_permissions, group_params_permissions, \
                 wellknown_params_permissions = \
@@ -901,8 +1056,7 @@ class SMB(object):
             if remaining_wellknowns is not None:
                 list_permissions.append(
                     self.create_permissions_object(
-                        remaining_wellknowns, wellknown_smb_permissions,
-                        'WELLKNOWN'))
+                        remaining_wellknowns, wellknown_smb_permissions, 'WELLKNOWN'))
 
             flat_list_permissions = \
                 [item for sublist in list_permissions for item in sublist]
@@ -919,16 +1073,22 @@ class SMB(object):
         module for better readability & passing it to other methods"""
         try:
             LOG.info("Creating SMB Dictionary")
-            params = ['allow_variable_expansion', 'auto_create_directory', 'continuously_available',
-                      'file_filter_extensions', 'file_filter_type', 'file_filtering_enabled', 'strict_ca_lockout',
-                      'ca_timeout', 'change_notify', 'oplocks', 'impersonate_guest', 'impersonate_user', 'host_acl',
-                      'smb3_encryption_enabled', 'ca_write_integrity']
+            params = [
+                'allow_variable_expansion', 'auto_create_directory',
+                'continuously_available',
+                'file_filter_extensions', 'file_filter_type',
+                'file_filtering_enabled', 'strict_ca_lockout',
+                'ca_timeout', 'change_notify', 'oplocks', 'impersonate_guest',
+                'impersonate_user', 'host_acl', 'smb3_encryption_enabled',
+                'ca_write_integrity', 'allow_delete_readonly',
+                'allow_execute_always', 'inheritable_path_acl']
 
-            smb_params = {
+            udpated_smb_params = {
                 'name': smb_details['name'],
                 'path': smb_details['path'],
                 'permissions': smb_details['permissions'],
                 'description': smb_details['description'],
+                'run_as_root': smb_details['run_as_root'],
                 'directory_create_mask': smb_details['directory_create_mask'],
                 'directory_create_mode': smb_details['directory_create_mode'],
                 'file_create_mask': smb_details['file_create_mask'],
@@ -942,9 +1102,9 @@ class SMB(object):
             }
 
             for param in params:
-                smb_params[param] = smb_details[param]
+                udpated_smb_params[param] = smb_details[param]
 
-            return smb_params
+            return udpated_smb_params
         except Exception as e:
 
             error_message = 'Failed to get SMB params from details' \
@@ -991,21 +1151,23 @@ class SMB(object):
         try:
             zone = self.module.params['access_zone']
             if type == 'USER':
-                api_response = self.auth_api_instance.get_auth_user(
-                    auth_user_id='USER:' + name,
-                    zone=zone, provider=provider)
-                return api_response.users[0].sid.id
+                api_response = Auth(
+                    self.auth_api,
+                    self.module).get_user_details(name=name, zone=zone,
+                                                  provider=provider)
+                return api_response['users'][0]['sid']['id']
             elif type == 'GROUP':
-                api_response = self.auth_api_instance.get_auth_group(
-                    auth_group_id='GROUP:' + name, zone=zone,
-                    provider=provider)
-                return api_response.groups[0].sid.id
+                api_response = Auth(
+                    self.auth_api,
+                    self.module).get_group_details(name=name, zone=zone,
+                                                   provider=provider)
+                return api_response['groups'][0]['sid']['id']
         except Exception as e:
-            error_message = "Failed to get {0}:{1} details for " \
-                            "AccessZone:{2} and Provider:{3} " \
-                            "with error {4}".format(type, name,
-                                                    self.module.params['access_zone'],
-                                                    provider, utils.determine_error(e))
+            error_message = "Failed to get {0}:{1} details for AccessZone:{2} " \
+                            "and Provider:{3} with error" \
+                            " {4}".format(type, name,
+                                          self.module.params['access_zone'],
+                                          provider, utils.determine_error(e))
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
@@ -1050,6 +1212,22 @@ class SMB(object):
             LOG.error(error_message)
             return None, None, None
 
+    def is_sid_in_permission_list(self, permission_list, index, sid, params_permission):
+        """checking if the sid is in permission list"""
+        if sid in permission_list[index].keys():
+            permission_type = \
+                params_permission['permission_type'].lower()
+
+            permission = params_permission['permission'].lower()
+            permission_list_per = permission_list[index][sid]['permission']
+            permission_list_type = permission_list[index][sid]['permission_type']
+
+            if (permission_type != permission_list_type) or \
+                    (permission != permission_list_per):
+                return True
+        else:
+            return True
+
     def is_permission_modified(self, smb_params_permissions):
         """checking if the permission is changed"""
         try:
@@ -1063,27 +1241,16 @@ class SMB(object):
                     params_permission['permission'] = "change"
 
                 permission_type_list = ['user', 'group', 'wellknown']
-                permission_list = [user_permissions, group_permissions, wellknown_permissions]
+                permission_list = [user_permissions, group_permissions,
+                                   wellknown_permissions]
                 for index in range(len(permission_type_list)):
                     if permission_type_list[index] + '_name' in params_permission:
                         sid = self.get_sid(
                             params_permission[permission_type_list[index] + '_name'],
                             permission_type_list[index].upper(),
                             params_permission['provider_type'])
-                        if sid in permission_list[index].keys():
-                            permission_type = \
-                                params_permission['permission_type'].lower()
-
-                            permission = params_permission['permission'].lower()
-
-                            if permission_type != \
-                                    permission_list[index][sid]['permission_type']:
-                                return True
-                            if permission != \
-                                    permission_list[index][sid]['permission']:
-                                return True
-                        else:
-                            return True
+                        return self.is_sid_in_permission_list(
+                            permission_list, index, sid, params_permission)
             return False
         except Exception as e:
             error_message = 'Failed to validate if permission modified' \
@@ -1096,10 +1263,96 @@ class SMB(object):
         if self.module.params['file_filter_extension'] is not None and \
                 (not self.module.params['file_filter_extension']['state'] or
                  not self.module.params['file_filter_extension']['extensions']):
-            error_message = "extensions and state are required together when file_filter_extension" \
-                            " is mentioned."
+            error_message = "extensions and state are required together when" \
+                            " file_filter_extension is mentioned."
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
+
+    def check_newname_or_mode_bits_modified(self, smb_params):
+        """Check if newname or mode bits are modified"""
+        mod_flag = False
+        if self.module.params['new_share_name'] and \
+                (self.module.params['new_share_name'].lower() !=
+                 smb_params['name'].lower()):
+            return True
+
+        smb_share_mask_mode_bit_params = [
+            'directory_create_mask', 'directory_create_mode', 'file_create_mask',
+            'file_create_mode']
+
+        for param in smb_share_mask_mode_bit_params:
+            if self.module.params[param] and \
+                    int(self.module.params[param], 8) != smb_params[param]:
+                return True
+        return mod_flag
+
+    def is_path_modified(self, smb_params):
+        """Checking if SMB path has changed"""
+        if self.module.params['path'] and \
+                self.module.params['path'] != smb_params['path']:
+            error_message = "Modifying path for a SMB Share is not allowed" \
+                            " through Ansible Module"
+            self.module.fail_json(msg=error_message)
+
+    def is_file_filter_param_modified(self, smb_params):
+        """Validating file filter params"""
+        modify_list = []
+        if self.module.params['file_filter_extension']:
+            if self.module.params['file_filter_extension']['state'] == "present-in-share":
+                modify_list = set(list(smb_params['file_filter_extensions']) + list(
+                    self.module.params['file_filter_extension']['extensions']))
+
+            elif self.module.params['file_filter_extension']['state'] == "absent-in-share":
+                modify_list = set(list(smb_params['file_filter_extensions'])) - set(
+                    list(self.module.params['file_filter_extension']['extensions']))
+
+        if self.module.params['file_filter_extension'] and \
+                set(modify_list) != set(smb_params['file_filter_extensions']):
+            return True
+
+    def is_hostacl_modified(self, smb_params):
+        """Checking if hostacl has changed"""
+        if self.module.params["host_acls"]:
+            for host_acl in self.module.params["host_acls"]:
+                if host_acl['access_type'] + ": " + host_acl['name'] not in \
+                        smb_params["host_acl"]:
+                    return True
+
+    def is_bool_str_modified(self, smb_params):
+        """Checking if bool or other str parameters has changed"""
+        smb_share_params = [
+            'allow_variable_expansion', 'auto_create_directory',
+            'continuously_available', 'file_filtering_enabled',
+            'strict_ca_lockout', 'change_notify', 'oplocks', 'impersonate_guest',
+            'impersonate_user', 'description', 'ntfs_acl_support',
+            'access_based_enumeration', 'access_based_enumeration_root_only',
+            'browsable', 'smb3_encryption_enabled', 'ca_write_integrity',
+            'allow_delete_readonly', 'allow_execute_always',
+            'inheritable_path_acl']
+
+        to_modify = False
+        for param in smb_share_params:
+            if self.module.params.get(param) is not None and \
+                    self.module.params.get(param) != smb_params[param]:
+                to_modify = True
+
+        if self.module.params['file_filter_extension'] is not None and \
+                (self.module.params['file_filter_extension']['type'] and
+                    self.module.params['file_filter_extension']['type'] !=
+                    smb_params['file_filter_type']):
+            to_modify = True
+
+        return to_modify
+
+    def is_rar_modified(self, smb_params):
+        """Checking if run_as_root has changed"""
+        pb_rar_list = self.module.params.get('run_as_root')
+        module_rar_list = smb_params.get('run_as_root')
+
+        mod_flag, modify_list = self.prepare_run_as_root_list(pb_rar_list, module_rar_list)
+        if mod_flag:
+            return True, modify_list
+        return False, None
 
     def is_smb_modified(self, smb_params):
         """Checking if SMB attribute has changed & if modification required"""
@@ -1108,72 +1361,30 @@ class SMB(object):
             LOG.debug("is_smb_modified called with "
                       "params: %s", smb_params)
 
-            if self.module.params['new_share_name'] \
-                    and (self.module.params['new_share_name'].lower()
-                         != smb_params['name'].lower()):
-                return True
+            self.is_path_modified(smb_params)
+            name_mode_bit_flag = False
+            name_mode_bit_flag = self.check_newname_or_mode_bits_modified(smb_params)
 
-            smb_share_mask_mode_bit_params = ['directory_create_mask', 'directory_create_mode', 'file_create_mask',
-                                              'file_create_mode']
+            file_filter_flag = False
+            file_filter_flag = self.is_file_filter_param_modified(smb_params)
 
-            for param in smb_share_mask_mode_bit_params:
-                if self.module.params[param] and \
-                        int(self.module.params[param], 8) != \
-                        smb_params[param]:
-                    return True
-
-            modify_list = []
-            if self.module.params['file_filter_extension']:
-                if self.module.params['file_filter_extension']['state'] == "present-in-share":
-                    modify_list = set(list(smb_params['file_filter_extensions']) + list(
-                        self.module.params['file_filter_extension']['extensions']))
-
-                elif self.module.params['file_filter_extension']['state'] == "absent-in-share":
-                    modify_list = set(list(smb_params['file_filter_extensions'])) - set(
-                        list(self.module.params['file_filter_extension']['extensions']))
-
-            if self.module.params['file_filter_extension'] and set(modify_list) != set(
-                    smb_params['file_filter_extensions']):
-                return True
-
-            if self.module.params['ca_timeout'] and smb_params['ca_timeout'] != self.ca_timeout_value():
+            if self.module.params['ca_timeout'] and \
+                    smb_params['ca_timeout'] != self.ca_timeout_value():
                 return True
 
             if self.module.params['permissions'] and \
                     self.is_permission_modified(smb_params['permissions']):
                 return True
 
-            if self.module.params['path'] and \
-                    self.module.params['path'] != smb_params['path']:
-                error_message = "Modifying path for a SMB Share is not " \
-                                "allowed through Ansible Module"
-                self.module.fail_json(msg=error_message)
+            host_acl_flag = False
+            host_acl_flag = self.is_hostacl_modified(smb_params)
 
-            smb_share_params = ['allow_variable_expansion', 'auto_create_directory', 'continuously_available',
-                                'file_filtering_enabled', 'strict_ca_lockout', 'change_notify', 'oplocks',
-                                'impersonate_guest', 'impersonate_user', 'description', 'ntfs_acl_support',
-                                'access_based_enumeration', 'access_based_enumeration_root_only', 'browsable',
-                                'smb3_encryption_enabled', 'ca_write_integrity']
+            bool_str_flag = False
+            bool_str_flag = self.is_bool_str_modified(smb_params)
 
-            if self.module.params["host_acls"]:
-                for host_acl in self.module.params["host_acls"]:
-                    if host_acl['access_type'] + ": " + host_acl['name'] not in smb_params["host_acl"]:
-                        return True
-
-            to_modify = False
-            for param in smb_share_params:
-                if self.module.params[param] and \
-                        self.module.params[param] != \
-                        smb_params[param]:
-                    to_modify = True
-
-            if self.module.params['file_filter_extension'] is not None and \
-                    (self.module.params['file_filter_extension']['type'] and
-                     self.module.params['file_filter_extension']['type'] !=
-                     smb_params['file_filter_type']):
-                to_modify = True
-
-            return to_modify
+            modify_flags = [name_mode_bit_flag, file_filter_flag,
+                            host_acl_flag, bool_str_flag]
+            return any(m_flag for m_flag in modify_flags if m_flag)
 
         except Exception as e:
             error_message = 'Failed to determine if any modification' \
@@ -1182,7 +1393,7 @@ class SMB(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
-    def update_smb_details(self, smb_share_id, smb_details):
+    def update_smb_details(self, smb_share_id, smb_details, updated_rar):
         """Updating SMB attributes"""
         try:
             LOG.debug("updating SMB: %s details with : %s ", smb_share_id,
@@ -1218,28 +1429,32 @@ class SMB(object):
 
             smb_share = self.isi_sdk.SmbShare(
                 permissions=permissions,
-                description=self.module.params['description'],
-                ntfs_acl_support=self.module.params['ntfs_acl_support'],
-                access_based_enumeration=self.module.params[
-                    'access_based_enumeration'],
-                access_based_enumeration_root_only=self.module.params[
-                    'access_based_enumeration_root_only'],
-                browsable=self.module.params['browsable'],
-                name=self.module.params['new_share_name'],
-                allow_variable_expansion=self.module.params['allow_variable_expansion'],
-                auto_create_directory=self.module.params['auto_create_directory'],
+                description=self.module.params.get('description'),
+                ntfs_acl_support=self.module.params.get('ntfs_acl_support'),
+                access_based_enumeration=self.module.params.get(
+                    'access_based_enumeration'),
+                access_based_enumeration_root_only=self.module.params.get(
+                    'access_based_enumeration_root_only'),
+                browsable=self.module.params.get('browsable'),
+                name=self.module.params.get('new_share_name'),
+                allow_variable_expansion=self.module.params.get('allow_variable_expansion'),
+                auto_create_directory=self.module.params.get('auto_create_directory'),
                 file_filter_extensions=modify_list,
                 file_filter_type=file_filter_type,
-                file_filtering_enabled=self.module.params['file_filtering_enabled'],
+                file_filtering_enabled=self.module.params.get('file_filtering_enabled'),
                 ca_timeout=self.ca_timeout_value(),
-                strict_ca_lockout=self.module.params['strict_ca_lockout'],
-                smb3_encryption_enabled=self.module.params['smb3_encryption_enabled'],
-                ca_write_integrity=self.module.params['ca_write_integrity'],
-                change_notify=self.module.params['change_notify'],
-                oplocks=self.module.params['oplocks'],
-                impersonate_guest=self.module.params['impersonate_guest'],
-                impersonate_user=self.module.params['impersonate_user'],
-                host_acl=host_acl_list)
+                strict_ca_lockout=self.module.params.get('strict_ca_lockout'),
+                smb3_encryption_enabled=self.module.params.get('smb3_encryption_enabled'),
+                ca_write_integrity=self.module.params.get('ca_write_integrity'),
+                change_notify=self.module.params.get('change_notify'),
+                oplocks=self.module.params.get('oplocks'),
+                impersonate_guest=self.module.params.get('impersonate_guest'),
+                impersonate_user=self.module.params.get('impersonate_user'),
+                host_acl=host_acl_list,
+                run_as_root=updated_rar,
+                allow_execute_always=self.module.params.get('allow_execute_always'),
+                allow_delete_readonly=self.module.params.get('allow_delete_readonly'),
+                inheritable_path_acl=self.module.params.get('inheritable_path_acl'))
 
             smb_share = self.octal_param_update(smb_share)
 
@@ -1273,44 +1488,40 @@ class SMB(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
+    def validate_run_as_root_list(self):
+        """Validate run_as_root and add default provider_type"""
+        run_as_root = self.module.params['run_as_root']
+        for persona in run_as_root:
+            if utils.is_param_empty_spaces(persona['name']):
+                err_messge = "Provide valid value for persona name."
+                self.module.fail_json(msg=err_messge)
+
     def validate_permission_dict(self):
-        """Validate permission and add default provider_type """
+        """Validate permission and add default provider_type"""
         permissions = self.module.params['permissions']
-        for i in range(len(permissions)):
-            if "user_name" in permissions[i] and not (
-                    "provider_type" in permissions[i].keys()):
-                self.module.params['permissions'][i][
-                    'provider_type'] = 'local'
-            if "group_name" in permissions[i] and not (
-                    "provider_type" in permissions[i].keys()):
-                self.module.params['permissions'][i][
-                    'provider_type'] = 'local'
-            if "wellknown" in permissions[i] and (
-                    "provider_type" in permissions[i].keys()):
+        for perm in permissions:
+            if ("user_name" in perm or "group_name" in perm) and \
+                    "provider_type" not in perm:
+                perm['provider_type'] = 'local'
+            if "wellknown" in perm and "provider_type" in perm:
                 LOG.warn("'provider_type' for wellknown will be ignored")
 
-        LOG.info("Default provider_type added to permission  : %s",
+        LOG.info("Default provider_type added to permission: %s",
                  self.module.params['permissions'])
 
-    def perform_module_operation(self):
-        """
-        Perform different actions on SMB share based on user
-        parameter provided in the playbook
-        """
-
-        share_name = self.module.params['share_name']
-        path = self.module.params['path']
-        access_zone = self.module.params['access_zone']
-        state = self.module.params['state']
-        new_share_name = self.module.params['new_share_name']
+    def validate_permission_and_runas_root(self):
+        """validate permission and runas_root"""
         permissions = self.module.params['permissions']
+        run_as_root = self.module.params['run_as_root']
+        if permissions:
+            self.validate_permission_dict()
+        elif run_as_root:
+            self.validate_run_as_root_list()
 
-        result = {'changed': False,
-                  'smb_details': None}
-
-        self.file_filter_param_validation()
-        if (not share_name) or ' ' in share_name:
-            error_message = "Invalid share name {0}".format(share_name)
+    def validate_input_params(self, share_name, access_zone, path):
+        """Validate the user input parameters"""
+        if (not share_name) or utils.is_param_empty_spaces(share_name):
+            error_message = f"Invalid share name {share_name}"
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
@@ -1318,83 +1529,31 @@ class SMB(object):
             effective_path = path
             if access_zone.lower() == "system":
                 if not path.startswith('/'):
-                    err_msg = "Invalid path {0}, Path must start " \
-                              "with '/'".format(path)
+                    err_msg = f"Invalid path {path}, Path must start " \
+                              "with '/'"
                     LOG.error(err_msg)
                     self.module.fail_json(msg=err_msg)
             else:
                 if not path.startswith('/'):
-                    path = "/{0}".format(path)
+                    path = f"/{path}"
                 effective_path = self.get_zone_base_path(
                     access_zone) + path
-            path = effective_path
             self.module.params['path'] = effective_path
 
-        if permissions:
-            self.validate_permission_dict()
+    def validate_path(self, path):
+        """Validate the path"""
+        if not path or utils.is_param_empty_spaces(path):
+            self.module.fail_json(msg="Invalid path. Valid path is "
+                                  "required to create a smb share")
 
-        smb_details = self.get_smb_details(share_name, access_zone)
+    def format_output(self, smb_details):
+        """Format the output"""
+        for key in ('directory_create_mask', 'directory_create_mode', 'file_create_mask', 'file_create_mode'):
+            if smb_details['shares'][0].get(key):
+                smb_details['shares'][0][f"{key}(octal)"] = "{0:o}".format(int(smb_details['shares'][0][key]))
 
-        LOG.debug('SMB Details with unmodified mode/mask '
-                  'bits : %s', smb_details)
-        to_modify = False
-
-        if smb_details and state == "present":
-            smb_params = self.get_smb_params_from_details(
-                smb_details['shares'][0])
-
-            to_modify = self.is_smb_modified(smb_params)
-
-        if state == 'present' and not smb_details:
-            LOG.info("Creating a new SMB share %s", share_name)
-            if not path or path == '' or ' ' in path:
-                self.module.fail_json(msg="Invalid path.Valid path is "
-                                          "required to create a smb share ")
-            smb_details = self.create_smb_share()
-            if smb_details:
-                share_name = smb_details['id']
-                smb_details = self.get_smb_details(share_name, access_zone)
-                result['changed'] = True
-
-        elif state == 'absent' and smb_details:
-            LOG.info("Deleting the SMB share %s", share_name)
-            self.delete_smb_share()
-            result['changed'] = True
-            smb_details = None
-
-        elif state == 'present' and smb_details and to_modify:
-            LOG.info("Modify the SMB share details")
-            self.update_smb_details(share_name, smb_params)
-            if new_share_name:
-                smb_details = self.get_smb_details(
-                    new_share_name, access_zone)
-            else:
-                smb_details = self.get_smb_details(
-                    share_name, access_zone)
-            share_name = smb_details['shares'][0]['name']
-            result['changed'] = True
-
-        octal_dict = "{0:o}"
-        if state == 'present' and smb_details:
-            LOG.info('Getting Details for SMB : %s : ', share_name)
-
-            smb_details['shares'][0]['directory_create_mask(octal)'] = \
-                octal_dict.format(smb_details['shares'][0]
-                                  ['directory_create_mask'])
-            smb_details['shares'][0]['directory_create_mode(octal)'] = \
-                octal_dict.format(smb_details['shares'][0]
-                                  ['directory_create_mode'])
-            smb_details['shares'][0]['file_create_mask(octal)'] = \
-                octal_dict.format(smb_details['shares'][0]
-                                  ['file_create_mask'])
-            smb_details['shares'][0]['file_create_mode(octal)'] = \
-                octal_dict.format(smb_details['shares'][0]
-                                  ['file_create_mode'])
-
-            LOG.debug('SMB Details : %s ', smb_details)
-            result['smb_details'] = smb_details
-
-        self.module.exit_json(**result)
+        LOG.debug('SMB Details : %s', smb_details)
+        return smb_details
 
 
 def get_smb_parameters():
@@ -1421,8 +1580,10 @@ def get_smb_parameters():
         file_filter_extension=dict(
             type='dict', options=dict(
                 extensions=dict(type='list', elements='str'),
-                type=dict(default='deny', type='str', required=False, choices=['allow', 'deny']),
-                state=dict(type='str', choices=['present-in-share', 'absent-in-share']),
+                type=dict(default='deny', type='str', required=False,
+                          choices=['allow', 'deny']),
+                state=dict(type='str',
+                           choices=['present-in-share', 'absent-in-share']),
             ),
             required=False
         ),
@@ -1430,7 +1591,8 @@ def get_smb_parameters():
         ca_timeout=dict(
             type='dict', options=dict(
                 value=dict(type='int'),
-                unit=dict(default='seconds', type='str', choices=['seconds', 'minutes', 'hours']))),
+                unit=dict(default='seconds', type='str',
+                          choices=['seconds', 'minutes', 'hours']))),
         strict_ca_lockout=dict(type='bool'),
         smb3_encryption_enabled=dict(type='bool'),
         ca_write_integrity=dict(type='str', choices=['none', 'full', 'write-read-coherent']),
@@ -1441,14 +1603,104 @@ def get_smb_parameters():
         host_acls=dict(type='list', elements='dict',
                        options=dict(name=dict(type='str', required=True),
                                     access_type=dict(type='str', required=True))),
+        allow_delete_readonly=dict(type='bool'), allow_execute_always=dict(type='bool'),
+        inheritable_path_acl=dict(type='bool'),
+        run_as_root=dict(
+            type='list', elements='dict',
+            options=dict(
+                name=dict(type='str', required=True),
+                type=dict(type='str', choices=['user', 'group', 'wellknown'],
+                          required=True),
+                provider_type=dict(type='str', default='local'),
+                state=dict(type='str', choices=['allow', 'deny'],
+                           default='allow'))),
     )
+
+
+class SMBExitHandler:
+    def handle(self, smb_obj, smb_details):
+        if smb_details:
+            smb_details = smb_obj.format_output(smb_details)
+        smb_obj.result['smb_details'] = smb_details
+        smb_obj.module.exit_json(**smb_obj.result)
+
+
+class SMBDeleteHandler:
+    def handle(self, smb_obj, smb_params, smb_details):
+        if smb_params['state'] == 'absent' and smb_details:
+            info_msg = f"Deleting SMB share {smb_params['share_name']}"
+            LOG.info(info_msg)
+            smb_obj.delete_smb_share()
+            smb_obj.result['changed'] = True
+            smb_details = {}
+        SMBExitHandler().handle(smb_obj, smb_details)
+
+
+class SMBModifyHandler:
+    def handle(self, smb_obj, smb_params, smb_details):
+        state = smb_params['state']
+        to_modify = False
+
+        if smb_details and state == "present":
+            all_smb_params = smb_obj.get_smb_params_from_details(
+                smb_details['shares'][0])
+
+            to_modify = smb_obj.is_smb_modified(all_smb_params)
+            to_rar_modified, updated_rar_list = smb_obj.is_rar_modified(all_smb_params)
+
+            if to_modify or to_rar_modified:
+                LOG.info("Modify the SMB share details")
+                smb_obj.update_smb_details(smb_params['share_name'],
+                                           all_smb_params, updated_rar_list)
+                if smb_params['new_share_name']:
+                    smb_details = smb_obj.get_smb_details(
+                        smb_params['new_share_name'],
+                        smb_params['access_zone'])
+                else:
+                    smb_details = smb_obj.get_smb_details(
+                        smb_params['share_name'], smb_params['access_zone'])
+                smb_obj.result['changed'] = True
+        SMBDeleteHandler().handle(smb_obj, smb_params, smb_details)
+
+
+class SMBCreateHandler:
+    def handle(self, smb_obj, smb_params, smb_details):
+        state = smb_params['state']
+        path = smb_params['path']
+        access_zone = smb_params['access_zone']
+        if state == 'present' and not smb_details:
+            LOG.info(f"Creating a new SMB share {0}".format(smb_params['share_name']))
+            smb_obj.validate_path(path)
+            smb_details = smb_obj.create_smb_share()
+            if smb_details:
+                share_name = smb_details['id']
+                smb_details = smb_obj.get_smb_details(share_name, access_zone)
+                smb_obj.result['changed'] = True
+        SMBModifyHandler().handle(smb_obj, smb_params, smb_details)
+
+
+class SMBHandler:
+    def handle(self, smb_obj, smb_params):
+        share_name = smb_params['share_name']
+        path = smb_params['path']
+        access_zone = smb_params['access_zone']
+
+        smb_obj.file_filter_param_validation()
+        smb_obj.validate_input_params(share_name, access_zone, path)
+        smb_obj.validate_permission_and_runas_root()
+
+        smb_details = smb_obj.get_smb_details(share_name, access_zone)
+
+        LOG.info('SMB Details with unmodified mode/mask '
+                 'bits : %s', smb_details)
+        SMBCreateHandler().handle(smb_obj, smb_params, smb_details)
 
 
 def main():
     """Create PowerScale Smb object and perform action on it
         based on user input from playbook"""
     obj = SMB()
-    obj.perform_module_operation()
+    SMBHandler().handle(obj, obj.module.params)
 
 
 if __name__ == '__main__':

@@ -1,4 +1,4 @@
-# Copyright: (c) 2021, Dell Technologies
+# Copyright: (c) 2021-2024, Dell Technologies
 
 # Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -81,7 +81,8 @@ class MockGatherfactsApi:
         'EmailSettings': {},
         'ClusterIdentity': {},
         'ClusterOwner': {},
-        'ServerCertificate': []
+        'ServerCertificate': [],
+        'support_assist_settings': {}
     }
     API = "api"
     MODULE = "module"
@@ -1294,6 +1295,59 @@ class MockGatherfactsApi:
             ]
 
     @staticmethod
+    def get_support_assist_settings(response_type):
+        if response_type == "api" or response_type == "module":
+            return {
+                "automatic_case_creation": False,
+                "connection": {
+                    "gateway_endpoints": [
+                        {
+                            "enabled": True,
+                            "host": "XX.XX.XX.XX",
+                            "port": 9443,
+                            "priority": 1,
+                            "use_proxy": False,
+                            "validate_ssl": False
+                        }
+                    ],
+                    "mode": "gateway",
+                    "network_pools": [
+                        {
+                            "pool": "pool2",
+                            "subnet": "subnet0"
+                        }
+                    ]
+                },
+                "connection_state": "enabled",
+                "contact": {
+                    "primary": {
+                        "email": "abc.def@sample.com",
+                        "first_name": "abc",
+                        "last_name": "def",
+                        "phone": "1234567890"
+                    },
+                    "secondary": {
+                        "email": "kangD@example.com",
+                        "first_name": "Daniel",
+                        "last_name": "Kang",
+                        "phone": "1234567891"
+                    }
+                },
+                "enable_download": False,
+                "enable_remote_support": False,
+                "onefs_software_id": "ELMISL1019H4GY",
+                "supportassist_enabled": True,
+                "telemetry": {
+                    "offline_collection_period": 60,
+                    "telemetry_enabled": True,
+                    "telemetry_persist": True,
+                    "telemetry_threads": 10
+                }
+            }
+        else:
+            return "Got error SDK Error message while getting support assist settings details "
+
+    @staticmethod
     def get_gather_facts_module_response(gather_subset):
         param = "module"
         subset_error_dict = {
@@ -1327,6 +1381,7 @@ class MockGatherfactsApi:
             "access_zones": MockGatherfactsApi.get_access_zones_response(param),
             "clients": MockGatherfactsApi.get_clients_response(param),
             "snmp_settings": MockGatherfactsApi.get_snmp_settings_response(param),
+            "support_assist_settings": MockGatherfactsApi.get_support_assist_settings(param)
         }
         return subset_error_dict.get(gather_subset)
 
@@ -1364,6 +1419,7 @@ class MockGatherfactsApi:
             "access_zones": MockGatherfactsApi.get_access_zones_response(param),
             "clients": MockGatherfactsApi.get_clients_response(param),
             "snmp_settings": MockGatherfactsApi.get_snmp_settings_response(param),
+            "support_assist_settings": MockGatherfactsApi.get_support_assist_settings(param)
         }
         return subset_error_dict.get(gather_subset)
 
@@ -1402,6 +1458,7 @@ class MockGatherfactsApi:
             "access_zones": MockGatherfactsApi.get_access_zones_response(param),
             "clients": MockGatherfactsApi.get_clients_response(param),
             "snmp_settings": MockGatherfactsApi.get_snmp_settings_response(param),
+            "support_assist_settings": MockGatherfactsApi.get_support_assist_settings(param)
         }
         return subset_error_dict.get(gather_subset)
 
@@ -1444,6 +1501,7 @@ class MockGatherfactsApi:
             "synciq_target_cluster_certificates": "list_certificates_peer",
 
             "access_zones": "list_zones",
-            "clients": "get_summary_client"
+            "clients": "get_summary_client",
+            "support_assist_settings": "get_supportassist_settings"
         }
         return subset_method_dict.get(gather_subset)

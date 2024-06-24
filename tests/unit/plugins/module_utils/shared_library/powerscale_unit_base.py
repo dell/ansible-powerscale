@@ -1,4 +1,4 @@
-# Copyright: (c) 2023, Dell Technologies
+# Copyright: (c) 2023-2024, Dell Technologies
 
 # Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -33,6 +33,14 @@ class PowerScaleUnitBase:
                 module_handler().handle(module_mock, module_mock.module.params)
             else:
                 module_mock.perform_module_operation()
+        except FailJsonException as fj_object:
+            if error_msg not in fj_object.message:
+                raise AssertionError(fj_object.message)
+
+    def capture_fail_json_method(self, error_msg, module_mock, function_name, *args, **kwargs):
+        try:
+            func = getattr(module_mock, function_name)
+            func(*args, **kwargs)
         except FailJsonException as fj_object:
             if error_msg not in fj_object.message:
                 raise AssertionError(fj_object.message)

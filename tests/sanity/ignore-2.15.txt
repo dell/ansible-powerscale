@@ -13,6 +13,12 @@ plugins/modules/s3_bucket.py compile-2.7
 plugins/modules/s3_bucket.py compile-3.5
 plugins/modules/s3_bucket.py import-2.7
 plugins/modules/s3_bucket.py import-3.5
+plugins/modules/smb.py compile-3.5
+plugins/modules/smb.py compile-2.7
+plugins/modules/smb.py import-3.5
+plugins/modules/smb.py import-2.7
+plugins/module_utils/storage/dell/shared_library/zones_summary.py compile-2.7
+plugins/module_utils/storage/dell/shared_library/zones_summary.py import-2.7
 plugins/modules/nfs_zone_settings.py compile-2.7
 plugins/modules/nfs_zone_settings.py compile-3.5
 plugins/modules/nfs_zone_settings.py import-2.7
@@ -136,3 +142,12 @@ plugins/module_utils/storage/dell/shared_library/certificate.py import-2.7
 plugins/module_utils/storage/dell/shared_library/certificate.py compile-3.5
 plugins/module_utils/storage/dell/shared_library/certificate.py import-3.5
 plugins/modules/server_certificate.py validate-modules:missing-gplv3-license
+plugins/modules/support_assist.py import-2.7
+plugins/modules/support_assist.py import-3.5
+plugins/modules/support_assist.py compile-2.7
+plugins/modules/support_assist.py compile-3.5
+plugins/module_utils/storage/dell/shared_library/support_assist.py compile-2.7
+plugins/module_utils/storage/dell/shared_library/support_assist.py import-2.7
+plugins/module_utils/storage/dell/shared_library/support_assist.py compile-3.5
+plugins/module_utils/storage/dell/shared_library/support_assist.py import-3.5
+plugins/modules/support_assist.py validate-modules:missing-gplv3-license
