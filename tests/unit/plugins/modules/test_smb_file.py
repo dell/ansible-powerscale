@@ -93,6 +93,7 @@ class TestSmbFile():
             return_value=MockSmbFileApi.SmbFile["openfiles"])
         resp = smb_file_module_mock.get_file_id(file_path=file_path)
         assert resp is not None
+
     def test_get_file_id_with_file_id(self, smb_file_module_mock):
         file_id = 1593
         smb_file_module_mock.get_smb_files = MagicMock(
