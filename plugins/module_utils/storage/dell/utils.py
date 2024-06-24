@@ -549,3 +549,7 @@ def get_nfs_map_object():
 def is_email_address_valid(address):
     if address is not None and re.search(r'^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$', address) is None:
         return True
+
+
+def is_param_length_valid(item):
+    return len(item) <= 225

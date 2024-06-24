@@ -38,3 +38,4 @@ plugins/modules/smb_global_settings.py validate-modules:missing-gplv3-license
 plugins/modules/snmp_settings.py validate-modules:missing-gplv3-license
 plugins/modules/server_certificate.py validate-modules:missing-gplv3-license
 plugins/modules/support_assist.py validate-modules:missing-gplv3-license
+plugins/modules/role.py validate-modules:missing-gplv3-license
