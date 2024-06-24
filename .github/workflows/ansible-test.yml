@@ -1,4 +1,3 @@
-
 name: CI
 
 on:
@@ -18,7 +17,7 @@ jobs:
         ansible-version: [stable-2.15, stable-2.16, stable-2.17, devel]
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v4
@@ -39,29 +38,23 @@ jobs:
 
   ###
   # Unit tests (OPTIONAL)
-  #
+  # 
   # https://docs.ansible.com/ansible/latest/dev_guide/testing_units.html
 
   unit:
-    name: Unit Tests (?${{ matrix.ansible }} with ${{ matrix.python }} python)
+    name: Unit Tests (Ⓐ${{ matrix.ansible }} with ${{ matrix.python }} python)
     needs: [build]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        python: ['3.9', '3.10', '3.11']
+        python: ['3.10', '3.11']
         ansible:
           - stable-2.15
           - stable-2.16
           - stable-2.17
           - devel
         exclude:
-          - ansible: stable-2.16
-            python: '3.9'
-          - ansible: stable-2.17
-            python: '3.9'
-          - ansible: devel
-            python: '3.9'
           - ansible: devel
             python: '3.10'
 
@@ -74,33 +67,29 @@ jobs:
           ansible-core-version: ${{ matrix.ansible }}
           target-python-version: ${{ matrix.python }}
 
+
   ###
   # Sanity tests (REQUIRED)
   #
   # https://docs.ansible.com/ansible/latest/dev_guide/testing_sanity.html
 
   sanity:
-    name: Sanity (?${{ matrix.ansible }} with ${{ matrix.python }} python)
+    name: Sanity (Ⓐ${{ matrix.ansible }} with ${{ matrix.python }} python)
+    runs-on: ubuntu-latest
     needs: [build]
     strategy:
+      fail-fast: false
       matrix:
-        python: ['3.9', '3.10', '3.11']
+        python: ['3.10', '3.11']
         ansible:
           - stable-2.15
           - stable-2.16
           - stable-2.17
           - devel
         exclude:
-          - ansible: stable-2.16
-            python: '3.9'
-          - ansible: stable-2.17
-            python: '3.9'
-          - ansible: devel
-            python: '3.9'
           - ansible: devel
             python: '3.10'
 
-    runs-on: ubuntu-latest
     steps:
       - name: Perform sanity testing
         uses: ansible-community/ansible-test-gh-action@release/v1
@@ -118,28 +107,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10", "3.11"]
+        python-version: ["3.10", "3.11"]
         ansible-version: [stable-2.15, stable-2.16, stable-2.17, devel]
         exclude:
-        # Ansible-core 2.16 is supported only from Python 3.10 onwards
-          - python-version: "3.9"
-            ansible-version: stable-2.16
-          - python-version: "3.9"
-            ansible-version: stable-2.17
-          - python-version: "3.9"
-            ansible-version: devel
           - ansible-version: devel
             python-version: '3.10'
 
     steps:
       # Important: This sets up your GITHUB_WORKSPACE environment variable
       - name: Checkout the source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0 # needed for progressive mode to work
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
 
