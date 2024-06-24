@@ -269,3 +269,18 @@ releases:
       minor_changes:
         - Added support for OneFS 9.7 Key West release.
     release_date: '2024-03-29'
+  3.1.0:
+    changes:
+      minor_changes:
+        - Added support for running as root, along with other boolean flags such
+          as allow_delete_readonly, allow_execute_always, and inheritable_path_acl
+          in SMB module.
+        - Added support for OneFS 9.8 Lonestar release.
+    modules:
+      - description: Manage auth roles on a PowerScale Storage System.
+        name: roles
+        namespace: ''
+      - description: Manage support assist settings on a PowerScale Storage System.
+        name: support_assist
+        namespace: ''
+    release_date: '2024-06-28'
