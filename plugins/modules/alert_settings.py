@@ -174,11 +174,12 @@ class AlertSettings(PowerScaleBase):
         """
         modify_dict = {}
         pb_maintenance = settings_params.get('enable_celog_maintenance_mode')
-        if pb_maintenance is not None and settings_details['maintenance'] != pb_maintenance:
-          modify_dict['enable_celog_maintenance_mode'] = pb_maintenance
+        if pb_maintenance is not None and \
+                settings_details['maintenance'] != pb_maintenance:
+            modify_dict['enable_celog_maintenance_mode'] = pb_maintenance
 
         if settings_params.get('prune') is not None:
-          modify_dict['prune'] = settings_params.get('prune')
+            modify_dict['prune'] = settings_params.get('prune')
         return modify_dict
 
     def get_alert_setting_parameters(self):
@@ -196,8 +197,9 @@ class AlertSettingsExitHandler:
 class AlertSettingsModifyHandler:
     def handle(self, alert_setting_obj, alert_setting_params):
         alert_setting_details = alert_setting_obj.get_alert_settings_details()
-        modify_params = alert_setting_obj.is_alert_setting_modify_required(settings_params=alert_setting_params,
-                                                                           settings_details=alert_setting_details)
+        modify_params = alert_setting_obj.is_alert_setting_modify_required(
+            settings_params=alert_setting_params,
+            settings_details=alert_setting_details)
         if modify_params:
             changed = alert_setting_obj.modify_alert_settings(
                 modify_dict=modify_params)
