@@ -38,10 +38,12 @@ options:
     description:
     - Removes all maintenance mode history that is greater than set number of days.
     - Range of I(prune) is 0 to 4294967295.
+    - If I(prune) is set in task, then I(changed) will be c(true) always.
     type: int
 
 notes:
 - The I(check_mode) and idempotency is supported.
+- Idempotency is not supported with I(prune) option.
 '''
 
 EXAMPLES = r'''
@@ -149,8 +151,6 @@ class AlertSettings(PowerScaleBase):
         try:
             msg = "Modifing maintenance mode with parameters"
             LOG.info(msg)
-            if self.module.params.get('prune') is not None:
-                modify_dict['prune'] = self.module.params.get('prune')
             event_maintenance = self.isi_sdk.EventMaintenanceExtended(
                 maintenance=modify_dict.get('enable_celog_maintenance_mode'),
                 prune=modify_dict.get('prune'))
@@ -175,8 +175,10 @@ class AlertSettings(PowerScaleBase):
         modify_dict = {}
         pb_maintenance = settings_params.get('enable_celog_maintenance_mode')
         if pb_maintenance is not None and settings_details['maintenance'] != pb_maintenance:
-            modify_dict['enable_celog_maintenance_mode'] = pb_maintenance
+          modify_dict['enable_celog_maintenance_mode'] = pb_maintenance
 
+        if settings_params.get('prune') is not None:
+          modify_dict['prune'] = settings_params.get('prune')
         return modify_dict
 
     def get_alert_setting_parameters(self):
