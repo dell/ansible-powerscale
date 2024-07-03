@@ -14,7 +14,7 @@ from mock.mock import MagicMock
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.initial_mock \
     import utils
 
-from ansible_collections.dellemc.powerscale.plugins.modules.alert_settings import AlertSettings, AlertSettingsHandler, main
+from ansible_collections.dellemc.powerscale.plugins.modules.alert_settings import AlertSettings, AlertSettingsModifyHandler, main
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_alert_settings_api import MockAlertSettingsApi
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_api_exception \
     import MockApiException
@@ -31,15 +31,15 @@ class TestAlertSettings(PowerScaleUnitBase):
         Returns an instance of the `AlertSettings` class for testing purposes.
 
         :return: An instance of the `AlertSettings` class.
-        :rtype: `SMB`
+        :rtype: `AlertSettings`
         """
         return AlertSettings
 
     def test_get_alert_settings_response(self, powerscale_module_mock):
         self.set_module_params(
             powerscale_module_mock, self.alert_args, {})
-        AlertSettingsHandler().handle(powerscale_module_mock,
-                                      powerscale_module_mock.module.params)
+        AlertSettingsModifyHandler().handle(powerscale_module_mock,
+                                            powerscale_module_mock.module.params)
         powerscale_module_mock.event_api.get_event_maintenance.assert_called()
 
     def test_get_alert_settings_exception(self, powerscale_module_mock):
@@ -49,7 +49,7 @@ class TestAlertSettings(PowerScaleUnitBase):
             side_effect=MockApiException)
         self.capture_fail_json_call(
             MockAlertSettingsApi.get_alert_exception_response('get_alert'),
-            powerscale_module_mock, AlertSettingsHandler)
+            powerscale_module_mock, AlertSettingsModifyHandler)
 
     def test_modify_maintenance_mode(self, powerscale_module_mock):
         self.set_module_params(
@@ -59,8 +59,8 @@ class TestAlertSettings(PowerScaleUnitBase):
             return_value=MockAlertSettingsApi.SETTING_DETAILS)
         powerscale_module_mock.isi_sdk.EventMaintenanceExtended = MagicMock(
             {"maintenance": True, "prune": 10})
-        AlertSettingsHandler().handle(powerscale_module_mock,
-                                      powerscale_module_mock.module.params)
+        AlertSettingsModifyHandler().handle(powerscale_module_mock,
+                                            powerscale_module_mock.module.params)
         powerscale_module_mock.event_api.update_event_maintenance.assert_called()
 
     def test_modify_maintenance_mode_exception(self, powerscale_module_mock):
@@ -74,7 +74,7 @@ class TestAlertSettings(PowerScaleUnitBase):
         self.capture_fail_json_call(
             MockAlertSettingsApi.get_alert_exception_response(
                 'modify_exp'),
-            powerscale_module_mock, AlertSettingsHandler)
+            powerscale_module_mock, AlertSettingsModifyHandler)
 
     def test_main(self, powerscale_module_mock):
         main()

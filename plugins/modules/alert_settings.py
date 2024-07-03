@@ -45,33 +45,24 @@ notes:
 '''
 
 EXAMPLES = r'''
-- name: Get alert setiings
+- name: Enable CELOG maintenance mode
   dellemc.powerscale.alert_settings:
     onefs_host: "{{ onefs_host }}"
     port_no: "{{ port_no }}"
     api_user: "{{ api_user }}"
     api_password: "{{ api_password }}"
     verify_ssl: "{{ verify_ssl }}"
-
-- name: Enable CELOG maintenance mode
-  dellemc.powerscale.support_assist:
-    onefs_host: "{{ onefs_host }}"
-    port_no: "{{ port_no }}"
-    api_user: "{{ api_user }}"
-    api_password: "{{ api_password }}"
-    verify_ssl: "{{ verify_ssl }}"
     enable_celog_maintenance_mode: true
-    prune: 1
 
-- name: Disable CELOG maintenance mode
-  dellemc.powerscale.support_assist:
+- name: Disable CELOG and prune all history of maintenance mode
+  dellemc.powerscale.alert_settings:
     onefs_host: "{{ onefs_host }}"
     port_no: "{{ port_no }}"
     api_user: "{{ api_user }}"
     api_password: "{{ api_password }}"
     verify_ssl: "{{ verify_ssl }}"
     enable_celog_maintenance_mode: false
-    prune: 2
+    prune: 0
 '''
 
 RETURN = r'''
@@ -99,16 +90,6 @@ alert_settings_details:
             description: Start time of CELOG maintenance mode, as a UNIX
                          timestamp in seconds.
             type: int
-          network_pools:
-            description: List of network pools.
-            type: list
-            contains:
-              pool:
-                description: The network pool name.
-                type: str
-              subnet:
-                description: The network pool subnet.
-                type: str
       maintenance:
         description: Indicates if maintenance mode is enabled.
         type: bool
@@ -211,7 +192,8 @@ class AlertSettingsExitHandler:
 
 
 class AlertSettingsModifyHandler:
-    def handle(self, alert_setting_obj, alert_setting_params, alert_setting_details):
+    def handle(self, alert_setting_obj, alert_setting_params):
+        alert_setting_details = alert_setting_obj.get_alert_settings_details()
         modify_params = alert_setting_obj.is_alert_setting_modify_required(settings_params=alert_setting_params,
                                                                            settings_details=alert_setting_details)
         if modify_params:
@@ -223,19 +205,11 @@ class AlertSettingsModifyHandler:
         AlertSettingsExitHandler().handle(alert_setting_obj, alert_setting_details)
 
 
-class AlertSettingsHandler:
-    def handle(self, alert_setting_obj, alert_setting_params):
-        alert_setting_details = alert_setting_obj.get_alert_settings_details()
-        AlertSettingsModifyHandler().handle(
-            alert_setting_obj=alert_setting_obj, alert_setting_params=alert_setting_params,
-            alert_setting_details=alert_setting_details)
-
-
 def main():
     """ perform action on PowerScale Alert Settings object and perform action on it
         based on user input from playbook."""
     obj = AlertSettings()
-    AlertSettingsHandler().handle(obj, obj.module.params)
+    AlertSettingsModifyHandler().handle(obj, obj.module.params)
 
 
 if __name__ == '__main__':
