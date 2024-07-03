@@ -44,6 +44,8 @@ Parameters
 
     Range of *prune* is 0 to 4294967295.
 
+    If *prune* is set in task, then *changed* will be ``true`` always.
+
 
   onefs_host (True, str, None)
     IP address or FQDN of the PowerScale cluster.
@@ -77,6 +79,7 @@ Notes
 
 .. note::
    - The *check_mode* and idempotency is supported.
+   - Idempotency is not supported with *prune* option.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -88,33 +91,24 @@ Examples
 .. code-block:: yaml+jinja
 
     
-    - name: Get alert setiings
+    - name: Enable CELOG maintenance mode
       dellemc.powerscale.alert_settings:
         onefs_host: "{{ onefs_host }}"
         port_no: "{{ port_no }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         verify_ssl: "{{ verify_ssl }}"
-
-    - name: Enable CELOG maintenance mode
-      dellemc.powerscale.support_assist:
-        onefs_host: "{{ onefs_host }}"
-        port_no: "{{ port_no }}"
-        api_user: "{{ api_user }}"
-        api_password: "{{ api_password }}"
-        verify_ssl: "{{ verify_ssl }}"
         enable_celog_maintenance_mode: true
-        prune: 1
 
-    - name: Disable CELOG maintenance mode
-      dellemc.powerscale.support_assist:
+    - name: Disable CELOG and prune all history of maintenance mode
+      dellemc.powerscale.alert_settings:
         onefs_host: "{{ onefs_host }}"
         port_no: "{{ port_no }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         verify_ssl: "{{ verify_ssl }}"
         enable_celog_maintenance_mode: false
-        prune: 2
+        prune: 0
 
 
 
@@ -139,19 +133,6 @@ alert_settings_details (always, dict, {'history': [{'end': 0, 'start': 171982233
 
     start (, int, )
       Start time of CELOG maintenance mode, as a UNIX timestamp in seconds.
-
-
-    network_pools (, list, )
-      List of network pools.
-
-
-      pool (, str, )
-        The network pool name.
-
-
-      subnet (, str, )
-        The network pool subnet.
-
 
 
 
