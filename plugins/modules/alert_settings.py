@@ -38,7 +38,7 @@ options:
     description:
     - Removes all maintenance mode history that is greater than set number of days.
     - Range of I(prune) is 0 to 4294967295.
-    - If I(prune) is set in task, then I(changed) will be c(true) always.
+    - If I(prune) is set in task, then I(changed) will be C(true) always.
     type: int
 
 notes:
@@ -190,7 +190,7 @@ class AlertSettings(PowerScaleBase):
 
 class AlertSettingsExitHandler:
     def handle(self, alert_setting_obj, alert_setting_details):
-        alert_setting_obj.result["alert_setting_details"] = alert_setting_details
+        alert_setting_obj.result["alert_settings_details"] = alert_setting_details
         alert_setting_obj.module.exit_json(**alert_setting_obj.result)
 
 
