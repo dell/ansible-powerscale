@@ -50,6 +50,7 @@ author:
 - Trisha Datta(@trisha-dell) <ansible.team@dell.com>
 - Meenakshi Dembi(@dembim) <ansible.team.dell.com>
 - Sachin Apagundi(@sachin-apa) <ansible.team.dell.com>
+- Kritika Bhateja(@Kritika-Bhateja-03) <ansible.team.dell.com>
 
 options:
   include_all_access_zones:
@@ -133,6 +134,7 @@ options:
     - Server certificate - C(server_certificate).
     - roles - C(roles).
     - Support assist settings- C(support_assist_settings).
+    - Smartquota- C(smartquota).
     required: true
     choices: [attributes, access_zones, nodes, providers, users, groups,
               smb_shares, nfs_exports, nfs_aliases, clients, synciq_reports, synciq_target_reports,
@@ -141,7 +143,7 @@ options:
               node_pools, storagepool_tiers, smb_files, user_mapping_rules, ldap,
               nfs_zone_settings, nfs_default_settings, nfs_global_settings, synciq_global_settings, s3_buckets,
               smb_global_settings, ntp_servers, email_settings, cluster_identity, cluster_owner, snmp_settings,
-              server_certificate, roles, support_assist_settings]
+              server_certificate, roles, support_assist_settings, smartquota]
     type: list
     elements: str
 notes:
@@ -515,6 +517,15 @@ EXAMPLES = r'''
     api_password: "{{ api_password }}"
     gather_subset:
       - support_assist_settings
+
+- name: Get smartquota from PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{ onefs_host }}"
+    verify_ssl: "{{ verify_ssl }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    gather_subset:
+      - smartquota
 '''
 
 RETURN = r'''
@@ -927,10 +938,102 @@ NfsExports:
             type: list
     sample: [
         {
-            "id": 205,
+            "all_dirs": false,
+            "block_size": 8192,
+            "can_set_time": true,
+            "case_insensitive": false,
+            "case_preserving": true,
+            "chown_restricted": false,
+            "clients": [
+                "localhost"
+            ],
+            "commit_asynchronous": false,
+            "conflicting_paths": [],
+            "description": "CSI_QUOTA_ID:description",
+            "directory_transfer_size": 131072,
+            "encoding": "DEFAULT",
+            "id": xxxx,
+            "link_max": 32767,
+            "map_all": null,
+            "map_failure": {
+                "enabled": false,
+                "primary_group": {
+                    "id": null,
+                    "name": null,
+                    "type": null
+                },
+                "secondary_groups": [],
+                "user": {
+                    "id": "USER:nobody",
+                    "name": null,
+                    "type": null
+                }
+            },
+            "map_full": true,
+            "map_lookup_uid": false,
+            "map_non_root": {
+                "enabled": false,
+                "primary_group": {
+                    "id": null,
+                    "name": null,
+                    "type": null
+                },
+                "secondary_groups": [],
+                "user": {
+                    "id": "USER:nobody",
+                    "name": null,
+                    "type": null
+                }
+            },
+            "map_retry": true,
+            "map_root": {
+                "enabled": false,
+                "primary_group": {
+                    "id": null,
+                    "name": null,
+                    "type": null
+                },
+                "secondary_groups": [],
+                "user": {
+                    "id": "USER:nobody",
+                    "name": null,
+                    "type": null
+                }
+            },
+            "max_file_size": 9223372036854775807,
+            "name_max_size": 255,
+            "no_truncate": false,
             "paths": [
                 "/ifs/data/sample/fs1"
-            ]
+            ],
+            "read_only": false,
+            "read_only_clients": [],
+            "read_transfer_max_size": 1048576,
+            "read_transfer_multiple": 512,
+            "read_transfer_size": 131072,
+            "read_write_clients": [],
+            "readdirplus": true,
+            "readdirplus_prefetch": 10,
+            "return_32bit_file_ids": false,
+            "root_clients": [],
+            "security_flavors": [
+                "unix"
+            ],
+            "setattr_asynchronous": false,
+            "snapshot": "-",
+            "symlinks": true,
+            "time_delta": 1e-09,
+            "unresolved_clients": [],
+            "write_datasync_action": "DATASYNC",
+            "write_datasync_reply": "DATASYNC",
+            "write_filesync_action": "FILESYNC",
+            "write_filesync_reply": "FILESYNC",
+            "write_transfer_max_size": 1048576,
+            "write_transfer_multiple": 512,
+            "write_transfer_size": 524288,
+            "write_unstable_action": "UNSTABLE",
+            "write_unstable_reply": "UNSTABLE",
+            "zone": "System"
         }
     ]
 NfsZoneSettings:
@@ -2457,6 +2560,7 @@ class Info(object):
         self.storagepool_api = self.isi_sdk.StoragepoolApi(self.api_client)
         self.certificate_api = self.isi_sdk.CertificateApi(self.api_client)
         self.support_assist_api = self.isi_sdk.SupportassistApi(self.api_client)
+        self.smartquota_api = self.isi_sdk.QuotaApi(self.api_client)
 
     def get_attributes_list(self):
         """Get the list of attributes of a given PowerScale Storage"""
@@ -2628,12 +2732,7 @@ class Info(object):
             nfs_exports_details = (self.protocol_api.list_nfs_exports(zone=access_zone))\
                 .to_dict()
             nfs_exports = nfs_exports_details["exports"]
-            if nfs_exports:
-                for nfs_export in nfs_exports:
-                    nfs_exports_list.append({"id": nfs_export['id'], "paths": nfs_export['paths']})
-            LOG.info('Got nfs_exports from PowerScale cluster  %s',
-                     self.module.params['onefs_host'])
-            return nfs_exports_list
+            return nfs_exports
         except Exception as e:
             error_msg = (
                 'Get nfs_exports list for PowerScale cluster: {0} failed with'
@@ -2978,6 +3077,27 @@ class Info(object):
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
+    def get_smartquota_list(self):
+        """Get the smartquota list of a given PowerScale Storage"""
+        try:
+            smartquota = []
+            smartquota_details = self.smartquota_api.list_quota_quotas().to_dict()
+            smartquota.extend(smartquota_details['quotas'])
+            resume = smartquota_details['resume']
+            while resume:
+                smartquota_details = self.smartquota_api.list_quota_quotas(resume=resume).to_dict()
+                smartquota.extend(smartquota_details['quotas'])
+                resume = smartquota_details['resume']
+            msg = f"Got smartquota list from PowerScale cluster {self.module.params['onefs_host']}"
+            LOG.info(msg)
+            return smartquota
+        except Exception as e:
+            error_msg = (
+                f"Getting smartquota list for PowerScale: {self.module.params['onefs_host']}" +
+                f" failed with error: {utils.determine_error(e)}")
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
+
     def perform_module_operation(self):
         """Perform different actions on Gatherfacts based on user parameter
         chosen in playbook
@@ -3028,6 +3148,7 @@ class Info(object):
         server_certificate = []
         roles = {}
         support_assist_settings = {}
+        smartquota = []
 
         if 'attributes' in str(subset):
             attributes = self.get_attributes_list()
@@ -3110,6 +3231,8 @@ class Info(object):
         if 'support_assist_settings' in str(subset):
             support_assist_settings = SupportAssist(
                 self.support_assist_api, self.module).get_support_assist_settings()
+        if 'smartquota' in str(subset):
+            smartquota = self.get_smartquota_list()
 
         result = dict(
             Attributes=attributes,
@@ -3149,7 +3272,8 @@ class Info(object):
             SnmpSettings=snmp_settings,
             ServerCertificate=server_certificate,
             roles=roles,
-            support_assist_settings=support_assist_settings
+            support_assist_settings=support_assist_settings,
+            Smartquota=smartquota
         )
 
         result.update(SynciqTargetClusterCertificate=synciq_target_cluster_certificates)
@@ -3220,7 +3344,8 @@ def get_info_parameters():
                                     'snmp_settings',
                                     'server_certificate',
                                     'roles',
-                                    'support_assist_settings'
+                                    'support_assist_settings',
+                                    'smartquota'
                                     ]),
     )
 
