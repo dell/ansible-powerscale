@@ -83,6 +83,7 @@ class MockGatherfactsApi:
         'ClusterOwner': {},
         'ServerCertificate': [],
         'roles': {},
+        'smart_quota': [],
         'support_assist_settings': {}
     }
     API = "api"
