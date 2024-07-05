@@ -30,5 +30,5 @@
 
     # Use this task to convert start or end timestamp to date
     - name: Convert Unix timestamp to date
-      debug:
+      ansible.builtin.debug:
         msg: "{{ timestamp_converted }}"
