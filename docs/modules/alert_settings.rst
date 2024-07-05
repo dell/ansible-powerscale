@@ -128,11 +128,17 @@ alert_settings_details (always, dict, {'history': [{'end': 0, 'start': 171982233
 
 
     end (, int, )
-      End time of CELOG maintenance mode, as a UNIX timestamp in seconds. Value 0 indicates that maintenance mode is still enabled.
+      End time of CELOG maintenance mode, as a UNIX timestamp in seconds.
+
+      Value 0 indicates that maintenance mode is still enabled.
+
+      Refer alert setting sample playbook examples to convert UNIX timestamp to human readable format.
 
 
     start (, int, )
       Start time of CELOG maintenance mode, as a UNIX timestamp in seconds.
+
+      Refer alert setting sample playbook examples to convert UNIX timestamp to human readable format.
 
 
 

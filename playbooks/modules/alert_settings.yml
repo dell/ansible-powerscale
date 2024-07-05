@@ -7,6 +7,8 @@
     api_user: "user"
     api_password: "xxxx"
     verify_ssl: false
+    timestamp: 1720091148
+    timestamp_converted: "{{ '%Y-%m-%d %H:%M:%S'|strftime(timestamp) }}"
 
   tasks:
     - name: Enable celog maintenance mode
@@ -25,3 +27,8 @@
         verify_ssl: "{{ verify_ssl }}"
         enable_celog_maintenance_mode: false
         prune: 0
+
+    # Use this task to convert start or end timestamp to date
+    - name: Convert Unix timestamp to date
+      debug:
+        msg: "{{ timestamp_converted }}"

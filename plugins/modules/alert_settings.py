@@ -83,14 +83,19 @@ alert_settings_details:
         type: list
         contains:
           end:
-            description: End time of CELOG maintenance mode, as a UNIX
-                         timestamp in seconds.
-                         Value 0 indicates that maintenance
-                         mode is still enabled.
+            description:
+              - End time of CELOG maintenance mode, as a UNIX
+                timestamp in seconds.
+              - Value 0 indicates that maintenance mode is still enabled.
+              - Refer alert setting sample playbook examples to convert
+                UNIX timestamp to human readable format.
             type: int
           start:
-            description: Start time of CELOG maintenance mode, as a UNIX
-                         timestamp in seconds.
+            description:
+              - Start time of CELOG maintenance mode, as a UNIX
+                timestamp in seconds.
+              - Refer alert setting sample playbook examples to convert
+                UNIX timestamp to human readable format.
             type: int
       maintenance:
         description: Indicates if maintenance mode is enabled.
