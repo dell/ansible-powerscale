@@ -50,7 +50,7 @@ Parameters
 
 
   clients (optional, list, None)
-    Specifies the clients to the export. The type of access to clients in this list is determined by the *read_only* parameter.
+    Specifies the clients to the export. The type of access to clients in this list is determined by the \ :emphasis:`read\_only`\  parameter.
 
     This list can be changed anytime during the lifetime of the NFS export.
 
@@ -80,7 +80,7 @@ Parameters
 
 
   sub_directories_mountable (optional, bool, None)
-    ``true`` if all directories under the specified paths are mountable. If not set, sub-directories will not be mountable.
+    \ :literal:`true`\  if all directories under the specified paths are mountable. If not set, sub-directories will not be mountable.
 
     This setting can be modified any time.
 
@@ -94,17 +94,17 @@ Parameters
   state (True, str, None)
     Defines whether the NFS export should exist or not.
 
-    Value ``present`` indicates that the NFS export should exist in system.
+    Value \ :literal:`present`\  indicates that the NFS export should exist in system.
 
-    Value ``absent`` indicates that the NFS export should not exist in system.
+    Value \ :literal:`absent`\  indicates that the NFS export should not exist in system.
 
 
   client_state (optional, str, None)
     Defines whether the clients can access the NFS export.
 
-    Value ``present-in-export`` indicates that the clients can access the NFS export.
+    Value \ :literal:`present-in-export`\  indicates that the clients can access the NFS export.
 
-    Value ``absent-in-export`` indicates that the client cannot access the NFS export.
+    Value \ :literal:`absent-in-export`\  indicates that the client cannot access the NFS export.
 
     Required when adding or removing access of clients from the export.
 
@@ -190,9 +190,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    ``true`` - indicates that the SSL certificate should be verified.
+    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
 
-    ``false`` - indicates that the SSL certificate should not be verified.
+    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -210,7 +210,6 @@ Notes
 -----
 
 .. note::
-   - The *check_mode* is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -365,7 +364,7 @@ NFS_export_details (always, complex, {'all_dir': 'false', 'block_size': 8192, 'c
 
 
   all_dirs (, bool, )
-    *sub_directories_mountable* flag value.
+    \ :emphasis:`sub\_directories\_mountable`\  flag value.
 
 
   id (, int, 12)
@@ -483,4 +482,5 @@ Authors
 - Manisha Agrawal(@agrawm3) <ansible.team@dell.com>
 - Bhavneet Sharma(@Bhavneet-Sharma) <ansible.team@dell.com>
 - Trisha Datta(@trisha-dell) <ansible.team@dell.com>
+- Kritika Bhateja(@Kritika-Bhateja-03) <ansible.team.dell.com>)
 
