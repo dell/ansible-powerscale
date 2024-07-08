@@ -115,6 +115,7 @@ class TestSmartQuota():
                                          },
                                          "list_snapshots": True,
                                          "state": "present"})
+        smartquota_module_mock.module.check_mode = False
         smartquota_module_mock.module.params = self.get_smartquota_args
         utils.get_size_bytes = MagicMock(side_effect=[
             MockSmartQuotaApi.get_smartquota_dependent_response("advisory"),
@@ -174,6 +175,7 @@ class TestSmartQuota():
                                              "include_snapshots": True
                                          },
                                          "state": "present"})
+        smartquota_module_mock.module.check_mode = False
         smartquota_module_mock.module.params = self.get_smartquota_args
         smartquota_module_mock.auth_api_instance.get_auth_user = MagicMock(
             return_value=MockSmartQuotaApi.get_user_sid())
@@ -204,6 +206,7 @@ class TestSmartQuota():
                                              "include_snapshots": True
                                          },
                                          "state": "absent"})
+        smartquota_module_mock.module.check_mode = False
         smartquota_module_mock.module.params = self.get_smartquota_args
         smartquota_module_mock.auth_api_instance.get_auth_group = MagicMock(
             return_value=MockSmartQuotaApi.get_group_sid())
@@ -234,6 +237,7 @@ class TestSmartQuota():
                                              "include_snapshots": True
                                          },
                                          "state": "absent"})
+        smartquota_module_mock.module.check_mode = False
         smartquota_module_mock.module.params = self.get_smartquota_args
         smartquota_module_mock.auth_api_instance.get_auth_group = MagicMock(
             return_value=MockSmartQuotaApi.get_group_sid())
