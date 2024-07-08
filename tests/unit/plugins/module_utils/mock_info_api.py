@@ -83,10 +83,16 @@ class MockGatherfactsApi:
         'ClusterOwner': {},
         'ServerCertificate': [],
         'roles': {},
-        'support_assist_settings': {}
+        'support_assist_settings': {},
+        'alert_settings': {},
+        'alert_rules': [],
+        'alert_channels': [],
+        'alert_categories': [],
+        'event_groups': []
     }
     API = "api"
     MODULE = "module"
+    NAME = "Heartbeat Self-Test"
 
     @staticmethod
     def get_network_groupnets_response(response_type):
@@ -1397,6 +1403,122 @@ class MockGatherfactsApi:
             return "Got error SDK Error message while getting support assist settings details "
 
     @staticmethod
+    def get_event_maintenance(response_type):
+        if response_type == "api" or response_type == "module":
+            return {
+                "history": [
+                    {
+                        "end": 0,
+                        "start": 1719831994
+                    }
+                ],
+                "maintenance": "true"
+            }
+        else:
+            return "Fetching maintenance events failed with error: SDK Error message"
+
+    @staticmethod
+    def get_alert_categories(response_type):
+        if response_type == "api" or response_type == "module":
+            return {
+                "categories": [
+                    {
+                        "id": "id1",
+                        "id_name": "id_name1",
+                        "name": "name1"
+                    }
+                ],
+                "resume": None,
+                "total": 1
+            }
+        else:
+            return "Fetching alert categories failed with error: SDK Error message"
+
+    @staticmethod
+    def get_event_channels(response_type):
+        if response_type == "api" or response_type == "module":
+            return {
+                "channels": [
+                    {
+                        "allowed_nodes": [],
+                        "enabled": "true",
+                        "excluded_nodes": [],
+                        "id": 2,
+                        "name": MockGatherfactsApi.NAME,
+                        "parameters": {
+                            "address": [],
+                            "batch": "",
+                            "batch_period": "",
+                            "custom_template": "",
+                            "send_as": "",
+                            "smtp_host": "",
+                            "smtp_password": "",
+                            "smtp_port": "",
+                            "smtp_security": "",
+                            "smtp_use_auth": "",
+                            "smtp_username": "",
+                            "subject": ""
+                        },
+                        "rules": ["Heatrbeat"],
+                        "system": "true",
+                        "type": "heartbreak"
+                    }
+                ],
+                "resume": None,
+                "total": 1
+            }
+        else:
+            return "Fetching event channels failed with error"
+
+    @staticmethod
+    def get_alert_rules(response_type):
+        if response_type == "api" or response_type == "module":
+            return {
+                "alert_conditions": [
+                    {
+                        "categories": [],
+                        "channels": [],
+                        "condition": "ONGOING",
+                        "eventgroup_ids": ["400050004"],
+                        "exclude_eventgroup_ids": [],
+                        "id": 1,
+                        "interval": 0,
+                        "limit": 0,
+                        "name": MockGatherfactsApi.NAME,
+                        "severities": [],
+                        "transient": 0
+                    }
+                ],
+                "resume": None,
+                "total": 1
+            }
+        else:
+            return "Fetching alert rules failed with erro"
+
+    @staticmethod
+    def get_event_groups(response_type):
+        if response_type == "api" or response_type == "module":
+            return {
+                "eventgroup_definitions": [
+                    {
+                        "category": "400000000",
+                        "channels": [],
+                        "description": "ONGOING",
+                        "id": 1,
+                        "name": MockGatherfactsApi.NAME,
+                        "no_ignore": True,
+                        "node": True,
+                        "rules": [],
+                        "suppressed": False
+                    }
+                ],
+                "resume": None,
+                "total": 1
+            }
+        else:
+            return "Fetching event groups failed with error: SDK Error message"
+
+    @staticmethod
     def get_gather_facts_module_response(gather_subset):
         param = "module"
         subset_error_dict = {
@@ -1431,7 +1553,12 @@ class MockGatherfactsApi:
             "clients": MockGatherfactsApi.get_clients_response(param),
             "snmp_settings": MockGatherfactsApi.get_snmp_settings_response(param),
             "roles": MockGatherfactsApi.get_auth_roles(param),
-            "support_assist_settings": MockGatherfactsApi.get_support_assist_settings(param)
+            "support_assist_settings": MockGatherfactsApi.get_support_assist_settings(param),
+            "event_group": MockGatherfactsApi.get_event_groups(param),
+            "alert_rules": MockGatherfactsApi.get_alert_rules(param),
+            "alert_categories": MockGatherfactsApi.get_alert_categories(param),
+            "alert_channels": MockGatherfactsApi.get_event_channels(param),
+            "alert_settings": MockGatherfactsApi.get_event_maintenance(param)
         }
         return subset_error_dict.get(gather_subset)
 
@@ -1470,7 +1597,12 @@ class MockGatherfactsApi:
             "clients": MockGatherfactsApi.get_clients_response(param),
             "snmp_settings": MockGatherfactsApi.get_snmp_settings_response(param),
             "roles": MockGatherfactsApi.get_auth_roles(param),
-            "support_assist_settings": MockGatherfactsApi.get_support_assist_settings(param)
+            "support_assist_settings": MockGatherfactsApi.get_support_assist_settings(param),
+            "event_group": MockGatherfactsApi.get_event_groups(param),
+            "alert_rules": MockGatherfactsApi.get_alert_rules(param),
+            "alert_categories": MockGatherfactsApi.get_alert_categories(param),
+            "alert_channels": MockGatherfactsApi.get_event_channels(param),
+            "alert_settings": MockGatherfactsApi.get_event_maintenance(param)
         }
         return subset_error_dict.get(gather_subset)
 
@@ -1510,7 +1642,12 @@ class MockGatherfactsApi:
             "clients": MockGatherfactsApi.get_clients_response(param),
             "snmp_settings": MockGatherfactsApi.get_snmp_settings_response(param),
             "roles": MockGatherfactsApi.get_auth_roles(param),
-            "support_assist_settings": MockGatherfactsApi.get_support_assist_settings(param)
+            "support_assist_settings": MockGatherfactsApi.get_support_assist_settings(param),
+            "event_group": MockGatherfactsApi.get_event_groups(param),
+            "alert_rules": MockGatherfactsApi.get_alert_rules(param),
+            "alert_categories": MockGatherfactsApi.get_alert_categories(param),
+            "alert_channels": MockGatherfactsApi.get_event_channels(param),
+            "alert_settings": MockGatherfactsApi.get_event_maintenance(param)
         }
         return subset_error_dict.get(gather_subset)
 
@@ -1555,6 +1692,11 @@ class MockGatherfactsApi:
             "access_zones": "list_zones",
             "clients": "get_summary_client",
             "roles": "list_auth_roles",
-            "support_assist_settings": "get_supportassist_settings"
+            "support_assist_settings": "get_supportassist_settings",
+            "event_group": "get_event_eventgroup_definitions",
+            "alert_rules": "list_event_alert_conditions",
+            "alert_categories": "get_event_categories",
+            "alert_channels": "list_event_channels",
+            "alert_settings": "get_event_maintenance"
         }
         return subset_method_dict.get(gather_subset)

@@ -25,8 +25,8 @@ description:
   SyncIQ reports, SyncIQ target reports, SyncIQ target cluster certificates,
   SyncIQ policies, SyncIQ performance rules.
 - Get list of network groupnets, network pools for all access zones or a
-  specific access zone, network rules, network subnets, network interfaces,
-  node pools, storage pool tiers, smb open files, s3 buckets, ntp_servers.
+  specific access zone, network rules, network subnets, network interfaces.
+- Get list of node pools, storage pool tiers, smb open files, s3 buckets, ntp_servers.
 - Get list of user mapping rules, ldap providers of the PowerScale cluster.
 - Get NFS zone settings details of the PowerScale cluster.
 - Get NFS default settings details of the PowerScale cluster.
@@ -37,6 +37,7 @@ description:
 - Get SNMP settings details of the PowerScale cluster.
 - Retrieve a list of server certificate details.
 - Get support assist settings details of the PowerScale cluster.
+- Get list of alert rules, alert channels, alert categories, event groups and alert settings.
 
 extends_documentation_fragment:
   - dellemc.powerscale.powerscale
@@ -74,6 +75,37 @@ options:
     choices: ['effective', 'user', 'default']
     default: 'effective'
     type: str
+  sort_dir:
+    description:
+    - The direction in which the results should be sorted.
+    - Applicable to C(alert_rules), and C(event_channels).
+    type: str
+    choices: ['asc', 'desc']
+    version_added: '3.2.0'
+  sort:
+    description:
+    - The field that will be used for sorting.
+    - Applicable to C(alert_rules), and C(event_channels).
+    type: str
+    version_added: '3.2.0'
+  channels:
+    description:
+    - Return only conditions for the specified channel.
+    - Applicable to C(alert_rules).
+    type: str
+    version_added: '3.2.0'
+  category:
+    description:
+    - Return eventgroups in the specified category.
+    - Applicable to C(event_group).
+    type: str
+    version_added: '3.2.0'
+  alert_info:
+    description:
+    - Include alert rules and channels in output.
+    - Applicable to C(event_group).
+    type: bool
+    version_added: '3.2.0'
   gather_subset:
     description:
     - List of string variables to specify the PowerScale Storage System
@@ -125,14 +157,19 @@ options:
     - The list of user mapping rules of PowerScale cluster.
     - The list of ldap providers of PowerScale cluster.
     - SMB global settings - C(smb_global_settings).
-    - NTP servers C(ntp_servers)
-    - Email settings C(email_settings)
-    - Cluster identity C(cluster_identity)
-    - Cluster owner C(cluster_owner)
+    - NTP servers C(ntp_servers).
+    - Email settings C(email_settings).
+    - Cluster identity C(cluster_identity).
+    - Cluster owner C(cluster_owner).
     - SNMP settings - C(snmp_settings).
     - Server certificate - C(server_certificate).
-    - roles - C(roles).
+    - Roles - C(roles).
     - Support assist settings- C(support_assist_settings).
+    - Alert settings - C(alert_settings).
+    - Alert rules - C(alert_rules).
+    - Alert channels - C(alert_channels).
+    - Alert categories - C(alert_categories).
+    - Event groups - C(event_group).
     required: true
     choices: [attributes, access_zones, nodes, providers, users, groups,
               smb_shares, nfs_exports, nfs_aliases, clients, synciq_reports, synciq_target_reports,
@@ -141,7 +178,8 @@ options:
               node_pools, storagepool_tiers, smb_files, user_mapping_rules, ldap,
               nfs_zone_settings, nfs_default_settings, nfs_global_settings, synciq_global_settings, s3_buckets,
               smb_global_settings, ntp_servers, email_settings, cluster_identity, cluster_owner, snmp_settings,
-              server_certificate, roles, support_assist_settings]
+              server_certificate, roles, support_assist_settings, alert_settings, alert_rules, alert_channels,
+              alert_categories, event_group]
     type: list
     elements: str
 notes:
@@ -453,7 +491,7 @@ EXAMPLES = r'''
     gather_subset:
       - smb_global_settings
 
-- name: Get the list of server certificate.
+- name: Get the list of server certificate
   dellemc.powerscale.info:
     onefs_host: "{{ onefs_host }}"
     verify_ssl: "{{ verify_ssl }}"
@@ -515,6 +553,46 @@ EXAMPLES = r'''
     api_password: "{{ api_password }}"
     gather_subset:
       - support_assist_settings
+
+- name: Get alert categories and alert settings from PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{ onefs_host }}"
+    verify_ssl: "{{ verify_ssl }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    gather_subset:
+      - alert_categories
+      - alert_settings
+
+- name: Get list of alert rules in descending order from PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{ onefs_host }}"
+    verify_ssl: "{{ verify_ssl }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    gather_subset:
+      - alert_rules
+    sort_dir: "desc"
+
+- name: Get list of event groups with alert info from PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{ onefs_host }}"
+    verify_ssl: "{{ verify_ssl }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    gather_subset:
+      - event_group
+    alert_info: true
+
+- name: Get sorted list of alert channel based on name key from PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{ onefs_host }}"
+    verify_ssl: "{{ verify_ssl }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    gather_subset:
+      - alert_channels
+    sort: "name"
 '''
 
 RETURN = r'''
@@ -2168,7 +2246,7 @@ ServerCertificate:
 roles:
     description: List of auth roles.
     type: dict
-    returned: Always
+    returned: When C(roles) is in a given I(gather_subset)
     contains:
         description:
             description: Description of the auth role.
@@ -2227,7 +2305,7 @@ roles:
 support_assist_settings:
     description: The support assist settings details.
     type: dict
-    returned: always
+    returned: When C(support_assist_settings) is in a given I(gather_subset)
     contains:
         automatic_case_creation:
             description: C(True) indicates automatic case creation is enabled.
@@ -2399,6 +2477,317 @@ support_assist_settings:
           "telemetry_threads": 10
         }
     }
+alert_settings:
+    description: The alert settings details.
+    type: dict
+    returned: When C(alert_settings) is in a given I(gather_subset).
+    contains:
+        history:
+            description: History list of CELOG maintenance mode windows.
+            type: list
+            contains:
+                end:
+                    description:
+                        - End time of CELOG maintenance mode, as a UNIX
+                          timestamp in seconds.
+                        - Value 0 indicates that maintenance mode is still
+                          enabled.
+                    type: int
+                start:
+                    description: Start time of CELOG maintenance mode, as a UNIX
+                                 timestamp in seconds.
+                    type: int
+        maintenance:
+            description: Indicates if maintenance mode is enabled.
+            type: bool
+    sample: {
+        history: [
+            {
+                "end": 0,
+                "start": 1719822336,
+            }
+        ],
+        "maintenance": "false"
+    }
+alert_categories:
+    description: The alert categories details.
+    type: list
+    returned: When C(alert_categories) is in a given I(gather_subset).
+    contains:
+        categories:
+            description: High level categorisation of eventgroups.
+            type: list
+            contains:
+                id:
+                    description: Numeric identifier of eventgroup category.
+                    type: str
+                id_name:
+                    description: Name of category.
+                    type: str
+                name:
+                    description: Description of category.
+                    type: str
+        resume:
+            description: Provide this token as the 'resume' query argument to continue listing results.
+            type: str
+        total:
+            description: Total number of items available.
+            type: int
+    sample: {
+        categories: [
+            {
+                "id": "200000000",
+                "id_name": "NODE_STATUS_EVENTS",
+                "name": "Node status events",
+            }
+        ],
+        "resume": null,
+        "total": 1
+    }
+alert_channels:
+    description: The alert channels details.
+    type: list
+    returned: When C(alert_channels) is in a given I(gather_subset).
+    contains:
+        channels:
+            description: Named channel through which alerts can be delivered.
+            type: list
+            contains:
+                allowed_nodes:
+                    description: Nodes (LNNs) that can be masters for this channel.
+                    type: list
+                enabled:
+                    description: Channel is to be used or not.
+                    type: bool
+                excluded_nodes:
+                    description: Nodes (LNNs) that cannot be masters for this channel.
+                    type: list
+                parameters:
+                    description: Parameters to be used for an smtp channel.
+                    type: dict
+                    contains:
+                        address:
+                            description: Email addresses to send to.
+                            type: list
+                        batch:
+                            description: Batching criterion.
+                            type: str
+                        batch_period:
+                            description: Period over which batching is to be performed.
+                            type: int
+                        custom_template:
+                            description: Path to custom notification template.
+                            type: str
+                        send_as:
+                            description: Email address to use as from.
+                            type: str
+                        smtp_host:
+                            description: SMTP host.
+                            type: str
+                        smtp_password:
+                            description: Password for SMTP authentication, only if
+                                         smtp_use_auth true.
+                            type: str
+                        smtp_port:
+                            description: SMTP relay port. It defaults to 25.
+                            type: int
+                        smtp_security:
+                            description: Encryption protocol to use for SMTP.
+                            type: str
+                        smtp_use_auth:
+                            description: Use SMTP authentication. It defaults to false.
+                            type: bool
+                        smtp_username:
+                            description: Username for SMTP authentication, only if smtp_use_auth true.
+                            type: str
+                        subject:
+                            description: Subject for emails.
+                            type: str
+                system:
+                    description: Channel is a pre-defined system channel.
+                    type: bool
+                type:
+                    description: The mechanism used by the channel.
+                    type: str
+                id:
+                    description: Unique identifier.
+                    type: int
+                name:
+                    description: Channel name, may not contain /.
+                    type: str
+                rules:
+                    description: Alert rules involving this eventgroup type.
+                    type: str
+        resume:
+            description: Provide this token as the 'resume' query argument to continue listing results.
+            type: str
+        total:
+            description: Total number of items available.
+            type: int
+    sample: {
+        channels: [
+            {
+                "allowed_nodes": [],
+                "enabled": "true",
+                "excluded_nodes": [],
+                "id": 2,
+                "name": "Heartbeat Self-Test",
+                "parameters": {
+                    "address": [],
+                    "batch": "",
+                    "batch_period": "",
+                    "custom_template": "",
+                    "send_as": "",
+                    "smtp_host": "",
+                    "smtp_password": "",
+                    "smtp_port": "",
+                    "smtp_security": "",
+                    "smtp_use_auth": "",
+                    "smtp_username": "",
+                    "subject": ""
+                },
+                "rules": ["Heatrbeat"],
+                "system": "true",
+                "type": "heartbreak"
+            }
+        ],
+        "resume": null,
+        "total": 1
+    }
+alert_rules:
+    description: The alert rules details.
+    type: list
+    returned: When C(alert_rules) is in a given I(gather_subset).
+    contains:
+        alert_conditions:
+            description: Specifies under what conditions and over which channel an alert should be sent.
+            type: list
+            contains:
+                categories:
+                    description: Event Group categories to be alerted.
+                    type: list
+                channels:
+                    description: Channels for alert.
+                    type: list
+                condition:
+                    description: Trigger condition for alert.
+                    type: str
+                eventgroup_ids:
+                    description: Event Group IDs to be alerted.
+                    type: list
+                exclude_eventgroup_ids:
+                    description: Event Group categories to be excluded from alerts.
+                    type: list
+                id:
+                    description: Unique identifier.
+                    type: int
+                interval:
+                    description: Required with ONGOING condition only, period
+                                 in seconds between alerts of ongoing conditions.
+                    type: int
+                limit:
+                    description: Required with NEW EVENTS condition only,
+                                 limits the number of alerts sent as events are added.
+                    type: int
+                name:
+                    description: Unique identifier.
+                    type: str
+                severities:
+                    description: Severities to be alerted.
+                    type: list
+                transient:
+                    description: Any eventgroup lasting less than this many
+                                 seconds is deemed transient and will not
+                                 generate alerts under this condition.
+                    type: int
+        resume:
+            description: Provide this token as the 'resume' query argument to
+                         continue listing results.
+            type: str
+        total:
+            description: Total number of items available.
+            type: int
+    sample: {
+        alert_conditions: [
+            {
+                "categories": [],
+                "channels": [],
+                "condition": "ONGOING",
+                "eventgroup_ids": ["400050004"],
+                "exclude_eventgroup_ids": [],
+                "id": 1,
+                "interval": 0,
+                "limit": 0,
+                "name": "Heartbeat Self-Test",
+                "severities": [],
+                "transient": 0
+            }
+        ],
+        "resume": null,
+        "total": 1
+    }
+event_groups:
+    description: The event group details.
+    type: list
+    returned: When C(event_group) is in a given I(gather_subset).
+    contains:
+        eventgroup_definitions:
+            description: Description of an eventgroup that can occur and be detected.
+            type: list
+            contains:
+                category:
+                    description: ID of eventgroup category.
+                    type: list
+                channels:
+                    description: Channels by which this eventgroup type can be alerted.
+                    type: list
+                description:
+                    description: Human readable description, may contain value placeholders.
+                    type: str
+                id:
+                    description: Unique identifier.
+                    type: int
+                name:
+                    description: Name for eventgroup.
+                    type: str
+                no_ignore:
+                    description: True if event should not be ignored.
+                    type: bool
+                node:
+                    description: True if this eventgroup type is node specific,
+                                 false cluster wide.
+                    type: bool
+                rules:
+                    description: Alert rules involving this eventgroup type.
+                    type: list
+                suppressed:
+                    description: True if alerting is suppressed for this
+                                 eventgroup type.
+                    type: bool
+        resume:
+            description: Provide this token as the 'resume' query argument
+                         to continue listing results.
+            type: str
+        total:
+            description: Total number of items available.
+            type: int
+    sample: {
+        eventgroup_definitions: [
+            {
+                "category": "400000000",
+                "channels": [],
+                "description": "ONGOING",
+                "id": 1,
+                "name": "Heartbeat Self-Test",
+                "no_ignore": true,
+                "node": true,
+                "rules": [],
+                "suppressed": false
+            }
+        ],
+        "resume": null,
+        "total": 1
+    }
 '''
 
 from ansible.module_utils.basic import AnsibleModule
@@ -2414,6 +2803,8 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.sh
     import Auth
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.support_assist \
     import SupportAssist
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.events \
+    import Events
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
 
@@ -2457,6 +2848,7 @@ class Info(object):
         self.storagepool_api = self.isi_sdk.StoragepoolApi(self.api_client)
         self.certificate_api = self.isi_sdk.CertificateApi(self.api_client)
         self.support_assist_api = self.isi_sdk.SupportassistApi(self.api_client)
+        self.event_api = self.isi_sdk.EventApi(self.api_client)
 
     def get_attributes_list(self):
         """Get the list of attributes of a given PowerScale Storage"""
@@ -3028,6 +3420,11 @@ class Info(object):
         server_certificate = []
         roles = {}
         support_assist_settings = {}
+        alert_settings = {}
+        event_group = []
+        alert_rules = []
+        alert_channels = []
+        alert_categories = []
 
         if 'attributes' in str(subset):
             attributes = self.get_attributes_list()
@@ -3110,6 +3507,16 @@ class Info(object):
         if 'support_assist_settings' in str(subset):
             support_assist_settings = SupportAssist(
                 self.support_assist_api, self.module).get_support_assist_settings()
+        if 'alert_settings' in str(subset):
+            alert_settings = Events(self.event_api, self.module).get_event_maintenance()
+        if 'alert_rules' in str(subset):
+            alert_rules = Events(self.event_api, self.module).get_alert_rules()
+        if 'alert_categories' in str(subset):
+            alert_categories = Events(self.event_api, self.module).get_alert_categories()
+        if 'alert_channels' in str(subset):
+            alert_channels = Events(self.event_api, self.module).get_event_channels()
+        if 'event_group' in str(subset):
+            event_group = Events(self.event_api, self.module).get_event_groups()
 
         result = dict(
             Attributes=attributes,
@@ -3149,7 +3556,12 @@ class Info(object):
             SnmpSettings=snmp_settings,
             ServerCertificate=server_certificate,
             roles=roles,
-            support_assist_settings=support_assist_settings
+            support_assist_settings=support_assist_settings,
+            alert_settings=alert_settings,
+            alert_rules=alert_rules,
+            alert_channels=alert_channels,
+            alert_categories=alert_categories,
+            event_groups=event_group
         )
 
         result.update(SynciqTargetClusterCertificate=synciq_target_cluster_certificates)
@@ -3181,47 +3593,27 @@ def get_info_parameters():
         scope=dict(required=False, type='str',
                    choices=['effective', 'user', 'default'],
                    default='effective'),
-        gather_subset=dict(type='list', required=True, elements='str',
-                           choices=['attributes',
-                                    'access_zones',
-                                    'nodes',
-                                    'providers',
-                                    'users',
-                                    'groups',
-                                    'smb_shares',
-                                    'nfs_exports',
-                                    'nfs_aliases',
-                                    'clients',
-                                    'synciq_reports',
-                                    'synciq_target_reports',
-                                    'synciq_policies',
-                                    'synciq_target_cluster_certificates',
-                                    'synciq_performance_rules',
-                                    'network_groupnets',
-                                    'network_pools',
-                                    'network_rules',
-                                    'network_interfaces',
-                                    'network_subnets',
-                                    'node_pools',
-                                    'storagepool_tiers',
-                                    'smb_files',
-                                    'user_mapping_rules',
-                                    'ldap',
-                                    'nfs_zone_settings',
-                                    'nfs_default_settings',
-                                    'nfs_global_settings',
-                                    'synciq_global_settings',
-                                    's3_buckets',
-                                    'smb_global_settings',
-                                    'ntp_servers',
-                                    'email_settings',
-                                    'cluster_identity',
-                                    'cluster_owner',
-                                    'snmp_settings',
-                                    'server_certificate',
-                                    'roles',
-                                    'support_assist_settings'
-                                    ]),
+        gather_subset=dict(
+            type='list', required=True, elements='str',
+            choices=['attributes', 'access_zones', 'nodes',
+                     'providers', 'users', 'groups',
+                     'smb_shares', 'nfs_exports', 'nfs_aliases',
+                     'clients', 'synciq_reports', 'synciq_target_reports',
+                     'synciq_policies', 'synciq_target_cluster_certificates',
+                     'synciq_performance_rules', 'network_groupnets',
+                     'network_pools', 'network_rules', 'network_interfaces',
+                     'network_subnets', 'node_pools', 'storagepool_tiers',
+                     'smb_files', 'user_mapping_rules', 'ldap',
+                     'nfs_zone_settings', 'nfs_default_settings',
+                     'nfs_global_settings', 'synciq_global_settings',
+                     's3_buckets', 'smb_global_settings', 'ntp_servers',
+                     'email_settings', 'cluster_identity', 'cluster_owner',
+                     'snmp_settings', 'server_certificate', 'roles',
+                     'support_assist_settings', 'alert_settings', 'alert_rules',
+                     'alert_channels', 'alert_categories', 'event_group']),
+        sort_dir=dict(type='str', choices=['asc', 'desc']),
+        sort=dict(type='str'), channels=dict(type='str'), category=dict(type='str'),
+        alert_info=dict(type='bool')
     )
 
 

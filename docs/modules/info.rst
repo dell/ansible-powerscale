@@ -14,9 +14,11 @@ Synopsis
 
 Gathering information about Specified PowerScale Storage entities, includes attributes, access zones, nodes, authentication providers for all access zones, users and groups for an access zone.
 
-Get list of smb\_shares, nfs\_exports, nfs\_aliases, active clients, SyncIQ reports, SyncIQ target reports, SyncIQ target cluster certificates, SyncIQ policies, SyncIQ performance rules.
+Get list of smb_shares, nfs_exports, nfs_aliases, active clients, SyncIQ reports, SyncIQ target reports, SyncIQ target cluster certificates, SyncIQ policies, SyncIQ performance rules.
 
-Get list of network groupnets, network pools for all access zones or a specific access zone, network rules, network subnets, network interfaces, node pools, storage pool tiers, smb open files, s3 buckets, ntp\_servers.
+Get list of network groupnets, network pools for all access zones or a specific access zone, network rules, network subnets, network interfaces.
+
+Get list of node pools, storage pool tiers, smb open files, s3 buckets, ntp_servers.
 
 Get list of user mapping rules, ldap providers of the PowerScale cluster.
 
@@ -38,6 +40,8 @@ Retrieve a list of server certificate details.
 
 Get support assist settings details of the PowerScale cluster.
 
+Get list of alert rules, alert channels, alert categories, event groups and alert settings.
+
 
 
 Requirements
@@ -45,8 +49,8 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.15 or later.
-- Python 3.10, 3.11 or 3.12.
+- Ansible-core 2.14 or later.
+- Python 3.9, 3.10 or 3.11.
 
 
 
@@ -56,7 +60,7 @@ Parameters
   include_all_access_zones (optional, bool, None)
     Specifies if requested component details need to be fetched from all access zones.
 
-    It is mutually exclusive with \ :emphasis:`access\_zone`\ .
+    It is mutually exclusive with *access_zone*.
 
 
   access_zone (optional, str, System)
@@ -64,13 +68,43 @@ Parameters
 
 
   scope (optional, str, effective)
-    The scope of ldap. If no scope is specified, the \ :literal:`effective`\  scope would be taken by default.
+    The scope of ldap. If no scope is specified, the ``effective`` scope would be taken by default.
 
-    If specified as \ :literal:`effective`\  or not specified, all fields are returned.
+    If specified as ``effective`` or not specified, all fields are returned.
 
-    If specified as \ :literal:`user`\ , only fields with non-default values are shown.
+    If specified as ``user``, only fields with non-default values are shown.
 
-    If specified as \ :literal:`default`\ , the original values are returned.
+    If specified as ``default``, the original values are returned.
+
+
+  sort_dir (optional, str, None)
+    The direction in which the results should be sorted.
+
+    Applicable to ``alert_rules``, and ``event_channels``.
+
+
+  sort (optional, str, None)
+    The field that will be used for sorting.
+
+    Applicable to ``alert_rules``, and ``event_channels``.
+
+
+  channels (optional, str, None)
+    Return only conditions for the specified channel.
+
+    Applicable to ``alert_rules``.
+
+
+  category (optional, str, None)
+    Return eventgroups in the specified category.
+
+    Applicable to ``event_group``.
+
+
+  alert_info (optional, bool, None)
+    Include alert rules and channels in output.
+
+    Applicable to ``event_group``.
 
 
   gather_subset (True, list, None)
@@ -78,65 +112,65 @@ Parameters
 
     List of all PowerScale Storage System entities supported by the module.
 
-    Attributes - \ :literal:`attributes`\ .
+    Attributes - ``attributes``.
 
-    Access zones - \ :literal:`access\_zones`\ .
+    Access zones - ``access_zones``.
 
-    Nodes - \ :literal:`nodes`\ .
+    Nodes - ``nodes``.
 
-    Providers - \ :literal:`providers`\ .
+    Providers - ``providers``.
 
-    Users - \ :literal:`users`\ .
+    Users - ``users``.
 
-    Groups - \ :literal:`groups`\ .
+    Groups - ``groups``.
 
-    Smb shares - \ :literal:`smb\_shares`\ .
+    Smb shares - ``smb_shares``.
 
-    Nfs exports - \ :literal:`nfs\_exports`\ .
+    Nfs exports - ``nfs_exports``.
 
-    Nfs aliases - \ :literal:`nfs\_aliases`\ .
+    Nfs aliases - ``nfs_aliases``.
 
-    Clients - \ :literal:`clients`\ .
+    Clients - ``clients``.
 
-    Synciq reports - \ :literal:`synciq\_reports`\ .
+    Synciq reports - ``synciq_reports``.
 
-    Synciq target reports - \ :literal:`synciq\_target\_reports`\ .
+    Synciq target reports - ``synciq_target_reports``.
 
-    Synciq policies - \ :literal:`synciq\_policies`\ .
+    Synciq policies - ``synciq_policies``.
 
-    Synciq target cluster certificates - \ :literal:`synciq\_target\_cluster\_certificates`\ .
+    Synciq target cluster certificates - ``synciq_target_cluster_certificates``.
 
-    Synciq performance rules - \ :literal:`synciq\_performance\_rules`\ .
+    Synciq performance rules - ``synciq_performance_rules``.
 
-    Network groupnets - \ :literal:`network\_groupnets`\ .
+    Network groupnets - ``network_groupnets``.
 
-    Network pools - \ :literal:`network\_pools`\ .
+    Network pools - ``network_pools``.
 
-    Network rules - \ :literal:`network\_rules`\ .
+    Network rules - ``network_rules``.
 
-    Network interfaces - \ :literal:`network\_interfaces`\ .
+    Network interfaces - ``network_interfaces``.
 
-    Network subnets - \ :literal:`network\_subnets`\ .
+    Network subnets - ``network_subnets``.
 
-    Node pools - \ :literal:`node\_pools`\ .
+    Node pools - ``node_pools``.
 
-    Storagepool tiers - \ :literal:`storagepool\_tiers`\ .
+    Storagepool tiers - ``storagepool_tiers``.
 
-    SMB files - \ :literal:`smb\_files`\ .
+    SMB files - ``smb_files``.
 
-    User mapping rules - \ :literal:`user\_mapping\_rules`\ .
+    User mapping rules - ``user_mapping_rules``.
 
-    LDAPs - \ :literal:`ldap`\ .
+    LDAPs - ``ldap``.
 
-    NFS zone settings - \ :literal:`nfs\_zone\_settings`\ .
+    NFS zone settings - ``nfs_zone_settings``.
 
-    NFS default settings - \ :literal:`nfs\_default\_settings`\ .
+    NFS default settings - ``nfs_default_settings``.
 
-    SyncIQ global settings - \ :literal:`synciq\_global\_settings`\ .
+    SyncIQ global settings - ``synciq_global_settings``.
 
-    S3 buckets - \ :literal:`s3\_buckets`\ .
+    S3 buckets - ``s3_buckets``.
 
-    The list of \ :emphasis:`attributes`\ , \ :emphasis:`access\_zones`\  and \ :emphasis:`nodes`\  is for the entire PowerScale cluster.
+    The list of *attributes*, *access_zones* and *nodes* is for the entire PowerScale cluster.
 
     The list of providers for the entire PowerScale cluster.
 
@@ -156,23 +190,33 @@ Parameters
 
     The list of ldap providers of PowerScale cluster.
 
-    SMB global settings - \ :literal:`smb\_global\_settings`\ .
+    SMB global settings - ``smb_global_settings``.
 
-    NTP servers \ :literal:`ntp\_servers`\ 
+    NTP servers ``ntp_servers``.
 
-    Email settings \ :literal:`email\_settings`\ 
+    Email settings ``email_settings``.
 
-    Cluster identity \ :literal:`cluster\_identity`\ 
+    Cluster identity ``cluster_identity``.
 
-    Cluster owner \ :literal:`cluster\_owner`\ 
+    Cluster owner ``cluster_owner``.
 
-    SNMP settings - \ :literal:`snmp\_settings`\ .
+    SNMP settings - ``snmp_settings``.
 
-    Server certificate - \ :literal:`server\_certificate`\ .
+    Server certificate - ``server_certificate``.
 
-    roles - \ :literal:`roles`\ .
+    Roles - ``roles``.
 
-    Support assist settings- \ :literal:`support\_assist\_settings`\ .
+    Support assist settings- ``support_assist_settings``.
+
+    Alert settings - ``alert_settings``.
+
+    Alert rules - ``alert_rules``.
+
+    Alert channels - ``alert_channels``.
+
+    Alert categories - ``alert_categories``.
+
+    Event groups - ``event_group``.
 
 
   onefs_host (True, str, None)
@@ -186,9 +230,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
+    ``true`` - indicates that the SSL certificate should be verified.
 
-    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
+    ``false`` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -206,9 +250,9 @@ Notes
 -----
 
 .. note::
-   - The parameters \ :emphasis:`access\_zone`\  and \ :emphasis:`include\_all\_access\_zones`\  are mutually exclusive.
-   - Listing of SyncIQ target cluster certificates is not supported by isi\_sdk\_8\_1\_1 version.
-   - The \ :emphasis:`check\_mode`\  is supported.
+   - The parameters *access_zone* and *include_all_access_zones* are mutually exclusive.
+   - Listing of SyncIQ target cluster certificates is not supported by isi_sdk_8_1_1 version.
+   - The *check_mode* is supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -522,7 +566,7 @@ Examples
         gather_subset:
           - smb_global_settings
 
-    - name: Get the list of server certificate.
+    - name: Get the list of server certificate
       dellemc.powerscale.info:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -584,6 +628,46 @@ Examples
         api_password: "{{ api_password }}"
         gather_subset:
           - support_assist_settings
+
+    - name: Get alert categories and alert settings from PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - alert_categories
+          - alert_settings
+
+    - name: Get list of alert rules in descending order from PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - alert_rules
+        sort_dir: "desc"
+
+    - name: Get list of event groups with alert info from PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - event_group
+        alert_info: true
+
+    - name: Get sorted list of alert channel based on name key from PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - alert_channels
+        sort: "name"
 
 
 
@@ -868,7 +952,7 @@ NfsZoneSettings (When C(nfs_zone_settings) is in a given I(gather_subset), dict,
 
 
   nfsv4_allow_numeric_ids (, bool, )
-    If \ :literal:`true`\ , sends owners and groups as UIDs and GIDs when look up fails or if the \ :emphasis:`nfsv4\_no\_names`\  property is set to 1.
+    If ``true``, sends owners and groups as UIDs and GIDs when look up fails or if the *nfsv4_no_names* property is set to 1.
 
 
   nfsv4_domain (, str, )
@@ -876,19 +960,19 @@ NfsZoneSettings (When C(nfs_zone_settings) is in a given I(gather_subset), dict,
 
 
   nfsv4_no_domain (, bool, )
-    If \ :literal:`true`\ , sends owners and groups without a domain name.
+    If ``true``, sends owners and groups without a domain name.
 
 
   nfsv4_no_domain_uids (, bool, )
-    If \ :literal:`true`\ , sends UIDs and GIDs without a domain name.
+    If ``true``, sends UIDs and GIDs without a domain name.
 
 
   nfsv4_no_names (, bool, )
-    If \ :literal:`true`\ , sends owners and groups as UIDs and GIDs.
+    If ``true``, sends owners and groups as UIDs and GIDs.
 
 
   nfsv4_replace_domain (, bool, )
-    If \ :literal:`true`\ , replaces the owner or group domain with an NFS domain name.
+    If ``true``, replaces the owner or group domain with an NFS domain name.
 
 
   zone (, str, )
@@ -1493,7 +1577,7 @@ S3_bucket_details (When C(s3_buckets) is in a given I(gather_subset), dict, {'ac
 
 
   path (, str, )
-    Path of S3 bucket with in \ :literal:`'/ifs'`\ .
+    Path of S3 bucket with in ``'/ifs'``.
 
 
   zid (, int, )
@@ -1665,7 +1749,7 @@ ntp_servers (Always, dict, {'servers': [{'id': '10.**.**.**', 'key': None, 'name
 
 
     key (, str, )
-      Key value from \ :emphasis:`key\_file`\  that maps to this server.
+      Key value from *key_file* that maps to this server.
 
 
     name (, str, )
@@ -1696,7 +1780,7 @@ cluster_identity (Always, dict, {'cluster_identity': {'description': 'asdadasdas
 
 
   mttdl_level_msg (, str, )
-    mttdl\_level\_msg.
+    mttdl_level_msg.
 
 
   name (, str, )
@@ -1847,7 +1931,7 @@ ServerCertificate (When C(server_certificate) is in a given I(gather_subset), li
 
 
 
-roles (Always, dict, {'roles': [{'description': 'Test_Description', 'id': 'Test_Role', 'members': [{'id': 'UID:2008', 'name': 'esa', 'type': 'user'}], 'name': 'Test_Role', 'privileges': [{'id': 'ISI_PRIV_LOGIN_PAPI', 'name': 'Platform API', 'permission': 'r'}]}]})
+roles (When C(roles) is in a given I(gather_subset), dict, {'roles': [{'description': 'Test_Description', 'id': 'Test_Role', 'members': [{'id': 'UID:2008', 'name': 'esa', 'type': 'user'}], 'name': 'Test_Role', 'privileges': [{'id': 'ISI_PRIV_LOGIN_PAPI', 'name': 'Platform API', 'permission': 'r'}]}]})
   List of auth roles.
 
 
@@ -1898,12 +1982,12 @@ roles (Always, dict, {'roles': [{'description': 'Test_Description', 'id': 'Test_
 
 
 
-support_assist_settings (always, dict, {'automatic_case_creation': False, 'connection': {'gateway_endpoints': [{'enabled': True, 'host': 'XX.XX.XX.XX', 'port': 9443, 'priority': 1, 'use_proxy': False, 'validate_ssl': False}, {'enabled': True, 'host': 'XX.XX.XX.XY', 'port': 9443, 'priority': 2, 'use_proxy': False, 'validate_ssl': False}], 'mode': 'gateway', 'network_pools': [{'pool': 'pool1', 'subnet': 'subnet0'}]}, 'connection_state': 'disabled', 'contact': {'primary': {'email': 'p7VYg@example.com', 'first_name': 'Eric', 'last_name': 'Nam', 'phone': '1234567890'}, 'secondary': {'email': 'kangD@example.com', 'first_name': 'Daniel', 'last_name': 'Kang', 'phone': '1234567891'}}, 'enable_download': False, 'enable_remote_support': False, 'onefs_software_id': 'ELMISL1019H4GY', 'supportassist_enabled': True, 'telemetry': {'offline_collection_period': 60, 'telemetry_enabled': True, 'telemetry_persist': True, 'telemetry_threads': 10}})
+support_assist_settings (When C(support_assist_settings) is in a given I(gather_subset), dict, {'automatic_case_creation': False, 'connection': {'gateway_endpoints': [{'enabled': True, 'host': 'XX.XX.XX.XX', 'port': 9443, 'priority': 1, 'use_proxy': False, 'validate_ssl': False}, {'enabled': True, 'host': 'XX.XX.XX.XY', 'port': 9443, 'priority': 2, 'use_proxy': False, 'validate_ssl': False}], 'mode': 'gateway', 'network_pools': [{'pool': 'pool1', 'subnet': 'subnet0'}]}, 'connection_state': 'disabled', 'contact': {'primary': {'email': 'p7VYg@example.com', 'first_name': 'Eric', 'last_name': 'Nam', 'phone': '1234567890'}, 'secondary': {'email': 'kangD@example.com', 'first_name': 'Daniel', 'last_name': 'Kang', 'phone': '1234567891'}}, 'enable_download': False, 'enable_remote_support': False, 'onefs_software_id': 'ELMISL1019H4GY', 'supportassist_enabled': True, 'telemetry': {'offline_collection_period': 60, 'telemetry_enabled': True, 'telemetry_persist': True, 'telemetry_threads': 10}})
   The support assist settings details.
 
 
   automatic_case_creation (, bool, )
-    \ :literal:`True`\  indicates automatic case creation is enabled.
+    ``True`` indicates automatic case creation is enabled.
 
 
   connection (, dict, )
@@ -2034,7 +2118,7 @@ support_assist_settings (always, dict, {'automatic_case_creation': False, 'conne
 
 
   enable_download (, bool, )
-    \ :literal:`True`\  indicates downloads are enabled.
+    ``True`` indicates downloads are enabled.
 
 
   enable_remote_support (, bool, )
@@ -2047,6 +2131,279 @@ support_assist_settings (always, dict, {'automatic_case_creation': False, 'conne
 
   accepted_terms (, bool, )
     Whether to accept or reject the terms and conditions for remote support.
+
+
+
+alert_settings (When C(alert_settings) is in a given I(gather_subset)., dict, {'history': [{'end': 0, 'start': 1719822336}], 'maintenance': 'false'})
+  The alert settings details.
+
+
+  history (, list, )
+    History list of CELOG maintenance mode windows.
+
+
+    end (, int, )
+      End time of CELOG maintenance mode, as a UNIX timestamp in seconds.
+
+      Value 0 indicates that maintenance mode is still enabled.
+
+
+    start (, int, )
+      Start time of CELOG maintenance mode, as a UNIX timestamp in seconds.
+
+
+
+  maintenance (, bool, )
+    Indicates if maintenance mode is enabled.
+
+
+
+alert_categories (When C(alert_categories) is in a given I(gather_subset)., list, {'categories': [{'id': '200000000', 'id_name': 'NODE_STATUS_EVENTS', 'name': 'Node status events'}], 'resume': None, 'total': 1})
+  The alert categories details.
+
+
+  categories (, list, )
+    High level categorisation of eventgroups.
+
+
+    id (, str, )
+      Numeric identifier of eventgroup category.
+
+
+    id_name (, str, )
+      Name of category.
+
+
+    name (, str, )
+      Description of category.
+
+
+
+  resume (, str, )
+    Provide this token as the 'resume' query argument to continue listing results.
+
+
+  total (, int, )
+    Total number of items available.
+
+
+
+alert_channels (When C(alert_channels) is in a given I(gather_subset)., list, {'channels': [{'allowed_nodes': [], 'enabled': 'true', 'excluded_nodes': [], 'id': 2, 'name': 'Heartbeat Self-Test', 'parameters': {'address': [], 'batch': '', 'batch_period': '', 'custom_template': '', 'send_as': '', 'smtp_host': '', 'smtp_password': '', 'smtp_port': '', 'smtp_security': '', 'smtp_use_auth': '', 'smtp_username': '', 'subject': ''}, 'rules': ['Heatrbeat'], 'system': 'true', 'type': 'heartbreak'}], 'resume': None, 'total': 1})
+  The alert channels details.
+
+
+  channels (, list, )
+    Named channel through which alerts can be delivered.
+
+
+    allowed_nodes (, list, )
+      Nodes (LNNs) that can be masters for this channel.
+
+
+    enabled (, bool, )
+      Channel is to be used or not.
+
+
+    excluded_nodes (, list, )
+      Nodes (LNNs) that cannot be masters for this channel.
+
+
+    parameters (, dict, )
+      Parameters to be used for an smtp channel.
+
+
+      address (, list, )
+        Email addresses to send to.
+
+
+      batch (, str, )
+        Batching criterion.
+
+
+      batch_period (, int, )
+        Period over which batching is to be performed.
+
+
+      custom_template (, str, )
+        Path to custom notification template.
+
+
+      send_as (, str, )
+        Email address to use as from.
+
+
+      smtp_host (, str, )
+        SMTP host.
+
+
+      smtp_password (, str, )
+        Password for SMTP authentication, only if smtp_use_auth true.
+
+
+      smtp_port (, int, )
+        SMTP relay port. It defaults to 25.
+
+
+      smtp_security (, str, )
+        Encryption protocol to use for SMTP.
+
+
+      smtp_use_auth (, bool, )
+        Use SMTP authentication. It defaults to false.
+
+
+      smtp_username (, str, )
+        Username for SMTP authentication, only if smtp_use_auth true.
+
+
+      subject (, str, )
+        Subject for emails.
+
+
+
+    system (, bool, )
+      Channel is a pre-defined system channel.
+
+
+    type (, str, )
+      The mechanism used by the channel.
+
+
+    id (, int, )
+      Unique identifier.
+
+
+    name (, str, )
+      Channel name, may not contain /.
+
+
+    rules (, str, )
+      Alert rules involving this eventgroup type.
+
+
+
+  resume (, str, )
+    Provide this token as the 'resume' query argument to continue listing results.
+
+
+  total (, int, )
+    Total number of items available.
+
+
+
+alert_rules (When C(alert_rules) is in a given I(gather_subset)., list, {'alert_conditions': [{'categories': [], 'channels': [], 'condition': 'ONGOING', 'eventgroup_ids': ['400050004'], 'exclude_eventgroup_ids': [], 'id': 1, 'interval': 0, 'limit': 0, 'name': 'Heartbeat Self-Test', 'severities': [], 'transient': 0}], 'resume': None, 'total': 1})
+  The alert rules details.
+
+
+  alert_conditions (, list, )
+    Specifies under what conditions and over which channel an alert should be sent.
+
+
+    categories (, list, )
+      Event Group categories to be alerted.
+
+
+    channels (, list, )
+      Channels for alert.
+
+
+    condition (, str, )
+      Trigger condition for alert.
+
+
+    eventgroup_ids (, list, )
+      Event Group IDs to be alerted.
+
+
+    exclude_eventgroup_ids (, list, )
+      Event Group categories to be excluded from alerts.
+
+
+    id (, int, )
+      Unique identifier.
+
+
+    interval (, int, )
+      Required with ONGOING condition only, period in seconds between alerts of ongoing conditions.
+
+
+    limit (, int, )
+      Required with NEW EVENTS condition only, limits the number of alerts sent as events are added.
+
+
+    name (, str, )
+      Unique identifier.
+
+
+    severities (, list, )
+      Severities to be alerted.
+
+
+    transient (, int, )
+      Any eventgroup lasting less than this many seconds is deemed transient and will not generate alerts under this condition.
+
+
+
+  resume (, str, )
+    Provide this token as the 'resume' query argument to continue listing results.
+
+
+  total (, int, )
+    Total number of items available.
+
+
+
+event_groups (When C(event_group) is in a given I(gather_subset)., list, {'eventgroup_definitions': [{'category': '400000000', 'channels': [], 'description': 'ONGOING', 'id': 1, 'name': 'Heartbeat Self-Test', 'no_ignore': True, 'node': True, 'rules': [], 'suppressed': False}], 'resume': None, 'total': 1})
+  The event group details.
+
+
+  eventgroup_definitions (, list, )
+    Description of an eventgroup that can occur and be detected.
+
+
+    category (, list, )
+      ID of eventgroup category.
+
+
+    channels (, list, )
+      Channels by which this eventgroup type can be alerted.
+
+
+    description (, str, )
+      Human readable description, may contain value placeholders.
+
+
+    id (, int, )
+      Unique identifier.
+
+
+    name (, str, )
+      Name for eventgroup.
+
+
+    no_ignore (, bool, )
+      True if event should not be ignored.
+
+
+    node (, bool, )
+      True if this eventgroup type is node specific, false cluster wide.
+
+
+    rules (, list, )
+      Alert rules involving this eventgroup type.
+
+
+    suppressed (, bool, )
+      True if alerting is suppressed for this eventgroup type.
+
+
+
+  resume (, str, )
+    Provide this token as the 'resume' query argument to continue listing results.
+
+
+  total (, int, )
+    Total number of items available.
 
 
 
