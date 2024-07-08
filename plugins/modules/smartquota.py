@@ -17,14 +17,15 @@ version_added: '1.2.0'
 short_description: Manage Smart Quotas on PowerScale
 
 description:
-- Manages Smart Quotas on a PowerScale storage system. This includes getting details,
-  modifying, creating and deleting Smart Quotas.
+- Manages Smart Quotas on a PowerScale storage system. This includes
+  getting details, modifying, creating and deleting Smart Quotas.
 
 extends_documentation_fragment:
   - dellemc.powerscale.powerscale
 
 author:
 - P Srinivas Rao (@srinivas-rao5) <ansible.team@dell.com>
+- Kritika Bhateja(@Kritika-Bhateja-03) <ansible.team.dell.com>)
 
 options:
   path:
@@ -52,8 +53,8 @@ options:
   access_zone:
     description:
     - This option mentions the zone in which the user/group exists.
-    - For a non-system access zone, the path relative to the non-system Access Zone's
-      base directory has to be given.
+    - For a non-system access zone, the path relative to the non-system
+      Access Zone's base directory has to be given.
     - For a system access zone, the absolute path has to be given.
     type: str
     default: 'system'
@@ -103,16 +104,16 @@ options:
         - Threshold value after which the soft limit exceeded notification
           will be sent and the I(soft_grace) period will start.
         - Write access will be restricted after the grace period expires.
-        - Both I(soft_grace_period) and I(soft_limit_size) are required to modify
-          soft threshold for the quota.
+        - Both I(soft_grace_period) and I(soft_limit_size) are required to
+          modify soft threshold for the quota.
         type: float
       soft_grace_period:
         description:
         - Grace Period after the soft limit for quota is exceeded.
         - After the grace period, the write access to the quota will be
           restricted.
-        - Both I(soft_grace_period) and I(soft_limit_size) are required to modify
-          soft threshold for the quota.
+        - Both I(soft_grace_period) and I(soft_limit_size) are required
+          to modify soft threshold for the quota.
         type: int
       period_unit:
         description:
@@ -136,14 +137,17 @@ options:
         type: str
         choices: ['GB', 'TB']
       container:
-         description: If C(true), SMB shares using the quota directory see the quota thresholds as share size.
+         description:
+         - If C(true), SMB shares using the quota directory see
+           the quota thresholds as share size.
          type: bool
          default: false
   state:
     description:
     - Define whether the Smart Quota should exist or not.
     - C(present) - indicates that the Smart Quota should exist on the system.
-    - C(absent) - indicates that the Smart Quota should not exist on the system.
+    - C(absent) - indicates that the Smart Quota should not exist on the
+      system.
     choices: ['absent', 'present']
     type: str
     required: true
@@ -155,7 +159,6 @@ notes:
   included and one without snapshots included.
 - Once the limits are assigned, then the quota cannot be converted to
   accounting. Only modification to the threshold limits is permitted.
-- The I(check_mode) is not supported.
 '''
 EXAMPLES = r'''
 - name: Create a Quota for a User excluding snapshot
@@ -179,7 +182,8 @@ EXAMPLES = r'''
       cap_unit: "{{cap_unit}}"
     state: "present"
 
-- name: Create a Quota for a Directory for accounting includes snapshots and data protection overheads
+- name: Create a Quota for a Directory for accounting includes snapshots
+    and data protection overheads
   dellemc.powerscale.smartquota:
     onefs_host: "{{onefs_host}}"
     verify_ssl: "{{verify_ssl}}"
@@ -417,7 +421,7 @@ class SmartQuota(object):
 
         # initialize the ansible module
         self.module = AnsibleModule(argument_spec=self.module_params,
-                                    supports_check_mode=False,
+                                    supports_check_mode=True,
                                     mutually_exclusive=mut_ex_args,
                                     required_if=req_if_args)
 
@@ -505,11 +509,13 @@ class SmartQuota(object):
             quota_create_params["thresholds_on"] = quota_dict["thresholds_on"]
         quota_params_obj = utils.isi_sdk.QuotaQuotaCreateParams(**quota_create_params)
         try:
-            api_response = self.quota_api_instance.create_quota_quota(
-                quota_quota=quota_params_obj, zone=zone)
-            message = "Quota created, %s" % api_response
-            LOG.info(message)
-            return api_response
+            if not self.module.check_mode:
+                api_response = self.quota_api_instance.create_quota_quota(
+                    quota_quota=quota_params_obj, zone=zone)
+                message = "Quota created, %s" % api_response
+                LOG.info(message)
+                return api_response
+            return True
         except utils.ApiException as e:
             error_message = "Create quota for %s failed with %s" \
                             % (path, determine_error(e))
@@ -535,10 +541,11 @@ class SmartQuota(object):
                             'thresholds': threshold_obj}
         quota_params_obj = utils.isi_sdk.QuotaQuota(**get_quota_params)
         try:
-            self.quota_api_instance.update_quota_quota(
-                quota_quota=quota_params_obj, quota_quota_id=quota_id)
-            msg = "Quota Updated successfully for path %s" % path
-            LOG.debug(msg)
+            if not self.module.check_mode:
+                self.quota_api_instance.update_quota_quota(
+                    quota_quota=quota_params_obj, quota_quota_id=quota_id)
+                msg = "Quota Updated successfully for path %s" % path
+                LOG.debug(msg)
             return True
         except utils.ApiException as e:
             error_message = "Update quota for path %s failed with %s" \
@@ -624,9 +631,10 @@ class SmartQuota(object):
         :return: True, if the delete operation is successful.
         """
         try:
-            self.quota_api_instance.delete_quota_quota(quota_id)
-            msg = "Quota Deleted Successfully for Path %s" % path
-            LOG.debug(msg)
+            if not self.module.check_mode:
+                self.quota_api_instance.delete_quota_quota(quota_id)
+                msg = "Quota Deleted Successfully for Path %s" % path
+                LOG.debug(msg)
             return True
         except Exception as e:
             error_message = "Delete quota for %s failed with %s" \
