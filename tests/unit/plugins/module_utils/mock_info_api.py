@@ -1303,7 +1303,7 @@ class MockGatherfactsApi:
 
     @staticmethod
     def get_auth_roles(response_type):
-        if response_type == "api":
+        if response_type == "api" or response_type == "module":
             return [{
                     "description" : "Test_Description",
                     "id" : "Test_Role",
@@ -1325,27 +1325,6 @@ class MockGatherfactsApi:
                             }
                         ]
                     }]
-        elif response_type == "module":
-            return [
-                {
-                    "description" : "Test_Description",
-                    "id" : "Test_Role",
-                    "members" : [
-                        {
-                            "id" : "UID:2008",
-                            "name" : "esa",
-                            "type" : "user"
-                        }
-                    ],
-                    "name" : "Test_Role",
-                    "privileges" : [
-                        {
-                            "id" : "ISI_PRIV_LOGIN_PAPI",
-                            "name" : "Platform API",
-                            "permission" : "r"
-                        }
-                    ]
-                }]
         else:
             return "Failed to get the auth role list due to error SDK Error message."
 
