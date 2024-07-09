@@ -154,6 +154,7 @@ class TestFileSystem():
                                          },
                                          "list_snapshots": True,
                                          "state": "present"})
+        filesystem_module_mock.module.check_mode = False
         filesystem_module_mock.module.params = self.get_filesystem_args
         filesystem_module_mock.quota_api = MagicMock()
         filesystem_module_mock.get_filesystem = MagicMock(
@@ -184,6 +185,7 @@ class TestFileSystem():
                                          },
                                          "list_snapshots": True,
                                          "state": "present"})
+        filesystem_module_mock.module.check_mode = False
         filesystem_module_mock.module.params = self.get_filesystem_args
         filesystem_module_mock.quota_api = MagicMock()
         filesystem_module_mock.namespace_api.get_directory_metadata = MagicMock()
