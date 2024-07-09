@@ -30,6 +30,7 @@ extends_documentation_fragment:
 author:
 - Prashant Rakheja (@prashant-dell) <ansible.team@dell.com>
 - Trisha Datta (@trisha-dell) <ansible.team@dell.com>
+- Kritika Bhateja(@Kritika-Bhateja-03) <ansible.team.dell.com>)
 
 options:
   path:
@@ -223,11 +224,12 @@ options:
     default: false
 
 notes:
-- While deleting a filesystem when recursive_force_delete is set as C(true) it deletes all sub files and folders
-  recursively. This is C(true) even if the filesystem is not empty.
-- Modification of I(inherit_flags) of filesystem ACL is successful only if I(access_rights) is also specified in
+- While deleting a filesystem when recursive_force_delete is set as C(true) it
+  deletes all sub files and folders recursively. This is C(true)
+  even if the filesystem is not empty.
+- Modification of I(inherit_flags) of filesystem ACL is
+  successful only if I(access_rights) is also specified in
   the I(access_control_rights) dictionary.
-- I(Check_mode) is not supported.
 '''
 
 EXAMPLES = r'''
@@ -581,7 +583,7 @@ class FileSystem(object):
         required_together = [['access_control_rights', 'access_control_rights_state']]
         # initialize the Ansible module
         self.module = AnsibleModule(argument_spec=self.module_params,
-                                    supports_check_mode=False,
+                                    supports_check_mode=True,
                                     mutually_exclusive=mutually_exclusive,
                                     required_together=required_together
                                     )
@@ -725,33 +727,33 @@ class FileSystem(object):
 
             info_message = "Attempting to create new FS {0}".format(path)
             LOG.info(info_message)
-            if acl is not None:
-                self.namespace_api.create_directory(
-                    path,
-                    x_isi_ifs_target_type='container',
-                    recursive=recursive,
-                    x_isi_ifs_access_control=acl,
-                    overwrite=False)
-            else:
-                self.namespace_api.create_directory(
-                    path,
-                    x_isi_ifs_target_type='container',
-                    recursive=recursive,
-                    overwrite=False)
-            if quota is not None and quota['quota_state'] == 'present':
-                self.create_quota(quota, path)
-            permissions = \
-                self.isi_sdk.NamespaceAcl(
-                    authoritative='mode',
-                    owner=owner,
-                    group=group)
-            self.namespace_api.set_acl(namespace_path=path,
-                                       acl=True,
-                                       namespace_acl=permissions)
+            if not self.module.check_mode:
+                if acl is not None:
+                    self.namespace_api.create_directory(
+                        path,
+                        x_isi_ifs_target_type='container',
+                        recursive=recursive,
+                        x_isi_ifs_access_control=acl,
+                        overwrite=False)
+                else:
+                    self.namespace_api.create_directory(
+                        path,
+                        x_isi_ifs_target_type='container',
+                        recursive=recursive,
+                        overwrite=False)
+                if quota is not None and quota['quota_state'] == 'present':
+                    self.create_quota(quota, path)
+                permissions = \
+                    self.isi_sdk.NamespaceAcl(
+                        authoritative='mode',
+                        owner=owner,
+                        group=group)
+                self.namespace_api.set_acl(namespace_path=path,
+                                           acl=True,
+                                           namespace_acl=permissions)
 
-            if acl_rights:
-                self.set_access_control_rights(acl_rights, path)
-
+                if acl_rights:
+                    self.set_access_control_rights(acl_rights, path)
             return True
         except Exception as e:
             error_msg = self.determine_error(error_obj=e)
@@ -764,13 +766,15 @@ class FileSystem(object):
         """Sets the ACL permissions on specified filesystem."""
         try:
             acl = self.get_acl_permissions(acl_rights)
-            permissions = self.isi_sdk.NamespaceAcl(
-                authoritative='acl',
-                action="update",
-                acl=acl)
-            self.namespace_api.set_acl(namespace_path=path,
-                                       acl=True,
-                                       namespace_acl=permissions)
+            if not self.module.check_mode:
+                permissions = self.isi_sdk.NamespaceAcl(
+                    authoritative='acl',
+                    action="update",
+                    acl=acl)
+                self.namespace_api.set_acl(namespace_path=path,
+                                           acl=True,
+                                           namespace_acl=permissions)
+            return True
         except Exception as e:
             error_message = 'Setting ACL rights of Filesystem %s failed ' \
                             'with error: %s' % (path, utils.determine_error(error_obj=e))
@@ -801,7 +805,8 @@ class FileSystem(object):
                                     'is not safe'.format(path)
                     LOG.error(error_message)
                     self.module.fail_json(msg=error_message)
-            self.namespace_api.delete_directory(directory_path=path, recursive=recursive_force_delete)
+            if not self.module.check_mode:
+                self.namespace_api.delete_directory(directory_path=path, recursive=recursive_force_delete)
             return True
         except Exception as e:
             error_msg = self.determine_error(error_obj=e)
@@ -813,18 +818,19 @@ class FileSystem(object):
     def modify_acl(self, path, mode):
         """Modifies Filesystem ACL on PowerScale."""
         try:
-            if mode == 'posix':
-                acl = self.module.params['access_control']
-                new_mode = self.isi_sdk.NamespaceAcl(
-                    authoritative='mode',
-                    mode=acl)
-                self.namespace_api.set_acl(namespace_path=path,
-                                           acl=True,
-                                           namespace_acl=new_mode)
-            else:
-                acl_rights = self.module.params['access_control_rights']
-                if acl_rights:
-                    self.set_access_control_rights(acl_rights, path)
+            if not self.module.check_mode:
+                if mode == 'posix':
+                    acl = self.module.params['access_control']
+                    new_mode = self.isi_sdk.NamespaceAcl(
+                        authoritative='mode',
+                        mode=acl)
+                    self.namespace_api.set_acl(namespace_path=path,
+                                               acl=True,
+                                               namespace_acl=new_mode)
+                else:
+                    acl_rights = self.module.params['access_control_rights']
+                    if acl_rights:
+                        self.set_access_control_rights(acl_rights, path)
 
             return True
         except Exception as e:
@@ -913,11 +919,12 @@ class FileSystem(object):
             LOG.info('Modifying Quota..')
             get_quotas = self.quota_api.list_quota_quotas(path='/' + path,
                                                           type='directory')
-            quota_id = get_quotas.quotas[0].id
-            updated_quota = self.get_quota_update_param(quota)
-            self.quota_api.update_quota_quota(
-                quota_quota=updated_quota,
-                quota_quota_id=quota_id)
+            if not self.module.check_mode:
+                quota_id = get_quotas.quotas[0].id
+                updated_quota = self.get_quota_update_param(quota)
+                self.quota_api.update_quota_quota(
+                    quota_quota=updated_quota,
+                    quota_quota_id=quota_id)
             return True
         except Exception as e:
             error_msg = self.determine_error(error_obj=e)
@@ -929,9 +936,10 @@ class FileSystem(object):
     def delete_quota(self, path):
         """Deletes Filesystem Quota on PowerScale"""
         try:
-            self.quota_api.delete_quota_quotas(
-                path='/' + path,
-                type='directory')
+            if not self.module.check_mode:
+                self.quota_api.delete_quota_quotas(
+                    path='/' + path,
+                    type='directory')
             return True
         except Exception as e:
             error_msg = self.determine_error(error_obj=e)
@@ -1018,9 +1026,10 @@ class FileSystem(object):
     def create_quota(self, quota, path):
         """Creates a Quota"""
         try:
-            quota_param = self.get_quota_param(quota, '/' + path)
-            self.quota_api.create_quota_quota(
-                quota_quota=quota_param)
+            if not self.module.check_mode:
+                quota_param = self.get_quota_param(quota, '/' + path)
+                self.quota_api.create_quota_quota(
+                    quota_quota=quota_param)
             return True
         except Exception as e:
             error_msg = self.determine_error(error_obj=e)
@@ -1034,51 +1043,53 @@ class FileSystem(object):
         try:
             LOG.info('Determining if the ACLs are modified..')
             filesystem_acl = self.get_acl(effective_path)
-            info_message = 'ACL of the filesystem on ' \
-                           'the array is %s' % filesystem_acl['acl']
-            LOG.info(info_message)
-            if self.module.params['access_control']:
-                if self.module.params['access_control'] == 'private_read':
-                    acl_posix = '0550'
-                    new_authoritative = 'acl'
-                elif self.module.params['access_control'] == 'private':
-                    acl_posix = '0770'
-                    new_authoritative = 'acl'
-                elif self.module.params['access_control'] == 'public_read':
-                    acl_posix = '0775'
-                    new_authoritative = 'acl'
-                elif self.module.params['access_control'] == \
-                        'public_read_write' or self.module.params['access_control'] == 'public':
-                    acl_posix = '0777'
-                    new_authoritative = 'acl'
-                else:
-                    acl_posix = self.module.params['access_control']
-                    new_authoritative = 'mode'
-
-                info_message = 'ACL provided in the ' \
-                               'playbook is {0}'.format(acl_posix)
+            if isinstance(filesystem_acl, dict):
+                info_message = 'ACL of the filesystem on '\
+                    'the array is %s' % filesystem_acl['acl']
                 LOG.info(info_message)
+                if self.module.params['access_control']:
+                    if self.module.params['access_control'] == 'private_read':
+                        acl_posix = '0550'
+                        new_authoritative = 'acl'
+                    elif self.module.params['access_control'] == 'private':
+                        acl_posix = '0770'
+                        new_authoritative = 'acl'
+                    elif self.module.params['access_control'] == 'public_read':
+                        acl_posix = '0775'
+                        new_authoritative = 'acl'
+                    elif self.module.params['access_control'] == \
+                            'public_read_write' or self.module.params['access_control'] == 'public':
+                        acl_posix = '0777'
+                        new_authoritative = 'acl'
+                    else:
+                        acl_posix = self.module.params['access_control']
+                        new_authoritative = 'mode'
 
-                filesystem_acl_error_message = 'Modification of ACL from Ansible ' \
-                                               'modules is only supported from ' \
-                                               'POSIX to POSIX mode bits.'
+                    info_message = 'ACL provided in the '\
+                        'playbook is {0}'.format(acl_posix)
+                    LOG.info(info_message)
 
-                if (filesystem_acl['authoritative'] == 'acl'
+                    filesystem_acl_error_message = 'Modification of ACL from Ansible '\
+                        'modules is only supported from'\
+                        'POSIX to POSIX mode bits.'
+
+                    if (filesystem_acl['authoritative'] == 'acl'
                         and new_authoritative == 'mode') or \
-                   (filesystem_acl['authoritative'] == 'mode'
-                        and new_authoritative == 'acl') or \
-                   (filesystem_acl['authoritative'] == 'acl'
-                        and new_authoritative == 'acl' and filesystem_acl['mode'] != acl_posix):
-                    LOG.error(filesystem_acl_error_message)
-                    self.module.fail_json(msg=filesystem_acl_error_message)
+                            (filesystem_acl['authoritative'] == 'mode'
+                             and new_authoritative == 'acl') or \
+                            (filesystem_acl['authoritative'] == 'acl'
+                             and new_authoritative == 'acl' and filesystem_acl['mode'] != acl_posix):
+                        LOG.error(filesystem_acl_error_message)
+                        self.module.fail_json(msg=filesystem_acl_error_message)
 
-                if acl_posix != filesystem_acl['mode']:
-                    return True, "posix"
-            if self.module.params['access_control_rights']:
-                if self.is_acl_rights_modified(filesystem_acl, self.module.params['access_control_rights']):
-                    return True, "acl"
+                    if acl_posix != filesystem_acl['mode']:
+                        return True, "posix"
+                if self.module.params['access_control_rights']:
+                    if self.is_acl_rights_modified(filesystem_acl, self.module.params['access_control_rights']):
+                        return True, "acl"
 
-            return False, None
+                return False, None
+            return True, None
         except Exception as e:
             error_msg = self.determine_error(error_obj=e)
             error_message = 'Error {0} while determining if ' \
@@ -1120,10 +1131,12 @@ class FileSystem(object):
     def get_acl(self, effective_path):
         """Retrieves ACL rights of filesystem"""
         try:
-            filesystem_acl = \
-                (self.namespace_api.get_acl(effective_path,
-                                            acl=True)).to_dict()
-            return filesystem_acl
+            if not self.module.check_mode:
+                filesystem_acl = \
+                    (self.namespace_api.get_acl(effective_path,
+                                                acl=True)).to_dict()
+                return filesystem_acl
+            return True
         except Exception as e:
             error_message = 'Error %s while retrieving the access control list for ' \
                             'namespace object.' % utils.determine_error(error_obj=e)
@@ -1376,19 +1389,19 @@ class FileSystem(object):
                          'name': owner['name']}
 
                 acl = self.get_acl(effective_path)
-                file_uid = acl['owner']['id']
-                info_message = 'The user ID fetched from playbook is ' \
-                               '{0} and the user ID on ' \
-                               'the file is {1}'.format(owner_uid, file_uid)
-                LOG.info(info_message)
-
                 modified = False
-                if owner_provider.lower() != 'ads' and \
-                        owner_uid != file_uid:
-                    modified = True
-                # For ADS providers, the SID of the owner gets set in the ACL
-                if owner_provider.lower() == 'ads' and owner_sid != file_uid:
-                    modified = True
+                if isinstance(acl, dict):
+                    file_uid = acl['owner']['id']
+                    info_message = 'The user ID fetched from playbook is '\
+                        '{0} and the user ID on '\
+                        'the file is {1}'.format(owner_uid, file_uid)
+                    LOG.info(info_message)
+                    if owner_provider.lower() != 'ads' and \
+                            owner_uid != file_uid:
+                        modified = True
+                    # For ADS providers, the SID of the owner gets set in the ACL
+                    if owner_provider.lower() == 'ads' and owner_sid != file_uid:
+                        modified = True
 
                 if modified:
                     LOG.info('Modifying owner..')
@@ -1431,19 +1444,19 @@ class FileSystem(object):
                          'name': group['name']}
 
                 acl = self.get_acl(effective_path)
-                file_gid = acl['group']['id']
-                info_message = 'The group ID fetched from playbook is ' \
-                               '{0} and the group ID on ' \
-                               'the file is {1}'.format(group_uid, file_gid)
-                LOG.info(info_message)
-
                 modified = False
-                if group_provider.lower() != 'ads' and \
-                        group_uid != file_gid:
-                    modified = True
-                # For ADS providers, the SID of the group gets set in the ACL
-                if group_provider.lower() == 'ads' and group_sid != file_gid:
-                    modified = True
+                if isinstance(acl, dict):
+                    file_gid = acl['group']['id']
+                    info_message = 'The group ID fetched from playbook is '\
+                        '{0} and the group ID on ' \
+                        'the file is {1}'.format(group_uid, file_gid)
+                    LOG.info(info_message)
+                    if group_provider.lower() != 'ads' and \
+                            group_uid != file_gid:
+                        modified = True
+                    # For ADS providers, the SID of the group gets set in the ACL
+                    if group_provider.lower() == 'ads' and group_sid != file_gid:
+                        modified = True
 
                 if modified:
                     LOG.info('Modifying group..')
@@ -1462,12 +1475,14 @@ class FileSystem(object):
     def modify_owner(self, owner, effective_path):
         """Modifies the FS owner"""
         try:
-            permissions = self.isi_sdk.NamespaceAcl(
-                authoritative='mode',
-                owner=owner)
-            self.namespace_api.set_acl(namespace_path=effective_path,
-                                       acl=True,
-                                       namespace_acl=permissions)
+            if not self.module.check_mode:
+                permissions = self.isi_sdk.NamespaceAcl(
+                    authoritative='mode',
+                    owner=owner)
+                self.namespace_api.set_acl(namespace_path=effective_path,
+                                           acl=True,
+                                           namespace_acl=permissions)
+            return True
         except Exception as e:
             error_msg = self.determine_error(error_obj=e)
             error_message = 'Failed to modify owner ' \
@@ -1478,12 +1493,14 @@ class FileSystem(object):
     def modify_group(self, group, effective_path):
         """Modifies the FS group"""
         try:
-            permissions = self.isi_sdk.NamespaceAcl(
-                authoritative='mode',
-                group=group)
-            self.namespace_api.set_acl(namespace_path=effective_path,
-                                       acl=True,
-                                       namespace_acl=permissions)
+            if not self.module.check_mode:
+                permissions = self.isi_sdk.NamespaceAcl(
+                    authoritative='mode',
+                    group=group)
+                self.namespace_api.set_acl(namespace_path=effective_path,
+                                           acl=True,
+                                           namespace_acl=permissions)
+            return True
         except Exception as e:
             error_msg = self.determine_error(error_obj=e)
             error_message = 'Failed to modify group ' \
@@ -1583,6 +1600,8 @@ class FileSystem(object):
         if state == 'present':
             LOG.info('Getting filesystem details..')
             result['filesystem_details'] = self.get_filesystem(effective_path)
+            if result.get('filesystem_details') is None:
+                result['filesystem_details'] = {}
             result['filesystem_details'].update(namespace_acl=self.get_acl(effective_path))
             result['quota_details'] = self.get_quota(effective_path)
             if self.module.params['list_snapshots']:
