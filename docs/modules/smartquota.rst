@@ -169,6 +169,7 @@ Notes
 .. note::
    - To perform any operation, path, quota\_type and state are mandatory parameters.
    - There can be two quotas for each type per directory, one with snapshots included and one without snapshots included.
+   - The \ :emphasis:`check\_mode`\  is not supported.
    - Once the limits are assigned, then the quota cannot be converted to accounting. Only modification to the threshold limits is permitted.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
@@ -203,7 +204,7 @@ Examples
         state: "present"
 
     - name: Create a Quota for a Directory for accounting includes snapshots
-      and data protection overheads
+        and data protection overheads
       dellemc.powerscale.smartquota:
         onefs_host: "{{onefs_host}}"
         verify_ssl: "{{verify_ssl}}"

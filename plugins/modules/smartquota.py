@@ -157,6 +157,7 @@ notes:
   mandatory parameters.
 - There can be two quotas for each type per directory, one with snapshots
   included and one without snapshots included.
+- The I(check_mode) is not supported.
 - Once the limits are assigned, then the quota cannot be converted to
   accounting. Only modification to the threshold limits is permitted.
 '''
