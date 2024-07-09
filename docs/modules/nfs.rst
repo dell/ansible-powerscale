@@ -210,6 +210,7 @@ Notes
 -----
 
 .. note::
+   - The \ :emphasis:`check\_mode`\  is supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -483,3 +484,4 @@ Authors
 - Bhavneet Sharma(@Bhavneet-Sharma) <ansible.team@dell.com>
 - Trisha Datta(@trisha-dell) <ansible.team@dell.com>
 - Kritika Bhateja(@Kritika-Bhateja-03) <ansible.team.dell.com>)
+

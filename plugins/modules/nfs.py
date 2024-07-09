@@ -197,6 +197,8 @@ options:
             choices: [absent, present]
             default: present
 
+notes:
+  - The I(check_mode) is supported.
 '''
 
 EXAMPLES = r'''
@@ -586,21 +588,19 @@ class NfsExport(object):
 
     def _create_nfs_export_create_params_object(self, path):
         try:
-            if not self.module.check_mode:
-                nfs_export = self.isi_sdk.NfsExportCreateParams(
-                    paths=[path],
-                    clients=self.module.params['clients'],
-                    read_only_clients=self.module.params['read_only_clients'],
-                    read_write_clients=self.module.params['read_write_clients'],
-                    root_clients=self.module.params['root_clients'],
-                    read_only=self.module.params['read_only'],
-                    all_dirs=self.module.params['sub_directories_mountable'],
-                    description=self.module.params['description'],
-                    security_flavors=get_security_keys(
-                        self.module.params['security_flavors']),
-                    zone=self.module.params['access_zone'])
-                return nfs_export
-            return True
+            nfs_export = self.isi_sdk.NfsExportCreateParams(
+                paths=[path],
+                clients=self.module.params['clients'],
+                read_only_clients=self.module.params['read_only_clients'],
+                read_write_clients=self.module.params['read_write_clients'],
+                root_clients=self.module.params['root_clients'],
+                read_only=self.module.params['read_only'],
+                all_dirs=self.module.params['sub_directories_mountable'],
+                description=self.module.params['description'],
+                security_flavors=get_security_keys(
+                    self.module.params['security_flavors']),
+                zone=self.module.params['access_zone'])
+            return nfs_export
         except Exception as e:
             error_msg = 'Create NfsExportCreateParams object for path {0}' \
                 ' failed with error {1}'.format(
@@ -753,8 +753,6 @@ class NfsExport(object):
         mod_flag, nfs_export = self._check_clients(nfs_export, playbook_client_dict, current_client_dict, mod_flag)
         mod_flag, nfs_export = self._check_read_only_clients(nfs_export, playbook_client_dict, current_client_dict, mod_flag)
         mod_flag, nfs_export = self._check_root_clients(nfs_export, playbook_client_dict, current_client_dict, mod_flag)
-
-        # mod_flag = mod_flag1 or mod_flag2 or mod_flag3 or mod_flag4
         return mod_flag, nfs_export
 
     def _check_mod_field(self, field_name_playbook, field_name_powerscale):
