@@ -34,8 +34,7 @@ class TestSmartQuota():
                      new=MockApiException)
         return smartquota_module_mock
 
-    def test_smartquota_create_quota(self, smartquota_module_mock):
-        self.get_smartquota_args.update({"path": MockSmartQuotaApi.PATH1,
+    @pytest.mark.parametrize("params", [{"path": MockSmartQuotaApi.PATH1,
                                          "access_zone": "System",
                                          "quota_type": "directory",
                                          "user_name": "sample",
@@ -53,38 +52,30 @@ class TestSmartQuota():
                                              "container": True,
                                          },
                                          "list_snapshots": True,
-                                         "state": "present"})
-        smartquota_module_mock.module.params = self.get_smartquota_args
-        smartquota_module_mock.get_quota_params = MagicMock(return_value=None)
-        utils.isi_sdk.QuotaQuotaThresholds = MagicMock(return_value=None)
-        utils.validate_threshold_overhead_parameter = MagicMock(return_value=None)
-        utils.isi_sdk.QuotaQuotaCreateParams = MagicMock(return_value=None)
-        smartquota_module_mock.add_limits_with_unit = MagicMock()
-        smartquota_module_mock.quota_api_instance.create_quota_quota = MagicMock(return_value=None)
-        smartquota_module_mock.determine_error = MagicMock(return_value=None)
-        smartquota_module_mock.perform_module_operation()
-        assert smartquota_module_mock.module.exit_json.call_args[1]["changed"] is True
-
-    def test_smartquota_create_quota_paramset1(self, smartquota_module_mock):
-        self.get_smartquota_args.update({"path": MockSmartQuotaApi.PATH1,
-                                         "access_zone": "System",
-                                         "quota_type": "directory",
-                                         "user_name": "sample",
-                                         "group_name": "sample_group",
-                                         "provider_type": "nis",
-                                         "quota": {
-                                             "thresholds_on": "fs_logical_size",
-                                             "soft_limit_size": 5,
-                                             "hard_limit_size": 10,
-                                             "cap_unit": "GB",
-                                             "soft_grace_period": 1,
-                                             "period_unit": "months",
-                                             "advisory_limit_size": 3,
-                                             "include_overheads": True,
-                                             "container": True,
-                                         },
-                                         "list_snapshots": True,
-                                         "state": "present"})
+                                         "state": "present"},
+                                        {
+                                        "path": MockSmartQuotaApi.PATH1,
+                                        "access_zone": "System",
+                                        "quota_type": "directory",
+                                        "user_name": "sample",
+                                        "group_name": "sample_group",
+                                        "provider_type": "nis",
+                                        "quota": {
+                                            "thresholds_on": "fs_logical_size",
+                                            "soft_limit_size": 5,
+                                            "hard_limit_size": 10,
+                                            "cap_unit": "GB",
+                                            "soft_grace_period": 1,
+                                            "period_unit": "months",
+                                            "advisory_limit_size": 3,
+                                            "include_overheads": True,
+                                            "container": True,
+                                        },
+                                        "list_snapshots": True,
+                                        "state": "present"}
+                                        ])
+    def test_smartquota_create_quota(self, params, smartquota_module_mock):
+        self.get_smartquota_args.update(params)
         smartquota_module_mock.module.params = self.get_smartquota_args
         smartquota_module_mock.get_quota_params = MagicMock(return_value=None)
         utils.isi_sdk.QuotaQuotaThresholds = MagicMock(return_value=None)
