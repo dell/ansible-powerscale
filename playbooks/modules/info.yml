@@ -267,7 +267,7 @@
         gather_subset:
           - alert_settings
 
-    - name: Get list of Alert rules with filters
+    - name: Get list of Alert rules with query parameters
       dellemc.powerscale.info:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
@@ -275,11 +275,12 @@
         verify_ssl: "{{ verify_ssl }}"
         gather_subset:
           - alert_rules
-        sort_dir: 'desc'
-        sort: 'condition'
-        channels: 'SupportAssist'
+        query_parameters:
+          - sort_dir: 'desc'
+          - sort: 'condition'
+          - channels: 'SupportAssist'
 
-    - name: Get list of Alert channels with filters
+    - name: Get list of Alert channels with query parameters
       dellemc.powerscale.info:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
@@ -287,10 +288,11 @@
         verify_ssl: "{{ verify_ssl }}"
         gather_subset:
           - alert_channels
-        sort_dir: 'desc'
-        sort: 'enabled'
+        query_parameters:
+          - sort_dir: 'desc'
+          - sort: enabled
 
-    - name: Get Alert categories with filters
+    - name: Get Alert categories from PowerScale cluster
       dellemc.powerscale.info:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
@@ -299,7 +301,7 @@
         gather_subset:
           - alert_categories
 
-    - name: Get event groups with filters
+    - name: Get event groups with query parameters
       dellemc.powerscale.info:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
@@ -307,5 +309,6 @@
         verify_ssl: "{{ verify_ssl }}"
         gather_subset:
           - event_group
-        alert_info: 'true'
-        category: '100000000'
+        query_parameters:
+          - alert_info: 'true'
+          - category: '100000000'

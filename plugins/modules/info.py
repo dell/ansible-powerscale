@@ -75,36 +75,12 @@ options:
     choices: ['effective', 'user', 'default']
     default: 'effective'
     type: str
-  sort_dir:
+  query_parameters:
     description:
-    - The direction in which the results should be sorted.
-    - Applicable to C(alert_rules), and C(event_channels).
-    type: str
-    choices: ['asc', 'desc']
-    version_added: '3.2.0'
-  sort:
-    description:
-    - The field that will be used for sorting.
-    - Applicable to C(alert_rules), and C(event_channels).
-    type: str
-    version_added: '3.2.0'
-  channels:
-    description:
-    - Return only conditions for the specified channel.
-    - Applicable to C(alert_rules).
-    type: str
-    version_added: '3.2.0'
-  category:
-    description:
-    - Return eventgroups in the specified category.
-    - Applicable to C(event_group).
-    type: str
-    version_added: '3.2.0'
-  alert_info:
-    description:
-    - Include alert rules and channels in output.
-    - Applicable to C(event_group).
-    type: bool
+    - List of key-value pairs that will be used for filtering.
+    - Applicable to C(alert_rules), C(event_group) and C(event_channels).
+    type: list
+    elements: dict
     version_added: '3.2.0'
   gather_subset:
     description:
@@ -572,7 +548,10 @@ EXAMPLES = r'''
     api_password: "{{ api_password }}"
     gather_subset:
       - alert_rules
-    sort_dir: "desc"
+    query_parameters:
+      - sort_dir: "desc"
+      - sort: "condition"
+      - channels: "SupportAssist"
 
 - name: Get list of event groups with alert info from PowerScale cluster
   dellemc.powerscale.info:
@@ -582,7 +561,9 @@ EXAMPLES = r'''
     api_password: "{{ api_password }}"
     gather_subset:
       - event_group
-    alert_info: true
+    query_parameters:
+      - alert_info: true
+      - category: '100000000'
 
 - name: Get sorted list of alert channel based on name key from PowerScale cluster
   dellemc.powerscale.info:
@@ -592,7 +573,9 @@ EXAMPLES = r'''
     api_password: "{{ api_password }}"
     gather_subset:
       - alert_channels
-    sort: "name"
+    query_parameters:
+      - sort: "enabled"
+      - sort_dir: "asc"
 '''
 
 RETURN = r'''
@@ -3611,9 +3594,7 @@ def get_info_parameters():
                      'snmp_settings', 'server_certificate', 'roles',
                      'support_assist_settings', 'alert_settings', 'alert_rules',
                      'alert_channels', 'alert_categories', 'event_group']),
-        sort_dir=dict(type='str', choices=['asc', 'desc']),
-        sort=dict(type='str'), channels=dict(type='str'), category=dict(type='str'),
-        alert_info=dict(type='bool')
+        query_parameters=dict(type='list', elements='dict')
     )
 
 

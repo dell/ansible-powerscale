@@ -77,34 +77,10 @@ Parameters
     If specified as ``default``, the original values are returned.
 
 
-  sort_dir (optional, str, None)
-    The direction in which the results should be sorted.
+  query_parameters (optional, list, None)
+    List of key-value pairs that will be used for filtering.
 
-    Applicable to ``alert_rules``, and ``event_channels``.
-
-
-  sort (optional, str, None)
-    The field that will be used for sorting.
-
-    Applicable to ``alert_rules``, and ``event_channels``.
-
-
-  channels (optional, str, None)
-    Return only conditions for the specified channel.
-
-    Applicable to ``alert_rules``.
-
-
-  category (optional, str, None)
-    Return eventgroups in the specified category.
-
-    Applicable to ``event_group``.
-
-
-  alert_info (optional, bool, None)
-    Include alert rules and channels in output.
-
-    Applicable to ``event_group``.
+    Applicable to ``alert_rules``, ``event_group`` and ``event_channels``.
 
 
   gather_subset (True, list, None)
@@ -647,7 +623,10 @@ Examples
         api_password: "{{ api_password }}"
         gather_subset:
           - alert_rules
-        sort_dir: "desc"
+        query_parameters:
+          - sort_dir: "desc"
+          - sort: "condition"
+          - channels: "SupportAssist"
 
     - name: Get list of event groups with alert info from PowerScale cluster
       dellemc.powerscale.info:
@@ -657,7 +636,9 @@ Examples
         api_password: "{{ api_password }}"
         gather_subset:
           - event_group
-        alert_info: true
+        query_parameters:
+          - alert_info: true
+          - category: '100000000'
 
     - name: Get sorted list of alert channel based on name key from PowerScale cluster
       dellemc.powerscale.info:
@@ -667,7 +648,9 @@ Examples
         api_password: "{{ api_password }}"
         gather_subset:
           - alert_channels
-        sort: "name"
+        query_parameters:
+          - sort: "enabled"
+          - sort_dir: "asc"
 
 
 

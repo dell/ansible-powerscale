@@ -51,18 +51,19 @@ class Events:
         :rtype: list
         """
         try:
-            alert_info = self.module.params.get('alert_info')
-            category = self.module.params.get('category')
-            all_event_groups = []
+            query_params = self.module.params.get('query_parameters')
             filter_params = {}
-            if alert_info:
-                filter_params['alert_info'] = alert_info
-            elif category:
-                filter_params['category'] = category
+            if query_params:
+                for parm in query_params:
+                    for key, value in parm.items():
+                        if key in ['alert_info', 'category']:
+                            filter_params[key] = value
+            all_event_groups = []
+            LOG.info(f"filter_params: {filter_params}")
 
-            event_groups = (self.event_api.get_event_eventgroup_definitions(**filter_params)).to_dict()
-            all_event_groups.append(event_groups)
-            resume = event_groups.get('resume')
+            event_group = (self.event_api.get_event_eventgroup_definitions(**filter_params)).to_dict()
+            all_event_groups.append(event_group)
+            resume = event_group.get('resume')
 
             while resume:
                 event_groups_resume = (self.event_api.get_event_eventgroup_definitions(resume=resume, **filter_params)).to_dict()
@@ -108,24 +109,23 @@ class Events:
         :rtype: list
         """
         try:
-            sort_dir = self.module.params.get('sort_dir')
-            sort = self.module.params.get('sort')
-            channels = self.module.params.get('channels')
             all_alert_rules = []
-            base_params = {}
-            if sort_dir:
-                base_params = {'dir': sort_dir.upper()}
-            elif sort:
-                base_params = {'sort': sort}
-            elif channels:
-                base_params['channels'] = channels
+            query_params = self.module.params.get('query_parameters')
+            filter_params = {}
+            if query_params:
+                for parm in query_params:
+                    for key, value in parm.items():
+                        if key in ['sort', 'channels']:
+                            filter_params[key] = value
+                        elif key == 'sort_dir':
+                            filter_params['dir'] = value.upper()
 
-            alert_rules = (self.event_api.list_event_alert_conditions(**base_params)).to_dict()
+            alert_rules = (self.event_api.list_event_alert_conditions(**filter_params)).to_dict()
             all_alert_rules.append(alert_rules)
             resume = alert_rules['resume']
 
             while resume:
-                alert_rules = (self.event_api.list_event_alert_conditions(resume=resume, **base_params)).to_dict()
+                alert_rules = (self.event_api.list_event_alert_conditions(resume=resume, **filter_params)).to_dict()
                 resume = alert_rules['resume']
                 all_alert_rules.append(alert_rules)
             return all_alert_rules
@@ -143,15 +143,16 @@ class Events:
         :rtype: list
         """
         try:
-            sort_dir = self.module.params.get('sort_dir')
-            sort = self.module.params.get('sort')
             all_event_channels = []
+            query_params = self.module.params.get('query_parameters')
             filter_params = {}
-
-            if sort_dir:
-                filter_params = {'dir': sort_dir.upper()}
-            elif sort:
-                filter_params = {'sort': sort}
+            if query_params:
+                for parm in query_params:
+                    for key, value in parm.items():
+                        if key == 'sort':
+                            filter_params[key] = value
+                        elif key == 'sort_dir':
+                            filter_params['dir'] = value.upper()
 
             event_channels = (self.event_api.list_event_channels(**filter_params)).to_dict()
             all_event_channels.append(event_channels)
