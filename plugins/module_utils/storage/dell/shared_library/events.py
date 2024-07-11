@@ -59,7 +59,6 @@ class Events:
                         if key in ['alert_info', 'category']:
                             filter_params[key] = value
             all_event_groups = []
-            LOG.info(f"filter_params: {filter_params}")
 
             event_group = (self.event_api.get_event_eventgroup_definitions(**filter_params)).to_dict()
             all_event_groups.append(event_group)
