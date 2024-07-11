@@ -77,10 +77,9 @@ options:
     type: str
   query_parameters:
     description:
-    - List of key-value pairs that will be used for filtering.
+    - Contains dictionary of query parameters for specific I(gather_subset).
     - Applicable to C(alert_rules), C(event_group) and C(event_channels).
-    type: list
-    elements: dict
+    type: dict
     version_added: '3.2.0'
   gather_subset:
     description:
@@ -549,9 +548,10 @@ EXAMPLES = r'''
     gather_subset:
       - alert_rules
     query_parameters:
-      - sort_dir: "desc"
-      - sort: "condition"
-      - channels: "SupportAssist"
+      alert_rules:
+        - sort_dir: "desc"
+        - sort: "condition"
+        - channels: "SupportAssist"
 
 - name: Get list of event groups with alert info from PowerScale cluster
   dellemc.powerscale.info:
@@ -562,8 +562,9 @@ EXAMPLES = r'''
     gather_subset:
       - event_group
     query_parameters:
-      - alert_info: true
-      - category: '100000000'
+      event_group:
+        - alert_info: true
+        - category: '100000000'
 
 - name: Get sorted list of alert channel based on name key from PowerScale cluster
   dellemc.powerscale.info:
@@ -574,8 +575,9 @@ EXAMPLES = r'''
     gather_subset:
       - alert_channels
     query_parameters:
-      - sort: "enabled"
-      - sort_dir: "asc"
+      alert_channels:
+        - sort: "enabled"
+        - sort_dir: "asc"
 '''
 
 RETURN = r'''
@@ -3594,7 +3596,7 @@ def get_info_parameters():
                      'snmp_settings', 'server_certificate', 'roles',
                      'support_assist_settings', 'alert_settings', 'alert_rules',
                      'alert_channels', 'alert_categories', 'event_group']),
-        query_parameters=dict(type='list', elements='dict')
+        query_parameters=dict(type='dict')
     )
 
 

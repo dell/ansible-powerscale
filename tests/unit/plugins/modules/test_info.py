@@ -534,7 +534,7 @@ class TestInfo():
             gather_subset)
         self.get_module_args.update({
             'gather_subset': ['alert_channels'],
-            'query_parameters': [{'sort': 'name'}, {'sort_dir': 'desc'}]
+            'query_parameters': {'alert_channels': [{'sort': 'name'}, {'sort_dir': 'desc'}]}
         })
         gatherfacts_module_mock.module.params = self.get_module_args
         with patch.object(gatherfacts_module_mock.event_api, MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
@@ -567,8 +567,8 @@ class TestInfo():
             gather_subset)
         self.get_module_args.update({
             'gather_subset': ['alert_rules'],
-            'query_parameters': [{'sort_dir': 'asc'}, {'sort': 'name'},
-                                 {'channel': 'condition'}]
+            'query_parameters': {'alert_rules': [
+                {'sort_dir': 'asc'}, {'sort': 'name'}, {'channel': 'condition'}]}
         })
         gatherfacts_module_mock.module.params = self.get_module_args
         with patch.object(gatherfacts_module_mock.event_api, MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
@@ -601,7 +601,8 @@ class TestInfo():
             gather_subset)
         self.get_module_args.update({
             'gather_subset': ['event_group'],
-            'query_parameters': [{'alert_info': 'true'}, {'category': '400000000'}]
+            'query_parameters': {'event_group': [{'alert_info': 'true'},
+                                                 {'category': '400000000'}]}
         })
         gatherfacts_module_mock.module.params = self.get_module_args
         with patch.object(gatherfacts_module_mock.event_api, MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:

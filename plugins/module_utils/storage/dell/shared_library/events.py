@@ -52,14 +52,16 @@ class Events:
         """
         try:
             query_params = self.module.params.get('query_parameters')
-            filter_params = {}
+            event_grp_query_params = []
             if query_params:
-                for parm in query_params:
+                event_grp_query_params = query_params.get('event_group')
+            filter_params = {}
+            if event_grp_query_params:
+                for parm in event_grp_query_params:
                     for key, value in parm.items():
                         if key in ['alert_info', 'category']:
                             filter_params[key] = value
             all_event_groups = []
-
             event_group = (self.event_api.get_event_eventgroup_definitions(**filter_params)).to_dict()
             all_event_groups.append(event_group)
             resume = event_group.get('resume')
@@ -111,8 +113,11 @@ class Events:
             all_alert_rules = []
             query_params = self.module.params.get('query_parameters')
             filter_params = {}
+            alrt_ruls_query_params = []
             if query_params:
-                for parm in query_params:
+                alrt_ruls_query_params = query_params.get('alert_rules')
+            if alrt_ruls_query_params:
+                for parm in alrt_ruls_query_params:
                     for key, value in parm.items():
                         if key in ['sort', 'channels']:
                             filter_params[key] = value
@@ -145,8 +150,11 @@ class Events:
             all_event_channels = []
             query_params = self.module.params.get('query_parameters')
             filter_params = {}
+            alrt_channls_query_params = []
             if query_params:
-                for parm in query_params:
+                alrt_channls_query_params = query_params.get('alert_channels')
+            if alrt_channls_query_params:
+                for parm in alrt_channls_query_params:
                     for key, value in parm.items():
                         if key == 'sort':
                             filter_params[key] = value

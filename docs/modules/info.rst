@@ -77,8 +77,8 @@ Parameters
     If specified as ``default``, the original values are returned.
 
 
-  query_parameters (optional, list, None)
-    List of key-value pairs that will be used for filtering.
+  query_parameters (optional, dict, None)
+    Contains dictionary of query parameters for specific *gather_subset*.
 
     Applicable to ``alert_rules``, ``event_group`` and ``event_channels``.
 
@@ -624,9 +624,10 @@ Examples
         gather_subset:
           - alert_rules
         query_parameters:
-          - sort_dir: "desc"
-          - sort: "condition"
-          - channels: "SupportAssist"
+          alert_rules:
+            - sort_dir: "desc"
+            - sort: "condition"
+            - channels: "SupportAssist"
 
     - name: Get list of event groups with alert info from PowerScale cluster
       dellemc.powerscale.info:
@@ -637,8 +638,9 @@ Examples
         gather_subset:
           - event_group
         query_parameters:
-          - alert_info: true
-          - category: '100000000'
+          event_group:
+            - alert_info: true
+            - category: '100000000'
 
     - name: Get sorted list of alert channel based on name key from PowerScale cluster
       dellemc.powerscale.info:
@@ -649,8 +651,9 @@ Examples
         gather_subset:
           - alert_channels
         query_parameters:
-          - sort: "enabled"
-          - sort_dir: "asc"
+          alert_channels:
+            - sort: "enabled"
+            - sort_dir: "asc"
 
 
 

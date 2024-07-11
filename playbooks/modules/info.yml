@@ -276,9 +276,10 @@
         gather_subset:
           - alert_rules
         query_parameters:
-          - sort_dir: 'desc'
-          - sort: 'condition'
-          - channels: 'SupportAssist'
+          alert_rules:
+            - sort_dir: 'desc'
+            - sort: 'condition'
+            - channels: 'SupportAssist'
 
     - name: Get list of Alert channels with query parameters
       dellemc.powerscale.info:
@@ -289,8 +290,9 @@
         gather_subset:
           - alert_channels
         query_parameters:
-          - sort_dir: 'desc'
-          - sort: enabled
+          alert_channels:
+            - sort_dir: 'desc'
+            - sort: enabled
 
     - name: Get Alert categories from PowerScale cluster
       dellemc.powerscale.info:
@@ -310,5 +312,6 @@
         gather_subset:
           - event_group
         query_parameters:
-          - alert_info: 'true'
-          - category: '100000000'
+          event_group:
+            - alert_info: 'true'
+            - category: '100000000'
