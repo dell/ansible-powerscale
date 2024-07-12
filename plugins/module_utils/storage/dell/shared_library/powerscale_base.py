@@ -53,6 +53,7 @@ class PowerScaleBase:
         self._certificate_api = None
         self._zones_summary_api = None
         self._support_assist_api = None
+        self._event_api = None
 
     @property
     def protocol_api(self):
@@ -133,3 +134,13 @@ class PowerScaleBase:
         if self._support_assist_api is None:
             self._support_assist_api = self.isi_sdk.SupportassistApi(self.api_client)
         return self._support_assist_api
+
+    @property
+    def event_api(self):
+        """Returns the event API object.
+        :return: The event API object.
+        :rtype: isi_sdk.EventApi
+        """
+        if self._event_api is None:
+            self._event_api = self.isi_sdk.EventApi(self.api_client)
+        return self._event_api
