@@ -1070,7 +1070,7 @@ class FileSystem(object):
                     LOG.info(info_message)
 
                     filesystem_acl_error_message = 'Modification of ACL from Ansible '\
-                        'modules is only supported from'\
+                        'modules is only supported from '\
                         'POSIX to POSIX mode bits.'
 
                     if (filesystem_acl['authoritative'] == 'acl'
