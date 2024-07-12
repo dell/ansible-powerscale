@@ -59,7 +59,7 @@ class Events:
             if event_grp_query_params:
                 for parm in event_grp_query_params:
                     for key, value in parm.items():
-                        if key in ['alert_info', 'category']:
+                        if key in ['alert_info', 'category', 'limit']:
                             filter_params[key] = value
             all_event_groups = []
             event_group = (self.event_api.get_event_eventgroup_definitions(**filter_params)).to_dict()
@@ -86,11 +86,21 @@ class Events:
         """
         try:
             all_alert_categories = []
-            alert_categories = (self.event_api.get_event_categories()).to_dict()
+            query_params = self.module.params.get('query_parameters')
+            filter_params = {}
+            alrt_catgry_query_params = []
+            if query_params:
+                alrt_catgry_query_params = query_params.get('alert_categories')
+            if alrt_catgry_query_params:
+                for parm in alrt_catgry_query_params:
+                    for key, value in parm.items():
+                        if key in ['limit']:
+                            filter_params[key] = value
+            alert_categories = (self.event_api.get_event_categories(**filter_params)).to_dict()
             all_alert_categories.append(alert_categories)
 
             while alert_categories.get('resume'):
-                alert_categories_resume = (self.event_api.get_event_categories(resume=alert_categories.get('resume'))).to_dict()
+                alert_categories_resume = (self.event_api.get_event_categories(resume=alert_categories.get('resume'), **filter_params)).to_dict()
                 all_alert_categories.append(alert_categories_resume)
             return all_alert_categories
 
@@ -119,7 +129,7 @@ class Events:
             if alrt_ruls_query_params:
                 for parm in alrt_ruls_query_params:
                     for key, value in parm.items():
-                        if key in ['sort', 'channels']:
+                        if key in ['sort', 'channels', 'limit']:
                             filter_params[key] = value
                         elif key == 'sort_dir':
                             filter_params['dir'] = value.upper()
@@ -156,7 +166,7 @@ class Events:
             if alrt_channls_query_params:
                 for parm in alrt_channls_query_params:
                     for key, value in parm.items():
-                        if key == 'sort':
+                        if key in ['sort', 'limit']:
                             filter_params[key] = value
                         elif key == 'sort_dir':
                             filter_params['dir'] = value.upper()

@@ -501,7 +501,8 @@ class TestInfo():
         api_response = MockGatherfactsApi.get_gather_facts_api_response(
             gather_subset)
         self.get_module_args.update({
-            'gather_subset': ['alert_categories']
+            'gather_subset': ['alert_categories'],
+            'query_parameters': {'alert_categories': [{'limit': '4'}]}
         })
         gatherfacts_module_mock.module.params = self.get_module_args
         with patch.object(gatherfacts_module_mock.event_api, MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
