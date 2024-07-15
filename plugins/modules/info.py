@@ -146,10 +146,39 @@ options:
               server_certificate, roles, support_assist_settings, smartquota]
     type: list
     elements: str
+  filters:
+    description:
+    - List of filters to support filtered output for storage entities.
+    - Each filter is a tuple of {filter_key, filter_operator, filter_value}.
+    - Supports passing of multiple filters.
+    - The storage entities, 'rdf', 'health', 'snapshot_policies' and
+      'metro_dr_env', does not support filters. Filters are ignored
+      if passed.
+    required: False
+    type: list
+    elements: dict
+    suboptions:
+      filter_key:
+        description:
+        - Name identifier of the filter.
+        type: str
+        required: True
+      filter_operator:
+        description:
+        - Operation to be performed on filter key.
+        type: str
+        choices: [equal]
+        required: True
+      filter_value:
+        description:
+        - Value of the filter key.
+        type: raw
+        required: True
 notes:
 - The parameters I(access_zone) and I(include_all_access_zones) are mutually exclusive.
 - Listing of SyncIQ target cluster certificates is not supported by isi_sdk_8_1_1 version.
 - The I(check_mode) is supported.
+- Filter functionality is supported only for the following 'gather_subset'- 'nfs', 'smartquota'.
 '''
 
 EXAMPLES = r'''
@@ -2852,6 +2881,11 @@ class Info(object):
             nfs_exports_details = (self.protocol_api.list_nfs_exports(zone=access_zone))\
                 .to_dict()
             nfs_exports = nfs_exports_details["exports"]
+            filters = self.module.params.get('filters')
+            filters_dict = self.get_filters(filters)
+            if filters_dict:
+                filtered_nfs_exports = filter_dict_list(nfs_exports, filters_dict)
+                return filtered_nfs_exports
             return nfs_exports
         except Exception as e:
             error_msg = (
@@ -3218,6 +3252,30 @@ class Info(object):
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
+    def get_filters(self, filters=None):
+        """Get the filters to be applied"""
+        filters_dict = {}
+        # TO DO run below line only if filters is not None
+        if filters is None:
+            return filters_dict
+        filters_items = [item for item in filters
+                         if 'filter_key' in item and 'filter_operator' in item
+                         and 'filter_value' in item]
+        if not filters_items:
+            self.module.fail_json(msg='filter_key, filter_operator, filter_value are expected.')
+        for item in filters_items:
+            f_key = item["filter_key"]
+            f_val = item["filter_value"]
+            f_op = item["filter_operator"]
+            if not (f_key and f_val and f_op):
+                error_msg = "Provide input for filter sub-options."
+                self.module.fail_json(msg=error_msg)
+            if f_op != 'equal':
+                error_msg = "The filter operator is not supported -- only 'equal' is supported."
+                self.module.fail_json(msg=error_msg)
+            filters_dict[f_key] = f_val
+        return filters_dict
+
     def perform_module_operation(self):
         """Perform different actions on Gatherfacts based on user parameter
         chosen in playbook
@@ -3467,7 +3525,30 @@ def get_info_parameters():
                                     'support_assist_settings',
                                     'smartquota'
                                     ]),
+        filters=dict(type='list',
+                     required=False,
+                     elements='dict',
+                     options=dict(
+                         filter_key=dict(type='str', required=True, no_log=False),
+                         filter_operator=dict(type='str',
+                                              required=True,
+                                              choices=['equal']),
+                         filter_value=dict(type='raw', required=True)))
     )
+
+
+def filter_dict_list(dict_list, filters):
+    """
+    Filters a list of dictionaries based on a list of filters.
+    :param dict_list: List of dictionaries to filter
+    :param filters: List of filters, where each filter is a tuple (key, value)
+    :return: Filtered list of dictionaries
+    """
+    return [
+        d for d in dict_list
+        if all((isinstance(d.get(key), (list, dict)) and value in d.get(key))
+               or d.get(key) == value
+               for key, value in filters.items())]
 
 
 def main():
