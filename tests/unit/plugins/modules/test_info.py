@@ -434,6 +434,8 @@ class TestInfo():
             'zone': "System",
         })
         gatherfacts_module_mock.module.params = self.get_module_args
+        gatherfacts_module_mock.major = 9
+        gatherfacts_module_mock.minor = 5
         with patch.object(gatherfacts_module_mock.support_assist_api, MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
             mock_method.return_value = MockSDKResponse(api_response)
             gatherfacts_module_mock.perform_module_operation()
@@ -451,6 +453,8 @@ class TestInfo():
             'zone': "System",
         })
         gatherfacts_module_mock.module.params = self.get_module_args
+        gatherfacts_module_mock.major = 9
+        gatherfacts_module_mock.minor = 5
         with patch.object(gatherfacts_module_mock.support_assist_api, MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
             mock_method.side_effect = MagicMock(side_effect=MockApiException)
             gatherfacts_module_mock.perform_module_operation()

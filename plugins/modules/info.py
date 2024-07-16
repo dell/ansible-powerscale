@@ -2821,8 +2821,9 @@ class Info(object):
 
         self.api_client = utils.get_powerscale_connection(self.module.params)
         self.isi_sdk = utils.get_powerscale_sdk()
+        self.major = int(str(self.isi_sdk)[21])
+        self.minor = int(str(self.isi_sdk)[23])
         LOG.info('Got python SDK instance for provisioning on PowerScale ')
-
         self.cluster_api = self.isi_sdk.ClusterApi(self.api_client)
         self.zone_api = self.isi_sdk.ZonesApi(self.api_client)
         self.auth_api = self.isi_sdk.AuthApi(self.api_client)
@@ -2834,6 +2835,8 @@ class Info(object):
         self.certificate_api = self.isi_sdk.CertificateApi(self.api_client)
         self.support_assist_api = self.isi_sdk.SupportassistApi(self.api_client)
         self.event_api = self.isi_sdk.EventApi(self.api_client)
+        if self.major > 9 or (self.major == 9 and self.minor > 4):
+            self.support_assist_api = self.isi_sdk.SupportassistApi(self.api_client)
 
     def get_attributes_list(self):
         """Get the list of attributes of a given PowerScale Storage"""
@@ -3490,8 +3493,13 @@ class Info(object):
         if 'roles' in str(subset):
             roles = Auth(self.auth_api, self.module).get_auth_roles(access_zone)
         if 'support_assist_settings' in str(subset):
-            support_assist_settings = SupportAssist(
-                self.support_assist_api, self.module).get_support_assist_settings()
+            if self.major > 9 or (self.major == 9 and self.minor > 4):
+                support_assist_settings = SupportAssist(
+                    self.support_assist_api, self.module).get_support_assist_settings()
+            else:
+                error_msg = "support_assist_settings is supported for One FS version 9.5.0 and above."
+                LOG.error(error_msg)
+                self.module.fail_json(msg=error_msg)
         if 'alert_settings' in str(subset):
             alert_settings = Events(self.event_api, self.module).get_event_maintenance()
         if 'alert_rules' in str(subset):
