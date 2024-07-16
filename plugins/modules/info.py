@@ -3244,6 +3244,11 @@ class Info(object):
                 resume = smartquota_details['resume']
             msg = f"Got smartquota list from PowerScale cluster {self.module.params['onefs_host']}"
             LOG.info(msg)
+            filters = self.module.params.get('filters')
+            filters_dict = self.get_filters(filters)
+            if filters_dict:
+                filtered_smartquota = filter_dict_list(smartquota, filters_dict)
+                return filtered_smartquota
             return smartquota
         except Exception as e:
             error_msg = (

@@ -153,7 +153,6 @@ class TestSmartQuota():
         utils.isi_sdk.QuotaQuota = MagicMock(return_value=None)
         smartquota_module_mock.quota_api_instance.update_quota_quota = MagicMock(return_value=None)
         smartquota_module_mock.determine_error = MagicMock(return_value=None)
-        # smartquota_module_mock.get_quota_details = MagicMock(return_value=(None, None))
         smartquota_module_mock.perform_module_operation()
         assert smartquota_module_mock.module.exit_json.call_args[1]["changed"] is True
 
