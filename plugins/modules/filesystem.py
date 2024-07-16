@@ -565,6 +565,8 @@ import copy
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.namespace \
+    import Namespace
 
 LOG = utils.get_logger('filesystem')
 
@@ -635,51 +637,6 @@ class FileSystem(object):
                                                             str(error_msg))
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
-
-    def get_filesystem(self, path):
-        """Gets a FileSystem on PowerScale."""
-        try:
-            resp = self.namespace_api.get_directory_metadata(
-                path,
-                metadata=True)
-            return resp.to_dict()
-        except utils.ApiException as e:
-            if str(e.status) == "404":
-                log_msg = "Filesystem {0} status is " \
-                          "{1}".format(path, e.status)
-                LOG.info(log_msg)
-                return None
-            else:
-                error_msg = self.determine_error(error_obj=e)
-                error_message = "Failed to get details of Filesystem " \
-                                "{0} with error {1} ".format(
-                                    path,
-                                    str(error_msg))
-                LOG.error(error_message)
-                self.module.fail_json(msg=error_message)
-
-        except Exception as e:
-            error_message = "Failed to get details of Filesystem {0} with" \
-                            " error {1} ".format(path, str(e))
-            LOG.error(error_message)
-            self.module.fail_json(msg=error_message)
-
-    def get_quota(self, effective_path):
-        """Gets Quota details"""
-        # On a single path , you can create multiple Quotas of
-        # different types (directory, user etc)
-        # We are filtering Quotas on the path and the type (directory).
-        # On a given path, there can be only One Quota of a given type.
-        try:
-            filesystem_quota = self.quota_api.list_quota_quotas(
-                path='/' + effective_path,
-                type='directory')
-            return filesystem_quota.to_dict()
-        except Exception:
-            error_message = 'Unable to get Quota details on ' \
-                            'path {0}'.format(effective_path)
-            LOG.info(error_message)
-            return None
 
     def create_filesystem(self, path, recursive, acl, acl_rights, quota, owner, group):
         """Creates a FileSystem on PowerScale."""
@@ -1042,7 +999,8 @@ class FileSystem(object):
         """Determines if ACLs are modified."""
         try:
             LOG.info('Determining if the ACLs are modified..')
-            filesystem_acl = self.get_acl(effective_path)
+            filesystem_acl = Namespace(self.namespace_api,
+                                       self.module).get_acl(effective_path)
             if isinstance(filesystem_acl, dict):
                 info_message = 'ACL of the filesystem on '\
                     'the array is %s' % filesystem_acl['acl']
@@ -1127,21 +1085,6 @@ class FileSystem(object):
             (list(set(acl_rights['access_rights']) - set(acl['accessrights'])) or
              acl_rights['inherit_flags'] and list(set(acl_rights['inherit_flags']) - set(acl['inherit_flags'])) or
              acl_rights['access_type'] != acl['accesstype'])
-
-    def get_acl(self, effective_path):
-        """Retrieves ACL rights of filesystem"""
-        try:
-            if not self.module.check_mode:
-                filesystem_acl = \
-                    (self.namespace_api.get_acl(effective_path,
-                                                acl=True)).to_dict()
-                return filesystem_acl
-            return True
-        except Exception as e:
-            error_message = 'Error %s while retrieving the access control list for ' \
-                            'namespace object.' % utils.determine_error(error_obj=e)
-            LOG.error(error_message)
-            self.module.fail_json(msg=error_message)
 
     def is_quota_modified(self, filesystem_quota):
         """Determines if Quota is modified"""
@@ -1291,24 +1234,6 @@ class FileSystem(object):
             error = str(error_obj)
         return error
 
-    def get_filesystem_snapshots(self, effective_path):
-        """Get snapshots for a given filesystem"""
-        try:
-            snapshot_list = \
-                self.snapshot_api.list_snapshot_snapshots().to_dict()
-            snapshots = []
-
-            for snap in snapshot_list['snapshots']:
-                if snap['path'] == '/' + effective_path:
-                    snapshots.append(snap)
-            return snapshots
-        except Exception as e:
-            error_msg = self.determine_error(error_obj=e)
-            error_message = 'Failed to get filesystem snapshots ' \
-                            'due to error {0}'.format((str(error_msg)))
-            LOG.error(error_message)
-            self.module.fail_json(msg=error_message)
-
     def get_owner_id(self, name, zone, provider):
         """Get the User Account Details in PowerScale"""
         try:
@@ -1388,7 +1313,8 @@ class FileSystem(object):
                 owner = {'type': 'user', 'id': owner_uid,
                          'name': owner['name']}
 
-                acl = self.get_acl(effective_path)
+                acl = Namespace(self.namespace_api,
+                                self.module).get_acl(effective_path)
                 modified = False
                 if isinstance(acl, dict):
                     file_uid = acl['owner']['id']
@@ -1443,7 +1369,8 @@ class FileSystem(object):
                 group = {'type': 'group', 'id': group_uid,
                          'name': group['name']}
 
-                acl = self.get_acl(effective_path)
+                acl = Namespace(self.namespace_api,
+                                self.module).get_acl(effective_path)
                 modified = False
                 if isinstance(acl, dict):
                     file_gid = acl['group']['id']
@@ -1541,8 +1468,10 @@ class FileSystem(object):
 
         effective_path = self.determine_path()
 
-        filesystem = self.get_filesystem(effective_path)
-        filesystem_quota = self.get_quota(effective_path)
+        filesystem = Namespace(self.namespace_api,
+                               self.module).get_filesystem(effective_path)
+        filesystem_quota = Namespace(self.namespace_api,
+                                     self.module).get_quota(effective_path)
 
         is_acl_modified = False
         is_quota_modified = False
@@ -1599,14 +1528,18 @@ class FileSystem(object):
 
         if state == 'present':
             LOG.info('Getting filesystem details..')
-            result['filesystem_details'] = self.get_filesystem(effective_path)
+            result['filesystem_details'] = Namespace(self.namespace_api,
+                                                     self.module).get_filesystem(effective_path)
             if result.get('filesystem_details') is None:
                 result['filesystem_details'] = {}
-            result['filesystem_details'].update(namespace_acl=self.get_acl(effective_path))
-            result['quota_details'] = self.get_quota(effective_path)
+            result['filesystem_details'].update(namespace_acl=Namespace(self.namespace_api,
+                                                                        self.module).get_acl(effective_path))
+            result['quota_details'] = Namespace(self.namespace_api,
+                                                self.module).get_quota(effective_path)
             if self.module.params['list_snapshots']:
                 result['filesystem_snapshots'] = \
-                    self.get_filesystem_snapshots(effective_path)
+                    Namespace(self.namespace_api,
+                              self.module).get_filesystem_snapshots(effective_path)
 
         if result['create_filesystem'] or result['delete_filesystem'] or \
                 result['modify_filesystem'] or result['add_quota'] \

@@ -53,6 +53,15 @@ class TestFileSystem():
         filesystem_module_mock.perform_module_operation()
         assert filesystem_module_mock.module.exit_json.call_args[1]['changed']
 
+    def test_delete_file_system_check_mode(self, filesystem_module_mock):
+        self.get_filesystem_args.update({"path": "/ifs/ATest3", "recursive_force_delete": True, "access_zone": "System", "state": "absent"})
+        filesystem_module_mock.module.check_mode = True
+        filesystem_module_mock.module.params = self.get_filesystem_args
+        filesystem_module_mock.protocol_api = MagicMock()
+        filesystem_module_mock.namespace_api.delete_directory = MagicMock(return_value=True)
+        filesystem_module_mock.perform_module_operation()
+        assert filesystem_module_mock.module.exit_json.call_args[1]['changed']
+
     def test_test_delete_file_system_exception(self, filesystem_module_mock):
         self.get_filesystem_args.update({"path": "/ifs/ATest3", "recursive_force_delete": True, "access_zone": "System", "state": "absent"})
         filesystem_module_mock.module.params = self.get_filesystem_args
@@ -76,6 +85,20 @@ class TestFileSystem():
         assert filesystem_module_mock.module.exit_json.call_args[1]['changed'] \
             and filesystem_module_mock.module.exit_json.call_args[1]['create_filesystem']
 
+    def test_create_file_system_with_check_mode(self, filesystem_module_mock):
+        self.get_filesystem_args.update({"path": "/ifs/ATest3", "owner": {"name": "test"}, "group": {"name": "group_test"},
+                                         "access_control_rights":
+                                         {"access_rights": ["dir_gen_all"], "inherit_flags": "container_inherit",
+                                          "access_type": "allow",
+                                          "trustee": {"name": "test_user", "type": "user", "provider_type": "local"}},
+                                        "access_zone": "System", "state": "present", "access_control_rights_state": "add"})
+        filesystem_module_mock.module.params = self.get_filesystem_args
+        filesystem_module_mock.module.check_mode = True
+        filesystem_module_mock.get_filesystem = MagicMock(return_value={})
+        filesystem_module_mock.get_acl_object = MagicMock()
+        filesystem_module_mock.perform_module_operation()
+        assert filesystem_module_mock.module.exit_json.call_args[1]['changed']
+
     def test_modify_file_system_with_access_control_rights(self, filesystem_module_mock):
         self.get_filesystem_args.update({"path": "/ifs/ATest3", "owner": {"name": "test"}, "group": {"name": "group_test"},
                                          "access_control_rights":
@@ -89,6 +112,20 @@ class TestFileSystem():
         filesystem_module_mock.perform_module_operation()
         assert filesystem_module_mock.module.exit_json.call_args[1]['changed'] \
             and filesystem_module_mock.module.exit_json.call_args[1]['modify_filesystem']
+
+    def test_modify_file_system_with_check_mode(self, filesystem_module_mock):
+        self.get_filesystem_args.update({"path": "/ifs/ATest3", "owner": {"name": "test"}, "group": {"name": "group_test"},
+                                         "access_control_rights":
+                                         {"access_rights": ["dir_gen_all"], "inherit_flags": "container_inherit",
+                                          "access_type": "allow",
+                                          "trustee": {"name": "test_user", "type": "user", "provider_type": "local"}},
+                                         "access_zone": "System", "state": "present", "access_control_rights_state": "add"})
+        filesystem_module_mock.module.params = self.get_filesystem_args
+        filesystem_module_mock.module.check_mode = True
+        filesystem_module_mock.get_acl = MagicMock(return_value=MockFileSystemApi.get_acl_response())
+        filesystem_module_mock.get_acl_object = MagicMock()
+        filesystem_module_mock.perform_module_operation()
+        assert filesystem_module_mock.module.exit_json.call_args[1]['changed']
 
     def test_access_control_rights_validation(self, filesystem_module_mock):
         self.get_filesystem_args.update({"path": "/ifs/ATest3", "owner": {"name": "test"}, "group": {"name": "group_test"},
