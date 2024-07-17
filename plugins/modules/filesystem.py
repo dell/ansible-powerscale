@@ -230,6 +230,7 @@ notes:
 - Modification of I(inherit_flags) of filesystem ACL is
   successful only if I(access_rights) is also specified in
   the I(access_control_rights) dictionary.
+- I(Check_mode) is not supported.
 '''
 
 EXAMPLES = r'''
