@@ -567,6 +567,10 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.namespace \
     import Namespace
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.quota \
+    import Quota
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.snapshot \
+    import Snapshot
 
 LOG = utils.get_logger('filesystem')
 
@@ -1470,8 +1474,8 @@ class FileSystem(object):
 
         filesystem = Namespace(self.namespace_api,
                                self.module).get_filesystem(effective_path)
-        filesystem_quota = Namespace(self.namespace_api,
-                                     self.module).get_quota(effective_path)
+        filesystem_quota = Quota(self.quota_api,
+                                 self.module).get_quota(effective_path)
 
         is_acl_modified = False
         is_quota_modified = False
@@ -1534,12 +1538,12 @@ class FileSystem(object):
                 result['filesystem_details'] = {}
             result['filesystem_details'].update(namespace_acl=Namespace(self.namespace_api,
                                                                         self.module).get_acl(effective_path))
-            result['quota_details'] = Namespace(self.namespace_api,
-                                                self.module).get_quota(effective_path)
+            result['quota_details'] = Quota(self.quota_api,
+                                            self.module).get_quota(effective_path)
             if self.module.params['list_snapshots']:
                 result['filesystem_snapshots'] = \
-                    Namespace(self.namespace_api,
-                              self.module).get_filesystem_snapshots(effective_path)
+                    Snapshot(self.snapshot_api,
+                             self.module).get_filesystem_snapshots(effective_path)
 
         if result['create_filesystem'] or result['delete_filesystem'] or \
                 result['modify_filesystem'] or result['add_quota'] \

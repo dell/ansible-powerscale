@@ -67,38 +67,3 @@ class Namespace:
                             'namespace object.' % utils.determine_error(error_obj=e)
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
-
-    def get_quota(self, effective_path):
-        """Gets Quota details"""
-        # On a single path , you can create multiple Quotas of
-        # different types (directory, user etc)
-        # We are filtering Quotas on the path and the type (directory).
-        # On a given path, there can be only One Quota of a given type.
-        try:
-            filesystem_quota = self.quota_api.list_quota_quotas(
-                path='/' + effective_path,
-                type='directory')
-            return filesystem_quota.to_dict()
-        except Exception:
-            error_message = 'Unable to get Quota details on ' \
-                            'path {0}'.format(effective_path)
-            LOG.info(error_message)
-            return None
-
-    def get_filesystem_snapshots(self, effective_path):
-        """Get snapshots for a given filesystem"""
-        try:
-            snapshot_list = \
-                self.snapshot_api.list_snapshot_snapshots().to_dict()
-            snapshots = []
-
-            for snap in snapshot_list['snapshots']:
-                if snap['path'] == '/' + effective_path:
-                    snapshots.append(snap)
-            return snapshots
-        except Exception as e:
-            error_msg = self.determine_error(error_obj=e)
-            error_message = 'Failed to get filesystem snapshots ' \
-                            'due to error {0}'.format((str(error_msg)))
-            LOG.error(error_message)
-            self.module.fail_json(msg=error_message)

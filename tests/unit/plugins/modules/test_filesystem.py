@@ -20,7 +20,12 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.\
     module_utils.mock_filesystem_api import MockFileSystemApi
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_api_exception \
     import MockApiException
-
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.namespace \
+    import Namespace
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.quota \
+    import Quota
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.snapshot \
+    import Snapshot
 
 class TestFileSystem():
     get_filesystem_args = {'path': None,
@@ -78,8 +83,9 @@ class TestFileSystem():
                                           "access_type": "allow",
                                           "trustee": {"name": "test_user", "type": "user", "provider_type": "local"}},
                                         "access_zone": "System", "state": "present", "access_control_rights_state": "add"})
+        filesystem_module_mock.module.check_mode = False
         filesystem_module_mock.module.params = self.get_filesystem_args
-        filesystem_module_mock.get_filesystem = MagicMock(return_value={})
+        filesystem_module_mock.namespace_api.get_filesystem = MagicMock(return_value={})
         filesystem_module_mock.get_acl_object = MagicMock()
         filesystem_module_mock.perform_module_operation()
         assert filesystem_module_mock.module.exit_json.call_args[1]['changed'] \
@@ -94,7 +100,7 @@ class TestFileSystem():
                                         "access_zone": "System", "state": "present", "access_control_rights_state": "add"})
         filesystem_module_mock.module.params = self.get_filesystem_args
         filesystem_module_mock.module.check_mode = True
-        filesystem_module_mock.get_filesystem = MagicMock(return_value={})
+        filesystem_module_mock.namespace_api.get_filesystem = MagicMock(return_value={})
         filesystem_module_mock.get_acl_object = MagicMock()
         filesystem_module_mock.perform_module_operation()
         assert filesystem_module_mock.module.exit_json.call_args[1]['changed']
@@ -154,7 +160,7 @@ class TestFileSystem():
         filesystem_module_mock.module.params = self.get_filesystem_args
         filesystem_module_mock.get_quota_param = MagicMock(return_value=None)
         filesystem_module_mock.quota_api.create_quota_quota = MagicMock(return_value=None)
-        filesystem_module_mock.determine_error = MagicMock(return_value=None)
+        # utils.determine_error = MagicMock(return_value=None)
         filesystem_module_mock.perform_module_operation()
         assert filesystem_module_mock.module.exit_json.call_args[1]["changed"] is True
 
@@ -174,7 +180,7 @@ class TestFileSystem():
         filesystem_module_mock.module.params = self.get_filesystem_args
         filesystem_module_mock.protocol_api = MagicMock()
         filesystem_module_mock.quota_api.update_quota_quota = MagicMock(return_value=True)
-        filesystem_module_mock.determine_error = MagicMock(return_value=None)
+        utils.determine_error = MagicMock(return_value=None)
         filesystem_module_mock.perform_module_operation()
         assert filesystem_module_mock.module.exit_json.call_args[1]["changed"] is True
 
@@ -194,17 +200,17 @@ class TestFileSystem():
         filesystem_module_mock.module.check_mode = False
         filesystem_module_mock.module.params = self.get_filesystem_args
         filesystem_module_mock.quota_api = MagicMock()
-        filesystem_module_mock.get_filesystem = MagicMock(
+        filesystem_module_mock.namespace_api.get_filesystem = MagicMock(
             return_value=MockFileSystemApi.FILESYSTEM_DETAILS)
-        filesystem_module_mock.get_quota = MagicMock(
+        filesystem_module_mock.quota_api.get_quota = MagicMock(
             return_value=MockFileSystemApi.QUOTA_DETAILS)
         filesystem_module_mock.quota_api.list_quota_quotas = MagicMock()
         filesystem_module_mock.namespace_api.get_acl = MagicMock()
         utils.get_threshold_overhead_parameter = MagicMock()
         utils.get_size_bytes = MagicMock()
-        filesystem_module_mock.get_quota_param = MagicMock(return_value=None)
+        filesystem_module_mock.quota_api.get_quota_param = MagicMock(return_value=None)
         filesystem_module_mock.quota_api.create_quota_quota = MagicMock(side_effect=MockApiException)
-        filesystem_module_mock.determine_error = MagicMock(return_value=None)
+        utils.determine_error = MagicMock(return_value=None)
         filesystem_module_mock.perform_module_operation()
         assert MockFileSystemApi.file_system_create_quota_response("error") in \
             filesystem_module_mock.module.fail_json.call_args[1]["msg"]
@@ -232,7 +238,7 @@ class TestFileSystem():
         utils.get_size_bytes = MagicMock()
         filesystem_module_mock.get_container_param = MagicMock()
         filesystem_module_mock.quota_api.update_quota_quota = MagicMock(side_effect=MockApiException)
-        filesystem_module_mock.determine_error = MagicMock(return_value=None)
+        utils.determine_error = MagicMock(return_value=None)
         filesystem_module_mock.perform_module_operation()
         assert MockFileSystemApi.file_system_update_quota_response("error") in \
             filesystem_module_mock.module.fail_json.call_args[1]["msg"]
