@@ -16,7 +16,7 @@ from mock.mock import MagicMock
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.initial_mock \
     import utils
 
-from ansible_collections.dellemc.powerscale.plugins.modules.networkpool import NetworkPool
+from ansible_collections.dellemc.powerscale.plugins.modules.networkpool import NetworkPool, NetworkPoolHandler
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.\
     module_utils import mock_networkpool_api as MockNetworkPoolApi
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_sdk_response \
@@ -52,7 +52,7 @@ class TestNetworkPool(PowerScaleUnitBase):
         powerscale_module_mock.module.params = self.get_network_pool_args
         powerscale_module_mock.network_groupnet_api.get_subnets_subnet_pool = MagicMock(
             return_value=MockSDKResponse(MockNetworkPoolApi.GET_NETWORK_POOLS))
-        powerscale_module_mock.perform_module_operation()
+        NetworkPoolHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
         assert network_pool == powerscale_module_mock.module.exit_json.call_args[1]['network_pool']
 
@@ -63,7 +63,7 @@ class TestNetworkPool(PowerScaleUnitBase):
         powerscale_module_mock.network_groupnet_api.get_subnets_subnet_pool = MagicMock(side_effect=utils.ApiException)
         self.capture_fail_json_call(MockNetworkPoolApi.get_networkpool_failed_msg(
             MockNetworkPoolApi.GET_NETWORK_POOLS['pools'][0]['name']),
-            powerscale_module_mock, invoke_perform_module=True)
+            powerscale_module_mock, NetworkPoolHandler)
 
     def test_get_network_pool_with_404_exception(self, powerscale_module_mock):
         MockNetworkPoolApi.GET_NETWORK_POOLS
@@ -71,7 +71,7 @@ class TestNetworkPool(PowerScaleUnitBase):
         MockApiException.status = '404'
         powerscale_module_mock.module.params = self.get_network_pool_args
         powerscale_module_mock.network_groupnet_api.get_subnets_subnet_pool = MagicMock(side_effect=utils.ApiException)
-        powerscale_module_mock.perform_module_operation()
+        NetworkPoolHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
     def common_create_pool_params(self, powerscale_module_mock):
@@ -104,7 +104,7 @@ class TestNetworkPool(PowerScaleUnitBase):
         self.common_create_pool_params(powerscale_module_mock)
         powerscale_module_mock.network_groupnet_api.create_subnets_subnet_pool = MagicMock(
             return_value=MockSDKResponse(MockNetworkPoolApi.CREATE_NETWORK_POOL))
-        powerscale_module_mock.perform_module_operation()
+        NetworkPoolHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
         powerscale_module_mock.network_groupnet_api.create_subnets_subnet_pool.assert_called()
 
@@ -113,7 +113,7 @@ class TestNetworkPool(PowerScaleUnitBase):
         powerscale_module_mock.network_groupnet_api.create_subnets_subnet_pool = MagicMock(side_effect=utils.ApiException)
         self.capture_fail_json_call(MockNetworkPoolApi.create_networkpool_failed_msg(
             MockNetworkPoolApi.GET_NETWORK_POOLS['pools'][0]['name']),
-            powerscale_module_mock, invoke_perform_module=True)
+            powerscale_module_mock, NetworkPoolHandler)
 
     def test_delete_network_pool(self, powerscale_module_mock):
         self.get_network_pool_args.update({"state": "absent"})
@@ -121,7 +121,7 @@ class TestNetworkPool(PowerScaleUnitBase):
         powerscale_module_mock.network_groupnet_api.get_subnets_subnet_pool = MagicMock(
             return_value=MockSDKResponse(MockNetworkPoolApi.GET_NETWORK_POOLS))
         powerscale_module_mock.network_groupnet_api.delete_subnets_subnet_pool = MagicMock(return_value=None)
-        powerscale_module_mock.perform_module_operation()
+        NetworkPoolHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
         assert (powerscale_module_mock.module.exit_json.call_args[1]['changed'])
         powerscale_module_mock.network_groupnet_api.delete_subnets_subnet_pool.assert_called()
 
@@ -133,7 +133,7 @@ class TestNetworkPool(PowerScaleUnitBase):
         powerscale_module_mock.network_groupnet_api.delete_subnets_subnet_pool = MagicMock(side_effect=utils.ApiException)
         self.capture_fail_json_call(MockNetworkPoolApi.delete_networkpool_failed_msg(
             MockNetworkPoolApi.GET_NETWORK_POOLS['pools'][0]['name']),
-            powerscale_module_mock, invoke_perform_module=True)
+            powerscale_module_mock, NetworkPoolHandler)
 
     def common_modify_pool_params(self, powerscale_module_mock):
         self.get_network_pool_args.update({"state": "present",
@@ -170,7 +170,7 @@ class TestNetworkPool(PowerScaleUnitBase):
     def test_modify_network_pool(self, powerscale_module_mock):
         self.common_modify_pool_params(powerscale_module_mock)
         powerscale_module_mock.network_groupnet_api.update_subnets_subnet_pool = MagicMock(return_value=None)
-        powerscale_module_mock.perform_module_operation()
+        NetworkPoolHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
         assert (powerscale_module_mock.module.exit_json.call_args[1]['changed'])
         powerscale_module_mock.network_groupnet_api.update_subnets_subnet_pool.assert_called()
 
@@ -179,7 +179,7 @@ class TestNetworkPool(PowerScaleUnitBase):
         powerscale_module_mock.network_groupnet_api.update_subnets_subnet_pool = MagicMock(side_effect=utils.ApiException)
         self.capture_fail_json_call(MockNetworkPoolApi.modify_networkpool_failed_msg(
             MockNetworkPoolApi.GET_NETWORK_POOLS['pools'][0]['name']),
-            powerscale_module_mock, invoke_perform_module=True)
+            powerscale_module_mock, NetworkPoolHandler)
 
     def test_create_network_pool_with_blank_name(self, powerscale_module_mock):
         self.get_network_pool_args.update({"state": "present",
@@ -188,7 +188,7 @@ class TestNetworkPool(PowerScaleUnitBase):
         powerscale_module_mock.network_groupnet_api.get_subnets_subnet_pool = MagicMock(
             return_value=MockSDKResponse(MockNetworkPoolApi.GET_NETWORK_POOLS))
         self.capture_fail_json_call(MockNetworkPoolApi.network_pool_failed_msg('invalid_pool_name'),
-                                    powerscale_module_mock, invoke_perform_module=True)
+                                    powerscale_module_mock, NetworkPoolHandler)
 
     def test_modify_description_morethan_128(self, powerscale_module_mock):
         self.get_network_pool_args.update({"state": "present",
@@ -197,7 +197,7 @@ class TestNetworkPool(PowerScaleUnitBase):
         powerscale_module_mock.network_groupnet_api.get_subnets_subnet_pool = MagicMock(
             return_value=MockSDKResponse(MockNetworkPoolApi.GET_NETWORK_POOLS))
         self.capture_fail_json_call(MockNetworkPoolApi.network_pool_failed_msg('invalid_pool_description'),
-                                    powerscale_module_mock, invoke_perform_module=True)
+                                    powerscale_module_mock, NetworkPoolHandler)
 
     def test_modify_invalid_ip_range(self, powerscale_module_mock):
         self.get_network_pool_args.update({"state": "present",
@@ -208,7 +208,7 @@ class TestNetworkPool(PowerScaleUnitBase):
         powerscale_module_mock.network_groupnet_api.get_subnets_subnet_pool = MagicMock(
             return_value=MockSDKResponse(MockNetworkPoolApi.GET_NETWORK_POOLS))
         self.capture_fail_json_call(MockNetworkPoolApi.network_pool_failed_msg('invalid_ip_range'),
-                                    powerscale_module_mock, invoke_perform_module=True)
+                                    powerscale_module_mock, NetworkPoolHandler)
 
     def test_modify_invalid_iface(self, powerscale_module_mock):
         self.get_network_pool_args.update({"state": "present",
@@ -219,7 +219,7 @@ class TestNetworkPool(PowerScaleUnitBase):
         powerscale_module_mock.network_groupnet_api.get_subnets_subnet_pool = MagicMock(
             return_value=MockSDKResponse(MockNetworkPoolApi.GET_NETWORK_POOLS))
         self.capture_fail_json_call(MockNetworkPoolApi.network_pool_failed_msg('invalid_iface'),
-                                    powerscale_module_mock, invoke_perform_module=True)
+                                    powerscale_module_mock, NetworkPoolHandler)
 
     def test_modify_invalid_route(self, powerscale_module_mock):
         self.get_network_pool_args.update({"state": "present",
@@ -231,4 +231,4 @@ class TestNetworkPool(PowerScaleUnitBase):
         powerscale_module_mock.network_groupnet_api.get_subnets_subnet_pool = MagicMock(
             return_value=MockSDKResponse(MockNetworkPoolApi.GET_NETWORK_POOLS))
         self.capture_fail_json_call(MockNetworkPoolApi.network_pool_failed_msg('invalid_route'),
-                                    powerscale_module_mock, invoke_perform_module=True)
+                                    powerscale_module_mock, NetworkPoolHandler)
