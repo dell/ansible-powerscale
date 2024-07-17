@@ -50,6 +50,7 @@ The below requirements are needed on the host that executes this module.
 
 
 
+
 Parameters
 ----------
 
@@ -177,6 +178,27 @@ Parameters
     Smartquota- \ :literal:`smartquota`\ .
 
 
+  filters (False, list, None)
+    List of filters to support filtered output for storage entities.
+
+    Each filter is a tuple of {filter\_key, filter\_operator, filter\_value}.
+
+    Supports passing of multiple filters.
+
+
+    filter_key (True, str, None)
+      Name identifier of the filter.
+
+
+    filter_operator (True, str, None)
+      Operation to be performed on filter key.
+
+
+    filter_value (True, raw, None)
+      Value of the filter key.
+
+
+
   onefs_host (True, str, None)
     IP address or FQDN of the PowerScale cluster.
 
@@ -211,6 +233,7 @@ Notes
    - The parameters \ :emphasis:`access\_zone`\  and \ :emphasis:`include\_all\_access\_zones`\  are mutually exclusive.
    - Listing of SyncIQ target cluster certificates is not supported by isi\_sdk\_8\_1\_1 version.
    - The \ :emphasis:`check\_mode`\  is supported.
+   - Filter functionality is supported only for the following 'gather\_subset'- 'nfs', 'smartquota'.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -305,6 +328,39 @@ Examples
         access_zone: "{{access_zone}}"
         gather_subset:
           - nfs_exports
+
+    - name: Get list of nfs exports in the PowerScale cluster using filter
+      dellemc.powerscale.info:
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{powerscaleport}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        access_zone: "{{access_zone}}"
+        gather_subset:
+          - nfs_exports
+        filters:
+          - filter_key: "id"
+            filter_operator: "equal"
+            filter_value: 7075
+
+    - name: Get list of nfs exports in the PowerScale cluster using multiple filter
+      dellemc.powerscale.info:
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{powerscaleport}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        access_zone: "{{access_zone}}"
+        gather_subset:
+          - nfs_exports
+        filters:
+          - filter_key: "id"
+            filter_operator: "equal"
+            filter_value: 7075
+          - filter_key: description
+            filter_operator: "equal"
+            filter_value: test-filter export
 
     - name: Get list of nfs aliases in the PowerScale cluster
       dellemc.powerscale.info:
@@ -595,6 +651,19 @@ Examples
         api_password: "{{ api_password }}"
         gather_subset:
           - smartquota
+
+    - name: Get smartquota from PowerScale cluster using filter
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - smartquota
+        filters:
+          - filter_key: "id"
+            filter_operator: "equal"
+            filter_value: "xxx"
 
 
 
