@@ -230,7 +230,7 @@ notes:
 - Modification of I(inherit_flags) of filesystem ACL is
   successful only if I(access_rights) is also specified in
   the I(access_control_rights) dictionary.
-- I(Check_mode) is not supported.
+- I(Check_mode) is supported.
 '''
 
 EXAMPLES = r'''
@@ -1440,6 +1440,32 @@ class FileSystem(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
+    def get_filesystem(self, effective_path):
+        """Returns the filesystem object"""
+        try:
+            filesystem = Namespace(self.namespace_api,
+                                   self.module).get_filesystem(effective_path)
+            return filesystem
+        except Exception as e:
+            error_msg = self.determine_error(error_obj=e)
+            error_message = 'Failed to get filesystem ' \
+                            'due to error {0}'.format(str(error_msg))
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    def get_quota(self, effective_path):
+        """Returns the quota object"""
+        try:
+            quota = Quota(self.quota_api,
+                          self.module).get_quota(effective_path)
+            return quota
+        except Exception as e:
+            error_msg = self.determine_error(error_obj=e)
+            error_message = 'Failed to get quota ' \
+                            'due to error {0}'.format(str(error_msg))
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
     def perform_module_operation(self):
         """Perform different actions on Snapshot based on user parameter
         chosen in playbook
@@ -1472,11 +1498,8 @@ class FileSystem(object):
         self.validate_input(quota)
 
         effective_path = self.determine_path()
-
-        filesystem = Namespace(self.namespace_api,
-                               self.module).get_filesystem(effective_path)
-        filesystem_quota = Quota(self.quota_api,
-                                 self.module).get_quota(effective_path)
+        filesystem = self.get_filesystem(effective_path)
+        filesystem_quota = self.get_quota(effective_path)
 
         is_acl_modified = False
         is_quota_modified = False
