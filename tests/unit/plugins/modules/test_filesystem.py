@@ -20,12 +20,7 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.\
     module_utils.mock_filesystem_api import MockFileSystemApi
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_api_exception \
     import MockApiException
-from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.namespace \
-    import Namespace
-from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.quota \
-    import Quota
-from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.snapshot \
-    import Snapshot
+
 
 class TestFileSystem():
     get_filesystem_args = {'path': None,
@@ -47,6 +42,7 @@ class TestFileSystem():
         filesystem_module_mock = FileSystem()
         filesystem_module_mock.module = MagicMock()
         filesystem_module_mock.namespace_api = MagicMock()
+        filesystem_module_mock.quota_api = MagicMock()
         filesystem_module_mock.auth_api = MagicMock()
         return filesystem_module_mock
 
@@ -238,7 +234,7 @@ class TestFileSystem():
         utils.get_size_bytes = MagicMock()
         filesystem_module_mock.get_container_param = MagicMock()
         filesystem_module_mock.quota_api.update_quota_quota = MagicMock(side_effect=MockApiException)
-        utils.determine_error = MagicMock(return_value=None)
+        filesystem_module_mock.determine_error = MagicMock(return_value=None)
         filesystem_module_mock.perform_module_operation()
         assert MockFileSystemApi.file_system_update_quota_response("error") in \
             filesystem_module_mock.module.fail_json.call_args[1]["msg"]

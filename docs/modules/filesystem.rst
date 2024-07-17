@@ -25,8 +25,6 @@ The below requirements are needed on the host that executes this module.
 - Python 3.10, 3.11 or 3.12.
 
 
-
-
 Parameters
 ----------
 
@@ -224,7 +222,7 @@ Notes
 .. note::
    - While deleting a filesystem when recursive\_force\_delete is set as \ :literal:`true`\  it deletes all sub files and folders recursively. This is \ :literal:`true`\  even if the filesystem is not empty.
    - Modification of \ :emphasis:`inherit\_flags`\  of filesystem ACL is successful only if \ :emphasis:`access\_rights`\  is also specified in the \ :emphasis:`access\_control\_rights`\  dictionary.
-   - \ :emphasis:`Check\_mode`\  is not supported.
+   - \ :emphasis:`Check\_mode`\  is supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
