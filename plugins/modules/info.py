@@ -151,9 +151,6 @@ options:
     - List of filters to support filtered output for storage entities.
     - Each filter is a tuple of {filter_key, filter_operator, filter_value}.
     - Supports passing of multiple filters.
-    - The storage entities, 'rdf', 'health', 'snapshot_policies' and
-      'metro_dr_env', does not support filters. Filters are ignored
-      if passed.
     required: False
     type: list
     elements: dict
@@ -265,6 +262,39 @@ EXAMPLES = r'''
     access_zone: "{{access_zone}}"
     gather_subset:
       - nfs_exports
+
+- name: Get list of nfs exports in the PowerScale cluster using filter
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    access_zone: "{{access_zone}}"
+    gather_subset:
+      - nfs_exports
+    filters:
+      - filter_key: "id"
+        filter_operator: "equal"
+        filter_value: 7075
+
+- name: Get list of nfs exports in the PowerScale cluster using multiple filter
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    access_zone: "{{access_zone}}"
+    gather_subset:
+      - nfs_exports
+    filters:
+      - filter_key: "id"
+        filter_operator: "equal"
+        filter_value: 7075
+      - filter_key: description
+        filter_operator: "equal"
+        filter_value: test-filter export
 
 - name: Get list of nfs aliases in the PowerScale cluster
   dellemc.powerscale.info:
@@ -555,6 +585,19 @@ EXAMPLES = r'''
     api_password: "{{ api_password }}"
     gather_subset:
       - smartquota
+
+- name: Get smartquota from PowerScale cluster using filter
+  dellemc.powerscale.info:
+    onefs_host: "{{ onefs_host }}"
+    verify_ssl: "{{ verify_ssl }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    gather_subset:
+      - smartquota
+    filters:
+      - filter_key: "id"
+        filter_operator: "equal"
+        filter_value: "xxx"
 '''
 
 RETURN = r'''
