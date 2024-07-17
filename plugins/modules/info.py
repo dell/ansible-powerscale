@@ -3523,7 +3523,6 @@ class Info(object):
                        'nfs_default_settings', 'nfs_global_settings', 'synciq_global_settings', 's3_buckets',
                        'smb_global_settings', 'ntp_servers', 'email_settings', 'cluster_identity', 'cluster_owner',
                        'snmp_settings', 'server_certificate', 'event_group']
-
         for key in subset:
             if key not in subset_list:
                 result[key] = subset_mapping[key]()
