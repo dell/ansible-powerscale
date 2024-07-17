@@ -3314,10 +3314,11 @@ class Info(object):
         if not filters_items:
             self.module.fail_json(msg='filter_key, filter_operator, filter_value are expected.')
         for item in filters_items:
-            f_key = item["filter_key"]
-            f_val = item["filter_value"]
-            f_op = item["filter_operator"]
-            if not (f_key and f_val and f_op):
+            try:
+                f_key = item["filter_key"]
+                f_val = item["filter_value"]
+                f_op = item["filter_operator"]
+            except KeyError:
                 error_msg = "Provide input for filter sub-options."
                 self.module.fail_json(msg=error_msg)
             if f_op != 'equal':
@@ -3599,11 +3600,13 @@ def filter_dict_list(dict_list, filters):
     :param filters: List of filters, where each filter is a tuple (key, value)
     :return: Filtered list of dictionaries
     """
-    return [
-        d for d in dict_list
-        if all((isinstance(d.get(key), (list, dict)) and value in d.get(key))
-               or d.get(key) == value
-               for key, value in filters.items())]
+    try:
+        return [
+            d for d in dict_list
+            if all((isinstance(d[key], (list, dict)) and value in d.get(key))
+                   or d.get(key) == value for key, value in filters.items())]
+    except KeyError:
+        return dict_list
 
 
 def main():
