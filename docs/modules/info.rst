@@ -177,6 +177,8 @@ Parameters
 
     Smartquota- \ :literal:`smartquota`\ .
 
+    Filesystem - \ :literal:`filesystem`\ .
+
 
   filters (False, list, None)
     List of filters to support filtered output for storage entities.
@@ -197,6 +199,18 @@ Parameters
     filter_value (True, raw, None)
       Value of the filter key.
 
+
+
+  path (optional, str, ifs)
+    This is the directory path. It is the absolute path for System access zone and is relative if using a non-System access zone. For example, if your access zone is 'Ansible' and it has a base path 'ifs/ansible' and the path specified is '/user1', then the effective path would be 'ifs/ansible/user1'. If your access zone is System, and you have 'directory1' in the access zone, the path provided should be 'ifs/directory1'.
+
+    Required only if gather\_subset is filesystem.
+
+
+  query_parameters (optional, dict, None)
+    Contains dictionary of query parameters for specific \ :emphasis:`gather\_subset`\ .
+
+    Applicable to \ :literal:`alert\_rules`\ , \ :literal:`event\_group`\ , \ :literal:`event\_channels`\  and \ :literal:`filesystem`\ .
 
 
   onefs_host (True, str, None)
@@ -664,6 +678,30 @@ Examples
           - filter_key: "id"
             filter_operator: "equal"
             filter_value: "xxx"
+
+    - name: Get filesystem from PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - filesystem
+        path: "<path>"
+
+    - name: Get filesystem from PowerScale cluster with query parameters
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - filesystem
+        query_parameters:
+          metadata: true
+          quota: true
+          acl: true
+        path: "<path>"
 
 
 

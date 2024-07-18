@@ -135,6 +135,7 @@ options:
     - roles - C(roles).
     - Support assist settings- C(support_assist_settings).
     - Smartquota- C(smartquota).
+    - Filesystem - C(filesystem).
     required: true
     choices: [attributes, access_zones, nodes, providers, users, groups,
               smb_shares, nfs_exports, nfs_aliases, clients, synciq_reports, synciq_target_reports,
@@ -143,7 +144,7 @@ options:
               node_pools, storagepool_tiers, smb_files, user_mapping_rules, ldap,
               nfs_zone_settings, nfs_default_settings, nfs_global_settings, synciq_global_settings, s3_buckets,
               smb_global_settings, ntp_servers, email_settings, cluster_identity, cluster_owner, snmp_settings,
-              server_certificate, roles, support_assist_settings, smartquota]
+              server_certificate, roles, support_assist_settings, smartquota, filesystem]
     type: list
     elements: str
   filters:
@@ -171,6 +172,26 @@ options:
         - Value of the filter key.
         type: raw
         required: True
+    version_added: '3.2.0'
+  path:
+    description:
+    - This is the directory path. It is the absolute path for System access zone
+      and is relative if using a non-System access zone. For example, if your access
+      zone is 'Ansible' and it has a base path 'ifs/ansible' and the path
+      specified is '/user1', then the effective path would be
+      'ifs/ansible/user1'.
+      If your access zone is System, and you have 'directory1' in the access
+      zone, the path provided should be 'ifs/directory1'.
+    - Required only if gather_subset is filesystem.
+    type: str
+    default: "ifs"
+    version_added: '3.2.0'
+  query_parameters:
+    description:
+    - Contains dictionary of query parameters for specific I(gather_subset).
+    - Applicable to C(alert_rules), C(event_group), C(event_channels) and C(filesystem).
+    type: dict
+    version_added: '3.2.0'
 notes:
 - The parameters I(access_zone) and I(include_all_access_zones) are mutually exclusive.
 - Listing of SyncIQ target cluster certificates is not supported by isi_sdk_8_1_1 version.
@@ -598,6 +619,30 @@ EXAMPLES = r'''
       - filter_key: "id"
         filter_operator: "equal"
         filter_value: "xxx"
+
+- name: Get filesystem from PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{ onefs_host }}"
+    verify_ssl: "{{ verify_ssl }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    gather_subset:
+      - filesystem
+    path: "<path>"
+
+- name: Get filesystem from PowerScale cluster with query parameters
+  dellemc.powerscale.info:
+    onefs_host: "{{ onefs_host }}"
+    verify_ssl: "{{ verify_ssl }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    gather_subset:
+      - filesystem
+    query_parameters:
+      metadata: true
+      quota: true
+      acl: true
+    path: "<path>"
 '''
 
 RETURN = r'''
@@ -2711,6 +2756,12 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.sh
     import SupportAssist
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.namespace \
+    import Namespace
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.quota \
+    import Quota
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.snapshot \
+    import Snapshot
 
 LOG = utils.get_logger('info')
 
@@ -2753,6 +2804,9 @@ class Info(object):
         self.storagepool_api = self.isi_sdk.StoragepoolApi(self.api_client)
         self.certificate_api = self.isi_sdk.CertificateApi(self.api_client)
         self.smartquota_api = self.isi_sdk.QuotaApi(self.api_client)
+        self.namespace_api = self.isi_sdk.NamespaceApi(self.api_client)
+        self.quota_api = self.isi_sdk.QuotaApi(self.api_client)
+        self.snapshot_api = self.isi_sdk.SnapshotApi(self.api_client)
         if self.major > 9 or (self.major == 9 and self.minor > 4):
             self.support_assist_api = self.isi_sdk.SupportassistApi(self.api_client)
 
@@ -3302,6 +3356,53 @@ class Info(object):
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
+    def get_metadata(self, effective_path):
+        return Namespace(self.namespace_api, self.module).get_filesystem(effective_path)
+
+    def get_acl(self, effective_path):
+        return Namespace(self.namespace_api, self.module).get_acl(effective_path)
+
+    def get_quota(self, effective_path):
+        return Quota(self.quota_api, self.module).get_quota(effective_path)
+
+    def get_snapshots(self, effective_path):
+        return Snapshot(self.snapshot_api, self.module).get_filesystem_snapshots(effective_path)
+
+    def get_filesystem_list(self, path):
+        """Get the filesystem list of a given PowerScale Storage"""
+        try:
+            fileystem_list = []
+            filesystem_paths = Namespace(self.namespace_api,
+                                         self.module).list_all_filesystem_from_directory((path))
+            if not filesystem_paths:
+                return fileystem_list
+            filesystem_paths = filesystem_paths.get("children")
+            for filesystem in filesystem_paths:
+                fileystem_list.append({"name": filesystem.get("name")})
+            data_fetchers = {'metadata': self.get_metadata,
+                             'acl': self.get_acl,
+                             'quota': self.get_quota,
+                             'snapshot': self.get_snapshots
+                             }
+            # Extract the required parameters from query_params
+            query_params = self.module.params.get('query_parameters')
+            if query_params:
+                required_params = {k: v for k, v in query_params.items() if v}
+                if fileystem_list:
+                    for each_filesystem in fileystem_list:
+                        effective_path = path + '/' + each_filesystem['name']
+                        for param, fetcher in data_fetchers.items():
+                            if param in required_params:
+                                data = fetcher(effective_path)
+                                each_filesystem.update(data)
+            return fileystem_list
+        except Exception as e:
+            error_msg = (
+                f"Getting filesystem for PowerScale: {self.module.params['onefs_host']}" +
+                f" failed with error: {utils.determine_error(e)}")
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
+
     def get_filters(self, filters=None):
         """Get the filters to be applied"""
         filters_dict = {}
@@ -3335,6 +3436,7 @@ class Info(object):
         access_zone = self.module.params['access_zone']
         subset = self.module.params['gather_subset']
         scope = self.module.params['scope']
+        path = self.module.params.get('path')
         if not subset:
             self.module.fail_json(msg="Please specify gather_subset")
 
@@ -3378,6 +3480,7 @@ class Info(object):
         roles = {}
         support_assist_settings = {}
         smartquota = []
+        filesystem = []
 
         if 'attributes' in str(subset):
             attributes = self.get_attributes_list()
@@ -3467,6 +3570,8 @@ class Info(object):
                 error_msg = "support_assist_settings is supported for One FS version 9.5.0 and above."
                 LOG.error(error_msg)
                 self.module.fail_json(msg=error_msg)
+        if 'filesystem' in str(subset):
+            filesystem = self.get_filesystem_list(path)
 
         result = dict(
             Attributes=attributes,
@@ -3507,7 +3612,8 @@ class Info(object):
             ServerCertificate=server_certificate,
             roles=roles,
             support_assist_settings=support_assist_settings,
-            smart_quota=smartquota
+            smart_quota=smartquota,
+            file_system=filesystem
         )
 
         result.update(SynciqTargetClusterCertificate=synciq_target_cluster_certificates)
@@ -3579,7 +3685,8 @@ def get_info_parameters():
                                     'server_certificate',
                                     'roles',
                                     'support_assist_settings',
-                                    'smartquota'
+                                    'smartquota',
+                                    'filesystem'
                                     ]),
         filters=dict(type='list',
                      required=False,
@@ -3589,7 +3696,9 @@ def get_info_parameters():
                          filter_operator=dict(type='str',
                                               required=True,
                                               choices=['equal']),
-                         filter_value=dict(type='raw', required=True)))
+                         filter_value=dict(type='raw', required=True))),
+        path=dict(required=False, type='str', default='ifs'),
+        query_parameters=dict(type='dict')
     )
 
 
