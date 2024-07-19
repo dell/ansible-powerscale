@@ -3356,43 +3356,59 @@ class Info(object):
     def get_snapshots(self, effective_path):
         return Snapshot(self.snapshot_api, self.module).get_filesystem_snapshots(effective_path)
 
+    def list_filesystems(self, path):
+        """List all filesystems from the given directory path."""
+        namespace = Namespace(self.namespace_api, self.module)
+        filesystem_paths = namespace.list_all_filesystem_from_directory(path)
+        return filesystem_paths.get("children", []) if filesystem_paths else []
+
+    def fetch_data(self, effective_path, data_fetchers, required_params):
+        """Fetch required data based on query parameters."""
+        fetched_data = {}
+        for param, fetcher in data_fetchers.items():
+            if param in required_params:
+                data = fetcher(effective_path)
+                if param == "snapshot":
+                    fetched_data["snapshots"] = data
+                else:
+                    fetched_data.update(data)
+        return fetched_data
+
+    def get_required_params(self, query_params):
+        """Extract required parameters from query parameters."""
+        if "path" in query_params:
+            del query_params["path"]
+        return {k: v for k, v in query_params.items() if v}
+
     def get_filesystem_list(self, path):
-        """Get the filesystem list of a given PowerScale Storage"""
+        """Get the filesystem list of a given PowerScale Storage."""
         try:
-            fileystem_list = []
-            filesystem_paths = Namespace(self.namespace_api,
-                                         self.module).list_all_filesystem_from_directory((path))
-            if not filesystem_paths:
-                return fileystem_list
-            filesystem_paths = filesystem_paths.get("children")
-            for filesystem in filesystem_paths:
-                fileystem_list.append({"name": filesystem.get("name")})
-            data_fetchers = {'metadata': self.get_metadata,
-                             'acl': self.get_acl,
-                             'quota': self.get_quota,
-                             'snapshot': self.get_snapshots
-                             }
-            # Extract the required parameters from query_params
-            query_params = self.module.params.get('query_parameters').get('filesystem')
-            if "path" in query_params:
-                del query_params["path"]
-            if query_params:
-                required_params = {k: v for k, v in query_params.items() if v}
-                if fileystem_list:
-                    for each_filesystem in fileystem_list:
-                        effective_path = path + '/' + each_filesystem['name']
-                        for param, fetcher in data_fetchers.items():
-                            if param in required_params:
-                                data = fetcher(effective_path)
-                                if param == "snapshot":
-                                    each_filesystem["snapshots"] = data
-                                else:
-                                    each_filesystem.update(data)
-            return fileystem_list
+            filesystem_list = [{"name": fs.get("name")} for fs in self.list_filesystems(path)]
+            if not filesystem_list:
+                return filesystem_list
+
+            data_fetchers = {
+                'metadata': self.get_metadata,
+                'acl': self.get_acl,
+                'quota': self.get_quota,
+                'snapshot': self.get_snapshots
+            }
+
+            query_params = self.module.params.get('query_parameters', {}).get('filesystem', {})
+            required_params = self.get_required_params(query_params)
+
+            if required_params:
+                for each_filesystem in filesystem_list:
+                    effective_path = f"{path}/{each_filesystem['name']}"
+                    fetched_data = self.fetch_data(effective_path, data_fetchers, required_params)
+                    each_filesystem.update(fetched_data)
+
+            return filesystem_list
         except Exception as e:
             error_msg = (
                 f"Getting filesystem for PowerScale: {self.module.params['onefs_host']}" +
-                f" failed with error: {utils.determine_error(e)}")
+                f" failed with error: {utils.determine_error(e)}"
+            )
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
