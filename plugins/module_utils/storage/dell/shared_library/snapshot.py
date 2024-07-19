@@ -28,14 +28,22 @@ class Snapshot:
     def get_filesystem_snapshots(self, effective_path):
         """Get snapshots for a given filesystem"""
         try:
+            snapshots = []
+            filtered_snapshots = []
             snapshot_list = \
                 self.snapshot_api.list_snapshot_snapshots().to_dict()
-            snapshots = []
-
+            snapshots.extend(snapshot_list['snapshots'])
+            resume = snapshot_list['resume']
+            while resume:
+                snapshot_list = \
+                    self.snapshot_api.list_snapshot_snapshots(
+                        resume=resume).to_dict()
+                snapshots.extend(snapshot_list['snapshots'])
+                resume = snapshot_list['resume']
             for snap in snapshot_list['snapshots']:
                 if snap['path'] == '/' + effective_path:
-                    snapshots.append(snap)
-            return snapshots
+                    filtered_snapshots.append(snap)
+            return filtered_snapshots
         except Exception as e:
             error_msg = utils.determine_error(error_obj=e)
             error_message = 'Failed to get filesystem snapshots ' \

@@ -173,19 +173,6 @@ options:
         type: raw
         required: True
     version_added: '3.2.0'
-  path:
-    description:
-    - This is the directory path. It is the absolute path for System access zone
-      and is relative if using a non-System access zone. For example, if your access
-      zone is 'Ansible' and it has a base path 'ifs/ansible' and the path
-      specified is '/user1', then the effective path would be
-      'ifs/ansible/user1'.
-      If your access zone is System, and you have 'directory1' in the access
-      zone, the path provided should be 'ifs/directory1'.
-    - Required only if gather_subset is filesystem.
-    type: str
-    default: "ifs"
-    version_added: '3.2.0'
   query_parameters:
     description:
     - Contains dictionary of query parameters for specific I(gather_subset).
@@ -639,10 +626,11 @@ EXAMPLES = r'''
     gather_subset:
       - filesystem
     query_parameters:
-      metadata: true
-      quota: true
-      acl: true
-    path: "<path>"
+      filesystem:
+        metadata: true
+        quota: true
+        acl: true
+        path: "<path>"
 '''
 
 RETURN = r'''
@@ -3385,7 +3373,9 @@ class Info(object):
                              'snapshot': self.get_snapshots
                              }
             # Extract the required parameters from query_params
-            query_params = self.module.params.get('query_parameters')
+            query_params = self.module.params.get('query_parameters').get('filesystem')
+            if "path" in query_params:
+                del query_params["path"]
             if query_params:
                 required_params = {k: v for k, v in query_params.items() if v}
                 if fileystem_list:
@@ -3394,7 +3384,10 @@ class Info(object):
                         for param, fetcher in data_fetchers.items():
                             if param in required_params:
                                 data = fetcher(effective_path)
-                                each_filesystem.update(data)
+                                if param == "snapshot":
+                                    each_filesystem["snapshots"] = data
+                                else:
+                                    each_filesystem.update(data)
             return fileystem_list
         except Exception as e:
             error_msg = (
@@ -3436,7 +3429,10 @@ class Info(object):
         access_zone = self.module.params['access_zone']
         subset = self.module.params['gather_subset']
         scope = self.module.params['scope']
-        path = self.module.params.get('path')
+        # TO DO optmise the below
+        path = self.module.params.get("query_parameters").get("filesystem").get('path')
+        if not path:
+            path = "ifs"
         if not subset:
             self.module.fail_json(msg="Please specify gather_subset")
 
@@ -3697,7 +3693,6 @@ def get_info_parameters():
                                               required=True,
                                               choices=['equal']),
                          filter_value=dict(type='raw', required=True))),
-        path=dict(required=False, type='str', default='ifs'),
         query_parameters=dict(type='dict')
     )
 
