@@ -156,7 +156,6 @@ class TestFileSystem():
         filesystem_module_mock.module.params = self.get_filesystem_args
         filesystem_module_mock.get_quota_param = MagicMock(return_value=None)
         filesystem_module_mock.quota_api.create_quota_quota = MagicMock(return_value=None)
-        # utils.determine_error = MagicMock(return_value=None)
         filesystem_module_mock.perform_module_operation()
         assert filesystem_module_mock.module.exit_json.call_args[1]["changed"] is True
 

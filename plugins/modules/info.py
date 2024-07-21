@@ -3374,16 +3374,17 @@ class Info(object):
                     fetched_data.update(data)
         return fetched_data
 
-    def get_required_params(self, query_params):
+    def get_required_params(self, query_params=None):
         """Extract required parameters from query parameters."""
         if "path" in query_params:
             del query_params["path"]
         return {k: v for k, v in query_params.items() if v}
 
-    def get_filesystem_list(self, path):
+    def get_filesystem_list(self, path, query_params=None):
         """Get the filesystem list of a given PowerScale Storage."""
         try:
             filesystem_list = [{"name": fs.get("name")} for fs in self.list_filesystems(path)]
+            required_params = None
             if not filesystem_list:
                 return filesystem_list
 
@@ -3393,9 +3394,9 @@ class Info(object):
                 'quota': self.get_quota,
                 'snapshot': self.get_snapshots
             }
-
-            query_params = self.module.params.get('query_parameters', {}).get('filesystem', {})
-            required_params = self.get_required_params(query_params)
+            if query_params and "filesystem" in query_params:
+                filesystem_query_params = query_params.get('filesystem')
+                required_params = self.get_required_params(query_params=filesystem_query_params)
 
             if required_params:
                 for each_filesystem in filesystem_list:
@@ -3445,10 +3446,10 @@ class Info(object):
         access_zone = self.module.params['access_zone']
         subset = self.module.params['gather_subset']
         scope = self.module.params['scope']
-        # TO DO optmise the below
-        path = self.module.params.get("query_parameters").get("filesystem").get('path')
-        if not path:
-            path = "ifs"
+        path = "ifs"
+        query_params = self.module.params.get("query_parameters")
+        if query_params and "filesystem" in query_params:
+            path = query_params.get("filesystem").get('path')
         if not subset:
             self.module.fail_json(msg="Please specify gather_subset")
 
@@ -3583,7 +3584,7 @@ class Info(object):
                 LOG.error(error_msg)
                 self.module.fail_json(msg=error_msg)
         if 'filesystem' in str(subset):
-            filesystem = self.get_filesystem_list(path)
+            filesystem = self.get_filesystem_list(path, query_params)
 
         result = dict(
             Attributes=attributes,
