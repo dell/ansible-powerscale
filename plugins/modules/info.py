@@ -3389,6 +3389,11 @@ class Info(object):
             if not filesystem_list:
                 return filesystem_list
 
+            filters = self.module.params.get('filters')
+            filters_dict = self.get_filters(filters)
+            if filters_dict:
+                filesystem_list = filter_dict_list(filesystem_list, filters_dict)
+
             data_fetchers = {
                 'metadata': self.get_metadata,
                 'acl': self.get_acl,
@@ -3447,10 +3452,12 @@ class Info(object):
         access_zone = self.module.params['access_zone']
         subset = self.module.params['gather_subset']
         scope = self.module.params['scope']
-        path = "ifs"
+        path = None
         query_params = self.module.params.get("query_parameters")
         if query_params and "filesystem" in query_params:
             path = query_params.get("filesystem").get('path')
+        if not path:
+            path = "ifs"
         if not subset:
             self.module.fail_json(msg="Please specify gather_subset")
 
