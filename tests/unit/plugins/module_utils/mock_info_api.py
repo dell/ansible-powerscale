@@ -84,7 +84,8 @@ class MockGatherfactsApi:
         'ServerCertificate': [],
         'roles': {},
         'smart_quota': [],
-        'support_assist_settings': {}
+        'support_assist_settings': {},
+        'filesystem': []
     }
     API = "api"
     MODULE = "module"
