@@ -85,7 +85,7 @@ class MockGatherfactsApi:
         'roles': {},
         'smart_quota': [],
         'support_assist_settings': {},
-        'filesystem': []
+        'file_system': []
     }
     API = "api"
     MODULE = "module"
