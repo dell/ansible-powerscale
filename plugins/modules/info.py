@@ -3377,9 +3377,10 @@ class Info(object):
 
     def get_required_params(self, query_params=None):
         """Extract required parameters from query parameters."""
-        if "path" in query_params:
-            del query_params["path"]
-        return {k: v for k, v in query_params.items() if v}
+        if query_params:
+            if "path" in query_params:
+                del query_params["path"]
+            return {k: v for k, v in query_params.items() if v is True}
 
     def get_filesystem_list(self, path, query_params=None):
         """Get the filesystem list of a given PowerScale Storage."""
@@ -3452,12 +3453,12 @@ class Info(object):
         access_zone = self.module.params['access_zone']
         subset = self.module.params['gather_subset']
         scope = self.module.params['scope']
-        path = None
+        path = "ifs"
         query_params = self.module.params.get("query_parameters")
         if query_params and "filesystem" in query_params:
-            path = query_params.get("filesystem").get('path')
-        if not path:
-            path = "ifs"
+            filesystem = query_params.get("filesystem")
+            if filesystem and "path" in filesystem:
+                path = filesystem.get("path")
         if not subset:
             self.module.fail_json(msg="Please specify gather_subset")
 
