@@ -630,6 +630,7 @@ EXAMPLES = r'''
         metadata: true
         quota: true
         acl: true
+        snapshot: true
         path: "<path>"
 '''
 
