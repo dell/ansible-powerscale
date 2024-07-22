@@ -33,11 +33,11 @@ class Namespace:
                 metadata=True)
             return resp.to_dict()
         except utils.ApiException as e:
-            self.handle_APIexception(path, e)
+            self.handle_apiexception(path, e)
         except Exception as e:
             error_message = "Failed to get details of Filesystem {0} with" \
                             " error {1} ".format(path, str(e))
-            self.handle_exception(error_message, e)
+            self.handle_exception(error_message)
 
     def list_all_filesystem_from_directory(self, path):
         """Lists all filesystems in a directory"""
@@ -45,11 +45,11 @@ class Namespace:
             resp = self.namespace_api.get_directory_contents(directory_path=path)
             return resp.to_dict()
         except utils.ApiException as e:
-            self.handle_APIexception(path, e)
+            self.handle_apiexception(path, e)
         except Exception as e:
             error_message = "Failed to get details of Filesystem {0} with" \
                             " error {1} ".format(path, str(e))
-            self.handle_exception(error_message, e)
+            self.handle_exception(error_message)
 
     def get_acl(self, effective_path):
         """Retrieves ACL rights of filesystem"""
@@ -63,9 +63,9 @@ class Namespace:
         except Exception as e:
             error_message = 'Error %s while retrieving the access control list for ' \
                             'namespace object.' % utils.determine_error(error_obj=e)
-            self.handle_exception(error_message, e)
+            self.handle_exception(error_message)
 
-    def handle_APIexception(self, path, e):
+    def handle_apiexception(self, path, e):
         if str(e.status) == "404":
             log_msg = "Filesystem {0} status is \
                 {1}.format(path, e.status)"
@@ -79,6 +79,6 @@ class Namespace:
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
-    def handle_exception(self, error_message, e):
+    def handle_exception(self, error_message):
         LOG.error(error_message)
         self.module.fail_json(msg=error_message)
