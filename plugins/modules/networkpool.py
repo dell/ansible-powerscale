@@ -26,6 +26,7 @@ author:
 - Meenakshi Dembi (@dembim) <ansible.team@dell.com>
 - Pavan Mudunuri (@Pavan-Mudunuri) <ansible.team@dell.com>
 - Bhavneet Sharma (@Bhavneet-Sharma) <ansible.team@dell.com>
+- Trisha Datta (@trisha-dell) <ansible.team@dell.com>
 
 options:
   pool_name:
@@ -184,7 +185,8 @@ options:
             choices: ['roundrobin', 'failover', 'lacp', 'fec']
             type: str
 notes:
-- The I(check_mode) is not supported.
+- The I(check_mode) is supported.
+- The I(diff) is supported.
 - Removal of I(sc_dns_zone_aliases) is not supported.
 '''
 
@@ -422,6 +424,7 @@ from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
 import ipaddress
+import copy
 
 # initialize the logger
 LOG = utils.get_logger('networkpool')
@@ -437,10 +440,16 @@ class NetworkPool(object):
         self.module_params.update(get_network_pool_parameters())
 
         # initialize the ansible module
-        self.module = AnsibleModule(argument_spec=self.module_params)
+        self.module = AnsibleModule(
+            argument_spec=self.module_params,
+            supports_check_mode=True)
 
         # result is a dictionary that contains changed status and
-        self.result = {"changed": False}
+        self.result = {
+            "changed": False,
+            "network_pool": [],
+            "diff": None
+        }
         PREREQS_VALIDATE = utils.validate_module_pre_reqs(self.module.params)
         if PREREQS_VALIDATE \
                 and not PREREQS_VALIDATE["all_packages_found"]:
@@ -461,7 +470,9 @@ class NetworkPool(object):
         :return: None
         """
         try:
-            self.network_groupnet_api.create_subnets_subnet_pool(pool_params, groupnet, subnet)
+            if not self.module.check_mode:
+                self.network_groupnet_api.create_subnets_subnet_pool(pool_params, groupnet, subnet)
+
         except ValueError as e:
             # Work around an issue in the underlying api call used in
             # most versions of the isi_sdk.  The network pool is created, but
@@ -507,8 +518,17 @@ class NetworkPool(object):
         :return: True if deletion is successful
         """
         try:
-            self.network_groupnet_api.delete_subnets_subnet_pool(pool, groupnet, subnet)
-            return True
+            if not self.module.check_mode:
+                self.network_groupnet_api.delete_subnets_subnet_pool(pool, groupnet, subnet)
+            network_pool_details = self.get_network_pool(
+                groupnet=self.module.params['groupnet_name'],
+                subnet=self.module.params['subnet_name'],
+                pool=self.module.params['pool_name'])
+            LOG.info("Deleted network pool %s", str(network_pool_details))
+            if network_pool_details is None:
+                return {}
+            else:
+                return network_pool_details
         except Exception as e:
             error_msg = utils.determine_error(error_obj=e)
             error_message = 'Failed to delete network pool: %s with ' \
@@ -537,7 +557,6 @@ class NetworkPool(object):
         if sc_params.get('sc_dns_zone_aliases'):
             sc_params['sc_dns_zone_aliases'] = self.remove_duplicate_aliases(
                 sc_params['sc_dns_zone_aliases'])
-
         if sc_params.get('static_routes'):
             updated_routes = self.replace_prefix_len(sc_params['static_routes'])
             routes = from_routes_unique_routes(updated_routes, pool_details)
@@ -559,7 +578,7 @@ class NetworkPool(object):
             if keys == 'new_pool_name' and pool_params[keys] and \
                     self.do_update(pool_details['pools'][0]['name'], pool_params[keys]):
                 modify_pool_dict['name'] = pool_params[keys]
-            elif pool_params[keys] and \
+            elif keys != 'new_pool_name' and pool_params[keys] and \
                     self.do_update(pool_details['pools'][0][keys], pool_params[keys]):
                 modify_pool_dict[keys] = pool_params[keys]
         return modify_pool_dict
@@ -572,8 +591,8 @@ class NetworkPool(object):
         :return :Dictionary of parameters that needs to be modified,
         if no parameters are to be modified dict is empty
         """
-        modify_pool_dict = self.check_modify_for_common_params(pool_details,
-                                                               pool_params)
+        modify_pool_dict = self.check_modify_for_common_params(pool_details=pool_details,
+                                                               pool_params=pool_params)
 
         if pool_params.get('additional_pool_params'):
             additional_pool_params = pool_params.get('additional_pool_params')
@@ -616,8 +635,10 @@ class NetworkPool(object):
         :return: True if modify is successful
         """
         try:
-            self.network_groupnet_api.update_subnets_subnet_pool(modify_pool_param, pool, groupnet, subnet)
-            return True
+            if not self.module.check_mode:
+                self.network_groupnet_api.update_subnets_subnet_pool(modify_pool_param, pool, groupnet, subnet)
+                return True
+            return False
         except Exception as e:
             error_message = 'Failed to update network pool: %s with ' \
                             'error: %s' % (pool, e)
@@ -691,7 +712,8 @@ class NetworkPool(object):
             if additional_params.get('ranges') and additional_params.get('range_state') == "add":
                 network_pool_param['ranges'] = additional_params['ranges']
 
-        return network_pool_param
+        final_params = {k: v for k, v in network_pool_param.items() if v is not None}
+        return final_params
 
     def replace_prefix_len(self, routes):
 
@@ -762,59 +784,60 @@ class NetworkPool(object):
         if pool_params.get('additional_pool_params'):
             self.validate_additional_pool_params(pool_params)
 
-    def perform_module_operation(self):
-        """
-        Perform different actions based on parameters chosen in playbook
-        """
-        result = dict(
-            changed=False,
-            network_pool=[]
-        )
-        groupnet_name = self.module.params['groupnet_name']
-        subnet_name = self.module.params['subnet_name']
-        pool_name = self.module.params['pool_name']
-        state = self.module.params['state']
-        pool_params = self.module.params
-        modify_pool_param = None
-        new_pool_name = self.module.params['new_pool_name']
+    def get_diff_after(self, pool_params, network_pool_details):
+        """Get diff between playbook input and network pool details
+        :param pool_params: Dictionary of parameters input from playbook
+        :param network_pool_details: Dictionary of network pool details
+        :return: Dictionary of parameters of differences"""
 
-        self.validate_input(pool_params)
+        if pool_params["state"] == "absent":
+            return {}, {}
+        else:
+            modify_params = {}
+            if network_pool_details is None:
+                diff_dict = {
+                    "access_zone": pool_params['access_zone'],
+                    "addr_family": "ipv4",
+                    "aggregation_mode": "lacp",
+                    "alloc_method": "static",
+                    "description": pool_params['description'],
+                    "firewall_policy": "default_pools_policy",
+                    "groupnet": pool_params['groupnet_name'],
+                    "id": pool_params['groupnet_name'] + "." + pool_params['subnet_name'] + "." + pool_params['pool_name'],
+                    "ifaces": [],
+                    "ipv6_perform_dad": False,
+                    "name": pool_params['pool_name'],
+                    "nfsv3_rroce_only": False,
+                    "ranges": [],
+                    "rebalance_policy": "auto",
+                    "rules": [],
+                    "sc_auto_unsuspend_delay": 0,
+                    "sc_connect_policy": "round_robin",
+                    "sc_dns_zone": "",
+                    "sc_dns_zone_aliases": [],
+                    "sc_failover_policy": "round_robin",
+                    "sc_subnet": "",
+                    "sc_suspended_nodes": [],
+                    "sc_ttl": 0,
+                    "static_routes": [],
+                    "subnet": pool_params['subnet_name']
+                }
+                modify_params = self.is_pool_modifiable(
+                    pool_details={"pools": [diff_dict]},
+                    pool_params=pool_params)
+                diff_dict1 = copy.deepcopy(diff_dict)
+                for key in modify_params.keys():
+                    diff_dict1[key] = modify_params[key]
+                return diff_dict1, modify_params
 
-        input_param = {}
-        for param in self.module.params:
-            input_param[param] = self.module.params[param]
-
-        pool_details = self.get_network_pool(
-            groupnet_name, subnet_name, pool_name)
-
-        if state == "absent" and pool_details:
-            result['changed'] = self.delete_network_pool(
-                groupnet_name, subnet_name, pool_name)
-            result['network_pool'] = []
-
-        if state == "present" and not pool_details:
-            pool_params = self.construct_pool_parameters(input_param)
-            if pool_params:
-                self.create_network_pool(groupnet_name, subnet_name, pool_params)
-                result['changed'] = True
-
-        # Form dictionary of modifiable parameters for a pool
-        if pool_details and input_param:
-            modify_pool_param = \
-                self.is_pool_modifiable(pool_details, pool_params)
-
-        # Modify network pool
-        if modify_pool_param and state == "present":
-            self.modify_network_pool(modify_pool_param, pool_name, groupnet_name, subnet_name)
-            if new_pool_name:
-                pool_name = new_pool_name
-            result['changed'] = result['modify_network_pool'] = True
-
-        if state == 'present':
-            result['network_pool'] = \
-                self.get_network_pool(groupnet_name, subnet_name, pool_name)
-
-        self.module.exit_json(**result)
+            if network_pool_details is not None:
+                modify_params = self.is_pool_modifiable(
+                    pool_details=network_pool_details,
+                    pool_params=pool_params)
+                diff_dict = copy.deepcopy(network_pool_details['pools'][0])
+                for key in modify_params.keys():
+                    diff_dict[key] = modify_params[key]
+                return diff_dict, modify_params
 
 
 def from_routes_unique_routes(routes, pool_details):
@@ -826,7 +849,6 @@ def from_routes_unique_routes(routes, pool_details):
     """
     existing_routes = pool_details['pools'][0]['static_routes'].copy()
     add_existing_routes = []
-
     for route in routes:
         state = route.get('route_state')
         del route['route_state']
@@ -865,24 +887,24 @@ def get_network_pool_parameters():
             sc_subnet=dict(type='str'),
             sc_auto_unsuspend_delay=dict(type='int'),
             static_routes=dict(type='list', elements='dict', options=dict(
-                               gateway=dict(type='str', required=True),
-                               prefix_len=dict(type='int', required=True),
-                               subnet=dict(type='str', required=True),
-                               route_state=dict(
-                                   type='str', choices=['add', 'remove'],
-                                   default='add'))),
+                gateway=dict(type='str', required=True),
+                prefix_len=dict(type='int', required=True),
+                subnet=dict(type='str', required=True),
+                route_state=dict(
+                    type='str', choices=['add', 'remove'],
+                    default='add'))),
             sc_dns_zone_aliases=dict(type='list', elements='str'),
             sc_ttl=dict(type='int'))),
         state=dict(required=True, type='str', choices=['absent', 'present']),
         subnet_name=dict(required=True, type='str'),
         additional_pool_params=dict(type='dict', options=dict(
             ranges=dict(type='list', elements='dict', options=dict(
-                        low=dict(type='str'),
-                        high=dict(type='str'))),
+                low=dict(type='str'),
+                high=dict(type='str'))),
             range_state=dict(type='str', choices=['add', 'remove']),
             ifaces=dict(type='list', elements='dict', options=dict(
-                        iface=dict(type='str'),
-                        lnn=dict(type='int'))),
+                iface=dict(type='str'),
+                lnn=dict(type='int'))),
             iface_state=dict(type='str', choices=['add', 'remove']))))
 
 
@@ -894,11 +916,103 @@ def is_valid_ip(address):
         return False
 
 
+class NetworkPoolExitHandler():
+    def handle(self, network_pool_obj, network_pool_details):
+        if network_pool_details is None:
+            network_pool_obj.result['network_pool'] = {}
+        else:
+            network_pool_obj.result['network_pool'] = network_pool_details
+        network_pool_obj.module.exit_json(**network_pool_obj.result)
+
+
+class NetworkPoolDeleteHandler():
+    def handle(self, network_pool_obj, pool_params, network_pool_details):
+        if pool_params["state"] == "absent" and network_pool_details:
+            network_pool_details = network_pool_obj.delete_network_pool(
+                groupnet=pool_params["groupnet_name"],
+                subnet=pool_params["subnet_name"],
+                pool=pool_params["pool_name"])
+            network_pool_obj.result['changed'] = True
+        NetworkPoolExitHandler().handle(network_pool_obj, network_pool_details)
+
+
+class NetworkPoolModifyHandler():
+    def handle(self, network_pool_obj, pool_params, network_pool_details, modify_param_dict):
+        if pool_params["state"] == "present" and network_pool_details:
+            modify_pool_param = modify_param_dict
+
+            # Modify network pool
+            pool_name = pool_params['pool_name']
+            if modify_pool_param:
+                network_pool_obj.result['modify_network_pool'] = network_pool_obj.modify_network_pool(
+                    modify_pool_param=modify_pool_param,
+                    pool=pool_params["pool_name"],
+                    groupnet=pool_params["groupnet_name"],
+                    subnet=pool_params["subnet_name"])
+                network_pool_obj.result['changed'] = True
+                pool_name = pool_params["pool_name"]
+                if network_pool_obj.result['modify_network_pool'] and pool_params["new_pool_name"]:
+                    pool_name = pool_params["new_pool_name"]
+            network_pool_details = \
+                network_pool_obj.get_network_pool(
+                    groupnet=pool_params['groupnet_name'],
+                    subnet=pool_params['subnet_name'],
+                    pool=pool_name)
+
+        NetworkPoolDeleteHandler().handle(
+            network_pool_obj, pool_params, network_pool_details)
+
+
+class NetworkPoolCreateHandler():
+    def handle(self, network_pool_obj, pool_params, network_pool_details, modify_param_dict):
+        if pool_params["state"] == "present" and network_pool_details is None:
+            create_pool_params = network_pool_obj.construct_pool_parameters(input_param=pool_params)
+            if create_pool_params:
+                network_pool_obj.create_network_pool(
+                    groupnet=pool_params['groupnet_name'],
+                    subnet=pool_params['subnet_name'],
+                    pool_params=create_pool_params)
+                network_pool_obj.result['changed'] = True
+
+            network_pool_details = \
+                network_pool_obj.get_network_pool(
+                    groupnet=pool_params['groupnet_name'],
+                    subnet=pool_params['subnet_name'],
+                    pool=pool_params['pool_name'])
+        NetworkPoolModifyHandler().handle(
+            network_pool_obj=network_pool_obj, pool_params=pool_params,
+            network_pool_details=network_pool_details, modify_param_dict=modify_param_dict)
+
+
+class NetworkPoolHandler():
+    def handle(self, network_pool_obj, pool_params):
+        network_pool_obj.validate_input(pool_params=pool_params)
+        network_pool_details = network_pool_obj.get_network_pool(
+            groupnet=pool_params['groupnet_name'],
+            subnet=pool_params['subnet_name'],
+            pool=pool_params['pool_name'])
+        diff_dict, modify_param_dict = network_pool_obj.get_diff_after(
+            pool_params=pool_params,
+            network_pool_details=network_pool_details)
+        if network_pool_details is None:
+            before = {}
+        else:
+            before = network_pool_details['pools'][0]
+        if network_pool_obj.module._diff:
+            network_pool_obj.result['diff'] = dict(
+                before=before,
+                after=diff_dict
+            )
+        NetworkPoolCreateHandler().handle(
+            network_pool_obj=network_pool_obj, pool_params=pool_params,
+            network_pool_details=network_pool_details, modify_param_dict=modify_param_dict)
+
+
 def main():
-    """ Create PowerScale network pool object and perform actions on it
-        based on user input from playbook"""
+    """ Create PowerScale Network Poolobject and perform action on it
+        based on user input from playbook."""
     obj = NetworkPool()
-    obj.perform_module_operation()
+    NetworkPoolHandler().handle(obj, obj.module.params)
 
 
 if __name__ == '__main__':
