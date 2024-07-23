@@ -186,10 +186,10 @@ class MockFileSystemApi:
     }
 
     QUOTA_DETAILS_1 = {
-        "quotas": { 
-            "inodes": 1, 
-            "logical": 0, 
-            "physical": 2048 
+        "quotas": {
+            "inodes": 1,
+            "logical": 0,
+            "physical": 2048
         }
     }
     QUOTA_DETAILS = {
@@ -203,7 +203,6 @@ class MockFileSystemApi:
     EMPTY_SMB_SHARES = {
         "shares": []
     }
-
 
     @staticmethod
     def get_acl_response():

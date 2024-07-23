@@ -564,8 +564,6 @@ filesystem_snapshots:
 import re
 import copy
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.powerscale_base \
-    import PowerScaleBase
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.namespace \
@@ -1096,10 +1094,10 @@ class FileSystem(object):
 
     def is_access_or_inherit_modified(self, acl_rights, acl):
         """Determines if access rights or inherit flags of ACL are modified"""
-        return (acl_rights['access_rights'] and \
-            (list(set(acl_rights['access_rights']) - set(acl['accessrights']))) or
-             (acl_rights['inherit_flags'] and (set(acl_rights['inherit_flags']) - set(acl['inherit_flags']))) or
-             acl_rights['access_type'] != acl['accesstype'])
+        return (acl_rights['access_rights'] and
+                (list(set(acl_rights['access_rights']) - set(acl['accessrights']))) or
+                (acl_rights['inherit_flags'] and (set(acl_rights['inherit_flags']) - set(acl['inherit_flags']))) or
+                acl_rights['access_type'] != acl['accesstype'])
 
     def check_quota_param_modification(self, quota, filesystem_quota):
         if 'cap_unit' in quota and quota['cap_unit'] is not None:
@@ -1126,8 +1124,7 @@ class FileSystem(object):
                 quota['hard_limit_size'] is not None:
             hard_limit_size = utils.get_size_bytes(
                 quota['hard_limit_size'], cap_unit)
-            if hard_limit_size != filesystem_quota[
-                'quotas'][0]['thresholds']['hard']:
+            if hard_limit_size != filesystem_quota['quotas'][0]['thresholds']['hard']:
                 return True
 
     def is_quota_modified(self, filesystem_quota):
@@ -1534,6 +1531,8 @@ class FilesystemExitHandler():
 
         # Finally update the module result!
         filesystem_obj.module.exit_json(**filesystem_obj.result)
+
+
 class FilesystemDetailsHandler():
     def handle(self, filesystem_obj, filesystem_params, effective_path):
         if filesystem_params['state'] == 'present':
@@ -1541,17 +1540,18 @@ class FilesystemDetailsHandler():
                                                                     filesystem_obj.module).get_filesystem(effective_path)
             if filesystem_obj.result.get('filesystem_details') is None:
                 filesystem_obj.result['filesystem_details'] = {}
-            filesystem_obj.result['filesystem_details'].update(namespace_acl=Namespace(filesystem_obj.namespace_api,
-                                                                                    filesystem_obj.module).get_acl(
-                effective_path))
+            filesystem_obj.result['filesystem_details'].update(
+                namespace_acl=Namespace(filesystem_obj.namespace_api, filesystem_obj.module).get_acl(
+                    effective_path))
             filesystem_obj.result['quota_details'] = Quota(filesystem_obj.quota_api,
-                                                        filesystem_obj.module).get_quota(effective_path)
+                                                           filesystem_obj.module).get_quota(effective_path)
             if filesystem_obj.module.params['list_snapshots']:
                 filesystem_obj.result['filesystem_snapshots'] = \
                     Snapshot(filesystem_obj.snapshot_api,
-                            filesystem_obj.module).get_filesystem_snapshots(effective_path)
+                             filesystem_obj.module).get_filesystem_snapshots(effective_path)
 
         FilesystemExitHandler().handle(filesystem_obj)
+
 
 class FilesystemDeleteHandler():
     def handle(self, filesystem_obj, filesystem_params, filesystem_details, effective_path):
