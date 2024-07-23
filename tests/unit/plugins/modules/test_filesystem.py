@@ -59,7 +59,7 @@ class TestFileSystem():
         try:
             FilesystemHandler().handle(filesystem_module_mock, filesystem_module_mock.module.params)
         except FailJsonException as fj_object:
-            assert error_msg in fj_object.message 
+            assert error_msg in fj_object.message
 
     def test_delete_file_system(self, filesystem_module_mock):
         self.get_filesystem_args.update({"path": self.path1, "recursive_force_delete": True, "access_zone": "System", "state": "absent"})
@@ -70,8 +70,8 @@ class TestFileSystem():
         filesystem_module_mock.protocol_api.list_smb_shares.to_dict = MagicMock(
             return_value=MockFileSystemApi.EMPTY_SMB_SHARES)
         filesystem_module_mock.module.check_mode = False
-        FilesystemHandler().handle(filesystem_module_mock,
-                            filesystem_module_mock.module.params)
+        FilesystemHandler().handle(
+            filesystem_module_mock, filesystem_module_mock.module.params)
         assert filesystem_module_mock.module.exit_json.call_args[1]['changed']
         filesystem_module_mock.namespace_api.delete_directory.assert_called()
 
@@ -84,8 +84,8 @@ class TestFileSystem():
         filesystem_module_mock.protocol_api.list_smb_shares.to_dict = MagicMock(
             return_value=MockFileSystemApi.EMPTY_SMB_SHARES)
         filesystem_module_mock.module.check_mode = True
-        FilesystemHandler().handle(filesystem_module_mock,
-                            filesystem_module_mock.module.params)
+        FilesystemHandler().handle(
+            filesystem_module_mock, filesystem_module_mock.module.params)
         assert filesystem_module_mock.module.exit_json.call_args[1]['changed']
 
     def test_test_delete_file_system_exception(self, filesystem_module_mock):
@@ -96,7 +96,6 @@ class TestFileSystem():
         self.capture_fail_json_call(
             MockFileSystemApi.get_error_responses(
                 'delete_filesystem_exception'), filesystem_module_mock)
-    
 
     def test_create_file_system_with_access_control_rights(self, filesystem_module_mock):
         self.get_filesystem_args.update({"path": self.path1, "owner": {"name": "test"}, "group": {"name": "group_test"},
@@ -109,8 +108,8 @@ class TestFileSystem():
         filesystem_module_mock.module.params = self.get_filesystem_args
         filesystem_module_mock.get_filesystem = MagicMock(return_value={})
         filesystem_module_mock.get_acl_object = MagicMock(return_value=True)
-        FilesystemHandler().handle(filesystem_module_mock,
-                            filesystem_module_mock.module.params)
+        FilesystemHandler().handle(
+            filesystem_module_mock, filesystem_module_mock.module.params)
         assert filesystem_module_mock.module.exit_json.call_args[1]['changed'] \
             and filesystem_module_mock.module.exit_json.call_args[1]['create_filesystem']
 
@@ -125,8 +124,8 @@ class TestFileSystem():
         filesystem_module_mock.module.check_mode = True
         filesystem_module_mock.namespace_api.get_filesystem = MagicMock(return_value={})
         filesystem_module_mock.get_acl_object = MagicMock()
-        FilesystemHandler().handle(filesystem_module_mock,
-                            filesystem_module_mock.module.params)
+        FilesystemHandler().handle(
+            filesystem_module_mock, filesystem_module_mock.module.params)
         assert filesystem_module_mock.module.exit_json.call_args[1]['changed']
 
     def test_modify_file_system_with_access_control_rights(self, filesystem_module_mock):
@@ -139,8 +138,8 @@ class TestFileSystem():
         filesystem_module_mock.module.params = self.get_filesystem_args
         filesystem_module_mock.get_acl = MagicMock(return_value=MockFileSystemApi.get_acl_response())
         filesystem_module_mock.get_acl_object = MagicMock()
-        FilesystemHandler().handle(filesystem_module_mock,
-                            filesystem_module_mock.module.params)
+        FilesystemHandler().handle(
+            filesystem_module_mock, filesystem_module_mock.module.params)
         assert filesystem_module_mock.module.exit_json.call_args[1]['changed'] \
             and filesystem_module_mock.module.exit_json.call_args[1]['modify_filesystem']
 
@@ -155,8 +154,8 @@ class TestFileSystem():
         filesystem_module_mock.module.check_mode = True
         filesystem_module_mock.get_acl = MagicMock(return_value=MockFileSystemApi.get_acl_response())
         filesystem_module_mock.get_acl_object = MagicMock()
-        FilesystemHandler().handle(filesystem_module_mock,
-                            filesystem_module_mock.module.params)
+        FilesystemHandler().handle(
+            filesystem_module_mock, filesystem_module_mock.module.params)
         assert filesystem_module_mock.module.exit_json.call_args[1]['changed']
 
     def test_access_control_rights_validation(self, filesystem_module_mock):
@@ -189,8 +188,8 @@ class TestFileSystem():
         filesystem_module_mock.get_quota = MagicMock(return_value=MockFileSystemApi.QUOTA_DETAILS)
         filesystem_module_mock.get_quota_param = MagicMock(return_value=None)
         filesystem_module_mock.quota_api.create_quota_quota = MagicMock(return_value=None)
-        FilesystemHandler().handle(filesystem_module_mock,
-                            filesystem_module_mock.module.params)
+        FilesystemHandler().handle(
+            filesystem_module_mock, filesystem_module_mock.module.params)
         assert filesystem_module_mock.module.exit_json.call_args[1]["changed"] is True
         filesystem_module_mock.quota_api.create_quota_quota.assert_called()
 
@@ -212,8 +211,8 @@ class TestFileSystem():
         filesystem_module_mock.module.check_mode = False
         filesystem_module_mock.quota_api.update_quota_quota = MagicMock(return_value=True)
         utils.determine_error = MagicMock(return_value=None)
-        FilesystemHandler().handle(filesystem_module_mock,
-                            filesystem_module_mock.module.params)
+        FilesystemHandler().handle(
+            filesystem_module_mock, filesystem_module_mock.module.params)
         assert filesystem_module_mock.module.exit_json.call_args[1]["changed"] is True
 
     def test_file_system_create_quota_exception(self, filesystem_module_mock):
@@ -240,7 +239,6 @@ class TestFileSystem():
             MockFileSystemApi.get_error_responses(
                 'create_quota_exception'), filesystem_module_mock)
 
-
     def test_file_system_modify_quota_exception(self, filesystem_module_mock):
         self.get_filesystem_args.update({"path": self.path1,
                                          "access_zone": "System",
@@ -265,8 +263,8 @@ class TestFileSystem():
         filesystem_module_mock.get_container_param = MagicMock()
         filesystem_module_mock.quota_api.update_quota_quota = MagicMock(side_effect=MockApiException)
         filesystem_module_mock.determine_error = MagicMock(return_value=None)
-        FilesystemHandler().handle(filesystem_module_mock,
-                            filesystem_module_mock.module.params)
+        FilesystemHandler().handle(
+            filesystem_module_mock, filesystem_module_mock.module.params)
         self.capture_fail_json_call(
             MockFileSystemApi.get_error_responses(
                 'update_quota_exception'), filesystem_module_mock)
