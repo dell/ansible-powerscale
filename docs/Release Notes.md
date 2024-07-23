@@ -1,6 +1,6 @@
 **Ansible Modules for Dell Technologies PowerScale** 
 =========================================
-### Release notes 3.1.0
+### Release notes 3.2.0
 
 >   © 2024 Dell Inc. or its subsidiaries. All rights reserved. Dell
 >   and other trademarks are trademarks of Dell Inc. or its
@@ -27,7 +27,7 @@ Table 1. Revision history
 
 | Revision | Date          | Description                                               |
 |----------|---------------|-----------------------------------------------------------|
-| 01       | June 2024     | Ansible Modules for Dell PowerScale 3.1.0                 |
+| 01       | June 2024     | Ansible Modules for Dell PowerScale 3.2.0                 |
 
 
 Product description
@@ -68,6 +68,8 @@ The Ansible Modules for Dell PowerScale support the following features:
 - Import, modify, setting default, and delete a server certificate.
 - Get details, create, modify, and delete auth roles.
 - Get details, accept terms, and modify support assist settings.
+- Get details and modify alert settings.
+- Get details of filesystems, NFS exports, alert_settings, alert_rules, alert_categories, event_groups and alert_channels using Info module.
   
 The Ansible modules use playbooks, written in yaml syntax, to list, show, create, delete, and modify each of these entities.
 
@@ -75,12 +77,12 @@ New Features and Enhancements
 ---------------------------
 This section describes the features of the Ansible Modules for Dell PowerScale for this release.
 
-The Ansible Modules for Dell PowerScale release 3.1.0 supports the following features:
+The Ansible Modules for Dell PowerScale release 3.2.0 supports the following features:
 
-- Added support for OneFS 9.8 Lonestar release.
-- Added support to Get, create, modify, and delete auth roles.
-- Added support to Get, accept terms, and modify support assist settings.
-- Added support for running as root, allow_delete_readonly, allow_execute_always, and inheritable_path_acl in SMB module.
+- Added support for check mode and diff mode in network pool module.
+- Added support for check mode in Filesystem, NFS and Smart Quota modules.
+- Added support for listing filesystems, NFS exports, alert_settings, alert_rules, alert_categories, event_groups and alert_channels in Info module
+- Added support for query paramters and filters in Info module.
 
 Known issues
 ------------

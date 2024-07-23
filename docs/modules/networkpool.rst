@@ -193,7 +193,8 @@ Notes
 -----
 
 .. note::
-   - The *check_mode* is not supported.
+   - The *check_mode* is supported.
+   - The *diff* is supported.
    - Removal of *sc_dns_zone_aliases* is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
