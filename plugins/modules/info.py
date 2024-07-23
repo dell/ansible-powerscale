@@ -25,8 +25,8 @@ description:
   SyncIQ reports, SyncIQ target reports, SyncIQ target cluster certificates,
   SyncIQ policies, SyncIQ performance rules.
 - Get list of network groupnets, network pools for all access zones or a
-  specific access zone, network rules, network subnets, network interfaces,
-  node pools, storage pool tiers, smb open files, s3 buckets, ntp_servers.
+  specific access zone, network rules, network subnets, network interfaces.
+- Get list of node pools, storage pool tiers, smb open files, s3 buckets, ntp_servers.
 - Get list of user mapping rules, ldap providers of the PowerScale cluster.
 - Get NFS zone settings details of the PowerScale cluster.
 - Get NFS default settings details of the PowerScale cluster.
@@ -37,6 +37,7 @@ description:
 - Get SNMP settings details of the PowerScale cluster.
 - Retrieve a list of server certificate details.
 - Get support assist settings details of the PowerScale cluster.
+- Get list of alert rules, alert channels, alert categories, event groups and alert settings.
 
 extends_documentation_fragment:
   - dellemc.powerscale.powerscale
@@ -75,6 +76,12 @@ options:
     choices: ['effective', 'user', 'default']
     default: 'effective'
     type: str
+  query_parameters:
+    description:
+    - Contains dictionary of query parameters for specific I(gather_subset).
+    - Applicable to C(alert_rules), C(event_group) and C(event_channels).
+    type: dict
+    version_added: '3.2.0'
   gather_subset:
     description:
     - List of string variables to specify the PowerScale Storage System
@@ -126,16 +133,21 @@ options:
     - The list of user mapping rules of PowerScale cluster.
     - The list of ldap providers of PowerScale cluster.
     - SMB global settings - C(smb_global_settings).
-    - NTP servers C(ntp_servers)
-    - Email settings C(email_settings)
-    - Cluster identity C(cluster_identity)
-    - Cluster owner C(cluster_owner)
+    - NTP servers C(ntp_servers).
+    - Email settings C(email_settings).
+    - Cluster identity C(cluster_identity).
+    - Cluster owner C(cluster_owner).
     - SNMP settings - C(snmp_settings).
     - Server certificate - C(server_certificate).
-    - roles - C(roles).
+    - Roles - C(roles).
     - Support assist settings- C(support_assist_settings).
     - Smartquota- C(smartquota).
     - Filesystem - C(filesystem).
+    - Alert settings - C(alert_settings).
+    - Alert rules - C(alert_rules).
+    - Alert channels - C(alert_channels).
+    - Alert categories - C(alert_categories).
+    - Event groups - C(event_group).
     required: true
     choices: [attributes, access_zones, nodes, providers, users, groups,
               smb_shares, nfs_exports, nfs_aliases, clients, synciq_reports, synciq_target_reports,
@@ -144,7 +156,8 @@ options:
               node_pools, storagepool_tiers, smb_files, user_mapping_rules, ldap,
               nfs_zone_settings, nfs_default_settings, nfs_global_settings, synciq_global_settings, s3_buckets,
               smb_global_settings, ntp_servers, email_settings, cluster_identity, cluster_owner, snmp_settings,
-              server_certificate, roles, support_assist_settings, smartquota, filesystem]
+              server_certificate, roles, support_assist_settings, smartquota, filesystem, alert_settings,
+              alert_rules, alert_channels, alert_categories, event_group]
     type: list
     elements: str
   filters:
@@ -522,7 +535,7 @@ EXAMPLES = r'''
     gather_subset:
       - smb_global_settings
 
-- name: Get the list of server certificate.
+- name: Get the list of server certificate
   dellemc.powerscale.info:
     onefs_host: "{{ onefs_host }}"
     verify_ssl: "{{ verify_ssl }}"
@@ -585,6 +598,56 @@ EXAMPLES = r'''
     gather_subset:
       - support_assist_settings
 
+- name: Get alert categories and alert settings from PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{ onefs_host }}"
+    verify_ssl: "{{ verify_ssl }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    gather_subset:
+      - alert_categories
+      - alert_settings
+
+- name: Get list of alert rules in descending order from PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{ onefs_host }}"
+    verify_ssl: "{{ verify_ssl }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    gather_subset:
+      - alert_rules
+    query_parameters:
+      alert_rules:
+        - sort_dir: "desc"
+        - sort: "condition"
+        - channels: "SupportAssist"
+
+- name: Get list of event groups with alert info from PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{ onefs_host }}"
+    verify_ssl: "{{ verify_ssl }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    gather_subset:
+      - event_group
+    query_parameters:
+      event_group:
+        - alert_info: true
+        - category: '100000000'
+
+- name: Get sorted list of alert channel based on name key from PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{ onefs_host }}"
+    verify_ssl: "{{ verify_ssl }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    gather_subset:
+      - alert_channels
+    query_parameters:
+      alert_channels:
+        - sort: "enabled"
+        - sort_dir: "asc"
+        
 - name: Get smartquota from PowerScale cluster
   dellemc.powerscale.info:
     onefs_host: "{{ onefs_host }}"
@@ -631,7 +694,7 @@ EXAMPLES = r'''
         quota: true
         acl: true
         snapshot: true
-        path: "<path>"
+        path: "<path>"           
 '''
 
 RETURN = r'''
@@ -2394,7 +2457,7 @@ ServerCertificate:
 roles:
     description: List of auth roles.
     type: dict
-    returned: Always
+    returned: When C(roles) is in a given I(gather_subset)
     contains:
         description:
             description: Description of the auth role.
@@ -2556,7 +2619,7 @@ smart_quota:
 support_assist_settings:
     description: The support assist settings details.
     type: dict
-    returned: always
+    returned: When C(support_assist_settings) is in a given I(gather_subset)
     contains:
         automatic_case_creation:
             description: C(True) indicates automatic case creation is enabled.
@@ -2728,6 +2791,317 @@ support_assist_settings:
           "telemetry_threads": 10
         }
     }
+alert_settings:
+    description: The alert settings details.
+    type: dict
+    returned: When C(alert_settings) is in a given I(gather_subset).
+    contains:
+        history:
+            description: History list of CELOG maintenance mode windows.
+            type: list
+            contains:
+                end:
+                    description:
+                        - End time of CELOG maintenance mode, as a UNIX
+                          timestamp in seconds.
+                        - Value 0 indicates that maintenance mode is still
+                          enabled.
+                    type: int
+                start:
+                    description: Start time of CELOG maintenance mode, as a UNIX
+                                 timestamp in seconds.
+                    type: int
+        maintenance:
+            description: Indicates if maintenance mode is enabled.
+            type: bool
+    sample: {
+        history: [
+            {
+                "end": 0,
+                "start": 1719822336,
+            }
+        ],
+        "maintenance": "false"
+    }
+alert_categories:
+    description: The alert categories details.
+    type: list
+    returned: When C(alert_categories) is in a given I(gather_subset).
+    contains:
+        categories:
+            description: High level categorisation of eventgroups.
+            type: list
+            contains:
+                id:
+                    description: Numeric identifier of eventgroup category.
+                    type: str
+                id_name:
+                    description: Name of category.
+                    type: str
+                name:
+                    description: Description of category.
+                    type: str
+        resume:
+            description: Provide this token as the 'resume' query argument to continue listing results.
+            type: str
+        total:
+            description: Total number of items available.
+            type: int
+    sample: {
+        categories: [
+            {
+                "id": "200000000",
+                "id_name": "NODE_STATUS_EVENTS",
+                "name": "Node status events",
+            }
+        ],
+        "resume": null,
+        "total": 1
+    }
+alert_channels:
+    description: The alert channels details.
+    type: list
+    returned: When C(alert_channels) is in a given I(gather_subset).
+    contains:
+        channels:
+            description: Named channel through which alerts can be delivered.
+            type: list
+            contains:
+                allowed_nodes:
+                    description: Nodes (LNNs) that can be masters for this channel.
+                    type: list
+                enabled:
+                    description: Channel is to be used or not.
+                    type: bool
+                excluded_nodes:
+                    description: Nodes (LNNs) that cannot be masters for this channel.
+                    type: list
+                parameters:
+                    description: Parameters to be used for an smtp channel.
+                    type: dict
+                    contains:
+                        address:
+                            description: Email addresses to send to.
+                            type: list
+                        batch:
+                            description: Batching criterion.
+                            type: str
+                        batch_period:
+                            description: Period over which batching is to be performed.
+                            type: int
+                        custom_template:
+                            description: Path to custom notification template.
+                            type: str
+                        send_as:
+                            description: Email address to use as from.
+                            type: str
+                        smtp_host:
+                            description: SMTP host.
+                            type: str
+                        smtp_password:
+                            description: Password for SMTP authentication, only if
+                                         smtp_use_auth true.
+                            type: str
+                        smtp_port:
+                            description: SMTP relay port. It defaults to 25.
+                            type: int
+                        smtp_security:
+                            description: Encryption protocol to use for SMTP.
+                            type: str
+                        smtp_use_auth:
+                            description: Use SMTP authentication. It defaults to false.
+                            type: bool
+                        smtp_username:
+                            description: Username for SMTP authentication, only if smtp_use_auth true.
+                            type: str
+                        subject:
+                            description: Subject for emails.
+                            type: str
+                system:
+                    description: Channel is a pre-defined system channel.
+                    type: bool
+                type:
+                    description: The mechanism used by the channel.
+                    type: str
+                id:
+                    description: Unique identifier.
+                    type: int
+                name:
+                    description: Channel name, may not contain /.
+                    type: str
+                rules:
+                    description: Alert rules involving this eventgroup type.
+                    type: str
+        resume:
+            description: Provide this token as the 'resume' query argument to continue listing results.
+            type: str
+        total:
+            description: Total number of items available.
+            type: int
+    sample: {
+        channels: [
+            {
+                "allowed_nodes": [],
+                "enabled": "true",
+                "excluded_nodes": [],
+                "id": 2,
+                "name": "Heartbeat Self-Test",
+                "parameters": {
+                    "address": [],
+                    "batch": "",
+                    "batch_period": "",
+                    "custom_template": "",
+                    "send_as": "",
+                    "smtp_host": "",
+                    "smtp_password": "",
+                    "smtp_port": "",
+                    "smtp_security": "",
+                    "smtp_use_auth": "",
+                    "smtp_username": "",
+                    "subject": ""
+                },
+                "rules": ["Heatrbeat"],
+                "system": "true",
+                "type": "heartbreak"
+            }
+        ],
+        "resume": null,
+        "total": 1
+    }
+alert_rules:
+    description: The alert rules details.
+    type: list
+    returned: When C(alert_rules) is in a given I(gather_subset).
+    contains:
+        alert_conditions:
+            description: Specifies under what conditions and over which channel an alert should be sent.
+            type: list
+            contains:
+                categories:
+                    description: Event Group categories to be alerted.
+                    type: list
+                channels:
+                    description: Channels for alert.
+                    type: list
+                condition:
+                    description: Trigger condition for alert.
+                    type: str
+                eventgroup_ids:
+                    description: Event Group IDs to be alerted.
+                    type: list
+                exclude_eventgroup_ids:
+                    description: Event Group categories to be excluded from alerts.
+                    type: list
+                id:
+                    description: Unique identifier.
+                    type: int
+                interval:
+                    description: Required with ONGOING condition only, period
+                                 in seconds between alerts of ongoing conditions.
+                    type: int
+                limit:
+                    description: Required with NEW EVENTS condition only,
+                                 limits the number of alerts sent as events are added.
+                    type: int
+                name:
+                    description: Unique identifier.
+                    type: str
+                severities:
+                    description: Severities to be alerted.
+                    type: list
+                transient:
+                    description: Any eventgroup lasting less than this many
+                                 seconds is deemed transient and will not
+                                 generate alerts under this condition.
+                    type: int
+        resume:
+            description: Provide this token as the 'resume' query argument to
+                         continue listing results.
+            type: str
+        total:
+            description: Total number of items available.
+            type: int
+    sample: {
+        alert_conditions: [
+            {
+                "categories": [],
+                "channels": [],
+                "condition": "ONGOING",
+                "eventgroup_ids": ["400050004"],
+                "exclude_eventgroup_ids": [],
+                "id": 1,
+                "interval": 0,
+                "limit": 0,
+                "name": "Heartbeat Self-Test",
+                "severities": [],
+                "transient": 0
+            }
+        ],
+        "resume": null,
+        "total": 1
+    }
+event_groups:
+    description: The event group details.
+    type: list
+    returned: When C(event_group) is in a given I(gather_subset).
+    contains:
+        eventgroup_definitions:
+            description: Description of an eventgroup that can occur and be detected.
+            type: list
+            contains:
+                category:
+                    description: ID of eventgroup category.
+                    type: list
+                channels:
+                    description: Channels by which this eventgroup type can be alerted.
+                    type: list
+                description:
+                    description: Human readable description, may contain value placeholders.
+                    type: str
+                id:
+                    description: Unique identifier.
+                    type: int
+                name:
+                    description: Name for eventgroup.
+                    type: str
+                no_ignore:
+                    description: True if event should not be ignored.
+                    type: bool
+                node:
+                    description: True if this eventgroup type is node specific,
+                                 false cluster wide.
+                    type: bool
+                rules:
+                    description: Alert rules involving this eventgroup type.
+                    type: list
+                suppressed:
+                    description: True if alerting is suppressed for this
+                                 eventgroup type.
+                    type: bool
+        resume:
+            description: Provide this token as the 'resume' query argument
+                         to continue listing results.
+            type: str
+        total:
+            description: Total number of items available.
+            type: int
+    sample: {
+        eventgroup_definitions: [
+            {
+                "category": "400000000",
+                "channels": [],
+                "description": "ONGOING",
+                "id": 1,
+                "name": "Heartbeat Self-Test",
+                "no_ignore": true,
+                "node": true,
+                "rules": [],
+                "suppressed": false
+            }
+        ],
+        "resume": null,
+        "total": 1
+    }
 '''
 
 from ansible.module_utils.basic import AnsibleModule
@@ -2743,6 +3117,8 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.sh
     import Auth
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.support_assist \
     import SupportAssist
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.events \
+    import Events
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.namespace \
@@ -2783,6 +3159,7 @@ class Info(object):
         self.major = int(str(self.isi_sdk)[21])
         self.minor = int(str(self.isi_sdk)[23])
         LOG.info('Got python SDK instance for provisioning on PowerScale ')
+
         self.cluster_api = self.isi_sdk.ClusterApi(self.api_client)
         self.zone_api = self.isi_sdk.ZonesApi(self.api_client)
         self.auth_api = self.isi_sdk.AuthApi(self.api_client)
@@ -2798,6 +3175,7 @@ class Info(object):
         self.snapshot_api = self.isi_sdk.SnapshotApi(self.api_client)
         if self.major > 9 or (self.major == 9 and self.minor > 4):
             self.support_assist_api = self.isi_sdk.SupportassistApi(self.api_client)
+        self.event_api = self.isi_sdk.EventApi(self.api_client)
 
     def get_attributes_list(self):
         """Get the list of attributes of a given PowerScale Storage"""
@@ -3445,10 +3823,17 @@ class Info(object):
             filters_dict[f_key] = f_val
         return filters_dict
 
+    def get_support_assist_settings(self):
+        """Get support assist settings based on the version."""
+        if self.major > 9 or (self.major == 9 and self.minor > 4):
+            return SupportAssist(self.support_assist_api, self.module).get_support_assist_settings()
+        else:
+            error_msg = "support_assist_settings is supported for One FS version 9.5.0 and above."
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
+
     def perform_module_operation(self):
-        """Perform different actions on Gatherfacts based on user parameter
-        chosen in playbook
-        """
+        """Perform different actions on Gatherfacts based on user parameter chosen in playbook"""
         include_all_access_zones = self.module.params['include_all_access_zones']
         access_zone = self.module.params['access_zone']
         subset = self.module.params['gather_subset']
@@ -3462,183 +3847,163 @@ class Info(object):
         if not subset:
             self.module.fail_json(msg="Please specify gather_subset")
 
-        attributes = []
-        access_zones = []
-        nodes = []
-        providers = []
-        users = []
-        groups = []
-        smb_shares = []
-        clients = []
-        nfs_exports = []
-        nfs_aliases = []
-        synciq_reports = []
-        synciq_target_reports = []
-        synciq_policies = []
-        synciq_target_cluster_certificates = []
-        synciq_performance_rules = []
-        network_pools = []
-        network_groupnets = []
-        network_rules = []
-        network_interfaces = []
-        network_subnets = []
-        node_pools = []
-        storagepool_tiers = []
-        smb_files = []
-        user_mapping_rules = []
-        ldap = []
-        nfs_zone_settings = {}
-        nfs_default_settings = {}
-        nfs_global_settings = {}
-        synciq_global_settings = {}
-        s3_buckets = {}
-        smb_global_settings = {}
-        ntp_servers = {}
-        email_settings = {}
-        cluster_identity = {}
-        cluster_owner = {}
-        snmp_settings = {}
-        server_certificate = []
-        roles = {}
-        support_assist_settings = {}
-        smartquota = []
-        filesystem = []
+        # Initialize result dictionary with default values
+        result = {
+            'Attributes': [],
+            'AccessZones': [],
+            'Nodes': [],
+            'Providers': [],
+            'Users': [],
+            'Groups': [],
+            'SmbShares': [],
+            'Clients': [],
+            'NfsExports': [],
+            'NfsAliases': [],
+            'SynciqReports': [],
+            'SynciqTargetReports': [],
+            'SynciqPolicies': [],
+            'SynciqTargetClusterCertificate': [],
+            'SynciqPerformanceRules': [],
+            'NetworkGroupnets': [],
+            'NetworkPools': [],
+            'NetworkRules': [],
+            'NetworkInterfaces': [],
+            'NetworkSubnets': [],
+            'NodePools': [],
+            'StoragePoolTiers': [],
+            'SmbOpenFiles': [],
+            'UserMappingRules': [],
+            'LdapProviders': [],
+            'NfsZoneSettings': {},
+            'NfsDefaultSettings': {},
+            'NfsGlobalSettings': {},
+            'SynciqGlobalSettings': {},
+            's3Buckets': {},
+            'SmbGlobalSettings': {},
+            'NTPServers': {},
+            'EmailSettings': {},
+            'ClusterIdentity': {},
+            'ClusterOwner': {},
+            'SnmpSettings': {},
+            'ServerCertificate': [],
+            'roles': {},
+            'support_assist_settings': {},
+            'alert_settings': {},
+            'alert_rules': [],
+            'alert_categories': [],
+            'alert_channels': [],
+            'event_groups': [],
+            'smartquota' : [],
+            'filesystem' : []
+        }
 
-        if 'attributes' in str(subset):
-            attributes = self.get_attributes_list()
-        if 'access_zones' in str(subset):
-            access_zones = self.get_access_zones_list()
-        if 'nodes' in str(subset):
-            nodes = self.get_nodes_list()
-        if 'providers' in str(subset):
-            providers = self.get_providers_list(access_zone)
-        if 'users' in str(subset):
-            users = self.get_users_list(access_zone)
-        if 'groups' in str(subset):
-            groups = self.get_groups_list(access_zone)
-        if 'smb_shares' in str(subset):
-            smb_shares = self.get_smb_shares_list(access_zone)
-        if 'clients' in str(subset):
-            clients = self.get_clients_list()
-        if 'nfs_exports' in str(subset):
-            nfs_exports = self.get_nfs_exports_list(access_zone)
-        if 'nfs_aliases' in str(subset):
-            nfs_aliases = self.get_nfs_aliases_list(access_zone)
-        if 'synciq_reports' in str(subset):
-            synciq_reports = self.get_synciq_reports()
-        if 'synciq_target_reports' in str(subset):
-            synciq_target_reports = self.get_synciq_target_reports()
-        if 'synciq_policies' in str(subset):
-            synciq_policies = self.get_syniq_policies_list()
-        if 'synciq_target_cluster_certificates' in str(subset):
-            synciq_target_cluster_certificates = self.get_synciq_target_cluster_certificates_list()
-        if 'synciq_performance_rules' in str(subset):
-            synciq_performance_rules = self.get_synciq_performance_rules()
-        if 'network_groupnets' in str(subset):
-            network_groupnets = self.get_network_groupnets()
-        if 'network_pools' in str(subset):
-            network_pools = self.get_network_pools(access_zone, include_all_access_zones)
-        if 'network_rules' in str(subset):
-            network_rules = self.get_network_rules()
-        if 'network_interfaces' in str(subset):
-            network_interfaces = self.get_network_interfaces()
-        if 'network_subnets' in str(subset):
-            network_subnets = self.get_network_subnets()
-        if 'node_pools' in str(subset):
-            node_pools = self.get_node_pools()
-        if 'storagepool_tiers' in str(subset):
-            storagepool_tiers = self.get_storagepool_tiers()
-        if 'smb_files' in str(subset):
-            smb_files = self.get_smb_files()
-        if 'user_mapping_rules' in str(subset):
-            user_mapping_rules = self.get_user_mapping_rules(access_zone)
-        if 'ldap' in str(subset):
-            ldap = self.get_ldap_providers(scope)
-        if 'nfs_zone_settings' in str(subset):
-            nfs_zone_settings = self.get_zone_settings(access_zone)
-        if 'nfs_default_settings' in str(subset):
-            nfs_default_settings = Protocol(self.protocol_api, self.module).get_nfs_default_settings(access_zone)
-        if 'nfs_global_settings' in str(subset):
-            nfs_global_settings = self.get_nfs_global_settings()
-        if 'synciq_global_settings' in str(subset):
-            synciq_global_settings = SyncIQ(self.synciq_api, self.module).get_synciq_global_settings()
-        if 's3_buckets' in str(subset):
-            s3_buckets = Protocol(self.protocol_api, self.module).get_s3_bucket_list()
-        if 'smb_global_settings' in str(subset):
-            smb_global_settings = Protocol(
-                self.protocol_api, self.module).get_smb_global_settings()
-        if 'ntp_servers' in str(subset):
-            ntp_servers = Protocol(self.protocol_api, self.module).get_ntp_server_list()
-        if 'email_settings' in str(subset):
-            email_settings = Cluster(self.cluster_api, self.module).get_email_settings()
-        if 'cluster_identity' in str(subset):
-            cluster_identity = Cluster(self.cluster_api, self.module).get_cluster_identity_details()
-        if 'cluster_owner' in str(subset):
-            cluster_owner = Cluster(self.cluster_api, self.module).get_cluster_owner_details()
-        if 'snmp_settings' in str(subset):
-            snmp_settings = Protocol(
-                self.protocol_api, self.module).get_snmp_settings()
-        if 'server_certificate' in str(subset):
-            server_certificate = Certificate(self.certificate_api, self.module).get_server_certificate_with_default()
-        if 'roles' in str(subset):
-            roles = Auth(self.auth_api, self.module).get_auth_roles(access_zone)
-        if 'smartquota' in str(subset):
-            smartquota = self.get_smartquota_list()
-        if 'support_assist_settings' in str(subset):
-            if self.major > 9 or (self.major == 9 and self.minor > 4):
-                support_assist_settings = SupportAssist(
-                    self.support_assist_api, self.module).get_support_assist_settings()
+        # Call the appropriate method based on the subset
+        subset_mapping = {
+            'attributes': self.get_attributes_list,
+            'access_zones': self.get_access_zones_list,
+            'nodes': self.get_nodes_list,
+            'providers': lambda: self.get_providers_list(access_zone),
+            'users': lambda: self.get_users_list(access_zone),
+            'groups': lambda: self.get_groups_list(access_zone),
+            'smb_shares': lambda: self.get_smb_shares_list(access_zone),
+            'clients': self.get_clients_list,
+            'nfs_exports': lambda: self.get_nfs_exports_list(access_zone),
+            'nfs_aliases': lambda: self.get_nfs_aliases_list(access_zone),
+            'synciq_reports': self.get_synciq_reports,
+            'synciq_target_reports': self.get_synciq_target_reports,
+            'synciq_policies': self.get_syniq_policies_list,
+            'synciq_target_cluster_certificates': self.get_synciq_target_cluster_certificates_list,
+            'synciq_performance_rules': self.get_synciq_performance_rules,
+            'network_groupnets': self.get_network_groupnets,
+            'network_pools': lambda: self.get_network_pools(access_zone, include_all_access_zones),
+            'network_rules': self.get_network_rules,
+            'network_interfaces': self.get_network_interfaces,
+            'network_subnets': self.get_network_subnets,
+            'node_pools': self.get_node_pools,
+            'storagepool_tiers': self.get_storagepool_tiers,
+            'smb_files': self.get_smb_files,
+            'user_mapping_rules': lambda: self.get_user_mapping_rules(access_zone),
+            'ldap': lambda: self.get_ldap_providers(scope),
+            'nfs_zone_settings': lambda: self.get_zone_settings(access_zone),
+            'nfs_default_settings': lambda: Protocol(self.protocol_api, self.module).get_nfs_default_settings(access_zone),
+            'nfs_global_settings': self.get_nfs_global_settings,
+            'synciq_global_settings': lambda: SyncIQ(self.synciq_api, self.module).get_synciq_global_settings(),
+            's3_buckets': lambda: Protocol(self.protocol_api, self.module).get_s3_bucket_list(),
+            'smb_global_settings': lambda: Protocol(self.protocol_api, self.module).get_smb_global_settings(),
+            'ntp_servers': lambda: Protocol(self.protocol_api, self.module).get_ntp_server_list(),
+            'email_settings': lambda: Cluster(self.cluster_api, self.module).get_email_settings(),
+            'cluster_identity': lambda: Cluster(self.cluster_api, self.module).get_cluster_identity_details(),
+            'cluster_owner': lambda: Cluster(self.cluster_api, self.module).get_cluster_owner_details(),
+            'snmp_settings': lambda: Protocol(self.protocol_api, self.module).get_snmp_settings(),
+            'server_certificate': lambda: Certificate(self.certificate_api, self.module).get_server_certificate_with_default(),
+            'roles': lambda: Auth(self.auth_api, self.module).get_auth_roles(access_zone),
+            'support_assist_settings': self.get_support_assist_settings,
+            'alert_settings': lambda: Events(self.event_api, self.module).get_event_maintenance(),
+            'alert_rules': lambda: Events(self.event_api, self.module).get_alert_rules(),
+            'alert_categories': lambda: Events(self.event_api, self.module).get_alert_categories(),
+            'alert_channels': lambda: Events(self.event_api, self.module).get_event_channels(),
+            'event_group': lambda: Events(self.event_api, self.module).get_event_groups(),
+            'smartquota': self.get_smartquota_list(),
+            'filesystem': self.get_filesystem_list(path, query_params)
+        }
+
+        key_mapping = {
+            'attributes': 'Attributes',
+            'access_zones': 'AccessZones',
+            'nodes': 'Nodes',
+            'providers': 'Providers',
+            'users': 'Users',
+            'groups': 'Groups',
+            'smb_shares': 'SmbShares',
+            'clients': 'Clients',
+            'nfs_exports': 'NfsExports',
+            'nfs_aliases': 'NfsAliases',
+            'synciq_reports': 'SynciqReports',
+            'synciq_target_reports': 'SynciqTargetReports',
+            'synciq_policies': 'SynciqPolicies',
+            'synciq_performance_rules': 'SynciqPerformanceRules',
+            'network_groupnets': 'NetworkGroupnets',
+            'network_pools': 'NetworkPools',
+            'network_rules': 'NetworkRules',
+            'network_interfaces': 'NetworkInterfaces',
+            'network_subnets': 'NetworkSubnets',
+            'node_pools': 'NodePools',
+            'storagepool_tiers': 'StoragePoolTiers',
+            'smb_files': 'SmbOpenFiles',
+            'user_mapping_rules': 'UserMappingRules',
+            'ldap': 'LdapProviders',
+            'nfs_zone_settings': 'NfsZoneSettings',
+            'nfs_default_settings': 'NfsDefaultSettings',
+            'nfs_global_settings': 'NfsGlobalSettings',
+            'synciq_global_settings': 'SynciqGlobalSettings',
+            'smb_global_settings': 'SmbGlobalSettings',
+            'ntp_servers': 'NtpServers',
+            'email_settings': 'EmailSettings',
+            'cluster_identity': 'ClusterIdentity',
+            'cluster_owner': 'ClusterOwner',
+            'snmp_settings': 'SnmpSettings',
+            'server_certificate': 'ServerCertificate',
+            's3_buckets': 's3Buckets',
+            'synciq_target_cluster_certificates': 'SynciqTargetClusterCertificate',
+            'event_group': 'event_groups',
+            'smartquota': 'smart_quota',
+            'filesystem': 'file_system'
+        }
+
+        # Map the subset to the appropriate Key
+        subset_list = ['attributes', 'access_zones', 'nodes', 'providers', 'users', 'groups', 'smb_shares', 'clients',
+                       'nfs_exports', 'nfs_aliases', 'synciq_reports', 'synciq_target_reports', 'synciq_policies',
+                       'synciq_target_cluster_certificates', 'synciq_performance_rules', 'network_groupnets',
+                       'network_pools', 'network_rules', 'network_interfaces', 'network_subnets', 'node_pools',
+                       'storagepool_tiers', 'smb_files', 'user_mapping_rules', 'ldap', 'nfs_zone_settings',
+                       'nfs_default_settings', 'nfs_global_settings', 'synciq_global_settings', 's3_buckets',
+                       'smb_global_settings', 'ntp_servers', 'email_settings', 'cluster_identity', 'cluster_owner',
+                       'snmp_settings', 'server_certificate', 'event_group', 'smartquota', 'filesystem']
+        for key in subset:
+            if key not in subset_list:
+                result[key] = subset_mapping[key]()
             else:
-                error_msg = "support_assist_settings is supported for One FS version 9.5.0 and above."
-                LOG.error(error_msg)
-                self.module.fail_json(msg=error_msg)
-        if 'filesystem' in str(subset):
-            filesystem = self.get_filesystem_list(path, query_params)
-
-        result = dict(
-            Attributes=attributes,
-            AccessZones=access_zones,
-            Nodes=nodes,
-            Providers=providers,
-            Users=users,
-            Groups=groups,
-            SmbShares=smb_shares,
-            Clients=clients,
-            NfsExports=nfs_exports,
-            NfsAliases=nfs_aliases,
-            SynciqReports=synciq_reports,
-            SynciqTargetReports=synciq_target_reports,
-            SynciqPolicies=synciq_policies,
-            SynciqPerformanceRules=synciq_performance_rules,
-            NetworkGroupnets=network_groupnets,
-            NetworkPools=network_pools,
-            NetworkRules=network_rules,
-            NetworkInterfaces=network_interfaces,
-            NetworkSubnets=network_subnets,
-            NodePools=node_pools,
-            StoragePoolTiers=storagepool_tiers,
-            SmbOpenFiles=smb_files,
-            UserMappingRules=user_mapping_rules,
-            LdapProviders=ldap,
-            NfsZoneSettings=nfs_zone_settings,
-            NfsDefaultSettings=nfs_default_settings,
-            NfsGlobalSettings=nfs_global_settings,
-            SynciqGlobalSettings=synciq_global_settings,
-            s3Buckets=s3_buckets,
-            SmbGlobalSettings=smb_global_settings,
-            NTPServers=ntp_servers,
-            EmailSettings=email_settings,
-            ClusterIdentity=cluster_identity,
-            ClusterOwner=cluster_owner,
-            SnmpSettings=snmp_settings,
-            ServerCertificate=server_certificate,
-            roles=roles,
-            support_assist_settings=support_assist_settings,
-            smart_quota=smartquota,
-            file_system=filesystem
-        )
-
-        result.update(SynciqTargetClusterCertificate=synciq_target_cluster_certificates)
+                result[key_mapping[key]] = subset_mapping[key]()
 
         self.module.exit_json(**result)
 
@@ -3667,49 +4032,25 @@ def get_info_parameters():
         scope=dict(required=False, type='str',
                    choices=['effective', 'user', 'default'],
                    default='effective'),
-        gather_subset=dict(type='list', required=True, elements='str',
-                           choices=['attributes',
-                                    'access_zones',
-                                    'nodes',
-                                    'providers',
-                                    'users',
-                                    'groups',
-                                    'smb_shares',
-                                    'nfs_exports',
-                                    'nfs_aliases',
-                                    'clients',
-                                    'synciq_reports',
-                                    'synciq_target_reports',
-                                    'synciq_policies',
-                                    'synciq_target_cluster_certificates',
-                                    'synciq_performance_rules',
-                                    'network_groupnets',
-                                    'network_pools',
-                                    'network_rules',
-                                    'network_interfaces',
-                                    'network_subnets',
-                                    'node_pools',
-                                    'storagepool_tiers',
-                                    'smb_files',
-                                    'user_mapping_rules',
-                                    'ldap',
-                                    'nfs_zone_settings',
-                                    'nfs_default_settings',
-                                    'nfs_global_settings',
-                                    'synciq_global_settings',
-                                    's3_buckets',
-                                    'smb_global_settings',
-                                    'ntp_servers',
-                                    'email_settings',
-                                    'cluster_identity',
-                                    'cluster_owner',
-                                    'snmp_settings',
-                                    'server_certificate',
-                                    'roles',
-                                    'support_assist_settings',
-                                    'smartquota',
-                                    'filesystem'
-                                    ]),
+        gather_subset=dict(
+            type='list', required=True, elements='str',
+            choices=['attributes', 'access_zones', 'nodes',
+                     'providers', 'users', 'groups',
+                     'smb_shares', 'nfs_exports', 'nfs_aliases',
+                     'clients', 'synciq_reports', 'synciq_target_reports',
+                     'synciq_policies', 'synciq_target_cluster_certificates',
+                     'synciq_performance_rules', 'network_groupnets',
+                     'network_pools', 'network_rules', 'network_interfaces',
+                     'network_subnets', 'node_pools', 'storagepool_tiers',
+                     'smb_files', 'user_mapping_rules', 'ldap',
+                     'nfs_zone_settings', 'nfs_default_settings',
+                     'nfs_global_settings', 'synciq_global_settings',
+                     's3_buckets', 'smb_global_settings', 'ntp_servers',
+                     'email_settings', 'cluster_identity', 'cluster_owner',
+                     'snmp_settings', 'server_certificate', 'roles',
+                     'support_assist_settings', 'alert_settings', 'alert_rules',
+                     'alert_channels', 'alert_categories', 'event_group',
+                     'filesystem', 'smartquota']),
         filters=dict(type='list',
                      required=False,
                      elements='dict',
