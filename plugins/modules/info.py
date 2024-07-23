@@ -76,12 +76,6 @@ options:
     choices: ['effective', 'user', 'default']
     default: 'effective'
     type: str
-  query_parameters:
-    description:
-    - Contains dictionary of query parameters for specific I(gather_subset).
-    - Applicable to C(alert_rules), C(event_group) and C(event_channels).
-    type: dict
-    version_added: '3.2.0'
   gather_subset:
     description:
     - List of string variables to specify the PowerScale Storage System
@@ -196,7 +190,7 @@ notes:
 - The parameters I(access_zone) and I(include_all_access_zones) are mutually exclusive.
 - Listing of SyncIQ target cluster certificates is not supported by isi_sdk_8_1_1 version.
 - The I(check_mode) is supported.
-- Filter functionality is supported only for the following 'gather_subset'- 'nfs', 'smartquota'.
+- Filter functionality is supported only for the following 'gather_subset'- 'nfs', 'smartquota', 'filesystem'.
 '''
 
 EXAMPLES = r'''
@@ -647,7 +641,7 @@ EXAMPLES = r'''
       alert_channels:
         - sort: "enabled"
         - sort_dir: "asc"
-        
+
 - name: Get smartquota from PowerScale cluster
   dellemc.powerscale.info:
     onefs_host: "{{ onefs_host }}"
@@ -694,7 +688,27 @@ EXAMPLES = r'''
         quota: true
         acl: true
         snapshot: true
-        path: "<path>"           
+        path: "<path>"
+
+- name: Get filesystem from PowerScale cluster with query parameters along with filters
+  dellemc.powerscale.info:
+    onefs_host: "{{ onefs_host }}"
+    verify_ssl: "{{ verify_ssl }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    gather_subset:
+      - filesystem
+    query_parameters:
+      filesystem:
+        metadata: true
+        quota: true
+        acl: true
+        snapshot: true
+        path: "<path>"
+    filters:
+      - filter_key: "name"
+        filter_operator: "equal"
+        filter_value: "xxx"
 '''
 
 RETURN = r'''
@@ -2615,7 +2629,24 @@ smart_quota:
         "shadow_refs_ready": true
     }
     }
-]
+    ]
+file_system:
+  description: The filesystem details.
+  type: list
+  returned: always
+  contains:
+        name:
+            description: The name of the filesystem.
+            type: str
+            sample: "home"
+  sample: [
+        {
+            "name": "home"
+        },
+        {
+            "name": "smb11"
+        }
+    ]
 support_assist_settings:
     description: The support assist settings details.
     type: dict
