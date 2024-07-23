@@ -19,7 +19,7 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock
     import MockApiException
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.initial_mock \
     import utils
-from ansible_collections.dellemc.powerscale.plugins.modules.info import Info, main
+from ansible_collections.dellemc.powerscale.plugins.modules.info import Info
 
 utils.get_logger = MagicMock()
 
