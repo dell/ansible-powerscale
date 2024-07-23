@@ -3974,8 +3974,8 @@ class Info(object):
             'alert_categories': lambda: Events(self.event_api, self.module).get_alert_categories(),
             'alert_channels': lambda: Events(self.event_api, self.module).get_event_channels(),
             'event_group': lambda: Events(self.event_api, self.module).get_event_groups(),
-            'smartquota': self.get_smartquota_list(),
-            'filesystem': self.get_filesystem_list(path, query_params)
+            'smartquota': self.get_smartquota_list,
+            'filesystem': lambda: self.get_filesystem_list(path, query_params)
         }
 
         key_mapping = {
