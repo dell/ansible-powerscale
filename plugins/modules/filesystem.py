@@ -566,12 +566,8 @@ import copy
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
-from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.namespace \
-    import Namespace
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.quota \
     import Quota
-from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.snapshot \
-    import Snapshot
 
 LOG = utils.get_logger('filesystem')
 
@@ -624,6 +620,67 @@ class FileSystem(object):
         self.zone_summary_api = self.isi_sdk.ZonesSummaryApi(self.api_client)
         self.snapshot_api = self.isi_sdk.SnapshotApi(self.api_client)
         self.auth_api = self.isi_sdk.AuthApi(self.api_client)
+
+    def get_filesystem(self, path):
+        """Gets a FileSystem on PowerScale."""
+        try:
+            resp = self.namespace_api.get_directory_metadata(
+                path,
+                metadata=True)
+            return resp.to_dict()
+        except utils.ApiException as e:
+            if str(e.status) == "404":
+                log_msg = "Filesystem {0} status is " \
+                          "{1}".format(path, e.status)
+                LOG.info(log_msg)
+                return None
+            else:
+                error_msg = self.determine_error(error_obj=e)
+                error_message = "Failed to get details of Filesystem " \
+                                "{0} with error {1} ".format(
+                                    path,
+                                    str(error_msg))
+                LOG.error(error_message)
+                self.module.fail_json(msg=error_message)
+
+        except Exception as e:
+            error_message = "Failed to get details of Filesystem {0} with" \
+                            " error {1} ".format(path, str(e))
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    def get_acl(self, effective_path):
+        """Retrieves ACL rights of filesystem"""
+        try:
+            if not self.module.check_mode:
+                filesystem_acl = \
+                    (self.namespace_api.get_acl(effective_path,
+                                                acl=True)).to_dict()
+                return filesystem_acl
+            return True
+        except Exception as e:
+            error_message = 'Error %s while retrieving the access control list for ' \
+                            'namespace object.' % utils.determine_error(error_obj=e)
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    def get_filesystem_snapshots(self, effective_path):
+        """Get snapshots for a given filesystem"""
+        try:
+            snapshot_list = \
+                self.snapshot_api.list_snapshot_snapshots().to_dict()
+            snapshots = []
+
+            for snap in snapshot_list['snapshots']:
+                if snap['path'] == '/' + effective_path:
+                    snapshots.append(snap)
+            return snapshots
+        except Exception as e:
+            error_msg = utils.determine_error(error_obj=e)
+            error_message = 'Failed to get filesystem snapshots ' \
+                            'due to error {0}'.format((str(error_msg)))
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
 
     def determine_path(self):
         path = None
@@ -1024,8 +1081,7 @@ class FileSystem(object):
         """Determines if ACLs are modified."""
         try:
             LOG.info('Determining if the ACLs are modified..')
-            filesystem_acl = Namespace(self.namespace_api,
-                                       self.module).get_acl(effective_path)
+            filesystem_acl = self.get_acl(effective_path)
             if not isinstance(filesystem_acl, dict):
                 return True, None
 
@@ -1329,8 +1385,7 @@ class FileSystem(object):
             owner = {'type': 'user', 'id': owner_uid,
                      'name': owner['name']}
 
-            acl = Namespace(self.namespace_api,
-                            self.module).get_acl(effective_path)
+            acl = self.get_acl(effective_path)
             modified = False
             if isinstance(acl, dict):
                 file_uid = acl['owner']['id']
@@ -1384,8 +1439,7 @@ class FileSystem(object):
             group = {'type': 'group', 'id': group_uid,
                      'name': group['name']}
 
-            acl = Namespace(self.namespace_api,
-                            self.module).get_acl(effective_path)
+            acl = self.get_acl(effective_path)
             modified = False
             if isinstance(acl, dict):
                 file_gid = acl['group']['id']
@@ -1444,19 +1498,6 @@ class FileSystem(object):
         except Exception as e:
             error_msg = self.determine_error(error_obj=e)
             error_message = 'Failed to modify group ' \
-                            'due to error {0}'.format(str(error_msg))
-            LOG.error(error_message)
-            self.module.fail_json(msg=error_message)
-
-    def get_filesystem(self, effective_path):
-        """Returns the filesystem object"""
-        try:
-            filesystem = Namespace(self.namespace_api,
-                                   self.module).get_filesystem(effective_path)
-            return filesystem
-        except Exception as e:
-            error_msg = self.determine_error(error_obj=e)
-            error_message = 'Failed to get filesystem ' \
                             'due to error {0}'.format(str(error_msg))
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
@@ -1536,19 +1577,16 @@ class FilesystemExitHandler():
 class FilesystemDetailsHandler():
     def handle(self, filesystem_obj, filesystem_params, effective_path):
         if filesystem_params['state'] == 'present':
-            filesystem_obj.result['filesystem_details'] = Namespace(filesystem_obj.namespace_api,
-                                                                    filesystem_obj.module).get_filesystem(effective_path)
+            filesystem_obj.result['filesystem_details'] = filesystem_obj.get_filesystem(path=effective_path)
             if filesystem_obj.result.get('filesystem_details') is None:
                 filesystem_obj.result['filesystem_details'] = {}
             filesystem_obj.result['filesystem_details'].update(
-                namespace_acl=Namespace(filesystem_obj.namespace_api, filesystem_obj.module).get_acl(
-                    effective_path))
+                namespace_acl=filesystem_obj.get_acl(effective_path))
             filesystem_obj.result['quota_details'] = Quota(filesystem_obj.quota_api,
                                                            filesystem_obj.module).get_quota(effective_path)
             if filesystem_obj.module.params['list_snapshots']:
                 filesystem_obj.result['filesystem_snapshots'] = \
-                    Snapshot(filesystem_obj.snapshot_api,
-                             filesystem_obj.module).get_filesystem_snapshots(effective_path)
+                    filesystem_obj.get_filesystem_snapshots(effective_path)
 
         FilesystemExitHandler().handle(filesystem_obj)
 
@@ -1644,7 +1682,7 @@ class FilesystemHandler():
         filesystem_obj.validate_input(quota)
 
         effective_path = filesystem_obj.determine_path()
-        filesystem_details = filesystem_obj.get_filesystem(effective_path)
+        filesystem_details = filesystem_obj.get_filesystem(path=effective_path)
         filesystem_quota = filesystem_obj.get_quota(effective_path)
 
         is_acl_modified = False
