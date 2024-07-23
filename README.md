@@ -46,6 +46,8 @@ The Ansible Modules for Dell PowerScale support the following features:
 - Get details, import, modify, setting default and delete server certificates.
 - Get details, create, modify, and delete auth roles.
 - Get details, and modify support assist settings.
+- Get details and modify alert settings.
+- Get details of filesystems, NFS exports, alert_settings, alert_rules, alert_categories, event_groups and alert_channels using Info module.
 
 The tasks can be executed by running simple playbooks written in yaml syntax.
 
@@ -71,7 +73,7 @@ The tasks can be executed by running simple playbooks written in yaml syntax.
 Ansible collection for PowerScale is released and licensed under the GPL-3.0 license. See [LICENSE](https://github.com/dell/ansible-powerscale/blob/main/LICENSE) for the full terms. Ansible modules and modules utilities that are part of the Ansible collection for PowerScale are released and licensed under the Apache 2.0 license. See [MODULE-LICENSE](https://github.com/dell/ansible-powerscale/blob/main/MODULE-LICENSE) for the full terms.
 
 ## Supported platforms
-  * Dell PowerScale OneFS versions 9.3.x, 9.4.x, 9.5.x, and 9.8.x
+  * Dell PowerScale OneFS versions 9.4.x, 9.5.x, 9.7.x, and 9.8.x
 
 ## Prerequisites
 This table provides information about the software prerequisites for the Ansible Modules for Dell PowerScale.
