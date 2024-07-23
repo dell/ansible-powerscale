@@ -14,11 +14,11 @@ Synopsis
 
 Gathering information about Specified PowerScale Storage entities, includes attributes, access zones, nodes, authentication providers for all access zones, users and groups for an access zone.
 
-Get list of smb_shares, nfs_exports, nfs_aliases, active clients, SyncIQ reports, SyncIQ target reports, SyncIQ target cluster certificates, SyncIQ policies, SyncIQ performance rules.
+Get list of smb\_shares, nfs\_exports, nfs\_aliases, active clients, SyncIQ reports, SyncIQ target reports, SyncIQ target cluster certificates, SyncIQ policies, SyncIQ performance rules.
 
 Get list of network groupnets, network pools for all access zones or a specific access zone, network rules, network subnets, network interfaces.
 
-Get list of node pools, storage pool tiers, smb open files, s3 buckets, ntp_servers.
+Get list of node pools, storage pool tiers, smb open files, s3 buckets, ntp\_servers.
 
 Get list of user mapping rules, ldap providers of the PowerScale cluster.
 
@@ -54,14 +54,13 @@ The below requirements are needed on the host that executes this module.
 
 
 
-
 Parameters
 ----------
 
   include_all_access_zones (optional, bool, None)
     Specifies if requested component details need to be fetched from all access zones.
 
-    It is mutually exclusive with *access_zone*.
+    It is mutually exclusive with \ :emphasis:`access\_zone`\ .
 
 
   access_zone (optional, str, System)
@@ -69,19 +68,13 @@ Parameters
 
 
   scope (optional, str, effective)
-    The scope of ldap. If no scope is specified, the ``effective`` scope would be taken by default.
+    The scope of ldap. If no scope is specified, the \ :literal:`effective`\  scope would be taken by default.
 
-    If specified as ``effective`` or not specified, all fields are returned.
+    If specified as \ :literal:`effective`\  or not specified, all fields are returned.
 
-    If specified as ``user``, only fields with non-default values are shown.
+    If specified as \ :literal:`user`\ , only fields with non-default values are shown.
 
-    If specified as ``default``, the original values are returned.
-
-
-  query_parameters (optional, dict, None)
-    Contains dictionary of query parameters for specific *gather_subset*.
-
-    Applicable to ``alert_rules``, ``event_group`` and ``event_channels``.
+    If specified as \ :literal:`default`\ , the original values are returned.
 
 
   gather_subset (True, list, None)
@@ -89,65 +82,65 @@ Parameters
 
     List of all PowerScale Storage System entities supported by the module.
 
-    Attributes - ``attributes``.
+    Attributes - \ :literal:`attributes`\ .
 
-    Access zones - ``access_zones``.
+    Access zones - \ :literal:`access\_zones`\ .
 
-    Nodes - ``nodes``.
+    Nodes - \ :literal:`nodes`\ .
 
-    Providers - ``providers``.
+    Providers - \ :literal:`providers`\ .
 
-    Users - ``users``.
+    Users - \ :literal:`users`\ .
 
-    Groups - ``groups``.
+    Groups - \ :literal:`groups`\ .
 
-    Smb shares - ``smb_shares``.
+    Smb shares - \ :literal:`smb\_shares`\ .
 
-    Nfs exports - ``nfs_exports``.
+    Nfs exports - \ :literal:`nfs\_exports`\ .
 
-    Nfs aliases - ``nfs_aliases``.
+    Nfs aliases - \ :literal:`nfs\_aliases`\ .
 
-    Clients - ``clients``.
+    Clients - \ :literal:`clients`\ .
 
-    Synciq reports - ``synciq_reports``.
+    Synciq reports - \ :literal:`synciq\_reports`\ .
 
-    Synciq target reports - ``synciq_target_reports``.
+    Synciq target reports - \ :literal:`synciq\_target\_reports`\ .
 
-    Synciq policies - ``synciq_policies``.
+    Synciq policies - \ :literal:`synciq\_policies`\ .
 
-    Synciq target cluster certificates - ``synciq_target_cluster_certificates``.
+    Synciq target cluster certificates - \ :literal:`synciq\_target\_cluster\_certificates`\ .
 
-    Synciq performance rules - ``synciq_performance_rules``.
+    Synciq performance rules - \ :literal:`synciq\_performance\_rules`\ .
 
-    Network groupnets - ``network_groupnets``.
+    Network groupnets - \ :literal:`network\_groupnets`\ .
 
-    Network pools - ``network_pools``.
+    Network pools - \ :literal:`network\_pools`\ .
 
-    Network rules - ``network_rules``.
+    Network rules - \ :literal:`network\_rules`\ .
 
-    Network interfaces - ``network_interfaces``.
+    Network interfaces - \ :literal:`network\_interfaces`\ .
 
-    Network subnets - ``network_subnets``.
+    Network subnets - \ :literal:`network\_subnets`\ .
 
-    Node pools - ``node_pools``.
+    Node pools - \ :literal:`node\_pools`\ .
 
-    Storagepool tiers - ``storagepool_tiers``.
+    Storagepool tiers - \ :literal:`storagepool\_tiers`\ .
 
-    SMB files - ``smb_files``.
+    SMB files - \ :literal:`smb\_files`\ .
 
-    User mapping rules - ``user_mapping_rules``.
+    User mapping rules - \ :literal:`user\_mapping\_rules`\ .
 
-    LDAPs - ``ldap``.
+    LDAPs - \ :literal:`ldap`\ .
 
-    NFS zone settings - ``nfs_zone_settings``.
+    NFS zone settings - \ :literal:`nfs\_zone\_settings`\ .
 
-    NFS default settings - ``nfs_default_settings``.
+    NFS default settings - \ :literal:`nfs\_default\_settings`\ .
 
-    SyncIQ global settings - ``synciq_global_settings``.
+    SyncIQ global settings - \ :literal:`synciq\_global\_settings`\ .
 
-    S3 buckets - ``s3_buckets``.
+    S3 buckets - \ :literal:`s3\_buckets`\ .
 
-    The list of *attributes*, *access_zones* and *nodes* is for the entire PowerScale cluster.
+    The list of \ :emphasis:`attributes`\ , \ :emphasis:`access\_zones`\  and \ :emphasis:`nodes`\  is for the entire PowerScale cluster.
 
     The list of providers for the entire PowerScale cluster.
 
@@ -167,37 +160,37 @@ Parameters
 
     The list of ldap providers of PowerScale cluster.
 
-    SMB global settings - ``smb_global_settings``.
+    SMB global settings - \ :literal:`smb\_global\_settings`\ .
 
-    NTP servers ``ntp_servers``.
+    NTP servers \ :literal:`ntp\_servers`\ .
 
-    Email settings ``email_settings``.
+    Email settings \ :literal:`email\_settings`\ .
 
-    Cluster identity ``cluster_identity``.
+    Cluster identity \ :literal:`cluster\_identity`\ .
 
-    Cluster owner ``cluster_owner``.
+    Cluster owner \ :literal:`cluster\_owner`\ .
 
-    SNMP settings - ``snmp_settings``.
+    SNMP settings - \ :literal:`snmp\_settings`\ .
 
-    Server certificate - ``server_certificate``.
+    Server certificate - \ :literal:`server\_certificate`\ .
 
-    Roles - ``roles``.
+    Roles - \ :literal:`roles`\ .
 
-    Support assist settings- ``support_assist_settings``.
-
-    Alert settings - ``alert_settings``.
-
-    Alert rules - ``alert_rules``.
-
-    Alert channels - ``alert_channels``.
-
-    Alert categories - ``alert_categories``.
-
-    Event groups - ``event_group``.
+    Support assist settings- \ :literal:`support\_assist\_settings`\ .
 
     Smartquota- \ :literal:`smartquota`\ .
 
     Filesystem - \ :literal:`filesystem`\ .
+
+    Alert settings - \ :literal:`alert\_settings`\ .
+
+    Alert rules - \ :literal:`alert\_rules`\ .
+
+    Alert channels - \ :literal:`alert\_channels`\ .
+
+    Alert categories - \ :literal:`alert\_categories`\ .
+
+    Event groups - \ :literal:`event\_group`\ .
 
 
   filters (False, list, None)
@@ -238,9 +231,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    ``true`` - indicates that the SSL certificate should be verified.
+    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
 
-    ``false`` - indicates that the SSL certificate should not be verified.
+    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -258,11 +251,12 @@ Notes
 -----
 
 .. note::
-   - The parameters *access_zone* and *include_all_access_zones* are mutually exclusive.
-   - Listing of SyncIQ target cluster certificates is not supported by isi_sdk_8_1_1 version.
-   - The *check_mode* is supported.
-   - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
+   - The parameters \ :emphasis:`access\_zone`\  and \ :emphasis:`include\_all\_access\_zones`\  are mutually exclusive.
+   - Listing of SyncIQ target cluster certificates is not supported by isi\_sdk\_8\_1\_1 version.
+   - The \ :emphasis:`check\_mode`\  is supported.
    - Filter functionality is supported only for the following 'gather\_subset'- 'nfs', 'smartquota', 'filesystem'.
+   - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
+
 
 
 
@@ -766,7 +760,28 @@ Examples
             quota: true
             acl: true
             snapshot: true
-            path: "<path>"   
+            path: "<path>"
+
+    - name: Get filesystem from PowerScale cluster with query parameters along with filters
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - filesystem
+        query_parameters:
+          filesystem:
+            metadata: true
+            quota: true
+            acl: true
+            snapshot: true
+            path: "<path>"
+        filters:
+          - filter_key: "name"
+            filter_operator: "equal"
+            filter_value: "xxx"
+
 
 
 Return Values
@@ -1144,7 +1159,7 @@ NfsZoneSettings (When C(nfs_zone_settings) is in a given I(gather_subset), dict,
 
 
   nfsv4_allow_numeric_ids (, bool, )
-    If ``true``, sends owners and groups as UIDs and GIDs when look up fails or if the *nfsv4_no_names* property is set to 1.
+    If \ :literal:`true`\ , sends owners and groups as UIDs and GIDs when look up fails or if the \ :emphasis:`nfsv4\_no\_names`\  property is set to 1.
 
 
   nfsv4_domain (, str, )
@@ -1152,19 +1167,19 @@ NfsZoneSettings (When C(nfs_zone_settings) is in a given I(gather_subset), dict,
 
 
   nfsv4_no_domain (, bool, )
-    If ``true``, sends owners and groups without a domain name.
+    If \ :literal:`true`\ , sends owners and groups without a domain name.
 
 
   nfsv4_no_domain_uids (, bool, )
-    If ``true``, sends UIDs and GIDs without a domain name.
+    If \ :literal:`true`\ , sends UIDs and GIDs without a domain name.
 
 
   nfsv4_no_names (, bool, )
-    If ``true``, sends owners and groups as UIDs and GIDs.
+    If \ :literal:`true`\ , sends owners and groups as UIDs and GIDs.
 
 
   nfsv4_replace_domain (, bool, )
-    If ``true``, replaces the owner or group domain with an NFS domain name.
+    If \ :literal:`true`\ , replaces the owner or group domain with an NFS domain name.
 
 
   zone (, str, )
@@ -1769,7 +1784,7 @@ S3_bucket_details (When C(s3_buckets) is in a given I(gather_subset), dict, {'ac
 
 
   path (, str, )
-    Path of S3 bucket with in ``'/ifs'``.
+    Path of S3 bucket with in \ :literal:`'/ifs'`\ .
 
 
   zid (, int, )
@@ -1941,7 +1956,7 @@ ntp_servers (Always, dict, {'servers': [{'id': '10.**.**.**', 'key': None, 'name
 
 
     key (, str, )
-      Key value from *key_file* that maps to this server.
+      Key value from \ :emphasis:`key\_file`\  that maps to this server.
 
 
     name (, str, )
@@ -1972,7 +1987,7 @@ cluster_identity (Always, dict, {'cluster_identity': {'description': 'asdadasdas
 
 
   mttdl_level_msg (, str, )
-    mttdl_level_msg.
+    mttdl\_level\_msg.
 
 
   name (, str, )
@@ -2172,6 +2187,8 @@ roles (When C(roles) is in a given I(gather_subset), dict, {'roles': [{'descript
       Specifies the permission of the privilege.
 
 
+
+
 smart_quota (always, list, [{'container': True, 'description': '', 'efficiency_ratio': None, 'enforced': False, 'id': 'iddd', 'include_snapshots': False, 'labels': '', 'linked': False, 'notifications': 'default', 'path': 'VALUE_SPECIFIED_IN_NO_LOG_PARAMETER', 'persona': {'id': 'UID:9355', 'name': 'test_user_12', 'type': 'user'}, 'ready': True, 'reduction_ratio': None, 'thresholds': {'advisory': None, 'advisory_exceeded': False, 'advisory_last_exceeded': None, 'hard': None, 'hard_exceeded': False, 'hard_last_exceeded': None, 'percent_advisory': None, 'percent_soft': None, 'soft': None, 'soft_exceeded': False, 'soft_grace': None, 'soft_last_exceeded': None}, 'thresholds_on': 'applogicalsize', 'type': 'user', 'usage': {'applogical': 0, 'applogical_ready': True, 'fslogical': 0, 'fslogical_ready': True, 'fsphysical': 0, 'fsphysical_ready': False, 'inodes': 0, 'inodes_ready': True, 'physical': 0, 'physical_data': 0, 'physical_data_ready': True, 'physical_protection': 0, 'physical_protection_ready': True, 'physical_ready': True, 'shadow_refs': 0, 'shadow_refs_ready': True}}])
   The smart quota details.
 
@@ -2200,12 +2217,22 @@ smart_quota (always, list, [{'container': True, 'description': '', 'efficiency_r
     The Quota usage.
 
 
+
+file_system (always, list, [{'name': 'home'}, {'name': 'smb11'}])
+  The filesystem details.
+
+
+  name (, str, home)
+    The name of the filesystem.
+
+
+
 support_assist_settings (When C(support_assist_settings) is in a given I(gather_subset), dict, {'automatic_case_creation': False, 'connection': {'gateway_endpoints': [{'enabled': True, 'host': 'XX.XX.XX.XX', 'port': 9443, 'priority': 1, 'use_proxy': False, 'validate_ssl': False}, {'enabled': True, 'host': 'XX.XX.XX.XY', 'port': 9443, 'priority': 2, 'use_proxy': False, 'validate_ssl': False}], 'mode': 'gateway', 'network_pools': [{'pool': 'pool1', 'subnet': 'subnet0'}]}, 'connection_state': 'disabled', 'contact': {'primary': {'email': 'p7VYg@example.com', 'first_name': 'Eric', 'last_name': 'Nam', 'phone': '1234567890'}, 'secondary': {'email': 'kangD@example.com', 'first_name': 'Daniel', 'last_name': 'Kang', 'phone': '1234567891'}}, 'enable_download': False, 'enable_remote_support': False, 'onefs_software_id': 'ELMISL1019H4GY', 'supportassist_enabled': True, 'telemetry': {'offline_collection_period': 60, 'telemetry_enabled': True, 'telemetry_persist': True, 'telemetry_threads': 10}})
   The support assist settings details.
 
 
   automatic_case_creation (, bool, )
-    ``True`` indicates automatic case creation is enabled.
+    \ :literal:`True`\  indicates automatic case creation is enabled.
 
 
   connection (, dict, )
@@ -2336,7 +2363,7 @@ support_assist_settings (When C(support_assist_settings) is in a given I(gather_
 
 
   enable_download (, bool, )
-    ``True`` indicates downloads are enabled.
+    \ :literal:`True`\  indicates downloads are enabled.
 
 
   enable_remote_support (, bool, )
@@ -2455,7 +2482,7 @@ alert_channels (When C(alert_channels) is in a given I(gather_subset)., list, {'
 
 
       smtp_password (, str, )
-        Password for SMTP authentication, only if smtp_use_auth true.
+        Password for SMTP authentication, only if smtp\_use\_auth true.
 
 
       smtp_port (, int, )
@@ -2471,7 +2498,7 @@ alert_channels (When C(alert_channels) is in a given I(gather_subset)., list, {'
 
 
       smtp_username (, str, )
-        Username for SMTP authentication, only if smtp_use_auth true.
+        Username for SMTP authentication, only if smtp\_use\_auth true.
 
 
       subject (, str, )
