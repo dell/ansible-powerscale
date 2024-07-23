@@ -19,7 +19,7 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock
     import MockApiException
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.initial_mock \
     import utils
-from ansible_collections.dellemc.powerscale.plugins.modules.info import Info
+from ansible_collections.dellemc.powerscale.plugins.modules.info import Info, main
 
 utils.get_logger = MagicMock()
 
@@ -45,6 +45,7 @@ class TestInfo():
         gatherfacts_module_mock.synciq_api = MagicMock()
         gatherfacts_module_mock.statistics_api = MagicMock()
         gatherfacts_module_mock.support_assist_api = MagicMock()
+        gatherfacts_module_mock.event_api = MagicMock()
         utils.ISI_SDK_VERSION_9 = MagicMock(return_value=True)
         return gatherfacts_module_mock
 
@@ -459,3 +460,186 @@ class TestInfo():
             gatherfacts_module_mock.perform_module_operation()
         assert MockGatherfactsApi.get_gather_facts_error_response(
             gather_subset) == gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
+
+    @pytest.mark.parametrize("gather_subset", [
+        "support_assist_settings"
+    ]
+    )
+    def test_get_facts_supportassist_exception(self, gatherfacts_module_mock, gather_subset):
+        """Test the get_facts that uses the support assist api endpoint to get the exception"""
+        gatherfacts_module_mock.major = 8
+        gatherfacts_module_mock.minor = 4
+        resp = gatherfacts_module_mock.get_support_assist_settings()
+        print(f"response is: {resp}")
+        assert "support_assist_settings is supported for One FS version 9.5.0 and above" in gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
+
+    @pytest.mark.parametrize("input_params", [
+        {"gather_subset": "alert_settings", "return_key": "alert_settings"}
+    ]
+    )
+    def test_get_facts_alert_settings_api_module(self, gatherfacts_module_mock, input_params):
+        """Test the get_facts that uses the alert settings api endpoint to get the module response"""
+
+        gather_subset = input_params.get('gather_subset')
+        return_key = input_params.get('return_key')
+        api_response = MockGatherfactsApi.get_gather_facts_api_response(
+            gather_subset)
+        self.get_module_args.update({
+            'gather_subset': ['alert_settings']
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        with patch.object(gatherfacts_module_mock.event_api, MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
+            mock_method.return_value = MockSDKResponse(api_response)
+            gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_gather_facts_module_response(
+            gather_subset) == gatherfacts_module_mock.module.exit_json.call_args[1][return_key]
+
+    @pytest.mark.parametrize("gather_subset", ["alert_settings"])
+    def test_get_facts_alert_settings_api_exception(self, gatherfacts_module_mock, gather_subset):
+        """Test the get_facts that uses the alert settings api endpoint to get the exception"""
+        self.get_module_args.update({
+            'gather_subset': [gather_subset]
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        with patch.object(gatherfacts_module_mock.event_api, MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
+            mock_method.side_effect = MagicMock(side_effect=MockApiException)
+            gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_gather_facts_error_response(
+            gather_subset) in gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
+
+    @pytest.mark.parametrize("input_params", [
+        {"gather_subset": "alert_categories", "return_key": "alert_categories"}])
+    def test_get_facts_alert_categories_api_module(self, gatherfacts_module_mock, input_params):
+        """Test the get_facts that uses the alert categories api endpoint to get the module response"""
+
+        gather_subset = input_params.get('gather_subset')
+        return_key = input_params.get('return_key')
+        api_response = MockGatherfactsApi.get_gather_facts_api_response(
+            gather_subset)
+        self.get_module_args.update({
+            'gather_subset': ['alert_categories'],
+            'query_parameters': {'alert_categories': [{'limit': '4'}]}
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        with patch.object(gatherfacts_module_mock.event_api, MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
+            mock_method.return_value = MockSDKResponse(api_response)
+            gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_gather_facts_module_response(
+            gather_subset) == gatherfacts_module_mock.module.exit_json.call_args[1][return_key][0]
+
+    @pytest.mark.parametrize("gather_subset", ["alert_categories"])
+    def test_get_facts_alert_categories_api_exception(self, gatherfacts_module_mock, gather_subset):
+        """Test the get_facts that uses the alert categories api endpoint to get the exception"""
+        self.get_module_args.update({
+            'gather_subset': [gather_subset]
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        with patch.object(gatherfacts_module_mock.event_api, MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
+            mock_method.side_effect = MagicMock(side_effect=MockApiException)
+            gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_gather_facts_error_response(
+            gather_subset) in gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
+
+    @pytest.mark.parametrize("input_params", [
+        {"gather_subset": "alert_channels", "return_key": "alert_channels"}])
+    def test_get_facts_alert_channels_api_module(self, gatherfacts_module_mock, input_params):
+        """Test the get_facts that uses the alert channels api endpoint to get the module response"""
+
+        gather_subset = input_params.get('gather_subset')
+        return_key = input_params.get('return_key')
+        api_response = MockGatherfactsApi.get_gather_facts_api_response(
+            gather_subset)
+        self.get_module_args.update({
+            'gather_subset': ['alert_channels'],
+            'query_parameters': {'alert_channels': [{'sort': 'name'}, {'sort_dir': 'desc'}]}
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        with patch.object(gatherfacts_module_mock.event_api, MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
+            mock_method.return_value = MockSDKResponse(api_response)
+            gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_gather_facts_module_response(
+            gather_subset) == gatherfacts_module_mock.module.exit_json.call_args[1][return_key][0]
+
+    @pytest.mark.parametrize("gather_subset", ["alert_channels"])
+    def test_get_facts_alert_channels_api_exception(self, gatherfacts_module_mock, gather_subset):
+        """Test the get_facts that uses the alert channels api endpoint to get the exception"""
+        self.get_module_args.update({
+            'gather_subset': [gather_subset]
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        with patch.object(gatherfacts_module_mock.event_api, MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
+            mock_method.side_effect = MagicMock(side_effect=MockApiException)
+            gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_gather_facts_error_response(
+            gather_subset) in gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
+
+    @pytest.mark.parametrize("input_params", [
+        {"gather_subset": "alert_rules", "return_key": "alert_rules"}])
+    def test_get_facts_alert_rules_api_module(self, gatherfacts_module_mock, input_params):
+        """Test the get_facts that uses the alert rules api endpoint to get the module response"""
+
+        gather_subset = input_params.get('gather_subset')
+        return_key = input_params.get('return_key')
+        api_response = MockGatherfactsApi.get_gather_facts_api_response(
+            gather_subset)
+        self.get_module_args.update({
+            'gather_subset': ['alert_rules'],
+            'query_parameters': {'alert_rules': [
+                {'sort_dir': 'asc'}, {'sort': 'name'}, {'channel': 'condition'}]}
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        with patch.object(gatherfacts_module_mock.event_api, MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
+            mock_method.return_value = MockSDKResponse(api_response)
+            gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_gather_facts_module_response(
+            gather_subset) == gatherfacts_module_mock.module.exit_json.call_args[1][return_key][0]
+
+    @pytest.mark.parametrize("gather_subset", ["alert_rules"])
+    def test_get_facts_alert_rules_api_exception(self, gatherfacts_module_mock, gather_subset):
+        """Test the get_facts that uses the alert rules api endpoint to get the exception"""
+        self.get_module_args.update({
+            'gather_subset': [gather_subset]
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        with patch.object(gatherfacts_module_mock.event_api, MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
+            mock_method.side_effect = MagicMock(side_effect=MockApiException)
+            gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_gather_facts_error_response(
+            gather_subset) in gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
+
+    @pytest.mark.parametrize("input_params", [
+        {"gather_subset": "event_group", "return_key": "event_groups"}])
+    def test_get_facts_event_groups_api_module(self, gatherfacts_module_mock, input_params):
+        """Test the get_facts that uses the event groups api endpoint to get the module response"""
+
+        gather_subset = input_params.get('gather_subset')
+        return_key = input_params.get('return_key')
+        api_response = MockGatherfactsApi.get_gather_facts_api_response(
+            gather_subset)
+        self.get_module_args.update({
+            'gather_subset': ['event_group'],
+            'query_parameters': {'event_group': [{'alert_info': 'true'},
+                                                 {'category': '400000000'}]}
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        with patch.object(gatherfacts_module_mock.event_api, MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
+            mock_method.return_value = MockSDKResponse(api_response)
+            gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_gather_facts_module_response(
+            gather_subset) == gatherfacts_module_mock.module.exit_json.call_args[1][return_key][0]
+
+    @pytest.mark.parametrize("gather_subset", ["event_group"])
+    def test_get_facts_event_groups_api_exception(self, gatherfacts_module_mock, gather_subset):
+        """Test the get_facts that uses the event group api endpoint to get the exception"""
+        self.get_module_args.update({
+            'gather_subset': [gather_subset]
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        with patch.object(gatherfacts_module_mock.event_api, MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
+            mock_method.side_effect = MagicMock(side_effect=MockApiException)
+            gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_gather_facts_error_response(
+            gather_subset) in gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
+
+    def test_main(self):
+        main()
