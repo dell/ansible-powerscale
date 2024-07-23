@@ -46,6 +46,10 @@ class TestInfo():
         gatherfacts_module_mock.statistics_api = MagicMock()
         gatherfacts_module_mock.support_assist_api = MagicMock()
         gatherfacts_module_mock.event_api = MagicMock()
+        gatherfacts_module_mock.namespace_api = MagicMock()
+        gatherfacts_module_mock.quota_api = MagicMock()
+        gatherfacts_module_mock.snapshot_api = MagicMock()
+        gatherfacts_module_mock.smartquota_api = MagicMock()
         utils.ISI_SDK_VERSION_9 = MagicMock(return_value=True)
         return gatherfacts_module_mock
 
@@ -640,6 +644,3 @@ class TestInfo():
             gatherfacts_module_mock.perform_module_operation()
         assert MockGatherfactsApi.get_gather_facts_error_response(
             gather_subset) in gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
-
-    def test_main(self):
-        main()

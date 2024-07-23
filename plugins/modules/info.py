@@ -3924,8 +3924,8 @@ class Info(object):
             'alert_categories': [],
             'alert_channels': [],
             'event_groups': [],
-            'smartquota' : [],
-            'filesystem' : []
+            'smart_quota' : [],
+            'file_system' : []
         }
 
         # Call the appropriate method based on the subset
