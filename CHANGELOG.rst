@@ -5,6 +5,22 @@ Dellemc.Powerscale Change Logs
 .. contents:: Topics
 
 
+v3.2.0
+======
+
+Minor Changes
+-------------
+
+- Added support for check mode and diff mode in network pool module.
+- Added support for check mode in Filesystem, NFS and Smart Quota modules.
+- Added support for listing filesystems, smart quotas, alert_settings, alert_rules, alert_categories, event_groups and alert_channels in Info module.
+- Added support for query parameters and filters in Info module.
+
+New Modules
+-----------
+
+- dellemc.powerscale.alert_settings - Manage alert settings on a PowerScale Storage System.
+
 v3.1.0
 ======
 

@@ -1,13 +1,3 @@
-<!--
-Copyright (c) 2024 Dell Inc., or its subsidiaries. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
--->
-
 # Maintainer guidelines
 
 As a Maintainer of this project you have the responsibility of keeping true to the vision of the project with a high-degree quality. Being part of this group is a privilege that requires dedication and time to attend to the daily activities that are associated with the maintenance of this project.

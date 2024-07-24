@@ -46,6 +46,9 @@ The Ansible Modules for Dell PowerScale support the following features:
 - Get details, import, modify, setting default and delete server certificates.
 - Get details, create, modify, and delete auth roles.
 - Get details, and modify support assist settings.
+- Get details and modify alert settings.
+- Get details of filesystems, smart quotas, alert_settings, alert_rules, alert_categories, event_groups and alert_channels using Info module.
+- Use query parameters and filters for Info module.
 
 The tasks can be executed by running simple playbooks written in yaml syntax.
 
@@ -71,14 +74,14 @@ The tasks can be executed by running simple playbooks written in yaml syntax.
 Ansible collection for PowerScale is released and licensed under the GPL-3.0 license. See [LICENSE](https://github.com/dell/ansible-powerscale/blob/main/LICENSE) for the full terms. Ansible modules and modules utilities that are part of the Ansible collection for PowerScale are released and licensed under the Apache 2.0 license. See [MODULE-LICENSE](https://github.com/dell/ansible-powerscale/blob/main/MODULE-LICENSE) for the full terms.
 
 ## Supported platforms
-  * Dell PowerScale OneFS versions 9.3.x, 9.4.x, 9.5.x, and 9.8.x
+  * Dell PowerScale OneFS versions 9.4.x, 9.5.x, 9.7.x, and 9.8.x
 
 ## Prerequisites
 This table provides information about the software prerequisites for the Ansible Modules for Dell PowerScale.
 
 | **Ansible Modules** | **OneFS Version** | **Python version** | **Python SDK version** | **Ansible**              |
 |---------------------|-----------------------|--------------------|----------------------------|--------------------------|
-| v3.2.0 | 9.4.x <br> 9.5.x <br> 9.7.x <br> 9.8.x | 3.9 <br> 3.10 <br> 3.11 <br> 3.12 | 0.3.0.1 | 2.14 <br> 2.15 <br> 2.16 <br> 2.17 |
+| v3.2.0 | 9.4.x <br> 9.5.x <br> 9.7.x <br> 9.8.x | 3.9 <br> 3.10 <br> 3.11 <br> 3.12 | 0.3.0.1 | 2.15 <br> 2.16 <br> 2.17 |
 
 # List of Ansible modules for Dell PowerScale
   * [File System Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/filesystem.rst)
@@ -122,6 +125,7 @@ This table provides information about the software prerequisites for the Ansible
   * [Server Certificate Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/server_certificate.rst)
   * [Roles](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/roles.rst)
   * [Support Assist](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/support_assist.rst)
+  * [Alert Settings](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/alert_settings.rst)
 
 
 ## Installation and execution of Ansible modules for Dell PowerScale

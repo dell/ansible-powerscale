@@ -1,13 +1,3 @@
-<!--
-Copyright (c) 2024 Dell Inc., or its subsidiaries. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
--->
-
 # How to contribute
 
 Become one of the contributors to this project! We thrive to build a welcoming and open community for anyone who wants to use the project or contribute to it. There are just a few small guidelines you need to follow. To help us create a safe and positive community experience for all, we require all participants to adhere to the [Code of Conduct](https://github.com/dell/ansible-powerscale/blob/main/docs/CODE_OF_CONDUCT.md).
