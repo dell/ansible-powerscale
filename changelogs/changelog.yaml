@@ -284,3 +284,15 @@ releases:
         name: support_assist
         namespace: ''
     release_date: '2024-06-28'
+  3.2.0:
+    changes:
+      minor_changes:
+        - Added support for check mode and diff mode in network pool module.
+        - Added support for check mode in Filesystem, NFS and Smart Quota modules.
+        - Added support for listing filesystems, smart quotas, alert_settings, alert_rules, alert_categories, event_groups and alert_channels in Info module.
+        - Added support for query parameters and filters in Info module.
+    modules:
+      - description: Manage alert settings on a PowerScale Storage System.
+        name: alert_settings
+        namespace: ''
+    release_date: '2024-07-31'

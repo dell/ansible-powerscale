@@ -1,13 +1,3 @@
-<!--
-Copyright (c) 2024 Dell Inc., or its subsidiaries. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
--->
-
 # Triage issues
 
 The main goal of issue triage is to categorize all incoming issues and make sure each issue has all basic information needed for anyone else to understand and be able to start working on it.
@@ -43,7 +33,7 @@ Should explain what happened, what was expected and how to reproduce it together
 
  - Ansible Version: [e.g. 2.15]
  - Python Version [e.g. 3.11]
- - Ansible modules for Dell PowerScale Version: [e.g. 3.1.0]
+ - Ansible modules for Dell PowerScale Version: [e.g. 3.2.0]
  - PowerScale SDK version: [e.g. 0.3.0.1]
  - Any other additional information...
 
