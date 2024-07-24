@@ -13,8 +13,8 @@ Minor Changes
 
 - Added support for check mode and diff mode in network pool module.
 - Added support for check mode in Filesystem, NFS and Smart Quota modules.
-- Added support for listing filesystems, NFS exports, alert_settings, alert_rules, alert_categories, event_groups and alert_channels in Info module
-- Added support for query paramters and filters in Info module.
+- Added support for listing filesystems, smart quotas, alert_settings, alert_rules, alert_categories, event_groups and alert_channels in Info module.
+- Added support for query parameters and filters in Info module.
 
 New Modules
 -----------
