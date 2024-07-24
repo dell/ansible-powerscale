@@ -47,7 +47,8 @@ The Ansible Modules for Dell PowerScale support the following features:
 - Get details, create, modify, and delete auth roles.
 - Get details, and modify support assist settings.
 - Get details and modify alert settings.
-- Get details of filesystems, NFS exports, alert_settings, alert_rules, alert_categories, event_groups and alert_channels using Info module.
+- Get details of filesystems, smart quotas, alert_settings, alert_rules, alert_categories, event_groups and alert_channels using Info module.
+- Use query parameters and filters for Info module.
 
 The tasks can be executed by running simple playbooks written in yaml syntax.
 
@@ -124,6 +125,7 @@ This table provides information about the software prerequisites for the Ansible
   * [Server Certificate Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/server_certificate.rst)
   * [Roles](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/roles.rst)
   * [Support Assist](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/support_assist.rst)
+  * [Alert Settings](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/alert_settings.rst)
 
 
 ## Installation and execution of Ansible modules for Dell PowerScale
