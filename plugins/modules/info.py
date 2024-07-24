@@ -51,6 +51,7 @@ author:
 - Trisha Datta(@trisha-dell) <ansible.team@dell.com>
 - Meenakshi Dembi(@dembim) <ansible.team.dell.com>
 - Sachin Apagundi(@sachin-apa) <ansible.team.dell.com>
+- Kritika Bhateja(@Kritika-Bhateja-03) <ansible.team.dell.com>
 
 options:
   include_all_access_zones:
@@ -75,12 +76,6 @@ options:
     choices: ['effective', 'user', 'default']
     default: 'effective'
     type: str
-  query_parameters:
-    description:
-    - Contains dictionary of query parameters for specific I(gather_subset).
-    - Applicable to C(alert_rules), C(event_group) and C(event_channels).
-    type: dict
-    version_added: '3.2.0'
   gather_subset:
     description:
     - List of string variables to specify the PowerScale Storage System
@@ -140,6 +135,8 @@ options:
     - Server certificate - C(server_certificate).
     - Roles - C(roles).
     - Support assist settings- C(support_assist_settings).
+    - Smartquota- C(smartquota).
+    - Filesystem - C(filesystem).
     - Alert settings - C(alert_settings).
     - Alert rules - C(alert_rules).
     - Alert channels - C(alert_channels).
@@ -153,14 +150,47 @@ options:
               node_pools, storagepool_tiers, smb_files, user_mapping_rules, ldap,
               nfs_zone_settings, nfs_default_settings, nfs_global_settings, synciq_global_settings, s3_buckets,
               smb_global_settings, ntp_servers, email_settings, cluster_identity, cluster_owner, snmp_settings,
-              server_certificate, roles, support_assist_settings, alert_settings, alert_rules, alert_channels,
-              alert_categories, event_group]
+              server_certificate, roles, support_assist_settings, smartquota, filesystem, alert_settings,
+              alert_rules, alert_channels, alert_categories, event_group]
     type: list
     elements: str
+  filters:
+    description:
+    - List of filters to support filtered output for storage entities.
+    - Each filter is a tuple of {filter_key, filter_operator, filter_value}.
+    - Supports passing of multiple filters.
+    required: False
+    type: list
+    elements: dict
+    suboptions:
+      filter_key:
+        description:
+        - Name identifier of the filter.
+        type: str
+        required: True
+      filter_operator:
+        description:
+        - Operation to be performed on filter key.
+        type: str
+        choices: [equal]
+        required: True
+      filter_value:
+        description:
+        - Value of the filter key.
+        type: raw
+        required: True
+    version_added: '3.2.0'
+  query_parameters:
+    description:
+    - Contains dictionary of query parameters for specific I(gather_subset).
+    - Applicable to C(alert_rules), C(event_group), C(event_channels) and C(filesystem).
+    type: dict
+    version_added: '3.2.0'
 notes:
 - The parameters I(access_zone) and I(include_all_access_zones) are mutually exclusive.
 - Listing of SyncIQ target cluster certificates is not supported by isi_sdk_8_1_1 version.
 - The I(check_mode) is supported.
+- Filter functionality is supported only for the following 'gather_subset'- 'nfs', 'smartquota', 'filesystem'.
 '''
 
 EXAMPLES = r'''
@@ -247,6 +277,39 @@ EXAMPLES = r'''
     access_zone: "{{access_zone}}"
     gather_subset:
       - nfs_exports
+
+- name: Get list of nfs exports in the PowerScale cluster using filter
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    access_zone: "{{access_zone}}"
+    gather_subset:
+      - nfs_exports
+    filters:
+      - filter_key: "id"
+        filter_operator: "equal"
+        filter_value: 7075
+
+- name: Get list of nfs exports in the PowerScale cluster using multiple filter
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    access_zone: "{{access_zone}}"
+    gather_subset:
+      - nfs_exports
+    filters:
+      - filter_key: "id"
+        filter_operator: "equal"
+        filter_value: 7075
+      - filter_key: description
+        filter_operator: "equal"
+        filter_value: test-filter export
 
 - name: Get list of nfs aliases in the PowerScale cluster
   dellemc.powerscale.info:
@@ -578,6 +641,74 @@ EXAMPLES = r'''
       alert_channels:
         - sort: "enabled"
         - sort_dir: "asc"
+
+- name: Get smartquota from PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{ onefs_host }}"
+    verify_ssl: "{{ verify_ssl }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    gather_subset:
+      - smartquota
+
+- name: Get smartquota from PowerScale cluster using filter
+  dellemc.powerscale.info:
+    onefs_host: "{{ onefs_host }}"
+    verify_ssl: "{{ verify_ssl }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    gather_subset:
+      - smartquota
+    filters:
+      - filter_key: "id"
+        filter_operator: "equal"
+        filter_value: "xxx"
+
+- name: Get filesystem from PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{ onefs_host }}"
+    verify_ssl: "{{ verify_ssl }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    gather_subset:
+      - filesystem
+    path: "<path>"
+
+- name: Get filesystem from PowerScale cluster with query parameters
+  dellemc.powerscale.info:
+    onefs_host: "{{ onefs_host }}"
+    verify_ssl: "{{ verify_ssl }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    gather_subset:
+      - filesystem
+    query_parameters:
+      filesystem:
+        metadata: true
+        quota: true
+        acl: true
+        snapshot: true
+        path: "<path>"
+
+- name: Get filesystem from PowerScale cluster with query parameters along with filters
+  dellemc.powerscale.info:
+    onefs_host: "{{ onefs_host }}"
+    verify_ssl: "{{ verify_ssl }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    gather_subset:
+      - filesystem
+    query_parameters:
+      filesystem:
+        metadata: true
+        quota: true
+        acl: true
+        snapshot: true
+        path: "<path>"
+    filters:
+      - filter_key: "name"
+        filter_operator: "equal"
+        filter_value: "xxx"
 '''
 
 RETURN = r'''
@@ -982,18 +1113,127 @@ NfsExports:
     type: list
     returned: When C(nfs_exports) is in a given I(gather_subset)
     contains:
+        all_dirs:
+            description: I(sub_directories_mountable) flag value.
+            type: bool
         id:
-            description: ID of the NFS exports.
-            type: str
-        path:
-            description: Path of the NFS exports.
+            description: The ID of the NFS Export, generated by the array.
+            type: int
+            sample: 12
+        paths:
+            description: The filesystem path.
             type: list
+            sample:  ['/ifs/dir/filepath']
+        zone:
+            description: Specifies the zone in which the export is valid.
+            type: str
+            sample: 'System'
+        read_only:
+            description: Specifies whether the export is read-only or read-write.
+            type: bool
+        read_only_clients:
+            description: The list of read only clients for the NFS Export.
+            type: list
+            sample:  ['client_ip', 'client_ip']
+        read_write_clients:
+            description: The list of read write clients for the NFS Export.
+            type: list
+            sample:  ['client_ip', 'client_ip']
+        root_clients:
+            description: The list of root clients for the NFS Export.
+            type: list
+            sample:  ['client_ip', 'client_ip']
+        clients:
+            description: The list of clients for the NFS Export.
+            type: list
+            sample:  ['client_ip', 'client_ip']
+        description:
+            description: Description for the export.
+            type: str
+        map_root:
+            description: Specifies the users and groups to which non-root and root clients are mapped.
+            type: complex
+            contains:
+                enabled:
+                    description: True if the user mapping is applied.
+                    type: bool
+                user:
+                    description: Specifies the persona name.
+                    type: complex
+                    contains:
+                        id:
+                            description: Specifies the persona name.
+                            type: str
+                primary_group:
+                    description: Specifies the primary group.
+                    type: complex
+                    contains:
+                        id:
+                            description: Specifies the primary group name.
+                            type: str
+                secondary_groups:
+                    description: Specifies the secondary groups.
+                    type: list
+        map_non_root:
+            description: Specifies the users and groups to which non-root and root clients are mapped.
+            type: complex
+            contains:
+                enabled:
+                    description: True if the user mapping is applied.
+                    type: bool
+                user:
+                    description: Specifies the persona details.
+                    type: complex
+                    contains:
+                        id:
+                            description: Specifies the persona name.
+                            type: str
+                primary_group:
+                    description: Specifies the primary group details.
+                    type: complex
+                    contains:
+                        id:
+                            description: Specifies the primary group name.
+                            type: str
+                secondary_groups:
+                    description: Specifies the secondary groups details.
+                    type: list
+
     sample: [
-        {
-            "id": 205,
-            "paths": [
-                "/ifs/data/sample/fs1"
-            ]
+        "all_dir": "false",
+        "block_size": 8192,
+        "clients": None,
+        "id": 9324,
+        "read_only_client": ["x.x.x.x"],
+        "security_flavors": ["unix", "krb5"],
+        "zone": "System",
+        "map_root": {
+            "enabled": true,
+            "primary_group": {
+                "id": GROUP:group1,
+                "name": null,
+                "type": null
+            },
+            "secondary_groups": [],
+            "user": {
+                "id": "USER:user",
+                "name": null,
+                "type": null
+            }
+        },
+        "map_non_root": {
+            "enabled": false,
+            "primary_group": {
+                "id": null,
+                "name": null,
+                "type": null
+            },
+            "secondary_groups": [],
+            "user": {
+                "id": "USER:nobody",
+                "name": null,
+                "type": null
+            }
         }
     ]
 NfsZoneSettings:
@@ -2287,6 +2527,126 @@ roles:
                 }]
             }]
         }
+smart_quota:
+  description: The smart quota details.
+  type: list
+  returned: always
+  contains:
+        id:
+            description: The ID of the Quota.
+            type: str
+            sample: "2nQKAAEAAAAAAAAAAAAAQIMCAAAAAAAA"
+        enforced:
+            description: Whether the limits are enforced on Quota or not.
+            type: bool
+            sample: true
+        container:
+            description: If C(true), SMB shares using the quota directory see the quota thresholds as share size.
+            type: bool
+            sample: true
+        thresholds:
+            description: Includes information about all the limits imposed on quota.
+                         The limits are mentioned in bytes and I(soft_grace) is in seconds.
+            type: dict
+            sample: {
+                    "advisory": 3221225472,
+                    "advisory(GB)": "3.0",
+                    "advisory_exceeded": false,
+                    "advisory_last_exceeded": 0,
+                    "hard": 6442450944,
+                    "hard(GB)": "6.0",
+                    "hard_exceeded": false,
+                    "hard_last_exceeded": 0,
+                    "soft": 5368709120,
+                    "soft(GB)": "5.0",
+                    "soft_exceeded": false,
+                    "soft_grace": 3024000,
+                    "soft_last_exceeded": 0
+                }
+        type:
+            description: The type of Quota.
+            type: str
+            sample: "directory"
+        usage:
+            description: The Quota usage.
+            type: dict
+            sample: {
+                    "inodes": 1,
+                    "logical": 0,
+                    "physical": 2048
+                }
+  sample: [
+    {
+    "container": true,
+    "description": "",
+    "efficiency_ratio": null,
+    "enforced": false,
+    "id": "iddd",
+    "include_snapshots": false,
+    "labels": "",
+    "linked": false,
+    "notifications": "default",
+    "path": "VALUE_SPECIFIED_IN_NO_LOG_PARAMETER",
+    "persona": {
+        "id": "UID:9355",
+        "name": "test_user_12",
+        "type": "user"
+    },
+    "ready": true,
+    "reduction_ratio": null,
+    "thresholds": {
+        "advisory": null,
+        "advisory_exceeded": false,
+        "advisory_last_exceeded": null,
+        "hard": null,
+        "hard_exceeded": false,
+        "hard_last_exceeded": null,
+        "percent_advisory": null,
+        "percent_soft": null,
+        "soft": null,
+        "soft_exceeded": false,
+        "soft_grace": null,
+        "soft_last_exceeded": null
+    },
+    "thresholds_on": "applogicalsize",
+    "type": "user",
+    "usage": {
+        "applogical": 0,
+        "applogical_ready": true,
+        "fslogical": 0,
+        "fslogical_ready": true,
+        "fsphysical": 0,
+        "fsphysical_ready": false,
+        "inodes": 0,
+        "inodes_ready": true,
+        "physical": 0,
+        "physical_data": 0,
+        "physical_data_ready": true,
+        "physical_protection": 0,
+        "physical_protection_ready": true,
+        "physical_ready": true,
+        "shadow_refs": 0,
+        "shadow_refs_ready": true
+    }
+    }
+    ]
+file_system:
+  description: The filesystem details.
+  type: list
+  returned: always
+  contains:
+        name:
+            description: The name of the filesystem.
+            type: str
+            sample: "home"
+  sample: [
+        {
+            "name": "home"
+        },
+        {
+            "name": "smb11"
+        }
+    ]
 support_assist_settings:
     description: The support assist settings details.
     type: dict
@@ -2792,6 +3152,12 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.sh
     import Events
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.namespace \
+    import Namespace
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.quota \
+    import Quota
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.snapshot \
+    import Snapshot
 
 LOG = utils.get_logger('info')
 
@@ -2834,6 +3200,10 @@ class Info(object):
         self.network_api = self.isi_sdk.NetworkApi(self.api_client)
         self.storagepool_api = self.isi_sdk.StoragepoolApi(self.api_client)
         self.certificate_api = self.isi_sdk.CertificateApi(self.api_client)
+        self.smartquota_api = self.isi_sdk.QuotaApi(self.api_client)
+        self.namespace_api = self.isi_sdk.NamespaceApi(self.api_client)
+        self.quota_api = self.isi_sdk.QuotaApi(self.api_client)
+        self.snapshot_api = self.isi_sdk.SnapshotApi(self.api_client)
         if self.major > 9 or (self.major == 9 and self.minor > 4):
             self.support_assist_api = self.isi_sdk.SupportassistApi(self.api_client)
         self.event_api = self.isi_sdk.EventApi(self.api_client)
@@ -3004,16 +3374,15 @@ class Info(object):
     def get_nfs_exports_list(self, access_zone):
         """Get the list of nfs_exports of a given PowerScale Storage"""
         try:
-            nfs_exports_list = []
             nfs_exports_details = (self.protocol_api.list_nfs_exports(zone=access_zone))\
                 .to_dict()
             nfs_exports = nfs_exports_details["exports"]
-            if nfs_exports:
-                for nfs_export in nfs_exports:
-                    nfs_exports_list.append({"id": nfs_export['id'], "paths": nfs_export['paths']})
-            LOG.info('Got nfs_exports from PowerScale cluster  %s',
-                     self.module.params['onefs_host'])
-            return nfs_exports_list
+            filters = self.module.params.get('filters')
+            filters_dict = self.get_filters(filters)
+            if filters_dict:
+                filtered_nfs_exports = filter_dict_list(nfs_exports, filters_dict)
+                return filtered_nfs_exports
+            return nfs_exports
         except Exception as e:
             error_msg = (
                 'Get nfs_exports list for PowerScale cluster: {0} failed with'
@@ -3358,6 +3727,132 @@ class Info(object):
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
+    def get_smartquota_list(self):
+        """Get the smartquota list of a given PowerScale Storage"""
+        try:
+            smartquota = []
+            smartquota_details = self.smartquota_api.list_quota_quotas().to_dict()
+            smartquota.extend(smartquota_details['quotas'])
+            resume = smartquota_details['resume']
+            while resume:
+                smartquota_details = self.smartquota_api.list_quota_quotas(resume=resume).to_dict()
+                smartquota.extend(smartquota_details['quotas'])
+                resume = smartquota_details['resume']
+            msg = f"Got smartquota list from PowerScale cluster {self.module.params['onefs_host']}"
+            LOG.info(msg)
+            filters = self.module.params.get('filters')
+            filters_dict = self.get_filters(filters)
+            if filters_dict:
+                filtered_smartquota = filter_dict_list(smartquota, filters_dict)
+                return filtered_smartquota
+            return smartquota
+        except Exception as e:
+            error_msg = (
+                f"Getting smartquota list for PowerScale: {self.module.params['onefs_host']}" +
+                f" failed with error: {utils.determine_error(e)}")
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
+
+    def get_metadata(self, effective_path):
+        return Namespace(self.namespace_api, self.module).get_filesystem(effective_path)
+
+    def get_acl(self, effective_path):
+        return Namespace(self.namespace_api, self.module).get_acl(effective_path)
+
+    def get_quota(self, effective_path):
+        return Quota(self.quota_api, self.module).get_quota(effective_path)
+
+    def get_snapshots(self, effective_path):
+        return Snapshot(self.snapshot_api, self.module).get_filesystem_snapshots(effective_path)
+
+    def list_filesystems(self, path):
+        """List all filesystems from the given directory path."""
+        namespace = Namespace(self.namespace_api, self.module)
+        filesystem_paths = namespace.list_all_filesystem_from_directory(path)
+        return filesystem_paths.get("children", []) if filesystem_paths else []
+
+    def fetch_data(self, effective_path, data_fetchers, required_params):
+        """Fetch required data based on query parameters."""
+        fetched_data = {}
+        for param, fetcher in data_fetchers.items():
+            if param in required_params:
+                data = fetcher(effective_path)
+                if param == "snapshot":
+                    fetched_data["snapshots"] = data
+                else:
+                    fetched_data.update(data)
+        return fetched_data
+
+    def get_required_params(self, query_params=None):
+        """Extract required parameters from query parameters."""
+        if query_params:
+            if "path" in query_params:
+                del query_params["path"]
+            return {k: v for k, v in query_params.items() if v is True}
+
+    def get_filesystem_list(self, path, query_params=None):
+        """Get the filesystem list of a given PowerScale Storage."""
+        try:
+            filesystem_list = [{"name": fs.get("name")} for fs in self.list_filesystems(path)]
+            required_params = None
+            if not filesystem_list:
+                return filesystem_list
+
+            filters = self.module.params.get('filters')
+            filters_dict = self.get_filters(filters)
+            if filters_dict:
+                filesystem_list = filter_dict_list(filesystem_list, filters_dict)
+
+            data_fetchers = {
+                'metadata': self.get_metadata,
+                'acl': self.get_acl,
+                'quota': self.get_quota,
+                'snapshot': self.get_snapshots
+            }
+            if query_params and "filesystem" in query_params:
+                filesystem_query_params = query_params.get('filesystem')
+                required_params = self.get_required_params(query_params=filesystem_query_params)
+
+            if required_params:
+                for each_filesystem in filesystem_list:
+                    effective_path = f"{path}/{each_filesystem['name']}"
+                    fetched_data = self.fetch_data(effective_path, data_fetchers, required_params)
+                    each_filesystem.update(fetched_data)
+
+            return filesystem_list
+        except Exception as e:
+            error_msg = (
+                f"Getting filesystem for PowerScale: {self.module.params['onefs_host']}" +
+                f" failed with error: {utils.determine_error(e)}"
+            )
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
+
+    def get_filters(self, filters=None):
+        """Get the filters to be applied"""
+        filters_dict = {}
+        # TO DO run below line only if filters is not None
+        if filters is None:
+            return filters_dict
+        filters_items = [item for item in filters
+                         if 'filter_key' in item and 'filter_operator' in item
+                         and 'filter_value' in item]
+        if not filters_items:
+            self.module.fail_json(msg='filter_key, filter_operator, filter_value are expected.')
+        for item in filters_items:
+            try:
+                f_key = item["filter_key"]
+                f_val = item["filter_value"]
+                f_op = item["filter_operator"]
+            except KeyError:
+                error_msg = "Provide input for filter sub-options."
+                self.module.fail_json(msg=error_msg)
+            if f_op != 'equal':
+                error_msg = "The filter operator is not supported -- only 'equal' is supported."
+                self.module.fail_json(msg=error_msg)
+            filters_dict[f_key] = f_val
+        return filters_dict
+
     def get_support_assist_settings(self):
         """Get support assist settings based on the version."""
         if self.major > 9 or (self.major == 9 and self.minor > 4):
@@ -3373,7 +3868,12 @@ class Info(object):
         access_zone = self.module.params['access_zone']
         subset = self.module.params['gather_subset']
         scope = self.module.params['scope']
-
+        path = "ifs"
+        query_params = self.module.params.get("query_parameters")
+        if query_params and "filesystem" in query_params:
+            filesystem = query_params.get("filesystem")
+            if filesystem and "path" in filesystem:
+                path = filesystem.get("path")
         if not subset:
             self.module.fail_json(msg="Please specify gather_subset")
 
@@ -3422,7 +3922,9 @@ class Info(object):
             'alert_rules': [],
             'alert_categories': [],
             'alert_channels': [],
-            'event_groups': []
+            'event_groups': [],
+            'smart_quota' : [],
+            'file_system' : []
         }
 
         # Call the appropriate method based on the subset
@@ -3470,7 +3972,9 @@ class Info(object):
             'alert_rules': lambda: Events(self.event_api, self.module).get_alert_rules(),
             'alert_categories': lambda: Events(self.event_api, self.module).get_alert_categories(),
             'alert_channels': lambda: Events(self.event_api, self.module).get_event_channels(),
-            'event_group': lambda: Events(self.event_api, self.module).get_event_groups()
+            'event_group': lambda: Events(self.event_api, self.module).get_event_groups(),
+            'smartquota': self.get_smartquota_list,
+            'filesystem': lambda: self.get_filesystem_list(path, query_params)
         }
 
         key_mapping = {
@@ -3511,7 +4015,9 @@ class Info(object):
             'server_certificate': 'ServerCertificate',
             's3_buckets': 's3Buckets',
             'synciq_target_cluster_certificates': 'SynciqTargetClusterCertificate',
-            'event_group': 'event_groups'
+            'event_group': 'event_groups',
+            'smartquota': 'smart_quota',
+            'filesystem': 'file_system'
         }
 
         # Map the subset to the appropriate Key
@@ -3522,7 +4028,7 @@ class Info(object):
                        'storagepool_tiers', 'smb_files', 'user_mapping_rules', 'ldap', 'nfs_zone_settings',
                        'nfs_default_settings', 'nfs_global_settings', 'synciq_global_settings', 's3_buckets',
                        'smb_global_settings', 'ntp_servers', 'email_settings', 'cluster_identity', 'cluster_owner',
-                       'snmp_settings', 'server_certificate', 'event_group']
+                       'snmp_settings', 'server_certificate', 'event_group', 'smartquota', 'filesystem']
         for key in subset:
             if key not in subset_list:
                 result[key] = subset_mapping[key]()
@@ -3573,9 +4079,35 @@ def get_info_parameters():
                      'email_settings', 'cluster_identity', 'cluster_owner',
                      'snmp_settings', 'server_certificate', 'roles',
                      'support_assist_settings', 'alert_settings', 'alert_rules',
-                     'alert_channels', 'alert_categories', 'event_group']),
+                     'alert_channels', 'alert_categories', 'event_group',
+                     'filesystem', 'smartquota']),
+        filters=dict(type='list',
+                     required=False,
+                     elements='dict',
+                     options=dict(
+                         filter_key=dict(type='str', required=True, no_log=False),
+                         filter_operator=dict(type='str',
+                                              required=True,
+                                              choices=['equal']),
+                         filter_value=dict(type='raw', required=True))),
         query_parameters=dict(type='dict')
     )
+
+
+def filter_dict_list(dict_list, filters):
+    """
+    Filters a list of dictionaries based on a list of filters.
+    :param dict_list: List of dictionaries to filter
+    :param filters: List of filters, where each filter is a tuple (key, value)
+    :return: Filtered list of dictionaries
+    """
+    try:
+        return [
+            d for d in dict_list
+            if all((isinstance(d[key], (list, dict)) and value in d.get(key))
+                   or d.get(key) == value for key, value in filters.items())]
+    except KeyError:
+        return dict_list
 
 
 def main():

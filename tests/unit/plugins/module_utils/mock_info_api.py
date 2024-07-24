@@ -83,6 +83,8 @@ class MockGatherfactsApi:
         'ClusterOwner': {},
         'ServerCertificate': [],
         'roles': {},
+        'smart_quota': [],
+        'file_system': [],
         'support_assist_settings': {},
         'alert_settings': {},
         'alert_rules': [],
@@ -1498,8 +1500,146 @@ class MockGatherfactsApi:
             return "Fetching event groups failed with error: SDK Error message"
 
     @staticmethod
+    def get_smartquota_list(response_type):
+        if response_type == "error":
+            return "Getting smartquota list for PowerScale"
+        if response_type == "api":
+            return {
+                "quotas": [
+                    {
+                        "container": True,
+                        "description": "",
+                        "efficiency_ratio": 0.0,
+                        "enforced": True,
+                        "id": "xxxx",
+                        "include_snapshots": False,
+                        "labels": "",
+                        "linked": False,
+                        "notifications": "default",
+                        "path": "/ifs/xxxx",
+                        "persona": "",
+                        "ready": True,
+                        "reduction_ratio": "",
+                        "thresholds": {
+                            "advisory": "",
+                            "advisory_exceeded": False,
+                            "advisory_last_exceeded": "",
+                            "hard": 3221225472,
+                            "hard_exceeded": False,
+                            "hard_last_exceeded": "",
+                            "percent_advisory": "",
+                            "percent_soft": "",
+                            "soft": "",
+                            "soft_exceeded": False,
+                            "soft_grace": "",
+                            "soft_last_exceeded": ""
+                        },
+                        "thresholds_on": "fslogicalsize",
+                        "type": "directory",
+                        "usage": {
+                            "applogical": 0,
+                            "applogical_ready": True,
+                            "fslogical": 0,
+                            "fslogical_ready": True,
+                            "fsphysical": 2048,
+                            "fsphysical_ready": True,
+                            "inodes": 1,
+                            "inodes_ready": True,
+                            "physical": 2048,
+                            "physical_data": 0,
+                            "physical_data_ready": True,
+                            "physical_protection": 0,
+                            "physical_protection_ready": True,
+                            "physical_ready": True,
+                            "shadow_refs": 0,
+                            "shadow_refs_ready": True
+                        }
+                    }],
+                "resume": None,
+                "total": 1
+            }
+        else:
+            return [
+                {
+                    "container": True,
+                    "description": "",
+                    "efficiency_ratio": 0.0,
+                    "enforced": True,
+                    "id": "xxxx",
+                    "include_snapshots": False,
+                    "labels": "",
+                    "linked": False,
+                    "notifications": "default",
+                    "path": "/ifs/xxxx",
+                    "persona": "",
+                    "ready": True,
+                    "reduction_ratio": "",
+                    "thresholds": {
+                        "advisory": "",
+                        "advisory_exceeded": False,
+                        "advisory_last_exceeded": "",
+                        "hard": 3221225472,
+                        "hard_exceeded": False,
+                        "hard_last_exceeded": "",
+                        "percent_advisory": "",
+                        "percent_soft": "",
+                        "soft": "",
+                        "soft_exceeded": False,
+                        "soft_grace": "",
+                        "soft_last_exceeded": ""
+                    },
+                    "thresholds_on": "fslogicalsize",
+                    "type": "directory",
+                    "usage": {
+                        "applogical": 0,
+                        "applogical_ready": True,
+                        "fslogical": 0,
+                        "fslogical_ready": True,
+                        "fsphysical": 2048,
+                        "fsphysical_ready": True,
+                        "inodes": 1,
+                        "inodes_ready": True,
+                        "physical": 2048,
+                        "physical_data": 0,
+                        "physical_data_ready": True,
+                        "physical_protection": 0,
+                        "physical_protection_ready": True,
+                        "physical_ready": True,
+                        "shadow_refs": 0,
+                        "shadow_refs_ready": True
+                    }
+                }
+            ]
+
+    @staticmethod
+    def get_filesystem_list(response_type):
+        if response_type == "api":
+            return {
+                "children": [
+                    {
+                        "name": "home"
+                    },
+                    {
+                        "name": "smb11"
+                    }
+                ]
+            }
+        elif response_type == "module":
+            return [
+                {
+                    "name": "home"
+                },
+                {
+                    "name": "smb11"
+                }
+            ]
+        else:
+            return "Failed to get details of Filesystem"
+
+    @staticmethod
     def get_gather_facts_module_response(gather_subset):
         param = "module"
+        path = "ifs"
         subset_error_dict = {
             "nfs_global_settings": MockGatherfactsApi.get_nfsglobal_settings(param),
             "smb_global_settings": MockGatherfactsApi.get_smb_global_settings(param),
@@ -1537,7 +1677,9 @@ class MockGatherfactsApi:
             "alert_rules": MockGatherfactsApi.get_alert_rules(param),
             "alert_categories": MockGatherfactsApi.get_alert_categories(param),
             "alert_channels": MockGatherfactsApi.get_event_channels(param),
-            "alert_settings": MockGatherfactsApi.get_event_maintenance(param)
+            "alert_settings": MockGatherfactsApi.get_event_maintenance(param),
+            "filesystem": MockGatherfactsApi.get_filesystem_list(param),
+            "smartquota": MockGatherfactsApi.get_smartquota_list(param)
         }
         return subset_error_dict.get(gather_subset)
 
@@ -1581,13 +1723,16 @@ class MockGatherfactsApi:
             "alert_rules": MockGatherfactsApi.get_alert_rules(param),
             "alert_categories": MockGatherfactsApi.get_alert_categories(param),
             "alert_channels": MockGatherfactsApi.get_event_channels(param),
-            "alert_settings": MockGatherfactsApi.get_event_maintenance(param)
+            "alert_settings": MockGatherfactsApi.get_event_maintenance(param),
+            "filesystem": MockGatherfactsApi.get_filesystem_list(param),
+            "smartquota": MockGatherfactsApi.get_smartquota_list(param)
         }
         return subset_error_dict.get(gather_subset)
 
     @staticmethod
     def get_gather_facts_error_response(gather_subset):
         param = "error"
+        path = "ifs"
         subset_error_dict = {
             "nfs_global_settings": MockGatherfactsApi.get_nfsglobal_settings(param),
             "smb_global_settings": MockGatherfactsApi.get_smb_global_settings(param),
@@ -1626,7 +1771,9 @@ class MockGatherfactsApi:
             "alert_rules": MockGatherfactsApi.get_alert_rules(param),
             "alert_categories": MockGatherfactsApi.get_alert_categories(param),
             "alert_channels": MockGatherfactsApi.get_event_channels(param),
-            "alert_settings": MockGatherfactsApi.get_event_maintenance(param)
+            "alert_settings": MockGatherfactsApi.get_event_maintenance(param),
+            "filesystem": MockGatherfactsApi.get_filesystem_list(param),
+            "smartquota": MockGatherfactsApi.get_smartquota_list(param)
         }
         return subset_error_dict.get(gather_subset)
 
@@ -1676,6 +1823,8 @@ class MockGatherfactsApi:
             "alert_rules": "list_event_alert_conditions",
             "alert_categories": "get_event_categories",
             "alert_channels": "list_event_channels",
-            "alert_settings": "get_event_maintenance"
+            "alert_settings": "get_event_maintenance",
+            "smartquota": "list_quota_quotas",
+            "filesystem": "get_directory_contents"
         }
         return subset_method_dict.get(gather_subset)

@@ -10,6 +10,7 @@ __metaclass__ = type
 
 
 class MockFileSystemApi:
+    MODULE_UTILS_PATH = 'ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.utils'
     FILE_SYSTEM_MODULE_ARGS = {
         'unispherehost': '**.***.**.***',
         'path': None,
@@ -22,7 +23,7 @@ class MockFileSystemApi:
         'quota': None,
         'state': None
     }
-
+    DATE_TIME = "Thu, 15 Jun 2023 12:20:42 GMT"
     FILESYSTEM_DETAILS = {
         "attrs": [
             {
@@ -48,22 +49,22 @@ class MockFileSystemApi:
             {
                 "name": "last_modified",
                 "namespace": None,
-                "value": "Thu, 15 Jun 2023 12:20:42 GMT"
+                "value": DATE_TIME
             },
             {
                 "name": "change_time",
                 "namespace": None,
-                "value": "Thu, 15 Jun 2023 12:20:42 GMT"
+                "value": DATE_TIME
             },
             {
                 "name": "access_time",
                 "namespace": None,
-                "value": "Thu, 15 Jun 2023 12:20:42 GMT"
+                "value": DATE_TIME
             },
             {
                 "name": "create_time",
                 "namespace": None,
-                "value": "Thu, 15 Jun 2023 12:20:42 GMT"
+                "value": DATE_TIME
             },
             {
                 "name": "mtime_val",
@@ -184,15 +185,24 @@ class MockFileSystemApi:
         }
     }
 
+    QUOTA_DETAILS_1 = {
+        "quotas": {
+            "inodes": 1,
+            "logical": 0,
+            "physical": 2048
+        }
+    }
     QUOTA_DETAILS = {
 
-        "quotas": [],
+        "quotas": None,
         "resume": None
     }
-
-    @staticmethod
-    def delete_file_system_response(error):
-        return "Deletion of Filesystem"
+    EMPTY_NFS_EXPORTS = {
+        "exports": None
+    }
+    EMPTY_SMB_SHARES = {
+        "shares": []
+    }
 
     @staticmethod
     def get_acl_response():
@@ -224,13 +234,12 @@ class MockFileSystemApi:
         }
 
     @staticmethod
-    def get_acl_validation_error():
-        return "Please specify access_rights or inherit_flags to set ACL"
-
-    @staticmethod
-    def file_system_create_quota_response(error):
-        return "Creation of Quota ifs/ATest3 failed with error: None"
-
-    @staticmethod
-    def file_system_update_quota_response(error):
-        return "Modification of Quota on path"
+    def get_error_responses(response_type):
+        if response_type == 'update_quota_exception':
+            return "Modification of Quota on path"
+        elif response_type == "create_quota_exception":
+            return "Creation of Quota ifs/ATest3 failed with error: None"
+        elif response_type == "delete_filesystem_exception":
+            return "Deletion of Filesystem"
+        elif response_type == "acl_validation_exception":
+            return "Please specify access_rights or inherit_flags to set ACL"
