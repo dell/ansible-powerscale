@@ -325,3 +325,73 @@
           event_group:
             - alert_info: 'true'
             - category: '100000000'
+
+    - name: Get smartquota from PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - smartquota
+
+    - name: Get smartquota from PowerScale cluster using filter
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - smartquota
+        filters:
+          - filter_key: "id"
+            filter_operator: "equal"
+            filter_value: "xxx"
+
+    - name: Get filesystem from PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - filesystem
+        path: "<path>"
+
+    - name: Get filesystem from PowerScale cluster with
+        query parameters
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - filesystem
+        query_parameters:
+          filesystem:
+            metadata: true
+            quota: true
+            acl: true
+            snapshot: true
+            path: "<path>"
+
+    - name: Get filesystem from PowerScale cluster with query
+        parameters along with filters
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - filesystem
+        query_parameters:
+          filesystem:
+            metadata: true
+            quota: true
+            acl: true
+            snapshot: true
+            path: "<path>"
+        filters:
+          - filter_key: "name"
+            filter_operator: "equal"
+            filter_value: "xxx"
