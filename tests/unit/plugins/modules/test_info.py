@@ -19,7 +19,7 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock
     import MockApiException
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.initial_mock \
     import utils
-from ansible_collections.dellemc.powerscale.plugins.modules.info import Info, main
+from ansible_collections.dellemc.powerscale.plugins.modules.info import Info
 
 utils.get_logger = MagicMock()
 
@@ -723,6 +723,3 @@ class TestInfo():
             gatherfacts_module_mock.perform_module_operation()
         assert MockGatherfactsApi.get_gather_facts_error_response(
             gather_subset) in gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
-
-    def test_main(self):
-        main()
