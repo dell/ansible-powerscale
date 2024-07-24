@@ -644,3 +644,82 @@ class TestInfo():
             gatherfacts_module_mock.perform_module_operation()
         assert MockGatherfactsApi.get_gather_facts_error_response(
             gather_subset) in gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
+
+    @pytest.mark.parametrize("input_params", [
+        {"gather_subset": "smartquota", "return_key": "smart_quota"}
+    ]
+    )
+    def test_get_facts_smartquota_api_module(self, gatherfacts_module_mock, input_params):
+        """Test the get_facts that uses the smartquota api endpoint to get the module response"""
+
+        gather_subset = input_params.get('gather_subset')
+        return_key = input_params.get('return_key')
+        api_response = MockGatherfactsApi.get_gather_facts_api_response(
+            gather_subset)
+        self.get_module_args.update({
+            'gather_subset': ['smartquota'],
+            'zone': "System",
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+
+        with patch.object(gatherfacts_module_mock.smartquota_api, MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
+            mock_method.return_value = MockSDKResponse(api_response)
+            gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_gather_facts_module_response(
+            gather_subset) == gatherfacts_module_mock.module.exit_json.call_args[1][return_key]
+
+    @pytest.mark.parametrize("gather_subset", [
+        "smartquota"
+    ]
+    )
+    def test_get_facts_smartquota_api_exception(self, gatherfacts_module_mock, gather_subset):
+        """Test the get_facts that uses the smartquota api endpoint to get the exception"""
+        self.get_module_args.update({
+            'gather_subset': [gather_subset],
+            'zone': "System",
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        with patch.object(gatherfacts_module_mock.smartquota_api, MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
+            mock_method.side_effect = MagicMock(side_effect=MockApiException)
+            gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_gather_facts_error_response(
+            gather_subset) in gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
+
+    @pytest.mark.parametrize("input_params", [
+        {"gather_subset": "filesystem", "return_key": "file_system"}
+    ]
+    )
+    def test_get_facts_filesystem_api_module(self, gatherfacts_module_mock, input_params):
+        """Test the get_facts that uses the filesystem api endpoint to get the module response"""
+
+        gather_subset = input_params.get('gather_subset')
+        return_key = input_params.get('return_key')
+        api_response = MockGatherfactsApi.get_gather_facts_api_response(
+            gather_subset)
+        self.get_module_args.update({
+            'gather_subset': ['filesystem'],
+            'zone': "System",
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        with patch.object(gatherfacts_module_mock.namespace_api, MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
+            mock_method.return_value = MockSDKResponse(api_response)
+            gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_gather_facts_module_response(
+            gather_subset) == gatherfacts_module_mock.module.exit_json.call_args[1][return_key]
+
+    @pytest.mark.parametrize("gather_subset", [
+        "filesystem"
+    ]
+    )
+    def test_get_facts_filesystem_api_exception(self, gatherfacts_module_mock, gather_subset):
+        """Test the get_facts that uses the filesystem api endpoint to get the exception"""
+        self.get_module_args.update({
+            'gather_subset': [gather_subset],
+            'zone': "System",
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        with patch.object(gatherfacts_module_mock.namespace_api, MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
+            mock_method.side_effect = MagicMock(side_effect=MockApiException)
+            gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_gather_facts_error_response(
+            gather_subset) in gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
