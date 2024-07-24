@@ -26,6 +26,7 @@ author:
 - Manisha Agrawal(@agrawm3) <ansible.team@dell.com>
 - Bhavneet Sharma(@Bhavneet-Sharma) <ansible.team@dell.com>
 - Trisha Datta(@trisha-dell) <ansible.team@dell.com>
+- Kritika Bhateja(@Kritika-Bhateja-03) <ansible.team.dell.com>)
 
 options:
   path:
@@ -197,8 +198,7 @@ options:
             default: present
 
 notes:
-- The I(check_mode) is not supported.
-
+  - The I(check_mode) is supported.
 '''
 
 EXAMPLES = r'''
@@ -486,7 +486,7 @@ class NfsExport(object):
         # Initialize the ansible module
         self.module = AnsibleModule(
             argument_spec=self.module_params,
-            supports_check_mode=False
+            supports_check_mode=True
         )
         # Result is a dictionary that contains changed status, NFS export
         # details
@@ -620,15 +620,16 @@ class NfsExport(object):
         if nfs_map_non_root:
             nfs_export.map_non_root = nfs_map_non_root
         try:
-            msg = ("Creating NFS export with parameters:nfs_export=%s",
-                   nfs_export)
-            LOG.info(msg)
-            if ignore_unresolvable_hosts is not True:
-                response = self.protocol_api.create_nfs_export(nfs_export, zone=access_zone)
-            else:
-                response = self.protocol_api.create_nfs_export(nfs_export, zone=access_zone,
-                                                               ignore_unresolvable_hosts=ignore_unresolvable_hosts)
-            self.result['NFS_export_details'] = self._get_nfs_export_from_id(response.id, access_zone=access_zone)
+            if not self.module.check_mode:
+                msg = ("Creating NFS export with parameters:nfs_export=%s",
+                       nfs_export)
+                LOG.info(msg)
+                if ignore_unresolvable_hosts is not True:
+                    response = self.protocol_api.create_nfs_export(nfs_export, zone=access_zone)
+                else:
+                    response = self.protocol_api.create_nfs_export(nfs_export, zone=access_zone,
+                                                                   ignore_unresolvable_hosts=ignore_unresolvable_hosts)
+                self.result['NFS_export_details'] = self._get_nfs_export_from_id(response.id, access_zone=access_zone)
             return True
 
         except Exception as e:
@@ -752,8 +753,6 @@ class NfsExport(object):
         mod_flag, nfs_export = self._check_clients(nfs_export, playbook_client_dict, current_client_dict, mod_flag)
         mod_flag, nfs_export = self._check_read_only_clients(nfs_export, playbook_client_dict, current_client_dict, mod_flag)
         mod_flag, nfs_export = self._check_root_clients(nfs_export, playbook_client_dict, current_client_dict, mod_flag)
-
-        # mod_flag = mod_flag1 or mod_flag2 or mod_flag3 or mod_flag4
         return mod_flag, nfs_export
 
     def _check_mod_field(self, field_name_playbook, field_name_powerscale):
@@ -818,20 +817,21 @@ class NfsExport(object):
 
     def perform_modify_nfs_export(self, nfs_export, path, access_zone, ignore_unresolvable_hosts):
         try:
-            if ignore_unresolvable_hosts is not True:
-                self.protocol_api.update_nfs_export(
-                    nfs_export,
-                    self.result['NFS_export_details']['id'],
-                    zone=self.result['NFS_export_details']['zone'])
-            else:
-                self.protocol_api.update_nfs_export(
-                    nfs_export,
-                    self.result['NFS_export_details']['id'],
-                    zone=self.result['NFS_export_details']['zone'],
-                    ignore_unresolvable_hosts=ignore_unresolvable_hosts)
-            # update result with updated details
-            self.result['NFS_export_details'] = self.get_nfs_export(
-                path, access_zone)
+            if not self.module.check_mode:
+                if ignore_unresolvable_hosts is not True:
+                    self.protocol_api.update_nfs_export(
+                        nfs_export,
+                        self.result['NFS_export_details']['id'],
+                        zone=self.result['NFS_export_details']['zone'])
+                else:
+                    self.protocol_api.update_nfs_export(
+                        nfs_export,
+                        self.result['NFS_export_details']['id'],
+                        zone=self.result['NFS_export_details']['zone'],
+                        ignore_unresolvable_hosts=ignore_unresolvable_hosts)
+                # update result with updated details
+                self.result['NFS_export_details'] = self.get_nfs_export(
+                    path, access_zone)
             return True
 
         except Exception as e:
@@ -847,13 +847,14 @@ class NfsExport(object):
         '''
         nfs_export = self.result['NFS_export_details']
         try:
-            msg = ('Deleting NFS export with path: {0}, zone: {1} and ID: {2}'.format(
-                nfs_export['paths'][0], nfs_export['zone'], nfs_export['id']))
-            LOG.info(msg)
-            self.protocol_api.delete_nfs_export(
-                nfs_export['id'], zone=nfs_export['zone'])
+            if not self.module.check_mode:
+                msg = ('Deleting NFS export with path: {0}, zone: {1} and ID: {2}'.format(
+                    nfs_export['paths'][0], nfs_export['zone'], nfs_export['id']))
+                LOG.info(msg)
+                self.protocol_api.delete_nfs_export(
+                    nfs_export['id'], zone=nfs_export['zone'])
 
-            self.result['NFS_export_details'] = {}
+                self.result['NFS_export_details'] = {}
             return True
         except Exception as e:
             error_msg = (

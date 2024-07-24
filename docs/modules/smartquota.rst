@@ -58,7 +58,7 @@ Parameters
   provider_type (optional, str, local)
     This option defines the type which is used to authenticate the user/group.
 
-    If the *provider_type* is 'ads' then the domain name of the Active Directory Server has to be mentioned in the *user_name*. The format for the *user_name* should be 'DOMAIN_NAME\user_name' or "DOMAIN_NAME\\user_name".
+    If the \ :emphasis:`provider\_type`\  is 'ads' then the domain name of the Active Directory Server has to be mentioned in the \ :emphasis:`user\_name`\ . The format for the \ :emphasis:`user\_name`\  should be 'DOMAIN\_NAME\\user\_name' or "DOMAIN\_NAME\\\\user\_name".
 
     This option acts as a filter for all operations except creation.
 
@@ -80,7 +80,7 @@ Parameters
 
 
     thresholds_on (optional, str, None)
-      For SDK 9.0.0 the parameter *include_overheads* is deprecated and *thresholds_on* is used.
+      For SDK 9.0.0 the parameter \ :emphasis:`include\_overheads`\  is deprecated and \ :emphasis:`thresholds\_on`\  is used.
 
 
     advisory_limit_size (optional, float, None)
@@ -88,11 +88,11 @@ Parameters
 
 
     soft_limit_size (optional, float, None)
-      Threshold value after which the soft limit exceeded notification will be sent and the *soft_grace* period will start.
+      Threshold value after which the soft limit exceeded notification will be sent and the \ :emphasis:`soft\_grace`\  period will start.
 
       Write access will be restricted after the grace period expires.
 
-      Both *soft_grace_period* and *soft_limit_size* are required to modify soft threshold for the quota.
+      Both \ :emphasis:`soft\_grace\_period`\  and \ :emphasis:`soft\_limit\_size`\  are required to modify soft threshold for the quota.
 
 
     soft_grace_period (optional, int, None)
@@ -100,15 +100,15 @@ Parameters
 
       After the grace period, the write access to the quota will be restricted.
 
-      Both *soft_grace_period* and *soft_limit_size* are required to modify soft threshold for the quota.
+      Both \ :emphasis:`soft\_grace\_period`\  and \ :emphasis:`soft\_limit\_size`\  are required to modify soft threshold for the quota.
 
 
     period_unit (optional, str, None)
-      Unit of the time period for *soft_grace_period*.
+      Unit of the time period for \ :emphasis:`soft\_grace\_period`\ .
 
       For months the number of days is assumed to be 30 days.
 
-      This parameter is required only if the *soft_grace_period*, is specified.
+      This parameter is required only if the \ :emphasis:`soft\_grace\_period`\ , is specified.
 
 
     hard_limit_size (optional, float, None)
@@ -124,16 +124,16 @@ Parameters
 
 
     container (optional, bool, False)
-      If ``true``, SMB shares using the quota directory see the quota thresholds as share size.
+      If \ :literal:`true`\ , SMB shares using the quota directory see the quota thresholds as share size.
 
 
 
   state (True, str, None)
     Define whether the Smart Quota should exist or not.
 
-    ``present`` - indicates that the Smart Quota should exist on the system.
+    \ :literal:`present`\  - indicates that the Smart Quota should exist on the system.
 
-    ``absent`` - indicates that the Smart Quota should not exist on the system.
+    \ :literal:`absent`\  - indicates that the Smart Quota should not exist on the system.
 
 
   onefs_host (True, str, None)
@@ -147,9 +147,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    ``true`` - indicates that the SSL certificate should be verified.
+    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
 
-    ``false`` - indicates that the SSL certificate should not be verified.
+    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -167,10 +167,10 @@ Notes
 -----
 
 .. note::
-   - To perform any operation, path, quota_type and state are mandatory parameters.
+   - To perform any operation, path, quota\_type and state are mandatory parameters.
    - There can be two quotas for each type per directory, one with snapshots included and one without snapshots included.
+   - The \ :emphasis:`check\_mode`\  is not supported.
    - Once the limits are assigned, then the quota cannot be converted to accounting. Only modification to the threshold limits is permitted.
-   - The *check_mode* is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -203,7 +203,8 @@ Examples
           cap_unit: "{{cap_unit}}"
         state: "present"
 
-    - name: Create a Quota for a Directory for accounting includes snapshots and data protection overheads
+    - name: Create a Quota for a Directory for accounting includes snapshots
+        and data protection overheads
       dellemc.powerscale.smartquota:
         onefs_host: "{{onefs_host}}"
         verify_ssl: "{{verify_ssl}}"
@@ -327,11 +328,11 @@ quota_details (When Quota exists., complex, {'container': True, 'description': '
 
 
   container (, bool, True)
-    If ``true``, SMB shares using the quota directory see the quota thresholds as share size.
+    If \ :literal:`true`\ , SMB shares using the quota directory see the quota thresholds as share size.
 
 
   thresholds (, dict, {'advisory': 3221225472, 'advisory(GB)': '3.0', 'advisory_exceeded': False, 'advisory_last_exceeded': 0, 'hard': 6442450944, 'hard(GB)': '6.0', 'hard_exceeded': False, 'hard_last_exceeded': 0, 'soft': 5368709120, 'soft(GB)': '5.0', 'soft_exceeded': False, 'soft_grace': 3024000, 'soft_last_exceeded': 0})
-    Includes information about all the limits imposed on quota. The limits are mentioned in bytes and *soft_grace* is in seconds.
+    Includes information about all the limits imposed on quota. The limits are mentioned in bytes and \ :emphasis:`soft\_grace`\  is in seconds.
 
 
   type (, str, directory)
@@ -357,4 +358,5 @@ Authors
 ~~~~~~~
 
 - P Srinivas Rao (@srinivas-rao5) <ansible.team@dell.com>
+- Kritika Bhateja(@Kritika-Bhateja-03) <ansible.team.dell.com>)
 
