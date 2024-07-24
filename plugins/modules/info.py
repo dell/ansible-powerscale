@@ -3374,7 +3374,6 @@ class Info(object):
     def get_nfs_exports_list(self, access_zone):
         """Get the list of nfs_exports of a given PowerScale Storage"""
         try:
-            nfs_exports_list = []
             nfs_exports_details = (self.protocol_api.list_nfs_exports(zone=access_zone))\
                 .to_dict()
             nfs_exports = nfs_exports_details["exports"]

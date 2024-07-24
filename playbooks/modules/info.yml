@@ -22,7 +22,8 @@
           - access_zones
           - nodes
 
-    - name: Get list of authentication providers, users and groups for an access zone of the PowerScale cluster
+    - name: Get list of authentication providers, users
+        and groups for an access zone of the PowerScale cluster
       dellemc.powerscale.info:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -34,7 +35,8 @@
           - users
           - groups
 
-    - name: Get list of authentication providers, users and groups for System access zone of the PowerScale cluster
+    - name: Get list of authentication providers, users
+        and groups for System access zone of the PowerScale cluster
       dellemc.powerscale.info:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -45,7 +47,8 @@
           - users
           - groups
 
-    - name: Get list of smb shares, nfs exports, clients of the PowerScale cluster
+    - name: Get list of smb shares, nfs exports, clients
+        of the PowerScale cluster
       dellemc.powerscale.info:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -57,7 +60,8 @@
           - nfs_exports
           - clients
 
-    - name: Get list of synciq reports and synciq target reports of the PowerScale cluster
+    - name: Get list of synciq reports and synciq target
+        reports of the PowerScale cluster
       dellemc.powerscale.info:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -77,7 +81,8 @@
         gather_subset:
           - synciq_policies
 
-    - name: Get list of SyncIQ target cluster certificates of a PowerScale cluster
+    - name: Get list of SyncIQ target cluster
+        certificates of a PowerScale cluster
       dellemc.powerscale.info:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -86,7 +91,8 @@
         gather_subset:
           - synciq_target_cluster_certificates
 
-    - name: Get list of synciq performance rules of the PowerScale cluster
+    - name: Get list of synciq performance rules of the
+        PowerScale cluster
       dellemc.powerscale.info:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -95,7 +101,8 @@
         gather_subset:
           - synciq_performance_rules
 
-    - name: Get list of network groupnets, subnets, pools, rules and interfaces of the PowerScale cluster
+    - name: Get list of network groupnets, subnets, pools, rules
+        and interfaces of the PowerScale cluster
       dellemc.powerscale.info:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -108,7 +115,8 @@
           - network_rules
           - network_interfaces
 
-    - name: Get list of network pools, authentication providers for all access zone of the PowerScale cluster
+    - name: Get list of network pools, authentication providers
+        for all access zone of the PowerScale cluster
       dellemc.powerscale.info:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -119,7 +127,8 @@
           - providers
           - network_pools
 
-    - name: Get list of node pools and storage tiers of the PowerScale cluster
+    - name: Get list of node pools and storage tiers of the
+        PowerScale cluster
       dellemc.powerscale.info:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -228,7 +237,8 @@
         gather_subset:
           - server_certificate
 
-    - name: Get attributes, access_zones and nodes of the PowerScale cluster
+    - name: Get attributes, access_zones and nodes of the
+        PowerScale cluster
       dellemc.powerscale.info:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
