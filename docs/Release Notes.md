@@ -95,6 +95,8 @@ Known problems in this release are listed.
 | SyncIQ Job creation/modification/retrieval | When SyncIQ policy has any job of the type "resync_prep/allow_write/allow_write_revert" then creation, modification or retrieval of SyncIQ job will fail with an error saying "Invalid value for 'action', must be one of ['copy', 'sync']". | This is an issue in the supported OneFS versions. |
 | SMB share creation with NIS group permissions | Creating a SMB share with NIS group permissions fails with error that the group cannot be found. | This is an issue in the supported OneFS versions. |
 | Getting group details  | Getting the details of a group by group_name with provider type as NIS fails. | This is an issue in the supported OneFS versions. |
+| Filtering event group info details  | Filtering with query params alert_info for gather_subset event group does not work as expected | This is an issue in the supported OneFS versions. |
+| Sorting alert rules info details  | Filtering with query params channels for gather_subset alert rules does not work as expected. | This is an issue in the supported OneFS versions. |
 
 Limitations
 -----------
