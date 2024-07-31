@@ -71,7 +71,7 @@ The tasks can be executed by running simple playbooks written in yaml syntax.
 * [Maintanence](#maintanence)
 
 ## License
-Ansible collection for PowerScale is released and licensed under the GPL-3.0 license. See [LICENSE](https://github.com/dell/ansible-powerscale/blob/main/LICENSE) for the full terms. Ansible modules and modules utilities that are part of the Ansible collection for PowerScale are released and licensed under the Apache 2.0 license. See [MODULE-LICENSE](https://github.com/dell/ansible-powerscale/blob/main/MODULE-LICENSE) for the full terms.
+Ansible collection for PowerScale is released and licensed under the GPL-3.0 license. See [LICENSE](https://github.com/dell/ansible-powerscale/blob/main/LICENSE) for the full terms.
 
 ## Supported platforms
   * Dell PowerScale OneFS versions 9.4.x, 9.5.x, 9.7.x, and 9.8.x

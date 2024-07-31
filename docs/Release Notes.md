@@ -27,7 +27,7 @@ Table 1. Revision history
 
 | Revision | Date          | Description                                               |
 |----------|---------------|-----------------------------------------------------------|
-| 01       | June 2024     | Ansible Modules for Dell PowerScale 3.2.0                 |
+| 01       | July 2024     | Ansible Modules for Dell PowerScale 3.2.0                 |
 
 
 Product description
