@@ -192,6 +192,8 @@ Parameters
 
     Event groups - \ :literal:`event\_group`\ .
 
+    Writable snapshots - \ :literal:`writable\_snapshot`\ .
+
 
   filters (False, list, None)
     List of filters to support filtered output for storage entities.
@@ -218,6 +220,32 @@ Parameters
     Contains dictionary of query parameters for specific \ :emphasis:`gather\_subset`\ .
 
     Applicable to \ :literal:`alert\_rules`\ , \ :literal:`event\_group`\ , \ :literal:`event\_channels`\  and \ :literal:`filesystem`\ .
+
+    If \ :literal:`writable\_snapshot`\  is passed as \ :emphasis:`gather\_subset`\ , if \ :emphasis:`wspath`\  is given, all other query parameters inside \ :emphasis:`writable\_snapshot`\  will be ignored.
+
+
+    writable_snapshot (optional, dict, None)
+      The query parameters for \ :emphasis:`gather\_subset`\  'writable\_snapshot'.
+
+      Supports the following query parameters.
+
+
+      dir (optional, str, None)
+        The direction of the sort.
+
+
+      limit (optional, int, None)
+        The limit.
+
+
+      sort (optional, str, None)
+        The field that is used for sorting.
+
+
+      state (optional, str, None)
+        To list the writable snapshot matching this state.
+
+
 
 
   onefs_host (True, str, None)
@@ -254,7 +282,7 @@ Notes
    - The parameters \ :emphasis:`access\_zone`\  and \ :emphasis:`include\_all\_access\_zones`\  are mutually exclusive.
    - Listing of SyncIQ target cluster certificates is not supported by isi\_sdk\_8\_1\_1 version.
    - The \ :emphasis:`check\_mode`\  is supported.
-   - Filter functionality is supported only for the following 'gather\_subset'- 'nfs', 'smartquota', 'filesystem'.
+   - Filter functionality is supported only for the following 'gather\_subset'- 'nfs', 'smartquota', 'filesystem' 'writable\_snapshot'.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -781,6 +809,53 @@ Examples
           - filter_key: "name"
             filter_operator: "equal"
             filter_value: "xxx"
+
+    - name: Get all writable snapshots from PowerScale cluster
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+          - writable_snapshot
+
+    - name: To get the specific writable snapshot.
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+            - writable_snapshot
+        query_parameters:
+          writable_snapshot:
+            wspath: "/ifs/test_mkdir"
+
+    - name: To filter the writable snapshot in ascending order.
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+            - writable_snapshot
+        query_parameters:
+          writable_snapshot:
+            dir: ASC
+            limit: 1
+
+    - name: To sort the writable snapshot in ascending order.
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        gather_subset:
+            - writable_snapshot
+        query_parameters:
+          writable_snapshot:
+            sort: src_snap
+            state: active
 
 
 
