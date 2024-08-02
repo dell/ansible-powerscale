@@ -752,7 +752,7 @@ EXAMPLES = r'''
     api_user: "{{ api_user }}"
     api_password: "{{ api_password }}"
     gather_subset:
-        - writable_snapshot
+      - writable_snapshot
     query_parameters:
       writable_snapshot:
         wspath: "/ifs/test_mkdir"
@@ -764,7 +764,7 @@ EXAMPLES = r'''
     api_user: "{{ api_user }}"
     api_password: "{{ api_password }}"
     gather_subset:
-        - writable_snapshot
+      - writable_snapshot
     query_parameters:
       writable_snapshot:
         dir: ASC
@@ -777,7 +777,7 @@ EXAMPLES = r'''
     api_user: "{{ api_user }}"
     api_password: "{{ api_password }}"
     gather_subset:
-        - writable_snapshot
+      - writable_snapshot
     query_parameters:
       writable_snapshot:
         sort: src_snap
