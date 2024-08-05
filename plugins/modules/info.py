@@ -3231,8 +3231,7 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.sh
     import Quota
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.snapshot \
     import Snapshot
-from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.writable_snapshot \
-    import WritableSnapshot
+
 
 LOG = utils.get_logger('info')
 
@@ -3829,7 +3828,7 @@ class Info(object):
             self.module.fail_json(msg=error_msg)
 
     def get_writable_snapshots(self):
-        writable_snapshots = WritableSnapshot(self.snapshot_api, self.module).list_writable_snapshots()
+        writable_snapshots = Snapshot(self.snapshot_api, self.module).list_writable_snapshots()
         filtered_writable_snapshots = []
         filters = self.module.params.get('filters')
         filters_dict = self.get_filters(filters)
@@ -3925,13 +3924,9 @@ class Info(object):
         if not filters_items:
             self.module.fail_json(msg='filter_key, filter_operator, filter_value are expected.')
         for item in filters_items:
-            try:
-                f_key = item["filter_key"]
-                f_val = item["filter_value"]
-                f_op = item["filter_operator"]
-            except KeyError:
-                error_msg = "Provide input for filter sub-options."
-                self.module.fail_json(msg=error_msg)
+            f_key = item.get("filter_key")
+            f_val = item.get("filter_value")
+            f_op = item.get("filter_operator")
             if f_op != 'equal':
                 error_msg = "The filter operator is not supported -- only 'equal' is supported."
                 self.module.fail_json(msg=error_msg)

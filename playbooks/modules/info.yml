@@ -405,7 +405,7 @@
         gather_subset:
           - writable_snapshot
 
-    - name: To get the specific writable snapshot.
+    - name: To get the specific writable snapshot
       dellemc.powerscale.info:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -417,7 +417,7 @@
           writable_snapshot:
             wspath: "/ifs/test_mkdir"
 
-    - name: To filter the writable snapshot in ascending order.
+    - name: To filter the writable snapshot in ascending order
       dellemc.powerscale.info:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -430,7 +430,7 @@
             dir: ASC
             limit: 1
 
-    - name: To sort the writable snapshot in ascending order.
+    - name: To filter the writable snapshot using sort
       dellemc.powerscale.info:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"

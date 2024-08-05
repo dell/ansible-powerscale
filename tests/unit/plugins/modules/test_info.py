@@ -738,6 +738,7 @@ class TestInfo():
         self.get_module_args.update({
             'gather_subset': ['writable_snapshot'],
             'zone': "System",
+            "filters": [{"filter_key": "id", "filter_operator": "equal", "filter_value": 66258688}]
         })
         gatherfacts_module_mock.module.params = self.get_module_args
 
@@ -763,3 +764,19 @@ class TestInfo():
             gatherfacts_module_mock.perform_module_operation()
         assert MockGatherfactsApi.get_gather_facts_error_response(
             gather_subset) in gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
+
+    def test_get_filters_empty_case(self, gatherfacts_module_mock):
+        resp = gatherfacts_module_mock.get_filters()
+        assert resp == {}
+
+    def test_get_filters_failure_case1(self, gatherfacts_module_mock):
+        filter_dict = [{"filter_key": "id", "filter_operator": "equal"}]
+        gatherfacts_module_mock.get_filters(filters=filter_dict)
+        assert gatherfacts_module_mock.module.fail_json.call_args[1]['msg'] \
+            == 'filter_key, filter_operator, filter_value are expected.'
+
+    def test_get_filters_failure_case2(self, gatherfacts_module_mock):
+        filter_dict = [{"filter_key": "id", "filter_operator": "less", "filter_value": 123}]
+        gatherfacts_module_mock.get_filters(filters=filter_dict)
+        assert gatherfacts_module_mock.module.fail_json.call_args[1]['msg'] \
+            == "The filter operator is not supported -- only 'equal' is supported."

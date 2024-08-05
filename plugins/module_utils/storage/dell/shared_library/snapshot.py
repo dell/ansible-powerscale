@@ -50,3 +50,35 @@ class Snapshot:
                             'due to error {0}'.format((str(error_msg)))
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
+
+    def list_writable_snapshots(self):
+        """
+        List the writable snapshots.
+
+        :param filter: The filter for the list.
+        :type filter: dict
+        :returns: The list of snapshots.
+        :rtype: list
+        """
+        try:
+            query_params = self.module.params.get('query_parameters')
+            writable_snapshot_query_params = query_params.get('writable_snapshot', []) if query_params else []
+            filter_params = {}
+            if writable_snapshot_query_params:
+                if "wspath" in writable_snapshot_query_params:
+                    return self.snapshot_api.get_snapshot_writable_wspath(
+                        snapshot_writable_wspath=writable_snapshot_query_params["wspath"]
+                    ).to_dict().get("writable")
+                else:
+                    filter_params = dict(writable_snapshot_query_params.items())
+            writable_snapshots = []
+            snapshot_list = \
+                self.snapshot_api.list_snapshot_writable(**filter_params).to_dict()
+            writable_snapshots.extend(snapshot_list['writable'])
+            return writable_snapshots
+        except Exception as e:
+            error_msg = utils.determine_error(error_obj=e)
+            error_message = 'Failed to get writeable snapshots ' \
+                            'due to error {0}'.format((str(error_msg)))
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
