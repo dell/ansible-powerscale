@@ -50,6 +50,7 @@ options:
       - Channels for the alert.
     type: list
     elements: str
+    required: true
   eventgroup_ids:
     description:
       - Event group ID's to be alerted.
@@ -262,7 +263,7 @@ class AlertRule(PowerScaleBase):
                                      'REBOOT_EVENTS', 'SW_EVENTS', 'QUOTA_EVENTS',
                                      'SNAP_EVENTS', 'WINNET_EVENTS', 'FILESYS_EVENTS',
                                      'HW_EVENTS', 'CPOOL_EVENTS']),
-            channels=dict(type='list', elements='str'),
+            channels=dict(type='list', elements='str', required=True),
             eventgroup_ids=dict(type='list', elements='str'),
             exclude_eventgroup_ids=dict(type='list', elements='str'),
             interval=dict(type='int'),
