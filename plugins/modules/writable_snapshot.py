@@ -71,7 +71,7 @@ EXAMPLES = r'''
         src_snap: 2
         state: present
 
-- name: To create a writable snapshot using Name.
+- name: To create a writable snapshot using Name
   dellemc.powerscale.writable_snapshot:
     onefs_host: "{{ onefs_host }}"
     verify_ssl: "{{ verify_ssl }}"
@@ -156,7 +156,7 @@ writable_snapshot_details:
             type: str
             sample: "Snapshot: 2024Apr15, 4:40 PM"
         state:
-            description: The name of the source snapshot.s
+            description: The name of the source snapshot.
             type: str
             sample: active
     sample: [
