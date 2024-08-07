@@ -184,31 +184,14 @@ options:
   query_parameters:
     description:
     - Contains dictionary of query parameters for specific I(gather_subset).
-    - Applicable to C(alert_rules), C(event_group), C(event_channels) and C(filesystem).
+    - Applicable to C(alert_rules), C(event_group), C(event_channels), C(filesystem)
+      and C(writable_snapshot).
     - If C(writable_snapshot) is passed as I(gather_subset), if I(wspath) is given,
       all other query parameters inside I(writable_snapshot) will be ignored.
-    suboptions:
-      writable_snapshot:
-        description:
-        - The query parameters for I(gather_subset) 'writable_snapshot'.
-        - Supports the following query parameters.
-        type: dict
-        suboptions:
-          dir:
-            description: The direction of the sort.
-            type: str
-            choices: [ASC, DESC]
-          limit:
-            description: The limit.
-            type: int
-          sort:
-            description: The field that is used for sorting.
-            type: str
-            choices: [created, src_path, phys_size, state, src_snap]
-          state:
-            description: To list the writable snapshot matching this state.
-            type: str
-            choices: [all, active, deleting]
+    - To view the list of supported query parameters for C(writable_snapshot),
+      refer Query Parameters section from
+      U(https://developer.dell.com/apis/4088/versions/9.5.0/9.5.0.0_ISLANDER_OAS2.json/
+        paths/~1platform~114~1snapshot~1writable/get)
     type: dict
     version_added: '3.2.0'
 notes:

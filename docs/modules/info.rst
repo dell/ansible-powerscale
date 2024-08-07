@@ -219,33 +219,11 @@ Parameters
   query_parameters (optional, dict, None)
     Contains dictionary of query parameters for specific \ :emphasis:`gather\_subset`\ .
 
-    Applicable to \ :literal:`alert\_rules`\ , \ :literal:`event\_group`\ , \ :literal:`event\_channels`\  and \ :literal:`filesystem`\ .
+    Applicable to \ :literal:`alert\_rules`\ , \ :literal:`event\_group`\ , \ :literal:`event\_channels`\ , \ :literal:`filesystem`\  and \ :literal:`writable\_snapshot`\ .
 
     If \ :literal:`writable\_snapshot`\  is passed as \ :emphasis:`gather\_subset`\ , if \ :emphasis:`wspath`\  is given, all other query parameters inside \ :emphasis:`writable\_snapshot`\  will be ignored.
 
-
-    writable_snapshot (optional, dict, None)
-      The query parameters for \ :emphasis:`gather\_subset`\  'writable\_snapshot'.
-
-      Supports the following query parameters.
-
-
-      dir (optional, str, None)
-        The direction of the sort.
-
-
-      limit (optional, int, None)
-        The limit.
-
-
-      sort (optional, str, None)
-        The field that is used for sorting.
-
-
-      state (optional, str, None)
-        To list the writable snapshot matching this state.
-
-
+    To view the list of supported query parameters for \ :literal:`writable\_snapshot`\ , refer Query Parameters section from \ https://developer.dell.com/apis/4088/versions/9.5.0/9.5.0.0_ISLANDER_OAS2.json/%20paths/~1platform~114~1snapshot~1writable/get\ 
 
 
   onefs_host (True, str, None)
@@ -826,7 +804,7 @@ Examples
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         gather_subset:
-            - writable_snapshot
+          - writable_snapshot
         query_parameters:
           writable_snapshot:
             wspath: "/ifs/test_mkdir"
@@ -838,7 +816,7 @@ Examples
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         gather_subset:
-            - writable_snapshot
+          - writable_snapshot
         query_parameters:
           writable_snapshot:
             dir: ASC
@@ -851,7 +829,7 @@ Examples
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         gather_subset:
-            - writable_snapshot
+          - writable_snapshot
         query_parameters:
           writable_snapshot:
             sort: src_snap
