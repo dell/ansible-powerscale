@@ -479,6 +479,30 @@ class Snapshot(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
+    def get_datetime_diff_in_minutes(self, dt1, dt2):
+        """
+        Calculates the difference in minutes between two datetime objects.
+
+        Args:
+            dt1 (datetime): The first datetime object.
+            dt2 (datetime): The second datetime object.
+
+        Returns:
+            int: The difference in minutes between dt1 and dt2.
+
+        Raises:
+            TypeError: If dt1 or dt2 are None.
+        """
+
+        if dt1 is None or dt2 is None:
+            raise TypeError("Datetime objects cannot be None")
+
+        if dt1 > dt2:
+            td = dt1 - dt2
+        else:
+            td = dt2 - dt1
+        return int(round(td.total_seconds() / 60))
+
     def check_snapshot_modified(self, snapshot, alias,
                                 desired_retention,
                                 retention_unit,
@@ -570,19 +594,13 @@ class Snapshot(object):
                     existing_timestamp)
                 new_time_obj = datetime.fromtimestamp(
                     new_timestamp)
-
-                if existing_time_obj > new_time_obj:
-                    td = utils.dateutil.relativedelta.relativedelta(
-                        existing_time_obj, new_time_obj)
-                else:
-                    td = utils.dateutil.relativedelta.relativedelta(
-                        new_time_obj, existing_time_obj)
+                # Get datetime diff in minutes
+                td_min = self.get_datetime_diff_in_minutes(existing_time_obj, new_time_obj)
                 info_message = 'The time difference is ' \
-                               '{0} minutes'.format(td.minutes)
+                               '{0} minutes'.format(td_min)
                 LOG.info(info_message)
                 # A delta of two minutes is treated as idempotent
-                if td.seconds > 120 or td.minutes > 2 or \
-                        td.hours > 0 or td.days > 0 or td.years > 0:
+                if td_min > 2:
                     snapshot_modification_details[
                         'is_timestamp_modified'] = True
                     snapshot_modification_details[
