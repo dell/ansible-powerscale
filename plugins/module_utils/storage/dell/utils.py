@@ -7,17 +7,6 @@ HAS_POWERSCALE_SDK = False
 isi_sdk = None
 IMPORT_PKGS_FAIL = []
 
-try:
-    import urllib3
-
-    urllib3.disable_warnings()
-except ImportError:
-    IMPORT_PKGS_FAIL.append("urllib3")
-
-try:
-    import dateutil.relativedelta  # noqa   # pylint: disable=unused-import
-except ImportError:
-    IMPORT_PKGS_FAIL.append("python-dateutil")
 
 try:
     from pkg_resources import parse_version
