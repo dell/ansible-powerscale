@@ -177,44 +177,190 @@ writable_snapshot_details:
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.powerscale_base \
+    import PowerScaleBase
+
+LOG = utils.get_logger('writable_snapshot')
 
 
-class WritableSnapshot(object):
+class WritableSnapshot(PowerScaleBase):
     def __init__(self):
-        """Define all the parameters required by this module"""
+        """
+        Initializes the class instance.
 
-        self.module_params = utils \
-            .get_powerscale_management_host_parameters()
-        self.module_params.update(get_writable_snapshot_parameters())
+        :param self: The class instance.
+        """
 
-        # initialize the Ansible module
-        self.module = AnsibleModule(argument_spec=self.module_params,
-                                    supports_check_mode=True,
-                                    )
+        ansible_module_params = {
+            'argument_spec': self.get_writable_snapshot_parameters(),
+            'supports_check_mode': True
+        }
+        super().__init__(AnsibleModule, ansible_module_params)
 
-    def perform_module_operation(self):
-        pass
+        self.result.update({
+            "writable_snapshot_details": {}
+        })
+
+    def get_writable_snapshot_parameters(self):
+        return {
+            "writable_snapshot":
+            {"type": 'list', "elements": 'dict', "options":
+             {"dst_path": {"type": 'path', "required": True},
+              "src_snap": {"type": 'str', "required": False},
+              "state": {"type": 'str', "required": False, "choices": ['present', 'absent'], "default": 'present'},
+              },
+             "required_if": [("state", "present", ("src_snap",))]
+             }
+        }
+
+    def segregate_snapshots(self, module_params):
+        writable_snapshot = module_params.get('writable_snapshot')
+        snapshots_to_create, snapshots_to_delete = [], []
+        create_paths = set()
+        delete_paths = set()
+        for snapshot_dict in writable_snapshot:
+            if snapshot_dict.get('state') == 'present':
+                create_paths.add(snapshot_dict.get("dst_path"))
+                snapshots_to_create.append(snapshot_dict)
+            else:
+                delete_paths.add(snapshot_dict.get("dst_path"))
+                snapshots_to_delete.append(snapshot_dict)
+        common_paths = create_paths & delete_paths
+        create_snapshots = [s for s in snapshots_to_create if s['dst_path'] not in common_paths]
+        delete_snapshots = [s for s in snapshots_to_delete if s['dst_path'] not in common_paths]
+        return create_snapshots, delete_snapshots
+
+    def get_writable_snapshot(self, dst_path):
+        try:
+            snapshot_out = self.snapshot_api.get_snapshot_writable_wspath(
+                snapshot_writable_wspath=dst_path
+            ).to_dict().get("writable")
+            writable_snapshot_exists = True if snapshot_out else False
+            return writable_snapshot_exists
+        except Exception as e:
+            return False
+
+    def create_filesystem_snapshot(self, snapshots_to_create):
+        """Create a writable snapshot on PowerScale"""
+        create_result = []
+        changed_flag = False
+        for create_snapshot_dict in snapshots_to_create:
+            try:
+                snapshot_exits = self.get_writable_snapshot(create_snapshot_dict.get("dst_path"))
+                if not snapshot_exits:
+                    if not self.module.check_mode:
+                        writable_snapshot_create_item = self.isi_sdk.SnapshotWritableItem(
+                            dst_path=create_snapshot_dict.get("dst_path"),
+                            src_snap=create_snapshot_dict.get("src_snap")
+                        )
+                        output = self.snapshot_api.create_snapshot_writable_item(writable_snapshot_create_item)
+                        create_result.append(output.to_dict())
+                    changed_flag = True
+            except Exception as e:
+                error_msg = utils.determine_error(error_obj=e)
+                error_message = 'Failed to create writable snapshot: {0} for ' \
+                    'with error: {1}'.format(create_snapshot_dict.get("dst_path"), str(error_msg))
+                LOG.error(error_message)
+                self.module.fail_json(msg=error_message)
+        return changed_flag, create_result
+
+    def delete_writable_snapshot(self, snapshots_to_delete):
+        changed_flag = False
+        for delete_snapshot_dict in snapshots_to_delete:
+            dst_path = delete_snapshot_dict.get('dst_path')
+            try:
+                snapshot_exits = self.get_writable_snapshot(dst_path)
+                if snapshot_exits:
+                    if not self.module.check_mode:
+                        self.snapshot_api.delete_snapshot_writable_wspath(snapshot_writable_wspath=dst_path)
+                    changed_flag = True
+            except Exception as e:
+                error_msg = utils.determine_error(error_obj=e)
+                error_message = 'Failed to delete ' \
+                                'snapshot: {0} with ' \
+                                'error: {1}'.format(dst_path, str(error_msg))
+                LOG.error(error_message)
+                self.module.fail_json(msg=error_message)
+        return changed_flag
 
 
-def get_writable_snapshot_parameters():
-    return dict(
-        writable_snapshot=dict(type='list',
-                               required=False,
-                               elements='dict',
-                               options=dict(
-                                   dst_path=dict(required=True, type='path'),
-                                   src_snap=dict(type='str'),
-                                   state=dict(required=False, type='str',
-                                              choices=['present', 'absent'],
-                                              default='present')))
-    )
+class WritableSnapshotHandler:
+    def handle(self, writable_snapshot_obj, module_params):
+        """
+        Handles the writable_snapshot object based on the given module parameters.
+
+        Args:
+            writable_snapshot_obj (writable_snapshot): The writable_snapshot object to be handled.
+            module_params (dict): The module parameters containing the writable_snapshot details.
+
+        Returns:
+            None
+        """
+        create_snapshots, delete_snapshots = writable_snapshot_obj.segregate_snapshots(module_params)
+        writable_snapshot_obj.result['changed'] = False
+        WritableSnapshotCreateHandler().handle(writable_snapshot_obj, create_snapshots, delete_snapshots)
+
+
+class WritableSnapshotCreateHandler:
+    def handle(self, writable_snapshot_obj, create_snapshots, delete_snapshots):
+        """
+        Handles the writable_snapshot object and its details.
+
+        Args:
+            writable_snapshot_obj (writable_snapshot): The writable_snapshot object to be handled.
+            writable_snapshot_details (dict): The details of the writable_snapshot.
+
+        Returns:
+            None
+        """
+        create_details = []
+        if create_snapshots:
+            writable_snapshot_obj.result['changed'], create_details = writable_snapshot_obj.create_filesystem_snapshot(create_snapshots)
+        WritableSnapshotDeleteHandler().handle(writable_snapshot_obj, delete_snapshots, create_details)
+
+
+class WritableSnapshotDeleteHandler:
+    def handle(self, writable_snapshot_obj, delete_snapshots, details):
+        """
+        Deletes a writable_snapshot using the provided writable_snapshot details.
+
+        Args:
+            writable_snapshot_obj (writable_snapshot): The writable_snapshot object to delete.
+            writable_snapshot_details (dict): The details of the writable_snapshot to delete.
+
+        Returns:
+            tuple: A tuple containing a boolean indicating
+            if the writable_snapshot was deleted successfully,
+            and a dictionary of details about the deletion process.
+        """
+        if delete_snapshots:
+            changed = writable_snapshot_obj.delete_writable_snapshot(delete_snapshots)
+            writable_snapshot_obj.result['changed'] = changed or writable_snapshot_obj.result['changed']
+        WritableSnapshotExitHandler().handle(writable_snapshot_obj, details)
+
+
+class WritableSnapshotExitHandler:
+
+    def handle(self, writable_snapshot_obj, writable_snapshot_details):
+        """
+        Handles the writable_snapshot object and writable_snapshot details.
+
+        Args:
+            writable_snapshot_obj (writable_snapshot): The writable_snapshot object.
+            writable_snapshot_details (dict): The details of the writable_snapshot.
+
+        Returns:
+            None
+        """
+        writable_snapshot_obj.result['writable_snapshot_details'] = writable_snapshot_details
+        writable_snapshot_obj.module.exit_json(**writable_snapshot_obj.result)
 
 
 def main():
     """Create PowerScale WritableSnapshot object and perform action on it
         based on user input from playbook"""
     obj = WritableSnapshot()
-    obj.perform_module_operation()
+    WritableSnapshotHandler().handle(obj, obj.module.params)
 
 
 if __name__ == '__main__':
