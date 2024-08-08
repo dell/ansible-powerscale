@@ -558,6 +558,7 @@ class SyncIQReports(object):
         include_sub_reports = self.module.params['include_sub_reports']
         synciq_report = None
         synciq_sub_report_details = None
+        synciq_sub_report_detail = None
 
         if not id and not name:
             error_message = 'Please provide a valid report id or valid report name'
