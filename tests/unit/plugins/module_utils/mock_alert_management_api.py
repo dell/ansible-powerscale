@@ -57,6 +57,36 @@ class MockAlertRuleApi:
         "severities": ["emergency"],
         "transient": 10,
     }
+    
+    GET_EXISTING_ALERT_RULE_OPTIONS = [{
+        "alert_conditions": [{
+        "state": 'present',
+        "name": "alert_rule",
+        "id": "alert_rule",
+        "categories": ["100000000"],
+        "channels": ["SupportAssist"],
+        "condition": "NEW",
+        "eventgroup_ids": ["100010001", "100010002"],
+        "exclude_eventgroup_ids": ["100010005"],
+        "interval": 10,
+        "limit": 10,
+        "severities": ["emergency"],
+        "transient": 10,
+    }]}]
+
+    DELETE_EXISTING_ALERT_RULE_OPTIONS = {
+        "name": "alert_rule",
+        "id": "alert_rule",
+        "categories": ["SYS_DISK_EVENTS"],
+        "channels": ["SupportAssist"],
+        "condition": "NEW",
+        "eventgroup_ids": ["100010001", "100010002"],
+        "exclude_eventgroup_ids": ["100010005"],
+        "interval": 10,
+        "limit": 10,
+        "severities": ["emergency"],
+        "transient": 10,
+    }
 
     DELETE_ALERT_RULE_OPTIONS = {
         "state": 'absent',

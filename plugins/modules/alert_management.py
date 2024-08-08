@@ -387,7 +387,7 @@ class AlertRule(PowerScaleBase):
                 alert_rule = {}
                 changed = True
             except Exception as e:
-                error_message = f"Failed to update alert condition: {utils.determine_error(e)}"
+                error_message = f"Failed to delete alert condition: {utils.determine_error(e)}"
                 LOG.error(error_message)
                 self.module.fail_json(msg=error_message)
 
