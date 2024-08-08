@@ -548,17 +548,18 @@ def is_email_address_valid(address):
 def is_param_length_valid(item):
     return len(item) <= 225
 
+
 def get_network_pool_details(user, password, hostname, port, groupnet, subnet, pool_id, validate_certs=False):
     try:
-        params={
+        params = {
             "username": user,
             "password": password,
             "onefs_host": hostname,
             "port_no": port,
             "verify_ssl": validate_certs
-            }
+        }
         nwpool = NetworkPoolAPI(params)
-        session_url = "/platform/16/network/groupnets/" + groupnet + "/subnets/" + subnet +"/pools/" + pool_id + "?select=*"
+        session_url = "/platform/16/network/groupnets/" + groupnet + "/subnets/" + subnet + "/pools/" + pool_id + "?select=*"
         session_status_response = nwpool.invoke_request(headers={"Content-Type": "application/json"}, uri=session_url, method="GET")
         status_code = session_status_response.status_code
         return session_status_response.json_data

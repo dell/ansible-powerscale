@@ -26,6 +26,7 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock
     import MockApiException
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.powerscale_unit_base import PowerScaleUnitBase
 
+
 class TestNetworkPool(PowerScaleUnitBase):
     get_network_pool_args = {
         "api_user": "user",
@@ -40,15 +41,17 @@ class TestNetworkPool(PowerScaleUnitBase):
         "description": None,
         "access_zone": "ansible-neo",
         "new_pool_name": None,
-        "additional_pool_params": {"ranges": [],
-        "range_state": None,
-        "ifaces": [],
-        "iface_state": None},
+        "additional_pool_params": {
+            "ranges": [],
+            "range_state": None,
+            "ifaces": [],
+            "iface_state": None
+        },
         "sc_params": {
             "static_routes": [],
             "sc_dns_zone_aliases": []
-            }
         }
+    }
 
     @pytest.fixture
     def module_object(self):
