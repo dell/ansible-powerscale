@@ -246,7 +246,7 @@ class AlertRule(PowerScaleBase):
     def __init__(self):
 
         required_if_args = [
-          ["state", "present", ["channels"]]
+            ["state", "present", ["channels"]]
         ]
 
         ansible_module_params = {
