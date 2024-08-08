@@ -48,9 +48,9 @@ options:
   channels:
     description:
       - Channels for the alert.
+      - This is option is required for create alert condition.
     type: list
     elements: str
-    required: true
   eventgroup_ids:
     description:
       - Event group ID's to be alerted.
@@ -245,8 +245,13 @@ class AlertRule(PowerScaleBase):
 
     def __init__(self):
 
+        required_if_args = [
+          ["state", "present", ["channels"]]
+        ]
+
         ansible_module_params = {
             'argument_spec': self.get_alert_rule_parameters(),
+            'required_if': required_if_args,
             'supports_check_mode': True}
         super().__init__(AnsibleModule, ansible_module_params)
 
@@ -263,7 +268,7 @@ class AlertRule(PowerScaleBase):
                                      'REBOOT_EVENTS', 'SW_EVENTS', 'QUOTA_EVENTS',
                                      'SNAP_EVENTS', 'WINNET_EVENTS', 'FILESYS_EVENTS',
                                      'HW_EVENTS', 'CPOOL_EVENTS']),
-            channels=dict(type='list', elements='str', required=True),
+            channels=dict(type='list', elements='str'),
             eventgroup_ids=dict(type='list', elements='str'),
             exclude_eventgroup_ids=dict(type='list', elements='str'),
             interval=dict(type='int'),
