@@ -495,10 +495,18 @@ class NetworkPool(object):
         :return: If exists retuns the details of the network pool
         """
         try:
-            details = self.network_groupnet_api.get_subnets_subnet_pool(pool, groupnet, subnet)
-            return details.to_dict()
-        except utils.ApiException as e:
-            if str(e.status) == "404":
+            details = utils.get_network_pool_details(
+                user=self.module.params['api_user'],
+                password=self.module.params['api_password'],
+                hostname=self.module.params['onefs_host'],
+                port=self.module.params['port_no'],
+                validate_certs=self.module.params['verify_ssl'],
+                groupnet=groupnet,
+                subnet=subnet,
+                pool_id=pool)
+            return details
+        except Exception as e:
+            if "404" in str(e):
                 error_message = "Details not found for network pool %s" % (pool)
                 LOG.error(error_message)
                 return None
