@@ -28,7 +28,7 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.lo
     import CustomRotatingFileHandler
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.nwpool_utils \
     import NetworkPoolAPI
-from ansible.module_utils.urls import open_url, ConnectionError, SSLValidationError
+from ansible.module_utils.urls import ConnectionError, SSLValidationError
 from ansible.module_utils.six.moves.urllib.error import URLError, HTTPError
 import math
 from decimal import Decimal
@@ -563,4 +563,5 @@ def get_network_pool_details(user, password, hostname, port, groupnet, subnet, p
         status_code = session_status_response.status_code
         return session_status_response.json_data
     except (HTTPError, URLError, SSLValidationError, ConnectionError) as e:
+        ApiException = e
         raise e

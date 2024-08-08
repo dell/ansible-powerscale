@@ -425,8 +425,6 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
 import ipaddress
 import copy
-from ansible.module_utils.urls import open_url, ConnectionError, SSLValidationError
-from ansible.module_utils.six.moves.urllib.error import URLError, HTTPError
 
 # initialize the logger
 LOG = utils.get_logger('networkpool')
@@ -507,7 +505,7 @@ class NetworkPool(object):
                 subnet=subnet,
                 pool_id=pool)
             return details
-        except (HTTPError, URLError, SSLValidationError, ConnectionError) as e:
+        except Exception as e:
             if "404" in str(e):
                 error_message = "Details not found for network pool %s" % (pool)
                 LOG.error(error_message)
