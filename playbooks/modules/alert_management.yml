@@ -9,9 +9,9 @@
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        validate_certs: "{{ verify_ssl }}"
+        validate_certs: "{{ validate_certs }}"
         port: "{{ port }}"
-        status: present
+        state: present
         name: test_alert_rule
         categories: []
         channels: ["SupportAssist"]
@@ -28,9 +28,9 @@
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        validate_certs: "{{ verify_ssl }}"
+        validate_certs: "{{ validate_certs }}"
         port: "{{ port }}"
-        status: present
+        state: present
         name: test_rule_new
         condition: "NEW"
         categories:
@@ -55,9 +55,9 @@
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        validate_certs: "{{ verify_ssl }}"
+        validate_certs: "{{ validate_certs }}"
         port: "{{ port }}"
-        status: present
+        state: present
         name: test_rule_new
         condition: "NEW"
         categories:
@@ -82,7 +82,7 @@
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        validate_certs: "{{ verify_ssl }}"
+        validate_certs: "{{ validate_certs }}"
         port: "{{ port }}"
         state: absent
         name: test_rule_new
