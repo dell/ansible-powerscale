@@ -304,12 +304,14 @@ class AlertRule(PowerScaleBase):
         return {
             "name": module_params.get("name"),
             "condition": module_params.get("condition"),
-            "categories": module_params.get("categories"),
+            "categories": module_params.get("categories") \
+                if module_params.get("categories") else [],
             "channels": module_params.get("channels"),
             "eventgroup_ids": module_params.get("eventgroup_ids"),
-            "exclude_eventgroup_ids": module_params.get("exclude_eventgroup_ids"),
-            "interval": module_params.get("interval"),
-            "limit": module_params.get("limit"),
+            "exclude_eventgroup_ids": module_params.get("exclude_eventgroup_ids") \
+                if module_params.get("exclude_eventgroup_ids") else [],
+            "interval": module_params.get("interval") if module_params.get("interval") else 0,
+            "limit": module_params.get("limit") if module_params.get("limit") else 0,
             "severities": module_params.get("severities"),
             "transient": module_params.get("transient")
         }
