@@ -3,7 +3,7 @@
 
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-"""Ansible module for managing Server certificates"""
+"""Ansible module for managing alert rule"""
 
 from __future__ import absolute_import, division, print_function
 
@@ -11,11 +11,11 @@ __metaclass__ = type
 
 DOCUMENTATION = r'''
 ---
-module: alert_management
+module: alert_rule
 version_added: '3.3.0'
-short_description:  Manage alert condition on a PowerScale Storage System
+short_description:  Manage alert rule on a PowerScale Storage System
 description:
-  - Manage alert condition on a PowerScale Storage System includes create, modify or delete.
+  - Manage alert rule on a PowerScale Storage System includes create, modify or delete.
 extends_documentation_fragment:
   - dellemc.powerscale.powerscale
 author:
@@ -92,7 +92,7 @@ notes:
 
 EXAMPLES = r'''
 - name: To create the a new alert condition.
-  dellemc.powerscale.alert_management:
+  dellemc.powerscale.alert_rule:
     onefs_host: "{{ onefs_host }}"
     api_user: "{{ api_user }}"
     api_password: "{{ api_password }}"
@@ -118,7 +118,7 @@ EXAMPLES = r'''
       - emergency
 
 - name: To update the existing alert condition.
-  dellemc.powerscale.alert_management:
+  dellemc.powerscale.alert_rule:
     onefs_host: "{{ onefs_host }}"
     api_user: "{{ api_user }}"
     api_password: "{{ api_password }}"
@@ -145,7 +145,7 @@ EXAMPLES = r'''
       - critical
 
 - name: To delete the existing alert condition.
-  dellemc.powerscale.alert_management:
+  dellemc.powerscale.alert_rule:
     onefs_host: "{{ onefs_host }}"
     api_user: "{{ api_user }}"
     api_password: "{{ api_password }}"
@@ -225,7 +225,7 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.sh
     import Events
 from copy import deepcopy
 
-LOG = utils.get_logger('alert_management')
+LOG = utils.get_logger('alert_rule')
 
 CATEGORY_DICT = {
     "all": "all",
