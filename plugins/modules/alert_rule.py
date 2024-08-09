@@ -301,20 +301,22 @@ class AlertRule(PowerScaleBase):
         return alert_rule
 
     def get_module_params(self, module_params):
-        return {
+        data_dict = {
             "name": module_params.get("name"),
             "condition": module_params.get("condition"),
-            "categories": module_params.get("categories") \
-                if module_params.get("categories") else [],
+            "categories": module_params.get("categories") if module_params.get("categories") else [],
             "channels": module_params.get("channels"),
             "eventgroup_ids": module_params.get("eventgroup_ids"),
-            "exclude_eventgroup_ids": module_params.get("exclude_eventgroup_ids") \
-                if module_params.get("exclude_eventgroup_ids") else [],
             "interval": module_params.get("interval") if module_params.get("interval") else 0,
             "limit": module_params.get("limit") if module_params.get("limit") else 0,
             "severities": module_params.get("severities"),
             "transient": module_params.get("transient")
         }
+        if module_params.get("exclude_eventgroup_ids"):
+            data_dict.update({"exclude_eventgroup_ids": module_params.get("exclude_eventgroup_ids")})
+        else:
+            data_dict.update({"exclude_eventgroup_ids": []})
+        return data_dict
 
     def create_alert_condition(self, module_params):
         changed = False
