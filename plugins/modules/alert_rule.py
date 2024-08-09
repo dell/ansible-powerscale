@@ -96,7 +96,7 @@ EXAMPLES = r'''
     onefs_host: "{{ onefs_host }}"
     api_user: "{{ api_user }}"
     api_password: "{{ api_password }}"
-    verify_ssl: "{{ verify_ssl }}"
+    validate_certs: "{{ validate_certs }}"
     state: present
     name: alert_rule_new
     condition: NEW
@@ -122,7 +122,7 @@ EXAMPLES = r'''
     onefs_host: "{{ onefs_host }}"
     api_user: "{{ api_user }}"
     api_password: "{{ api_password }}"
-    verify_ssl: "{{ verify_ssl }}"
+    validate_certs: "{{ validate_certs }}"
     state: present
     name: alert_rule_new
     condition: NEW
@@ -149,7 +149,7 @@ EXAMPLES = r'''
     onefs_host: "{{ onefs_host }}"
     api_user: "{{ api_user }}"
     api_password: "{{ api_password }}"
-    verify_ssl: "{{ verify_ssl }}"
+    validate_certs: "{{ validate_certs }}"
     state: absent
     name: alert_rule_new
 '''
