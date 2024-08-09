@@ -31,7 +31,7 @@ class TestAlertRule(PowerScaleUnitBase):
 
     @pytest.fixture
     def mock_events(self):
-        with patch("ansible_collections.dellemc.powerscale.plugins.modules.alert_management.Events") as MockEvents:
+        with patch("ansible_collections.dellemc.powerscale.plugins.modules.alert_rule.Events") as MockEvents:
             yield MockEvents
 
     def test_get_create_alert_rule(self, powerscale_module_mock, mock_events):
