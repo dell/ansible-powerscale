@@ -186,3 +186,25 @@ class Events:
             error_message = f'Fetching event channels failed with error: {error_msg}'
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
+
+    def get_alert_channel(self, alert_channel_id):
+        """
+        Get alert channel
+        :param alert_channel_id: alert channel id
+        :return: alert channel
+        :rtype: dict
+        """
+        try:
+            alert_channel = (self.event_api.get_event_channel(event_channel_id=alert_channel_id)).to_dict()
+            if alert_channel:
+                return alert_channel
+        except Exception as e:
+            if str(e.status) == "404":
+                msg = f'Alert channel {alert_channel_id} not found.'
+                LOG.info(msg)
+                return None
+            else:
+                error_msg = utils.determine_error(error_obj=e)
+                error_message = f'Fetching alert channel failed with error: {error_msg}'
+                LOG.error(error_message)
+                self.module.fail_json(msg=error_message)

@@ -249,7 +249,7 @@ changed (always, bool, false)
   A boolean indicating if the task had to make changes.
 
 
-alert_channel_details (always, dict, {'allowed_nodes': [1, 2], 'enabled': True, 'excluded_nodes': [3], 'id': '1', 'name': 'sample_event_channel', 'parameters': {'address': ['sample.com'], 'batch': 'ALL', 'batch_period': 120, 'custom_template': 'sample', 'send_as': 'test@sample.com', 'smtp_host': 'sample.com', 'smtp_password': 'sample_password', 'smtp_port': 25, 'smtp_security': 'none', 'smtp_use_auth': False, 'smtp_username': 'sample-user', 'subject': 'sample'}, 'system': False, 'type': 'smtp'})
+alert_channel_details (always, dict, {'allowed_nodes': [1, 2], 'enabled': True, 'excluded_nodes': [3], 'id': '1', 'name': 'sample_event_channel', 'parameters': {'address': ['sample.com'], 'batch': 'ALL', 'batch_period': 120, 'custom_template': 'sample', 'send_as': 'test@sample.com', 'smtp_host': 'sample.com', 'smtp_password': 'sample_password', 'smtp_port': 25, 'smtp_security': 'none', 'smtp_use_auth': False, 'smtp_username': 'sample-user', 'subject': 'sample'}, 'rules': [], 'system': False, 'type': 'smtp'})
   The updated alert channel details.
 
 
@@ -324,6 +324,10 @@ alert_channel_details (always, dict, {'allowed_nodes': [1, 2], 'enabled': True, 
     subject (, str, )
       Subject for emails.
 
+
+
+  rules (, list, )
+    Alert rules involving this alert channel.
 
 
   system (, bool, )

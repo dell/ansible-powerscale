@@ -287,6 +287,9 @@ alert_channel_details:
           subject:
             description: Subject for emails.
             type: str
+      rules:
+        description: Alert rules involving this alert channel.
+        type: list
       system:
         description: Channel is a pre-defined system channel.
         type: bool
@@ -313,6 +316,7 @@ alert_channel_details:
         "smtp_username": "sample-user",
         "subject": "sample"
       },
+      "rules": [],
       "system": false,
       "type": "smtp"
     }
@@ -325,6 +329,7 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.events \
     import Events
+import copy
 
 LOG = utils.get_logger('alert_channel')
 
@@ -344,16 +349,195 @@ class AlertChannel(PowerScaleBase):
         # Result is a dictionary that contains changed status and alert
         # channel details
         self.result.update({
-            "alert_channel_details": {}
+            "changed": False,
+            "alert_channel_details": {},
+            "diff": None
         })
 
-    def get_alert_channel_details(self):
+    def prepare_smtp_parameters(self, smtp_parameters):
+        """Prepare smtp parameters
+        :param smtp_parameters: Dictionary of smtp parameters
+        :return: Dictionary of prepared smtp parameters"""
+        parameters = {k: v for k, v in smtp_parameters.items() if v is not None}
+        del parameters['update_password']
+        return parameters
+
+    def create_alert_channel(self, channel_params):
+        try:
+            LOG.info("Creating alert channel.")
+            pb_name = channel_params['name']
+            pb_type = channel_params['type']
+            pb_parameters = {}
+            if pb_type == 'smtp':
+                pb_parameters = self.prepare_smtp_parameters(channel_params['smtp_parameters'])
+            pb_allowed_nodes = channel_params['allowed_nodes']
+            pb_excluded_nodes = channel_params['excluded_nodes']
+            pb_enabled = channel_params['enabled']
+
+            event_channel = self.isi_sdk.EventChannelCreateParams(
+                name=pb_name, type=pb_type, parameters=pb_parameters,
+                allowed_nodes=pb_allowed_nodes, excluded_nodes=pb_excluded_nodes,
+                enabled=pb_enabled)
+            if not self.module.check_mode:
+                self.event_api.create_event_channel(event_channel)
+            return True
+        except Exception as e:
+            msg = f"Failed to create alert channel {channel_params['name']} with error: {utils.determine_error(e)}"
+            LOG.error(msg)
+            self.module.fail_json(msg=msg)
+
+    def send_test_alert_message(self, channel_details):
+        """Send test alert message
+        :param channel_details: Dictionary of alert channel details
+        :return: True if test alert message sent successfully else error
         """
-        Get details of alert channel
+        try:
+            LOG.info("Sending test alert.")
+            event_channel = self.isi_sdk.Empty()
+            event_channel_id = channel_details['name']
+            if not self.module.check_mode:
+                self.event_api.create_event_channel_0(event_channel, event_channel_id=event_channel_id)
+            return True
+        except Exception as e:
+            msg = f"Failed to send test alert for alert channel {event_channel_id} with error: {utils.determine_error(e)}"
+            LOG.error(msg)
+            self.module.fail_json(msg=msg)
+
+    def get_alert_channel_details(self, name):
+        """Get alert channel details
+        :param name: Name of the alert channel
+        :return: Dictionary of alert channel details
         """
         msg = "Getting alert channel details"
         LOG.info(msg)
-        return Events(self.event_api, self.module).get_event_maintenance()
+        channel_details = Events(self.event_api, self.module).get_alert_channel(alert_channel_id=name)
+        if channel_details:
+            return channel_details['channels'][0]
+        return None
+
+    def delete_alert_channel(self, channel_details):
+        """
+        Delete the alert channel.
+
+        :param channel_details: Dictionary of alert channel details
+        :return: True if the operation is successful.
+        """
+        try:
+            LOG.info("Deleting alert channel.")
+            event_channel_id = channel_details['name']
+            if not self.module.check_mode:
+                self.event_api.delete_event_channel(event_channel_id=event_channel_id)
+            return True
+
+        except Exception as e:
+            msg = f"Failed to delete alert channel {event_channel_id} with error: {utils.determine_error(e)}"
+            LOG.error(msg)
+            self.module.fail_json(msg=msg)
+
+    def get_diff_after(self, channel_params, channel_details):
+        """Get diff between playbook input and alert channel details
+        :param channel_params: Dictionary of parameters input from playbook
+        :param channel_details: Dictionary of alert channel details
+        :return: Dictionary of parameters of differences"""
+
+        if channel_params["state"] == "absent":
+            return {}
+        else:
+            if channel_details is None:
+                diff_dict = {
+                    "allowed_nodes": channel_params['allowed_nodes'],
+                    "enabled": channel_params['enabled'],
+                    "excluded_nodes": channel_params['excluded_nodes'],
+                    "id": "",
+                    "name": channel_params['name'],
+                    "parameters": channel_params['smtp_parameters'],
+                    "system": False,
+                    "type": channel_params['type']
+                }
+                return diff_dict
+            else:
+                diff_dict = copy.deepcopy(channel_details)
+                modify_dict = self.is_alert_channel_modify_required(channel_params, diff_dict)
+                for key in modify_dict.keys():
+                    diff_dict[key] = modify_dict[key]
+                return diff_dict
+
+    def is_smtp_modify_required(self, smtp_params, exiting_smtp_params):
+        """Check if smtp modify is required
+        :param smtp_params: Dictionary of smtp parameters
+        :param channel_params: Dictionary of parameters input from playbook
+        :return: modify dict if smtp modify is required else False
+        """
+        modify_smtp = {}
+        smtp_keys = ['address', 'send_as', 'subject', 'smtp_host', 'smtp_port',
+                     'batch', 'batch_period', 'smtp_security', 'smtp_use_auth',
+                     'smtp_username']
+        for key in smtp_keys:
+            if key in smtp_params and smtp_params[key] is not None and smtp_params[key] != exiting_smtp_params[key]:
+                modify_smtp[key] = exiting_smtp_params[key]
+        if smtp_params['update_password'] == "always" and smtp_params['smtp_password'] is not None:
+            modify_smtp['smtp_password'] = smtp_params['smtp_password']
+
+        return modify_smtp
+
+    def is_alert_channel_modify_required(self, channel_params, channel_details):
+        """Check if alert channel modify is required
+        :param channel_params: Dictionary of parameters input from playbook
+        :param channel_details: Dictionary of alert channel details
+        :return: True, modify dict if alert channel modify is required else False
+        """
+        modify_dict = {}
+        key_list = ['enabled', 'type']
+        for key in key_list:
+            if key in channel_params and channel_params[key] is not None and channel_params[key] != channel_details[key]:
+                modify_dict[key] = channel_params[key]
+
+        list_keys = ['allowed_nodes', 'excluded_nodes']
+        for key in list_keys:
+            if key in channel_params and channel_params[key]:
+                if sorted(channel_params[key]) != sorted(channel_details[key]):
+                    modify_dict[key] = channel_params[key]
+        if 'smtp_parameters' in channel_params and channel_params['smtp_parameters'] is not None:
+            smtp_params = channel_params['smtp_parameters']
+            param_smtp_dict = self.is_smtp_modify_required(smtp_params, channel_details['parameters'])
+            if param_smtp_dict:
+                modify_dict['parameters'] = param_smtp_dict
+        return modify_dict
+
+    def validate_input_params(self, channel_params):
+        """
+        Validate the parameters of the alert channel
+        :param channel_params: Parameters of the alert channel
+        :return:
+        """
+        if (utils.is_input_empty(channel_params['name'])):
+            msg = 'Invalid alert channel name. Provide valid name.'
+            self.module.fail_json(msg=msg)
+
+        if 'smtp_parameters' in channel_params and channel_params['smtp_parameters'] is not None:
+            smtp_params = channel_params['smtp_parameters']
+
+            def validate_email_address(key, address):
+                if utils.is_email_address_valid(address=address):
+                    err_msg = f'Invalid {key}: {str(address)}. Provide valid address.'
+                    self.module.fail_json(msg=err_msg)
+
+            if 'address' in smtp_params:
+                all_addr = smtp_params['address']
+                for tmp_address in all_addr:
+                    validate_email_address('address', tmp_address)
+
+            if 'send_as' in smtp_params:
+                validate_email_address('send_as', smtp_params['send_as'])
+            self.validate_smtp_use_auth(smtp_params)
+
+    def validate_smtp_use_auth(self, smtp_params):
+        if 'smtp_use_auth' in smtp_params and smtp_params['smtp_use_auth']:
+            auth_keys = ['smtp_username', 'smtp_password']
+            for key in auth_keys:
+                if key not in smtp_params or not smtp_params[key]:
+                    msg = 'Invalid smtp %s. Provide valid %s.' % (key, key)
+                    self.module.fail_json(msg=msg)
 
     def get_alert_channel_parameters(self):
         return dict(
@@ -381,9 +565,62 @@ class AlertChannel(PowerScaleBase):
             type=dict(type='str', choices=['smtp', 'connectemc'], default='connectemc'))
 
 
+class AlertChannelExitHandler:
+    def handle(self, channel_obj, channel_details):
+        if channel_details:
+            channel_obj.result['alert_channel_details'] = channel_details
+        channel_obj.module.exit_json(**channel_obj.result)
+
+
+class AlertChannelDeleteHandler:
+    def handle(self, channel_obj, channel_params, channel_details):
+        if channel_params['state'] == 'absent' and channel_details:
+            changed = channel_obj.delete_alert_channel(channel_details)
+            channel_obj.result['changed'] = changed
+            channel_details = {}
+        AlertChannelExitHandler().handle(channel_obj, channel_details)
+
+
+class AlertChannelSendAlertHandler:
+    def handle(self, channel_obj, channel_params, channel_details):
+        if channel_params['state'] == 'present' and channel_details and 'send_test_alert' in channel_params and channel_params['send_test_alert']:
+            changed = channel_obj.send_test_alert_message(channel_details)
+            channel_obj.result['changed'] = changed
+        AlertChannelDeleteHandler().handle(channel_obj, channel_params, channel_details)
+
+
+class AlertChannelModifyHandler:
+    def handle(self, channel_obj, channel_params, channel_details):
+        if channel_params['state'] == 'present' and channel_details:
+            modify_dict = channel_obj.is_alert_channel_modify_required(channel_params, channel_details)
+            changed = channel_obj.modify_alert_channel(channel_params, channel_details)
+            channel_obj.result['changed'] = changed
+        AlertChannelSendAlertHandler().handle(channel_obj, channel_params, channel_details)
+
+
+class AlertChannelCreateHandler:
+    def handle(self, channel_obj, channel_params, channel_details):
+        if channel_params['state'] == 'present' and not channel_details:
+            changed = channel_obj.create_alert_channel(channel_params)
+            channel_details = channel_obj.get_alert_channel_details(name=channel_params['name'])
+            channel_obj.result['changed'] = changed
+        # AlertChannelModifyHandler().handle(channel_obj, channel_params, channel_details)
+        AlertChannelSendAlertHandler().handle(channel_obj, channel_params, channel_details)
+
+
 class AlertChannelHandler:
-    def handle(self, alert_channel_obj, alert_channel_params):
-        pass
+    def handle(self, channel_obj, channel_params):
+        channel_obj.validate_input_params(channel_params)
+        channel_details = channel_obj.get_alert_channel_details(name=channel_params['name'])
+        diff_dict = channel_obj.get_diff_after(channel_params, channel_details)
+        if channel_details is not None:
+            before = {}
+        else:
+            before = channel_details
+        if channel_obj.module._diff:
+            channel_obj.result['diff'] = dict(before=before, after=diff_dict)
+
+        AlertChannelCreateHandler().handle(channel_obj, channel_params, channel_details)
 
 
 def main():
