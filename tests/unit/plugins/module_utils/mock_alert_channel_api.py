@@ -14,6 +14,7 @@ MODULE_UTILS_PATH = 'ansible_collections.dellemc.powerscale.plugins.modules.smb.
 class MockAlertChannelApi:
 
     CHANNEL_NAME = "test"
+    ENABLED = True
     ALERT_COMMON_ARGS = {
         "state": "present",
         "enabled": None,
@@ -57,6 +58,8 @@ class MockAlertChannelApi:
     def get_alert_channel_exception(response_type):
         err_msg_dict = {
             'get_alert': "Fetching alert channel failed with error: SDK Error message",
-            'modify_exp': "Modify alert settings failed with error: SDK Error message"
+            'create_exp': "Failed to create alert channel test with error: SDK Error message",
+            'test_alert_exp': "Failed to send test alert for alert channel test with error: SDK Error message",
+            'delete_exp': "Failed to delete alert channel test with error: SDK Error messag"
         }
         return err_msg_dict.get(response_type)

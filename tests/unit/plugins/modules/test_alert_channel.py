@@ -50,3 +50,75 @@ class TestAlertChannel(PowerScaleUnitBase):
         self.capture_fail_json_call(
             MockAlertChannelApi.get_alert_channel_exception('get_alert'),
             powerscale_module_mock, AlertChannelHandler)
+
+    def test_create_alert_channel(self, powerscale_module_mock):
+        self.set_module_params(
+            powerscale_module_mock, self.alert_args,
+            {"name": MockAlertChannelApi.CHANNEL_NAME, "enabled": True, "type": "smtp",
+             "smtp_parameters": MockAlertChannelApi.SMTP_ARGS, "allowed_nodes": [1],
+             "excluded_nodes": [2], "send_test_alert": True})
+        powerscale_module_mock.get_alert_channel_details = MagicMock(
+            return_value=None)
+        AlertChannelHandler().handle(powerscale_module_mock,
+                                     powerscale_module_mock.module.params)
+        powerscale_module_mock.event_api.create_event_channel.assert_called()
+
+    def test_create_alert_channel_exception(self, powerscale_module_mock):
+        self.set_module_params(
+            powerscale_module_mock, self.alert_args,
+            {"name": MockAlertChannelApi.CHANNEL_NAME, "enabled": MockAlertChannelApi.ENABLED, "type": "smtp",
+             "smtp_parameters": MockAlertChannelApi.SMTP_ARGS, "allowed_nodes": [1],
+             "excluded_nodes": [2], "send_test_alert": MockAlertChannelApi.ENABLED})
+        powerscale_module_mock.get_alert_channel_details = MagicMock(
+            return_value=None)
+        powerscale_module_mock.event_api.create_event_channel = MagicMock(
+            side_effect=MockApiException)
+        self.capture_fail_json_call(
+            MockAlertChannelApi.get_alert_channel_exception('create_exp'),
+            powerscale_module_mock, AlertChannelHandler)
+
+    def test_send_test_alert_message(self, powerscale_module_mock):
+        self.set_module_params(
+            powerscale_module_mock, self.alert_args,
+            {"name": MockAlertChannelApi.CHANNEL_NAME,
+             "send_test_alert": MockAlertChannelApi.ENABLED})
+        powerscale_module_mock.get_alert_channel_details = MagicMock(
+            return_value=MockAlertChannelApi.CHANNEL_DETAILS['channels'][0])
+        AlertChannelHandler().handle(powerscale_module_mock,
+                                     powerscale_module_mock.module.params)
+        powerscale_module_mock.event_api.create_event_channel_0.assert_called()
+
+    def test_send_test_alert_message_exception(self, powerscale_module_mock):
+        self.set_module_params(
+            powerscale_module_mock, self.alert_args,
+            {"name": MockAlertChannelApi.CHANNEL_NAME,
+             "send_test_alert": MockAlertChannelApi.ENABLED})
+        powerscale_module_mock.get_alert_channel_details = MagicMock(
+            return_value=MockAlertChannelApi.CHANNEL_DETAILS['channels'][0])
+        powerscale_module_mock.event_api.create_event_channel_0 = MagicMock(
+            side_effect=MockApiException)
+        self.capture_fail_json_call(
+            MockAlertChannelApi.get_alert_channel_exception('test_alert_exp'),
+            powerscale_module_mock, AlertChannelHandler)
+
+    def test_delete_alert_channel(self, powerscale_module_mock):
+        self.set_module_params(
+            powerscale_module_mock, self.alert_args,
+            {"name": MockAlertChannelApi.CHANNEL_NAME, "state": "absent"})
+        powerscale_module_mock.get_alert_channel_details = MagicMock(
+            return_value=MockAlertChannelApi.CHANNEL_DETAILS['channels'][0])
+        AlertChannelHandler().handle(powerscale_module_mock,
+                                     powerscale_module_mock.module.params)
+        powerscale_module_mock.event_api.delete_event_channel.assert_called()
+
+    def test_delete_alert_channel_expection(self, powerscale_module_mock):
+        self.set_module_params(
+            powerscale_module_mock, self.alert_args,
+            {"name": MockAlertChannelApi.CHANNEL_NAME, "state": "absent"})
+        powerscale_module_mock.get_alert_channel_details = MagicMock(
+            return_value=MockAlertChannelApi.CHANNEL_DETAILS['channels'][0])
+        powerscale_module_mock.event_api.delete_event_channel = MagicMock(
+            side_effect=MockApiException)
+        self.capture_fail_json_call(
+            MockAlertChannelApi.get_alert_channel_exception('delete_exp'),
+            powerscale_module_mock, AlertChannelHandler)
