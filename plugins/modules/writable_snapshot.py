@@ -198,9 +198,11 @@ class WritableSnapshot(PowerScaleBase):
         super().__init__(AnsibleModule, ansible_module_params)
 
         self.result.update({
-            "writable_snapshot_details": {},
-            "diff": {"before": [], "after": []}
+            "writable_snapshot_details": {}
         })
+
+        if self.module._diff:
+            self.result.update({"diff": {"before": [], "after": []}})
 
     def get_writable_snapshot_parameters(self):
         return {
@@ -237,7 +239,7 @@ class WritableSnapshot(PowerScaleBase):
     def validate_src_snap(self, snapshot_name):
         try:
             return self.snapshot_api.get_snapshot_snapshot(snapshot_name)
-        except Exception as e:
+        except Exception:
             return False
 
     def get_writable_snapshot(self, dst_path):
