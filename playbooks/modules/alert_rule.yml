@@ -9,7 +9,7 @@
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        validate_certs: "{{ validate_certs }}"
+        verify_ssl: "{{ verify_ssl }}"
         port: "{{ port }}"
         state: present
         name: test_alert_rule
@@ -28,7 +28,7 @@
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        validate_certs: "{{ validate_certs }}"
+        verify_ssl: "{{ verify_ssl }}"
         port: "{{ port }}"
         state: present
         name: test_rule_new
@@ -55,7 +55,7 @@
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        validate_certs: "{{ validate_certs }}"
+        verify_ssl: "{{ verify_ssl }}"
         port: "{{ port }}"
         state: present
         name: test_rule_new
@@ -82,7 +82,7 @@
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        validate_certs: "{{ validate_certs }}"
+        verify_ssl: "{{ verify_ssl }}"
         port: "{{ port }}"
         state: absent
         name: test_rule_new
