@@ -753,7 +753,7 @@ EXAMPLES = r'''
         dir: ASC
         limit: 1
 
-- name: To sort the writable snapshot in ascending order.
+- name: To filter the writable snapshot using sort.
   dellemc.powerscale.info:
     onefs_host: "{{ onefs_host }}"
     verify_ssl: "{{ verify_ssl }}"
