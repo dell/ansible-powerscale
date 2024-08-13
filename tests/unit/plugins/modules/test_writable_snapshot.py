@@ -20,9 +20,7 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shar
 class TestWritableSnapshot(PowerScaleUnitBase):
     writable_snapshot_args = {"onefs_host": "XX.XX.XX.XX",
                               "port_no": "8080",
-                              "verify_ssl": "false",
-                              "api_user": "root",
-                              "api_password": '***'
+                              "verify_ssl": "false"
                               }
 
     @pytest.fixture
