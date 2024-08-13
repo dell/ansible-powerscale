@@ -54,6 +54,10 @@ options:
         - This option is required I(state) is C(present).
         required: false
         type: str
+notes:
+- The I(check_mode) is supported.
+- The I(diff) is supported.
+- The I(writable_snapshot) parameter will follow the order of deleting operations before creating operations.
 '''
 
 EXAMPLES = r'''
@@ -179,7 +183,6 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.powerscale_base \
     import PowerScaleBase
-import yaml
 
 LOG = utils.get_logger('writable_snapshot')
 
@@ -202,8 +205,8 @@ class WritableSnapshot(PowerScaleBase):
             "writable_snapshot_details": {}
         })
 
-        # if self.module._diff:
-        self.diff = dict(before=[], after=[])
+        if self.module._diff:
+            self.result.update({"diff": {"before": {"writable_snapshots": []}, "after": {"writable_snapshots": []}}})
 
     def get_writable_snapshot_parameters(self):
         return {
@@ -253,17 +256,15 @@ class WritableSnapshot(PowerScaleBase):
         changed_flag = False
         for create_snapshot_dict in snapshots_to_create:
             try:
-                snapshot_exists, existing_snapshot = self.get_writable_snapshot(create_snapshot_dict.get("dst_path"))
-                if not snapshot_exists:
-                    if not self.module.check_mode and not self.module._diff:
+                snapshot_exits, existing_snapshot = self.get_writable_snapshot(create_snapshot_dict.get("dst_path"))
+                if not snapshot_exits:
+                    if not self.module.check_mode:
                         writable_snapshot_create_item = self.isi_sdk.SnapshotWritableItem(
                             dst_path=create_snapshot_dict.get("dst_path"),
                             src_snap=create_snapshot_dict.get("src_snap")
                         )
                         output = self.snapshot_api.create_snapshot_writable_item(writable_snapshot_create_item)
                         create_result.append(output.to_dict())
-                    elif self.module._diff:
-                        self.diff["after"].append(create_snapshot_dict)
                     changed_flag = True
                 else:
                     existing_snapshot_list.append(existing_snapshot)
@@ -273,6 +274,8 @@ class WritableSnapshot(PowerScaleBase):
                     'with error: {1}'.format(create_snapshot_dict.get("dst_path"), str(error_msg))
                 LOG.error(error_message)
                 self.module.fail_json(msg=error_message)
+        if self.module._diff:
+            self.result["diff"]["after"]["writable_snapshots"].extend(create_result)
         return changed_flag, create_result
 
     def delete_writable_snapshot(self, snapshots_to_delete):
@@ -281,14 +284,13 @@ class WritableSnapshot(PowerScaleBase):
         for delete_snapshot_dict in snapshots_to_delete:
             dst_path = delete_snapshot_dict.get('dst_path')
             try:
-                snapshot_exists, existing_snapshot = self.get_writable_snapshot(dst_path)
-                if snapshot_exists:
-                    if not self.module.check_mode and not self.module._diff:
+                snapshot_exits, existing_snapshot = self.get_writable_snapshot(dst_path)
+                if snapshot_exits:
+                    if not self.module.check_mode:
                         self.snapshot_api.delete_snapshot_writable_wspath(snapshot_writable_wspath=dst_path)
-                    elif self.module._diff:
-                        self.diff["before"].append(delete_snapshot_dict)
                     changed_flag = True
-                existing_snpashot_list.append(existing_snapshot)
+                if existing_snapshot:
+                    existing_snpashot_list.append(existing_snapshot)
             except Exception as e:
                 error_msg = utils.determine_error(error_obj=e)
                 error_message = 'Failed to delete ' \
@@ -296,6 +298,8 @@ class WritableSnapshot(PowerScaleBase):
                                 'error: {1}'.format(dst_path, str(error_msg))
                 LOG.error(error_message)
                 self.module.fail_json(msg=error_message)
+        if self.module._diff:
+            self.result["diff"]["before"]["writable_snapshots"].extend(existing_snpashot_list)
         return changed_flag
 
 
@@ -337,7 +341,8 @@ class WritableSnapshotDeleteHandler:
 
 
 class WritableSnapshotCreateHandler:
-    def handle(self, writable_snapshot_obj, create_snapshots, invalid_snapshots):
+    def handle(self, writable_snapshot_obj, create_snapshots,
+               invalid_snapshots):
         """
         Handles the writable_snapshot object and its details.
 
@@ -374,10 +379,6 @@ class WritableSnapshotExitHandler:
             writable_snapshot_obj.module.fail_json(
                 msg="Few writable snapshots are not able to be created because the source path is invalid:",
                 **writable_snapshot_obj.result)
-        if writable_snapshot_obj.module._diff:
-            writable_snapshot_obj.result['diff'] = dict(
-                before=yaml.safe_dump(writable_snapshot_obj.diff["before"]),
-                after=yaml.safe_dump(writable_snapshot_obj.diff["after"]))
         writable_snapshot_obj.module.exit_json(**writable_snapshot_obj.result)
 
 

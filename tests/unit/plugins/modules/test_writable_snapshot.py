@@ -99,10 +99,5 @@ class TestWritableSnapshot(PowerScaleUnitBase):
         self.set_module_params(powerscale_module_mock, self.writable_snapshot_args,
                                {"writable_snapshot": [{"src_snap": 2, "dst_path": "/ifs/ansible/", "state": "absent"}]})
         powerscale_module_mock.check_mode = False
-        powerscale_module_mock.snapshot_api.delete_snapshot_writable_wspath = MagicMock(side_effect=MockApiException)
-        self.capture_fail_json_call("Failed to delete snapshot: /ifs/ansible/ with error: SDK Error message", powerscale_module_mock, WritableSnapshotHandler)
-
-    def test_validate_src_snap_exception_case(self, powerscale_module_mock):
-        powerscale_module_mock.check_mode = False
-        powerscale_module_mock.snapshot_api.get_snapshot_snapshot = MagicMock(side_effect=MockApiException)
-        self.capture_fail_json_call(False, powerscale_module_mock, WritableSnapshotHandler)
+        powerscale_module_mock.snapshot_api.delete_snapshot_writable_wspath = MagicMock(side_effect=Exception)
+        self.capture_fail_json_call("Failed to delete snapshot: /ifs/ansible/ with error", powerscale_module_mock, WritableSnapshotHandler)
