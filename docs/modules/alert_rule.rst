@@ -62,13 +62,9 @@ Parameters
   interval (optional, int, None)
     Required with ONGOING condition only, period in seconds between alerts of ongoing conditions.
 
-    *interval* range is 0 - 9223372036854775807.
-
 
   limit (optional, int, None)
     Required with NEW EVENTS condition only, limits the number of alerts sent as events are added.
-
-    *limit* range is 0 - 9223372036854775807.
 
 
   severities (optional, list, None)
@@ -77,8 +73,6 @@ Parameters
 
   transient (optional, int, None)
     Any event group lasting less than this many seconds is deemed transient and will not generate alerts under this condition.
-
-    *transient* range is 0 - 9223372036854775807.
 
 
   onefs_host (True, str, None)

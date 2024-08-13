@@ -65,13 +65,11 @@ options:
     description:
       - Required with ONGOING condition only, period in seconds between
         alerts of ongoing conditions.
-      - I(interval) range is 0 - 9223372036854775807.
     type: int
   limit:
     description:
       - Required with NEW EVENTS condition only, limits the number of
         alerts sent as events are added.
-      - I(limit) range is 0 - 9223372036854775807.
     type: int
   severities:
     description:
@@ -83,7 +81,6 @@ options:
     description:
       - Any event group lasting less than this many seconds is deemed
         transient and will not generate alerts under this condition.
-      - I(transient) range is 0 - 9223372036854775807.
     type: int
 notes:
   - The I(check_mode) is supported.
