@@ -196,7 +196,6 @@ options:
     version_added: '3.2.0'
 notes:
 - The parameters I(access_zone) and I(include_all_access_zones) are mutually exclusive.
-- Listing of SyncIQ target cluster certificates is not supported by isi_sdk_8_1_1 version.
 - The I(check_mode) is supported.
 - Filter functionality is supported only for the following 'gather_subset'- 'nfs', 'smartquota', 'filesystem'
   'writable_snapshot'.

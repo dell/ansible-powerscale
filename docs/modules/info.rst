@@ -258,7 +258,6 @@ Notes
 
 .. note::
    - The parameters \ :emphasis:`access\_zone`\  and \ :emphasis:`include\_all\_access\_zones`\  are mutually exclusive.
-   - Listing of SyncIQ target cluster certificates is not supported by isi\_sdk\_8\_1\_1 version.
    - The \ :emphasis:`check\_mode`\  is supported.
    - Filter functionality is supported only for the following 'gather\_subset'- 'nfs', 'smartquota', 'filesystem' 'writable\_snapshot'.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
@@ -822,7 +821,7 @@ Examples
             dir: ASC
             limit: 1
 
-    - name: To sort the writable snapshot in ascending order.
+    - name: To filter the writable snapshot using sort.
       dellemc.powerscale.info:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
