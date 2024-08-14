@@ -278,7 +278,8 @@ class WritableSnapshot(PowerScaleBase):
                     'with error: {1}'.format(create_snapshot_dict.get("dst_path"), str(error_msg))
                 LOG.error(error_message)
                 self.module.fail_json(msg=error_message)
-        return changed_flag, create_result
+        result = create_result + existing_snapshot_list
+        return changed_flag, result
 
     def delete_writable_snapshot(self, snapshots_to_delete):
         changed_flag = False
