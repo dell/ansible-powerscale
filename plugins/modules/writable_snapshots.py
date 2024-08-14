@@ -11,7 +11,7 @@ __metaclass__ = type
 
 DOCUMENTATION = r'''
 ---
-module: writable_snapshot
+module: writable_snapshots
 version_added: '3.3.0'
 short_description: Manage writable snapshots on PowerScale
 description:
@@ -27,9 +27,9 @@ author:
 - Kritika Bhateja(@Kritika-Bhateja-03) <ansible.team.dell.com>
 
 options:
-  writable_snapshot:
+  writable_snapshots:
     description:
-    - List of writable snapshot details.
+    - List of writable snapshots details.
     required: False
     type: list
     elements: dict
@@ -57,17 +57,17 @@ options:
 notes:
 - The I(check_mode) is supported.
 - The I(diff) is supported.
-- The I(writable_snapshot) parameter will follow the order of deleting operations before creating operations.
+- The I(writable_snapshots) parameter will follow the order of deleting operations before creating operations.
 '''
 
 EXAMPLES = r'''
 - name: To create a writable snapshot using ID
-  dellemc.powerscale.writable_snapshot:
+  dellemc.powerscale.writable_snapshots:
     onefs_host: "{{ onefs_host }}"
     verify_ssl: "{{ verify_ssl }}"
     api_user: "{{ api_user }}"
     api_password: "{{ api_password }}"
-    writable_snapshot:
+    writable_snapshots:
       - dst_path: "/ifs/test_one"
         src_snap: 2
         state: present
@@ -76,12 +76,12 @@ EXAMPLES = r'''
         state: present
 
 - name: To create a writable snapshot using Name
-  dellemc.powerscale.writable_snapshot:
+  dellemc.powerscale.writable_snapshots:
     onefs_host: "{{ onefs_host }}"
     verify_ssl: "{{ verify_ssl }}"
     api_user: "{{ api_user }}"
     api_password: "{{ api_password }}"
-    writable_snapshot:
+    writable_snapshots:
       - dst_path: "/ifs/test_one"
         src_snap: "Snapshot: 2024Apr15, 4:40 PM"
         state: present
@@ -90,24 +90,24 @@ EXAMPLES = r'''
         state: present
 
 - name: To delete writable snapshot.
-  dellemc.powerscale.writable_snapshot:
+  dellemc.powerscale.writable_snapshots:
     onefs_host: "{{ onefs_host }}"
     verify_ssl: "{{ verify_ssl }}"
     api_user: "{{ api_user }}"
     api_password: "{{ api_password }}"
-    writable_snapshot:
+    writable_snapshots:
       - dst_path: "/ifs/test_one"
         state: absent
       - dst_path: "/ifs/test_two"
         sstate: absent
 
 - name: To create and delete writable snapshot
-  dellemc.powerscale.writable_snapshot:
+  dellemc.powerscale.writable_snapshots:
     onefs_host: "{{ onefs_host }}"
     verify_ssl: "{{ verify_ssl }}"
     api_user: "{{ api_user }}"
     api_password: "{{ api_password }}"
-    writable_snapshot:
+    writable_snapshots:
       - dst_path: "/ifs/test_test"
         src_snap: 2
         state: present
@@ -184,7 +184,7 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.powerscale_base \
     import PowerScaleBase
 
-LOG = utils.get_logger('writable_snapshot')
+LOG = utils.get_logger('writable_snapshots')
 
 
 class WritableSnapshot(PowerScaleBase):
@@ -210,7 +210,7 @@ class WritableSnapshot(PowerScaleBase):
 
     def get_writable_snapshot_parameters(self):
         return {
-            "writable_snapshot":
+            "writable_snapshots":
             {"type": 'list', "elements": 'dict', "options":
              {"dst_path": {"type": 'path', "required": True},
               "src_snap": {"type": 'str', "required": False},
@@ -221,7 +221,7 @@ class WritableSnapshot(PowerScaleBase):
         }
 
     def segregate_snapshots(self, module_params):
-        writable_snapshot = module_params.get('writable_snapshot')
+        writable_snapshot = module_params.get('writable_snapshots')
         snapshots_to_create, snapshots_to_delete, invalid_snapshots = [], [], []
         for snapshot_dict in writable_snapshot:
             if snapshot_dict.get('state') == 'present':

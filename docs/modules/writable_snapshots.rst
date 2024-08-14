@@ -1,8 +1,8 @@
-.. _writable_snapshot_module:
+.. _writable_snapshots_module:
 
 
-writable_snapshot -- Manage writable snapshots on PowerScale
-============================================================
+writable_snapshots -- Manage writable snapshots on PowerScale
+=============================================================
 
 .. contents::
    :local:
@@ -35,8 +35,8 @@ The below requirements are needed on the host that executes this module.
 Parameters
 ----------
 
-  writable_snapshot (False, list, None)
-    List of writable snapshot details.
+  writable_snapshots (False, list, None)
+    List of writable snapshots details.
 
 
     state (optional, str, present)
@@ -93,7 +93,7 @@ Notes
 .. note::
    - The \ :emphasis:`check\_mode`\  is supported.
    - The \ :emphasis:`diff`\  is supported.
-   - The \ :emphasis:`writable\_snapshot`\  parameter will follow the order of deleting operations before creating operations.
+   - The \ :emphasis:`writable\_snapshots`\  parameter will follow the order of deleting operations before creating operations.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -106,12 +106,12 @@ Examples
 
     
     - name: To create a writable snapshot using ID
-      dellemc.powerscale.writable_snapshot:
+      dellemc.powerscale.writable_snapshots:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        writable_snapshot:
+        writable_snapshots:
           - dst_path: "/ifs/test_one"
             src_snap: 2
             state: present
@@ -120,12 +120,12 @@ Examples
             state: present
 
     - name: To create a writable snapshot using Name
-      dellemc.powerscale.writable_snapshot:
+      dellemc.powerscale.writable_snapshots:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        writable_snapshot:
+        writable_snapshots:
           - dst_path: "/ifs/test_one"
             src_snap: "Snapshot: 2024Apr15, 4:40 PM"
             state: present
@@ -134,24 +134,24 @@ Examples
             state: present
 
     - name: To delete writable snapshot.
-      dellemc.powerscale.writable_snapshot:
+      dellemc.powerscale.writable_snapshots:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        writable_snapshot:
+        writable_snapshots:
           - dst_path: "/ifs/test_one"
             state: absent
           - dst_path: "/ifs/test_two"
             sstate: absent
 
     - name: To create and delete writable snapshot
-      dellemc.powerscale.writable_snapshot:
+      dellemc.powerscale.writable_snapshots:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        writable_snapshot:
+        writable_snapshots:
           - dst_path: "/ifs/test_test"
             src_snap: 2
             state: present
@@ -167,7 +167,7 @@ changed (always, bool, true)
   Whether or not the resource has changed.
 
 
-writable_snapshot_details (When writable snapshot is created., complex, [{'created': 1719895971, 'dst_path': '/ifs/test_test', 'id': 23, 'log_size': 0, 'phys_size': 2048, 'src_id': 2, 'src_path': '/ifs/tfacc_file_system_test', 'src_snap': 'Snapshot: 2024Apr15, 4:40 PM', 'state': 'active'}])
+writable_snapshots_details (When writable snapshot is created., complex, [{'created': 1719895971, 'dst_path': '/ifs/test_test', 'id': 23, 'log_size': 0, 'phys_size': 2048, 'src_id': 2, 'src_path': '/ifs/tfacc_file_system_test', 'src_snap': 'Snapshot: 2024Apr15, 4:40 PM', 'state': 'active'}])
   The writable snapshot details.
 
 

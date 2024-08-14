@@ -19,12 +19,12 @@
 
   tasks:
     - name: Create a writable snapshot using ID
-      dellemc.powerscale.writable_snapshot:
+      dellemc.powerscale.writable_snapshots:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        writable_snapshot:
+        writable_snapshots:
           - dst_path: "{{ dst_path1 }}"
             src_snap: "{{ src_snap_id }}"
             state: "{{ state_present }}"
@@ -33,12 +33,12 @@
             state: "{{ state_present }}"
 
     - name: Create a writable snapshot using Name.
-      dellemc.powerscale.writable_snapshot:
+      dellemc.powerscale.writable_snapshots:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        writable_snapshot:
+        writable_snapshots:
           - dst_path: "{{ dst_path1 }}"
             src_snap: "{{ src_snap_name }}"
             state: "{{ state_present }}"
@@ -47,24 +47,24 @@
             state: "{{ state_present }}"
 
     - name: Delete writable snapshot.
-      dellemc.powerscale.writable_snapshot:
+      dellemc.powerscale.writable_snapshots:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        writable_snapshot:
+        writable_snapshots:
           - dst_path: "{{ dst_path1 }}"
             state: "{{ state_absent }}"
           - dst_path: "{{ dst_path2 }}"
             state: "{{ state_absent }}"
 
     - name: Create and delete writable snapshot
-      dellemc.powerscale.writable_snapshot:
+      dellemc.powerscale.writable_snapshots:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
-        writable_snapshot:
+        writable_snapshots:
           - dst_path: "{{ dst_path2 }}"
             src_snap: "{{ src_snap_id }}"
             state: "{{ state_present }}"
