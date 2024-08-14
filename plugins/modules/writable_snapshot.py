@@ -265,6 +265,10 @@ class WritableSnapshot(PowerScaleBase):
                         )
                         output = self.snapshot_api.create_snapshot_writable_item(writable_snapshot_create_item)
                         create_result.append(output.to_dict())
+                    if self.module._diff:
+                        after_dict = [{"dst_path": create_snapshot_dict.get("dst_path"),
+                                      "src_snap": create_snapshot_dict.get("src_snap")}]
+                        self.result["diff"]["after"]["writable_snapshots"].extend(after_dict)
                     changed_flag = True
                 else:
                     existing_snapshot_list.append(existing_snapshot)
@@ -274,8 +278,6 @@ class WritableSnapshot(PowerScaleBase):
                     'with error: {1}'.format(create_snapshot_dict.get("dst_path"), str(error_msg))
                 LOG.error(error_message)
                 self.module.fail_json(msg=error_message)
-        if self.module._diff:
-            self.result["diff"]["after"]["writable_snapshots"].extend(create_result)
         return changed_flag, create_result
 
     def delete_writable_snapshot(self, snapshots_to_delete):
@@ -288,6 +290,9 @@ class WritableSnapshot(PowerScaleBase):
                 if snapshot_exits:
                     if not self.module.check_mode:
                         self.snapshot_api.delete_snapshot_writable_wspath(snapshot_writable_wspath=dst_path)
+                    if self.module._diff:
+                        before_dict = [{"dst_path": delete_snapshot_dict.get("dst_path")}]
+                        self.result["diff"]["before"]["writable_snapshots"].extend(before_dict)
                     changed_flag = True
                 if existing_snapshot:
                     existing_snpashot_list.append(existing_snapshot)
@@ -298,8 +303,6 @@ class WritableSnapshot(PowerScaleBase):
                                 'error: {1}'.format(dst_path, str(error_msg))
                 LOG.error(error_message)
                 self.module.fail_json(msg=error_message)
-        if self.module._diff:
-            self.result["diff"]["before"]["writable_snapshots"].extend(existing_snpashot_list)
         return changed_flag
 
 

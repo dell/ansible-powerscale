@@ -91,6 +91,9 @@ Notes
 -----
 
 .. note::
+   - The \ :emphasis:`check\_mode`\  is supported.
+   - The \ :emphasis:`diff`\  is supported.
+   - The \ :emphasis:`writable\_snapshot`\  parameter will follow the order of deleting operations before creating operations.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -116,7 +119,7 @@ Examples
             src_snap: 2
             state: present
 
-    - name: To create a writable snapshot using Name.
+    - name: To create a writable snapshot using Name
       dellemc.powerscale.writable_snapshot:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -201,7 +204,7 @@ writable_snapshot_details (When writable snapshot is created., complex, [{'creat
 
 
   state (, str, active)
-    The name of the source snapshot.s
+    The name of the source snapshot.
 
 
 
