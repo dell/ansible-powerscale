@@ -192,7 +192,7 @@ Parameters
 
     Event groups - \ :literal:`event\_group`\ .
 
-    Writable snapshots - \ :literal:`writable\_snapshot`\ .
+    Writable snapshots - \ :literal:`writable\_snapshots`\ .
 
 
   filters (False, list, None)
@@ -219,11 +219,11 @@ Parameters
   query_parameters (optional, dict, None)
     Contains dictionary of query parameters for specific \ :emphasis:`gather\_subset`\ .
 
-    Applicable to \ :literal:`alert\_rules`\ , \ :literal:`event\_group`\ , \ :literal:`event\_channels`\ , \ :literal:`filesystem`\  and \ :literal:`writable\_snapshot`\ .
+    Applicable to \ :literal:`alert\_rules`\ , \ :literal:`event\_group`\ , \ :literal:`event\_channels`\ , \ :literal:`filesystem`\  and \ :literal:`writable\_snapshots`\ .
 
-    If \ :literal:`writable\_snapshot`\  is passed as \ :emphasis:`gather\_subset`\ , if \ :emphasis:`wspath`\  is given, all other query parameters inside \ :emphasis:`writable\_snapshot`\  will be ignored.
+    If \ :literal:`writable\_snapshots`\  is passed as \ :emphasis:`gather\_subset`\ , if \ :emphasis:`wspath`\  is given, all other query parameters inside \ :emphasis:`writable\_snapshots`\  will be ignored.
 
-    To view the list of supported query parameters for \ :literal:`writable\_snapshot`\ , refer Query Parameters section from \ https://developer.dell.com/apis/4088/versions/9.5.0/9.5.0.0_ISLANDER_OAS2.json/%20paths/~1platform~114~1snapshot~1writable/get\ 
+    To view the list of supported query parameters for \ :literal:`writable\_snapshots`\ , refer Query Parameters section from \ https://developer.dell.com/apis/4088/versions/9.5.0/9.5.0.0_ISLANDER_OAS2.json/%20paths/~1platform~114~1snapshot~1writable/get\ 
 
 
   onefs_host (True, str, None)
@@ -259,7 +259,7 @@ Notes
 .. note::
    - The parameters \ :emphasis:`access\_zone`\  and \ :emphasis:`include\_all\_access\_zones`\  are mutually exclusive.
    - The \ :emphasis:`check\_mode`\  is supported.
-   - Filter functionality is supported only for the following 'gather\_subset'- 'nfs', 'smartquota', 'filesystem' 'writable\_snapshot'.
+   - Filter functionality is supported only for the following 'gather\_subset'- 'nfs', 'smartquota', 'filesystem' 'writable\_snapshots'.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -794,7 +794,7 @@ Examples
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         gather_subset:
-          - writable_snapshot
+          - writable_snapshots
 
     - name: To get the specific writable snapshot.
       dellemc.powerscale.info:
@@ -803,9 +803,9 @@ Examples
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         gather_subset:
-          - writable_snapshot
+          - writable_snapshots
         query_parameters:
-          writable_snapshot:
+          writable_snapshots:
             wspath: "/ifs/test_mkdir"
 
     - name: To filter the writable snapshot in ascending order.
@@ -815,9 +815,9 @@ Examples
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         gather_subset:
-          - writable_snapshot
+          - writable_snapshots
         query_parameters:
-          writable_snapshot:
+          writable_snapshots:
             dir: ASC
             limit: 1
 
@@ -828,9 +828,9 @@ Examples
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         gather_subset:
-          - writable_snapshot
+          - writable_snapshots
         query_parameters:
-          writable_snapshot:
+          writable_snapshots:
             sort: src_snap
             state: active
 

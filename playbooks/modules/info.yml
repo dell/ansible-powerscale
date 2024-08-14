@@ -403,7 +403,7 @@
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         gather_subset:
-          - writable_snapshot
+          - writable_snapshots
 
     - name: To get the specific writable snapshot
       dellemc.powerscale.info:
@@ -412,9 +412,9 @@
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         gather_subset:
-          - writable_snapshot
+          - writable_snapshots
         query_parameters:
-          writable_snapshot:
+          writable_snapshots:
             wspath: "/ifs/test_mkdir"
 
     - name: To filter the writable snapshot in ascending order
@@ -424,9 +424,9 @@
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         gather_subset:
-          - writable_snapshot
+          - writable_snapshots
         query_parameters:
-          writable_snapshot:
+          writable_snapshots:
             dir: ASC
             limit: 1
 
@@ -437,8 +437,8 @@
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         gather_subset:
-          - writable_snapshot
+          - writable_snapshots
         query_parameters:
-          writable_snapshot:
+          writable_snapshots:
             sort: src_snap
             state: active
