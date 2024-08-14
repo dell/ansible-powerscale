@@ -378,8 +378,10 @@ class AlertRule(PowerScaleBase):
                 self.module.fail_json(msg=error_message)
 
         if self.module._diff:
-            self.result.update({"diff": {"before": alert_rule_details, "after": after_updated_payload}})
-
+            if difference:
+                self.result.update({"diff": {"before": alert_rule_details, "after": after_updated_payload}})
+            else:
+                self.result.update({"diff": {"before": {}, "after": {}}})
         return changed, alert_data
 
     def delete_alert_condition(self, alert_rule_condition):
