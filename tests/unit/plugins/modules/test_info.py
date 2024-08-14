@@ -725,7 +725,7 @@ class TestInfo():
             gather_subset) in gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
 
     @pytest.mark.parametrize("input_params", [
-        {"gather_subset": "writable_snapshot", "return_key": "writable_snapshots"}
+        {"gather_subset": "writable_snapshots", "return_key": "writable_snapshots"}
     ]
     )
     def test_get_facts_writable_snapshot_api_module(self, gatherfacts_module_mock, input_params):
@@ -736,7 +736,7 @@ class TestInfo():
         api_response = MockGatherfactsApi.get_gather_facts_api_response(
             gather_subset)
         self.get_module_args.update({
-            'gather_subset': ['writable_snapshot'],
+            'gather_subset': ['writable_snapshots'],
             'zone': "System",
             "filters": [{"filter_key": "id", "filter_operator": "equal", "filter_value": 66258688}]
         })
@@ -749,13 +749,13 @@ class TestInfo():
             gather_subset) == gatherfacts_module_mock.module.exit_json.call_args[1][return_key]
 
     @pytest.mark.parametrize("gather_subset", [
-        "writable_snapshot"
+        "writable_snapshots"
     ]
     )
     def test_get_facts_writable_snapshot_api_exception(self, gatherfacts_module_mock, gather_subset):
         """Test the get_facts that uses the writable snapshot api endpoint to get the exception"""
         self.get_module_args.update({
-            'gather_subset': ['writable_snapshot'],
+            'gather_subset': ['writable_snapshots'],
             'zone': "System",
         })
         gatherfacts_module_mock.module.params = self.get_module_args

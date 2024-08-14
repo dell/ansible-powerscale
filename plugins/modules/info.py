@@ -142,7 +142,7 @@ options:
     - Alert channels - C(alert_channels).
     - Alert categories - C(alert_categories).
     - Event groups - C(event_group).
-    - Writable snapshots - C(writable_snapshot).
+    - Writable snapshots - C(writable_snapshots).
     required: true
     choices: [attributes, access_zones, nodes, providers, users, groups,
               smb_shares, nfs_exports, nfs_aliases, clients, synciq_reports, synciq_target_reports,
@@ -152,7 +152,7 @@ options:
               nfs_zone_settings, nfs_default_settings, nfs_global_settings, synciq_global_settings, s3_buckets,
               smb_global_settings, ntp_servers, email_settings, cluster_identity, cluster_owner, snmp_settings,
               server_certificate, roles, support_assist_settings, smartquota, filesystem, alert_settings,
-              alert_rules, alert_channels, alert_categories, event_group, writable_snapshot]
+              alert_rules, alert_channels, alert_categories, event_group, writable_snapshots]
     type: list
     elements: str
   filters:
@@ -185,10 +185,10 @@ options:
     description:
     - Contains dictionary of query parameters for specific I(gather_subset).
     - Applicable to C(alert_rules), C(event_group), C(event_channels), C(filesystem)
-      and C(writable_snapshot).
-    - If C(writable_snapshot) is passed as I(gather_subset), if I(wspath) is given,
-      all other query parameters inside I(writable_snapshot) will be ignored.
-    - To view the list of supported query parameters for C(writable_snapshot),
+      and C(writable_snapshots).
+    - If C(writable_snapshots) is passed as I(gather_subset), if I(wspath) is given,
+      all other query parameters inside I(writable_snapshots) will be ignored.
+    - To view the list of supported query parameters for C(writable_snapshots),
       refer Query Parameters section from
       U(https://developer.dell.com/apis/4088/versions/9.5.0/9.5.0.0_ISLANDER_OAS2.json/
         paths/~1platform~114~1snapshot~1writable/get)
@@ -198,7 +198,7 @@ notes:
 - The parameters I(access_zone) and I(include_all_access_zones) are mutually exclusive.
 - The I(check_mode) is supported.
 - Filter functionality is supported only for the following 'gather_subset'- 'nfs', 'smartquota', 'filesystem'
-  'writable_snapshot'.
+  'writable_snapshots'.
 '''
 
 EXAMPLES = r'''
@@ -725,7 +725,7 @@ EXAMPLES = r'''
     api_user: "{{ api_user }}"
     api_password: "{{ api_password }}"
     gather_subset:
-      - writable_snapshot
+      - writable_snapshots
 
 - name: To get the specific writable snapshot.
   dellemc.powerscale.info:
@@ -734,9 +734,9 @@ EXAMPLES = r'''
     api_user: "{{ api_user }}"
     api_password: "{{ api_password }}"
     gather_subset:
-      - writable_snapshot
+      - writable_snapshots
     query_parameters:
-      writable_snapshot:
+      writable_snapshots:
         wspath: "/ifs/test_mkdir"
 
 - name: To filter the writable snapshot in ascending order.
@@ -746,9 +746,9 @@ EXAMPLES = r'''
     api_user: "{{ api_user }}"
     api_password: "{{ api_password }}"
     gather_subset:
-      - writable_snapshot
+      - writable_snapshots
     query_parameters:
-      writable_snapshot:
+      writable_snapshots:
         dir: ASC
         limit: 1
 
@@ -759,9 +759,9 @@ EXAMPLES = r'''
     api_user: "{{ api_user }}"
     api_password: "{{ api_password }}"
     gather_subset:
-      - writable_snapshot
+      - writable_snapshots
     query_parameters:
-      writable_snapshot:
+      writable_snapshots:
         sort: src_snap
         state: active
 '''
@@ -4037,7 +4037,7 @@ class Info(object):
             'event_group': lambda: Events(self.event_api, self.module).get_event_groups(),
             'smartquota': self.get_smartquota_list,
             'filesystem': lambda: self.get_filesystem_list(path, query_params),
-            'writable_snapshot': self.get_writable_snapshots
+            'writable_snapshots': self.get_writable_snapshots
         }
 
         key_mapping = {
@@ -4081,7 +4081,7 @@ class Info(object):
             'event_group': 'event_groups',
             'smartquota': 'smart_quota',
             'filesystem': 'file_system',
-            'writable_snapshot': 'writable_snapshots'
+            'writable_snapshots': 'writable_snapshots'
         }
 
         # Map the subset to the appropriate Key
@@ -4093,7 +4093,7 @@ class Info(object):
                        'nfs_default_settings', 'nfs_global_settings', 'synciq_global_settings', 's3_buckets',
                        'smb_global_settings', 'ntp_servers', 'email_settings', 'cluster_identity', 'cluster_owner',
                        'snmp_settings', 'server_certificate', 'event_group', 'smartquota', 'filesystem',
-                       'writable_snapshot']
+                       'writable_snapshots']
         for key in subset:
             if key not in subset_list:
                 result[key] = subset_mapping[key]()
@@ -4145,7 +4145,7 @@ def get_info_parameters():
                      'snmp_settings', 'server_certificate', 'roles',
                      'support_assist_settings', 'alert_settings', 'alert_rules',
                      'alert_channels', 'alert_categories', 'event_group',
-                     'filesystem', 'smartquota', 'writable_snapshot']),
+                     'filesystem', 'smartquota', 'writable_snapshots']),
         filters=dict(type='list',
                      required=False,
                      elements='dict',

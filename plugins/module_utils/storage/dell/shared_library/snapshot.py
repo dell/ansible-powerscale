@@ -62,7 +62,7 @@ class Snapshot:
         """
         try:
             query_params = self.module.params.get('query_parameters')
-            writable_snapshot_query_params = query_params.get('writable_snapshot', []) if query_params else []
+            writable_snapshot_query_params = query_params.get('writable_snapshots', []) if query_params else []
             filter_params = {}
             if writable_snapshot_query_params:
                 if "wspath" in writable_snapshot_query_params:
