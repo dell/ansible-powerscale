@@ -122,7 +122,7 @@ changed:
     type: bool
     sample: "true"
 
-writable_snapshot_details:
+writable_snapshots_details:
     description: The writable snapshot details.
     type: complex
     returned: When writable snapshot is created.
@@ -202,7 +202,7 @@ class WritableSnapshot(PowerScaleBase):
         super().__init__(AnsibleModule, ansible_module_params)
 
         self.result.update({
-            "writable_snapshot_details": {}
+            "writable_snapshots_details": {}
         })
 
         if self.module._diff:
@@ -330,7 +330,7 @@ class WritableSnapshotDeleteHandler:
 
         Args:
             writable_snapshot_obj (writable_snapshot): The writable_snapshot object to delete.
-            writable_snapshot_details (dict): The details of the writable_snapshot to delete.
+            writable_snapshots_details (dict): The details of the writable_snapshot to delete.
 
         Returns:
             tuple: A tuple containing a boolean indicating
@@ -351,7 +351,7 @@ class WritableSnapshotCreateHandler:
 
         Args:
             writable_snapshot_obj (writable_snapshot): The writable_snapshot object to be handled.
-            writable_snapshot_details (dict): The details of the writable_snapshot.
+            writable_snapshots_details (dict): The details of the writable_snapshot.
 
         Returns:
             None
@@ -364,18 +364,18 @@ class WritableSnapshotCreateHandler:
 
 class WritableSnapshotExitHandler:
 
-    def handle(self, writable_snapshot_obj, invalid_snapshots, writable_snapshot_details):
+    def handle(self, writable_snapshot_obj, invalid_snapshots, writable_snapshots_details):
         """
         Handles the writable_snapshot object and writable_snapshot details.
 
         Args:
             writable_snapshot_obj (writable_snapshot): The writable_snapshot object.
-            writable_snapshot_details (dict): The details of the writable_snapshot.
+            writable_snapshots_details (dict): The details of the writable_snapshot.
 
         Returns:
             None
         """
-        writable_snapshot_obj.result['writable_snapshot_details'] = writable_snapshot_details
+        writable_snapshot_obj.result['writable_snapshots_details'] = writable_snapshots_details
         if invalid_snapshots:
             writable_snapshot_obj.result['failed_writable_snapshots'] = invalid_snapshots
             writable_snapshot_obj.result['changed'] = False
