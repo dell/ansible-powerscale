@@ -223,7 +223,9 @@ Parameters
 
     If \ :literal:`writable\_snapshots`\  is passed as \ :emphasis:`gather\_subset`\ , if \ :emphasis:`wspath`\  is given, all other query parameters inside \ :emphasis:`writable\_snapshots`\  will be ignored.
 
-    To view the list of supported query parameters for \ :literal:`writable\_snapshots`\ , refer Query Parameters section from \ https://developer.dell.com/apis/4088/versions/9.5.0/9.5.0.0_ISLANDER_OAS2.json/%20paths/~1platform~114~1snapshot~1writable/get\ 
+    To view the list of supported query parameters for \ :literal:`writable\_snapshots`\ .
+
+    Refer Query Parameters section from \ https://developer.dell.com/apis/4088/versions/9.5.0/9.5.0.0_ISLANDER_OAS2.json/%20paths/~1platform~114~1snapshot~1writable/get\ .
 
 
   onefs_host (True, str, None)
@@ -796,7 +798,7 @@ Examples
         gather_subset:
           - writable_snapshots
 
-    - name: To get the specific writable snapshot.
+    - name: To get the specific writable snapshot
       dellemc.powerscale.info:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -808,7 +810,7 @@ Examples
           writable_snapshots:
             wspath: "/ifs/test_mkdir"
 
-    - name: To filter the writable snapshot in ascending order.
+    - name: To filter the writable snapshot in ascending order
       dellemc.powerscale.info:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -821,7 +823,7 @@ Examples
             dir: ASC
             limit: 1
 
-    - name: To filter the writable snapshot using sort.
+    - name: To filter the writable snapshot using sort
       dellemc.powerscale.info:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"

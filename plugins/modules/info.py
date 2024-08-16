@@ -188,10 +188,10 @@ options:
       and C(writable_snapshots).
     - If C(writable_snapshots) is passed as I(gather_subset), if I(wspath) is given,
       all other query parameters inside I(writable_snapshots) will be ignored.
-    - To view the list of supported query parameters for C(writable_snapshots),
-      refer Query Parameters section from
+    - To view the list of supported query parameters for C(writable_snapshots).
+    - Refer Query Parameters section from
       U(https://developer.dell.com/apis/4088/versions/9.5.0/9.5.0.0_ISLANDER_OAS2.json/
-        paths/~1platform~114~1snapshot~1writable/get)
+        paths/~1platform~114~1snapshot~1writable/get).
     type: dict
     version_added: '3.2.0'
 notes:
@@ -727,7 +727,7 @@ EXAMPLES = r'''
     gather_subset:
       - writable_snapshots
 
-- name: To get the specific writable snapshot.
+- name: To get the specific writable snapshot
   dellemc.powerscale.info:
     onefs_host: "{{ onefs_host }}"
     verify_ssl: "{{ verify_ssl }}"
@@ -739,7 +739,7 @@ EXAMPLES = r'''
       writable_snapshots:
         wspath: "/ifs/test_mkdir"
 
-- name: To filter the writable snapshot in ascending order.
+- name: To filter the writable snapshot in ascending order
   dellemc.powerscale.info:
     onefs_host: "{{ onefs_host }}"
     verify_ssl: "{{ verify_ssl }}"
@@ -752,7 +752,7 @@ EXAMPLES = r'''
         dir: ASC
         limit: 1
 
-- name: To filter the writable snapshot using sort.
+- name: To filter the writable snapshot using sort
   dellemc.powerscale.info:
     onefs_host: "{{ onefs_host }}"
     verify_ssl: "{{ verify_ssl }}"
