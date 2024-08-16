@@ -723,3 +723,60 @@ class TestInfo():
             gatherfacts_module_mock.perform_module_operation()
         assert MockGatherfactsApi.get_gather_facts_error_response(
             gather_subset) in gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
+
+    @pytest.mark.parametrize("input_params", [
+        {"gather_subset": "writable_snapshots", "return_key": "writable_snapshots"}
+    ]
+    )
+    def test_get_facts_writable_snapshot_api_module(self, gatherfacts_module_mock, input_params):
+        """Test the get_facts that uses the writable snapshot api endpoint to get the module response"""
+
+        gather_subset = input_params.get('gather_subset')
+        return_key = input_params.get('return_key')
+        api_response = MockGatherfactsApi.get_gather_facts_api_response(
+            gather_subset)
+        self.get_module_args.update({
+            'gather_subset': ['writable_snapshots'],
+            'zone': "System",
+            "filters": [{"filter_key": "id", "filter_operator": "equal", "filter_value": 66258688}]
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+
+        with patch.object(gatherfacts_module_mock.snapshot_api, MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
+            mock_method.return_value = MockSDKResponse(api_response)
+            gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_gather_facts_module_response(
+            gather_subset) == gatherfacts_module_mock.module.exit_json.call_args[1][return_key]
+
+    @pytest.mark.parametrize("gather_subset", [
+        "writable_snapshots"
+    ]
+    )
+    def test_get_facts_writable_snapshot_api_exception(self, gatherfacts_module_mock, gather_subset):
+        """Test the get_facts that uses the writable snapshot api endpoint to get the exception"""
+        self.get_module_args.update({
+            'gather_subset': ['writable_snapshots'],
+            'zone': "System",
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        with patch.object(gatherfacts_module_mock.snapshot_api, MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
+            mock_method.side_effect = MagicMock(side_effect=MockApiException)
+            gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_gather_facts_error_response(
+            gather_subset) in gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
+
+    def test_get_filters_empty_case(self, gatherfacts_module_mock):
+        resp = gatherfacts_module_mock.get_filters()
+        assert resp == {}
+
+    def test_get_filters_failure_case1(self, gatherfacts_module_mock):
+        filter_dict = [{"filter_key": "id", "filter_operator": "equal"}]
+        gatherfacts_module_mock.get_filters(filters=filter_dict)
+        assert gatherfacts_module_mock.module.fail_json.call_args[1]['msg'] \
+            == 'filter_key, filter_operator, filter_value are expected.'
+
+    def test_get_filters_failure_case2(self, gatherfacts_module_mock):
+        filter_dict = [{"filter_key": "id", "filter_operator": "less", "filter_value": 123}]
+        gatherfacts_module_mock.get_filters(filters=filter_dict)
+        assert gatherfacts_module_mock.module.fail_json.call_args[1]['msg'] \
+            == "The filter operator is not supported -- only 'equal' is supported."

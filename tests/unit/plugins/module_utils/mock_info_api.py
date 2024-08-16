@@ -1637,6 +1637,41 @@ class MockGatherfactsApi:
             return "Failed to get details of Filesystem"
 
     @staticmethod
+    def get_writable_snapshot_list(response_type):
+        if response_type == 'api':
+            return {
+                "writable": [
+                    {
+                        "created": 1722504407,
+                        "dst_path": "/ifs/test2",
+                        "id": 66258688,
+                        "log_size": 0,
+                        "phys_size": 2048,
+                        "src_id": 230,
+                        "src_path": "/ifs/tfacc_test_dirNew",
+                        "src_snap": "ScheduleName_duration_2024-07-26_11:00",
+                        "state": "active"
+                    }
+                ]
+            }
+        elif response_type == "module":
+            return [
+                {
+                    "created": 1722504407,
+                    "dst_path": "/ifs/test2",
+                    "id": 66258688,
+                    "log_size": 0,
+                    "phys_size": 2048,
+                    "src_id": 230,
+                    "src_path": "/ifs/tfacc_test_dirNew",
+                    "src_snap": "ScheduleName_duration_2024-07-26_11:00",
+                    "state": "active"
+                }
+            ]
+        else:
+            return "Failed to get writeable snapshots"
+
+    @staticmethod
     def get_gather_facts_module_response(gather_subset):
         param = "module"
         path = "ifs"
@@ -1679,7 +1714,8 @@ class MockGatherfactsApi:
             "alert_channels": MockGatherfactsApi.get_event_channels(param),
             "alert_settings": MockGatherfactsApi.get_event_maintenance(param),
             "filesystem": MockGatherfactsApi.get_filesystem_list(param),
-            "smartquota": MockGatherfactsApi.get_smartquota_list(param)
+            "smartquota": MockGatherfactsApi.get_smartquota_list(param),
+            "writable_snapshots": MockGatherfactsApi.get_writable_snapshot_list(param)
         }
         return subset_error_dict.get(gather_subset)
 
@@ -1725,7 +1761,8 @@ class MockGatherfactsApi:
             "alert_channels": MockGatherfactsApi.get_event_channels(param),
             "alert_settings": MockGatherfactsApi.get_event_maintenance(param),
             "filesystem": MockGatherfactsApi.get_filesystem_list(param),
-            "smartquota": MockGatherfactsApi.get_smartquota_list(param)
+            "smartquota": MockGatherfactsApi.get_smartquota_list(param),
+            "writable_snapshots": MockGatherfactsApi.get_writable_snapshot_list(param)
         }
         return subset_error_dict.get(gather_subset)
 
@@ -1773,7 +1810,8 @@ class MockGatherfactsApi:
             "alert_channels": MockGatherfactsApi.get_event_channels(param),
             "alert_settings": MockGatherfactsApi.get_event_maintenance(param),
             "filesystem": MockGatherfactsApi.get_filesystem_list(param),
-            "smartquota": MockGatherfactsApi.get_smartquota_list(param)
+            "smartquota": MockGatherfactsApi.get_smartquota_list(param),
+            "writable_snapshots": MockGatherfactsApi.get_writable_snapshot_list(param)
         }
         return subset_error_dict.get(gather_subset)
 
@@ -1825,6 +1863,7 @@ class MockGatherfactsApi:
             "alert_channels": "list_event_channels",
             "alert_settings": "get_event_maintenance",
             "smartquota": "list_quota_quotas",
-            "filesystem": "get_directory_contents"
+            "filesystem": "get_directory_contents",
+            "writable_snapshots": "list_snapshot_writable",
         }
         return subset_method_dict.get(gather_subset)
