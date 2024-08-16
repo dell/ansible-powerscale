@@ -142,6 +142,7 @@ options:
     - Alert channels - C(alert_channels).
     - Alert categories - C(alert_categories).
     - Event groups - C(event_group).
+    - Writable snapshots - C(writable_snapshots).
     required: true
     choices: [attributes, access_zones, nodes, providers, users, groups,
               smb_shares, nfs_exports, nfs_aliases, clients, synciq_reports, synciq_target_reports,
@@ -151,7 +152,7 @@ options:
               nfs_zone_settings, nfs_default_settings, nfs_global_settings, synciq_global_settings, s3_buckets,
               smb_global_settings, ntp_servers, email_settings, cluster_identity, cluster_owner, snmp_settings,
               server_certificate, roles, support_assist_settings, smartquota, filesystem, alert_settings,
-              alert_rules, alert_channels, alert_categories, event_group]
+              alert_rules, alert_channels, alert_categories, event_group, writable_snapshots]
     type: list
     elements: str
   filters:
@@ -183,14 +184,21 @@ options:
   query_parameters:
     description:
     - Contains dictionary of query parameters for specific I(gather_subset).
-    - Applicable to C(alert_rules), C(event_group), C(event_channels) and C(filesystem).
+    - Applicable to C(alert_rules), C(event_group), C(event_channels), C(filesystem)
+      and C(writable_snapshots).
+    - If C(writable_snapshots) is passed as I(gather_subset), if I(wspath) is given,
+      all other query parameters inside I(writable_snapshots) will be ignored.
+    - To view the list of supported query parameters for C(writable_snapshots).
+    - Refer Query Parameters section from
+      U(https://developer.dell.com/apis/4088/versions/9.5.0/9.5.0.0_ISLANDER_OAS2.json/
+        paths/~1platform~114~1snapshot~1writable/get).
     type: dict
     version_added: '3.2.0'
 notes:
 - The parameters I(access_zone) and I(include_all_access_zones) are mutually exclusive.
-- Listing of SyncIQ target cluster certificates is not supported by isi_sdk_8_1_1 version.
 - The I(check_mode) is supported.
-- Filter functionality is supported only for the following 'gather_subset'- 'nfs', 'smartquota', 'filesystem'.
+- Filter functionality is supported only for the following 'gather_subset'- 'nfs', 'smartquota', 'filesystem'
+  'writable_snapshots'.
 '''
 
 EXAMPLES = r'''
@@ -709,6 +717,53 @@ EXAMPLES = r'''
       - filter_key: "name"
         filter_operator: "equal"
         filter_value: "xxx"
+
+- name: Get all writable snapshots from PowerScale cluster
+  dellemc.powerscale.info:
+    onefs_host: "{{ onefs_host }}"
+    verify_ssl: "{{ verify_ssl }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    gather_subset:
+      - writable_snapshots
+
+- name: To get the specific writable snapshot
+  dellemc.powerscale.info:
+    onefs_host: "{{ onefs_host }}"
+    verify_ssl: "{{ verify_ssl }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    gather_subset:
+      - writable_snapshots
+    query_parameters:
+      writable_snapshots:
+        wspath: "/ifs/test_mkdir"
+
+- name: To filter the writable snapshot in ascending order
+  dellemc.powerscale.info:
+    onefs_host: "{{ onefs_host }}"
+    verify_ssl: "{{ verify_ssl }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    gather_subset:
+      - writable_snapshots
+    query_parameters:
+      writable_snapshots:
+        dir: ASC
+        limit: 1
+
+- name: To filter the writable snapshot using sort
+  dellemc.powerscale.info:
+    onefs_host: "{{ onefs_host }}"
+    verify_ssl: "{{ verify_ssl }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    gather_subset:
+      - writable_snapshots
+    query_parameters:
+      writable_snapshots:
+        sort: src_snap
+        state: active
 '''
 
 RETURN = r'''
@@ -3159,6 +3214,7 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.sh
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.snapshot \
     import Snapshot
 
+
 LOG = utils.get_logger('info')
 
 
@@ -3753,6 +3809,16 @@ class Info(object):
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
+    def get_writable_snapshots(self):
+        writable_snapshots = Snapshot(self.snapshot_api, self.module).list_writable_snapshots()
+        filtered_writable_snapshots = []
+        filters = self.module.params.get('filters')
+        filters_dict = self.get_filters(filters)
+        if filters_dict:
+            filtered_writable_snapshots = filter_dict_list(writable_snapshots, filters_dict)
+            return filtered_writable_snapshots
+        return writable_snapshots
+
     def get_metadata(self, effective_path):
         return Namespace(self.namespace_api, self.module).get_filesystem(effective_path)
 
@@ -3840,13 +3906,9 @@ class Info(object):
         if not filters_items:
             self.module.fail_json(msg='filter_key, filter_operator, filter_value are expected.')
         for item in filters_items:
-            try:
-                f_key = item["filter_key"]
-                f_val = item["filter_value"]
-                f_op = item["filter_operator"]
-            except KeyError:
-                error_msg = "Provide input for filter sub-options."
-                self.module.fail_json(msg=error_msg)
+            f_key = item.get("filter_key")
+            f_val = item.get("filter_value")
+            f_op = item.get("filter_operator")
             if f_op != 'equal':
                 error_msg = "The filter operator is not supported -- only 'equal' is supported."
                 self.module.fail_json(msg=error_msg)
@@ -3974,7 +4036,8 @@ class Info(object):
             'alert_channels': lambda: Events(self.event_api, self.module).get_event_channels(),
             'event_group': lambda: Events(self.event_api, self.module).get_event_groups(),
             'smartquota': self.get_smartquota_list,
-            'filesystem': lambda: self.get_filesystem_list(path, query_params)
+            'filesystem': lambda: self.get_filesystem_list(path, query_params),
+            'writable_snapshots': self.get_writable_snapshots
         }
 
         key_mapping = {
@@ -4017,7 +4080,8 @@ class Info(object):
             'synciq_target_cluster_certificates': 'SynciqTargetClusterCertificate',
             'event_group': 'event_groups',
             'smartquota': 'smart_quota',
-            'filesystem': 'file_system'
+            'filesystem': 'file_system',
+            'writable_snapshots': 'writable_snapshots'
         }
 
         # Map the subset to the appropriate Key
@@ -4028,7 +4092,8 @@ class Info(object):
                        'storagepool_tiers', 'smb_files', 'user_mapping_rules', 'ldap', 'nfs_zone_settings',
                        'nfs_default_settings', 'nfs_global_settings', 'synciq_global_settings', 's3_buckets',
                        'smb_global_settings', 'ntp_servers', 'email_settings', 'cluster_identity', 'cluster_owner',
-                       'snmp_settings', 'server_certificate', 'event_group', 'smartquota', 'filesystem']
+                       'snmp_settings', 'server_certificate', 'event_group', 'smartquota', 'filesystem',
+                       'writable_snapshots']
         for key in subset:
             if key not in subset_list:
                 result[key] = subset_mapping[key]()
@@ -4080,7 +4145,7 @@ def get_info_parameters():
                      'snmp_settings', 'server_certificate', 'roles',
                      'support_assist_settings', 'alert_settings', 'alert_rules',
                      'alert_channels', 'alert_categories', 'event_group',
-                     'filesystem', 'smartquota']),
+                     'filesystem', 'smartquota', 'writable_snapshots']),
         filters=dict(type='list',
                      required=False,
                      elements='dict',
