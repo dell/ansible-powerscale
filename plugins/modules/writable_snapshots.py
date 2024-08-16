@@ -89,7 +89,7 @@ EXAMPLES = r'''
         src_snap: "Snapshot: 2024Apr15, 4:40 PM"
         state: present
 
-- name: To delete writable snapshot.
+- name: To delete writable snapshot
   dellemc.powerscale.writable_snapshots:
     onefs_host: "{{ onefs_host }}"
     verify_ssl: "{{ verify_ssl }}"
@@ -357,10 +357,12 @@ class WritableSnapshotCreateHandler:
         Returns:
             None
         """
-        create_details = []
+        unique_combined_list = []
         if create_snapshots:
             writable_snapshot_obj.result['changed'], create_details = writable_snapshot_obj.create_filesystem_snapshot(create_snapshots)
-        WritableSnapshotExitHandler().handle(writable_snapshot_obj, invalid_snapshots, create_details)
+            if create_details:
+                unique_combined_list = [dict(t) for t in {frozenset(d.items()) for d in create_details if d is not None}]
+        WritableSnapshotExitHandler().handle(writable_snapshot_obj, invalid_snapshots, unique_combined_list)
 
 
 class WritableSnapshotExitHandler:

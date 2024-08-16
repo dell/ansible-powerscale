@@ -49,8 +49,6 @@ class TestWritableSnapshot(PowerScaleUnitBase):
         self.set_module_params(powerscale_module_mock, self.writable_snapshot_args,
                                {"writable_snapshots": [{"src_snap": 2, "dst_path": "/ifs/ansible3/", "state": "present"}]})
         powerscale_module_mock.check_mode = False
-        powerscale_module_mock.get_writable_snapshot = MagicMock(
-            return_value=(True, [{"src_snap": 2, "dst_path": "/ifs/ansible3/"}]))
         WritableSnapshotHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
 

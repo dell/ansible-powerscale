@@ -133,7 +133,7 @@ Examples
             src_snap: "Snapshot: 2024Apr15, 4:40 PM"
             state: present
 
-    - name: To delete writable snapshot.
+    - name: To delete writable snapshot
       dellemc.powerscale.writable_snapshots:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
