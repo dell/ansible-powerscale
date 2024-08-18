@@ -18,7 +18,7 @@
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         verify_ssl: "{{ verify_ssl }}"
-        name: "{{channel_smtp}}"
+        name: "{{ channel_smtp }}"
         enabled: true
         type: "smtp"
         allowed_nodes:
@@ -44,7 +44,7 @@
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         verify_ssl: "{{ verify_ssl }}"
-        name: "{{channel_connectemc}}"
+        name: "{{ channel_connectemc }}"
         enabled: true
         type: "connectemc"
         allowed_nodes:

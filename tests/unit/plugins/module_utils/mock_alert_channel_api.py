@@ -25,9 +25,10 @@ class MockAlertChannelApi:
         "send_test_alert": None,
         "smtp_parameters": None
     }
+
     SMTP_ARGS = {
-        "address": ["powerscale@sample.com"],
-        "send_as": "powerscale@sample.com",
+        "send_to": ["powerscale@sample.com"],
+        "send_from": "powerscale@sample.com",
         "smtp_port": 25,
         "subject": "test subject",
         "smtp_host": "sample.com",
@@ -40,6 +41,17 @@ class MockAlertChannelApi:
         "update_password": "on_create"
     }
 
+    INVALID_USE_AUTH = {
+        "smtp_use_auth": True
+    }
+
+    SMTP_ARGS2 = {
+        "smtp_use_auth": True,
+        "smtp_username": "powerscale1",
+        "smtp_password": "powerscale1",
+        "update_password": "always"
+    }
+
     CHANNEL_DETAILS = {
         "channels": [
             {
@@ -48,6 +60,18 @@ class MockAlertChannelApi:
                 "excluded_nodes": [2],
                 "id": "1",
                 "name": CHANNEL_NAME,
+                "parameters": {
+                    "address": ["sample1@sample.com"],
+                    "batch": "ALL",
+                    "batch_period": 3600,
+                    "send_as": "sample1@sample.com",
+                    "smtp_port": 587,
+                    "smtp_host": "pscalehost.com",
+                    "smtp_use_auth": False,
+                    "smtp_username": "pscle_user",
+                    "subject": "sample subject",
+                    "smtp_security": "NONE"
+                },
                 "rules": [],
                 "type": "smtp"
             }
@@ -60,6 +84,10 @@ class MockAlertChannelApi:
             'get_alert': "Fetching alert channel failed with error: SDK Error message",
             'create_exp': "Failed to create alert channel test with error: SDK Error message",
             'test_alert_exp': "Failed to send test alert for alert channel test with error: SDK Error message",
-            'delete_exp': "Failed to delete alert channel test with error: SDK Error messag"
+            'delete_exp': "Failed to delete alert channel test with error: SDK Error messag",
+            'modify_exp': "Failed to modify alert channel test with error: SDK Error message",
+            'invalid_name1': "Invalid alert channel name. Provide valid name",
+            'invalid_name2': "Invalid alert channel name. Name cannot contain slashes. Provide valid name",
+            'smtp_auth_err': "smtp_username is required while enabling smtp_use_auth. Provide valid smtp_username"
         }
         return err_msg_dict.get(response_type)

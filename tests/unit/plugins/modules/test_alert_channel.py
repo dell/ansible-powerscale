@@ -122,3 +122,67 @@ class TestAlertChannel(PowerScaleUnitBase):
         self.capture_fail_json_call(
             MockAlertChannelApi.get_alert_channel_exception('delete_exp'),
             powerscale_module_mock, AlertChannelHandler)
+
+    def test_modify_alert_channel(self, powerscale_module_mock):
+        self.set_module_params(
+            powerscale_module_mock, self.alert_args,
+            {"name": MockAlertChannelApi.CHANNEL_NAME, "enabled": True, "type": "smtp",
+             "smtp_parameters": MockAlertChannelApi.SMTP_ARGS, "allowed_nodes": [2],
+             "excluded_nodes": [1], "send_test_alert": True})
+        powerscale_module_mock.get_alert_channel_details = MagicMock(
+            return_value=MockAlertChannelApi.CHANNEL_DETAILS['channels'][0])
+        AlertChannelHandler().handle(powerscale_module_mock,
+                                     powerscale_module_mock.module.params)
+        powerscale_module_mock.event_api.update_event_channel.assert_called()
+
+    def test_modify_alert_channel_exception(self, powerscale_module_mock):
+        self.set_module_params(
+            powerscale_module_mock, self.alert_args,
+            {"name": MockAlertChannelApi.CHANNEL_NAME, "enabled": MockAlertChannelApi.ENABLED, "type": "smtp",
+             "smtp_parameters": MockAlertChannelApi.SMTP_ARGS, "allowed_nodes": [2],
+             "excluded_nodes": [1], "send_test_alert": MockAlertChannelApi.ENABLED})
+        powerscale_module_mock.get_alert_channel_details = MagicMock(
+            return_value=MockAlertChannelApi.CHANNEL_DETAILS['channels'][0])
+        powerscale_module_mock.event_api.update_event_channel = MagicMock(
+            side_effect=MockApiException)
+        self.capture_fail_json_call(
+            MockAlertChannelApi.get_alert_channel_exception('modify_exp'),
+            powerscale_module_mock, AlertChannelHandler)
+
+    def test_validate_name(self, powerscale_module_mock):
+        self.set_module_params(
+            powerscale_module_mock, self.alert_args,
+            {"name": "  "})
+        self.capture_fail_json_call(
+            MockAlertChannelApi.get_alert_channel_exception('invalid_name1'),
+            powerscale_module_mock, AlertChannelHandler)
+
+    def test_validate_name_with_slash(self, powerscale_module_mock):
+        self.set_module_params(
+            powerscale_module_mock, self.alert_args,
+            {"name": "name/name"})
+        self.capture_fail_json_call(
+            MockAlertChannelApi.get_alert_channel_exception('invalid_name2'),
+            powerscale_module_mock, AlertChannelHandler)
+
+    def test_modify_alert_channel_with_update(self, powerscale_module_mock):
+        self.set_module_params(
+            powerscale_module_mock, self.alert_args,
+            {"name": MockAlertChannelApi.CHANNEL_NAME,
+             "smtp_parameters": MockAlertChannelApi.SMTP_ARGS2})
+        powerscale_module_mock.get_alert_channel_details = MagicMock(
+            return_value=MockAlertChannelApi.CHANNEL_DETAILS['channels'][0])
+        AlertChannelHandler().handle(powerscale_module_mock,
+                                     powerscale_module_mock.module.params)
+        powerscale_module_mock.event_api.update_event_channel.assert_called()
+
+    def test_invalid_smtp_auth_exception(self, powerscale_module_mock):
+        self.set_module_params(
+            powerscale_module_mock, self.alert_args,
+            {"name": MockAlertChannelApi.CHANNEL_NAME,
+             "smtp_parameters": MockAlertChannelApi.INVALID_USE_AUTH})
+        powerscale_module_mock.get_alert_channel_details = MagicMock(
+            return_value=MockAlertChannelApi.CHANNEL_DETAILS['channels'][0])
+        self.capture_fail_json_call(
+            MockAlertChannelApi.get_alert_channel_exception('smtp_auth_err'),
+            powerscale_module_mock, AlertChannelHandler)

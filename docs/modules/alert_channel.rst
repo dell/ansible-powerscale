@@ -33,8 +33,14 @@ Parameters
     Nodes (LNNs) that can be masters for this channel.
 
 
-  enabled (optional, bool, True)
+  enabled (optional, bool, None)
     Enable or disable the channel.
+
+    ``True`` indicates the channel is enabled.
+
+    ``False`` indicates the channel is disabled.
+
+    If not specified when creating the channel, It will be enabled by default.
 
 
   excluded_nodes (optional, list, None)
@@ -85,8 +91,10 @@ Parameters
       Period over which batching is to be performed.
 
 
-    smtp_use_auth (optional, bool, False)
+    smtp_use_auth (optional, bool, None)
       Enable SMTP authentication.
+
+      If *smtp_use_auth* is not set during creation, then It defaults set to c(false).
 
 
     smtp_username (optional, str, None)
@@ -116,8 +124,12 @@ Parameters
     State of the channel.
 
 
-  type (optional, str, connectemc)
+  type (optional, str, None)
     Type of the channel.
+
+    If *type* is ``smtp``, then *smtp_parameters* is required.
+
+    If *type* is not set during creation, then It defaults to ``connectemc``.
 
 
   onefs_host (True, str, None)
