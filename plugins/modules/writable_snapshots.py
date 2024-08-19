@@ -261,7 +261,19 @@ class WritableSnapshot(PowerScaleBase):
             existing_snapshot_src_snap = existing_snapshot.get("src_snap")
         return existing_snapshot_src_snap != src_snap, existing_snapshot_src_snap
 
-    def create_filesystem_snapshot(self, snapshots_to_create):
+    def update_diff_before_after(self, dst_path, src_snap, existing_snapshot_src_snap):
+        if self.module._diff:
+            after_dict = [{"dst_path": dst_path, "src_snap": src_snap}]
+            before_dict = [{"dst_path": dst_path, "src_snap": existing_snapshot_src_snap}]
+            self.result["diff"]["after"]["writable_snapshots"].extend(after_dict)
+            self.result["diff"]["before"]["writable_snapshots"].extend(before_dict)
+
+    def update_diff_after(self, dst_path, src_snap):
+        if self.module._diff:
+            after_dict = [{"dst_path": dst_path, "src_snap": src_snap}]
+            self.result["diff"]["after"]["writable_snapshots"].extend(after_dict)
+
+    def create_writable_snapshot(self, snapshots_to_create):
         """Create a writable snapshot on PowerScale"""
 
         create_result, existing_snapshot_list = [], []
@@ -281,10 +293,7 @@ class WritableSnapshot(PowerScaleBase):
                     if not self.module.check_mode:
                         output = self.snapshot_api.create_snapshot_writable_item(writable_snapshot_create_item)
                         create_result.append(output.to_dict())
-
-                    if self.module._diff:
-                        after_dict = [{"dst_path": dst_path, "src_snap": src_snap}]
-                        self.result["diff"]["after"]["writable_snapshots"].extend(after_dict)
+                    self.update_diff_after(dst_path, src_snap)
                     changed_flag = True
                 else:
                     src_snap_changed, existing_snapshot_src_snap = self.compare_src_snap(existing_snapshot, src_snap)
@@ -293,11 +302,7 @@ class WritableSnapshot(PowerScaleBase):
                             self.snapshot_api.delete_snapshot_writable_wspath(snapshot_writable_wspath=dst_path)
                             output = self.snapshot_api.create_snapshot_writable_item(writable_snapshot_create_item)
                             create_result.append(output.to_dict())
-                        if self.module._diff:
-                            after_dict = [{"dst_path": dst_path, "src_snap": src_snap}]
-                            self.result["diff"]["after"]["writable_snapshots"].extend(after_dict)
-                            before_dict = [{"dst_path": dst_path, "src_snap": existing_snapshot_src_snap}]
-                            self.result["diff"]["before"]["writable_snapshots"].extend(before_dict)
+                        self.update_diff_before_after(dst_path, src_snap, existing_snapshot_src_snap)
                         changed_flag = True
                     else:
                         existing_snapshot_list.append(existing_snapshot)
@@ -387,7 +392,7 @@ class WritableSnapshotCreateHandler:
         """
         unique_combined_list = []
         if create_snapshots:
-            writable_snapshot_obj.result['changed'], create_details = writable_snapshot_obj.create_filesystem_snapshot(create_snapshots)
+            writable_snapshot_obj.result['changed'], create_details = writable_snapshot_obj.create_writable_snapshot(create_snapshots)
             if create_details:
                 unique_combined_list = [dict(t) for t in {frozenset(d.items()) for d in create_details if d is not None}]
         WritableSnapshotExitHandler().handle(writable_snapshot_obj, invalid_snapshots, unique_combined_list)
