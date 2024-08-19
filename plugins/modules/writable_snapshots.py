@@ -231,11 +231,20 @@ class WritableSnapshot(PowerScaleBase):
                     snapshots_to_create.append(snapshot_dict)
             else:
                 snapshots_to_delete.append(snapshot_dict)
-        return snapshots_to_create, snapshots_to_delete, invalid_snapshots
+        unique_snapshots_to_create = self.check_duplicate_snapshots_to_create(snapshots_to_create)
+        return unique_snapshots_to_create, snapshots_to_delete, invalid_snapshots
+
+    def check_duplicate_snapshots_to_create(self, snapshots_to_create):
+        unique_data = {}
+        for item in snapshots_to_create:
+            unique_data[item['dst_path']] = item
+        result = list(unique_data.values())
+        return result
 
     def validate_src_snap(self, snapshot_name):
         try:
-            return self.snapshot_api.get_snapshot_snapshot(snapshot_name)
+            output = self.snapshot_api.get_snapshot_snapshot(snapshot_name)
+            return output
         except Exception:
             return False
 
@@ -261,11 +270,9 @@ class WritableSnapshot(PowerScaleBase):
             existing_snapshot_src_snap = existing_snapshot.get("src_snap")
         return existing_snapshot_src_snap != src_snap, existing_snapshot_src_snap
 
-    def update_diff_before_after(self, dst_path, src_snap, existing_snapshot_src_snap):
+    def update_diff_before(self, dst_path, existing_snapshot_src_snap):
         if self.module._diff:
-            after_dict = [{"dst_path": dst_path, "src_snap": src_snap}]
             before_dict = [{"dst_path": dst_path, "src_snap": existing_snapshot_src_snap}]
-            self.result["diff"]["after"]["writable_snapshots"].extend(after_dict)
             self.result["diff"]["before"]["writable_snapshots"].extend(before_dict)
 
     def update_diff_after(self, dst_path, src_snap):
@@ -273,56 +280,61 @@ class WritableSnapshot(PowerScaleBase):
             after_dict = [{"dst_path": dst_path, "src_snap": src_snap}]
             self.result["diff"]["after"]["writable_snapshots"].extend(after_dict)
 
-    def update_existing_writable_snapshot(self, dst_path, src_snap, existing_snapshot):
-        src_snap_changed, existing_snapshot_src_snap = self.compare_src_snap(existing_snapshot, src_snap)
-        if src_snap_changed:
-            if not self.module.check_mode:
-                self.snapshot_api.delete_snapshot_writable_wspath(snapshot_writable_wspath=dst_path)
-                writable_snapshot_create_item = self.isi_sdk.SnapshotWritableItem(
-                    dst_path=dst_path,
-                    src_snap=src_snap
-                )
-                output = self.snapshot_api.create_snapshot_writable_item(writable_snapshot_create_item)
-                return output.to_dict()
-
     def create_writable_snapshot(self, snapshots_to_create):
         """Create a writable snapshot on PowerScale"""
-
         create_result, existing_snapshot_list = [], []
         changed_flag = False
-
         for create_snapshot_dict in snapshots_to_create:
             dst_path = create_snapshot_dict.get("dst_path")
             src_snap = create_snapshot_dict.get("src_snap")
-
             try:
-                snapshot_exits, existing_snapshot = self.get_writable_snapshot(dst_path)
-                writable_snapshot_create_item = self.isi_sdk.SnapshotWritableItem(
-                    dst_path=dst_path,
-                    src_snap=src_snap
-                )
-                if not snapshot_exits:
-                    if not self.module.check_mode:
-                        output = self.snapshot_api.create_snapshot_writable_item(writable_snapshot_create_item)
-                        create_result.append(output.to_dict())
-                    self.update_diff_after(dst_path, src_snap)
+                snapshot_exists, existing_snapshot = self.get_writable_snapshot(dst_path)
+                if not snapshot_exists:
+                    output = self.handle_new_snapshot(dst_path, src_snap)
+                    create_result.append(output)
                     changed_flag = True
                 else:
-                    src_snap_changed, existing_snapshot_src_snap = self.compare_src_snap(existing_snapshot, src_snap)
-                    if src_snap_changed:
-                        output = self.update_existing_writable_snapshot(dst_path, src_snap, existing_snapshot)
-                        create_result.append(output) if output else None
-                        self.update_diff_before_after(dst_path, src_snap, existing_snapshot_src_snap)
+                    changed, result = self.handle_existing_snapshot(dst_path, src_snap, existing_snapshot)
+                    create_result.append(result)
+                    if changed:
                         changed_flag = True
                     else:
                         existing_snapshot_list.append(existing_snapshot)
             except Exception as e:
-                error_msg = utils.determine_error(error_obj=e)
-                error_message = 'Failed to create writable snapshot: {0} for ' \
-                    'with error: {1}'.format(dst_path, str(error_msg))
-                LOG.error(error_message)
+                self.log_snapshot_creation_error(dst_path, e)
+
         result = create_result + existing_snapshot_list
         return changed_flag, result
+
+    def handle_new_snapshot(self, dst_path, src_snap):
+        """Handle creation of a new snapshot."""
+        writable_snapshot_create_item = self.isi_sdk.SnapshotWritableItem(
+            dst_path=dst_path,
+            src_snap=src_snap
+        )
+        self.update_diff_after(dst_path, src_snap)
+        if not self.module.check_mode:
+            output = self.snapshot_api.create_snapshot_writable_item(writable_snapshot_create_item)
+            return output.to_dict()
+        return {}
+
+    def handle_existing_snapshot(self, dst_path, src_snap, existing_snapshot):
+        """Handle updating or retaining an existing snapshot."""
+        src_snap_changed, existing_snapshot_src_snap = self.compare_src_snap(existing_snapshot, src_snap)
+        output = {}
+        if src_snap_changed:
+            self.update_diff_before(dst_path, existing_snapshot_src_snap)
+            if not self.module.check_mode:
+                self.snapshot_api.delete_snapshot_writable_wspath(snapshot_writable_wspath=dst_path)
+            output = self.handle_new_snapshot(dst_path, src_snap)
+            return True, output
+        return False, output
+
+    def log_snapshot_creation_error(self, dst_path, error_obj):
+        """Log an error encountered during snapshot creation."""
+        error_msg = utils.determine_error(error_obj=error_obj)
+        error_message = 'Failed to create writable snapshot: {0} with error: {1}'.format(dst_path, str(error_msg))
+        LOG.error(error_message)
 
     def delete_writable_snapshot(self, snapshots_to_delete):
         changed_flag = False
@@ -400,12 +412,12 @@ class WritableSnapshotCreateHandler:
         Returns:
             None
         """
-        unique_combined_list = []
+        create_details = []
         if create_snapshots:
-            writable_snapshot_obj.result['changed'], create_details = writable_snapshot_obj.create_writable_snapshot(create_snapshots)
-            if create_details:
-                unique_combined_list = [dict(t) for t in {frozenset(d.items()) for d in create_details if d is not None}]
-        WritableSnapshotExitHandler().handle(writable_snapshot_obj, invalid_snapshots, unique_combined_list)
+            changed_flag, create_details = writable_snapshot_obj.create_writable_snapshot(create_snapshots)
+            writable_snapshot_obj.result['changed'] = writable_snapshot_obj.result['changed'] or changed_flag
+        details = [item for item in create_details if item]
+        WritableSnapshotExitHandler().handle(writable_snapshot_obj, invalid_snapshots, details)
 
 
 class WritableSnapshotExitHandler:
