@@ -273,6 +273,18 @@ class WritableSnapshot(PowerScaleBase):
             after_dict = [{"dst_path": dst_path, "src_snap": src_snap}]
             self.result["diff"]["after"]["writable_snapshots"].extend(after_dict)
 
+    def update_existing_writable_snapshot(self, dst_path, src_snap, existing_snapshot):
+        src_snap_changed, existing_snapshot_src_snap = self.compare_src_snap(existing_snapshot, src_snap)
+        if src_snap_changed:
+            if not self.module.check_mode:
+                self.snapshot_api.delete_snapshot_writable_wspath(snapshot_writable_wspath=dst_path)
+                writable_snapshot_create_item = self.isi_sdk.SnapshotWritableItem(
+                    dst_path=dst_path,
+                    src_snap=src_snap
+                )
+                output = self.snapshot_api.create_snapshot_writable_item(writable_snapshot_create_item)
+                return output.to_dict()
+
     def create_writable_snapshot(self, snapshots_to_create):
         """Create a writable snapshot on PowerScale"""
 
@@ -298,10 +310,8 @@ class WritableSnapshot(PowerScaleBase):
                 else:
                     src_snap_changed, existing_snapshot_src_snap = self.compare_src_snap(existing_snapshot, src_snap)
                     if src_snap_changed:
-                        if not self.module.check_mode:
-                            self.snapshot_api.delete_snapshot_writable_wspath(snapshot_writable_wspath=dst_path)
-                            output = self.snapshot_api.create_snapshot_writable_item(writable_snapshot_create_item)
-                            create_result.append(output.to_dict())
+                        output = self.update_existing_writable_snapshot(dst_path, src_snap, existing_snapshot)
+                        create_result.append(output) if output else None
                         self.update_diff_before_after(dst_path, src_snap, existing_snapshot_src_snap)
                         changed_flag = True
                     else:
