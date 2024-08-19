@@ -37,7 +37,7 @@ class TestWritableSnapshot(PowerScaleUnitBase):
         WritableSnapshotHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
-    def test_create_writable_snapshot(self, powerscale_module_mock):
+    def test_create_writable_snapshot_with_id(self, powerscale_module_mock):
         self.set_module_params(powerscale_module_mock, self.writable_snapshot_args,
                                {"writable_snapshots": [{"src_snap": 2, "dst_path": "/ifs/ansible2/", "state": "present"}]})
         powerscale_module_mock.check_mode = False
@@ -45,12 +45,19 @@ class TestWritableSnapshot(PowerScaleUnitBase):
         WritableSnapshotHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
-    def test_create_writable_snapshot_idempotence_mode(self, powerscale_module_mock):
+    def test_create_writable_snapshot_with_id_idempotence_mode(self, powerscale_module_mock):
         self.set_module_params(powerscale_module_mock, self.writable_snapshot_args,
                                {"writable_snapshots": [{"src_snap": 2, "dst_path": "/ifs/ansible3/", "state": "present"}]})
         powerscale_module_mock.check_mode = False
         WritableSnapshotHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+
+    def test_create_writable_snapshot_idempotence_mode(self, powerscale_module_mock):
+        self.set_module_params(powerscale_module_mock, self.writable_snapshot_args,
+                               {"writable_snapshots": [{"src_snap": "snap-2", "dst_path": "/ifs/ansible3/", "state": "present"}]})
+        powerscale_module_mock.check_mode = False
+        WritableSnapshotHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
     def test_create_writable_snapshot_exception(self, powerscale_module_mock):
         self.set_module_params(powerscale_module_mock, self.writable_snapshot_args,

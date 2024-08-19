@@ -249,35 +249,63 @@ class WritableSnapshot(PowerScaleBase):
         except Exception:
             return False, []
 
+    def compare_src_snap(self, existing_snapshot, src_snap):
+        try:
+            src_snap = int(src_snap)
+            src_type = int
+        except ValueError:
+            src_type = str
+        if src_type is int:
+            existing_snapshot_src_snap = existing_snapshot.get("src_id")
+        else:
+            existing_snapshot_src_snap = existing_snapshot.get("src_snap")
+        return existing_snapshot_src_snap != src_snap, existing_snapshot_src_snap
+
     def create_filesystem_snapshot(self, snapshots_to_create):
         """Create a writable snapshot on PowerScale"""
-        create_result = []
-        existing_snapshot_list = []
+
+        create_result, existing_snapshot_list = [], []
         changed_flag = False
+
         for create_snapshot_dict in snapshots_to_create:
+            dst_path = create_snapshot_dict.get("dst_path")
+            src_snap = create_snapshot_dict.get("src_snap")
+
             try:
-                snapshot_exits, existing_snapshot = self.get_writable_snapshot(create_snapshot_dict.get("dst_path"))
+                snapshot_exits, existing_snapshot = self.get_writable_snapshot(dst_path)
+                writable_snapshot_create_item = self.isi_sdk.SnapshotWritableItem(
+                    dst_path=dst_path,
+                    src_snap=src_snap
+                )
                 if not snapshot_exits:
                     if not self.module.check_mode:
-                        writable_snapshot_create_item = self.isi_sdk.SnapshotWritableItem(
-                            dst_path=create_snapshot_dict.get("dst_path"),
-                            src_snap=create_snapshot_dict.get("src_snap")
-                        )
                         output = self.snapshot_api.create_snapshot_writable_item(writable_snapshot_create_item)
                         create_result.append(output.to_dict())
+
                     if self.module._diff:
-                        after_dict = [{"dst_path": create_snapshot_dict.get("dst_path"),
-                                      "src_snap": create_snapshot_dict.get("src_snap")}]
+                        after_dict = [{"dst_path": dst_path, "src_snap": src_snap}]
                         self.result["diff"]["after"]["writable_snapshots"].extend(after_dict)
                     changed_flag = True
                 else:
-                    existing_snapshot_list.append(existing_snapshot)
+                    src_snap_changed, existing_snapshot_src_snap = self.compare_src_snap(existing_snapshot, src_snap)
+                    if src_snap_changed:
+                        if not self.module.check_mode:
+                            self.snapshot_api.delete_snapshot_writable_wspath(snapshot_writable_wspath=dst_path)
+                            output = self.snapshot_api.create_snapshot_writable_item(writable_snapshot_create_item)
+                            create_result.append(output.to_dict())
+                        if self.module._diff:
+                            after_dict = [{"dst_path": dst_path, "src_snap": src_snap}]
+                            self.result["diff"]["after"]["writable_snapshots"].extend(after_dict)
+                            before_dict = [{"dst_path": dst_path, "src_snap": existing_snapshot_src_snap}]
+                            self.result["diff"]["before"]["writable_snapshots"].extend(before_dict)
+                        changed_flag = True
+                    else:
+                        existing_snapshot_list.append(existing_snapshot)
             except Exception as e:
                 error_msg = utils.determine_error(error_obj=e)
                 error_message = 'Failed to create writable snapshot: {0} for ' \
-                    'with error: {1}'.format(create_snapshot_dict.get("dst_path"), str(error_msg))
+                    'with error: {1}'.format(dst_path, str(error_msg))
                 LOG.error(error_message)
-                self.module.fail_json(msg=error_message)
         result = create_result + existing_snapshot_list
         return changed_flag, result
 
