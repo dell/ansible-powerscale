@@ -1,5 +1,5 @@
 ---
-- name: Alert management operations on PowerScale Array
+- name: Alert Rule operations on PowerScale Array
   hosts: localhost
   connection: local
 

@@ -25,7 +25,7 @@ options:
     description:
       - The state option is used to mention the existence of server certificate.
     type: str
-    choices: [absent, present]
+    choices: ['absent', 'present']
     default: present
   name:
     description:
@@ -53,7 +53,7 @@ options:
     elements: str
   eventgroup_ids:
     description:
-      - Event group ID's to be alerted.
+      - Event group ID is to be alerted.
     type: list
     elements: str
   exclude_eventgroup_ids:
@@ -88,7 +88,7 @@ notes:
 '''
 
 EXAMPLES = r'''
-- name: To create the a new alert condition.
+- name: To create the a new alert condition
   dellemc.powerscale.alert_rule:
     onefs_host: "{{ onefs_host }}"
     api_user: "{{ api_user }}"
