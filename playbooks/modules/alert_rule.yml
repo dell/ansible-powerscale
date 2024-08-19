@@ -4,6 +4,19 @@
   connection: local
 
   tasks:
+
+    - name: Get the alert channel and alert group details.
+      dellemc.powerscale.alert_rule:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        port: "{{ port }}"
+        gahter_subset:
+          - alert_channels
+          - event_group
+      register: result_info
+
     - name: Create alert rule with basic options.
       dellemc.powerscale.alert_rule:
         onefs_host: "{{ onefs_host }}"
@@ -14,9 +27,11 @@
         state: present
         name: test_alert_rule
         categories: []
-        channels: ["SupportAssist"]
+        channels:
+          - result_info.alert_channels[0]['channels'][0].name
         condition: "NEW"
-        eventgroup_ids: ["100010001"]
+        eventgroup_ids:
+          - result_info.event_groups[0]['eventgroup_definitions'][0].id
         exclude_eventgroup_ids: []
         interval: 0
         limit: 0
@@ -36,13 +51,13 @@
         categories:
           - all
         channels:
-          - SupportAssist
+          - result_info.alert_channels[0]['channels'][0].name
         eventgroup_ids:
-          - 100010001
-          - 100010002
-          - 100010003
+          - result_info.event_groups[0]['eventgroup_definitions'][0].id
+          - result_info.event_groups[0]['eventgroup_definitions'][1].id
+          - result_info.event_groups[0]['eventgroup_definitions'][2].id
         exclude_eventgroup_ids:
-          - 100010005
+          - result_info.event_groups[0]['eventgroup_definitions'][3].id
         interval: 11
         transient: 10
         limit: 10
@@ -64,12 +79,12 @@
           - SYS_DISK_EVENTS
           - NODE_STATUS_EVENTS
         channels:
-          - SupportAssist
+          - result_info.alert_channels[0]['channels'][0].name
         eventgroup_ids:
-          - 100010001
-          - 100010002
+          - result_info.event_groups[0]['eventgroup_definitions'][0].id
+          - result_info.event_groups[0]['eventgroup_definitions'][1].id
         exclude_eventgroup_ids:
-          - 100010005
+          - result_info.event_groups[0]['eventgroup_definitions'][3].id
         interval: 11
         transient: 10
         limit: 10
