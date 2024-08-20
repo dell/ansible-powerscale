@@ -114,7 +114,7 @@ EXAMPLES = r'''
     severities:
       - emergency
 
-- name: To update the existing alert condition.
+- name: To update the existing alert condition
   dellemc.powerscale.alert_rule:
     onefs_host: "{{ onefs_host }}"
     api_user: "{{ api_user }}"
