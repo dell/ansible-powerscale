@@ -209,6 +209,13 @@ class WritableSnapshot(PowerScaleBase):
             self.result.update({"diff": {"before": {"writable_snapshots": []}, "after": {"writable_snapshots": []}}})
 
     def get_writable_snapshot_parameters(self):
+        """
+        Returns a dictionary with the parameters for the writable snapshots.
+
+        Returns:
+            dict: Dictionary with the parameters for the writable snapshots.
+
+        """
         return {
             "writable_snapshots":
             {"type": 'list', "elements": 'dict', "options":
@@ -221,6 +228,20 @@ class WritableSnapshot(PowerScaleBase):
         }
 
     def segregate_snapshots(self, module_params):
+        """
+        This function is used to segregate the writable snapshots into snapshots to
+        create and snapshots to delete.
+
+        Parameters:
+            module_params (dict): The parameters of the module.
+
+        Returns:
+            tuple: A tuple containing the following:
+                - unique_snapshots_to_create (list): The list of unique snapshots to
+                create.
+                - snapshots_to_delete (list): The list of snapshots to delete.
+                - invalid_snapshots (list): The list of invalid snapshots.
+        """
         writable_snapshot = module_params.get('writable_snapshots')
         snapshots_to_create, snapshots_to_delete, invalid_snapshots = [], [], []
         for snapshot_dict in writable_snapshot:
@@ -235,6 +256,15 @@ class WritableSnapshot(PowerScaleBase):
         return unique_snapshots_to_create, snapshots_to_delete, invalid_snapshots
 
     def check_duplicate_snapshots_to_create(self, snapshots_to_create):
+        """
+        Removes duplicate snapshots to create.
+
+        Args:
+            snapshots_to_create (List[Dict[str, Any]]): A list of dictionaries representing snapshots to create.
+
+        Returns:
+            List[Dict[str, Any]]: A list of dictionaries representing the unique snapshots to create.
+        """
         unique_data = {}
         for item in snapshots_to_create:
             unique_data[item['dst_path']] = item
@@ -242,6 +272,15 @@ class WritableSnapshot(PowerScaleBase):
         return result
 
     def validate_src_snap(self, snapshot_name):
+        """
+        Validates the source snapshot.
+
+        Args:
+            snapshot_name (str): The name of the snapshot.
+
+        Returns:
+            The output of the API call to get the snapshot, or False if an exception occurred.
+        """
         try:
             output = self.snapshot_api.get_snapshot_snapshot(snapshot_name)
             return output
@@ -249,6 +288,17 @@ class WritableSnapshot(PowerScaleBase):
             return False
 
     def get_writable_snapshot(self, dst_path):
+        """
+        Retrieves the writable snapshot for the given destination path.
+
+        Args:
+            dst_path (str): The destination path of the writable snapshot.
+
+        Returns:
+            tuple: A tuple containing two values. The first value is a boolean indicating
+            whether the writable snapshot exists or not. The second value is the writable
+            snapshot data if it exists, otherwise an empty list.
+        """
         try:
             snapshot_out = self.snapshot_api.get_snapshot_writable_wspath(
                 snapshot_writable_wspath=dst_path
@@ -259,6 +309,18 @@ class WritableSnapshot(PowerScaleBase):
             return False, []
 
     def compare_src_snap(self, existing_snapshot, src_snap):
+        """
+        Compares the source snapshot of an existing snapshot with a given source snapshot.
+
+        Args:
+            existing_snapshot (dict): The existing snapshot.
+            src_snap (Union[int, str]): The source of writable snapshot to be created.
+
+        Returns:
+            Tuple[bool, Union[int, str]]: A tuple containing two values. The first value is a boolean
+            indicating whether the source snapshots are different. The second value is the source
+            snapshot of the existing snapshot.
+        """
         try:
             src_snap = int(src_snap)
             src_type = int
@@ -271,17 +333,48 @@ class WritableSnapshot(PowerScaleBase):
         return existing_snapshot_src_snap != src_snap, existing_snapshot_src_snap
 
     def update_diff_before(self, dst_path, existing_snapshot_src_snap):
+        """
+        Updates the "diff" dictionary in the "result" dictionary with the given "dst_path" and "existing_snapshot_src_snap" before the module operation.
+
+        Args:
+            dst_path (str): The destination path of the writable snapshot.
+            existing_snapshot_src_snap (Union[int, str]): The source snapshot of the existing snapshot.
+
+        Returns:
+            None
+
+        """
         if self.module._diff:
             before_dict = [{"dst_path": dst_path, "src_snap": existing_snapshot_src_snap}]
             self.result["diff"]["before"]["writable_snapshots"].extend(before_dict)
 
     def update_diff_after(self, dst_path, src_snap):
+        """
+        Updates the "diff" dictionary in the "result" dictionary with the given "dst_path" and "src_snap" after the module operation.
+
+        Args:
+            dst_path (str): The destination path of the writable snapshot.
+            src_snap (Union[int, str]): The source snapshot of the existing snapshot.
+
+        Returns:
+            None
+
+        """
         if self.module._diff:
             after_dict = [{"dst_path": dst_path, "src_snap": src_snap}]
             self.result["diff"]["after"]["writable_snapshots"].extend(after_dict)
 
     def create_writable_snapshot(self, snapshots_to_create):
-        """Create a writable snapshot on PowerScale"""
+        """
+        Create one or more writable snapshots.
+
+        Args:
+            snapshots_to_create (list): A list of dictionaries containing the details of the snapshots to create.
+
+        Returns:
+            tuple: A tuple containing a boolean indicating if any snapshots were created and a list of dictionaries
+                   containing the details of all created snapshots.
+        """
         create_result, existing_snapshot_list = [], []
         changed_flag = False
         for create_snapshot_dict in snapshots_to_create:
@@ -307,7 +400,16 @@ class WritableSnapshot(PowerScaleBase):
         return changed_flag, result
 
     def handle_new_snapshot(self, dst_path, src_snap):
-        """Handle creation of a new snapshot."""
+        """
+        Handle creation of a new snapshot.
+
+        Args:
+            dst_path (str): The destination path of the writable snapshot.
+            src_snap (str): The source snapshot name or ID.
+
+        Returns:
+            dict: A dictionary containing the details of the newly created snapshot.
+        """
         writable_snapshot_create_item = self.isi_sdk.SnapshotWritableItem(
             dst_path=dst_path,
             src_snap=src_snap
@@ -319,7 +421,19 @@ class WritableSnapshot(PowerScaleBase):
         return {}
 
     def handle_existing_snapshot(self, dst_path, src_snap, existing_snapshot):
-        """Handle updating or retaining an existing snapshot."""
+        """
+        Handle updating an existing snapshot.
+
+        Args:
+            dst_path (str): The destination path of the writable snapshot.
+            src_snap (str): The source snapshot name or ID.
+            existing_snapshot (dict): The existing snapshot details.
+
+        Returns:
+            Tuple[bool, dict]: A tuple containing two values. The first value is a boolean
+            indicating whether the snapshot has been updated. The second value is the
+            dictionary containing the updated snapshot details.
+        """
         src_snap_changed, existing_snapshot_src_snap = self.compare_src_snap(existing_snapshot, src_snap)
         output = {}
         if src_snap_changed:
@@ -331,12 +445,34 @@ class WritableSnapshot(PowerScaleBase):
         return False, output
 
     def log_snapshot_creation_error(self, dst_path, error_obj):
-        """Log an error encountered during snapshot creation."""
+        """
+        Log an error encountered during snapshot creation.
+
+        Args:
+            dst_path (str): The destination path of the snapshot.
+            error_obj (Exception): The error encountered.
+
+        Returns:
+            None
+        """
         error_msg = utils.determine_error(error_obj=error_obj)
         error_message = 'Failed to create writable snapshot: {0} with error: {1}'.format(dst_path, str(error_msg))
         LOG.error(error_message)
 
     def delete_writable_snapshot(self, snapshots_to_delete):
+        """
+        Deletes writable snapshots based on the provided snapshot paths.
+
+        Args:
+            snapshots_to_delete (List[Dict[str, str]]): A list of dictionaries containing the paths of the snapshots to delete.
+
+        Returns:
+            bool: A boolean indicating whether the snapshots were successfully deleted.
+
+        Raises:
+            Exception: If an error occurs during the deletion process.
+
+        """
         changed_flag = False
         existing_snpashot_list = []
         for delete_snapshot_dict in snapshots_to_delete:
