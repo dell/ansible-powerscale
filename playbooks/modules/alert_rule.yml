@@ -6,7 +6,7 @@
   tasks:
 
     - name: Get the alert channel and alert group details.
-      dellemc.powerscale.alert_rule:
+      dellemc.powerscale.info:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
