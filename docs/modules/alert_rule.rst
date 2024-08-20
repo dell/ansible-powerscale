@@ -12,7 +12,7 @@ alert_rule -- Manage alert rule on a PowerScale Storage System
 Synopsis
 --------
 
-Manage alert rule on a PowerScale Storage System includes create, modify or delete.
+Manage alert rule on a PowerScale Storage System includes create, modify and delete.
 
 
 

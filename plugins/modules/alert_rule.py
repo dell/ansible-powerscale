@@ -15,7 +15,7 @@ module: alert_rule
 version_added: '3.3.0'
 short_description:  Manage alert rule on a PowerScale Storage System
 description:
-  - Manage alert rule on a PowerScale Storage System includes create, modify or delete.
+  - Manage alert rule on a PowerScale Storage System includes create, modify and delete.
 extends_documentation_fragment:
   - dellemc.powerscale.powerscale
 author:
