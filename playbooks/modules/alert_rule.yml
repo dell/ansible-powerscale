@@ -5,7 +5,7 @@
 
   tasks:
 
-    - name: Get the alert channel and alert group details.
+    - name: Get the alert channel and alert group details
       dellemc.powerscale.info:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
@@ -17,7 +17,7 @@
           - event_group
       register: result_info
 
-    - name: Create alert rule with basic options.
+    - name: Create alert rule with basic options
       dellemc.powerscale.alert_rule:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
@@ -38,7 +38,7 @@
         severities: []
         transient: 0
 
-    - name: Create alert rule with all options.
+    - name: Create alert rule with all options
       dellemc.powerscale.alert_rule:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
@@ -65,7 +65,7 @@
           - emergency
           - critical
 
-    - name: Update alert rule.
+    - name: Update alert rule
       dellemc.powerscale.alert_rule:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
@@ -92,7 +92,7 @@
           - emergency
           - critical
 
-    - name: Delete alert rule.
+    - name: Delete alert rule
       dellemc.powerscale.alert_rule:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"

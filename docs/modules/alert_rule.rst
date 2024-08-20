@@ -52,7 +52,7 @@ Parameters
 
 
   eventgroup_ids (optional, list, None)
-    Event group ID's to be alerted.
+    Event group ID is to be alerted.
 
 
   exclude_eventgroup_ids (optional, list, None)
@@ -119,7 +119,7 @@ Examples
 .. code-block:: yaml+jinja
 
     
-    - name: To create the a new alert condition.
+    - name: To create the a new alert condition
       dellemc.powerscale.alert_rule:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
@@ -145,7 +145,7 @@ Examples
         severities:
           - emergency
 
-    - name: To update the existing alert condition.
+    - name: To update the existing alert condition
       dellemc.powerscale.alert_rule:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
@@ -172,7 +172,7 @@ Examples
           - emergency
           - critical
 
-    - name: To delete the existing alert condition.
+    - name: To delete the existing alert condition
       dellemc.powerscale.alert_rule:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
