@@ -18,7 +18,7 @@ class MockWritableSanpshotsApi:
     WS_CREATE_ARGS = {"writable_snapshots": [{"src_snap": 2, "dst_path": DSTPATH, "state": "present"}]}
     WS_CREATE_ARGS_STR = {"writable_snapshots": [{"src_snap": "snap-2", "dst_path": DSTPATH, "state": "present"}]}
     WS_DELETE_ARGS = {"writable_snapshots": [{"src_snap": 2, "dst_path": DSTPATH, "state": "absent"}]}
-    WS_INVALID_DSTPATH_ARGS = {"writable_snapshots": [{"src_snap": "invalid", "dst_path": "/ifs/ansible2/", "state": "present"}]}
+    WS_INVALID_DSTPATH_ARGS = {"writable_snapshots": [{"src_snap": "invalid", "dst_path": DSTPATH, "state": "present"}]}
 
     @staticmethod
     def get_writeable_snpshots_error_response(response_type):
@@ -26,6 +26,6 @@ class MockWritableSanpshotsApi:
         if response_type == 'delete_exception':
             return f"Failed to delete snapshot: {dst_path} with error"
         elif response_type == 'create_exception':
-            return f"Failed to create snapshot: {dst_path} with error"
+            return f"Failed to create writable snapshot: {dst_path} with error: SDK Error message"
         elif response_type == 'invalid_dstpath':
             return "Few writable snapshots are not able to be created because the source path is invalid:"

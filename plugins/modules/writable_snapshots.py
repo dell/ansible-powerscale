@@ -458,6 +458,7 @@ class WritableSnapshot(PowerScaleBase):
         error_msg = utils.determine_error(error_obj=error_obj)
         error_message = 'Failed to create writable snapshot: {0} with error: {1}'.format(dst_path, str(error_msg))
         LOG.error(error_message)
+        self.module.fail_json(msg=error_message)
 
     def delete_writable_snapshot(self, snapshots_to_delete):
         """
