@@ -197,6 +197,16 @@ EXAMPLES = r'''
     name: "sample_event_channel"
     state: "present"
 
+- name: Send the test alert message
+  dellemc.powerscale.alert_channel:
+    onefs_host: "{{ onefs_host }}"
+    port_no: "{{ port_no }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    verify_ssl: "{{ verify_ssl }}"
+    name: "sample_event_channel"
+    send_test_alert: true
+    
 - name: Modify the alert channel
   dellemc.powerscale.alert_channel:
     onefs_host: "{{ onefs_host }}"
