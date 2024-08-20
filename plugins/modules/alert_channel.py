@@ -206,7 +206,7 @@ EXAMPLES = r'''
     verify_ssl: "{{ verify_ssl }}"
     name: "sample_event_channel"
     send_test_alert: true
-    
+
 - name: Modify the alert channel
   dellemc.powerscale.alert_channel:
     onefs_host: "{{ onefs_host }}"
