@@ -141,7 +141,7 @@ EXAMPLES = r'''
       - emergency
       - critical
 
-- name: To delete the existing alert condition.
+- name: To delete the existing alert condition
   dellemc.powerscale.alert_rule:
     onefs_host: "{{ onefs_host }}"
     api_user: "{{ api_user }}"
