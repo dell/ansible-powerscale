@@ -112,7 +112,7 @@ class TestWritableSnapshot(PowerScaleUnitBase):
     def test_delete_writable_snapshot_exception(self, powerscale_module_mock):
         self.set_module_params(powerscale_module_mock,
                                self.writable_snapshot_args,
-                               MockWritableSanpshotsApi.WS_CREATE_ARGS
+                               MockWritableSanpshotsApi.WS_DELETE_ARGS
                                )
         powerscale_module_mock.check_mode = False
         powerscale_module_mock.snapshot_api.delete_snapshot_writable_wspath = MagicMock(side_effect=Exception)
