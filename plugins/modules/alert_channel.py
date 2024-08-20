@@ -490,6 +490,7 @@ class AlertChannel(PowerScaleBase):
         if channel_params["state"] == "absent":
             return {}
         else:
+            diff_dict = {}
             if channel_details is None:
                 diff_dict = {
                     "allowed_nodes": channel_params['allowed_nodes'],
@@ -501,13 +502,12 @@ class AlertChannel(PowerScaleBase):
                     "system": False,
                     "type": channel_params['type']
                 }
-                return diff_dict
             else:
                 diff_dict = copy.deepcopy(channel_details)
                 modify_dict = self.is_alert_channel_modify_required(channel_params, diff_dict)
                 for key in modify_dict.keys():
                     diff_dict[key] = modify_dict[key]
-                return diff_dict
+            return diff_dict
 
     def is_smtp_modify_required(self, smtp_params, exiting_smtp_params):
         """Check if smtp modify is required
