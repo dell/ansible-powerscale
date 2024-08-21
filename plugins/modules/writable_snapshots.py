@@ -580,7 +580,7 @@ class WritableSnapshotExitHandler:
             writable_snapshot_obj.result['failed_writable_snapshots'] = invalid_snapshots
             writable_snapshot_obj.result['changed'] = False
             writable_snapshot_obj.module.fail_json(
-                msg="Few writable snapshots are not able to be created because the destination path or source path is invalid:",
+                msg="Few writable snapshots are not able to be created because the destination path or source path is invalid.",
                 **writable_snapshot_obj.result)
         writable_snapshot_obj.module.exit_json(**writable_snapshot_obj.result)
 

@@ -28,4 +28,4 @@ class MockWritableSanpshotsApi:
         elif response_type == 'create_exception':
             return f"Failed to create writable snapshot: {dst_path} with error: SDK Error message"
         elif response_type == 'invalid_dstpath':
-            return "Few writable snapshots are not able to be created because the destination path or source path is invalid:"
+            return "Few writable snapshots are not able to be created because the destination path or source path is invalid."
