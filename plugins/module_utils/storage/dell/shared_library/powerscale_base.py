@@ -54,6 +54,7 @@ class PowerScaleBase:
         self._zones_summary_api = None
         self._support_assist_api = None
         self._event_api = None
+        self._snapshot_api = None
 
     @property
     def protocol_api(self):
@@ -144,3 +145,13 @@ class PowerScaleBase:
         if self._event_api is None:
             self._event_api = self.isi_sdk.EventApi(self.api_client)
         return self._event_api
+
+    @property
+    def snapshot_api(self):
+        """Returns the snapshot API object.
+        :return: The snapshot API object.
+        :rtype: isi_sdk.SnapshotApi
+        """
+        if self._snapshot_api is None:
+            self._snapshot_api = self.isi_sdk.SnapshotApi(self.api_client)
+        return self._snapshot_api
