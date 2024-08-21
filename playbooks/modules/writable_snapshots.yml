@@ -1,0 +1,72 @@
+---
+- name: Sample playbook for managing Snapshots on Dell PowerScale.
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.**'
+    verify_ssl: false
+    api_user: 'user'
+    api_password: 'password'
+    owner: 'ansible_owner'
+    group: 'ansible_group'
+    access_control: 'private_read'
+    dst_path1: "/ifs/test_one"
+    dst_path2: "/ifs/test_two"
+    src_snap_id: 2
+    src_snap_name: "Snapshot: 2024Apr15, 4:40 PM"
+    state_present: 'present'
+    state_absent: 'absent'
+
+  tasks:
+    - name: Create a writable snapshot using ID
+      dellemc.powerscale.writable_snapshots:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        writable_snapshots:
+          - dst_path: "{{ dst_path1 }}"
+            src_snap: "{{ src_snap_id }}"
+            state: "{{ state_present }}"
+          - dst_path: "{{ dst_path2 }}"
+            src_snap: "{{ src_snap_id }}"
+            state: "{{ state_present }}"
+
+    - name: Create a writable snapshot using Name.
+      dellemc.powerscale.writable_snapshots:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        writable_snapshots:
+          - dst_path: "{{ dst_path1 }}"
+            src_snap: "{{ src_snap_name }}"
+            state: "{{ state_present }}"
+          - dst_path: "{{ dst_path2 }}"
+            src_snap: "{{ src_snap_name }}"
+            state: "{{ state_present }}"
+
+    - name: Delete writable snapshot.
+      dellemc.powerscale.writable_snapshots:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        writable_snapshots:
+          - dst_path: "{{ dst_path1 }}"
+            state: "{{ state_absent }}"
+          - dst_path: "{{ dst_path2 }}"
+            state: "{{ state_absent }}"
+
+    - name: Create and delete writable snapshot
+      dellemc.powerscale.writable_snapshots:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        writable_snapshots:
+          - dst_path: "{{ dst_path2 }}"
+            src_snap: "{{ src_snap_id }}"
+            state: "{{ state_present }}"
+          - dst_path: "{{ dst_path1 }}"
+            state: "{{ state_absent }}"
