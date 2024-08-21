@@ -91,8 +91,6 @@ Notes
 -----
 
 .. note::
-   - The \ :emphasis:`check\_mode`\  is supported.
-   - The \ :emphasis:`diff`\  is supported.
    - The \ :emphasis:`writable\_snapshots`\  parameter will follow the order of deleting operations before creating operations.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
@@ -163,7 +161,7 @@ Examples
 Return Values
 -------------
 
-changed (always, bool, true)
+changed (always, bool, True)
   Whether or not the resource has changed.
 
 

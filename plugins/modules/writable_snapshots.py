@@ -30,7 +30,7 @@ options:
   writable_snapshots:
     description:
     - List of writable snapshots details.
-    required: False
+    required: false
     type: list
     elements: dict
     suboptions:
@@ -54,9 +54,14 @@ options:
         - This option is required I(state) is C(present).
         required: false
         type: str
+attributes:
+    check_mode:
+        description: Runs task to validate without performing action on the target machine.
+        support: full
+    diff_mode:
+        description: Runs the task to report the changes made or to be made.
+        support: full
 notes:
-- The I(check_mode) is supported.
-- The I(diff) is supported.
 - The I(writable_snapshots) parameter will follow the order of deleting operations before creating operations.
 '''
 
@@ -120,7 +125,7 @@ changed:
     description: Whether or not the resource has changed.
     returned: always
     type: bool
-    sample: "true"
+    sample: true
 
 writable_snapshots_details:
     description: The writable snapshot details.
