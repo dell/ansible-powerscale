@@ -50,7 +50,7 @@ Parameters
     dst_path (True, path, None)
       The /ifs of the writable snapshot.
 
-      The destination path should be non-existing path and it's absolute path.
+      The destination path should be non-existing path and it is absolute path.
 
 
     src_snap (False, str, None)
