@@ -60,11 +60,11 @@ Parameters
 
 
   interval (optional, int, None)
-    Required with ONGOING condition only, period in seconds between alerts of ongoing conditions.
+    Required with ``ONGOING`` condition only, period in seconds between alerts of ongoing conditions.
 
 
   limit (optional, int, None)
-    Required with NEW EVENTS condition only, limits the number of alerts sent as events are added.
+    Required with ``NEW EVENTS`` condition only, limits the number of alerts sent as events are added.
 
 
   severities (optional, list, None)

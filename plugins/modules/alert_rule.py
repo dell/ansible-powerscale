@@ -63,12 +63,12 @@ options:
     elements: str
   interval:
     description:
-      - Required with ONGOING condition only, period in seconds between
+      - Required with C(ONGOING) condition only, period in seconds between
         alerts of ongoing conditions.
     type: int
   limit:
     description:
-      - Required with NEW EVENTS condition only, limits the number of
+      - Required with C(NEW EVENTS) condition only, limits the number of
         alerts sent as events are added.
     type: int
   severities:
