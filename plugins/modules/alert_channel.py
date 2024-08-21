@@ -140,6 +140,14 @@ options:
     - If I(type) is not set during creation, then It defaults to C(connectemc).
     type: str
     choices: ['connectemc', 'smtp']
+attributes:
+  check_mode:
+    description: Runs task to validate without performing action on the target
+                 machine.
+    support: full
+  diff_mode:
+    description: Runs the task to report the changes made or to be made.
+    support: full
 notes:
 - The I(check_mode), I(check_diff) and idempotency is supported.
 - Idempotency is not supported with I(send_test_alert) option.

@@ -36,9 +36,9 @@ Parameters
   enabled (optional, bool, None)
     Enable or disable the channel.
 
-    ``True`` indicates the channel is enabled.
+    \ :literal:`True`\  indicates the channel is enabled.
 
-    ``False`` indicates the channel is disabled.
+    \ :literal:`False`\  indicates the channel is disabled.
 
     If not specified when creating the channel, It will be enabled by default.
 
@@ -60,7 +60,7 @@ Parameters
   smtp_parameters (optional, dict, None)
     Parameters to be used for an SMTP channel.
 
-    The *smtp_parameters* is required when *type* is ``smtp``.
+    The \ :emphasis:`smtp\_parameters`\  is required when \ :emphasis:`type`\  is \ :literal:`smtp`\ .
 
 
     address (optional, list, None)
@@ -94,15 +94,15 @@ Parameters
     smtp_use_auth (optional, bool, None)
       Enable SMTP authentication.
 
-      If *smtp_use_auth* is not set during creation, then It defaults set to c(false).
+      If \ :emphasis:`smtp\_use\_auth`\  is not set during creation, then It defaults set to c(false).
 
 
     smtp_username (optional, str, None)
-      Username for SMTP authentication, only if *smtp_use_auth* is ``true``.
+      Username for SMTP authentication, only if \ :emphasis:`smtp\_use\_auth`\  is \ :literal:`true`\ .
 
 
     smtp_password (optional, str, None)
-      Password for SMTP authentication, only if *smtp_use_auth* is ``true``.
+      Password for SMTP authentication, only if \ :emphasis:`smtp\_use\_auth`\  is \ :literal:`true`\ .
 
 
     smtp_security (optional, str, None)
@@ -110,13 +110,13 @@ Parameters
 
 
     update_password (optional, str, always)
-      This parameter controls the way the *smtp_password* is updated during the creation and modification of alert channel.
+      This parameter controls the way the \ :emphasis:`smtp\_password`\  is updated during the creation and modification of alert channel.
 
-      ``always`` will update password for each execution.
+      \ :literal:`always`\  will update password for each execution.
 
-      ``on_create`` will only set while creating a alert channel.
+      \ :literal:`on\_create`\  will only set while creating a alert channel.
 
-      For modifying *smtp_password*, set the *update_password* to ``always``.
+      For modifying \ :emphasis:`smtp\_password`\ , set the \ :emphasis:`update\_password`\  to \ :literal:`always`\ .
 
 
 
@@ -127,9 +127,9 @@ Parameters
   type (optional, str, None)
     Type of the channel.
 
-    If *type* is ``smtp``, then *smtp_parameters* is required.
+    If \ :emphasis:`type`\  is \ :literal:`smtp`\ , then \ :emphasis:`smtp\_parameters`\  is required.
 
-    If *type* is not set during creation, then It defaults to ``connectemc``.
+    If \ :emphasis:`type`\  is not set during creation, then It defaults to \ :literal:`connectemc`\ .
 
 
   onefs_host (True, str, None)
@@ -143,9 +143,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    ``true`` - indicates that the SSL certificate should be verified.
+    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
 
-    ``false`` - indicates that the SSL certificate should not be verified.
+    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -163,8 +163,8 @@ Notes
 -----
 
 .. note::
-   - The *check_mode*, *check_diff* and idempotency is supported.
-   - Idempotency is not supported with *send_test_alert* option.
+   - The \ :emphasis:`check\_mode`\ , \ :emphasis:`check\_diff`\  and idempotency is supported.
+   - Idempotency is not supported with \ :emphasis:`send\_test\_alert`\  option.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -226,6 +226,16 @@ Examples
         verify_ssl: "{{ verify_ssl }}"
         name: "sample_event_channel"
         state: "present"
+
+    - name: Send the test alert message
+      dellemc.powerscale.alert_channel:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        name: "sample_event_channel"
+        send_test_alert: true
 
     - name: Modify the alert channel
       dellemc.powerscale.alert_channel:
@@ -314,7 +324,7 @@ alert_channel_details (always, dict, {'allowed_nodes': [1, 2], 'enabled': True, 
 
 
     smtp_password (, str, )
-      Password for SMTP authentication - only if smtp_use_auth true.
+      Password for SMTP authentication - only if smtp\_use\_auth true.
 
 
     smtp_port (, int, )
@@ -330,7 +340,7 @@ alert_channel_details (always, dict, {'allowed_nodes': [1, 2], 'enabled': True, 
 
 
     smtp_username (, str, )
-      Username for SMTP authentication - only if smtp_use_auth true.
+      Username for SMTP authentication - only if smtp\_use\_auth true.
 
 
     subject (, str, )
