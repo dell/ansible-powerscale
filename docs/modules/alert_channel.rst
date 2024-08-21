@@ -163,7 +163,6 @@ Notes
 -----
 
 .. note::
-   - The \ :emphasis:`check\_mode`\ , \ :emphasis:`check\_diff`\  and idempotency is supported.
    - Idempotency is not supported with \ :emphasis:`send\_test\_alert`\  option.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 

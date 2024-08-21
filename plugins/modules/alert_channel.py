@@ -149,7 +149,6 @@ attributes:
     description: Runs the task to report the changes made or to be made.
     support: full
 notes:
-- The I(check_mode), I(check_diff) and idempotency is supported.
 - Idempotency is not supported with I(send_test_alert) option.
 '''
 
