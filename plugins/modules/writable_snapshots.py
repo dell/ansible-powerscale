@@ -246,7 +246,7 @@ class WritableSnapshot(PowerScaleBase):
         snapshots_to_create, snapshots_to_delete, invalid_snapshots = [], [], []
         for snapshot_dict in writable_snapshot:
             if snapshot_dict.get('state') == 'present':
-                if not self.validate_src_snap(snapshot_dict.get('src_snap')):
+                if not self.validate_src_snap(snapshot_dict.get('src_snap')) or not snapshot_dict.get('dst_path').startswith('/ifs/'):
                     invalid_snapshots.append(snapshot_dict)
                 else:
                     snapshots_to_create.append(snapshot_dict)
@@ -575,7 +575,7 @@ class WritableSnapshotExitHandler:
             writable_snapshot_obj.result['failed_writable_snapshots'] = invalid_snapshots
             writable_snapshot_obj.result['changed'] = False
             writable_snapshot_obj.module.fail_json(
-                msg="Few writable snapshots are not able to be created because the source path is invalid:",
+                msg="Few writable snapshots are not able to be created because the destination path or source path is invalid:",
                 **writable_snapshot_obj.result)
         writable_snapshot_obj.module.exit_json(**writable_snapshot_obj.result)
 
