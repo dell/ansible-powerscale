@@ -42,7 +42,7 @@ options:
       - Event group categories to be alerted.
     type: list
     elements: str
-    choices: ['all', 'SYS_DISK_EVENTS', 'NODE_STATUS_EVENTS', 'REBOOT_EVENTS',
+    choices: ['SYS_DISK_EVENTS', 'NODE_STATUS_EVENTS', 'REBOOT_EVENTS',
       'SW_EVENTS', 'QUOTA_EVENTS', 'SNAP_EVENTS', 'WINNET_EVENTS', 'FILESYS_EVENTS',
       'HW_EVENTS', 'CPOOL_EVENTS']
   channels:
@@ -82,9 +82,13 @@ options:
       - Any event group lasting less than this many seconds is deemed
         transient and will not generate alerts under this condition.
     type: int
-notes:
-  - The I(check_mode) is supported.
-  - The I(diff) is supported.
+attributes:
+  check_mode:
+    support: full
+    description: Runs task to validate without performing action on the target machine.
+  diff_mode:
+    support: full
+    description: Runs the task to report the changes made or to be made.
 '''
 
 EXAMPLES = r'''
@@ -224,19 +228,6 @@ from copy import deepcopy
 
 LOG = utils.get_logger('alert_rule')
 
-CATEGORY_DICT = {
-    "all": "all",
-    "100000000": "SYS_DISK_EVENTS",
-    "200000000": "NODE_STATUS_EVENTS",
-    "300000000": "REBOOT_EVENTS",
-    "400000000": "SW_EVENTS",
-    "500000000": "QUOTA_EVENTS",
-    "600000000": "SNAP_EVENTS",
-    "700000000": "WINNET_EVENTS",
-    "800000000": "FILESYS_EVENTS",
-    "900000000": "HW_EVENTS",
-    "1100000000": "CPOOL_EVENTS"}
-
 
 class AlertRule(PowerScaleBase):
 
@@ -261,7 +252,7 @@ class AlertRule(PowerScaleBase):
             condition=dict(type='str', choices=['NEW', 'NEW EVENTS', 'ONGOING',
                                                 'SEVERITY INCREASE', 'SEVERITY DECREASE', 'RESOLVED']),
             categories=dict(type='list', elements='str',
-                            choices=['all', 'SYS_DISK_EVENTS', 'NODE_STATUS_EVENTS',
+                            choices=['SYS_DISK_EVENTS', 'NODE_STATUS_EVENTS',
                                      'REBOOT_EVENTS', 'SW_EVENTS', 'QUOTA_EVENTS',
                                      'SNAP_EVENTS', 'WINNET_EVENTS', 'FILESYS_EVENTS',
                                      'HW_EVENTS', 'CPOOL_EVENTS']),
@@ -286,6 +277,8 @@ class AlertRule(PowerScaleBase):
 
         alert_rule = {}
         if alert_conditions:
+            all_category_dict = self.event_api.get_event_categories().to_dict()
+            category_dict = {each["id"]: each["id_name"] for each in all_category_dict["categories"]}
             rule_name = module_params.get("name")
             for each_rule in alert_conditions:
                 if each_rule["name"] == rule_name:
@@ -293,7 +286,7 @@ class AlertRule(PowerScaleBase):
                     break
 
             if alert_rule.get("categories"):
-                categories = sorted([CATEGORY_DICT[key] for key in alert_rule["categories"]], reverse=True)
+                categories = sorted([category_dict[key] for key in alert_rule["categories"]], reverse=True)
                 alert_rule.update({"categories": categories})
         return alert_rule
 

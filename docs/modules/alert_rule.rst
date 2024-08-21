@@ -106,8 +106,6 @@ Notes
 -----
 
 .. note::
-   - The *check_mode* is supported.
-   - The *diff* is supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 

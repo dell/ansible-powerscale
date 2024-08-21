@@ -40,6 +40,8 @@ class TestAlertRule(PowerScaleUnitBase):
         mock_event_instance = mock_events.return_value
         mock_event_instance.get_alert_rules = MagicMock(
             return_value=MockAlertRuleApi.GET_EXISTING_ALERT_RULE_OPTIONS)
+        powerscale_module_mock.event_api.get_event_categories().to_dict = MagicMock(
+            return_value=MockAlertRuleApi.EVENT_CATEGORY)
         powerscale_module_mock.modify_alert_condition = MagicMock(return_value=(True, {"name": "alert_rule"}))
         AlertRuleHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True

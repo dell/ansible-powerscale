@@ -92,3 +92,16 @@ class MockAlertRuleApi:
         "state": 'absent',
         "name": "alert_rule"
     }
+
+    EVENT_CATEGORY = {
+        'categories': [
+            {'id': '100000000', 'id_name': 'SYS_DISK_EVENTS'},
+            {'id': '1100000000', 'id_name': 'CPOOL_EVENTS'},
+            {'id': '200000000', 'id_name': 'NODE_STATUS_EVENTS'},
+            {'id': '300000000', 'id_name': 'REBOOT_EVENTS'},
+            {'id': '400000000', 'id_name': 'SW_EVENTS'},
+            {'id': '500000000', 'id_name': 'QUOTA_EVENTS'},
+            {'id': '600000000', 'id_name': 'SNAP_EVENTS'},
+            {'id': '700000000', 'id_name': 'WINNET_EVENTS'},
+            {'id': '800000000', 'id_name': 'FILESYS_EVENTS'},
+            {'id': '900000000', 'id_name': 'HW_EVENTS'}]}
