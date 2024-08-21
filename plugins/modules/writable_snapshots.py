@@ -45,7 +45,7 @@ options:
       dst_path:
         description:
         - The /ifs of the writable snapshot.
-        - The destination path should be non-existing path and it's absolute path.
+        - The destination path should be non-existing path and it is absolute path.
         required: true
         type: path
       src_snap:
