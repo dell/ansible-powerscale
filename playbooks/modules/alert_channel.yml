@@ -1,0 +1,98 @@
+---
+- name: Alert Channel Module Operations on PowerScale Storage
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: "x.x.x.x"
+    api_user: "user"
+    api_password: "xxxx"
+    verify_ssl: false
+    channel_smtp: "sample_event_channel"
+    channel_connectemc: "connect_emc_alert_channel"
+
+  tasks:
+    - name: Create the SMTP alert channel
+      dellemc.powerscale.alert_channel:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        name: "{{ channel_smtp }}"
+        enabled: true
+        type: "smtp"
+        allowed_nodes:
+          - 1
+        excluded_nodes:
+          - 2
+        smtp_parameters:
+          address:
+            - "powerscale@sample.com"
+          send_as: "smtp_alert_channel@sample.com"
+          subject: "SMTP event channel"
+          smtp_host: "powerscale.sample.com"
+          smtp_port: 25
+          batch: "ALL"
+          batch_period: 120
+          smtp_use_auth: false
+          update_password: "on_create"
+
+    - name: Create the ConnectEMC channel
+      dellemc.powerscale.alert_channel:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        name: "{{ channel_connectemc }}"
+        enabled: true
+        type: "connectemc"
+        allowed_nodes:
+          - 1
+        excluded_nodes:
+          - 2
+
+    - name: Get the alert channel details
+      dellemc.powerscale.alert_channel:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        name: "sample_event_channel"
+        state: "present"
+
+    - name: Modify the alert channel
+      dellemc.powerscale.alert_channel:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        name: "sample_event_channel"
+        enabled: false
+        allowed_nodes:
+          - 2
+          - 3
+        excluded_nodes:
+          - 1
+
+    - name: Send the test alert message
+      dellemc.powerscale.alert_channel:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        name: "{{ channel_smtp }}"
+        send_test_alert: true
+
+    - name: Delete the alert channel
+      dellemc.powerscale.alert_channel:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        name: "sample_event_channel"
+        state: "absent"
