@@ -296,3 +296,18 @@ releases:
         name: alert_settings
         namespace: ''
     release_date: '2024-07-31'
+  3.3.0:
+    changes:
+      minor_changes:
+        - Added support for listing writable snapshots in Info module.
+    modules:
+      - description: Manage alert channel on a PowerScale Storage System.
+        name: alert_channel
+        namespace: ''
+      - description: Manage alert rule on a PowerScale Storage System.
+        name: alert_rule
+        namespace: ''
+      - description: Manage writable snapshots on PowerScale Storage System.
+        name: writable_snapshots
+        namespace: ''
+    release_date: '2024-08-30'
