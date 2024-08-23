@@ -47,7 +47,7 @@ options:
   name:
     description:
     - Name of the Channel.
-    - Name should be unique and can not be changed.
+    - Name should be unique and cannot be changed.
     type: str
     required: true
   send_test_alert:

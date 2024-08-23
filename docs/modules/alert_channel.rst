@@ -50,7 +50,7 @@ Parameters
   name (True, str, None)
     Name of the Channel.
 
-    Name should be unique and can not be changed.
+    Name should be unique and cannot be changed.
 
 
   send_test_alert (optional, bool, False)
