@@ -12,6 +12,7 @@ Minor Changes
 -------------
 
 - Added support for listing writable snapshots in Info module.
+- Added fix for firewall policy issue for network pool operations.
 
 New Modules
 -----------
