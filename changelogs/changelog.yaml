@@ -300,6 +300,7 @@ releases:
     changes:
       minor_changes:
         - Added support for listing writable snapshots in Info module.
+        - Added fix for firewall policy issue for network pool operations.
     modules:
       - description: Manage alert channel on a PowerScale Storage System.
         name: alert_channel
