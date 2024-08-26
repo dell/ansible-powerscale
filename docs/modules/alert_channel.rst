@@ -40,7 +40,7 @@ Parameters
 
     \ :literal:`False`\  indicates the channel is disabled.
 
-    If not specified when creating the channel, It will be enabled by default.
+    If not specified when creating the channel, it will be enabled by default.
 
 
   excluded_nodes (optional, list, None)
@@ -50,7 +50,7 @@ Parameters
   name (True, str, None)
     Name of the Channel.
 
-    Name should be unique and not modifiable.
+    Name should be unique and cannot be changed.
 
 
   send_test_alert (optional, bool, False)
@@ -94,7 +94,7 @@ Parameters
     smtp_use_auth (optional, bool, None)
       Enable SMTP authentication.
 
-      If \ :emphasis:`smtp\_use\_auth`\  is not set during creation, then It defaults set to c(false).
+      If \ :emphasis:`smtp\_use\_auth`\  is not set during creation, then it defaults set to \ :literal:`false`\ .
 
 
     smtp_username (optional, str, None)
@@ -129,7 +129,7 @@ Parameters
 
     If \ :emphasis:`type`\  is \ :literal:`smtp`\ , then \ :emphasis:`smtp\_parameters`\  is required.
 
-    If \ :emphasis:`type`\  is not set during creation, then It defaults to \ :literal:`connectemc`\ .
+    If \ :emphasis:`type`\  is not set during creation, then it defaults to \ :literal:`connectemc`\ .
 
 
   onefs_host (True, str, None)

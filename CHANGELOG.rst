@@ -5,6 +5,22 @@ Dellemc.Powerscale Change Logs
 .. contents:: Topics
 
 
+v3.3.0
+======
+
+Minor Changes
+-------------
+
+- Added support for listing writable snapshots in Info module.
+- Added fix for firewall policy issue for network pool operations.
+
+New Modules
+-----------
+
+- dellemc.powerscale.alert_channel - Manage alert channel on a PowerScale Storage System.
+- dellemc.powerscale.alert_rule - Manage alert rule on a PowerScale Storage System.
+- dellemc.powerscale.writable_snapshots - Manage writable snapshots on PowerScale Storage System.
+
 v3.2.0
 ======
 
