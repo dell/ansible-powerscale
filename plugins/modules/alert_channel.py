@@ -36,7 +36,7 @@ options:
     - Enable or disable the channel.
     - C(True) indicates the channel is enabled.
     - C(False) indicates the channel is disabled.
-    - If not specified when creating the channel, It will be
+    - If not specified when creating the channel, it will be
       enabled by default.
     type: bool
   excluded_nodes:
@@ -47,7 +47,7 @@ options:
   name:
     description:
     - Name of the Channel.
-    - Name should be unique and not modifiable.
+    - Name should be unique and cannot be changed.
     type: str
     required: true
   send_test_alert:
@@ -99,7 +99,7 @@ options:
         description:
         - Enable SMTP authentication.
         - If I(smtp_use_auth) is not set during creation,
-          then It defaults set to c(false).
+          then it defaults set to C(false).
         type: bool
       smtp_username:
         description:
@@ -137,7 +137,7 @@ options:
     description:
     - Type of the channel.
     - If I(type) is C(smtp), then I(smtp_parameters) is required.
-    - If I(type) is not set during creation, then It defaults to C(connectemc).
+    - If I(type) is not set during creation, then it defaults to C(connectemc).
     type: str
     choices: ['connectemc', 'smtp']
 attributes:
