@@ -114,17 +114,6 @@ class NetworkPoolAPI(object):
         }
         return url_kwargs
 
-    def _args_without_session(self, path, method, api_timeout, headers=None):
-        """Creates an argument spec in case of basic authentication"""
-        req_header = self._headers
-        if headers:
-            req_header.update(headers)
-        url_kwargs = self._url_common_args_spec(method, api_timeout, headers=headers)
-        url_kwargs["url_username"] = self.username
-        url_kwargs["url_password"] = self.password
-        url_kwargs["force_basic_auth"] = True
-        return url_kwargs
-
     def _args_with_session(self, method, api_timeout, headers=None):
         """Creates an argument spec, in case of authentication with session"""
         url_kwargs = self._url_common_args_spec(method, api_timeout, headers=headers)
