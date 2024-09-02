@@ -114,7 +114,7 @@ class NetworkPoolAPI(object):
         }
         return url_kwargs
 
-def _args_without_session(self, method, api_timeout, headers=None):
+    def _args_without_session(self, method, api_timeout, headers=None):
         """Creates an argument spec in case of basic authentication"""
         req_header = self._headers
         if headers:
