@@ -124,3 +124,29 @@ class Auth:
                             f'due to error {error_msg}.'
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
+
+    def get_auth_users(self, zone):
+        """
+        Get list of the auth user for a given access zone
+        """
+        LOG.info("Getting list of auth users.")
+        try:
+            user_list = []
+            user_list_details = (self.auth_api.list_auth_users(zone=zone)).to_dict()
+            user_list.extend(user_list_details['users'])
+            resume = user_list_details['resume']
+            while resume:
+                user_list_details = (self.auth_api.list_auth_users(resume=resume)).to_dict()
+                user_list.extend(user_list_details['users'])
+                resume = user_list_details['resume']
+            msg = f"Got user list from PowerScale cluster {self.module.params['onefs_host']}"
+            LOG.info(msg)
+            return user_list
+        except Exception as e:
+            error_msg = (
+                'Get Users List for PowerScale cluster: {0} and access zone: {1} '
+                'failed with error: {2}' .format(
+                    self.module.params['onefs_host'],zone,
+                    utils.determine_error(e)))
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)

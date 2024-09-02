@@ -3341,25 +3341,6 @@ class Info(object):
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
-    def get_users_list(self, access_zone):
-        """Get the list of users for an access zone of a given PowerScale
-        Storage"""
-        try:
-            users_list = (self.auth_api.list_auth_users(zone=access_zone))\
-                .to_dict()
-            LOG.info('Got Users from PowerScale cluster %s',
-                     self.module.params['onefs_host'])
-            return users_list
-        except Exception as e:
-            error_msg = (
-                'Get Users List for PowerScale cluster: {0} and access zone: {1} '
-                'failed with error: {2}' .format(
-                    self.module.params['onefs_host'],
-                    access_zone,
-                    utils.determine_error(e)))
-            LOG.error(error_msg)
-            self.module.fail_json(msg=error_msg)
-
     def get_groups_list(self, access_zone):
         """Get the list of groups for an access zone of a given PowerScale
         Storage"""
@@ -3995,7 +3976,7 @@ class Info(object):
             'access_zones': self.get_access_zones_list,
             'nodes': self.get_nodes_list,
             'providers': lambda: self.get_providers_list(access_zone),
-            'users': lambda: self.get_users_list(access_zone),
+            'users': lambda: Auth(self.auth_api, self.module).get_auth_users(access_zone),
             'groups': lambda: self.get_groups_list(access_zone),
             'smb_shares': lambda: self.get_smb_shares_list(access_zone),
             'clients': self.get_clients_list,
