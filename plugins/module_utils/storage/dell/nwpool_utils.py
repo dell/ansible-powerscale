@@ -114,6 +114,17 @@ class NetworkPoolAPI(object):
         }
         return url_kwargs
 
+def _args_without_session(self, method, api_timeout, headers=None):
+        """Creates an argument spec in case of basic authentication"""
+        req_header = self._headers
+        if headers:
+            req_header.update(headers)
+        url_kwargs = self._url_common_args_spec(method, api_timeout, headers=headers)
+        url_kwargs["url_username"] = self.username
+        url_kwargs["url_password"] = self.password
+        url_kwargs["force_basic_auth"] = True
+        return url_kwargs
+
     def _args_with_session(self, method, api_timeout, headers=None):
         """Creates an argument spec, in case of authentication with session"""
         url_kwargs = self._url_common_args_spec(method, api_timeout, headers=headers)
@@ -125,7 +136,7 @@ class NetworkPoolAPI(object):
             if 'X-Auth-Token' in self._headers:
                 url_kwargs = self._args_with_session(method, api_timeout, headers=headers)
             else:
-                url_kwargs = self._args_without_session(uri, method, api_timeout, headers=headers)
+                url_kwargs = self._args_without_session(method, api_timeout, headers=headers)
             if data and dump:
                 data = json.dumps(data)
             url = self._build_url(uri, query_param=query_param)
