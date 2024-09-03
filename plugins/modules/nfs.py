@@ -928,7 +928,7 @@ class NfsExport(object):
 
     def get_nfs_parameters(self):
         return dict(
-            path=dict(required=True, type='str', no_log=True),
+            path=dict(required=True, type='str'),
             access_zone=dict(type='str', default='System'),
             clients=dict(type='list', elements='str'),
             root_clients=dict(type='list', elements='str'),
