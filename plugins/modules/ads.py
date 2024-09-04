@@ -18,7 +18,8 @@ version_added: '1.2.0'
 short_description: Manages the ADS authentication provider on PowerScale
 description:
 - Manages the Active Directory authentication provider on the PowerScale storage
-  system. This includes adding spn, removing spn, fixing spn, checking spn, creating, modifying,
+  system.
+- This includes adding spn, removing spn, fixing spn, checking spn, creating, modifying,
   deleting and retreiving the details of an ADS provider.
 
 extends_documentation_fragment:
@@ -26,6 +27,7 @@ extends_documentation_fragment:
 
 author:
 - Jennifer John (@johnj9) <ansible.team@dell.com>
+- Bhavneet Sharma (@Bhavneet-Sharma) <ansible.team@dell.com>
 
 options:
   domain_name:
@@ -63,6 +65,76 @@ options:
     - Specify additional parameters to configure ADS domain.
     type: dict
     suboptions:
+      allocate_gids:
+        description:
+        - Allocates an ID for an unmapped Active Directory (ADS) group.
+        - ADS groups without GIDs can be proactively assigned a GID by
+          the ID mapper.
+        - If the ID mapper option is disabled, GIDs are not proactively
+          assigned, and when a primary group for a user does not include a
+          GID, the system may allocate one.
+        type: bool
+        version_added: '3.4.0'
+      allocate_uids:
+        description:
+        - Allocates a user ID for an unmapped Active Directory (ADS) user.
+        - ADS users without UIDs can be proactively assigned a UID by the
+          ID mapper.
+        - IF the ID mapper option is disabled, UIDs are not proactively
+          assigned, and when an identify for a user does not include a UID,
+          the system may allocate one.
+        type: bool
+        version_added: '3.4.0'
+      assume_default_domain:
+        description:
+        - Enables lookup of unqualified user names in the primary domain.
+        type: bool
+        version_added: '3.4.0'
+      authentication:
+        description:
+        - Enables authentication and identity management through the
+          authentication provider.
+        type: bool
+        version_added: '3.4.0'
+      create_home_directory:
+        description:
+        - Automatically creates a home directory on the first login.
+        type: bool
+        version_added: '3.4.0'
+      check_online_interval:
+        description:
+        - Specifies the time in seconds between provider online checks.
+        type: int
+        version_added: '3.4.0'
+      controller_time:
+        description:
+        - Specifies the current time for the domain controllers.
+        type: int
+        version_added: '3.4.0'
+      domain_offline_alerts:
+        description:
+        - Sends an alert if the domain goes offline.
+        type: bool
+        version_added: '3.4.0'
+      extra_expected_spns:
+        description:
+        - List of additional SPNs to expect beyond what automatic checking
+          routines might find.
+        type: list
+        elements: str
+        version_added: '3.4.0'
+      findable_groups:
+        description:
+        - Sets list of groups that can be resolved.
+        type: list
+        elements: str
+        version_added: '3.4.0'
+      findable_users:
+        description:
+        - Sets list of users that can be resolved.
+        type: list
+        elements: str
+        version_added: '3.4.0'
       groupnet:
         description:
         - Groupnet identifier.
@@ -73,6 +145,23 @@ options:
         - Specifies the path to the home directory template.
         - This is an optional parameter and defaults to C(/ifs/home/%D/%U).
         type: str
+      ignore_all_trusts:
+        description:
+        - If set to true, ignores all trusted domains.
+        type: bool
+        version_added: '3.4.0'
+      ignored_trusted_domains:
+        description:
+        - Includes trusted domains when I(ignore_all_trusts) is set to C(False).
+        type: list
+        elements: str
+        version_added: '3.4.0'
+      include_trusted_domains:
+        description:
+        - Includes trusted domains when 'ignore_all_trusts' is set to C(True).
+        type: list
+        elements: str
+        version_added: '3.4.0'
       login_shell:
         description:
         - Specifies the login shell path.
@@ -80,15 +169,104 @@ options:
         type: str
         choices: ['/bin/sh', '/bin/csh', '/bin/tcsh', '/bin/zsh', '/bin/bash',
                   '/bin/rbash', '/sbin/nologin']
+      ldap_sign_and_seal:
+        description:
+        - Enables encryption and signing on LDAP requests.
+        type: bool
+        version_added: '3.4.0'
+      lookup_groups:
+        description:
+        - Looks up AD groups in other providers before allocating a group ID.
+        type: bool
+        version_added: '3.4.0'
+      lookup_normalize_groups:
+        description:
+        - Normalizes AD group names to lowercase before look up.
+        type: bool
+        version_added: '3.4.0'
+      lookup_normalize_users:
+        description:
+        - Normalize AD user names to lowercase before look up.
+        type: bool
+        version_added: '3.4.0'
+      lookup_users:
+        description:
+        - Looks up AD users in other providers before allocating a user ID.
+        type: bool
+        version_added: '3.4.0'
+      lookup_domains:
+        description:
+        - Limits user and group lookups to the specified domains.
+        type: list
+        elements: str
+        version_added: '3.4.0'
       machine_account:
         description:
         - Specifies the machine account name when creating a SAM account with Active Directory.
         - The default cluster name is called C(default).
         type: str
+      machine_password_changes:
+        description:
+        - Enables periodic changes of the machine password for security.
+        type: bool
+        version_added: '3.4.0'
+      machine_password_lifespan:
+        description:
+        - Sets maximum age of a password in seconds.
+        type: int
+        version_added: '3.4.0'
+      nss_enumeration:
+        description:
+        - Enables the Active Directory provider to respond to 'getpwent'
+          and 'getgrent' requests.
+        type: bool
+        version_added: '3.4.0'
       organizational_unit:
         description:
         - Specifies the organizational unit.
         type: str
+      restrict_findable:
+        description:
+        - Check the provider for filtered lists of findable and
+          unfindable users and groups.
+        type: bool
+        version_added: '3.4.0'
+      rpc_call_timeout:
+        description:
+        - The maximum amount of time (in seconds) an RPC call to
+          Active Directory is allowed to take.
+        type: int
+        version_added: '3.4.0'
+      store_sfu_mappings:
+        description:
+        - Stores SFU mappings permanently in the ID mapper.
+        type: bool
+        version_added: '3.4.0'
+      server_retry_limit:
+        description:
+        - The number of retries attempted when a call to Active
+          Directory fails due to network error.
+        type: int
+        version_added: '3.4.0'
+      sfu_support:
+        description:
+        - Specifies whether to support RFC 2307 attributes on ADS domain
+          controllers.
+        type: str
+        choices: ['none', 'rfc2307']
+        version_added: '3.4.0'
+      unfindable_groups:
+        description:
+        - Specifies groups that cannot be resolved by the provider.
+        type: list
+        elements: str
+        version_added: '3.4.0'
+      unfindable_users:
+        description:
+        - Specifies users that cannot be resolved by the provider.
+        type: list
+        elements: str
+        version_added: '3.4.0'
   spns:
     description: List of SPN's to configure.
     type: list
@@ -122,8 +300,15 @@ options:
     choices: ['absent', 'present']
     type: str
     required: true
-notes:
-- The I(check_mode) is not supported.
+attributes:
+  check_mode:
+    description:
+    - Runs task to validate without performing action on the target machine.
+    support: full
+  diff_mode:
+    description:
+    - Runs the task to report the changes made or to be made.
+    support: full
 '''
 
 EXAMPLES = r'''
@@ -143,6 +328,45 @@ EXAMPLES = r'''
       login_shell: "/bin/zsh"
       machine_account: "test_account"
       organizational_unit: "org/sub_org"
+      allocate_gids: true
+      allocate_uids: false
+      assume_default_domain: false
+      authentication: true
+      create_home_directory: true
+      domain_offline_alerts: true
+      ignore_all_trusts: true
+      ignored_trusted_domains:
+        - "example.com"
+        - "example1.com"
+      include_trusted_domains:
+        - "trusted.com"
+      ldap_sign_and_seal: true
+      lookup_groups: true
+      lookup_normalize_groups: true
+      lookup_normalize_users: true
+      lookup_users: true
+      machine_password_changes: true
+      nss_enumeration: true
+      restrict_findable: true
+      store_sfu_mappings: true
+      check_online_interval: 7600
+      controller_time: 760000
+      machine_password_lifespan: 34567
+      rpc_call_timeout: 45
+      server_retry_limit: 789
+      sfu_support: "rfc2307"
+      extra_expected_spns:
+        - span
+      findable_groups:
+        - "groupone"
+      findable_users:
+        - "userone"
+      lookup_domains:
+        - "example.com"
+      unfindable_groups:
+        - "nogroups"
+      unfindable_users:
+        - "nouser"
     state: "present"
 
 - name: Modify an Active Directory provider with domain name
@@ -167,6 +391,10 @@ EXAMPLES = r'''
     ads_parameters:
       home_directory_template: "/ifs/usr_home/%D/%U"
       login_shell: "/bin/rbash"
+      allocate_gids: false
+      allocate_uids: true
+      assume_default_domain: true
+      authentication: false
     state: "present"
 
 - name: Get Active Directory provider details with domain name
@@ -267,58 +495,250 @@ ads_provider_details:
     returned: When Active Directory provider exists
     type: complex
     contains:
-        linked_access_zones:
-            description: List of access zones linked to the authentication
-                         provider.
+        allocate_gids:
+            description: Allocates an ID for an unmapped Active Directory (ADS)
+                         group.
+            type: bool
+        allocate_uids:
+            description: Allocates an ID for an unmapped Active Directory (ADS)
+                         user.
+            type: bool
+        assume_default_domain:
+            description: Enables lookup of unqualified user names in the
+                         primary domain.
+            type: bool
+        authentication:
+            description: Enables authentication and identity management
+                         through the authentication provider.
+            type: bool
+        check_online_interval:
+            description: Specifies the time in seconds between provider online checks.
+            type: int
+        controller_time:
+            description: Specifies the current time for the domain controllers.
+            type: int
+        create_home_directory:
+            description: Automatically creates a home directory on the first login.
+            type: bool
+        domain_offline_alerts:
+            description: Sends an alert if the domain goes offline.
+            type: bool
+        dup_spns:
+            description: Get duplicate SPNs in the provider domain.
             type: list
+        extra_expected_spns:
+            description: List of additional SPNs to expect beyond what automatic
+                         checking routines might find.
+            type: list
+        findable_groups:
+            description: Sets list of groups that can be resolved.
+            type: list
+        findable_users:
+            description: Sets list of users that can be resolved.
+            type: list
+        forest:
+            description: Specifies the Active Directory forest.
+            type: str
         groupnet:
             description: Groupnet identifier.
             type: str
         home_directory_template:
             description: Specifies the path to the home directory template.
             type: str
+        hostname:
+            description: Specifies the fully qualified hostname stored in the
+                         machine account.
+            type: str
         id:
             description: Specifies the ID of the Active Directory provider
                          instance.
             type: str
-        name:
-            description: Specifies the Active Directory provider name.
+        ignore_all_trusts:
+            description: If set to C(true), ignores all trusted domains.
+            type: bool
+        ignored_trusted_domains:
+            description: Includes trusted domains when I(ignore_all_trusts) is
+                         set to C(false.)
+            type: list
+        include_trusted_domains:
+            description: Includes trusted domains when I(ignore_all_trusts) is
+                         set to C(true.)
+            type: list
+        instance:
+            description: Specifies Active Directory provider instance.
             type: str
+        ldap_sign_and_seal:
+            description: Enables encryption and signing on LDAP requests.
+            type: bool
         login_shell:
             description: Specifies the login shell path.
             type: str
+        lookup_domains:
+            description: Limits user and group lookups to the specified domains.
+            type: list
+        linked_access_zones:
+            description: List of access zones linked to the authentication
+                         provider.
+            type: list
+        lookup_groups:
+            description: Looks up AD groups in other providers before allocating
+                         a group ID.
+            type: bool
+        lookup_normalize_groups:
+            description: Normalizes AD group names to lowercase before look up.
+            type: bool
+        lookup_normalize_users:
+            description: Normalizes AD user names to lowercase before look up.
+            type: bool
+        lookup_users:
+            description: Looks up AD users in other providers before allocating
+                         a user ID.
+            type: bool
         machine_account:
             description: Specifies the machine account name when creating a
                          SAM account with Active Directory.
             type: str
+        machine_password_changes:
+            description: Enables periodic changes of the machine password for
+                         security.
+            type: bool
+        machine_password_lifespan:
+            description: Sets maximum age of a password in seconds.
+            type: int
+        name:
+            description: Specifies the Active Directory provider name.
+            type: str
+        netbios_domain:
+            description: Specifies the NetBIOS domain name associated with
+                         the machine account.
+            type: str
+        node_dc_affinity:
+            description: Specifies the domain controller for which the node
+                         has affinity.
+            type: str
+        node_dc_affinity_timeout:
+            description: pecifies the timeout for the domain controller for which
+                         the local node has affinity.
+            type: int
+        nss_enumeration:
+            description: Enables the Active Directory provider to respond to
+                         'getpwent' and 'getgrent' requests.
+            type: bool
+        primary_domain:
+            description: Specifies the AD domain to which the provider is joined.
+            type: str
+        restrict_findable:
+            description: Check the provider for filtered lists of findable and
+                         unfindable users and groups.
+            type: bool
+        rpc_call_timeout:
+            description: The maximum amount of time (in seconds) an RPC call to
+                         Active Directory is allowed to take.
+            type: int
+        server_retry_limit:
+            description: The number of retries attempted when a call to Active
+                         Directory fails due to network error.
+            type: int
+        sfu_support:
+            description: Specifies whether to support RFC 2307 attributes on
+                         ADS domain controllers.
+            type: str
+        site:
+            description: Specifies the site for the Active Directory.
+            type: str
+        status:
+            description: Specifies the status of the provider.
+            type: str
+        store_sfu_mappings:
+            description: Stores SFU mappings permanently in the ID mapper.
+            type: bool
+        system:
+            description: If set to C(true), indicates that this provider instance
+                         was created by OneFS and cannot be removed.
+            type: bool
+        unfindable_groups:
+            description: Sets list of groups that cannot be resolved.
+            type: list
+        unfindable_users:
+            description: Sets list of users that cannot be resolved.
+            type: list
+        zone_name:
+            description: Specifies the name of the access zone in which this provider was created.
+            type: str
+        recommended_spns:
+            description: Configuration recommended SPNs.
+            type: list
+        spns:
+            description: Currently configured SPNs.
+            type: list
     sample:
-        {"ads_provider_details": [{
-                "forest": "sample.com",
-                "groupnet": "groupnet0",
-                "home_directory_template": "/ifs/home/%D/%U",
-                "hostname": "v.sample.com",
-                "id": "sample.com",
-                "linked_access_zones": [],
-                "login_shell": "/bin/abc",
-                "machine_account": "m1",
-                "name": "sample.com",
-                "extra_expected_spns": [
-                    "HOST/test5"
-                ],
-                "recommended_spns": [
-                    "HOST/test1",
-                    "HOST/test2",
-                    "HOST/test3",
-                    "HOST/test4"
-                ],
-                "spns": [
-                    "HOST/test2",
-                    "HOST/test3",
-                    "HOST/test4",
-                    "HOST/test5"
-                ],
-                "status": "online"
-            }]
+        {
+            "ads_provider_details": [
+                {
+                    "allocate_gids": true,
+                    "allocate_uids": true,
+                    "assume_default_domain": false,
+                    "authentication": true,
+                    "check_online_interval": 300,
+                    "controller_time": 1725339127,
+                    "create_home_directory": false,
+                    "domain_offline_alerts": false,
+                    "extra_expected_spns": [
+                        "HOST/test5"
+                    ],
+                    "findable_groups": [],
+                    "findable_users": [],
+                    "forest": "sample.emc.com",
+                    "groupnet": "groupnet0",
+                    "home_directory_template": "/ifs/home/%D/%U",
+                    "hostname": "sample.emc.com",
+                    "id": "SAMPLE.COM",
+                    "ignore_all_trusts": false,
+                    "ignored_trusted_domains": [],
+                    "include_trusted_domains": [],
+                    "instance": "",
+                    "ldap_sign_and_seal": false,
+                    "linked_access_zones": [
+                        "System"
+                    ],
+                    "login_shell": "/bin/zsh",
+                    "lookup_domains": [],
+                    "lookup_groups": true,
+                    "lookup_normalize_groups": true,
+                    "lookup_normalize_users": true,
+                    "lookup_users": true,
+                    "machine_account": "PI98S$$",
+                    "machine_password_changes": true,
+                    "machine_password_lifespan": 31536000,
+                    "name": "SAMPLE.COM",
+                    "netbios_domain": "PIERTP",
+                    "node_dc_affinity": null,
+                    "node_dc_affinity_timeout": null,
+                    "nss_enumeration": false,
+                    "primary_domain": "SAMPLE.COM",
+                    "recommended_spns": [
+                        "HOST/test1",
+                        "HOST/test2",
+                        "HOST/test3",
+                        "HOST/test4"
+                    ],
+                    "restrict_findable": false,
+                    "sfu_support": "none",
+                    "site": "Default-First-Site-Name",
+                    "spns": [
+                        "HOST/test2",
+                        "HOST/test3",
+                        "HOST/test4",
+                        "HOST/test5"
+                    ],
+                    "status": "online",
+                    "store_sfu_mappings": false,
+                    "system": false,
+                    "unfindable_groups": [],
+                    "unfindable_users": [],
+                    "zone_name": "System"
+                }
+            ]
         }
 '''
 
@@ -342,7 +762,7 @@ class Ads(object):
         # initialize the Ansible module
         self.module = AnsibleModule(
             argument_spec=self.module_params,
-            supports_check_mode=False,
+            supports_check_mode=True,
             required_one_of=required_one_of
         )
 
@@ -734,6 +1154,36 @@ def get_ads_parameters():
                                                       '/sbin/nologin']),
                 machine_account=dict(type='str'),
                 organizational_unit=dict(type='str'),
+                allocate_gids=dict(type='bool'),
+                allocate_uids=dict(type='bool'),
+                assume_default_domain=dict(type='bool'),
+                authentication=dict(type='bool'),
+                check_online_interval=dict(type='int'),
+                controller_time=dict(type='int'),
+                create_home_directory=dict(type='bool'),
+                domain_offline_alerts=dict(type='bool'),
+                ignore_all_trusts=dict(type='bool'),
+                ignored_trusted_domains=dict(type='list', elements='str'),
+                include_trusted_domains=dict(type='list', elements='str'),
+                ldap_sign_and_seal=dict(type='bool'),
+                lookup_groups=dict(type='bool'),
+                lookup_normalize_groups=dict(type='bool'),
+                lookup_normalize_users=dict(type='bool'),
+                lookup_users=dict(type='bool'),
+                machine_password_changes=dict(type='bool'),
+                nss_enumeration=dict(type='bool'),
+                restrict_findable=dict(type='bool'),
+                store_sfu_mappings=dict(type='bool'),
+                machine_password_lifespan=dict(type='int', no_log=False),
+                rpc_call_timeout=dict(type='int'),
+                server_retry_limit=dict(type='int'),
+                sfu_support=dict(type='str', choices=['none', 'rfc2307']),
+                extra_expected_spns=dict(type='list', elements='str'),
+                findable_groups=dict(type='list', elements='str'),
+                findable_users=dict(type='list', elements='str'),
+                lookup_domains=dict(type='list', elements='str'),
+                unfindable_groups=dict(type='list', elements='str'),
+                unfindable_users=dict(type='list', elements='str'),
             )
         ),
         spns=dict(
