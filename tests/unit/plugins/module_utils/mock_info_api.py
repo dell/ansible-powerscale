@@ -989,16 +989,27 @@ class MockGatherfactsApi:
             return resp
 
     @staticmethod
-    def get_users_response(response_type):
-        resp = [{
-                "name": "testuser",
-                }, {
-                "name": "testuser1",
-                }]
-        if response_type == "error":
-            return "Get Users List for PowerScale cluster: **.***.**.*** and access zone: System failed with error: SDK Error message"
+    def get_auth_users(response_type):
+        if response_type == "api":
+            return {
+                "users": [
+                    {
+                        "id": "id1",
+                        "id_name": "id_name1",
+                        "name": "name1"
+                    }
+                ]
+            }
+        elif response_type == "module":
+            return [
+                {
+                    "id": "id1",
+                    "id_name": "id_name1",
+                    "name": "name1"
+                }
+            ]
         else:
-            return resp
+            return "Get Users List for PowerScale cluster: **.***.**.*** and access zone: System failed with error: SDK Error message"
 
     @staticmethod
     def get_groups_response(response_type):
@@ -1393,7 +1404,7 @@ class MockGatherfactsApi:
                         "start": 1719831994
                     }
                 ],
-                "maintenance": "true"
+                "maintenance": "True"
             }
         else:
             return "Fetching maintenance events failed with error: SDK Error message"
@@ -1422,7 +1433,7 @@ class MockGatherfactsApi:
                 "channels": [
                     {
                         "allowed_nodes": [],
-                        "enabled": "true",
+                        "enabled": "True",
                         "excluded_nodes": [],
                         "id": 2,
                         "name": MockGatherfactsApi.NAME,
@@ -1441,7 +1452,7 @@ class MockGatherfactsApi:
                             "subject": ""
                         },
                         "rules": ["Heatrbeat"],
-                        "system": "true",
+                        "system": "True",
                         "type": "heartbreak"
                     }
                 ],
@@ -1691,7 +1702,7 @@ class MockGatherfactsApi:
             "network_pools": MockGatherfactsApi.get_network_pools_response(param),
             "network_groupnets": MockGatherfactsApi.get_network_groupnets_response(param),
             "providers": MockGatherfactsApi.get_providers_response(param),
-            "users": MockGatherfactsApi.get_users_response(param),
+            "users": MockGatherfactsApi.get_auth_users(param),
             "groups": MockGatherfactsApi.get_groups_response(param),
             "smb_shares": MockGatherfactsApi.get_smb_shares_response(param),
             "nfs_exports": MockGatherfactsApi.get_nfs_exports_response(param),
@@ -1738,7 +1749,7 @@ class MockGatherfactsApi:
             "network_pools": MockGatherfactsApi.get_network_pools_response(param),
             "network_groupnets": MockGatherfactsApi.get_network_groupnets_response(param),
             "providers": MockGatherfactsApi.get_providers_response(param),
-            "users": MockGatherfactsApi.get_users_response(param),
+            "users": MockGatherfactsApi.get_auth_users(param),
             "groups": MockGatherfactsApi.get_groups_response(param),
             "smb_shares": MockGatherfactsApi.get_smb_shares_response(param),
             "nfs_exports": MockGatherfactsApi.get_nfs_exports_response(param),
@@ -1786,7 +1797,7 @@ class MockGatherfactsApi:
             "network_pools": MockGatherfactsApi.get_network_pools_response(param),
             "network_groupnets": MockGatherfactsApi.get_network_groupnets_response(param),
             "providers": MockGatherfactsApi.get_providers_response(param),
-            "users": MockGatherfactsApi.get_users_response(param),
+            "users": MockGatherfactsApi.get_auth_users(param),
             "groups": MockGatherfactsApi.get_groups_response(param),
             "smb_shares": MockGatherfactsApi.get_smb_shares_response(param),
             "nfs_exports": MockGatherfactsApi.get_nfs_exports_response(param),
