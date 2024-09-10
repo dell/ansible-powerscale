@@ -326,12 +326,12 @@ class TestInfo():
             gather_subset) == gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
 
     @pytest.mark.parametrize("input_params", [
-        # {"gather_subset": "ldap", "return_key": "LdapProviders"},
-        # {"gather_subset": "user_mapping_rules", "return_key": "UserMappingRules"},
-        # {"gather_subset": "providers", "return_key": "Providers"},
+        {"gather_subset": "ldap", "return_key": "LdapProviders"},
+        {"gather_subset": "user_mapping_rules", "return_key": "UserMappingRules"},
+        {"gather_subset": "providers", "return_key": "Providers"},
         {"gather_subset": "users", "return_key": "Users"},
-        # {"gather_subset": "groups", "return_key": "Groups"},
-        # {"gather_subset": "roles", "return_key": "roles"},
+        {"gather_subset": "groups", "return_key": "Groups"},
+        {"gather_subset": "roles", "return_key": "roles"},
     ]
     )
     def test_get_facts_auth_api_module(self, gatherfacts_module_mock, input_params):
