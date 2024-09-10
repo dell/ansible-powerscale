@@ -1111,7 +1111,6 @@ class NFSCreateHandler:
 class NFSModifyHandler:
     def handle(self, nfs_obj, nfs_params, path, changed):
         if nfs_params['state'] == 'present' and nfs_obj.result['NFS_export_details']:
-            # check for modification
             changed = nfs_obj.modify_nfs_export(path, nfs_params['access_zone'], nfs_params['ignore_unresolvable_hosts']) or changed
         NFSCreateHandler().handle(nfs_obj=nfs_obj, nfs_params=nfs_params, path=path, changed=changed)
 
