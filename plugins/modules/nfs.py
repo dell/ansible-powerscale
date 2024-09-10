@@ -469,48 +469,49 @@ NFS_export_details:
 '''
 
 from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.powerscale_base \
+    import PowerScaleBase
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
 
 LOG = utils.get_logger('nfs')
 
 
-class NfsExport(object):
+class NfsExport(PowerScaleBase):
 
     '''Class with NFS export operations'''
 
     def __init__(self):
         ''' Define all parameters required by this module'''
-        self.module_params = utils.get_powerscale_management_host_parameters()
-        self.module_params.update(self.get_nfs_parameters())
-        # Initialize the ansible module
-        self.module = AnsibleModule(
-            argument_spec=self.module_params,
-            supports_check_mode=True
-        )
+
+        ansible_module_params = {
+            'argument_spec': self.get_nfs_parameters(),
+            'supports_check_mode': True
+        }
+        super().__init__(AnsibleModule, ansible_module_params)
         # Result is a dictionary that contains changed status, NFS export
         # details
         self.result = {
             "changed": False,
             "NFS_export_details": {}
         }
-        PREREQS_VALIDATE = utils.validate_module_pre_reqs(self.module.params)
-        if PREREQS_VALIDATE \
-                and not PREREQS_VALIDATE["all_packages_found"]:
-            self.module.fail_json(
-                msg=PREREQS_VALIDATE["error_message"])
+        # PREREQS_VALIDATE = utils.validate_module_pre_reqs(self.module.params)
+        # if PREREQS_VALIDATE \
+        #         and not PREREQS_VALIDATE["all_packages_found"]:
+        #     self.module.fail_json(
+        #         msg=PREREQS_VALIDATE["error_message"])
 
-        self.api_client = utils.get_powerscale_connection(self.module.params)
-        self.isi_sdk = utils.get_powerscale_sdk()
-        LOG.info('Got python SDK instance for provisioning on PowerScale ')
+        # self.api_client = utils.get_powerscale_connection(self.module.params)
+        # self.isi_sdk = utils.get_powerscale_sdk()
+        # LOG.info('Got python SDK instance for provisioning on PowerScale ')
 
-        self.protocol_api = self.isi_sdk.ProtocolsApi(self.api_client)
-        self.zone_summary_api = self.isi_sdk.ZonesSummaryApi(self.api_client)
+        # self.protocol_api = self.isi_sdk.ProtocolsApi(self.api_client)
+        # self.zone_summary_api = self.isi_sdk.ZonesSummaryApi(self.api_client)
 
     def get_zone_base_path(self, access_zone):
         """Returns the base path of the Access Zone."""
         try:
-            zone_path = (self.zone_summary_api.
+            zone_path = (self.zones_summary_api.
                          get_zones_summary_zone(access_zone)).to_dict()
             return zone_path["summary"]["path"]
         except Exception as e:
@@ -662,19 +663,25 @@ class NfsExport(object):
         Check if read-write clients are to be added/removed to/from NFS export
         '''
 
-        if playbook_client_dict['read_write_clients']:
-            for client in playbook_client_dict['read_write_clients']:
-                if client not in current_client_dict['read_write_clients'] and \
-                        self.module.params['client_state'] == 'present-in-export':
-                    current_client_dict['read_write_clients'].append(client)
-                    mod_flag = True
-                elif client in current_client_dict['read_write_clients'] and \
-                        self.module.params['client_state'] == 'absent-in-export':
-                    current_client_dict['read_write_clients'].remove(client)
-                    mod_flag = True
+        client_state = self.module.params['client_state']
+        if playbook_client_dict['read_write_clients'] is None:
+            return mod_flag, nfs_export
 
-            if mod_flag:
-                nfs_export.read_write_clients = current_client_dict['read_write_clients']
+        if client_state is None:
+            if playbook_client_dict['read_write_clients'] != current_client_dict['read_write_clients']:
+                current_client_dict['read_write_clients'] = playbook_client_dict['read_write_clients']
+                mod_flag = True
+        for client in playbook_client_dict['read_write_clients']:
+            if client_state == 'present-in-export' and client not in current_client_dict['read_write_clients']:
+                current_client_dict['read_write_clients'].append(client)
+                mod_flag = True
+
+            elif client_state == 'absent-in-export' and client in current_client_dict['read_write_clients']:
+                current_client_dict['read_write_clients'].remove(client)
+                mod_flag = True
+
+        if mod_flag:
+            nfs_export.read_write_clients = current_client_dict['read_write_clients']
 
         return mod_flag, nfs_export
 
@@ -683,19 +690,25 @@ class NfsExport(object):
         Check if clients are to be added/removed to/from NFS export
         '''
 
-        if playbook_client_dict['clients']:
-            for client in playbook_client_dict['clients']:
-                if client not in current_client_dict['clients'] and \
-                        self.module.params['client_state'] == 'present-in-export':
-                    current_client_dict['clients'].append(client)
-                    mod_flag = True
-                elif client in current_client_dict['clients'] and \
-                        self.module.params['client_state'] == 'absent-in-export':
-                    current_client_dict['clients'].remove(client)
-                    mod_flag = True
+        client_state = self.module.params['client_state']
+        if playbook_client_dict['clients'] is None:
+            return mod_flag, nfs_export
 
-            if mod_flag:
-                nfs_export.clients = current_client_dict['clients']
+        if client_state is None:
+            if playbook_client_dict['clients'] != current_client_dict['clients']:
+                current_client_dict['clients'] = playbook_client_dict['clients']
+                mod_flag = True
+        for client in playbook_client_dict['clients']:
+            if client_state == 'present-in-export' and client not in current_client_dict['clients']:
+                current_client_dict['clients'].append(client)
+                mod_flag = True
+
+            elif client_state == 'absent-in-export' and client in current_client_dict['clients']:
+                current_client_dict['clients'].remove(client)
+                mod_flag = True
+
+        if mod_flag:
+            nfs_export.clients = current_client_dict['clients']
 
         return mod_flag, nfs_export
 
@@ -704,19 +717,25 @@ class NfsExport(object):
         Check if read-only clients are to be added/removed to/from NFS export
         '''
 
-        if playbook_client_dict['read_only_clients']:
-            for client in playbook_client_dict['read_only_clients']:
-                if client not in current_client_dict['read_only_clients'] and \
-                        self.module.params['client_state'] == 'present-in-export':
-                    current_client_dict['read_only_clients'].append(client)
-                    mod_flag = True
-                elif client in current_client_dict['read_only_clients'] and \
-                        self.module.params['client_state'] == 'absent-in-export':
-                    current_client_dict['read_only_clients'].remove(client)
-                    mod_flag = True
+        client_state = self.module.params['client_state']
+        if playbook_client_dict['read_only_clients'] is None:
+            return mod_flag, nfs_export
 
-            if mod_flag:
-                nfs_export.read_only_clients = current_client_dict['read_only_clients']
+        if client_state is None:
+            if playbook_client_dict['read_only_clients'] != current_client_dict['read_only_clients']:
+                current_client_dict['read_only_clients'] = playbook_client_dict['read_only_clients']
+                mod_flag = True
+        for client in playbook_client_dict['read_only_clients']:
+            if client_state == 'present-in-export' and client not in current_client_dict['read_only_clients']:
+                current_client_dict['read_only_clients'].append(client)
+                mod_flag = True
+
+            elif client_state == 'absent-in-export' and client in current_client_dict['read_only_clients']:
+                current_client_dict['read_only_clients'].remove(client)
+                mod_flag = True
+
+        if mod_flag:
+            nfs_export.read_only_clients = current_client_dict['read_only_clients']
 
         return mod_flag, nfs_export
 
@@ -725,19 +744,25 @@ class NfsExport(object):
         Check if root clients are to be added/removed to/from NFS export
         '''
 
-        if playbook_client_dict['root_clients']:
-            for client in playbook_client_dict['root_clients']:
-                if client not in current_client_dict['root_clients'] and \
-                        self.module.params['client_state'] == 'present-in-export':
-                    current_client_dict['root_clients'].append(client)
-                    mod_flag = True
-                elif client in current_client_dict['root_clients'] and \
-                        self.module.params['client_state'] == 'absent-in-export':
-                    current_client_dict['root_clients'].remove(client)
-                    mod_flag = True
+        client_state = self.module.params['client_state']
+        if playbook_client_dict['root_clients'] is None:
+            return mod_flag, nfs_export
 
-            if mod_flag:
-                nfs_export.root_clients = current_client_dict['root_clients']
+        if client_state is None:
+            if playbook_client_dict['root_clients'] != current_client_dict['root_clients']:
+                current_client_dict['root_clients'] = playbook_client_dict['root_clients']
+                mod_flag = True
+        for client in playbook_client_dict['root_clients']:
+            if client_state == 'present-in-export' and client not in current_client_dict['root_clients']:
+                current_client_dict['root_clients'].append(client)
+                mod_flag = True
+
+            elif client_state == 'absent-in-export' and client in current_client_dict['root_clients']:
+                current_client_dict['root_clients'].remove(client)
+                mod_flag = True
+
+        if mod_flag:
+            nfs_export.root_clients = current_client_dict['root_clients']
 
         return mod_flag, nfs_export
 
@@ -888,43 +913,6 @@ class NfsExport(object):
             error_msg = 'Invalid input: Client state is given, clients not specified'
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
-        if self.module.params['client_state'] is None and any(
-                client_list is not None for client_list in all_client_list):
-            error_msg = 'Invalid input: Clients are given, client state not specified'
-            LOG.error(error_msg)
-            self.module.fail_json(msg=error_msg)
-
-    def perform_module_operation(self):
-        '''
-        Perform different actions on NFS exports based on user parameter
-        chosen in playbook
-        '''
-        state = self.module.params['state']
-        access_zone = self.module.params['access_zone']
-        ignore_unresolvable_hosts = self.module.params['ignore_unresolvable_hosts']
-        path = self.effective_path(access_zone=access_zone, path=self.module.params['path'])
-        changed = False
-
-        self.result['NFS_export_details'] = self.get_nfs_export(
-            path=path, access_zone=access_zone)
-
-        self._validate_input()
-        if state == 'present' and self.result['NFS_export_details']:
-            # check for modification
-            changed = self.modify_nfs_export(path, access_zone, ignore_unresolvable_hosts) or changed
-
-        if state == 'present' and not self.result['NFS_export_details']:
-            # create NFS export
-            changed = self.create_nfs_export(path=path, access_zone=access_zone, ignore_unresolvable_hosts=ignore_unresolvable_hosts)
-
-        if state == 'absent' and self.result['NFS_export_details']:
-            # delete nfs export
-            changed = self.delete_nfs_export() or changed
-
-        # Update the module's final state
-        LOG.info('changed %s', changed)
-        self.result['changed'] = changed
-        self.module.exit_json(**self.result)
 
     def get_nfs_parameters(self):
         return dict(
@@ -1096,11 +1084,53 @@ def is_map_secondary_groups_modified(nfs_map_params, nfs_export_details, nfs_exp
         return True
 
 
+class NFSExitHandler:
+    def handle(self, nfs_obj, changed):
+        LOG.info('changed %s', changed)
+        nfs_obj.result['changed'] = changed
+        nfs_obj.module.exit_json(**nfs_obj.result)
+
+
+class NFSDeleteHandler:
+    def handle(self, nfs_obj, nfs_params, changed):
+        if nfs_params['state'] == 'absent' and nfs_obj.result['NFS_export_details']:
+            # delete nfs export
+            changed = nfs_obj.delete_nfs_export() or changed
+        NFSExitHandler().handle(nfs_obj=nfs_obj, changed=changed)
+
+
+class NFSCreateHandler:
+    def handle(self, nfs_obj, nfs_params, path, changed):
+        if nfs_params['state'] == 'present' and not nfs_obj.result['NFS_export_details']:
+            changed = nfs_obj.create_nfs_export(
+                path=path, access_zone=nfs_params['access_zone'],
+                ignore_unresolvable_hosts=nfs_params['ignore_unresolvable_hosts'])
+        NFSDeleteHandler().handle(nfs_obj=nfs_obj, nfs_params=nfs_params, changed=changed)
+
+
+class NFSModifyHandler:
+    def handle(self, nfs_obj, nfs_params, path, changed):
+        if nfs_params['state'] == 'present' and nfs_obj.result['NFS_export_details']:
+            # check for modification
+            changed = nfs_obj.modify_nfs_export(path, nfs_params['access_zone'], nfs_params['ignore_unresolvable_hosts']) or changed
+        NFSCreateHandler().handle(nfs_obj=nfs_obj, nfs_params=nfs_params, path=path, changed=changed)
+
+
+class NFSHandler:
+    def handle(self, nfs_obj, nfs_params):
+        changed = False
+        path = nfs_obj.effective_path(access_zone=nfs_params['access_zone'], path=nfs_params['path'])
+        nfs_obj.result['NFS_export_details'] = nfs_obj.get_nfs_export(
+            path=path, access_zone=nfs_params['access_zone'])
+        nfs_obj._validate_input()
+        NFSModifyHandler().handle(nfs_obj=nfs_obj, nfs_params=nfs_params, path=path, changed=changed)
+
+
 def main():
-    ''' Create PowerScale_NFS export object and perform action on it
-        based on user input from playbook'''
+    """ Perform action on PowerScale nfs_export object and perform action on it
+        based on user input from playbook."""
     obj = NfsExport()
-    obj.perform_module_operation()
+    NFSHandler().handle(obj, obj.module.params)
 
 
 if __name__ == '__main__':

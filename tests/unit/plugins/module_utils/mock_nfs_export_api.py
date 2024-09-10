@@ -217,6 +217,10 @@ def get_nfs_failed_msg():
     return 'Got error SDK Error message while getting NFS export details for path'
 
 
+def get_multiple_nfs_failed_msg():
+    return 'Multiple NFS Exports found'
+
+
 def create_nfs_failed_msg():
     return 'Create NFS export for path: /ifs/test_sample_nfs and access zone: system failed'
 
