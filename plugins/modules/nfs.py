@@ -668,7 +668,7 @@ class NfsExport(PowerScaleBase):
             return mod_flag, nfs_export
 
         if client_state is None:
-            if playbook_client_dict['read_write_clients'] != current_client_dict['read_write_clients']:
+            if set(playbook_client_dict['read_write_clients']) != set(current_client_dict['read_write_clients']):
                 current_client_dict['read_write_clients'] = playbook_client_dict['read_write_clients']
                 mod_flag = True
         for client in playbook_client_dict['read_write_clients']:
@@ -695,7 +695,7 @@ class NfsExport(PowerScaleBase):
             return mod_flag, nfs_export
 
         if client_state is None:
-            if playbook_client_dict['clients'] != current_client_dict['clients']:
+            if set(playbook_client_dict['clients']) != set(current_client_dict['clients']):
                 current_client_dict['clients'] = playbook_client_dict['clients']
                 mod_flag = True
         for client in playbook_client_dict['clients']:
@@ -722,7 +722,7 @@ class NfsExport(PowerScaleBase):
             return mod_flag, nfs_export
 
         if client_state is None:
-            if playbook_client_dict['read_only_clients'] != current_client_dict['read_only_clients']:
+            if set(playbook_client_dict['read_only_clients']) != set(current_client_dict['read_only_clients']):
                 current_client_dict['read_only_clients'] = playbook_client_dict['read_only_clients']
                 mod_flag = True
         for client in playbook_client_dict['read_only_clients']:
@@ -749,7 +749,7 @@ class NfsExport(PowerScaleBase):
             return mod_flag, nfs_export
 
         if client_state is None:
-            if playbook_client_dict['root_clients'] != current_client_dict['root_clients']:
+            if set(playbook_client_dict['root_clients']) != set(current_client_dict['root_clients']):
                 current_client_dict['root_clients'] = playbook_client_dict['root_clients']
                 mod_flag = True
         for client in playbook_client_dict['root_clients']:
