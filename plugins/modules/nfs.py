@@ -40,7 +40,7 @@ options:
     - Specifies the clients to the export. The type of access to clients in
       this list is determined by the I(read_only) parameter.
     - This list can be changed anytime during the lifetime of the NFS export.
-    - If the clients list needs to be replaced, C(client_state) should not be provided.
+    - I(client_state) is not provided, then the host machine will replicate the values provided in the I(clients).
     type: list
     elements: str
   client_state:
@@ -162,7 +162,7 @@ options:
     - Specifies the clients with read-only access to the export, even when the
       export is read/write.
     - This list can be changed anytime during the lifetime of the NFS export.
-    - If the read_only_clients list needs to be replaced, C(client_state) should not be provided.
+    - I(client_state) is not provided, then the host machine will replicate the values provided in the I(read_only_clients).
     type: list
     elements: str
   read_write_clients:
@@ -170,14 +170,14 @@ options:
     - Specifies the clients with both read and write access to the export,
       even when the export is set to read-only.
     - This list can be changed anytime during the lifetime of the NFS export.
-    - If the read_write_clients list needs to be replaced, C(client_state) should not be provided.
+    - I(client_state) is not provided, then the host machine will replicate the values provided in the I(read_write_clients).
     type: list
     elements: str
   root_clients:
     description:
     - Specifies the clients with root access to the export.
     - This list can be changed anytime during the lifetime of the NFS export.
-    - If the root_clients list needs to be replaced, C(client_state) should not be provided.
+    - I(client_state) is not provided, then the host machine will replicate the values provided in the I(root_clients).
     type: list
     elements: str
   security_flavors:

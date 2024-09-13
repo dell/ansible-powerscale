@@ -29,20 +29,6 @@ The below requirements are needed on the host that executes this module.
 Parameters
 ----------
 
-  path (True, str, None)
-    Specifies the filesystem path. It is the absolute path for System access zone and it is relative if using non-system access zone.
-
-    For example, if your access zone is 'Ansible' and it has a base path '/ifs/ansible' and the path specified is '/user1', then the effective path would be '/ifs/ansible/user1'.
-
-    If your access zone is System, and you have 'directory1' in the access zone, the path provided should be '/ifs/directory1'.
-
-    The directory on the path must exist - the NFS module will not create the directory.
-
-    Ansible module will only support exports with a unique path.
-
-    If there are multiple exports present with the same path, fetching details, creation, modification or deletion of such exports will fail.
-
-
   access_zone (optional, str, System)
     Specifies the zone in which the export is valid.
 
@@ -54,49 +40,7 @@ Parameters
 
     This list can be changed anytime during the lifetime of the NFS export.
 
-
-  root_clients (optional, list, None)
-    Specifies the clients with root access to the export.
-
-    This list can be changed anytime during the lifetime of the NFS export.
-
-
-  read_only_clients (optional, list, None)
-    Specifies the clients with read-only access to the export, even when the export is read/write.
-
-    This list can be changed anytime during the lifetime of the NFS export.
-
-
-  read_write_clients (optional, list, None)
-    Specifies the clients with both read and write access to the export, even when the export is set to read-only.
-
-    This list can be changed anytime during the lifetime of the NFS export.
-
-
-  read_only (optional, bool, None)
-    Specifies whether the export is read-only or read-write. This parameter only has effect on the 'clients' list and not the other three types of clients.
-
-    This setting can be modified any time. If it is not set at the time of creation, the export will be of type read/write.
-
-
-  sub_directories_mountable (optional, bool, None)
-    \ :literal:`true`\  if all directories under the specified paths are mountable. If not set, sub-directories will not be mountable.
-
-    This setting can be modified any time.
-
-
-  description (optional, str, None)
-    Optional description field for the NFS export.
-
-    Can be modified by passing a new value.
-
-
-  state (True, str, None)
-    Defines whether the NFS export should exist or not.
-
-    Value \ :literal:`present`\  indicates that the NFS export should exist in system.
-
-    Value \ :literal:`absent`\  indicates that the NFS export should not exist in system.
+    If the clients list needs to be replaced, \ :literal:`client\_state`\  should not be provided.
 
 
   client_state (optional, str, None)
@@ -111,8 +55,10 @@ Parameters
     While removing clients, only the specified clients will be removed from the export, others will remain as is.
 
 
-  security_flavors (optional, list, None)
-    Specifies the authentication types that are supported for this export.
+  description (optional, str, None)
+    Optional description field for the NFS export.
+
+    Can be modified by passing a new value.
 
 
   ignore_unresolvable_hosts (optional, bool, None)
@@ -127,10 +73,6 @@ Parameters
       True if the user mapping is applied.
 
 
-    user (optional, str, None)
-      Specifies the persona name.
-
-
     primary_group (optional, str, None)
       Specifies the primary group name.
 
@@ -146,6 +88,10 @@ Parameters
       state (optional, str, present)
         Specifies the group state.
 
+
+
+    user (optional, str, None)
+      Specifies the persona name.
 
 
 
@@ -157,10 +103,6 @@ Parameters
       True if the user mapping is applied.
 
 
-    user (optional, str, None)
-      Specifies the persona name.
-
-
     primary_group (optional, str, None)
       Specifies the primary group name.
 
@@ -177,6 +119,72 @@ Parameters
         Specifies the group state.
 
 
+
+    user (optional, str, None)
+      Specifies the persona name.
+
+
+
+  path (True, str, None)
+    Specifies the filesystem path. It is the absolute path for System access zone and it is relative if using non-system access zone.
+
+    For example, if your access zone is 'Ansible' and it has a base path '/ifs/ansible' and the path specified is '/user1', then the effective path would be '/ifs/ansible/user1'.
+
+    If your access zone is System, and you have 'directory1' in the access zone, the path provided should be '/ifs/directory1'.
+
+    The directory on the path must exist - the NFS module will not create the directory.
+
+    Ansible module will only support exports with a unique path.
+
+    If there are multiple exports present with the same path, fetching details, creation, modification or deletion of such exports will fail.
+
+
+  read_only (optional, bool, None)
+    Specifies whether the export is read-only or read-write. This parameter only has effect on the 'clients' list and not the other three types of clients.
+
+    This setting can be modified any time. If it is not set at the time of creation, the export will be of type read/write.
+
+
+  read_only_clients (optional, list, None)
+    Specifies the clients with read-only access to the export, even when the export is read/write.
+
+    This list can be changed anytime during the lifetime of the NFS export.
+
+    If the read\_only\_clients list needs to be replaced, \ :literal:`client\_state`\  should not be provided.
+
+
+  read_write_clients (optional, list, None)
+    Specifies the clients with both read and write access to the export, even when the export is set to read-only.
+
+    This list can be changed anytime during the lifetime of the NFS export.
+
+    If the read\_write\_clients list needs to be replaced, \ :literal:`client\_state`\  should not be provided.
+
+
+  root_clients (optional, list, None)
+    Specifies the clients with root access to the export.
+
+    This list can be changed anytime during the lifetime of the NFS export.
+
+    If the root\_clients list needs to be replaced, \ :literal:`client\_state`\  should not be provided.
+
+
+  security_flavors (optional, list, None)
+    Specifies the authentication types that are supported for this export.
+
+
+  state (True, str, None)
+    Defines whether the NFS export should exist or not.
+
+    Value \ :literal:`present`\  indicates that the NFS export should exist in system.
+
+    Value \ :literal:`absent`\  indicates that the NFS export should not exist in system.
+
+
+  sub_directories_mountable (optional, bool, None)
+    \ :literal:`true`\  if all directories under the specified paths are mountable. If not set, sub-directories will not be mountable.
+
+    This setting can be modified any time.
 
 
   onefs_host (True, str, None)
@@ -259,6 +267,18 @@ Examples
         root_clients:
           - "{{client4}}"
         client_state: 'present-in-export'
+        state: 'present'
+
+    - name: Replace existing list of root clients
+      dellemc.powerscale.nfs:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        path: "<path>"
+        access_zone: "{{access_zone}}"
+        root_clients:
+          - "{{client4}}"
         state: 'present'
 
     - name: Set sub_directories_mountable flag to true
