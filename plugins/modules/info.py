@@ -252,6 +252,9 @@ EXAMPLES = r'''
     access_zone: "{{access_zone}}"
     gather_subset:
       - users
+     query_parameters:
+          users:
+            - filter: 'sample_user'
 
 - name: Get list of groups for an access zone of the PowerScale cluster
   dellemc.powerscale.info:
@@ -4066,7 +4069,7 @@ class Info(object):
         }
 
         # Map the subset to the appropriate Key
-        subset_list = ['attributes', 'access_zones', 'nodes', 'providers', 'users', 'groups', 'smb_shares', 'clients',
+        subset_list = ['attributes', 'access_zones', 'nodes', 'providers', 'groups', 'smb_shares', 'clients',
                        'nfs_exports', 'nfs_aliases', 'synciq_reports', 'synciq_target_reports', 'synciq_policies',
                        'synciq_target_cluster_certificates', 'synciq_performance_rules', 'network_groupnets',
                        'network_pools', 'network_rules', 'network_interfaces', 'network_subnets', 'node_pools',
@@ -4074,7 +4077,8 @@ class Info(object):
                        'nfs_default_settings', 'nfs_global_settings', 'synciq_global_settings', 's3_buckets',
                        'smb_global_settings', 'ntp_servers', 'email_settings', 'cluster_identity', 'cluster_owner',
                        'snmp_settings', 'server_certificate', 'event_group', 'smartquota', 'filesystem',
-                       'writable_snapshots']
+                       'writable_snapshots', 'users']
+
         for key in subset:
             if key not in subset_list:
                 result[key] = subset_mapping[key]()

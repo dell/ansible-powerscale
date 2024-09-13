@@ -442,3 +442,15 @@
           writable_snapshots:
             sort: src_snap
             state: active
+
+    - name: To filter the users using username
+          dellemc.powerscale.info:
+            onefs_host: "{{ onefs_host }}"
+            verify_ssl: "{{ verify_ssl }}"
+            api_user: "{{ api_user }}"
+            api_password: "{{ api_password }}"
+            gather_subset:
+              - users
+            query_parameters:
+              users:
+                filter: sample

@@ -131,12 +131,22 @@ class Auth:
         """
         LOG.info("Getting list of auth users.")
         try:
+            query_params = self.module.params.get('query_parameters')
+            auth_user_query_params = []
+            if query_params:
+                auth_user_query_params = query_params.get('users')
+            filter_params = {}
+            if auth_user_query_params:
+                for parm in auth_user_query_params:
+                    for key, value in parm.items():
+                        if key in ['filter']:
+                            filter_params[key] = value
             user_list = []
-            user_list_details = (self.auth_api.list_auth_users(zone=zone)).to_dict()
+            user_list_details = (self.auth_api.list_auth_users(**filter_params)).to_dict()
             user_list.extend(user_list_details['users'])
             resume = user_list_details.get('resume')
             while resume:
-                user_list_details = (self.auth_api.list_auth_users(resume=resume)).to_dict()
+                user_list_details = (self.auth_api.list_auth_users(resume=resume, **filter_params)).to_dict()
                 user_list.extend(user_list_details['users'])
                 resume = user_list_details['resume']
             msg = f"Got user list from PowerScale cluster {self.module.params['onefs_host']}"
