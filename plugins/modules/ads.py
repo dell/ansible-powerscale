@@ -746,7 +746,6 @@ import re
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
-import copy
 
 LOG = utils.get_logger('ads')
 
@@ -835,6 +834,7 @@ class Ads(object):
          ADS domain.
         :return: ADS Id.
         """
+        create_flag = False
         self.validate_create_params(domain, ads_user, ads_password, ads_parameters)
         ads_create_params = {
             'name': domain, 'user': ads_user,
@@ -858,21 +858,27 @@ class Ads(object):
                     message = "ADS domain created, %s" % api_response
                     LOG.info(message)
                     self.ads_name.insert(0, api_response.id)
-            return True
+            create_flag = True
         except utils.ApiException as e:
             error_message = "Add an Active Directory provider failed with" + \
                 utils.determine_error(error_obj=e)
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
-    def update_ads(self, ads_name, modified_ads):
+        if self.module._diff:
+            self.result.update({"diff": {"before": {}, "after": ads_create_params}})
+
+        return create_flag
+
+    def update_ads(self, ads_name, modified_ads, ads_details):
         """
          Modify the details of the Active Directory provider.
         :param ads_name: Specifies the Active Directory provider name.
         :param modified_ads: Parameters to modify.
+        :param ads_details: Details of the Active Directory provider.
         :return: True if the operation is successful.
         """
-
+        modify_flag = True
         try:
             ads_provider_params = utils.isi_sdk.ProvidersAdsIdParams(
                 **modified_ads)
@@ -882,30 +888,42 @@ class Ads(object):
                     providers_ads_id=ads_name)
                 message = "ADS provider updated successfully."
                 LOG.info(message)
-            return True
+            modify_flag = True
         except utils.ApiException as e:
             error_message = "Modifying ADS provider failed with" + \
                 utils.determine_error(error_obj=e)
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
-    def delete_ads(self, ads_name):
+        if self.module._diff:
+            self.result.update({"diff": {"before": ads_details, "after": modified_ads}})
+
+        return modify_flag
+
+    def delete_ads(self, ads_name, ads_details):
         """
          Delete the ADS provider.
         :param ads_name: Specifies the Active Directory provider name.
+        :param ads_details: Details of the Active Directory provider.
         :return: True if the operation is successful.
         """
+        delete_flag = False
         try:
             if not self.module.check_mode:
                 self.auth_api_instance.delete_providers_ads_by_id(ads_name)
                 message = "ADS provider deleted successfully."
                 LOG.info(message)
-            return True
+            delete_flag = True
         except utils.ApiException as e:
             error_message = "Deleting ADS provider failed with" + \
                 utils.determine_error(error_obj=e)
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
+
+        if self.module._diff:
+            self.result.update({"diff": {"before": ads_details, "after": {}}})
+
+        return delete_flag
 
     def update_extra_expected_spns(self, operation, spn, extra_expected_spns, recommended_spns):
         """
@@ -1000,7 +1018,6 @@ class Ads(object):
                     'login_shell', 'machine_account']
         updated_input_ads = {}
         updated_input_ads = self.remove_none(ads_key=ads_keys, input_ad_param=input_ads)
-        LOG.info("Updated input ads dictionary: %s", updated_input_ads)
 
         for key in list(updated_input_ads):
 
@@ -1058,8 +1075,6 @@ class Ads(object):
                     [ads_detail.update(linked_access_zones=zone_ids)
                         for ads_detail in ads_details
                         if ads_detail['id'].lower() == name.lower()]
-            msg = f"Updated ADS with access zone details {ads_details}"
-            LOG.info(msg=msg)
 
         except utils.ApiException as e:
             error_message = "Update ADS with access zone details " \
@@ -1110,46 +1125,6 @@ class Ads(object):
             self.module.fail_json(
                 msg="Multiple ADS instances are returned for the given "
                     "domain_name. Please specify instance_name")
-
-    def get_diff_after(self, ads_params, ads_details):
-        """Get diff between playbook input and ADS Provider details
-        :param ads_params: Dictionary of parameters input from playbook
-        :param ads_details: Dictionary of ADS Provider details
-        :return: Dictionary of parameters of differences"""
-
-        if ads_params["state"] == "absent":
-            return {}
-        else:
-            diff_dict = {}
-            ads_keys = ['allocate_gids', 'allocate_uids', 'assume_default_domain',
-                        'authentication', 'create_home_directory',
-                        'domain_offline_alerts', 'ignore_all_trusts',
-                        'ldap_sign_and_seal', 'lookup_groups', 'lookup_normalize_groups',
-                        'lookup_normalize_users', 'lookup_users', 'machine_password_changes',
-                        'nss_enumeration', 'restrict_findable', 'store_sfu_mappings',
-                        'check_online_interval', 'controller_time', 'machine_password_lifespan',
-                        'rpc_call_timeout', 'server_retry_limit', 'sfu_support',
-                        'groupnet', 'organizational_unit', 'home_directory_template',
-                        'login_shell', 'machine_account', 'forest', 'hostname',
-                        'id', 'instance', 'name', 'netbios_domain', 'node_dc_affinity',
-                        'node_dc_affinity_timeout', 'primary_domain',
-                        'site', 'status', 'system', 'zone_name']
-            if ads_details is None or len(ads_details) == 0:
-                for keys in ads_keys:
-                    diff_dict[keys] = ads_params.get(keys, "")
-                list_keys = ["dup_spn", "extra_expected_spns", "findable_groups",
-                             "findable_users", "ignored_trusted_domains",
-                             "include_trusted_domains", "lookup_domains",
-                             "recommended_spns", "spns", "unfindable_groups",
-                             "unfindable_users"]
-                for l_key in list_keys:
-                    diff_dict[l_key] = ads_params.get(l_key, [])
-            else:
-                diff_dict = copy.deepcopy(ads_details)
-                modify_dict = self.get_modified_ads(ads_params, diff_dict)
-                for key in modify_dict.keys():
-                    diff_dict[key] = modify_dict[key]
-            return diff_dict
 
     def get_ads_parameters(self):
         """
@@ -1234,14 +1209,16 @@ class ADSExitHandler:
         """
         ads_name = ads_obj.ads_name
         spn_command = ads_params.get('spn_command')
+
         if ads_details:
             ads_obj.update_ads_access_zone_info(ads_name, ads_details)
             ads_obj.result['ads_provider_details'] = ads_details
             if spn_command == 'check' and ads_details:
-                ads_obj.result['spn_check'] = ads_obj.get_spns_not_in_recommended_spns(ads_details[0]['spns'],
-                                                                                       ads_details[0]['recommended_spns'])
+                ads_obj.result['spn_check'] = ads_obj.get_spns_not_in_recommended_spns(
+                    ads_details[0]['spns'], ads_details[0]['recommended_spns'])
         else:
             ads_obj.result['ads_provider_details'] = {}
+
         ads_obj.module.exit_json(**ads_obj.result)
 
 
@@ -1268,10 +1245,12 @@ class ADSDeleteHandler:
             instance = ads_params.get('instance')
 
             ads_obj.validate_input(ads_details, domain, instance)
+
             if ads_details:
-                changed = ads_obj.delete_ads(ads_obj.ads_name[0])
+                changed = ads_obj.delete_ads(ads_obj.ads_name[0], ads_details[0])
                 ads_obj.result['changed'] = changed
                 ads_details = ads_obj.get_ads_details(ads_obj.ads_name)
+
         ADSExitHandler().handle(ads_obj, ads_params, ads_details)
 
 
@@ -1297,20 +1276,28 @@ class ADSModifyHandler:
         spn_command = ads_params.get('spn_command')
         # Modify an Active Directory provider
         check_modification = ads_parameters or ads_params.get('spns') or spn_command == 'fix'
+
         if ads_params.get('state') == "present" and ads_details and check_modification:
             modified_ads = {}
+
             if ads_parameters:
                 modified_ads = ads_obj.get_modified_ads(ads_parameters, ads_details)
             is_spn_modified, spns, extra_spns = ads_obj.perform_spn_operation(ads_details)
+
             if is_spn_modified:
                 modified_ads['spns'] = spns
                 modified_ads['extra_expected_spns'] = extra_spns
+
             if modified_ads:
-                LOG.info('Modifying ADS provider..')
+                LOG.info('Modifying ADS provider.')
                 ads_obj.validate_input(ads_details, domain, instance)
-                changed = ads_obj.update_ads(ads_obj.ads_name[0], modified_ads)
+                changed = ads_obj.update_ads(ads_obj.ads_name[0], modified_ads, ads_details[0])
                 ads_obj.result['changed'] = changed
                 ads_details = ads_obj.get_ads_details(ads_obj.ads_name)
+
+            if ads_obj.module._diff and not modified_ads:
+                ads_obj.result.update({"diff": {"before": {}, "after": {}}})
+
         ADSDeleteHandler().handle(ads_obj, ads_params, ads_details)
 
 
@@ -1333,12 +1320,15 @@ class ADSCreateHandler:
         domain = ads_params.get('domain_name')
         instance = ads_params.get('instance_name')
         ads_parameters = ads_params.get('ads_parameters')
+
         if ads_params.get('state') == "present" and not ads_details:
-            LOG.info("Add an Active Directory provider..")
+            LOG.info("Add an Active Directory provider.")
             changed = ads_obj.create_ads(domain, instance, ads_user,
                                          ads_password, ads_parameters)
             ads_obj.result['changed'] = changed
             ads_details = ads_obj.get_ads_details(ads_obj.ads_name)
+            ADSExitHandler().handle(ads_obj, ads_params, ads_details)
+
         ADSModifyHandler().handle(ads_obj, ads_params, ads_details)
 
 
@@ -1393,16 +1383,7 @@ class AdsHandler:
         self.handle_ads_name(ads_obj, ads_params)
 
         ads_details = ads_obj.get_ads_details(ads_obj.ads_name)
-        before_dict = {}
-        diff_dict = {}
-        diff_dict = ads_obj.get_diff_after(ads_params, ads_details)
 
-        if ads_details is None or len(ads_details) == 0:
-            before_dict = {}
-        else:
-            before_dict = ads_details
-        if ads_obj.module._diff:
-            ads_obj.result['diff'] = dict(before=before_dict, after=diff_dict)
         ADSCreateHandler().handle(ads_obj, ads_params, ads_details)
 
 
