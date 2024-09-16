@@ -9,6 +9,154 @@ from unittest.mock import MagicMock
 
 __metaclass__ = type
 
+ADS_NAME = 'ads.domain.com'
+DOMAIN_NAME = 'SAMPLE.LAB.EMC.COM'
+
+ADS_COMMAN_ARG = {
+    'domain_name': None,
+    'instance_name': None,
+    'ads_user': None,
+    'ads_password': None,
+    'state': 'present',
+    'ads_parameters': {
+        'groupnet': None,
+        'home_directory_template': None,
+        'login_shell': None,
+        'machine_account': None,
+        'organizational_unit': None,
+        'allocate_gids': None,
+        'allocate_uids': None,
+        'assume_default_domain': None,
+        'authentication': None,
+        'check_online_interval': None,
+        'controller_time': None,
+        'create_home_directory': None,
+        'domain_offline_alerts': None,
+        'ignore_all_trusts': None,
+        'ignored_trusted_domains': None,
+        'include_trusted_domains': None,
+        'ldap_sign_and_seal': None,
+        'lookup_groups': None,
+        'lookup_normalize_groups': None,
+        'lookup_normalize_users': None,
+        'lookup_users': None,
+        'machine_password_changes': None,
+        'nss_enumeration': None,
+        'restrict_findable': None,
+        'store_sfu_mappings': None,
+        'machine_password_lifespan': None,
+        'rpc_call_timeout': None,
+        'server_retry_limit': None,
+        'sfu_support': None,
+        'extra_expected_spns': None,
+        'findable_groups': None,
+        'findable_users': None,
+        'lookup_domains': None,
+        'unfindable_groups': None,
+        'unfindable_users': None,
+    },
+    'spns': None,
+    'spn_command': None
+}
+
+ADS_DETAILS = {
+    "ads": [
+        {
+            "allocate_gids": True,
+            "allocate_uids": True,
+            "assume_default_domain": False,
+            "authentication": True,
+            "check_online_interval": 300,
+            "controller_time": 1726470128,
+            "create_home_directory": True,
+            "domain_offlin,e_alerts": False,
+            "extra_expected_spns": [],
+            "findable_groups": [],
+            "findable_users": [],
+            "forest": DOMAIN_NAME,
+            "groupnet": "groupnet0",
+            "home_directory_template": "/ifs/home/%D/%D",
+            "hostname": "sample-isilon-x.sample.lab.emc.com",
+            "id": DOMAIN_NAME,
+            "ignore_all_trusts": False,
+            "ignored_trusted_domains": [],
+            "include_trusted_domains": [
+                "SAMPLE.LAB.EMC.COM"
+            ],
+            "ldap_sign_and_seal": False,
+            "login_shell": "/bin/zsh",
+            "lookup_domains": [],
+            "lookup_groups": True,
+            "lookup_normalize_groups": True,
+            "lookup_normalize_users": True,
+            "lookup_users": True,
+            "machine_account": "SAMPLE-ISILON-X$",
+            "machine_password_changes": True,
+            "machine_password_lifespan": 2592000,
+            "name": DOMAIN_NAME,
+            "netbios_domain": "SAMMPLERTP",
+            "nss_enumeration": False,
+            "primary_domain": DOMAIN_NAME,
+            "recommended_spns": [
+                "HOST/sample-isilon-x",
+                "nfs/sample-isilon-x",
+            ],
+            "restrict_findable": False,
+            "rpc_call_timeout": 400,
+            "server_retry_limit": 6,
+            "sfu_support": "none",
+            "site": "Default-First-Site-Name",
+            "spns": [
+                "HOST/sample-isilon-x",
+                "nfs/sample-isilon-x",
+            ],
+            "status": "online",
+            "store_sfu_mappings": False,
+            "system": False,
+            "unfindable_groups": [],
+            "unfindable_users": [],
+            "zone_name": "System"
+        }
+    ]
+}
+
+CREATE_ARGS = {
+    'domain_name': ADS_NAME,
+    'instance_name': ADS_NAME,
+    'ads_user': 'ads_user',
+    'ads_password': 'ads_password',
+    'state': 'present',
+    'ads_parameters': {
+        'groupnet': 'groupnet',
+        'home_directory_template': '/home',
+        'login_shell': '/bin/zsh',
+        'machine_account': 'test_account',
+        'organizational_unit': 'OU',
+        'allocate_gids': True,
+        'allocate_uids': False,
+        'assume_default_domain': True,
+        'authentication': True,
+    }
+}
+
+MODIFY_ARGS = {
+    'domain_name': ADS_NAME,
+    'ads_user': 'ads_user',
+    'ads_password': 'ads_password',
+    'state': 'present',
+    'ads_parameters': {
+        'allocate_gids': True,
+        'allocate_uids': False,
+        'assume_default_domain': True,
+        'authentication': True
+    },
+    'spns':
+        [{'spn': 'abc', 'state': 'present'},
+         {'spn': 'def', 'state': 'present'},
+         {'spn': 'HOST/sample-isilon-x', 'state': 'absent'}],
+    'spn_command': 'fix'
+}
+
 
 def get_ads_response():
     ads_response = MagicMock()

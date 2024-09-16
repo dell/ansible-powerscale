@@ -797,8 +797,8 @@ class Ads(object):
             ads_api_response = []
             for name in ads_name:
                 api_response = self.auth_api_instance.get_providers_ads_by_id(
-                    name)
-                ads_api_response.append(api_response.ads[0].to_dict())
+                    name).to_dict()
+                ads_api_response.append(api_response['ads'][0])
 
             return ads_api_response
         except utils.ApiException as e:
@@ -860,7 +860,7 @@ class Ads(object):
                     self.ads_name.insert(0, api_response.id)
             create_flag = True
         except utils.ApiException as e:
-            error_message = "Add an Active Directory provider failed with" + \
+            error_message = "Add an Active Directory provider failed with " + \
                 utils.determine_error(error_obj=e)
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
@@ -890,7 +890,7 @@ class Ads(object):
                 LOG.info(message)
             modify_flag = True
         except utils.ApiException as e:
-            error_message = "Modifying ADS provider failed with" + \
+            error_message = "Modifying Active Directory provider failed with " + \
                 utils.determine_error(error_obj=e)
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
@@ -915,7 +915,7 @@ class Ads(object):
                 LOG.info(message)
             delete_flag = True
         except utils.ApiException as e:
-            error_message = "Deleting ADS provider failed with" + \
+            error_message = "Deleting ADS provider failed with " + \
                 utils.determine_error(error_obj=e)
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
@@ -1020,7 +1020,6 @@ class Ads(object):
         updated_input_ads = self.remove_none(ads_key=ads_keys, input_ad_param=input_ads)
 
         for key in list(updated_input_ads):
-
             if updated_input_ads.get(key) != array_ads[0][key]:
 
                 updated_ads_dict[key] = updated_input_ads[key]
@@ -1052,7 +1051,7 @@ class Ads(object):
 
             return providers_summary
         except utils.ApiException as e:
-            error_message = "Get auth providers summary failed with" + \
+            error_message = "Get auth providers summary failed with " + \
                 utils.determine_error(error_obj=e)
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
@@ -1078,7 +1077,7 @@ class Ads(object):
 
         except utils.ApiException as e:
             error_message = "Update ADS with access zone details " \
-                "failed with" + utils.determine_error(error_obj=e)
+                "failed with " + utils.determine_error(error_obj=e)
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 

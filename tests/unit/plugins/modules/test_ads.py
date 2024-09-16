@@ -9,90 +9,139 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 import pytest
+# pylint: disable=unused-import
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.initial_mock \
     import utils
 from mock.mock import MagicMock
-
-from ansible_collections.dellemc.powerscale.plugins.modules.ads import Ads
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
+    import utils
+from ansible_collections.dellemc.powerscale.plugins.modules.ads import Ads, AdsHandler
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils \
     import mock_ads_api as MockAdsApi
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_api_exception \
     import MockApiException
+from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.powerscale_unit_base \
+    import PowerScaleUnitBase
 
 
-class TestAds():
+class TestAds(PowerScaleUnitBase):
     MODULE_UTILS_PATH = 'ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.utils'
-    ads_args = {'domain_name': 'ads_domain', 'instance_name': 'ads_instance',
-                'ads_user': 'user', 'ads_password': '***', 'state': 'present',
-                'ads_parameters': {'groupnet': None, 'home_directory_template': None,
-                                   'login_shell': None, 'machine_account': None, 'organizational_unit': None},
-                'spns': None, 'spn_command': None}
+    ads_args = MockAdsApi.ADS_COMMAN_ARG
 
     @pytest.fixture
-    def ads_module_mock(self, mocker):
-        mocker.patch(self.MODULE_UTILS_PATH + '.ApiException', new=MockApiException)
-        ads_module_mock = Ads()
-        return ads_module_mock
+    def module_object(self):
+        return Ads
 
-    def test_create_ads(self, ads_module_mock):
-        self.ads_args.update({'ads_parameters': {'groupnet': 'groupnet0', 'home_directory_template': '/home',
-                                                 'login_shell': '/bin/zsh', 'machine_account': 'test_account',
-                                                 'organizational_unit': 'OU', 'spns': [], 'spn_state': None}})
+    def test_create_ads(self, powerscale_module_mock):
+        self.set_module_params(
+            powerscale_module_mock, self.ads_args,
+            MockAdsApi.CREATE_ARGS)
+        powerscale_module_mock.module._diff = True
+        powerscale_module_mock.get_ads_details = MagicMock(
+            return_value=None)
+        AdsHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
+        powerscale_module_mock.auth_api_instance.create_providers_ads_item.assert_called()
 
-        ads_module_mock.module.params = self.ads_args
-        ads_module_mock.get_ads_details = MagicMock(return_value=None)
-        ads_module_mock.auth_api_instance.create_providers_ads_item = MagicMock(return_value=MockAdsApi.get_ads_response())
-        ads_module_mock.perform_module_operation()
+    def test_create_ads_exception(self, powerscale_module_mock):
+        self.set_module_params(
+            powerscale_module_mock, self.ads_args,
+            MockAdsApi.CREATE_ARGS)
+        powerscale_module_mock.module._diff = True
+        powerscale_module_mock.get_ads_details = MagicMock(
+            return_value=None)
+        powerscale_module_mock.auth_api_instance.create_providers_ads_item = MagicMock(
+            side_effect=MockApiException)
+        self.capture_fail_json_call(
+            "Add an Active Directory provider failed with SDK Error message",
+            powerscale_module_mock, AdsHandler
+        )
 
-        assert ads_module_mock.module.exit_json.call_args[1]["changed"] is True
+    def test_modify_ads(self, powerscale_module_mock):
+        self.set_module_params(
+            powerscale_module_mock, self.ads_args,
+            MockAdsApi.MODIFY_ARGS)
+        powerscale_module_mock.ads_name = [MockAdsApi.DOMAIN_NAME]
+        powerscale_module_mock.module._diff = True
+        powerscale_module_mock.get_ads_details = MagicMock(
+            return_value=MockAdsApi.ADS_DETAILS["ads"])
+        AdsHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
+        powerscale_module_mock.auth_api_instance.update_providers_ads_by_id.assert_called()
 
-    def test_create_ads_throws_exception(self, ads_module_mock):
-        ads_module_mock.module.params = self.ads_args
-        ads_module_mock.get_ads_details = MagicMock(return_value=None)
-        ads_module_mock.auth_api_instance.create_providers_ads_item = MagicMock(side_effect=utils.ApiException)
-        ads_module_mock.create(self.ads_args['domain_name'], self.ads_args['instance_name'],
-                               self.ads_args['ads_user'], self.ads_args['ads_password'],
-                               self.ads_args['ads_parameters'])
+    def test_modify_ads_exception(self, powerscale_module_mock):
+        self.set_module_params(
+            powerscale_module_mock, self.ads_args,
+            MockAdsApi.MODIFY_ARGS)
+        powerscale_module_mock.ads_name = [MockAdsApi.DOMAIN_NAME]
+        powerscale_module_mock.get_ads_details = MagicMock(
+            return_value=MockAdsApi.ADS_DETAILS["ads"])
+        powerscale_module_mock.auth_api_instance.update_providers_ads_by_id = MagicMock(
+            side_effect=MockApiException)
+        self.capture_fail_json_call(
+            "Modifying Active Directory provider failed with SDK Error message",
+            powerscale_module_mock, AdsHandler)
 
-        assert MockAdsApi.create_ads_ex_msg() in \
-            ads_module_mock.module.fail_json.call_args[1]['msg']
+    def test_delete_ads(self, powerscale_module_mock):
+        self.set_module_params(
+            powerscale_module_mock, self.ads_args,
+            {"domain_name": MockAdsApi.DOMAIN_NAME, "state": "absent"})
+        powerscale_module_mock.ads_name = [MockAdsApi.DOMAIN_NAME]
+        powerscale_module_mock.module._diff = True
+        powerscale_module_mock.get_ads_details = MagicMock(
+            return_value=MockAdsApi.ADS_DETAILS["ads"])
+        AdsHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
+        powerscale_module_mock.auth_api_instance.delete_providers_ads_by_id.assert_called()
 
-    def test_add_spn(self, ads_module_mock):
-        self.ads_args.update({'instance_name': None, 'spns': [{'spn': 'klm', 'state': 'present'}]})
-        ads_module_mock.module.params = self.ads_args
-        ads_module_mock.get_ads_details = MagicMock(return_value=MockAdsApi.get_ads_response_for_spn())
-        ads_module_mock.get_auth_providers_summary = MagicMock(return_value=MockAdsApi.get_provider_summary())
-        ads_module_mock.auth_api_instance.update_providers_ads_by_id = MagicMock(return_value=None)
-        ads_module_mock.zones_api_instance.list_zones = MagicMock(return_value=None)
-        ads_module_mock.perform_module_operation()
-        assert ads_module_mock.module.exit_json.call_args[1]["changed"] is True
+    def test_delete_ads_exception(self, powerscale_module_mock):
+        self.set_module_params(
+            powerscale_module_mock, self.ads_args,
+            {"domain_name": MockAdsApi.DOMAIN_NAME, "state": "absent"})
+        powerscale_module_mock.ads_name = [MockAdsApi.DOMAIN_NAME]
+        powerscale_module_mock.get_ads_details = MagicMock(
+            return_value=MockAdsApi.ADS_DETAILS["ads"])
+        powerscale_module_mock.auth_api_instance.delete_providers_ads_by_id = MagicMock(
+            side_effect=MockApiException)
+        self.capture_fail_json_call(
+            "Deleting ADS provider failed with SDK Error message",
+            powerscale_module_mock, AdsHandler)
 
-    def test_remove_spn(self, ads_module_mock):
-        self.ads_args.update({'instance_name': None, 'spns': [{'spn': 'abc', 'state': 'absent'}]})
-        ads_module_mock.module.params = self.ads_args
-        ads_module_mock.get_ads_details = MagicMock(return_value=MockAdsApi.get_ads_response_for_spn())
-        ads_module_mock.get_auth_providers_summary = MagicMock(return_value=MockAdsApi.get_provider_summary())
-        ads_module_mock.auth_api_instance.update_providers_ads_by_id = MagicMock(return_value=None)
-        ads_module_mock.zones_api_instance.list_zones = MagicMock(return_value=None)
-        ads_module_mock.perform_module_operation()
-        assert ads_module_mock.module.exit_json.call_args[1]["changed"] is True
+    def test_get_auth_providers_summary_exception(self, powerscale_module_mock):
+        self.set_module_params(
+            powerscale_module_mock, self.ads_args,
+            {"domain_name": MockAdsApi.DOMAIN_NAME, "state": "absent"})
+        powerscale_module_mock.get_ads_details = MagicMock(
+            return_value=MockAdsApi.ADS_DETAILS["ads"])
+        powerscale_module_mock.auth_api_instance.get_providers_summary = MagicMock(
+            side_effect=MockApiException)
+        self.capture_fail_json_call(
+            "Get auth providers summary failed with SDK Error message",
+            powerscale_module_mock, AdsHandler)
 
-    def test_fix_spn(self, ads_module_mock):
-        self.ads_args.update({'instance_name': None, 'spn_command': 'fix'})
-        ads_module_mock.module.params = self.ads_args
-        ads_module_mock.get_ads_details = MagicMock(return_value=MockAdsApi.get_ads_response_for_spn())
-        ads_module_mock.get_auth_providers_summary = MagicMock(return_value=MockAdsApi.get_provider_summary())
-        ads_module_mock.auth_api_instance.update_providers_ads_by_id = MagicMock(return_value=None)
-        ads_module_mock.zones_api_instance.list_zones = MagicMock(return_value=None)
-        ads_module_mock.perform_module_operation()
-        assert ads_module_mock.module.exit_json.call_args[1]["changed"] is True
+    def test_update_ads_zone_exception(self, powerscale_module_mock):
+        self.set_module_params(
+            powerscale_module_mock, self.ads_args,
+            {"domain_name": MockAdsApi.DOMAIN_NAME, "state": "present"})
+        powerscale_module_mock.get_ads_details = MagicMock(
+            return_value=MockAdsApi.ADS_DETAILS["ads"])
+        powerscale_module_mock.zones_api_instance.list_zones = MagicMock(
+            side_effect=MockApiException)
+        self.capture_fail_json_call(
+            "Update ADS with access zone details failed with SDK Error message",
+            powerscale_module_mock, AdsHandler)
 
-    def test_check_spn(self, ads_module_mock):
-        self.ads_args.update({'instance_name': None, 'spn_command': 'check'})
-        ads_module_mock.module.params = self.ads_args
-        ads_module_mock.get_ads_details = MagicMock(return_value=MockAdsApi.get_ads_response_for_spn())
-        ads_module_mock.get_auth_providers_summary = MagicMock(return_value=MockAdsApi.get_provider_summary())
-        ads_module_mock.auth_api_instance.update_providers_ads_by_id = MagicMock(return_value=None)
-        ads_module_mock.zones_api_instance.list_zones = MagicMock(return_value=None)
-        ads_module_mock.perform_module_operation()
-        assert 'klm' in ads_module_mock.module.exit_json.call_args[1]["spn_check"]
+    def test_get_ads_details(self, powerscale_module_mock):
+        self.set_module_params(
+            powerscale_module_mock, self.ads_args,
+            {"domain_name": MockAdsApi.DOMAIN_NAME, "state": "present"})
+        powerscale_module_mock.ads_name = [MockAdsApi.DOMAIN_NAME]
+        powerscale_module_mock.auth_api_instance.get_providers_ads_by_id.to_dict = MagicMock(
+            return_value=MockAdsApi.ADS_DETAILS)
+        AdsHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
+        powerscale_module_mock.auth_api_instance.get_providers_ads_by_id.assert_called()
+
+    def test_get_ads_exception(self, powerscale_module_mock):
+        powerscale_module_mock.ads_name = [MockAdsApi.DOMAIN_NAME]
+        powerscale_module_mock.auth_api_instance.get_providers_ads_by_id = MagicMock(
+            side_effect=MockApiException)
+        self.capture_fail_json_call(
+            "failed with error: SDK Error message",
+            powerscale_module_mock, AdsHandler)
