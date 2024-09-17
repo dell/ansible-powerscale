@@ -11,8 +11,15 @@ __metaclass__ = type
 
 ADS_NAME = 'ads.domain.com'
 DOMAIN_NAME = 'SAMPLE.LAB.EMC.COM'
+PASS1 = 'pass'
+USER1 = 'user'
 
 ADS_COMMAN_ARG = {
+    'onefs_host': '***.***.***.***',
+    'api_user': "user",
+    'api_password': "None",
+    'port_no': 880,
+    'verify_ssl': False,
     'domain_name': None,
     'instance_name': None,
     'ads_user': None,

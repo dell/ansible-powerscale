@@ -796,13 +796,19 @@ class Ads(object):
         try:
             ads_api_response = []
             for name in ads_name:
-                api_response = self.auth_api_instance.get_providers_ads_by_id(
-                    name).to_dict()
+                api_response = utils.get_ads_provider_details(
+                    user=self.module.params['api_user'],
+                    password=self.module.params['api_password'],
+                    hostname=self.module.params['onefs_host'],
+                    port=self.module.params['port_no'],
+                    ads_provider_name=name,
+                    validate_certs=self.module.params['verify_ssl'],
+                )
                 ads_api_response.append(api_response['ads'][0])
 
             return ads_api_response
-        except utils.ApiException as e:
-            if str(e.status) == '404':
+        except Exception as e:
+            if "404" in str(e):
                 error_message = "ADS provider {0} details are not found".\
                     format(ads_name)
                 LOG.info(error_message)
@@ -814,13 +820,6 @@ class Ads(object):
                                                     (error_obj=e))
                 LOG.error(error_message)
                 self.module.fail_json(msg=error_message)
-        except Exception as e:
-            error_message = 'Get details of ADS provider {0} failed with ' \
-                            'error: {1}'.format(ads_name,
-                                                utils.determine_error
-                                                (error_obj=e))
-            LOG.error(error_message)
-            self.module.fail_json(msg=error_message)
 
     def create_ads(self, domain, instance, ads_user, ads_password, ads_parameters):
         """
@@ -849,11 +848,10 @@ class Ads(object):
                 if ads_parameters[key] is not None:
                     ads_create_params[key] = ads_parameters[key]
 
-        ads_provider_obj = utils.isi_sdk.ProvidersAdsItem(**ads_create_params)
         try:
             if not self.module.check_mode:
                 api_response = self.auth_api_instance.create_providers_ads_item(
-                    providers_ads_item=ads_provider_obj)
+                    providers_ads_item=ads_create_params)
                 if api_response:
                     message = "ADS domain created, %s" % api_response
                     LOG.info(message)
@@ -880,11 +878,9 @@ class Ads(object):
         """
         modify_flag = True
         try:
-            ads_provider_params = utils.isi_sdk.ProvidersAdsIdParams(
-                **modified_ads)
             if not self.module.check_mode:
                 self.auth_api_instance.update_providers_ads_by_id(
-                    providers_ads_id_params=ads_provider_params,
+                    providers_ads_id_params=modified_ads,
                     providers_ads_id=ads_name)
                 message = "ADS provider updated successfully."
                 LOG.info(message)
@@ -908,6 +904,7 @@ class Ads(object):
         :return: True if the operation is successful.
         """
         delete_flag = False
+
         try:
             if not self.module.check_mode:
                 self.auth_api_instance.delete_providers_ads_by_id(ads_name)
@@ -1241,7 +1238,7 @@ class ADSDeleteHandler:
         # Delete an Active Directory provider
         if ads_params.get('state') == "absent":
             domain = ads_params.get('domain_name')
-            instance = ads_params.get('instance')
+            instance = ads_params.get('instance_name')
 
             ads_obj.validate_input(ads_details, domain, instance)
 
