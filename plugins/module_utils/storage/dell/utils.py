@@ -596,8 +596,7 @@ def get_ads_provider_details(user, password, hostname, port, ads_provider_name, 
         nwpool = NetworkPoolAPI(params)
         session_url = "/platform/14/auth/providers/ads/" + ads_provider_name + "?select=*"
         session_status_response = nwpool.invoke_request(headers={"Content-Type": "application/json"}, uri=session_url, method="GET")
-        status_code = session_status_response.status_code
+
         return session_status_response.json_data
     except (HTTPError, URLError, SSLValidationError, ConnectionError) as e:
-        ApiException = e
         raise e
