@@ -242,7 +242,7 @@ def validate_module_pre_reqs(module_params, module=None):
         )
         return prereqs_check
 
-    POWERSCALE_SDK_IMPORT = find_compatible_powerscale_sdk(module_params, module=None)
+    POWERSCALE_SDK_IMPORT = find_compatible_powerscale_sdk(module_params, module)
     if POWERSCALE_SDK_IMPORT and \
             not POWERSCALE_SDK_IMPORT["powerscale_package_imported"]:
         if POWERSCALE_SDK_IMPORT['error_message']:
@@ -343,7 +343,7 @@ def validate_python_version(cur_py_ver):
 ''' Validates threshold overhead parameter based on imported sdk version '''
 
 
-def validate_threshold_overhead_parameter(quota):
+def validate_threshold_overhead_parameter(quota, threshold_overhead_param):
     error_msg = None
     key = 'thresholds_on'
     if quota and key in quota \
