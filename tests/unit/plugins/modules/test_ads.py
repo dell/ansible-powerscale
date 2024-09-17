@@ -15,7 +15,7 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shar
 from mock.mock import MagicMock
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
-from ansible_collections.dellemc.powerscale.plugins.modules.ads import Ads, AdsHandler
+from ansible_collections.dellemc.powerscale.plugins.modules.ads import Ads, AdsHandler, main
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils \
     import mock_ads_api as MockAdsApi
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_api_exception \
@@ -267,3 +267,6 @@ class TestAds(PowerScaleUnitBase):
             powerscale_module_mock.check_for_groupnet('groupnet', array_ads, input_ads)
 
         assert exc.value.args[0] == "Modification of groupnet is not supported."
+
+    def test_main(self, powerscale_module_mock):
+        main()
