@@ -28,8 +28,6 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.lo
     import CustomRotatingFileHandler
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.nwpool_utils \
     import NetworkPoolAPI
-from ansible.module_utils.urls import ConnectionError, SSLValidationError
-from ansible.module_utils.six.moves.urllib.error import URLError, HTTPError
 import math
 from decimal import Decimal
 import datetime
