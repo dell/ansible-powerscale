@@ -767,7 +767,7 @@ class Ads(object):
             required_one_of=required_one_of
         )
 
-        PREREQS_VALIDATE = utils.validate_module_pre_reqs(self.module.params, "ads")
+        PREREQS_VALIDATE = utils.validate_module_pre_reqs(self.module.params)
         if PREREQS_VALIDATE \
                 and not PREREQS_VALIDATE["all_packages_found"]:
             self.module.fail_json(

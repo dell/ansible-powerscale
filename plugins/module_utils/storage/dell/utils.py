@@ -219,7 +219,7 @@ Validates the package pre-requisites of invoking module
 '''
 
 
-def validate_module_pre_reqs(module_params, module=None):
+def validate_module_pre_reqs(module_params):
     error_message = ""
     cur_py_ver = "{0}.{1}.{2}".format(str(sys.version_info[0]),
                                       str(sys.version_info[1]),
@@ -240,7 +240,7 @@ def validate_module_pre_reqs(module_params, module=None):
         )
         return prereqs_check
 
-    POWERSCALE_SDK_IMPORT = find_compatible_powerscale_sdk(module_params, module)
+    POWERSCALE_SDK_IMPORT = find_compatible_powerscale_sdk(module_params)
     if POWERSCALE_SDK_IMPORT and \
             not POWERSCALE_SDK_IMPORT["powerscale_package_imported"]:
         if POWERSCALE_SDK_IMPORT['error_message']:
@@ -283,7 +283,7 @@ def import_powerscale_sdk(sdk):
 ''' Find compatible powerscale sdk based on onefs version '''
 
 
-def find_compatible_powerscale_sdk(module_params, module=None):
+def find_compatible_powerscale_sdk(module_params):
     global HAS_POWERSCALE_SDK
     error_message = ""
 
@@ -299,15 +299,13 @@ def find_compatible_powerscale_sdk(module_params, module=None):
             major = str(parse_version(cluster_api.get_cluster_config().to_dict()['onefs_version']['release'].split('.')[0]))
             minor = str(parse_version(cluster_api.get_cluster_config().to_dict()['onefs_version']['release'].split('.')[1]))
             array_version = major + "_" + minor + "_0"
-            if module == "ads":
-                # Adding a workaround for home_directory_template failure in later versions of SDK.
+
+            if int(minor) >= 5:
                 compatible_powerscale_sdk = "isilon_sdk.v9_5_0"
             else:
-                if int(minor) >= 5:
-                    compatible_powerscale_sdk = "isilon_sdk.v9_5_0"
-                else:
-                    compatible_powerscale_sdk = "isilon_sdk.v" + array_version
+                compatible_powerscale_sdk = "isilon_sdk.v" + array_version
             import_powerscale_sdk(compatible_powerscale_sdk)
+
         except Exception as e:
             HAS_POWERSCALE_SDK = False
             error_message = 'Unable to fetch version of array {0}, ' \
