@@ -1236,8 +1236,7 @@ class FileSystem(object):
                                           'only MB, GB and TB are '
                                           'supported.')
 
-            VALIDATE_THRESHOLD = utils.validate_threshold_overhead_parameter(
-                quota, "include_data_protection_overhead")
+            VALIDATE_THRESHOLD = utils.validate_threshold_overhead_parameter(quota)
             if VALIDATE_THRESHOLD and not \
                     VALIDATE_THRESHOLD["param_is_valid"]:
                 self.module.fail_json(msg=VALIDATE_THRESHOLD["error_message"])
