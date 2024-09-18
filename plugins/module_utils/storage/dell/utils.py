@@ -550,22 +550,18 @@ def is_param_length_valid(item):
 
 
 def get_network_pool_details(user, password, hostname, port, groupnet, subnet, pool_id, validate_certs=False):
-    try:
-        params = {
-            "username": user,
-            "password": password,
-            "onefs_host": hostname,
-            "port_no": port,
-            "verify_ssl": validate_certs
-        }
-        nwpool = NetworkPoolAPI(params)
-        session_url = "/platform/16/network/groupnets/" + groupnet + "/subnets/" + subnet + "/pools/" + pool_id + "?select=*"
-        session_status_response = nwpool.invoke_request(headers={"Content-Type": "application/json"}, uri=session_url, method="GET")
-        status_code = session_status_response.status_code
-        return session_status_response.json_data
-    except (HTTPError, URLError, SSLValidationError, ConnectionError) as e:
-        ApiException = e
-        raise e
+    params = {
+        "username": user,
+        "password": password,
+        "onefs_host": hostname,
+        "port_no": port,
+        "verify_ssl": validate_certs
+    }
+    nwpool = NetworkPoolAPI(params)
+    session_url = "/platform/16/network/groupnets/" + groupnet + "/subnets/" + subnet + "/pools/" + pool_id + "?select=*"
+    session_status_response = nwpool.invoke_request(headers={"Content-Type": "application/json"}, uri=session_url, method="GET")
+
+    return session_status_response.json_data
 
 
 def get_ads_provider_details(user, password, hostname, port, ads_provider_name, validate_certs=False):
@@ -585,18 +581,15 @@ def get_ads_provider_details(user, password, hostname, port, ads_provider_name, 
     :raises SSLValidationError: If SSL certificate validation fails.
     :raises ConnectionError: If unable to connect to the cluster.
     """
-    try:
-        params = {
-            "username": user,
-            "password": password,
-            "onefs_host": hostname,
-            "port_no": port,
-            "verify_ssl": validate_certs
-        }
-        nwpool = NetworkPoolAPI(params)
-        session_url = "/platform/14/auth/providers/ads/" + ads_provider_name + "?select=*"
-        session_status_response = nwpool.invoke_request(headers={"Content-Type": "application/json"}, uri=session_url, method="GET")
+    params = {
+        "username": user,
+        "password": password,
+        "onefs_host": hostname,
+        "port_no": port,
+        "verify_ssl": validate_certs
+    }
+    nwpool = NetworkPoolAPI(params)
+    session_url = "/platform/14/auth/providers/ads/" + ads_provider_name + "?select=*"
+    session_status_response = nwpool.invoke_request(headers={"Content-Type": "application/json"}, uri=session_url, method="GET")
 
-        return session_status_response.json_data
-    except (HTTPError, URLError, SSLValidationError, ConnectionError) as e:
-        raise e
+    return session_status_response.json_data
