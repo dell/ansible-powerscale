@@ -106,11 +106,6 @@ options:
         - Specifies the time in seconds between provider online checks.
         type: int
         version_added: '3.4.0'
-      controller_time:
-        description:
-        - Specifies the current time for the domain controllers.
-        type: int
-        version_added: '3.4.0'
       domain_offline_alerts:
         description:
         - Sends an alert if the domain goes offline.
@@ -350,7 +345,6 @@ EXAMPLES = r'''
       restrict_findable: true
       store_sfu_mappings: true
       check_online_interval: 7600
-      controller_time: 760000
       machine_password_lifespan: 34567
       rpc_call_timeout: 45
       server_retry_limit: 789
@@ -1007,7 +1001,7 @@ class Ads(object):
                     'ldap_sign_and_seal', 'lookup_groups', 'lookup_normalize_groups',
                     'lookup_normalize_users', 'lookup_users', 'machine_password_changes',
                     'nss_enumeration', 'restrict_findable', 'store_sfu_mappings',
-                    'check_online_interval', 'controller_time', 'machine_password_lifespan',
+                    'check_online_interval', 'machine_password_lifespan',
                     'rpc_call_timeout', 'server_retry_limit', 'sfu_support',
                     'extra_expected_spns', 'findable_groups', 'findable_users',
                     'lookup_domains', 'unfindable_groups', 'unfindable_users',
@@ -1148,7 +1142,6 @@ class Ads(object):
                     assume_default_domain=dict(type='bool'),
                     authentication=dict(type='bool'),
                     check_online_interval=dict(type='int'),
-                    controller_time=dict(type='int'),
                     create_home_directory=dict(type='bool'),
                     domain_offline_alerts=dict(type='bool'),
                     ignore_all_trusts=dict(type='bool'),

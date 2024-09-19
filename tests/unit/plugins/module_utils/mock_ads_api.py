@@ -36,7 +36,6 @@ ADS_COMMAN_ARG = {
         'assume_default_domain': None,
         'authentication': None,
         'check_online_interval': None,
-        'controller_time': None,
         'create_home_directory': None,
         'domain_offline_alerts': None,
         'ignore_all_trusts': None,

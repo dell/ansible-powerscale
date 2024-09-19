@@ -95,10 +95,6 @@ Parameters
       Specifies the time in seconds between provider online checks.
 
 
-    controller_time (optional, int, None)
-      Specifies the current time for the domain controllers.
-
-
     domain_offline_alerts (optional, bool, None)
       Sends an alert if the domain goes offline.
 
@@ -333,7 +329,6 @@ Examples
           restrict_findable: true
           store_sfu_mappings: true
           check_online_interval: 7600
-          controller_time: 760000
           machine_password_lifespan: 34567
           rpc_call_timeout: 45
           server_retry_limit: 789

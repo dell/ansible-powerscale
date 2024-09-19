@@ -51,7 +51,6 @@
           restrict_findable: true
           store_sfu_mappings: true
           check_online_interval: 7600
-          controller_time: 760000
           machine_password_lifespan: 400
           rpc_call_timeout: 45
           server_retry_limit: 789
@@ -108,7 +107,6 @@
           restrict_findable: true
           store_sfu_mappings: true
           check_online_interval: 7600
-          controller_time: 760000
           machine_password_lifespan: 400
           rpc_call_timeout: 45
           server_retry_limit: 789
