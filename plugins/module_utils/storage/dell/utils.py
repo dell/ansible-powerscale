@@ -343,7 +343,7 @@ def validate_python_version(cur_py_ver):
 ''' Validates threshold overhead parameter based on imported sdk version '''
 
 
-def validate_threshold_overhead_parameter(quota, threshold_overhead_param):
+def validate_threshold_overhead_parameter(quota):
     error_msg = None
     key = 'thresholds_on'
     if quota and key in quota \

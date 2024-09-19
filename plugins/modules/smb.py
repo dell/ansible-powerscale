@@ -1520,7 +1520,7 @@ class SMB(PowerScaleBase):
 
     def validate_input_params(self, share_name, access_zone, path):
         """Validate the user input parameters"""
-        if (not share_name) or utils.is_param_empty_spaces(share_name):
+        if (not share_name) or len(share_name) < 1 or share_name.isspace():
             error_message = f"Invalid share name {share_name}"
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)

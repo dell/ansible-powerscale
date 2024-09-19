@@ -753,8 +753,7 @@ class SmartQuota(object):
         message = "Quota Dictionary after conversion:  %s" % str(quota)
         LOG.debug(message)
 
-        VALIDATE_THRESHOLD = utils.validate_threshold_overhead_parameter(
-            quota, "include_overheads")
+        VALIDATE_THRESHOLD = utils.validate_threshold_overhead_parameter(quota)
         if VALIDATE_THRESHOLD and not VALIDATE_THRESHOLD["param_is_valid"]:
             self.module.fail_json(msg=VALIDATE_THRESHOLD["error_message"])
         # If Access_Zone is System then absolute path is required
