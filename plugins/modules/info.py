@@ -253,8 +253,8 @@ EXAMPLES = r'''
     gather_subset:
       - users
     query_parameters:
-          users:
-            - filter: 'sample_user'
+        users:
+        - filter: 'sample_user'
 
 - name: Get list of groups for an access zone of the PowerScale cluster
   dellemc.powerscale.info:
