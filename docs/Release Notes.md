@@ -82,10 +82,9 @@ This section describes the features of the Ansible Modules for Dell PowerScale f
 
 The Ansible Modules for Dell PowerScale release 3.4.0 supports the following features:
 
-- Added support for listing all the user in Info module.
-- Extended the functionality of ADS module by adding additional parameters.
-- Removed masked paths in response for NFS module.
-- Modified SMB module for accepting space in SMB Share name.
+- ADS module has been enhanced to support the additional parameters.
+- Added support to list all the paginated data for the users in Info module.
+- NFS module is enhanced to remove masked paths in response and also added declarative approach of managing clients.
 
 Known issues
 ------------

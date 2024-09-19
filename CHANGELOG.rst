@@ -10,9 +10,9 @@ v3.4.0
 Minor Changes
 -------------
 
-- Added support for listing all the user in Info module.
-- Extended the functionality of ADS module by adding additional parameters.
-- Removed masked paths in response for NFS module.
+- ADS module has been enhanced to support the additional parameters.
+- Added support to list all the paginated data for the users in Info module.
+- NFS module is enhanced to remove masked paths in response and also added declarative approach of managing clients.
 
 v3.3.0
 ======
