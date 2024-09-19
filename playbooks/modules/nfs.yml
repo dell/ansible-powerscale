@@ -129,7 +129,8 @@
         client_state: 'absent-in-export'
         state: 'present'
 
-    # This task will replace existing read only clients, client1 and client2 with client3 and client4
+    # This task will replace existing read only clients, 
+    # client1 and client2 with client3 and client4
     - name: Replace existing readonly clients
       dellemc.powerscale.nfs:
         onefs_host: "{{ onefs_host }}"
