@@ -252,7 +252,7 @@ EXAMPLES = r'''
     access_zone: "{{access_zone}}"
     gather_subset:
       - users
-     query_parameters:
+    query_parameters:
           users:
             - filter: 'sample_user'
 
