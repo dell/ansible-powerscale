@@ -312,3 +312,11 @@ releases:
         name: writable_snapshots
         namespace: ''
     release_date: '2024-08-30'
+  3.4.0:
+    changes:
+      minor_changes:
+        - Added support for listing all the user in Info module.
+        - Extended the functionality of ADS module by adding additional parameters.
+        - Removed masked paths in response for NFS module.
+        - Modified SMB module for accepting space in SMB Share name.
+    release_date: '2024-09-30'

@@ -4,6 +4,16 @@ Dellemc.Powerscale Change Logs
 
 .. contents:: Topics
 
+v3.4.0
+======
+
+Minor Changes
+-------------
+
+- Added support for listing all the user in Info module.
+- Extended the functionality of ADS module by adding additional parameters.
+- Modified SMB module for accepting space in SMB Share name.
+- Removed masked paths in response for NFS module.
 
 v3.3.0
 ======
@@ -11,8 +21,8 @@ v3.3.0
 Minor Changes
 -------------
 
-- Added support for listing writable snapshots in Info module.
 - Added fix for firewall policy issue for network pool operations.
+- Added support for listing writable snapshots in Info module.
 
 New Modules
 -----------
