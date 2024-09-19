@@ -12,7 +12,6 @@ Minor Changes
 
 - Added support for listing all the user in Info module.
 - Extended the functionality of ADS module by adding additional parameters.
-- Modified SMB module for accepting space in SMB Share name.
 - Removed masked paths in response for NFS module.
 
 v3.3.0
