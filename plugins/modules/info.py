@@ -54,28 +54,38 @@ author:
 - Kritika Bhateja(@Kritika-Bhateja-03) <ansible.team.dell.com>
 
 options:
-  include_all_access_zones:
-    description:
-    - Specifies if requested component details need to be fetched from all
-      access zones.
-    - It is mutually exclusive with I(access_zone).
-    type: bool
   access_zone:
     description:
     - The access zone. If no Access Zone is specified, the 'System' access
       zone would be taken by default.
     default: 'System'
     type: str
-  scope:
+  filters:
     description:
-    - The scope of ldap. If no scope is specified, the C(effective) scope
-      would be taken by default.
-    - If specified as C(effective) or not specified, all fields are returned.
-    - If specified as C(user), only fields with non-default values are shown.
-    - If specified as C(default), the original values are returned.
-    choices: ['effective', 'user', 'default']
-    default: 'effective'
-    type: str
+    - List of filters to support filtered output for storage entities.
+    - Each filter is a tuple of {filter_key, filter_operator, filter_value}.
+    - Supports passing of multiple filters.
+    required: False
+    type: list
+    elements: dict
+    suboptions:
+      filter_key:
+        description:
+        - Name identifier of the filter.
+        type: str
+        required: True
+      filter_operator:
+        description:
+        - Operation to be performed on filter key.
+        type: str
+        choices: [equal]
+        required: True
+      filter_value:
+        description:
+        - Value of the filter key.
+        type: raw
+        required: True
+    version_added: '3.2.0'
   gather_subset:
     description:
     - List of string variables to specify the PowerScale Storage System
@@ -155,32 +165,22 @@ options:
               alert_rules, alert_channels, alert_categories, event_group, writable_snapshots]
     type: list
     elements: str
-  filters:
+  include_all_access_zones:
     description:
-    - List of filters to support filtered output for storage entities.
-    - Each filter is a tuple of {filter_key, filter_operator, filter_value}.
-    - Supports passing of multiple filters.
-    required: False
-    type: list
-    elements: dict
-    suboptions:
-      filter_key:
-        description:
-        - Name identifier of the filter.
-        type: str
-        required: True
-      filter_operator:
-        description:
-        - Operation to be performed on filter key.
-        type: str
-        choices: [equal]
-        required: True
-      filter_value:
-        description:
-        - Value of the filter key.
-        type: raw
-        required: True
-    version_added: '3.2.0'
+    - Specifies if requested component details need to be fetched from all
+      access zones.
+    - It is mutually exclusive with I(access_zone).
+    type: bool
+  scope:
+    description:
+    - The scope of ldap. If no scope is specified, the C(effective) scope
+      would be taken by default.
+    - If specified as C(effective) or not specified, all fields are returned.
+    - If specified as C(user), only fields with non-default values are shown.
+    - If specified as C(default), the original values are returned.
+    choices: ['effective', 'user', 'default']
+    default: 'effective'
+    type: str
   query_parameters:
     description:
     - Contains dictionary of query parameters for specific I(gather_subset).

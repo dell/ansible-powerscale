@@ -990,7 +990,7 @@ class MockGatherfactsApi:
 
     @staticmethod
     def get_auth_users(response_type):
-        if response_type == "api":
+        if response_type in ["api", "module"]:
             return {
                 "users": [
                     {
@@ -1000,14 +1000,6 @@ class MockGatherfactsApi:
                     }
                 ]
             }
-        elif response_type == "module":
-            return [
-                {
-                    "id": "id1",
-                    "id_name": "id_name1",
-                    "name": "name1"
-                }
-            ]
         else:
             return "Get Users List for PowerScale cluster: **.***.**.*** and access zone: System failed with error: SDK Error message"
 
