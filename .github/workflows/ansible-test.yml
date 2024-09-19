@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ansible-version: [stable-2.15, stable-2.16, stable-2.17, devel]
+        ansible-version: [stable-2.17]
     steps:
       - name: Check out code
         uses: actions/checkout@v3
@@ -31,7 +31,7 @@ jobs:
         run: ansible-galaxy collection build --output-path "${GITHUB_WORKSPACE}/.cache/collection-tarballs"
 
       - name: Store migrated collection artifacts
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4.4.0
         with:
           name: collection
           path: .cache/collection-tarballs
@@ -132,7 +132,7 @@ jobs:
         run: pip install ansible-lint --disable-pip-version-check
 
       - name: Download migrated collection artifacts
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4.1.8
         with:
           name: collection
           path: .cache/collection-tarballs

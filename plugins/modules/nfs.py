@@ -29,6 +29,110 @@ author:
 - Kritika Bhateja(@Kritika-Bhateja-03) <ansible.team.dell.com>)
 
 options:
+  access_zone:
+    description:
+    - Specifies the zone in which the export is valid.
+    - Access zone once set cannot be changed.
+    type: str
+    default: System
+  clients:
+    description:
+    - Specifies the clients to the export. The type of access to clients in
+      this list is determined by the I(read_only) parameter.
+    - This list can be changed anytime during the lifetime of the NFS export.
+    - I(client_state) is not provided, then the host machine will replicate the values provided in the I(clients).
+    type: list
+    elements: str
+  client_state:
+    description:
+    - Defines whether the clients can access the NFS export.
+    - Value C(present-in-export) indicates that the clients can access the NFS export.
+    - Value C(absent-in-export) indicates that the client cannot access the NFS export.
+    - Required when adding or removing access of clients from the export.
+    - While removing clients, only the specified clients will be removed from
+      the export, others will remain as is.
+    type: str
+    choices: [present-in-export, absent-in-export]
+  description:
+    description:
+    - Optional description field for the NFS export.
+    - Can be modified by passing a new value.
+    type: str
+  ignore_unresolvable_hosts:
+    description:
+    - Does not present an error condition on unresolvable hosts when creating
+     or modifying an export.
+    type: bool
+  map_root:
+    description:
+    - Specifies the users and groups to which non-root and root clients are mapped.
+    type: dict
+    suboptions:
+      enabled:
+        description:
+        - True if the user mapping is applied.
+        type: bool
+        default: true
+      primary_group:
+        description:
+        - Specifies the primary group name.
+        type: str
+      secondary_groups:
+        description:
+        - Specifies the secondary groups.
+        type: list
+        elements: dict
+        suboptions:
+          name:
+            description:
+            - Specifies the group name.
+            type: str
+            required: true
+          state:
+            description:
+            - Specifies the group state.
+            type: str
+            choices: [absent, present]
+            default: present
+      user:
+        description:
+        - Specifies the persona name.
+        type: str
+  map_non_root:
+    description:
+    - Specifies the users and groups to which non-root and root clients are mapped.
+    type: dict
+    suboptions:
+      enabled:
+        description:
+        - True if the user mapping is applied.
+        type: bool
+        default: true
+      primary_group:
+        description:
+        - Specifies the primary group name.
+        type: str
+      secondary_groups:
+        description:
+        - Specifies the secondary groups.
+        type: list
+        elements: dict
+        suboptions:
+          name:
+            description:
+            - Specifies the group name.
+            type: str
+            required: true
+          state:
+            description:
+            - Specifies the group state.
+            type: str
+            choices: [absent, present]
+            default: present
+      user:
+        description:
+        - Specifies the persona name.
+        type: str
   path:
     description:
     - Specifies the filesystem path. It is the absolute path for System access zone
@@ -45,39 +149,6 @@ options:
       creation, modification or deletion of such exports will fail.
     required: true
     type: str
-  access_zone:
-    description:
-    - Specifies the zone in which the export is valid.
-    - Access zone once set cannot be changed.
-    type: str
-    default: System
-  clients:
-    description:
-    - Specifies the clients to the export. The type of access to clients in
-      this list is determined by the I(read_only) parameter.
-    - This list can be changed anytime during the lifetime of the NFS export.
-    type: list
-    elements: str
-  root_clients:
-    description:
-    - Specifies the clients with root access to the export.
-    - This list can be changed anytime during the lifetime of the NFS export.
-    type: list
-    elements: str
-  read_only_clients:
-    description:
-    - Specifies the clients with read-only access to the export, even when the
-      export is read/write.
-    - This list can be changed anytime during the lifetime of the NFS export.
-    type: list
-    elements: str
-  read_write_clients:
-    description:
-    - Specifies the clients with both read and write access to the export,
-      even when the export is set to read-only.
-    - This list can be changed anytime during the lifetime of the NFS export.
-    type: list
-    elements: str
   read_only:
     description:
     - Specifies whether the export is read-only or read-write. This parameter
@@ -86,17 +157,35 @@ options:
     - This setting can be modified any time. If it is not set at the time of
       creation, the export will be of type read/write.
     type: bool
-  sub_directories_mountable:
+  read_only_clients:
     description:
-    - C(true) if all directories under the specified paths are mountable. If not
-      set, sub-directories will not be mountable.
-    - This setting can be modified any time.
-    type: bool
-  description:
+    - Specifies the clients with read-only access to the export, even when the
+      export is read/write.
+    - This list can be changed anytime during the lifetime of the NFS export.
+    - I(client_state) is not provided, then the host machine will replicate the values provided in the I(read_only_clients).
+    type: list
+    elements: str
+  read_write_clients:
     description:
-    - Optional description field for the NFS export.
-    - Can be modified by passing a new value.
-    type: str
+    - Specifies the clients with both read and write access to the export,
+      even when the export is set to read-only.
+    - This list can be changed anytime during the lifetime of the NFS export.
+    - I(client_state) is not provided, then the host machine will replicate the values provided in the I(read_write_clients).
+    type: list
+    elements: str
+  root_clients:
+    description:
+    - Specifies the clients with root access to the export.
+    - This list can be changed anytime during the lifetime of the NFS export.
+    - I(client_state) is not provided, then the host machine will replicate the values provided in the I(root_clients).
+    type: list
+    elements: str
+  security_flavors:
+    description:
+    - Specifies the authentication types that are supported for this export.
+    type: list
+    elements: str
+    choices: ['unix', 'kerberos', 'kerberos_integrity', 'kerberos_privacy']
   state:
     description:
     - Defines whether the NFS export should exist or not.
@@ -105,97 +194,12 @@ options:
     required: true
     type: str
     choices: [absent, present]
-  client_state:
+  sub_directories_mountable:
     description:
-    - Defines whether the clients can access the NFS export.
-    - Value C(present-in-export) indicates that the clients can access the NFS export.
-    - Value C(absent-in-export) indicates that the client cannot access the NFS export.
-    - Required when adding or removing access of clients from the export.
-    - While removing clients, only the specified clients will be removed from
-      the export, others will remain as is.
-    type: str
-    choices: [present-in-export, absent-in-export]
-  security_flavors:
-    description:
-    - Specifies the authentication types that are supported for this export.
-    type: list
-    elements: str
-    choices: ['unix', 'kerberos', 'kerberos_integrity', 'kerberos_privacy']
-  ignore_unresolvable_hosts:
-    description:
-    - Does not present an error condition on unresolvable hosts when creating
-     or modifying an export.
+    - C(true) if all directories under the specified paths are mountable. If not
+      set, sub-directories will not be mountable.
+    - This setting can be modified any time.
     type: bool
-  map_root:
-    description:
-    - Specifies the users and groups to which non-root and root clients are mapped.
-    type: dict
-    suboptions:
-      enabled:
-        description:
-        - True if the user mapping is applied.
-        type: bool
-        default: true
-      user:
-        description:
-        - Specifies the persona name.
-        type: str
-      primary_group:
-        description:
-        - Specifies the primary group name.
-        type: str
-      secondary_groups:
-        description:
-        - Specifies the secondary groups.
-        type: list
-        elements: dict
-        suboptions:
-          name:
-            description:
-            - Specifies the group name.
-            type: str
-            required: true
-          state:
-            description:
-            - Specifies the group state.
-            type: str
-            choices: [absent, present]
-            default: present
-  map_non_root:
-    description:
-    - Specifies the users and groups to which non-root and root clients are mapped.
-    type: dict
-    suboptions:
-      enabled:
-        description:
-        - True if the user mapping is applied.
-        type: bool
-        default: true
-      user:
-        description:
-        - Specifies the persona name.
-        type: str
-      primary_group:
-        description:
-        - Specifies the primary group name.
-        type: str
-      secondary_groups:
-        description:
-        - Specifies the secondary groups.
-        type: list
-        elements: dict
-        suboptions:
-          name:
-            description:
-            - Specifies the group name.
-            type: str
-            required: true
-          state:
-            description:
-            - Specifies the group state.
-            type: str
-            choices: [absent, present]
-            default: present
 
 notes:
   - The I(check_mode) is supported.
@@ -239,6 +243,18 @@ EXAMPLES = r'''
     root_clients:
       - "{{client4}}"
     client_state: 'present-in-export'
+    state: 'present'
+
+- name: Replace existing list of root clients
+  dellemc.powerscale.nfs:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    path: "<path>"
+    access_zone: "{{access_zone}}"
+    root_clients:
+      - "{{client4}}"
     state: 'present'
 
 - name: Set sub_directories_mountable flag to true
@@ -469,48 +485,37 @@ NFS_export_details:
 '''
 
 from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.powerscale_base \
+    import PowerScaleBase
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
 
 LOG = utils.get_logger('nfs')
 
 
-class NfsExport(object):
+class NfsExport(PowerScaleBase):
 
     '''Class with NFS export operations'''
 
     def __init__(self):
         ''' Define all parameters required by this module'''
-        self.module_params = utils.get_powerscale_management_host_parameters()
-        self.module_params.update(self.get_nfs_parameters())
-        # Initialize the ansible module
-        self.module = AnsibleModule(
-            argument_spec=self.module_params,
-            supports_check_mode=True
-        )
+
+        ansible_module_params = {
+            'argument_spec': self.get_nfs_parameters(),
+            'supports_check_mode': True
+        }
+        super().__init__(AnsibleModule, ansible_module_params)
         # Result is a dictionary that contains changed status, NFS export
         # details
         self.result = {
             "changed": False,
             "NFS_export_details": {}
         }
-        PREREQS_VALIDATE = utils.validate_module_pre_reqs(self.module.params)
-        if PREREQS_VALIDATE \
-                and not PREREQS_VALIDATE["all_packages_found"]:
-            self.module.fail_json(
-                msg=PREREQS_VALIDATE["error_message"])
-
-        self.api_client = utils.get_powerscale_connection(self.module.params)
-        self.isi_sdk = utils.get_powerscale_sdk()
-        LOG.info('Got python SDK instance for provisioning on PowerScale ')
-
-        self.protocol_api = self.isi_sdk.ProtocolsApi(self.api_client)
-        self.zone_summary_api = self.isi_sdk.ZonesSummaryApi(self.api_client)
 
     def get_zone_base_path(self, access_zone):
         """Returns the base path of the Access Zone."""
         try:
-            zone_path = (self.zone_summary_api.
+            zone_path = (self.zones_summary_api.
                          get_zones_summary_zone(access_zone)).to_dict()
             return zone_path["summary"]["path"]
         except Exception as e:
@@ -532,6 +537,7 @@ class NfsExport(object):
                 path = path[0:len(path) - 1]
             nfs_exports_extended_obj = self.protocol_api.list_nfs_exports(
                 path=path, zone=access_zone)
+
             if nfs_exports_extended_obj.total > 1:
                 error_msg = 'Multiple NFS Exports found'
                 LOG.error(error_msg)
@@ -662,19 +668,25 @@ class NfsExport(object):
         Check if read-write clients are to be added/removed to/from NFS export
         '''
 
-        if playbook_client_dict['read_write_clients']:
-            for client in playbook_client_dict['read_write_clients']:
-                if client not in current_client_dict['read_write_clients'] and \
-                        self.module.params['client_state'] == 'present-in-export':
-                    current_client_dict['read_write_clients'].append(client)
-                    mod_flag = True
-                elif client in current_client_dict['read_write_clients'] and \
-                        self.module.params['client_state'] == 'absent-in-export':
-                    current_client_dict['read_write_clients'].remove(client)
-                    mod_flag = True
+        client_state = self.module.params['client_state']
+        if playbook_client_dict['read_write_clients'] is None:
+            return mod_flag, nfs_export
 
-            if mod_flag:
-                nfs_export.read_write_clients = current_client_dict['read_write_clients']
+        if client_state is None:
+            if set(playbook_client_dict['read_write_clients']) != set(current_client_dict['read_write_clients']):
+                current_client_dict['read_write_clients'] = playbook_client_dict['read_write_clients']
+                mod_flag = True
+        for client in playbook_client_dict['read_write_clients']:
+            if client_state == 'present-in-export' and client not in current_client_dict['read_write_clients']:
+                current_client_dict['read_write_clients'].append(client)
+                mod_flag = True
+
+            elif client_state == 'absent-in-export' and client in current_client_dict['read_write_clients']:
+                current_client_dict['read_write_clients'].remove(client)
+                mod_flag = True
+
+        if mod_flag:
+            nfs_export.read_write_clients = current_client_dict['read_write_clients']
 
         return mod_flag, nfs_export
 
@@ -683,19 +695,25 @@ class NfsExport(object):
         Check if clients are to be added/removed to/from NFS export
         '''
 
-        if playbook_client_dict['clients']:
-            for client in playbook_client_dict['clients']:
-                if client not in current_client_dict['clients'] and \
-                        self.module.params['client_state'] == 'present-in-export':
-                    current_client_dict['clients'].append(client)
-                    mod_flag = True
-                elif client in current_client_dict['clients'] and \
-                        self.module.params['client_state'] == 'absent-in-export':
-                    current_client_dict['clients'].remove(client)
-                    mod_flag = True
+        client_state = self.module.params['client_state']
+        if playbook_client_dict['clients'] is None:
+            return mod_flag, nfs_export
 
-            if mod_flag:
-                nfs_export.clients = current_client_dict['clients']
+        if client_state is None:
+            if playbook_client_dict['clients'] != current_client_dict['clients']:
+                current_client_dict['clients'] = playbook_client_dict['clients']
+                mod_flag = True
+        for client in playbook_client_dict['clients']:
+            if client_state == 'present-in-export' and client not in current_client_dict['clients']:
+                current_client_dict['clients'].append(client)
+                mod_flag = True
+
+            elif client_state == 'absent-in-export' and client in current_client_dict['clients']:
+                current_client_dict['clients'].remove(client)
+                mod_flag = True
+
+        if mod_flag:
+            nfs_export.clients = current_client_dict['clients']
 
         return mod_flag, nfs_export
 
@@ -704,19 +722,25 @@ class NfsExport(object):
         Check if read-only clients are to be added/removed to/from NFS export
         '''
 
-        if playbook_client_dict['read_only_clients']:
-            for client in playbook_client_dict['read_only_clients']:
-                if client not in current_client_dict['read_only_clients'] and \
-                        self.module.params['client_state'] == 'present-in-export':
-                    current_client_dict['read_only_clients'].append(client)
-                    mod_flag = True
-                elif client in current_client_dict['read_only_clients'] and \
-                        self.module.params['client_state'] == 'absent-in-export':
-                    current_client_dict['read_only_clients'].remove(client)
-                    mod_flag = True
+        client_state = self.module.params['client_state']
+        if playbook_client_dict['read_only_clients'] is None:
+            return mod_flag, nfs_export
 
-            if mod_flag:
-                nfs_export.read_only_clients = current_client_dict['read_only_clients']
+        if client_state is None:
+            if playbook_client_dict['read_only_clients'] != current_client_dict['read_only_clients']:
+                current_client_dict['read_only_clients'] = playbook_client_dict['read_only_clients']
+                mod_flag = True
+        for client in playbook_client_dict['read_only_clients']:
+            if client_state == 'present-in-export' and client not in current_client_dict['read_only_clients']:
+                current_client_dict['read_only_clients'].append(client)
+                mod_flag = True
+
+            elif client_state == 'absent-in-export' and client in current_client_dict['read_only_clients']:
+                current_client_dict['read_only_clients'].remove(client)
+                mod_flag = True
+
+        if mod_flag:
+            nfs_export.read_only_clients = current_client_dict['read_only_clients']
 
         return mod_flag, nfs_export
 
@@ -725,19 +749,25 @@ class NfsExport(object):
         Check if root clients are to be added/removed to/from NFS export
         '''
 
-        if playbook_client_dict['root_clients']:
-            for client in playbook_client_dict['root_clients']:
-                if client not in current_client_dict['root_clients'] and \
-                        self.module.params['client_state'] == 'present-in-export':
-                    current_client_dict['root_clients'].append(client)
-                    mod_flag = True
-                elif client in current_client_dict['root_clients'] and \
-                        self.module.params['client_state'] == 'absent-in-export':
-                    current_client_dict['root_clients'].remove(client)
-                    mod_flag = True
+        client_state = self.module.params['client_state']
+        if playbook_client_dict['root_clients'] is None:
+            return mod_flag, nfs_export
 
-            if mod_flag:
-                nfs_export.root_clients = current_client_dict['root_clients']
+        if client_state is None:
+            if playbook_client_dict['root_clients'] != current_client_dict['root_clients']:
+                current_client_dict['root_clients'] = playbook_client_dict['root_clients']
+                mod_flag = True
+        for client in playbook_client_dict['root_clients']:
+            if client_state == 'present-in-export' and client not in current_client_dict['root_clients']:
+                current_client_dict['root_clients'].append(client)
+                mod_flag = True
+
+            elif client_state == 'absent-in-export' and client in current_client_dict['root_clients']:
+                current_client_dict['root_clients'].remove(client)
+                mod_flag = True
+
+        if mod_flag:
+            nfs_export.root_clients = current_client_dict['root_clients']
 
         return mod_flag, nfs_export
 
@@ -888,47 +918,10 @@ class NfsExport(object):
             error_msg = 'Invalid input: Client state is given, clients not specified'
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
-        if self.module.params['client_state'] is None and any(
-                client_list is not None for client_list in all_client_list):
-            error_msg = 'Invalid input: Clients are given, client state not specified'
-            LOG.error(error_msg)
-            self.module.fail_json(msg=error_msg)
-
-    def perform_module_operation(self):
-        '''
-        Perform different actions on NFS exports based on user parameter
-        chosen in playbook
-        '''
-        state = self.module.params['state']
-        access_zone = self.module.params['access_zone']
-        ignore_unresolvable_hosts = self.module.params['ignore_unresolvable_hosts']
-        path = self.effective_path(access_zone=access_zone, path=self.module.params['path'])
-        changed = False
-
-        self.result['NFS_export_details'] = self.get_nfs_export(
-            path=path, access_zone=access_zone)
-
-        self._validate_input()
-        if state == 'present' and self.result['NFS_export_details']:
-            # check for modification
-            changed = self.modify_nfs_export(path, access_zone, ignore_unresolvable_hosts) or changed
-
-        if state == 'present' and not self.result['NFS_export_details']:
-            # create NFS export
-            changed = self.create_nfs_export(path=path, access_zone=access_zone, ignore_unresolvable_hosts=ignore_unresolvable_hosts)
-
-        if state == 'absent' and self.result['NFS_export_details']:
-            # delete nfs export
-            changed = self.delete_nfs_export() or changed
-
-        # Update the module's final state
-        LOG.info('changed %s', changed)
-        self.result['changed'] = changed
-        self.module.exit_json(**self.result)
 
     def get_nfs_parameters(self):
         return dict(
-            path=dict(required=True, type='str', no_log=True),
+            path=dict(required=True, type='str'),
             access_zone=dict(type='str', default='System'),
             clients=dict(type='list', elements='str'),
             root_clients=dict(type='list', elements='str'),
@@ -1096,11 +1089,53 @@ def is_map_secondary_groups_modified(nfs_map_params, nfs_export_details, nfs_exp
         return True
 
 
+class NFSExitHandler:
+    def handle(self, nfs_obj, changed):
+        LOG.info('changed %s', changed)
+        nfs_obj.result['changed'] = changed
+        nfs_obj.module.exit_json(**nfs_obj.result)
+
+
+class NFSDeleteHandler:
+    def handle(self, nfs_obj, nfs_params, changed):
+        if nfs_params['state'] == 'absent' and nfs_obj.result['NFS_export_details']:
+            # delete nfs export
+            changed = nfs_obj.delete_nfs_export() or changed
+        NFSExitHandler().handle(nfs_obj=nfs_obj, changed=changed)
+
+
+class NFSCreateHandler:
+    def handle(self, nfs_obj, nfs_params, path, changed):
+        if nfs_params['state'] == 'present' and not nfs_obj.result['NFS_export_details']:
+            changed = nfs_obj.create_nfs_export(
+                path=path, access_zone=nfs_params['access_zone'],
+                ignore_unresolvable_hosts=nfs_params['ignore_unresolvable_hosts'])
+        NFSDeleteHandler().handle(nfs_obj=nfs_obj, nfs_params=nfs_params, changed=changed)
+
+
+class NFSModifyHandler:
+    def handle(self, nfs_obj, nfs_params, path, changed):
+        if nfs_params['state'] == 'present' and nfs_obj.result['NFS_export_details']:
+            # check for modification
+            changed = nfs_obj.modify_nfs_export(path, nfs_params['access_zone'], nfs_params['ignore_unresolvable_hosts']) or changed
+        NFSCreateHandler().handle(nfs_obj=nfs_obj, nfs_params=nfs_params, path=path, changed=changed)
+
+
+class NFSHandler:
+    def handle(self, nfs_obj, nfs_params):
+        changed = False
+        path = nfs_obj.effective_path(access_zone=nfs_params['access_zone'], path=nfs_params['path'])
+        nfs_obj.result['NFS_export_details'] = nfs_obj.get_nfs_export(
+            path=path, access_zone=nfs_params['access_zone'])
+        nfs_obj._validate_input()
+        NFSModifyHandler().handle(nfs_obj=nfs_obj, nfs_params=nfs_params, path=path, changed=changed)
+
+
 def main():
-    ''' Create PowerScale_NFS export object and perform action on it
-        based on user input from playbook'''
+    """ Perform action on PowerScale nfs_export object and perform action on it
+        based on user input from playbook."""
     obj = NfsExport()
-    obj.perform_module_operation()
+    NFSHandler().handle(obj, obj.module.params)
 
 
 if __name__ == '__main__':
