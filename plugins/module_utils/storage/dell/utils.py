@@ -28,8 +28,6 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.lo
     import CustomRotatingFileHandler
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.nwpool_utils \
     import NetworkPoolAPI
-from ansible.module_utils.urls import ConnectionError, SSLValidationError
-from ansible.module_utils.six.moves.urllib.error import URLError, HTTPError
 import math
 from decimal import Decimal
 import datetime
@@ -221,7 +219,7 @@ Validates the package pre-requisites of invoking module
 '''
 
 
-def validate_module_pre_reqs(module_params, module=None):
+def validate_module_pre_reqs(module_params):
     error_message = ""
     cur_py_ver = "{0}.{1}.{2}".format(str(sys.version_info[0]),
                                       str(sys.version_info[1]),
@@ -242,7 +240,7 @@ def validate_module_pre_reqs(module_params, module=None):
         )
         return prereqs_check
 
-    POWERSCALE_SDK_IMPORT = find_compatible_powerscale_sdk(module_params, module)
+    POWERSCALE_SDK_IMPORT = find_compatible_powerscale_sdk(module_params)
     if POWERSCALE_SDK_IMPORT and \
             not POWERSCALE_SDK_IMPORT["powerscale_package_imported"]:
         if POWERSCALE_SDK_IMPORT['error_message']:
@@ -285,7 +283,7 @@ def import_powerscale_sdk(sdk):
 ''' Find compatible powerscale sdk based on onefs version '''
 
 
-def find_compatible_powerscale_sdk(module_params, module=None):
+def find_compatible_powerscale_sdk(module_params):
     global HAS_POWERSCALE_SDK
     error_message = ""
 
@@ -301,15 +299,13 @@ def find_compatible_powerscale_sdk(module_params, module=None):
             major = str(parse_version(cluster_api.get_cluster_config().to_dict()['onefs_version']['release'].split('.')[0]))
             minor = str(parse_version(cluster_api.get_cluster_config().to_dict()['onefs_version']['release'].split('.')[1]))
             array_version = major + "_" + minor + "_0"
-            if module == "ads":
-                # Adding a workaround for home_directory_template failure in later versions of SDK.
-                compatible_powerscale_sdk = "isilon_sdk.v9_1_0"
+
+            if int(minor) >= 5:
+                compatible_powerscale_sdk = "isilon_sdk.v9_5_0"
             else:
-                if int(minor) >= 5:
-                    compatible_powerscale_sdk = "isilon_sdk.v9_5_0"
-                else:
-                    compatible_powerscale_sdk = "isilon_sdk.v" + array_version
+                compatible_powerscale_sdk = "isilon_sdk.v" + array_version
             import_powerscale_sdk(compatible_powerscale_sdk)
+
         except Exception as e:
             HAS_POWERSCALE_SDK = False
             error_message = 'Unable to fetch version of array {0}, ' \
@@ -550,19 +546,46 @@ def is_param_length_valid(item):
 
 
 def get_network_pool_details(user, password, hostname, port, groupnet, subnet, pool_id, validate_certs=False):
-    try:
-        params = {
-            "username": user,
-            "password": password,
-            "onefs_host": hostname,
-            "port_no": port,
-            "verify_ssl": validate_certs
-        }
-        nwpool = NetworkPoolAPI(params)
-        session_url = "/platform/16/network/groupnets/" + groupnet + "/subnets/" + subnet + "/pools/" + pool_id + "?select=*"
-        session_status_response = nwpool.invoke_request(headers={"Content-Type": "application/json"}, uri=session_url, method="GET")
-        status_code = session_status_response.status_code
-        return session_status_response.json_data
-    except (HTTPError, URLError, SSLValidationError, ConnectionError) as e:
-        ApiException = e
-        raise e
+    params = {
+        "username": user,
+        "password": password,
+        "onefs_host": hostname,
+        "port_no": port,
+        "verify_ssl": validate_certs
+    }
+    nwpool = NetworkPoolAPI(params)
+    session_url = "/platform/16/network/groupnets/" + groupnet + "/subnets/" + subnet + "/pools/" + pool_id + "?select=*"
+    session_status_response = nwpool.invoke_request(headers={"Content-Type": "application/json"}, uri=session_url, method="GET")
+
+    return session_status_response.json_data
+
+
+def get_ads_provider_details(user, password, hostname, port, ads_provider_name, validate_certs=False):
+    """
+    Fetches details of all the ADS providers in the cluster.
+
+    :param user: Username to authenticate.
+    :param password: Password to authenticate.
+    :param hostname: Cluster name or IP address.
+    :param port: Port number.
+    :param ads_provider_name: Name of the ADS provider to fetch details.
+    :param validate_certs: Validate SSL certificates.
+    :return: A dictionary of ADS providers.
+
+    :raises HTTPError: If unable to connect to the cluster.
+    :raises URLError: If unable to connect to the cluster.
+    :raises SSLValidationError: If SSL certificate validation fails.
+    :raises ConnectionError: If unable to connect to the cluster.
+    """
+    params = {
+        "username": user,
+        "password": password,
+        "onefs_host": hostname,
+        "port_no": port,
+        "verify_ssl": validate_certs
+    }
+    nwpool = NetworkPoolAPI(params)
+    session_url = "/platform/14/auth/providers/ads/" + ads_provider_name + "?select=*"
+    session_status_response = nwpool.invoke_request(headers={"Content-Type": "application/json"}, uri=session_url, method="GET")
+
+    return session_status_response.json_data
