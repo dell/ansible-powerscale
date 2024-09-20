@@ -54,28 +54,38 @@ author:
 - Kritika Bhateja(@Kritika-Bhateja-03) <ansible.team.dell.com>
 
 options:
-  include_all_access_zones:
-    description:
-    - Specifies if requested component details need to be fetched from all
-      access zones.
-    - It is mutually exclusive with I(access_zone).
-    type: bool
   access_zone:
     description:
     - The access zone. If no Access Zone is specified, the 'System' access
       zone would be taken by default.
     default: 'System'
     type: str
-  scope:
+  filters:
     description:
-    - The scope of ldap. If no scope is specified, the C(effective) scope
-      would be taken by default.
-    - If specified as C(effective) or not specified, all fields are returned.
-    - If specified as C(user), only fields with non-default values are shown.
-    - If specified as C(default), the original values are returned.
-    choices: ['effective', 'user', 'default']
-    default: 'effective'
-    type: str
+    - List of filters to support filtered output for storage entities.
+    - Each filter is a tuple of {filter_key, filter_operator, filter_value}.
+    - Supports passing of multiple filters.
+    required: False
+    type: list
+    elements: dict
+    suboptions:
+      filter_key:
+        description:
+        - Name identifier of the filter.
+        type: str
+        required: True
+      filter_operator:
+        description:
+        - Operation to be performed on filter key.
+        type: str
+        choices: [equal]
+        required: True
+      filter_value:
+        description:
+        - Value of the filter key.
+        type: raw
+        required: True
+    version_added: '3.2.0'
   gather_subset:
     description:
     - List of string variables to specify the PowerScale Storage System
@@ -155,32 +165,22 @@ options:
               alert_rules, alert_channels, alert_categories, event_group, writable_snapshots]
     type: list
     elements: str
-  filters:
+  include_all_access_zones:
     description:
-    - List of filters to support filtered output for storage entities.
-    - Each filter is a tuple of {filter_key, filter_operator, filter_value}.
-    - Supports passing of multiple filters.
-    required: False
-    type: list
-    elements: dict
-    suboptions:
-      filter_key:
-        description:
-        - Name identifier of the filter.
-        type: str
-        required: True
-      filter_operator:
-        description:
-        - Operation to be performed on filter key.
-        type: str
-        choices: [equal]
-        required: True
-      filter_value:
-        description:
-        - Value of the filter key.
-        type: raw
-        required: True
-    version_added: '3.2.0'
+    - Specifies if requested component details need to be fetched from all
+      access zones.
+    - It is mutually exclusive with I(access_zone).
+    type: bool
+  scope:
+    description:
+    - The scope of ldap. If no scope is specified, the C(effective) scope
+      would be taken by default.
+    - If specified as C(effective) or not specified, all fields are returned.
+    - If specified as C(user), only fields with non-default values are shown.
+    - If specified as C(default), the original values are returned.
+    choices: ['effective', 'user', 'default']
+    default: 'effective'
+    type: str
   query_parameters:
     description:
     - Contains dictionary of query parameters for specific I(gather_subset).
@@ -252,6 +252,9 @@ EXAMPLES = r'''
     access_zone: "{{access_zone}}"
     gather_subset:
       - users
+    query_parameters:
+      users:
+        - filter: 'sample_user'
 
 - name: Get list of groups for an access zone of the PowerScale cluster
   dellemc.powerscale.info:
@@ -3341,25 +3344,6 @@ class Info(object):
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
-    def get_users_list(self, access_zone):
-        """Get the list of users for an access zone of a given PowerScale
-        Storage"""
-        try:
-            users_list = (self.auth_api.list_auth_users(zone=access_zone))\
-                .to_dict()
-            LOG.info('Got Users from PowerScale cluster %s',
-                     self.module.params['onefs_host'])
-            return users_list
-        except Exception as e:
-            error_msg = (
-                'Get Users List for PowerScale cluster: {0} and access zone: {1} '
-                'failed with error: {2}' .format(
-                    self.module.params['onefs_host'],
-                    access_zone,
-                    utils.determine_error(e)))
-            LOG.error(error_msg)
-            self.module.fail_json(msg=error_msg)
-
     def get_groups_list(self, access_zone):
         """Get the list of groups for an access zone of a given PowerScale
         Storage"""
@@ -3995,7 +3979,7 @@ class Info(object):
             'access_zones': self.get_access_zones_list,
             'nodes': self.get_nodes_list,
             'providers': lambda: self.get_providers_list(access_zone),
-            'users': lambda: self.get_users_list(access_zone),
+            'users': lambda: Auth(self.auth_api, self.module).get_auth_users(access_zone),
             'groups': lambda: self.get_groups_list(access_zone),
             'smb_shares': lambda: self.get_smb_shares_list(access_zone),
             'clients': self.get_clients_list,
@@ -4085,7 +4069,7 @@ class Info(object):
         }
 
         # Map the subset to the appropriate Key
-        subset_list = ['attributes', 'access_zones', 'nodes', 'providers', 'users', 'groups', 'smb_shares', 'clients',
+        subset_list = ['attributes', 'access_zones', 'nodes', 'providers', 'groups', 'smb_shares', 'clients',
                        'nfs_exports', 'nfs_aliases', 'synciq_reports', 'synciq_target_reports', 'synciq_policies',
                        'synciq_target_cluster_certificates', 'synciq_performance_rules', 'network_groupnets',
                        'network_pools', 'network_rules', 'network_interfaces', 'network_subnets', 'node_pools',
@@ -4093,7 +4077,8 @@ class Info(object):
                        'nfs_default_settings', 'nfs_global_settings', 'synciq_global_settings', 's3_buckets',
                        'smb_global_settings', 'ntp_servers', 'email_settings', 'cluster_identity', 'cluster_owner',
                        'snmp_settings', 'server_certificate', 'event_group', 'smartquota', 'filesystem',
-                       'writable_snapshots']
+                       'writable_snapshots', 'users']
+
         for key in subset:
             if key not in subset_list:
                 result[key] = subset_mapping[key]()
