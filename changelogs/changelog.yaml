@@ -312,3 +312,10 @@ releases:
         name: writable_snapshots
         namespace: ''
     release_date: '2024-08-30'
+  3.4.0:
+    changes:
+      minor_changes:
+        - Added support to list all the paginated data for the users in Info module.
+        - ADS module has been enhanced to support the additional parameters.
+        - NFS module is enhanced to remove masked paths in response and also added declarative approach of managing clients.
+    release_date: '2024-09-30'

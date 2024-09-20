@@ -1,6 +1,6 @@
 **Ansible Modules for Dell Technologies PowerScale** 
 =========================================
-### Release notes 3.3.0
+### Release notes 3.4.0
 
 >   © 2024 Dell Inc. or its subsidiaries. All rights reserved. Dell
 >   and other trademarks are trademarks of Dell Inc. or its
@@ -27,7 +27,7 @@ Table 1. Revision history
 
 | Revision | Date          | Description                                               |
 |----------|---------------|-----------------------------------------------------------|
-| 01       | August 2024   | Ansible Modules for Dell PowerScale 3.3.0                 |
+| 01       | Sepetember 2024   | Ansible Modules for Dell PowerScale 3.4.0                 |
 
 
 Product description
@@ -80,12 +80,11 @@ New Features and Enhancements
 ---------------------------
 This section describes the features of the Ansible Modules for Dell PowerScale for this release.
 
-The Ansible Modules for Dell PowerScale release 3.3.0 supports the following features:
+The Ansible Modules for Dell PowerScale release 3.4.0 supports the following features:
 
-- Added support for create, modify, and delete Alert Channel.
-- Added support for create, modify, and delete Alert Rule.
-- Added support for create, and delete Writable Snapshots.
-- Added support for listing Writable Snapshots in Info module
+- ADS module has been enhanced to support the additional parameters.
+- Added support to list all the paginated data for the users in Info module.
+- NFS module is enhanced to remove masked paths in response and also added declarative approach of managing clients.
 
 Known issues
 ------------
