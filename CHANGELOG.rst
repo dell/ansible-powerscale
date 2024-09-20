@@ -4,6 +4,15 @@ Dellemc.Powerscale Change Logs
 
 .. contents:: Topics
 
+v3.4.0
+======
+
+Minor Changes
+-------------
+
+- ADS module has been enhanced to support the additional parameters.
+- Added support to list all the paginated data for the users in Info module.
+- NFS module is enhanced to remove masked paths in response and also added declarative approach of managing clients.
 
 v3.3.0
 ======
@@ -11,8 +20,8 @@ v3.3.0
 Minor Changes
 -------------
 
-- Added support for listing writable snapshots in Info module.
 - Added fix for firewall policy issue for network pool operations.
+- Added support for listing writable snapshots in Info module.
 
 New Modules
 -----------

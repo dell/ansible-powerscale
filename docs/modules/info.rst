@@ -57,24 +57,29 @@ The below requirements are needed on the host that executes this module.
 Parameters
 ----------
 
-  include_all_access_zones (optional, bool, None)
-    Specifies if requested component details need to be fetched from all access zones.
-
-    It is mutually exclusive with \ :emphasis:`access\_zone`\ .
-
-
   access_zone (optional, str, System)
     The access zone. If no Access Zone is specified, the 'System' access zone would be taken by default.
 
 
-  scope (optional, str, effective)
-    The scope of ldap. If no scope is specified, the \ :literal:`effective`\  scope would be taken by default.
+  filters (False, list, None)
+    List of filters to support filtered output for storage entities.
 
-    If specified as \ :literal:`effective`\  or not specified, all fields are returned.
+    Each filter is a tuple of {filter\_key, filter\_operator, filter\_value}.
 
-    If specified as \ :literal:`user`\ , only fields with non-default values are shown.
+    Supports passing of multiple filters.
 
-    If specified as \ :literal:`default`\ , the original values are returned.
+
+    filter_key (True, str, None)
+      Name identifier of the filter.
+
+
+    filter_operator (True, str, None)
+      Operation to be performed on filter key.
+
+
+    filter_value (True, raw, None)
+      Value of the filter key.
+
 
 
   gather_subset (True, list, None)
@@ -195,25 +200,20 @@ Parameters
     Writable snapshots - \ :literal:`writable\_snapshots`\ .
 
 
-  filters (False, list, None)
-    List of filters to support filtered output for storage entities.
+  include_all_access_zones (optional, bool, None)
+    Specifies if requested component details need to be fetched from all access zones.
 
-    Each filter is a tuple of {filter\_key, filter\_operator, filter\_value}.
-
-    Supports passing of multiple filters.
+    It is mutually exclusive with \ :emphasis:`access\_zone`\ .
 
 
-    filter_key (True, str, None)
-      Name identifier of the filter.
+  scope (optional, str, effective)
+    The scope of ldap. If no scope is specified, the \ :literal:`effective`\  scope would be taken by default.
 
+    If specified as \ :literal:`effective`\  or not specified, all fields are returned.
 
-    filter_operator (True, str, None)
-      Operation to be performed on filter key.
+    If specified as \ :literal:`user`\ , only fields with non-default values are shown.
 
-
-    filter_value (True, raw, None)
-      Value of the filter key.
-
+    If specified as \ :literal:`default`\ , the original values are returned.
 
 
   query_parameters (optional, dict, None)
@@ -323,6 +323,9 @@ Examples
         access_zone: "{{access_zone}}"
         gather_subset:
           - users
+        query_parameters:
+          users:
+            - filter: 'sample_user'
 
     - name: Get list of groups for an access zone of the PowerScale cluster
       dellemc.powerscale.info:
