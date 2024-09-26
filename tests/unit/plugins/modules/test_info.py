@@ -798,7 +798,7 @@ class TestInfo():
             gatherfacts_module_mock.perform_module_operation()
         assert MockGatherfactsApi.get_gather_facts_module_response(
             gather_subset)['users'] == gatherfacts_module_mock.module.exit_json.call_args[1][return_key]
-        
+
     @pytest.mark.parametrize("input_params", [
         {"gather_subset": "ldap", "return_key": "LdapProviders"}
     ]

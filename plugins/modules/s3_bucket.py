@@ -457,8 +457,7 @@ class S3Bucket(object):
                 zone=self.module.params["access_zone"],
                 provider=grantee_dict['provider_type'])[0]['gid']
         else:
-            grantee_details = Auth.get_wellknown_details(self,
-                name=grantee_dict['name'])
+            grantee_details = Auth.get_wellknown_details(self, name=grantee_dict['name'])
 
         grantee_dict['id'] = None
         grantee_dict['name'] = grantee_details['name']

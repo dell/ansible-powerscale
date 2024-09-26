@@ -27,20 +27,20 @@ class MockRoleApi:
         "state": "present"}
 
     PRIVILEGES = {
-        "privileges": 
+        "privileges":
             [
                 {
-                'id': 'ISI_PRIV_AUDIT', 
-                'name': 'Audit', 
-                'permission': 'w'
-                }, 
+                    'id': 'ISI_PRIV_AUDIT',
+                    'name': 'Audit',
+                    'permission': 'w'
+                },
                 {
-                 'id': 'ISI_PRIV_ANTIVIRUS', 
-                 'name': 'Antivirus', 
-                 'permission': 'r'
+                    'id': 'ISI_PRIV_ANTIVIRUS',
+                    'name': 'Antivirus',
+                    'permission': 'r'
                 }
             ]
-        }
+    }
     MEMBERS = {'id': 'UID:2140', 'name': 'esa', 'type': 'user'}
     MEMBERS_GROUP = {'id': 'UID:2146', 'name': 'Guest', 'type': 'group'}
     MEMBERS_WELLKNOW = {"wellknowns": [{'id': 'SID:S-1-1-0', 'name': 'user', 'type': 'wellknown'}]}
