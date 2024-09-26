@@ -306,6 +306,8 @@ S3_bucket_details:
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.auth \
+    import Auth
 
 LOG = utils.get_logger('s3_bucket')
 
@@ -397,26 +399,6 @@ class S3Bucket(object):
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
-    def get_wellknown_id(self, name):
-        """Get the wellknown account details in PowerScale
-        :param name: name of wellknown
-        """
-        try:
-            resp = self.auth_api.get_auth_wellknowns().to_dict()
-            for wellknown in resp['wellknowns']:
-                if wellknown['name'].lower() == name.lower():
-                    return wellknown
-            error_message = (f'Wellknown {name} does not exist. '
-                             f'Provide valid wellknown.')
-            LOG.error(error_message)
-            self.module.fail_json(msg=error_message)
-        except Exception as e:
-            error_msg = utils.determine_error(error_obj=e)
-            error_message = (f'Failed to get the wellknown id for wellknown '
-                             f'{name} due to error {str(error_msg)}.')
-            LOG.error(error_message)
-            self.module.fail_json(msg=error_message)
-
     def get_group_id(self, name, zone, provider):
         """
         get details of the group
@@ -475,7 +457,7 @@ class S3Bucket(object):
                 zone=self.module.params["access_zone"],
                 provider=grantee_dict['provider_type'])[0]['gid']
         else:
-            grantee_details = self.get_wellknown_id(
+            grantee_details = Auth.get_wellknown_details(self,
                 name=grantee_dict['name'])
 
         grantee_dict['id'] = None

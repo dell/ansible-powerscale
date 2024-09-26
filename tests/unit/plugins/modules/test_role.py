@@ -178,14 +178,14 @@ class TestRole(PowerScaleUnitBase):
                 "new_role_name": "Test_Role_Copy",
                 "privileges": [
                     {
-                        "name": "Audit",
-                        "permission": "w",
+                        "name": "Antivirus",
+                        "permission": "r",
                         "state": "present"
                     }
                 ],
                 "members": [
                     {
-                        "name": "esa",
+                        "name": "esa_user",
                         "type": "user",
                         'provider_type': "local",
                         "state": "present"
