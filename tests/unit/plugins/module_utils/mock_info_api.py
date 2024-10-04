@@ -626,6 +626,8 @@ class MockGatherfactsApi:
                     "user": "admin"
                 }
             ]
+        elif response_type == 'cluster_ip_exception':
+            return "Getting list of cluster external ips for PowerScale:"
         else:
             return "Getting list of smb open files for PowerScale: %s failed with error: SDK Error message" % (
                    MockGatherfactsApi.GATHERFACTS_COMMON_ARGS['onefs_host'])
@@ -1770,8 +1772,9 @@ class MockGatherfactsApi:
         return subset_error_dict.get(gather_subset)
 
     @staticmethod
-    def get_gather_facts_error_response(gather_subset):
-        param = "error"
+    def get_gather_facts_error_response(gather_subset, param=None):
+        if not param:
+            param = "error"
         path = "ifs"
         subset_error_dict = {
             "nfs_global_settings": MockGatherfactsApi.get_nfsglobal_settings(param),

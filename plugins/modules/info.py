@@ -3700,17 +3700,42 @@ class Info(object):
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
-    def get_smb_files(self):
+    def get_smb_file_for_each_cluster(self, client):
         """Get the list of smb open files given PowerScale Storage"""
         try:
-            smb_files_details = (self.protocol_api.get_smb_openfiles())\
-                .to_dict()
-            LOG.info('Got smb_files from PowerScale cluster  %s',
-                     self.module.params['onefs_host'])
-            return smb_files_details['openfiles']
+            self.protocol_api = self.isi_sdk.ProtocolsApi(client)
+            cluster_response = self.protocol_api.get_smb_openfiles().to_dict()
+            LOG.info(cluster_response)
+            return cluster_response["openfiles"]
         except Exception as e:
             error_msg = (
                 'Getting list of smb open files for PowerScale: {0} failed with'
+                ' error: {1}'.format(
+                    self.client.onefs_host,
+                    utils.determine_error(e)))
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
+
+    def get_smb_files(self):
+        """Get the list of smb open files given PowerScale Storage"""
+        try:
+            api_response = self.cluster_api.get_cluster_external_ips()
+            smb_files_list = []
+            for each_ip in api_response:
+                LOG.info(self.api_client)
+                self.api_client.onefs_host = each_ip
+                smb_file = self.get_smb_file_for_each_cluster(self.api_client)
+                smb_files_list.append(smb_file)
+            filtered_smb_files_list = []
+            filters = self.module.params.get('filters')
+            filters_dict = self.get_filters(filters)
+            if filters_dict:
+                filtered_smb_files_list = filter_dict_list(smb_files_list, filters_dict)
+                return filtered_smb_files_list
+            return smb_files_list
+        except Exception as e:
+            error_msg = (
+                'Getting list of cluster external ips for PowerScale: {0} failed with'
                 ' error: {1}'.format(
                     self.module.params['onefs_host'],
                     utils.determine_error(e)))
@@ -4078,7 +4103,6 @@ class Info(object):
                        'smb_global_settings', 'ntp_servers', 'email_settings', 'cluster_identity', 'cluster_owner',
                        'snmp_settings', 'server_certificate', 'event_group', 'smartquota', 'filesystem',
                        'writable_snapshots', 'users']
-
         for key in subset:
             if key not in subset_list:
                 result[key] = subset_mapping[key]()
