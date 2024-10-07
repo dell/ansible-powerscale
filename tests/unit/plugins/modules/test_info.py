@@ -396,16 +396,22 @@ class TestInfo():
         assert MockGatherfactsApi.get_gather_facts_module_response(
             gather_subset) == gatherfacts_module_mock.module.exit_json.call_args[1][return_key]
 
-    def test_get_facts_smb_files_module(self, gatherfacts_module_mock):
+    @pytest.mark.parametrize("input_params", [
+        {"gather_subset": "smb_files", "return_key": "SmbOpenFiles"},
+        {"gather_subset": "smb_files", "return_key": "SmbOpenFiles", "filters":
+            [{"filter_key": "id", "filter_operator": "equal", "filter_value": 1880}]}
+    ]
+    )
+    def test_get_facts_smb_files_module(self, gatherfacts_module_mock, input_params):
         """Test the get_facts that uses the protocols api endpoint to get the module response"""
-
-        gather_subset = "smb_files"
-        return_key = "SmbOpenFiles"
+        return_key = input_params.get('return_key')
+        gather_subset = input_params.get('gather_subset')
         smb_files_list = MockGatherfactsApi.get_gather_facts_api_response(
             gather_subset)
         self.get_module_args.update({
             'gather_subset': [gather_subset],
             'zone': "System",
+            "filters": input_params.get('filters')
         })
         gatherfacts_module_mock.cluster_api.get_cluster_external_ips = MagicMock(return_value=['192.168.0.1'])
         gatherfacts_module_mock.module.params = self.get_module_args
