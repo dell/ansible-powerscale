@@ -626,8 +626,8 @@ class FileSystem(object):
         try:
             resp = self.namespace_api.get_directory_metadata(
                 path,
-                metadata=True)
-            return resp.to_dict()
+                metadata=True).to_dict()
+            return resp
         except utils.ApiException as e:
             if str(e.status) == "404":
                 log_msg = "Filesystem {0} status is " \
@@ -642,12 +642,6 @@ class FileSystem(object):
                                     str(error_msg))
                 LOG.error(error_message)
                 self.module.fail_json(msg=error_message)
-
-        except Exception as e:
-            error_message = "Failed to get details of Filesystem {0} with" \
-                            " error {1} ".format(path, str(e))
-            LOG.error(error_message)
-            self.module.fail_json(msg=error_message)
 
     def get_acl(self, effective_path):
         """Retrieves ACL rights of filesystem"""
@@ -687,7 +681,6 @@ class FileSystem(object):
         if self.module.params['path']:
             path = self.module.params['path']
         access_zone = self.module.params['access_zone']
-
         if access_zone.lower() != 'system' and path:
             path = self.get_zone_base_path(access_zone) + path
 
@@ -737,7 +730,7 @@ class FileSystem(object):
         owner_id = self.get_owner_id(
             name=owner['name'],
             zone=self.module.params['access_zone'],
-            provider=owner_provider)['users'][0]['uid']['id']
+            provider=owner_provider)['users'][0]['sid']['id']
         create_owner = {'type': 'user', 'id': owner_id,
                         'name': owner['name']}
         return create_owner
@@ -752,7 +745,7 @@ class FileSystem(object):
             self.get_group_id(
                 name=group['name'],
                 zone=self.module.params['access_zone'],
-                provider=group_provider)['groups'][0]['gid']['id']
+                provider=group_provider)['groups'][0]['sid']['id']
 
         create_group = {'type': 'group', 'id': group_id,
                         'name': group['name']}
@@ -1262,11 +1255,11 @@ class FileSystem(object):
         if type == 'user':
             return self.get_owner_id(name=trustee_name,
                                      zone=access_zone,
-                                     provider=provider)['users'][0]['uid']['id']
+                                     provider=provider)['users'][0]['sid']['id']
         elif type == 'group':
             return self.get_group_id(name=trustee_name,
                                      zone=access_zone,
-                                     provider=provider)['groups'][0]['gid']['id']
+                                     provider=provider)['groups'][0]['sid']['id']
         else:
             return self.get_wellknown_id(name=trustee_name)['wellknowns'][0]['id']
 
@@ -1679,7 +1672,6 @@ class FilesystemHandler():
     def handle(self, filesystem_obj, filesystem_params):
         quota = copy.deepcopy(filesystem_params['quota'])
         filesystem_obj.validate_input(quota)
-
         effective_path = filesystem_obj.determine_path()
         filesystem_details = filesystem_obj.get_filesystem(path=effective_path)
         filesystem_quota = filesystem_obj.get_quota(effective_path)
