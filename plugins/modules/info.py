@@ -3705,13 +3705,12 @@ class Info(object):
         try:
             self.protocol_api = self.isi_sdk.ProtocolsApi(client)
             cluster_response = self.protocol_api.get_smb_openfiles().to_dict()
-            LOG.info(cluster_response)
             return cluster_response["openfiles"]
         except Exception as e:
             error_msg = (
                 'Getting list of smb open files for PowerScale: {0} failed with'
                 ' error: {1}'.format(
-                    self.client.onefs_host,
+                    client.onefs_host,
                     utils.determine_error(e)))
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)

@@ -629,8 +629,7 @@ class MockGatherfactsApi:
         elif response_type == 'cluster_ip_exception':
             return "Getting list of cluster external ips for PowerScale:"
         else:
-            return "Getting list of smb open files for PowerScale: %s failed with error: SDK Error message" % (
-                   MockGatherfactsApi.GATHERFACTS_COMMON_ARGS['onefs_host'])
+            return "Getting list of smb open files for PowerScale:"
 
     @staticmethod
     def get_user_mapping_rules_response(response_type):

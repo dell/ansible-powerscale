@@ -455,6 +455,26 @@ class TestInfo():
         assert MockGatherfactsApi.get_gather_facts_error_response(gather_subset, "cluster_ip_exception") in\
             gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
 
+    def test_get_facts_smb_files_exception(self, gatherfacts_module_mock):
+        """Test the get_facts that uses the protocols api endpoint to get the exception"""
+        gather_subset = "smb_files"
+        return_key = "SmbOpenFiles"
+        smb_files_list = MockGatherfactsApi.get_gather_facts_api_response(
+            gather_subset)
+        self.get_module_args.update({
+            'gather_subset': [gather_subset],
+            'zone': "System",
+        })
+        gatherfacts_module_mock.cluster_api.get_cluster_external_ips = MagicMock(return_value=['192.168.0.1'])
+        gatherfacts_module_mock.module.params = self.get_module_args
+        gatherfacts_module_mock.api_client.to_dict.onefs_host = MagicMock(return_value='192.168.0.1')
+        gatherfacts_module_mock.isi_sdk.ProtocolsApi = MagicMock(return_value=gatherfacts_module_mock.protocol_api)
+        gatherfacts_module_mock.protocol_api.get_smb_openfiles = MagicMock(
+            side_effect=MockApiException)
+        gatherfacts_module_mock.get_smb_file_for_each_cluster(gatherfacts_module_mock.api_client)
+        assert MockGatherfactsApi.get_gather_facts_error_response(gather_subset) in\
+            gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
+
     @pytest.mark.parametrize("input_params", [
         {"gather_subset": "support_assist_settings", "return_key": "support_assist_settings"}
     ]
