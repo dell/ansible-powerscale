@@ -250,21 +250,11 @@ class TestSmartQuota():
                is True
 
     def test_delete_group_quota(self, smartquota_module_mock):
-        self.get_smartquota_args.update({"path": MockSmartQuotaApi.PATH2,
+        self.get_smartquota_args.update({"path": MockSmartQuotaApi.PATH1,
                                          "access_zone": "sample-zone",
-                                         "quota_type": "group",
-                                         "provider_type": "local",
-                                         "group_name": "sample-user",
-                                         "quota": {
-                                             "thresholds_on": None,
-                                             "soft_limit_size": None,
-                                             "hard_limit_size": None,
-                                             "advisory_limit_size": None,
-                                             "cap_unit": None,
-                                             "soft_grace_period": None,
-                                             "period_unit": None,
-                                             "include_snapshots": True
-                                         },
+                                         "quota_type": "group_test",
+                                         "provider_type": "ldp",
+                                         "group_name": "sample-group",
                                          "state": "absent"})
         smartquota_module_mock.module.check_mode = False
         smartquota_module_mock.module.params = self.get_smartquota_args

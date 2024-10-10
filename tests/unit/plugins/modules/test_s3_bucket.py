@@ -102,19 +102,9 @@ class TestS3Bucket():
             "s3_bucket_name": MockS3BucketeApi.BUCKET_NAME,
             "path": MockS3BucketeApi.PATH_1,
             "access_zone": MockS3BucketeApi.ZONE,
-            "create_path": True,
+            "create_path": False,
             "owner": MockS3BucketeApi.OWNER,
-            "object_acl_policy": "replace",
-            "description": "description",
-            "acl": [{
-                "permission": "READ_ACP",
-                "grantee": {
-                    "name": MockS3BucketeApi.USER_1,
-                    "type": "user",
-                    "provider_type": "ads"
-                },
-                "acl_state": MockS3BucketeApi.STATE
-            }],
+            "description": "description_exception",
             "state": MockS3BucketeApi.STATE
         })
         s3bucket_module_mock.module.params = self.s3bucket_args

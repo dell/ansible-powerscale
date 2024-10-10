@@ -326,7 +326,6 @@ class TestInfo():
             gather_subset) == gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
 
     @pytest.mark.parametrize("input_params", [
-        {"gather_subset": "ldap", "return_key": "LdapProviders"},
         {"gather_subset": "user_mapping_rules", "return_key": "UserMappingRules"},
         {"gather_subset": "providers", "return_key": "Providers"},
         {"gather_subset": "groups", "return_key": "Groups"},
@@ -664,7 +663,7 @@ class TestInfo():
             mock_method.return_value = MockSDKResponse(api_response)
             gatherfacts_module_mock.perform_module_operation()
         assert MockGatherfactsApi.get_gather_facts_module_response(
-            gather_subset) == gatherfacts_module_mock.module.exit_json.call_args[1][return_key]
+            gather_subset)['quotas'] == gatherfacts_module_mock.module.exit_json.call_args[1][return_key]
 
     @pytest.mark.parametrize("gather_subset", [
         "smartquota"
@@ -799,3 +798,24 @@ class TestInfo():
             gatherfacts_module_mock.perform_module_operation()
         assert MockGatherfactsApi.get_gather_facts_module_response(
             gather_subset)['users'] == gatherfacts_module_mock.module.exit_json.call_args[1][return_key]
+
+    @pytest.mark.parametrize("input_params", [
+        {"gather_subset": "ldap", "return_key": "LdapProviders"}
+    ]
+    )
+    def test_get_facts_ldap(self, gatherfacts_module_mock, input_params):
+        """Test the get_facts that uses the auth api endpoint to get the module response"""
+
+        gather_subset = input_params.get('gather_subset')
+        return_key = input_params.get('return_key')
+        api_response = MockGatherfactsApi.get_gather_facts_api_response(
+            gather_subset)
+        self.get_module_args.update({
+            'gather_subset': [gather_subset]
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        with patch.object(gatherfacts_module_mock.auth_api, MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
+            mock_method.return_value = MockSDKResponse(api_response)
+            gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_gather_facts_module_response(
+            gather_subset)['ldap'] == gatherfacts_module_mock.module.exit_json.call_args[1][return_key]
