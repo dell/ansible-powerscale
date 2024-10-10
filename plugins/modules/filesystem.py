@@ -1301,7 +1301,7 @@ class FileSystem(object):
         try:
             resp = self.auth_api.get_auth_user(
                 auth_user_id='USER:' + name,
-                zone=zone, provider=provider.upper() + ":" + zone ).to_dict()
+                zone=zone, provider=provider.upper() + ":" + zone).to_dict()
             return resp
         except Exception as e:
             error_msg = self.determine_error(error_obj=e)
