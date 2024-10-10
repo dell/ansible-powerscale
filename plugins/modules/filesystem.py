@@ -730,7 +730,7 @@ class FileSystem(object):
         owner_id = self.get_owner_id(
             name=owner['name'],
             zone=self.module.params['access_zone'],
-            provider=owner_provider)['users'][0]['sid']['id']
+            provider=owner_provider)['users'][0]['uid']['id']
         create_owner = {'type': 'user', 'id': owner_id,
                         'name': owner['name']}
         return create_owner
@@ -760,7 +760,6 @@ class FileSystem(object):
             create_group = None
             if group:
                 create_group = self.get_group_info(group=group)
-
             info_message = "Attempting to create new FS {0}".format(path)
             LOG.info(info_message)
             if not self.module.check_mode:
@@ -1302,7 +1301,7 @@ class FileSystem(object):
         try:
             resp = self.auth_api.get_auth_user(
                 auth_user_id='USER:' + name,
-                zone=zone, provider=provider).to_dict()
+                zone=zone, provider=provider.upper() + ":" + zone ).to_dict()
             return resp
         except Exception as e:
             error_msg = self.determine_error(error_obj=e)
@@ -1317,9 +1316,12 @@ class FileSystem(object):
     def get_group_id(self, name, zone, provider):
         """Get the group account details in PowerScale"""
         try:
+            LOG.info("Getting group details here")
             resp = self.auth_api.get_auth_group(
                 auth_group_id='GROUP:' + name,
                 zone=zone, provider=provider).to_dict()
+
+            LOG.info(resp)
             return resp
         except Exception as e:
             error_msg = self.determine_error(error_obj=e)
