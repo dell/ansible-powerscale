@@ -51,6 +51,8 @@ class TestInfo():
         gatherfacts_module_mock.snapshot_api = MagicMock()
         gatherfacts_module_mock.smartquota_api = MagicMock()
         utils.ISI_SDK_VERSION_9 = MagicMock(return_value=True)
+        gatherfacts_module_mock.api_client = MagicMock()
+        gatherfacts_module_mock.isi_sdk = MagicMock()
         return gatherfacts_module_mock
 
     def test_empty_gather_subset(self, gatherfacts_module_mock):
@@ -364,7 +366,6 @@ class TestInfo():
             gather_subset) == gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
 
     @pytest.mark.parametrize("input_params", [
-        {"gather_subset": "smb_files", "return_key": "SmbOpenFiles"},
         {"gather_subset": "nfs_aliases", "return_key": "NfsAliases"},
         {"gather_subset": "smb_global_settings", "return_key": "SmbGlobalSettings"},
         {"gather_subset": "nfs_global_settings", "return_key": "NfsGlobalSettings"},
@@ -394,11 +395,36 @@ class TestInfo():
         assert MockGatherfactsApi.get_gather_facts_module_response(
             gather_subset) == gatherfacts_module_mock.module.exit_json.call_args[1][return_key]
 
+    @pytest.mark.parametrize("input_params", [
+        {"gather_subset": "smb_files", "return_key": "SmbOpenFiles"},
+        {"gather_subset": "smb_files", "return_key": "SmbOpenFiles", "filters":
+            [{"filter_key": "id", "filter_operator": "equal", "filter_value": 1880}]}
+    ]
+    )
+    def test_get_facts_smb_files_module(self, gatherfacts_module_mock, input_params):
+        """Test the get_facts that uses the protocols api endpoint to get the module response"""
+        return_key = input_params.get('return_key')
+        gather_subset = input_params.get('gather_subset')
+        smb_files_list = MockGatherfactsApi.get_gather_facts_api_response(
+            gather_subset)
+        self.get_module_args.update({
+            'gather_subset': [gather_subset],
+            'zone': "System",
+            "filters": input_params.get('filters')
+        })
+        gatherfacts_module_mock.cluster_api.get_cluster_external_ips = MagicMock(return_value=['192.168.0.1'])
+        gatherfacts_module_mock.module.params = self.get_module_args
+        gatherfacts_module_mock.api_client.to_dict.onefs_host = MagicMock(return_value='192.168.0.1')
+        gatherfacts_module_mock.protocol_api.get_smb_openfiles.to_dict = MagicMock(
+            return_value=MockSDKResponse(MockGatherfactsApi.get_gather_facts_api_response(
+                gather_subset)))
+        gatherfacts_module_mock.perform_module_operation()
+        gatherfacts_module_mock.protocol_api.get_smb_openfiles.assert_called()
+
     @pytest.mark.parametrize("gather_subset", [
         "nfs_global_settings",
         "smb_global_settings",
         "nfs_zone_settings",
-        "smb_files",
         "nfs_aliases",
         "smb_shares",
         "nfs_exports",
@@ -419,6 +445,40 @@ class TestInfo():
             gatherfacts_module_mock.perform_module_operation()
         assert MockGatherfactsApi.get_gather_facts_error_response(
             gather_subset) == gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
+
+    def test_get_facts_smb_files_cluseter_ip_exception(self, gatherfacts_module_mock):
+        """Test the get_facts that uses the protocols api endpoint to get the exception"""
+        gather_subset = "smb_files"
+        self.get_module_args.update({
+            'gather_subset': [gather_subset],
+            'zone': "System",
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        gatherfacts_module_mock.cluster_api.get_cluster_external_ips = MagicMock(
+            side_effect=MockApiException)
+        gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_gather_facts_error_response(gather_subset, "cluster_ip_exception") in\
+            gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
+
+    def test_get_facts_smb_files_exception(self, gatherfacts_module_mock):
+        """Test the get_facts that uses the protocols api endpoint to get the exception"""
+        gather_subset = "smb_files"
+        return_key = "SmbOpenFiles"
+        smb_files_list = MockGatherfactsApi.get_gather_facts_api_response(
+            gather_subset)
+        self.get_module_args.update({
+            'gather_subset': [gather_subset],
+            'zone': "System",
+        })
+        gatherfacts_module_mock.cluster_api.get_cluster_external_ips = MagicMock(return_value=['192.168.0.1'])
+        gatherfacts_module_mock.module.params = self.get_module_args
+        gatherfacts_module_mock.api_client.to_dict.onefs_host = MagicMock(return_value='192.168.0.1')
+        gatherfacts_module_mock.isi_sdk.ProtocolsApi = MagicMock(return_value=gatherfacts_module_mock.protocol_api)
+        gatherfacts_module_mock.protocol_api.get_smb_openfiles = MagicMock(
+            side_effect=MockApiException)
+        gatherfacts_module_mock.get_smb_file_for_each_cluster(gatherfacts_module_mock.api_client)
+        assert MockGatherfactsApi.get_gather_facts_error_response(gather_subset) in\
+            gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
 
     @pytest.mark.parametrize("input_params", [
         {"gather_subset": "support_assist_settings", "return_key": "support_assist_settings"}
