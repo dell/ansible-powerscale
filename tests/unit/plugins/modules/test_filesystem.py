@@ -218,14 +218,6 @@ class TestFileSystem():
     def test_file_system_create_quota_exception(self, filesystem_module_mock):
         self.get_filesystem_args.update({"path": self.path1,
                                          "access_zone": "System",
-                                         "quota": {
-                                             "thresholds_on": "fs_logical_size",
-                                             "soft_limit_size": 5,
-                                             "hard_limit_size": 10,
-                                             "cap_unit": "GB",
-                                             "container": True,
-                                             "quota_state": "present",
-                                         },
                                          "list_snapshots": True,
                                          "state": "present"})
         filesystem_module_mock.module.params = self.get_filesystem_args

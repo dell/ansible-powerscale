@@ -66,13 +66,13 @@ class TestSynciqPolicy():
         self.synciqpolicy_args.update({
             'policy_name': 'Policy_SP',
             'action': 'copy',
-            'description': 'Creating a policy',
+            'description': 'Creating a policy for getting exception',
             'source_cluster': {
-                'source_root_path': '/test/home'
+                'source_root_path': '/test/home_exception'
             },
             'target_cluster': {
                 'target_host': "target_host-1",
-                'target_path': "/test/target"
+                'target_path': "/test/target_exception"
             },
             'accelerated_failback': False,
             'restrict_target_network': True,
