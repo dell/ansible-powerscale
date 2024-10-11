@@ -1669,7 +1669,7 @@ class SMBCreateHandler:
         path = smb_params['path']
         access_zone = smb_params['access_zone']
         if state == 'present' and not smb_details:
-            LOG.info(f"Creating a new SMB share {0}".format(smb_params['share_name']))
+            LOG.info(f"Creating a new SMB share {smb_params['share_name']}")
             smb_obj.validate_path(path)
             smb_details = smb_obj.create_smb_share()
             if smb_details:
