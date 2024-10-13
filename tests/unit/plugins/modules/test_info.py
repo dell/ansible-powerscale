@@ -406,8 +406,6 @@ class TestInfo():
         """Test the get_facts that uses the protocols api endpoint to get the module response"""
         return_key = input_params.get('return_key')
         gather_subset = input_params.get('gather_subset')
-        smb_files_list = MockGatherfactsApi.get_gather_facts_api_response(
-            gather_subset)
         self.get_module_args.update({
             'gather_subset': [gather_subset],
             'zone': "System",
@@ -415,12 +413,14 @@ class TestInfo():
         })
         gatherfacts_module_mock.cluster_api.get_cluster_external_ips = MagicMock(return_value=['192.168.0.1'])
         gatherfacts_module_mock.module.params = self.get_module_args
-        gatherfacts_module_mock.api_client.to_dict.onefs_host = MagicMock(return_value='192.168.0.1')
-        gatherfacts_module_mock.protocol_api.get_smb_openfiles.to_dict = MagicMock(
+        gatherfacts_module_mock.api_client = utils.get_powerscale_connection(self.get_module_args)
+        gatherfacts_module_mock.isi_sdk.ProtocolsApi = MagicMock(return_value=gatherfacts_module_mock.protocol_api)
+        gatherfacts_module_mock.protocol_api.get_smb_openfiles = MagicMock(
             return_value=MockSDKResponse(MockGatherfactsApi.get_gather_facts_api_response(
                 gather_subset)))
         gatherfacts_module_mock.perform_module_operation()
-        gatherfacts_module_mock.protocol_api.get_smb_openfiles.assert_called()
+        assert MockGatherfactsApi.get_gather_facts_module_response(
+            gather_subset) == gatherfacts_module_mock.module.exit_json.call_args[1][return_key]
 
     @pytest.mark.parametrize("gather_subset", [
         "nfs_global_settings",
@@ -464,9 +464,6 @@ class TestInfo():
     def test_get_facts_smb_files_exception(self, gatherfacts_module_mock):
         """Test the get_facts that uses the protocols api endpoint to get the exception"""
         gather_subset = "smb_files"
-        return_key = "SmbOpenFiles"
-        smb_files_list = MockGatherfactsApi.get_gather_facts_api_response(
-            gather_subset)
         self.get_module_args.update({
             'gather_subset': [gather_subset],
             'zone': "System",
@@ -532,7 +529,7 @@ class TestInfo():
         """Test the get_facts that uses the support assist api endpoint to get the exception"""
         gatherfacts_module_mock.major = 8
         gatherfacts_module_mock.minor = 4
-        resp = gatherfacts_module_mock.get_support_assist_settings()
+        gatherfacts_module_mock.get_support_assist_settings()
         assert "support_assist_settings is supported for One FS version 9.5.0 and above" in gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
 
     @pytest.mark.parametrize("input_params", [

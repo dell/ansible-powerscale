@@ -612,7 +612,9 @@ class MockGatherfactsApi:
                         ],
                         "user": "admin"
                     }
-                ]
+                ],
+                "resume": None,
+                "total": 1
             }
         elif response_type == 'module':
             return [
@@ -1678,7 +1680,6 @@ class MockGatherfactsApi:
     @staticmethod
     def get_gather_facts_module_response(gather_subset):
         param = "module"
-        path = "ifs"
         subset_error_dict = {
             "nfs_global_settings": MockGatherfactsApi.get_nfsglobal_settings(param),
             "smb_global_settings": MockGatherfactsApi.get_smb_global_settings(param),
@@ -1774,7 +1775,6 @@ class MockGatherfactsApi:
     def get_gather_facts_error_response(gather_subset, param=None):
         if not param:
             param = "error"
-        path = "ifs"
         subset_error_dict = {
             "nfs_global_settings": MockGatherfactsApi.get_nfsglobal_settings(param),
             "smb_global_settings": MockGatherfactsApi.get_smb_global_settings(param),

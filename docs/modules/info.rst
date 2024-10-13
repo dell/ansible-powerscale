@@ -261,7 +261,9 @@ Notes
 .. note::
    - The parameters \ :emphasis:`access\_zone`\  and \ :emphasis:`include\_all\_access\_zones`\  are mutually exclusive.
    - The \ :emphasis:`check\_mode`\  is supported.
-   - Filter functionality is supported only for the following 'gather\_subset'- 'nfs', 'smartquota', 'filesystem' 'writable\_snapshots'.
+   - Filter functionality is supported only for the following 'gather\_subset'- 'nfs', 'smartquota', 'filesystem' 'writable\_snapshots', 'smb\_files'.
+   - The parameter \ :emphasis:`smb\_files`\  would return for all the clusters.
+   - When \ :emphasis:`gather\_subset`\  is \ :literal:`smb\_files`\ , it is assumed that the credentials of all node is same as the \ :emphasis:`hostname`\ .
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
