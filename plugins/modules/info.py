@@ -3723,7 +3723,7 @@ class Info(object):
     def get_smb_file_for_each_cluster(self, host_ip):
         """Get the list of smb open files given PowerScale Storage"""
         try:
-            params = self.module.params
+            params = self.module.params.copy()
             params["onefs_host"] = host_ip
             api_client = utils.get_powerscale_connection(params)
             api = self.isi_sdk.ProtocolsApi(api_client)
