@@ -156,7 +156,8 @@
         gather_subset:
           - smb_files
 
-    - name: Get smb open files of the PowerScale cluster of the PowerScale cluster using filter
+    - name: Get smb open files of the PowerScale cluster
+        of the PowerScale cluster using filter
       dellemc.powerscale.info:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
