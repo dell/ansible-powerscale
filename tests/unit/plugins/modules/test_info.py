@@ -410,7 +410,8 @@ class TestInfo():
             'zone': "System",
             "filters": input_params.get('filters')
         })
-        gatherfacts_module_mock.cluster_api.get_cluster_external_ips = MagicMock(return_value=['192.168.0.1'])
+        cluster_ip = '192.168.0.1'
+        gatherfacts_module_mock.cluster_api.get_cluster_external_ips = MagicMock(return_value=[cluster_ip])
         gatherfacts_module_mock.module.params = self.get_module_args
         gatherfacts_module_mock.api_client = utils.get_powerscale_connection(self.get_module_args)
         gatherfacts_module_mock.isi_sdk.ProtocolsApi = MagicMock(return_value=gatherfacts_module_mock.protocol_api)
@@ -418,8 +419,11 @@ class TestInfo():
             return_value=MockSDKResponse(MockGatherfactsApi.get_gather_facts_api_response(
                 gather_subset)))
         gatherfacts_module_mock.perform_module_operation()
-        assert MockGatherfactsApi.get_gather_facts_module_response(
-            gather_subset) == gatherfacts_module_mock.module.exit_json.call_args[1][return_key]
+        module_output = MockGatherfactsApi.get_gather_facts_module_response(
+            gather_subset)
+        for file in module_output:
+            file['node'] = cluster_ip
+        assert module_output == gatherfacts_module_mock.module.exit_json.call_args[1][return_key]
 
     @pytest.mark.parametrize("gather_subset", [
         "nfs_global_settings",

@@ -469,7 +469,8 @@ EXAMPLES = r'''
     gather_subset:
       - smb_files
 
-- name: Get smb open files of the PowerScale cluster of the PowerScale cluster using filter
+- name: Get smb open files of the PowerScale
+    cluster of the PowerScale cluster using filter
   dellemc.powerscale.info:
     onefs_host: "{{onefs_host}}"
     verify_ssl: "{{verify_ssl}}"
@@ -1524,11 +1525,15 @@ SmbOpenFiles:
         user:
             description: User holding file open.
             type: str
+        node:
+            description: The node on which the file is open.
+            type: str
     sample: [
         {
             "file": "C:\\ifs",
             "id": 1370,
             "locks": 0,
+            "node": xx.xx.xx.xx,
             "permissions": [
                 "read"
             ],
@@ -3719,20 +3724,18 @@ class Info(object):
         """Get the list of smb open files given PowerScale Storage"""
         try:
             params = self.module.params
-            self.module.params["onefs_host"] = host_ip
+            params["onefs_host"] = host_ip
             api_client = utils.get_powerscale_connection(params)
             api = self.isi_sdk.ProtocolsApi(api_client)
             cluster_response = api.get_smb_openfiles().to_dict()
-            openfiles = []
-            for file in cluster_response.get("openfiles"):
-                openfiles.append(file)
-            resume = cluster_response["resume"]
+            openfiles = cluster_response.get("openfiles", [])
+            resume = cluster_response.get("resume")
             while resume:
                 cluster_response = api.get_smb_openfiles().to_dict(resume=resume)
-                files = cluster_response.get("openfiles")
-                if files:
-                    openfiles.extend(files)
-                resume = cluster_response["resume"]
+                openfiles.extend(cluster_response.get("openfiles", []))
+                resume = cluster_response.get("resume")
+            for file_dict in openfiles:
+                file_dict["node"] = host_ip
             return openfiles
         except Exception as e:
             error_msg = (

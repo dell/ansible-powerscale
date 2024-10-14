@@ -540,7 +540,8 @@ Examples
         gather_subset:
           - smb_files
 
-    - name: Get smb open files of the PowerScale cluster of the PowerScale cluster using filter
+    - name: Get smb open files of the PowerScale
+        cluster of the PowerScale cluster using filter
       dellemc.powerscale.info:
         onefs_host: "{{onefs_host}}"
         verify_ssl: "{{verify_ssl}}"
@@ -1384,7 +1385,7 @@ Providers (When C(providers) is in a given I(gather_subset), list, {'provider_in
 
 
 
-SmbOpenFiles (When C(smb_files) is in a given I(gather_subset), list, [{'file': 'C:\\ifs', 'id': 1370, 'locks': 0, 'permissions': ['read'], 'user': 'admin'}])
+SmbOpenFiles (When C(smb_files) is in a given I(gather_subset), list, [{'file': 'C:\\ifs', 'id': 1370, 'locks': 0, 'node': 'xx.xx.xx.xx', 'permissions': ['read'], 'user': 'admin'}])
   List of SMB open files.
 
 
@@ -1406,6 +1407,10 @@ SmbOpenFiles (When C(smb_files) is in a given I(gather_subset), list, [{'file': 
 
   user (, str, )
     User holding file open.
+
+
+  node (, str, )
+    The node on which the file is open.
 
 
 
