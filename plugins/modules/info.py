@@ -469,6 +469,19 @@ EXAMPLES = r'''
     gather_subset:
       - smb_files
 
+- name: Get smb open files of the PowerScale cluster of the PowerScale cluster using filter
+  dellemc.powerscale.info:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    gather_subset:
+      - smb_files
+    filters:
+      - filter_key: "id"
+        filter_operator: "equal"
+        filter_value: "xxx"
+
 - name: Get list of user mapping rule of the PowerScale cluster
   dellemc.powerscale.info:
     onefs_host: "{{onefs_host}}"
