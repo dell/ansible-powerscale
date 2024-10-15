@@ -604,7 +604,7 @@ class MockGatherfactsApi:
             return {
                 "openfiles": [
                     {
-                        "file": "C:\\ifs\\data",
+                        "file": "C:\\ifs\\data_path",
                         "id": 1880,
                         "locks": 0,
                         "permissions": [
@@ -619,7 +619,7 @@ class MockGatherfactsApi:
         elif response_type == 'module':
             return [
                 {
-                    "file": "C:\\ifs\\data",
+                    "file": "C:\\ifs\\data_path",
                     "id": 1880,
                     "locks": 0,
                     "permissions": [
