@@ -425,6 +425,35 @@ class TestInfo():
             file['node'] = cluster_ip
         assert module_output == gatherfacts_module_mock.module.exit_json.call_args[1][return_key]
 
+    def test_get_facts_smb_files_module_with_resume(self, gatherfacts_module_mock, mocker):
+        """Test the get_facts that uses the protocols api endpoint to get the module response"""
+        gather_subset = "smb_files"
+        return_key = "SmbOpenFiles"
+        self.get_module_args.update({
+            'gather_subset': [gather_subset],
+            'zone': "System"
+        })
+        cluster_ip = '192.168.0.1'
+        gatherfacts_module_mock.cluster_api.get_cluster_external_ips = MagicMock(return_value=[cluster_ip])
+        gatherfacts_module_mock.module.params = self.get_module_args
+        gatherfacts_module_mock.api_client = utils.get_powerscale_connection(self.get_module_args)
+        gatherfacts_module_mock.isi_sdk.ProtocolsApi = MagicMock(return_value=gatherfacts_module_mock.protocol_api)
+
+        def mock_get_smb_files_with_resume(*args, **kwargs):
+            if kwargs.get('resume', None) == "abcd":
+                return MockSDKResponse(MockGatherfactsApi.get_gather_facts_api_response(
+                    "smb_files_with_resume2"))
+            return MockSDKResponse(MockGatherfactsApi.get_gather_facts_api_response(
+                "smb_files_with_resume"))
+        with patch.object(gatherfacts_module_mock.protocol_api, "get_smb_openfiles") as mock_method:
+            mock_method.side_effect = MagicMock(side_effect=mock_get_smb_files_with_resume)
+            gatherfacts_module_mock.perform_module_operation()
+        module_output = MockGatherfactsApi.get_gather_facts_module_response(
+            "smb_files_with_resume")
+        for file in module_output:
+            file['node'] = cluster_ip
+        assert module_output == gatherfacts_module_mock.module.exit_json.call_args[1][return_key]
+
     @pytest.mark.parametrize("gather_subset", [
         "nfs_global_settings",
         "smb_global_settings",

@@ -3731,7 +3731,7 @@ class Info(object):
             openfiles = cluster_response.get("openfiles", [])
             resume = cluster_response.get("resume")
             while resume:
-                cluster_response = api.get_smb_openfiles().to_dict(resume=resume)
+                cluster_response = api.get_smb_openfiles(resume=resume).to_dict()
                 openfiles.extend(cluster_response.get("openfiles", []))
                 resume = cluster_response.get("resume")
             for file_dict in openfiles:

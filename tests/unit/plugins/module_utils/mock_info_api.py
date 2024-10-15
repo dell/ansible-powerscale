@@ -634,6 +634,65 @@ class MockGatherfactsApi:
             return "Getting list of smb open files for PowerScale:"
 
     @staticmethod
+    def get_smb_files_response_with_resume2(response_type):
+        if response_type == 'api':
+            return {
+                "openfiles": [
+                    {
+                        "file": "C:\\ifs\\new_data",
+                        "id": 188,
+                        "locks": 0,
+                        "permissions": [
+                            "read"
+                        ],
+                        "user": "root"
+                    }
+                ],
+                "resume": None,
+                "total": 1
+            }
+
+    @staticmethod
+    def get_smb_files_response_with_resume(response_type):
+        if response_type == 'api':
+            return {
+                "openfiles": [
+                    {
+                        "file": "C:\\ifs\\data",
+                        "id": 1880,
+                        "locks": 0,
+                        "permissions": [
+                            "read"
+                        ],
+                        "user": "admin"
+                    }
+                ],
+                "resume": "abcd",
+                "total": 1
+            }
+        elif response_type == 'module':
+            return [
+                {
+                    "file": "C:\\ifs\\data",
+                    "id": 1880,
+                    "locks": 0,
+                    "permissions": [
+                        "read"
+                    ],
+                    "user": "admin"
+                },
+                {
+                    "file": "C:\\ifs\\new_data",
+                    "id": 188,
+                    "locks": 0,
+                    "permissions": [
+                        "read"
+                    ],
+                    "user": "root"
+                }
+            ]
+
+    @staticmethod
     def get_user_mapping_rules_response(response_type):
         if response_type == 'api':
             return {
@@ -1537,6 +1596,7 @@ class MockGatherfactsApi:
             "ldap": MockGatherfactsApi.get_ldap_details_response(param),
             "user_mapping_rules": MockGatherfactsApi.get_user_mapping_rules_response(param),
             "smb_files": MockGatherfactsApi.get_smb_files_response(param),
+            "smb_files_with_resume": MockGatherfactsApi.get_smb_files_response_with_resume(param),
             "storagepool_tiers": MockGatherfactsApi.get_storage_tier_response('api')['tiers'],
             "node_pools": MockGatherfactsApi.get_node_pool_response('api')['nodepools'],
             "network_subnets": MockGatherfactsApi.get_network_subnets_response(param),
@@ -1584,6 +1644,8 @@ class MockGatherfactsApi:
             "ldap": MockGatherfactsApi.get_ldap_details_response(param),
             "user_mapping_rules": MockGatherfactsApi.get_user_mapping_rules_response(param),
             "smb_files": MockGatherfactsApi.get_smb_files_response(param),
+            "smb_files_with_resume": MockGatherfactsApi.get_smb_files_response_with_resume(param),
+            "smb_files_with_resume2": MockGatherfactsApi.get_smb_files_response_with_resume2(param),
             "storagepool_tiers": MockGatherfactsApi.get_storage_tier_response(param),
             "node_pools": MockGatherfactsApi.get_node_pool_response(param),
             "network_subnets": MockGatherfactsApi.get_network_subnets_response(param),
