@@ -88,7 +88,7 @@ class TestFileSystem():
             filesystem_module_mock, filesystem_module_mock.module.params)
         assert filesystem_module_mock.module.exit_json.call_args[1]['changed']
 
-    def test_test_delete_file_system_exception(self, filesystem_module_mock):
+    def test_delete_file_system_exception(self, filesystem_module_mock):
         self.get_filesystem_args.update({"path": self.path1, "recursive_force_delete": True, "access_zone": "System", "state": "absent"})
         filesystem_module_mock.module.params = self.get_filesystem_args
         filesystem_module_mock.protocol_api.list_nfs_exports = MagicMock(side_effect=MockApiException)
@@ -106,20 +106,137 @@ class TestFileSystem():
                                         "access_zone": "System", "state": "present", "access_control_rights_state": "add"})
         filesystem_module_mock.module.check_mode = False
         filesystem_module_mock.module.params = self.get_filesystem_args
-        filesystem_module_mock.get_filesystem = MagicMock(return_value={})
+        filesystem_module_mock.get_filesystem = MagicMock(return_value=None)
         filesystem_module_mock.get_acl_object = MagicMock(return_value=True)
         FilesystemHandler().handle(
             filesystem_module_mock, filesystem_module_mock.module.params)
         assert filesystem_module_mock.module.exit_json.call_args[1]['changed'] \
             and filesystem_module_mock.module.exit_json.call_args[1]['create_filesystem']
 
+    def test_create_file_system_with_access_control_private_read(self, filesystem_module_mock):
+        self.get_filesystem_args.update(
+            {
+                "path": self.path1,
+                "owner": {"name": "test"},
+                "quota": {
+                    "thresholds_on": "fs_logical_size",
+                    "soft_limit_size": 5,
+                    "hard_limit_size": 10,
+                    "cap_unit": "GB",
+                    "container": True,
+                    "quota_state": "present",
+                },
+                "access_control": "private_read",
+                "access_zone": "System", "state": "present"})
+        filesystem_module_mock.module.check_mode = False
+        filesystem_module_mock.module.params = self.get_filesystem_args
+        filesystem_module_mock.get_filesystem = MagicMock(return_value=None)
+        filesystem_module_mock.get_acl_object = MagicMock(return_value=True)
+        FilesystemHandler().handle(
+            filesystem_module_mock, filesystem_module_mock.module.params)
+        assert filesystem_module_mock.module.exit_json.call_args[1]['changed'] \
+            and filesystem_module_mock.module.exit_json.call_args[1]['create_filesystem']
+
+    def test_create_quota_exception(self, filesystem_module_mock):
+        self.get_filesystem_args.update(
+            {
+                "path": self.path1,
+                "owner": {"name": "test"},
+                "quota": {
+                    "thresholds_on": "fs_logical_size",
+                    "soft_limit_size": 5,
+                    "hard_limit_size": 10,
+                    "cap_unit": "GB",
+                    "container": True,
+                    "quota_state": "present",
+                },
+                "access_zone": "System", "state": "present"})
+        filesystem_module_mock.module.check_mode = False
+        filesystem_module_mock.module.params = self.get_filesystem_args
+        filesystem_module_mock.get_filesystem = MagicMock(return_value=None)
+        filesystem_module_mock.get_acl_object = MagicMock(return_value=True)
+        filesystem_module_mock.determine_error = MagicMock()
+        self.capture_fail_json_call(
+            MockFileSystemApi.get_error_responses(
+                'create_quota_exception'), filesystem_module_mock)
+
+    def test_access_control_private_response(self, filesystem_module_mock):
+        self.get_filesystem_args.update({"path": self.path1,
+                                         "access_control": "private", "access_zone": "System", "state": "present"})
+        filesystem_module_mock.module.check_mode = False
+        filesystem_module_mock.module.params = self.get_filesystem_args
+        filesystem_module_mock.get_filesystem = MagicMock(
+            return_value=MockFileSystemApi.FILESYSTEM_DETAILS)
+        filesystem_module_mock.get_acl = MagicMock(
+            return_value=MockFileSystemApi.get_acl_response())
+        filesystem_module_mock.get_acl_object = MagicMock(return_value=True)
+        FilesystemHandler().handle(
+            filesystem_module_mock, filesystem_module_mock.module.params)
+        assert filesystem_module_mock.module.exit_json.call_args[1]['changed'] \
+            and filesystem_module_mock.module.exit_json.call_args[1]['modify_filesystem']
+
+    def test_create_file_system_with_access_control_public_read(self, filesystem_module_mock):
+        self.get_filesystem_args.update({"path": self.path1,
+                                         "access_control": "public_read", "access_zone": "System", "state": "present"})
+        filesystem_module_mock.module.check_mode = False
+        filesystem_module_mock.module.params = self.get_filesystem_args
+        filesystem_module_mock.get_filesystem = MagicMock(
+            return_value=MockFileSystemApi.FILESYSTEM_DETAILS)
+        filesystem_module_mock.get_acl = MagicMock(
+            return_value=MockFileSystemApi.get_acl_response())
+        filesystem_module_mock.get_acl_object = MagicMock(return_value=True)
+        FilesystemHandler().handle(
+            filesystem_module_mock, filesystem_module_mock.module.params)
+        assert filesystem_module_mock.module.exit_json.call_args[1]['changed'] \
+            and filesystem_module_mock.module.exit_json.call_args[1]['modify_filesystem']
+
+    def test_create_file_system_with_access_control_public(self, filesystem_module_mock):
+        self.get_filesystem_args.update({"path": self.path1,
+                                         "access_control": "public", "access_zone": "System", "state": "present"})
+        filesystem_module_mock.module.check_mode = False
+        filesystem_module_mock.module.params = self.get_filesystem_args
+        filesystem_module_mock.get_filesystem = MagicMock(
+            return_value=MockFileSystemApi.FILESYSTEM_DETAILS)
+        filesystem_module_mock.get_acl = MagicMock(
+            return_value=MockFileSystemApi.get_acl_response())
+        filesystem_module_mock.get_acl_object = MagicMock(return_value=True)
+        FilesystemHandler().handle(
+            filesystem_module_mock, filesystem_module_mock.module.params)
+        assert filesystem_module_mock.module.exit_json.call_args[1]['changed'] \
+            and filesystem_module_mock.module.exit_json.call_args[1]['modify_filesystem']
+
+    def test_modify_file_system_with_access_control(self, filesystem_module_mock):
+        self.get_filesystem_args.update({"path": self.path1,
+                                         "access_control": "private_read", "access_zone": "System", "state": "present"})
+        filesystem_module_mock.module.check_mode = False
+        filesystem_module_mock.module.params = self.get_filesystem_args
+        filesystem_module_mock.get_filesystem = MagicMock(
+            return_value=MockFileSystemApi.FILESYSTEM_DETAILS)
+        filesystem_module_mock.get_acl = MagicMock(
+            return_value=MockFileSystemApi.get_acl_response())
+        filesystem_module_mock.get_acl_object = MagicMock(return_value=True)
+        FilesystemHandler().handle(
+            filesystem_module_mock, filesystem_module_mock.module.params)
+        assert filesystem_module_mock.module.exit_json.call_args[1]['changed'] \
+            and filesystem_module_mock.module.exit_json.call_args[1]['modify_filesystem']
+
     def test_create_file_system_with_check_mode(self, filesystem_module_mock):
-        self.get_filesystem_args.update({"path": self.path1, "owner": {"name": "test"}, "group": {"name": "group_test"},
-                                         "access_control_rights":
-                                         {"access_rights": ["dir_gen_all"], "inherit_flags": "container_inherit",
-                                          "access_type": "allow",
-                                          "trustee": {"name": "test_user", "type": "user", "provider_type": "local"}},
-                                        "access_zone": "System", "state": "present", "access_control_rights_state": "add"})
+        self.get_filesystem_args.update(
+            {
+                "path": self.path1,
+                "owner": {"name": "test"},
+                "group": {"name": "group_test", "provider_type": "ldap"},
+                "access_control_rights": {
+                    "access_rights": ["dir_gen_all"],
+                    "inherit_flags": "container_inherit",
+                    "access_type": "allow",
+                    "trustee": {
+                        "name": "test_user",
+                        "type": "user",
+                        "provider_type": "local"
+                    }
+                },
+                "access_zone": "System", "state": "present", "access_control_rights_state": "add"})
         filesystem_module_mock.module.params = self.get_filesystem_args
         filesystem_module_mock.module.check_mode = True
         filesystem_module_mock.namespace_api.get_filesystem = MagicMock(return_value={})
@@ -127,6 +244,358 @@ class TestFileSystem():
         FilesystemHandler().handle(
             filesystem_module_mock, filesystem_module_mock.module.params)
         assert filesystem_module_mock.module.exit_json.call_args[1]['changed']
+
+    def test_modify_acl(self, filesystem_module_mock):
+        self.get_filesystem_args.update(
+            {
+                "path": self.path1,
+                "owner": {"name": "test"},
+                "group": {"name": "group_test", "provider_type": "ldap"},
+                "access_control_rights": {
+                    "access_rights": ["dir_gen_all"],
+                    "inherit_flags": "container_inherit",
+                    "access_type": "allow",
+                    "trustee": {
+                        "name": "test_user_new",
+                        "type": "user",
+                        "provider_type": "local"
+                    }
+                },
+                "access_zone": "System", "state": "present", "access_control_rights_state": "add"})
+        filesystem_module_mock.module.params = self.get_filesystem_args
+        filesystem_module_mock.module.check_mode = True
+        filesystem_module_mock.namespace_api.get_filesystem = MagicMock(
+            return_value=MockFileSystemApi.FILESYSTEM_DETAILS)
+        filesystem_module_mock.get_acl = MagicMock(
+            return_value=MockFileSystemApi.get_acl_response())
+        filesystem_module_mock.get_trustee_id = MagicMock(
+            return_value="id:2000")
+        FilesystemHandler().handle(
+            filesystem_module_mock, filesystem_module_mock.module.params)
+        assert filesystem_module_mock.module.exit_json.call_args[1]['changed'] \
+            and filesystem_module_mock.module.exit_json.call_args[1]['modify_filesystem']
+
+    def test_create_file_system_wo_owner_name_exception(self, filesystem_module_mock):
+        self.get_filesystem_args.update({"path": self.path1, "owner": {"provider_type": "nis"}, "access_zone": "System", "state": "present"})
+        filesystem_module_mock.module.params = self.get_filesystem_args
+        filesystem_module_mock.module.check_mode = False
+        filesystem_module_mock.get_filesystem = MagicMock(return_value=None)
+        filesystem_module_mock.get_owner_id = MagicMock()
+        self.capture_fail_json_call(
+            MockFileSystemApi.get_error_responses(
+                'create_file_system_wo_owner_name_exception'), filesystem_module_mock)
+
+    def test_modify_file_system_wo_owner_name_exception(self, filesystem_module_mock):
+        self.get_filesystem_args.update({"path": self.path1, "owner": {"provider_type": "nis"}, "access_zone": "System", "state": "present"})
+        filesystem_module_mock.module.params = self.get_filesystem_args
+        filesystem_module_mock.module.check_mode = False
+        filesystem_module_mock.get_filesystem = MagicMock(
+            return_value=MockFileSystemApi.FILESYSTEM_DETAILS)
+        filesystem_module_mock.get_owner_id = MagicMock()
+        self.capture_fail_json_call(
+            MockFileSystemApi.get_error_responses(
+                'create_file_system_wo_owner_name_exception'), filesystem_module_mock)
+
+    def test_create_file_system_wo_group_name_exception(self, filesystem_module_mock):
+        self.get_filesystem_args.update(
+            {
+                "path": self.path1,
+                "owner": {"name": "test"},
+                "group": {"provider_type": "ads"},
+                "access_zone": "System", "state": "present"
+            })
+        filesystem_module_mock.module.params = self.get_filesystem_args
+        filesystem_module_mock.module.check_mode = False
+        filesystem_module_mock.get_filesystem = MagicMock(return_value=None)
+        filesystem_module_mock.get_acl_object = MagicMock()
+        filesystem_module_mock.determine_error = MagicMock()
+        self.capture_fail_json_call(
+            MockFileSystemApi.get_error_responses(
+                'create_file_system_wo_group_name_exception'), filesystem_module_mock)
+
+    def test_modify_file_system_wo_group_name_exception(self, filesystem_module_mock):
+        self.get_filesystem_args.update({"path": self.path1, "group": {"provider_type": "ads"}, "access_zone": "System", "state": "present"})
+        filesystem_module_mock.module.params = self.get_filesystem_args
+        filesystem_module_mock.module.check_mode = False
+        filesystem_module_mock.namespace_api.get_filesystem = MagicMock(
+            return_value=MockFileSystemApi.FILESYSTEM_DETAILS)
+        filesystem_module_mock.get_acl_object = MagicMock()
+        filesystem_module_mock.determine_error = MagicMock()
+        self.capture_fail_json_call(
+            MockFileSystemApi.get_error_responses(
+                'create_file_system_wo_group_name_exception'), filesystem_module_mock)
+
+    def test_get_file_system_exception(self, filesystem_module_mock):
+        self.get_filesystem_args.update({"path": self.path1, "access_zone": "System", "state": "present"})
+        filesystem_module_mock.module.params = self.get_filesystem_args
+        filesystem_module_mock.module.check_mode = False
+        filesystem_module_mock.namespace_api.get_directory_metadata = MagicMock(side_effect=MockApiException)
+        filesystem_module_mock.determine_error = MagicMock()
+        self.capture_fail_json_call(
+            MockFileSystemApi.get_error_responses(
+                'get_filesystem_exception'), filesystem_module_mock)
+
+    def test_get_file_system_non_system_az(self, filesystem_module_mock):
+        self.get_filesystem_args.update({"path": self.path1, "access_zone": "sample_zone", "state": "present"})
+        filesystem_module_mock.module.params = self.get_filesystem_args
+        filesystem_module_mock.module.check_mode = False
+        filesystem_module_mock.namespace_api.get_directory_metadata.to_dict = MagicMock(
+            return_value=MockFileSystemApi.FILESYSTEM_DETAILS)
+        filesystem_module_mock.zone_summary_api.get_zones_summary_zone.to_dict = MagicMock(
+            return_value=MockFileSystemApi.ZONE_PATH)
+        FilesystemHandler().handle(
+            filesystem_module_mock, filesystem_module_mock.module.params)
+        filesystem_module_mock.zone_summary_api.get_zones_summary_zone.assert_called()
+
+    def test_get_acl_exception(self, filesystem_module_mock):
+        self.get_filesystem_args.update({"path": self.path1, "access_zone": "System", "state": "present"})
+        filesystem_module_mock.module.params = self.get_filesystem_args
+        filesystem_module_mock.module.check_mode = False
+        filesystem_module_mock.namespace_api.get_acl = MagicMock(side_effect=MockApiException)
+        filesystem_module_mock.determine_error = MagicMock()
+        self.capture_fail_json_call(
+            MockFileSystemApi.get_error_responses(
+                'get_acl_exception'), filesystem_module_mock)
+
+    def test_update_quota_advisory(self, filesystem_module_mock):
+        self.get_filesystem_args.update({"path": self.path1,
+                                         "access_zone": "System",
+                                         "quota": {
+                                             "thresholds_on": None,
+                                             "soft_limit_size": 2,
+                                             "hard_limit_size": 8,
+                                             "advisory_limit_size": 7,
+                                             "cap_unit": "MB",
+                                             "container": False,
+                                             "quota_state": "present",
+                                         },
+                                         "list_snapshots": True,
+                                         "state": "present"})
+        filesystem_module_mock.module.params = self.get_filesystem_args
+        filesystem_module_mock.module.check_mode = False
+        filesystem_module_mock.get_filesystem = MagicMock(
+            return_value=MockFileSystemApi.FILESYSTEM_DETAILS)
+        filesystem_module_mock.get_quota = MagicMock(
+            return_value=MockFileSystemApi.QUOTA_DETAILS_0)
+        FilesystemHandler().handle(
+            filesystem_module_mock, filesystem_module_mock.module.params)
+        assert filesystem_module_mock.module.exit_json.call_args[1]['changed'] \
+            and filesystem_module_mock.module.exit_json.call_args[1]['modify_filesystem']
+
+    def test_update_quota_soft(self, filesystem_module_mock):
+        self.get_filesystem_args.update({"path": self.path1,
+                                         "access_zone": "System",
+                                         "quota": {
+                                             "thresholds_on": None,
+                                             "soft_limit_size": 2,
+                                             "hard_limit_size": None,
+                                             "advisory_limit_size": None,
+                                             "cap_unit": "MB",
+                                             "container": False,
+                                             "quota_state": "present",
+                                         },
+                                         "list_snapshots": True,
+                                         "state": "present"})
+        filesystem_module_mock.module.params = self.get_filesystem_args
+        filesystem_module_mock.module.check_mode = False
+        filesystem_module_mock.get_filesystem = MagicMock(
+            return_value=MockFileSystemApi.FILESYSTEM_DETAILS)
+        filesystem_module_mock.get_quota = MagicMock(
+            return_value=MockFileSystemApi.QUOTA_DETAILS_0)
+        FilesystemHandler().handle(
+            filesystem_module_mock, filesystem_module_mock.module.params)
+        assert filesystem_module_mock.module.exit_json.call_args[1]['changed'] \
+            and filesystem_module_mock.module.exit_json.call_args[1]['modify_filesystem']
+
+    def test_update_quota_hard(self, filesystem_module_mock):
+        self.get_filesystem_args.update({"path": self.path1,
+                                         "access_zone": "System",
+                                         "quota": {
+                                             "thresholds_on": None,
+                                             "soft_limit_size": None,
+                                             "hard_limit_size": 8,
+                                             "advisory_limit_size": None,
+                                             "cap_unit": "MB",
+                                             "container": False,
+                                             "quota_state": "present",
+                                         },
+                                         "list_snapshots": True,
+                                         "state": "present"})
+        filesystem_module_mock.module.params = self.get_filesystem_args
+        filesystem_module_mock.module.check_mode = False
+        filesystem_module_mock.get_filesystem = MagicMock(
+            return_value=MockFileSystemApi.FILESYSTEM_DETAILS)
+        filesystem_module_mock.get_quota = MagicMock(
+            return_value=MockFileSystemApi.QUOTA_DETAILS_0)
+        FilesystemHandler().handle(
+            filesystem_module_mock, filesystem_module_mock.module.params)
+        assert filesystem_module_mock.module.exit_json.call_args[1]['changed'] \
+            and filesystem_module_mock.module.exit_json.call_args[1]['modify_filesystem']
+
+    def test_update_quota_exception(self, filesystem_module_mock):
+        self.get_filesystem_args.update({"path": self.path1,
+                                         "access_zone": "System",
+                                         "quota": {
+                                             "thresholds_on": "fs_logical_size",
+                                             "soft_limit_size": None,
+                                             "hard_limit_size": None,
+                                             "advisory_limit_size": 7,
+                                             "cap_unit": None,
+                                             "container": None,
+                                             "quota_state": "present",
+                                         },
+                                         "list_snapshots": True,
+                                         "state": "present"})
+        filesystem_module_mock.module.params = self.get_filesystem_args
+        filesystem_module_mock.module.check_mode = False
+        filesystem_module_mock.get_filesystem = MagicMock(return_value=MockFileSystemApi.FILESYSTEM_DETAILS)
+        filesystem_module_mock.isi_sdk.QuotaQuota = MagicMock(side_effect=MockApiException)
+        filesystem_module_mock.determine_error = MagicMock()
+        self.capture_fail_json_call(
+            MockFileSystemApi.get_error_responses(
+                'update_quota_exception'), filesystem_module_mock)
+
+    def test_update_include_snap_data_exception(self, filesystem_module_mock):
+        self.get_filesystem_args.update({"path": self.path1,
+                                         "access_zone": "System",
+                                         "quota": {
+                                             "include_snap_data": True,
+                                             "thresholds_on": None,
+                                             "soft_limit_size": None,
+                                             "hard_limit_size": None,
+                                             "advisory_limit_size": 7,
+                                             "cap_unit": None,
+                                             "container": None,
+                                             "quota_state": "present",
+                                         },
+                                         "list_snapshots": True,
+                                         "state": "present"})
+        filesystem_module_mock.module.params = self.get_filesystem_args
+        filesystem_module_mock.module.check_mode = False
+        filesystem_module_mock.get_filesystem = MagicMock(
+            return_value=MockFileSystemApi.FILESYSTEM_DETAILS)
+        filesystem_module_mock.get_quota = MagicMock(
+            return_value=MockFileSystemApi.QUOTA_DETAILS_0)
+        self.capture_fail_json_call(
+            MockFileSystemApi.get_error_responses(
+                'update_include_snap_data_exception'), filesystem_module_mock)
+
+    def test_update_quota_wo_quota_state_exception(self, filesystem_module_mock):
+        self.get_filesystem_args.update({"path": self.path1,
+                                         "access_zone": "System",
+                                         "quota": {
+                                             "thresholds_on": "fs_logical_size",
+                                             "soft_limit_size": 5,
+                                             "hard_limit_size": 10,
+                                             "cap_unit": "GB",
+                                             "container": True,
+                                             "quota_state": None,
+                                         },
+                                         "list_snapshots": True,
+                                         "state": "present"})
+        filesystem_module_mock.module.params = self.get_filesystem_args
+        filesystem_module_mock.module.check_mode = False
+        filesystem_module_mock.get_filesystem = MagicMock(return_value=MockFileSystemApi.FILESYSTEM_DETAILS)
+        filesystem_module_mock.determine_error = MagicMock()
+        self.capture_fail_json_call(
+            MockFileSystemApi.get_error_responses(
+                'get_quota_state_exception'), filesystem_module_mock)
+
+    def test_update_quota_invalid_cap_unit_exception(self, filesystem_module_mock):
+        self.get_filesystem_args.update({"path": self.path1,
+                                         "access_zone": "System",
+                                         "quota": {
+                                             "thresholds_on": "fs_logical_size",
+                                             "soft_limit_size": 5,
+                                             "hard_limit_size": 10,
+                                             "cap_unit": "KB",
+                                             "container": True,
+                                             "quota_state": "present",
+                                         },
+                                         "list_snapshots": True,
+                                         "state": "present"})
+        filesystem_module_mock.module.params = self.get_filesystem_args
+        filesystem_module_mock.module.check_mode = False
+        filesystem_module_mock.get_filesystem = MagicMock(return_value=MockFileSystemApi.FILESYSTEM_DETAILS)
+        filesystem_module_mock.determine_error = MagicMock()
+        self.capture_fail_json_call(
+            MockFileSystemApi.get_error_responses(
+                'get_cap_unit_exception'), filesystem_module_mock)
+
+    def test_delete_quota(self, filesystem_module_mock):
+        self.get_filesystem_args.update({"path": self.path1,
+                                         "access_zone": "System",
+                                         "quota": {
+                                             "thresholds_on": "fs_logical_size",
+                                             "soft_limit_size": 5,
+                                             "hard_limit_size": 10,
+                                             "cap_unit": "GB",
+                                             "container": True,
+                                             "quota_state": "absent",
+                                         },
+                                         "list_snapshots": True,
+                                         "state": "present"})
+        filesystem_module_mock.module.params = self.get_filesystem_args
+        filesystem_module_mock.module.check_mode = False
+        filesystem_module_mock.get_filesystem = MagicMock(return_value=MockFileSystemApi.FILESYSTEM_DETAILS)
+        filesystem_module_mock.get_quota = MagicMock(return_value=MockFileSystemApi.QUOTA_DETAILS_1)
+        FilesystemHandler().handle(
+            filesystem_module_mock, filesystem_module_mock.module.params)
+        assert filesystem_module_mock.module.exit_json.call_args[1]['changed'] \
+            and filesystem_module_mock.module.exit_json.call_args[1]['delete_quota']
+
+    def test_delete_quota_exception(self, filesystem_module_mock):
+        self.get_filesystem_args.update({"path": self.path1,
+                                         "access_zone": "System",
+                                         "quota": {
+                                             "thresholds_on": "fs_logical_size",
+                                             "soft_limit_size": 5,
+                                             "hard_limit_size": 10,
+                                             "cap_unit": "GB",
+                                             "container": True,
+                                             "quota_state": "absent",
+                                         },
+                                         "list_snapshots": True,
+                                         "state": "present"})
+        filesystem_module_mock.module.params = self.get_filesystem_args
+        filesystem_module_mock.module.check_mode = False
+        filesystem_module_mock.get_filesystem = MagicMock(return_value=MockFileSystemApi.FILESYSTEM_DETAILS)
+        filesystem_module_mock.get_quota = MagicMock(return_value=MockFileSystemApi.QUOTA_DETAILS_1)
+        filesystem_module_mock.quota_api.delete_quota_quotas = MagicMock(side_effect=MockApiException)
+        filesystem_module_mock.determine_error = MagicMock()
+        self.capture_fail_json_call(
+            MockFileSystemApi.get_error_responses(
+                'delete_quota_exception'), filesystem_module_mock)
+
+    def test_invalid_path_exception(self, filesystem_module_mock):
+        self.get_filesystem_args.update({"path": "sample_zone/path1",
+                                         "access_zone": "System",
+                                         "quota": {
+                                             "thresholds_on": "fs_logical_size",
+                                             "soft_limit_size": 5,
+                                             "hard_limit_size": 10,
+                                             "cap_unit": "KB",
+                                             "container": True,
+                                             "quota_state": "present",
+                                         },
+                                         "list_snapshots": True,
+                                         "state": "present"})
+        filesystem_module_mock.module.params = self.get_filesystem_args
+        filesystem_module_mock.module.check_mode = False
+        filesystem_module_mock.get_filesystem = MagicMock(return_value=MockFileSystemApi.FILESYSTEM_DETAILS)
+        filesystem_module_mock.determine_error = MagicMock()
+        self.capture_fail_json_call(
+            MockFileSystemApi.get_error_responses(
+                'invalid_path_exception'), filesystem_module_mock)
+
+    def test_get_filesystem_snapshots_exception(self, filesystem_module_mock):
+        self.get_filesystem_args.update({"path": self.path1, "access_zone": "System", "list_snapshots": True, "state": "present"})
+        filesystem_module_mock.module.params = self.get_filesystem_args
+        filesystem_module_mock.snapshot_api.list_snapshot_snapshots = MagicMock(side_effect=MockApiException)
+        filesystem_module_mock.determine_error = MagicMock()
+        self.capture_fail_json_call(
+            MockFileSystemApi.get_error_responses(
+                'get_filesystem_snapshots_exception'), filesystem_module_mock)
 
     def test_modify_file_system_with_access_control_rights(self, filesystem_module_mock):
         self.get_filesystem_args.update({"path": self.path1, "owner": {"name": "test"}, "group": {"name": "group_test"},
@@ -142,6 +611,31 @@ class TestFileSystem():
             filesystem_module_mock, filesystem_module_mock.module.params)
         assert filesystem_module_mock.module.exit_json.call_args[1]['changed'] \
             and filesystem_module_mock.module.exit_json.call_args[1]['modify_filesystem']
+
+    def test_modify_file_system_with_access_control_rights_with_trustee_group(self, filesystem_module_mock):
+        self.get_filesystem_args.update({"path": self.path1, "owner": {"name": "test"}, "group": {"name": "group_test"},
+                                         "access_control_rights":
+                                         {"access_rights": ["dir_gen_all"], "inherit_flags": "container_inherit",
+                                          "access_type": "allow",
+                                          "trustee": {"name": "test_group", "type": "group", "provider_type": "local"}},
+                                         "access_zone": "System", "state": "present", "access_control_rights_state": "add"})
+        filesystem_module_mock.module.params = self.get_filesystem_args
+        filesystem_module_mock.get_acl = MagicMock(return_value=MockFileSystemApi.get_acl_response())
+        filesystem_module_mock.get_acl_object = MagicMock()
+        FilesystemHandler().handle(
+            filesystem_module_mock, filesystem_module_mock.module.params)
+        assert filesystem_module_mock.module.exit_json.call_args[1]['changed'] \
+            and filesystem_module_mock.module.exit_json.call_args[1]['modify_filesystem']
+
+    def test_get_group_id_exception(self, filesystem_module_mock):
+        self.get_filesystem_args.update({"path": self.path1, "owner": {"name": "test"}, "group": {"name": "group_test"},
+                                         "access_zone": "System", "state": "present"})
+        filesystem_module_mock.module.params = self.get_filesystem_args
+        filesystem_module_mock.auth_api.get_auth_group = MagicMock(side_effect=MockApiException)
+        filesystem_module_mock.determine_error = MagicMock()
+        self.capture_fail_json_call(
+            MockFileSystemApi.get_error_responses(
+                'get_group_id_exception'), filesystem_module_mock)
 
     def test_modify_file_system_with_check_mode(self, filesystem_module_mock):
         self.get_filesystem_args.update({"path": self.path1, "owner": {"name": "test"}, "group": {"name": "group_test"},
@@ -193,6 +687,31 @@ class TestFileSystem():
         assert filesystem_module_mock.module.exit_json.call_args[1]["changed"] is True
         filesystem_module_mock.quota_api.create_quota_quota.assert_called()
 
+    def test_file_system_create_quota_get_quota_exception(self, filesystem_module_mock):
+        self.get_filesystem_args.update({"path": self.path1,
+                                         "access_zone": "System",
+                                         "quota": {
+                                             "thresholds_on": "fs_logical_size",
+                                             "soft_limit_size": 5,
+                                             "hard_limit_size": 10,
+                                             "cap_unit": "GB",
+                                             "container": True,
+                                             "quota_state": "present",
+                                         },
+                                         "list_snapshots": True,
+                                         "state": "present"})
+        filesystem_module_mock.module.params = self.get_filesystem_args
+        filesystem_module_mock.module.check_mode = False
+        filesystem_module_mock.get_filesystem = MagicMock(return_value=MockFileSystemApi.FILESYSTEM_DETAILS)
+        filesystem_module_mock.get_quota = MagicMock(
+            return_value=MockFileSystemApi.QUOTA_DETAILS
+        )
+        filesystem_module_mock.isi_sdk.QuotaQuotaCreateParams = MagicMock(side_effect=MockApiException)
+        utils.determine_error = MagicMock(return_value=None)
+        self.capture_fail_json_call(
+            MockFileSystemApi.get_error_responses(
+                'create_quota_get_exception'), filesystem_module_mock)
+
     def test_file_system_modify_quota(self, filesystem_module_mock):
         self.get_filesystem_args.update({"path": self.path1,
                                          "access_zone": "System",
@@ -218,6 +737,14 @@ class TestFileSystem():
     def test_file_system_create_quota_exception(self, filesystem_module_mock):
         self.get_filesystem_args.update({"path": self.path1,
                                          "access_zone": "System",
+                                         "quota": {
+                                             "thresholds_on": "fs_logical_size",
+                                             "soft_limit_size": 5,
+                                             "hard_limit_size": 10,
+                                             "cap_unit": "GB",
+                                             "container": True,
+                                             "quota_state": "present",
+                                         },
                                          "list_snapshots": True,
                                          "state": "present"})
         filesystem_module_mock.module.params = self.get_filesystem_args

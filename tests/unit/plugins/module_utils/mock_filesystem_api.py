@@ -23,7 +23,33 @@ class MockFileSystemApi:
         'quota': None,
         'state': None
     }
+    ZONE_PATH = {
+        'summary': {
+            'path': '/ifs/sample_zone'
+        }
+    }
     DATE_TIME = "Thu, 15 Jun 2023 12:20:42 GMT"
+    QUOTA_DETAILS_0 = {
+        "quotas": [
+            {
+                "thresholds": {
+                    "advisory": 5242880,
+                    "hard": 11534336,
+                    "soft": 4194304
+                },
+                "include_snapshots": False
+            }
+        ]
+    }
+    #                                          "thresholds_on": "fs_logical_size",
+    #                                          "soft_limit_size": 4,
+    #                                          "hard_limit_size": 11,
+    #                                          "advisory_limit_size": 5,
+    #                                          "cap_unit": 'GB',
+    #                                          "container": True,
+    #                                          "quota_state": "present",
+    #                                      }
+    # }
     FILESYSTEM_DETAILS = {
         "attrs": [
             {
@@ -243,3 +269,39 @@ class MockFileSystemApi:
             return "Deletion of Filesystem"
         elif response_type == "acl_validation_exception":
             return "Please specify access_rights or inherit_flags to set ACL"
+        elif response_type == "get_filesystem_exception":
+            return "Failed to get details of Filesystem"
+        elif response_type == "get_acl_exception":
+            return "while retrieving the access control list"
+        elif response_type == "get_filesystem_snapshots_exception":
+            return "Failed to get filesystem snapshots"
+        elif response_type == "get_zone_path_exception":
+            return "Unable to fetch base path of Access Zone"
+        elif response_type == "get_quota_state_exception":
+            return "quota_state is required"
+        elif response_type == "get_cap_unit_exception":
+            return "Invalid cap_unit provided"
+        elif response_type == "invalid_path_exception":
+            return "The path provided must start with /"
+        elif response_type == "get_group_id_exception":
+            return "Failed to get the group id for group"
+        elif response_type == "get_owner_id_exception":
+            return "Failed to get the owner id"
+        elif response_type == "create_file_system_wo_owner_name_exception":
+            return "Please specify a name for the owner."
+        elif response_type == "create_file_system_wo_group_name_exception":
+            return "Please specify a name for the group."
+        elif response_type == "set_acl_exception":
+            return "Setting ACL rights of Filesystem"
+        elif response_type == "delete_quota_exception":
+            return "Deletion of Quota on path"
+        elif response_type == "update_quota_exception":
+            return "Creation of Quota update param failed"
+        elif response_type == "create_quota_exception":
+            return "Creation of Quota param failed"
+        elif response_type == "update_include_snap_data_exception":
+            return "Modifying include_snap_data is not supported"
+        elif response_type == "create_quota_get_exception":
+            return "Creation of Quota param failed"
+        elif response_type == "set_access_control_rights_exception":
+            return "Setting ACL rights of Filesystem"
