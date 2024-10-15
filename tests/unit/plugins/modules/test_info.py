@@ -433,7 +433,7 @@ class TestInfo():
             'gather_subset': [gather_subset],
             'zone': "System"
         })
-        cluster_ip = '192.168.0.1'
+        cluster_ip = 'xx.xx.xx.xx'
         gatherfacts_module_mock.cluster_api.get_cluster_external_ips = MagicMock(return_value=[cluster_ip])
         gatherfacts_module_mock.module.params = self.get_module_args
         gatherfacts_module_mock.api_client = utils.get_powerscale_connection(self.get_module_args)
