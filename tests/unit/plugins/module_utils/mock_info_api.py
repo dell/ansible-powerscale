@@ -1010,6 +1010,8 @@ class MockGatherfactsApi:
             return [{"id": "1", "paths": "testuser"}, {
                 "id": "2", "paths": "testuser1",
             }]
+        elif response_type == "module_filter":
+            return [{"id": "1", "paths": "testuser"}]
         elif response_type == "api":
             return {"exports": [{"id": "1", "paths": "testuser"}, {
                 "id": "2", "paths": "testuser1",
@@ -1527,15 +1529,176 @@ class MockGatherfactsApi:
             }
 
     @staticmethod
+    def get_smartquota_list_with_resume(response_type):
+        if response_type == "api":
+            return {
+                "quotas": [
+                    {
+                        "container": True,
+                        "description": "",
+                        "efficiency_ratio": 0.0,
+                        "enforced": True,
+                        "id": "yyyy",
+                        "include_snapshots": False,
+                        "labels": "",
+                        "linked": False,
+                        "notifications": "default",
+                        "path": "/ifs/yyyy",
+                        "persona": "",
+                        "ready": True,
+                        "reduction_ratio": "",
+                        "thresholds": {
+                            "advisory": "",
+                            "advisory_exceeded": False,
+                            "advisory_last_exceeded": "",
+                            "hard": 3221225,
+                            "hard_exceeded": False,
+                            "hard_last_exceeded": "",
+                            "percent_advisory": "",
+                            "percent_soft": "",
+                            "soft": "",
+                            "soft_exceeded": False,
+                            "soft_grace": "",
+                            "soft_last_exceeded": ""
+                        },
+                        "thresholds_on": "fslogicalsize",
+                        "type": "directory",
+                        "usage": {
+                            "applogical": 0,
+                            "applogical_ready": True,
+                            "fslogical": 0,
+                            "fslogical_ready": True,
+                            "fsphysical": 4096,
+                            "fsphysical_ready": True,
+                            "inodes": 1,
+                            "inodes_ready": True,
+                            "physical": 4096,
+                            "physical_data": 0,
+                            "physical_data_ready": True,
+                            "physical_protection": 0,
+                            "physical_protection_ready": True,
+                            "physical_ready": True,
+                            "shadow_refs": 0,
+                            "shadow_refs_ready": True
+                        }
+                    }],
+                "resume": "abcd",
+                "total": 1
+            }
+        elif response_type == "module":
+            return [
+                {
+                    "container": True,
+                    "description": "",
+                    "efficiency_ratio": 0.0,
+                    "enforced": True,
+                    "id": "yyyy",
+                    "include_snapshots": False,
+                    "labels": "",
+                    "linked": False,
+                    "notifications": "default",
+                    "path": "/ifs/yyyy",
+                    "persona": "",
+                    "ready": True,
+                    "reduction_ratio": "",
+                    "thresholds": {
+                        "advisory": "",
+                        "advisory_exceeded": False,
+                        "advisory_last_exceeded": "",
+                        "hard": 3221225,
+                        "hard_exceeded": False,
+                        "hard_last_exceeded": "",
+                        "percent_advisory": "",
+                        "percent_soft": "",
+                        "soft": "",
+                        "soft_exceeded": False,
+                        "soft_grace": "",
+                        "soft_last_exceeded": ""
+                    },
+                    "thresholds_on": "fslogicalsize",
+                    "type": "directory",
+                    "usage": {
+                        "applogical": 0,
+                        "applogical_ready": True,
+                        "fslogical": 0,
+                        "fslogical_ready": True,
+                        "fsphysical": 4096,
+                        "fsphysical_ready": True,
+                        "inodes": 1,
+                        "inodes_ready": True,
+                        "physical": 4096,
+                        "physical_data": 0,
+                        "physical_data_ready": True,
+                        "physical_protection": 0,
+                        "physical_protection_ready": True,
+                        "physical_ready": True,
+                        "shadow_refs": 0,
+                        "shadow_refs_ready": True
+                    }
+                },
+                {
+                    "container": True,
+                    "description": "",
+                    "efficiency_ratio": 0.0,
+                    "enforced": True,
+                    "id": "xxxx",
+                    "include_snapshots": False,
+                    "labels": "",
+                    "linked": False,
+                    "notifications": "default",
+                    "path": "/ifs/xxxx",
+                    "persona": "",
+                    "ready": True,
+                    "reduction_ratio": "",
+                    "thresholds": {
+                        "advisory": "",
+                        "advisory_exceeded": False,
+                        "advisory_last_exceeded": "",
+                        "hard": 3221225472,
+                        "hard_exceeded": False,
+                        "hard_last_exceeded": "",
+                        "percent_advisory": "",
+                        "percent_soft": "",
+                        "soft": "",
+                        "soft_exceeded": False,
+                        "soft_grace": "",
+                        "soft_last_exceeded": ""
+                    },
+                    "thresholds_on": "fslogicalsize",
+                    "type": "directory",
+                    "usage": {
+                        "applogical": 0,
+                        "applogical_ready": True,
+                        "fslogical": 0,
+                        "fslogical_ready": True,
+                        "fsphysical": 2048,
+                        "fsphysical_ready": True,
+                        "inodes": 1,
+                        "inodes_ready": True,
+                        "physical": 2048,
+                        "physical_data": 0,
+                        "physical_data_ready": True,
+                        "physical_protection": 0,
+                        "physical_protection_ready": True,
+                        "physical_ready": True,
+                        "shadow_refs": 0,
+                        "shadow_refs_ready": True
+                    }
+                }
+            ]
+
+    @staticmethod
     def get_filesystem_list(response_type):
         if response_type == "api":
             return {
                 "children": [
                     {
-                        "name": "home"
+                        "name": "home",
+                        "path": "/ifs/home"
                     },
                     {
-                        "name": "smb11"
+                        "name": "smb11",
+                        "path": "/ifs/smb11"
                     }
                 ]
             }
@@ -1546,6 +1709,12 @@ class MockGatherfactsApi:
                 },
                 {
                     "name": "smb11"
+                }
+            ]
+        elif response_type == "module_filter":
+            return [
+                {
+                    "name": "home"
                 }
             ]
         else:
@@ -1587,8 +1756,9 @@ class MockGatherfactsApi:
             return "Failed to get writeable snapshots"
 
     @staticmethod
-    def get_gather_facts_module_response(gather_subset):
-        param = "module"
+    def get_gather_facts_module_response(gather_subset, param=None):
+        if not param:
+            param = "module"
         subset_error_dict = {
             "nfs_global_settings": MockGatherfactsApi.get_nfsglobal_settings(param),
             "smb_global_settings": MockGatherfactsApi.get_smb_global_settings(param),
@@ -1630,6 +1800,7 @@ class MockGatherfactsApi:
             "alert_settings": MockGatherfactsApi.get_event_maintenance(param),
             "filesystem": MockGatherfactsApi.get_filesystem_list(param),
             "smartquota": MockGatherfactsApi.get_smartquota_list(param),
+            "smartquota_with_resume": MockGatherfactsApi.get_smartquota_list_with_resume(param),
             "writable_snapshots": MockGatherfactsApi.get_writable_snapshot_list(param)
         }
         return subset_error_dict.get(gather_subset)
@@ -1679,6 +1850,7 @@ class MockGatherfactsApi:
             "alert_settings": MockGatherfactsApi.get_event_maintenance(param),
             "filesystem": MockGatherfactsApi.get_filesystem_list(param),
             "smartquota": MockGatherfactsApi.get_smartquota_list(param),
+            "smartquota_with_resume": MockGatherfactsApi.get_smartquota_list_with_resume(param),
             "writable_snapshots": MockGatherfactsApi.get_writable_snapshot_list(param)
         }
         return subset_error_dict.get(gather_subset)

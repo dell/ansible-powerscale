@@ -386,7 +386,7 @@ class TestInfo():
             gather_subset)
         self.get_module_args.update({
             'gather_subset': [gather_subset],
-            'zone': "System",
+            'zone': "System"
         })
         gatherfacts_module_mock.module.params = self.get_module_args
         with patch.object(gatherfacts_module_mock.protocol_api, MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
@@ -394,6 +394,25 @@ class TestInfo():
             gatherfacts_module_mock.perform_module_operation()
         assert MockGatherfactsApi.get_gather_facts_module_response(
             gather_subset) == gatherfacts_module_mock.module.exit_json.call_args[1][return_key]
+
+    def test_get_facts_nfs_exports_api_module(self, gatherfacts_module_mock):
+        """Test the get_facts that uses the protocols api endpoint to get the module response"""
+
+        gather_subset = "nfs_exports"
+        return_key = "NfsExports"
+        api_response = MockGatherfactsApi.get_gather_facts_api_response(
+            gather_subset)
+        self.get_module_args.update({
+            'gather_subset': [gather_subset],
+            'zone': "System",
+            'filters': [{"filter_key": "id", "filter_operator": "equal", "filter_value": "1"}]
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+        with patch.object(gatherfacts_module_mock.protocol_api, MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
+            mock_method.return_value = MockSDKResponse(api_response)
+            gatherfacts_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_gather_facts_module_response(
+            gather_subset, "module_filter") == gatherfacts_module_mock.module.exit_json.call_args[1][return_key]
 
     @pytest.mark.parametrize("input_params", [
         {"gather_subset": "smb_files", "return_key": "SmbOpenFiles"},
@@ -479,7 +498,7 @@ class TestInfo():
         assert MockGatherfactsApi.get_gather_facts_error_response(
             gather_subset) == gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
 
-    def test_get_facts_smb_files_cluseter_ip_exception(self, gatherfacts_module_mock):
+    def test_get_facts_smb_files_cluster_ip_exception(self, gatherfacts_module_mock):
         """Test the get_facts that uses the protocols api endpoint to get the exception"""
         gather_subset = "smb_files"
         self.get_module_args.update({
@@ -733,7 +752,9 @@ class TestInfo():
             gather_subset) in gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
 
     @pytest.mark.parametrize("input_params", [
-        {"gather_subset": "smartquota", "return_key": "smart_quota"}
+        {"gather_subset": "smartquota", "return_key": "smart_quota"},
+        {"gather_subset": "smartquota", "return_key": "smart_quota", "filters":
+            [{"filter_key": "id", "filter_operator": "equal", "filter_value": "xxxx"}]}
     ]
     )
     def test_get_facts_smartquota_api_module(self, gatherfacts_module_mock, input_params):
@@ -744,8 +765,9 @@ class TestInfo():
         api_response = MockGatherfactsApi.get_gather_facts_api_response(
             gather_subset)
         self.get_module_args.update({
-            'gather_subset': ['smartquota'],
+            'gather_subset': [gather_subset],
             'zone': "System",
+            'filters': input_params.get('filters')
         })
         gatherfacts_module_mock.module.params = self.get_module_args
 
@@ -754,6 +776,29 @@ class TestInfo():
             gatherfacts_module_mock.perform_module_operation()
         assert MockGatherfactsApi.get_gather_facts_module_response(
             gather_subset)['quotas'] == gatherfacts_module_mock.module.exit_json.call_args[1][return_key]
+
+    def test_get_facts_smartquota_with_resume(self, gatherfacts_module_mock, mocker):
+        """Test the get_facts that uses the protocols api endpoint to get the module response"""
+        gather_subset = "smartquota"
+        return_key = "smart_quota"
+        self.get_module_args.update({
+            'gather_subset': [gather_subset],
+            'zone': "System"
+        })
+        gatherfacts_module_mock.module.params = self.get_module_args
+
+        def mock_get_smartquota_with_resume(*args, **kwargs):
+            if kwargs.get('resume', None) == "abcd":
+                return MockSDKResponse(MockGatherfactsApi.get_gather_facts_api_response(
+                    "smartquota"))
+            return MockSDKResponse(MockGatherfactsApi.get_gather_facts_api_response(
+                "smartquota_with_resume"))
+        with patch.object(gatherfacts_module_mock.smartquota_api, "list_quota_quotas") as mock_method:
+            mock_method.side_effect = MagicMock(side_effect=mock_get_smartquota_with_resume)
+            gatherfacts_module_mock.perform_module_operation()
+        module_output = MockGatherfactsApi.get_gather_facts_module_response(
+            "smartquota_with_resume")
+        assert module_output == gatherfacts_module_mock.module.exit_json.call_args[1][return_key]
 
     @pytest.mark.parametrize("gather_subset", [
         "smartquota"
@@ -773,7 +818,11 @@ class TestInfo():
             gather_subset) in gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
 
     @pytest.mark.parametrize("input_params", [
-        {"gather_subset": "filesystem", "return_key": "file_system"}
+        {"gather_subset": "filesystem", "return_key": "file_system"},
+        {"gather_subset": "filesystem", "return_key": "file_system", "filters":
+            [{"filter_key": "name", "filter_operator": "equal", "filter_value": "home"}]},
+        {"gather_subset": "filesystem", "return_key": "file_system",
+            'query_parameters': {'filesystem': {'path': "/ifs/home"}}}
     ]
     )
     def test_get_facts_filesystem_api_module(self, gatherfacts_module_mock, input_params):
@@ -786,13 +835,20 @@ class TestInfo():
         self.get_module_args.update({
             'gather_subset': ['filesystem'],
             'zone': "System",
+            'filters': input_params.get('filters'),
+            'query_parameters': input_params.get('query_parameters')
         })
         gatherfacts_module_mock.module.params = self.get_module_args
         with patch.object(gatherfacts_module_mock.namespace_api, MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
             mock_method.return_value = MockSDKResponse(api_response)
             gatherfacts_module_mock.perform_module_operation()
-        assert MockGatherfactsApi.get_gather_facts_module_response(
-            gather_subset) == gatherfacts_module_mock.module.exit_json.call_args[1][return_key]
+        if input_params.get('filters'):
+            module_output = MockGatherfactsApi.get_gather_facts_module_response(
+                gather_subset, "module_filter")
+        else:
+            module_output = MockGatherfactsApi.get_gather_facts_module_response(
+                gather_subset)
+        assert module_output == gatherfacts_module_mock.module.exit_json.call_args[1][return_key]
 
     @pytest.mark.parametrize("gather_subset", [
         "filesystem"
@@ -909,3 +965,27 @@ class TestInfo():
             gatherfacts_module_mock.perform_module_operation()
         assert MockGatherfactsApi.get_gather_facts_module_response(
             gather_subset)['ldap'] == gatherfacts_module_mock.module.exit_json.call_args[1][return_key]
+
+    @pytest.mark.parametrize("input_params", [
+        {
+            "mock_data_fetchers": {
+                'metadata': lambda x: {'key1': 'value1', 'key2': 'value2'},
+            },
+            "mock_required_params": ['metadata'],
+            "output": {'key1': 'value1', 'key2': 'value2'}
+        },
+        {
+            "mock_data_fetchers": {
+                'snapshot': lambda x: ['snapshot1', 'snapshot2'],
+            },
+            "mock_required_params": ['snapshot'],
+            "output": {'snapshots': ['snapshot1', 'snapshot2']}
+        },
+    ])
+    def test_fetch_data_with_snapshot(self, gatherfacts_module_mock, input_params):
+        """Test the fetch_data method with a snapshot in the data fetchers."""
+        effective_path = '/path/to/filesystem'
+        mock_data_fetchers = input_params['mock_data_fetchers']
+        mock_required_params = input_params['mock_required_params']
+        fetched_data = gatherfacts_module_mock.fetch_data(effective_path, mock_data_fetchers, mock_required_params)
+        assert fetched_data == input_params["output"]
