@@ -1202,10 +1202,7 @@ class FileSystem(object):
                         filesystem_quota['quotas'][0][
                             'thresholds_on']:
                     return True
-            check_modify = self.check_quota_param_modification(quota=quota, filesystem_quota=filesystem_quota)
-            if check_modify:
-                return True
-            return False
+            return self.check_quota_param_modification(quota=quota, filesystem_quota=filesystem_quota)
 
     def validate_input(self, quota):
         """Valid input parameters"""

@@ -453,7 +453,7 @@ class TestFileSystem():
         filesystem_module_mock.determine_error = MagicMock()
         self.capture_fail_json_call(
             MockFileSystemApi.get_error_responses(
-                'update_quota_exception'), filesystem_module_mock)
+                'update_quota_error_exception'), filesystem_module_mock)
 
     def test_update_include_snap_data_exception(self, filesystem_module_mock):
         self.get_filesystem_args.update({"path": self.path1,
@@ -710,7 +710,7 @@ class TestFileSystem():
         utils.determine_error = MagicMock(return_value=None)
         self.capture_fail_json_call(
             MockFileSystemApi.get_error_responses(
-                'create_quota_get_exception'), filesystem_module_mock)
+                'create_quota_error_exception'), filesystem_module_mock)
 
     def test_file_system_modify_quota(self, filesystem_module_mock):
         self.get_filesystem_args.update({"path": self.path1,
@@ -756,7 +756,7 @@ class TestFileSystem():
         utils.determine_error = MagicMock(return_value=None)
         self.capture_fail_json_call(
             MockFileSystemApi.get_error_responses(
-                'create_quota_exception'), filesystem_module_mock)
+                'create_quota_error_exception'), filesystem_module_mock)
 
     def test_file_system_modify_quota_exception(self, filesystem_module_mock):
         self.get_filesystem_args.update({"path": self.path1,
