@@ -261,7 +261,9 @@ Notes
 .. note::
    - The parameters \ :emphasis:`access\_zone`\  and \ :emphasis:`include\_all\_access\_zones`\  are mutually exclusive.
    - The \ :emphasis:`check\_mode`\  is supported.
-   - Filter functionality is supported only for the following 'gather\_subset'- 'nfs', 'smartquota', 'filesystem' 'writable\_snapshots'.
+   - Filter functionality is supported only for the following 'gather\_subset'- 'nfs', 'smartquota', 'filesystem' 'writable\_snapshots', 'smb\_files'.
+   - The parameter \ :emphasis:`smb\_files`\  would return for all the clusters.
+   - When \ :emphasis:`gather\_subset`\  is \ :literal:`smb\_files`\ , it is assumed that the credentials of all node is same as the \ :emphasis:`hostname`\ .
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -537,6 +539,20 @@ Examples
         api_password: "{{api_password}}"
         gather_subset:
           - smb_files
+
+    - name: Get smb open files of the PowerScale
+        cluster of the PowerScale cluster using filter
+      dellemc.powerscale.info:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        gather_subset:
+          - smb_files
+        filters:
+          - filter_key: "id"
+            filter_operator: "equal"
+            filter_value: "xxx"
 
     - name: Get list of user mapping rule of the PowerScale cluster
       dellemc.powerscale.info:
@@ -1369,7 +1385,7 @@ Providers (When C(providers) is in a given I(gather_subset), list, {'provider_in
 
 
 
-SmbOpenFiles (When C(smb_files) is in a given I(gather_subset), list, [{'file': 'C:\\ifs', 'id': 1370, 'locks': 0, 'permissions': ['read'], 'user': 'admin'}])
+SmbOpenFiles (When C(smb_files) is in a given I(gather_subset), list, [{'file': 'C:\\ifs', 'id': 1370, 'locks': 0, 'node': 'xx.xx.xx.xx', 'permissions': ['read'], 'user': 'admin'}])
   List of SMB open files.
 
 
@@ -1391,6 +1407,10 @@ SmbOpenFiles (When C(smb_files) is in a given I(gather_subset), list, [{'file': 
 
   user (, str, )
     User holding file open.
+
+
+  node (, str, )
+    The node on which the file is open.
 
 
 
