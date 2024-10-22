@@ -1177,40 +1177,32 @@ class FileSystem(object):
 
     def is_quota_modified(self, filesystem_quota):
         """Determines if Quota is modified"""
-        try:
-            LOG.info('Determining if Quota is modified...')
-            if self.module.params['quota'] is not None \
-                    and filesystem_quota is not None and filesystem_quota[
-                'quotas'] and \
-                    self.module.params['quota']['quota_state'] == 'present':
-                quota = self.module.params['quota']
-                if 'include_snap_data' in quota and \
-                        quota['include_snap_data'] is not None:
-                    include_snap_data = quota['include_snap_data']
-                    if include_snap_data != \
-                            filesystem_quota['quotas'][0]['include_snapshots']:
-                        error_message = 'The value of include_snap_data does ' \
-                                        'not match the state on the array. ' \
-                                        'Modifying include_snap_data is ' \
-                                        'not supported.'
-                        LOG.error(error_message)
-                        self.module.fail_json(msg=error_message)
-                if THRESHOLD_PARAM in quota and \
-                        quota[THRESHOLD_PARAM] is not None:
-                    include_data_protection_overhead = \
-                        quota[THRESHOLD_PARAM]
-                    if include_data_protection_overhead != \
-                            filesystem_quota['quotas'][0][
-                                'thresholds_on']:
-                        return True
-                self.check_quota_param_modification(quota=quota, filesystem_quota=filesystem_quota)
-
-        except Exception as e:
-            error_msg = self.determine_error(error_obj=e)
-            error_message = 'Error {0} while determining ' \
-                            'if Quotas are modified '.format((str(error_msg)))
-            LOG.error(error_message)
-            self.module.fail_json(msg=error_message)
+        LOG.info('Determining if Quota is modified...')
+        if self.module.params['quota'] is not None \
+                and filesystem_quota is not None and filesystem_quota[
+            'quotas'] and \
+                self.module.params['quota']['quota_state'] == 'present':
+            quota = self.module.params['quota']
+            if 'include_snap_data' in quota and \
+                    quota['include_snap_data'] is not None:
+                include_snap_data = quota['include_snap_data']
+                if include_snap_data != \
+                        filesystem_quota['quotas'][0]['include_snapshots']:
+                    error_message = 'The value of include_snap_data does ' \
+                                    'not match the state on the array. ' \
+                                    'Modifying include_snap_data is ' \
+                                    'not supported.'
+                    LOG.error(error_message)
+                    self.module.fail_json(msg=error_message)
+            if THRESHOLD_PARAM in quota and \
+                    quota[THRESHOLD_PARAM] is not None:
+                include_data_protection_overhead = \
+                    quota[THRESHOLD_PARAM]
+                if include_data_protection_overhead != \
+                        filesystem_quota['quotas'][0][
+                            'thresholds_on']:
+                    return True
+            return self.check_quota_param_modification(quota=quota, filesystem_quota=filesystem_quota)
 
     def validate_input(self, quota):
         """Valid input parameters"""
@@ -1316,12 +1308,10 @@ class FileSystem(object):
     def get_group_id(self, name, zone, provider):
         """Get the group account details in PowerScale"""
         try:
-            LOG.info("Getting group details here")
             resp = self.auth_api.get_auth_group(
                 auth_group_id='GROUP:' + name,
                 zone=zone, provider=provider).to_dict()
 
-            LOG.info(resp)
             return resp
         except Exception as e:
             error_msg = self.determine_error(error_obj=e)
