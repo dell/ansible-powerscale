@@ -604,6 +604,60 @@ class MockGatherfactsApi:
             return {
                 "openfiles": [
                     {
+                        "file": "C:\\ifs\\data_path",
+                        "id": 1880,
+                        "locks": 0,
+                        "permissions": [
+                            "read"
+                        ],
+                        "user": "admin"
+                    }
+                ],
+                "resume": None,
+                "total": 1
+            }
+        elif response_type == 'module':
+            return [
+                {
+                    "file": "C:\\ifs\\data_path",
+                    "id": 1880,
+                    "locks": 0,
+                    "permissions": [
+                        "read"
+                    ],
+                    "user": "admin"
+                }
+            ]
+        elif response_type == 'cluster_ip_exception':
+            return "Getting list of cluster external ips for PowerScale:"
+        else:
+            return "Getting list of smb open files for PowerScale:"
+
+    @staticmethod
+    def get_smb_files_response_with_resume2(response_type):
+        if response_type == 'api':
+            return {
+                "openfiles": [
+                    {
+                        "file": "C:\\ifs\\new_data",
+                        "id": 188,
+                        "locks": 0,
+                        "permissions": [
+                            "read"
+                        ],
+                        "user": "root"
+                    }
+                ],
+                "resume": None,
+                "total": 1
+            }
+
+    @staticmethod
+    def get_smb_files_response_with_resume(response_type):
+        if response_type == 'api':
+            return {
+                "openfiles": [
+                    {
                         "file": "C:\\ifs\\data",
                         "id": 1880,
                         "locks": 0,
@@ -612,7 +666,9 @@ class MockGatherfactsApi:
                         ],
                         "user": "admin"
                     }
-                ]
+                ],
+                "resume": "abcd",
+                "total": 1
             }
         elif response_type == 'module':
             return [
@@ -624,11 +680,17 @@ class MockGatherfactsApi:
                         "read"
                     ],
                     "user": "admin"
+                },
+                {
+                    "file": "C:\\ifs\\new_data",
+                    "id": 188,
+                    "locks": 0,
+                    "permissions": [
+                        "read"
+                    ],
+                    "user": "root"
                 }
             ]
-        else:
-            return "Getting list of smb open files for PowerScale: %s failed with error: SDK Error message" % (
-                   MockGatherfactsApi.GATHERFACTS_COMMON_ARGS['onefs_host'])
 
     @staticmethod
     def get_user_mapping_rules_response(response_type):
@@ -948,6 +1010,8 @@ class MockGatherfactsApi:
             return [{"id": "1", "paths": "testuser"}, {
                 "id": "2", "paths": "testuser1",
             }]
+        elif response_type == "module_filter":
+            return [{"id": "1", "paths": "testuser"}]
         elif response_type == "api":
             return {"exports": [{"id": "1", "paths": "testuser"}, {
                 "id": "2", "paths": "testuser1",
@@ -1465,15 +1529,176 @@ class MockGatherfactsApi:
             }
 
     @staticmethod
+    def get_smartquota_list_with_resume(response_type):
+        if response_type == "api":
+            return {
+                "quotas": [
+                    {
+                        "container": True,
+                        "description": "",
+                        "efficiency_ratio": 0.0,
+                        "enforced": True,
+                        "id": "yyyy",
+                        "include_snapshots": False,
+                        "labels": "",
+                        "linked": False,
+                        "notifications": "default",
+                        "path": "/ifs/yyyy",
+                        "persona": "",
+                        "ready": True,
+                        "reduction_ratio": "",
+                        "thresholds": {
+                            "advisory": "",
+                            "advisory_exceeded": False,
+                            "advisory_last_exceeded": "",
+                            "hard": 3221225,
+                            "hard_exceeded": False,
+                            "hard_last_exceeded": "",
+                            "percent_advisory": "",
+                            "percent_soft": "",
+                            "soft": "",
+                            "soft_exceeded": False,
+                            "soft_grace": "",
+                            "soft_last_exceeded": ""
+                        },
+                        "thresholds_on": "fslogicalsize",
+                        "type": "directory",
+                        "usage": {
+                            "applogical": 0,
+                            "applogical_ready": True,
+                            "fslogical": 0,
+                            "fslogical_ready": True,
+                            "fsphysical": 4096,
+                            "fsphysical_ready": True,
+                            "inodes": 1,
+                            "inodes_ready": True,
+                            "physical": 4096,
+                            "physical_data": 0,
+                            "physical_data_ready": True,
+                            "physical_protection": 0,
+                            "physical_protection_ready": True,
+                            "physical_ready": True,
+                            "shadow_refs": 0,
+                            "shadow_refs_ready": True
+                        }
+                    }],
+                "resume": "abcd",
+                "total": 1
+            }
+        elif response_type == "module":
+            return [
+                {
+                    "container": True,
+                    "description": "",
+                    "efficiency_ratio": 0.0,
+                    "enforced": True,
+                    "id": "yyyy",
+                    "include_snapshots": False,
+                    "labels": "",
+                    "linked": False,
+                    "notifications": "default",
+                    "path": "/ifs/yyyy",
+                    "persona": "",
+                    "ready": True,
+                    "reduction_ratio": "",
+                    "thresholds": {
+                        "advisory": "",
+                        "advisory_exceeded": False,
+                        "advisory_last_exceeded": "",
+                        "hard": 3221225,
+                        "hard_exceeded": False,
+                        "hard_last_exceeded": "",
+                        "percent_advisory": "",
+                        "percent_soft": "",
+                        "soft": "",
+                        "soft_exceeded": False,
+                        "soft_grace": "",
+                        "soft_last_exceeded": ""
+                    },
+                    "thresholds_on": "fslogicalsize",
+                    "type": "directory",
+                    "usage": {
+                        "applogical": 0,
+                        "applogical_ready": True,
+                        "fslogical": 0,
+                        "fslogical_ready": True,
+                        "fsphysical": 4096,
+                        "fsphysical_ready": True,
+                        "inodes": 1,
+                        "inodes_ready": True,
+                        "physical": 4096,
+                        "physical_data": 0,
+                        "physical_data_ready": True,
+                        "physical_protection": 0,
+                        "physical_protection_ready": True,
+                        "physical_ready": True,
+                        "shadow_refs": 0,
+                        "shadow_refs_ready": True
+                    }
+                },
+                {
+                    "container": True,
+                    "description": "",
+                    "efficiency_ratio": 0.0,
+                    "enforced": True,
+                    "id": "xxxx",
+                    "include_snapshots": False,
+                    "labels": "",
+                    "linked": False,
+                    "notifications": "default",
+                    "path": "/ifs/xxxx",
+                    "persona": "",
+                    "ready": True,
+                    "reduction_ratio": "",
+                    "thresholds": {
+                        "advisory": "",
+                        "advisory_exceeded": False,
+                        "advisory_last_exceeded": "",
+                        "hard": 3221225472,
+                        "hard_exceeded": False,
+                        "hard_last_exceeded": "",
+                        "percent_advisory": "",
+                        "percent_soft": "",
+                        "soft": "",
+                        "soft_exceeded": False,
+                        "soft_grace": "",
+                        "soft_last_exceeded": ""
+                    },
+                    "thresholds_on": "fslogicalsize",
+                    "type": "directory",
+                    "usage": {
+                        "applogical": 0,
+                        "applogical_ready": True,
+                        "fslogical": 0,
+                        "fslogical_ready": True,
+                        "fsphysical": 2048,
+                        "fsphysical_ready": True,
+                        "inodes": 1,
+                        "inodes_ready": True,
+                        "physical": 2048,
+                        "physical_data": 0,
+                        "physical_data_ready": True,
+                        "physical_protection": 0,
+                        "physical_protection_ready": True,
+                        "physical_ready": True,
+                        "shadow_refs": 0,
+                        "shadow_refs_ready": True
+                    }
+                }
+            ]
+
+    @staticmethod
     def get_filesystem_list(response_type):
         if response_type == "api":
             return {
                 "children": [
                     {
-                        "name": "home"
+                        "name": "home",
+                        "path": "/ifs/home"
                     },
                     {
-                        "name": "smb11"
+                        "name": "smb11",
+                        "path": "/ifs/smb11"
                     }
                 ]
             }
@@ -1484,6 +1709,12 @@ class MockGatherfactsApi:
                 },
                 {
                     "name": "smb11"
+                }
+            ]
+        elif response_type == "module_filter":
+            return [
+                {
+                    "name": "home"
                 }
             ]
         else:
@@ -1525,9 +1756,9 @@ class MockGatherfactsApi:
             return "Failed to get writeable snapshots"
 
     @staticmethod
-    def get_gather_facts_module_response(gather_subset):
-        param = "module"
-        path = "ifs"
+    def get_gather_facts_module_response(gather_subset, param=None):
+        if not param:
+            param = "module"
         subset_error_dict = {
             "nfs_global_settings": MockGatherfactsApi.get_nfsglobal_settings(param),
             "smb_global_settings": MockGatherfactsApi.get_smb_global_settings(param),
@@ -1535,6 +1766,7 @@ class MockGatherfactsApi:
             "ldap": MockGatherfactsApi.get_ldap_details_response(param),
             "user_mapping_rules": MockGatherfactsApi.get_user_mapping_rules_response(param),
             "smb_files": MockGatherfactsApi.get_smb_files_response(param),
+            "smb_files_with_resume": MockGatherfactsApi.get_smb_files_response_with_resume(param),
             "storagepool_tiers": MockGatherfactsApi.get_storage_tier_response('api')['tiers'],
             "node_pools": MockGatherfactsApi.get_node_pool_response('api')['nodepools'],
             "network_subnets": MockGatherfactsApi.get_network_subnets_response(param),
@@ -1568,6 +1800,7 @@ class MockGatherfactsApi:
             "alert_settings": MockGatherfactsApi.get_event_maintenance(param),
             "filesystem": MockGatherfactsApi.get_filesystem_list(param),
             "smartquota": MockGatherfactsApi.get_smartquota_list(param),
+            "smartquota_with_resume": MockGatherfactsApi.get_smartquota_list_with_resume(param),
             "writable_snapshots": MockGatherfactsApi.get_writable_snapshot_list(param)
         }
         return subset_error_dict.get(gather_subset)
@@ -1582,6 +1815,8 @@ class MockGatherfactsApi:
             "ldap": MockGatherfactsApi.get_ldap_details_response(param),
             "user_mapping_rules": MockGatherfactsApi.get_user_mapping_rules_response(param),
             "smb_files": MockGatherfactsApi.get_smb_files_response(param),
+            "smb_files_with_resume": MockGatherfactsApi.get_smb_files_response_with_resume(param),
+            "smb_files_with_resume2": MockGatherfactsApi.get_smb_files_response_with_resume2(param),
             "storagepool_tiers": MockGatherfactsApi.get_storage_tier_response(param),
             "node_pools": MockGatherfactsApi.get_node_pool_response(param),
             "network_subnets": MockGatherfactsApi.get_network_subnets_response(param),
@@ -1615,14 +1850,15 @@ class MockGatherfactsApi:
             "alert_settings": MockGatherfactsApi.get_event_maintenance(param),
             "filesystem": MockGatherfactsApi.get_filesystem_list(param),
             "smartquota": MockGatherfactsApi.get_smartquota_list(param),
+            "smartquota_with_resume": MockGatherfactsApi.get_smartquota_list_with_resume(param),
             "writable_snapshots": MockGatherfactsApi.get_writable_snapshot_list(param)
         }
         return subset_error_dict.get(gather_subset)
 
     @staticmethod
-    def get_gather_facts_error_response(gather_subset):
-        param = "error"
-        path = "ifs"
+    def get_gather_facts_error_response(gather_subset, param=None):
+        if not param:
+            param = "error"
         subset_error_dict = {
             "nfs_global_settings": MockGatherfactsApi.get_nfsglobal_settings(param),
             "smb_global_settings": MockGatherfactsApi.get_smb_global_settings(param),
