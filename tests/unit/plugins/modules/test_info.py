@@ -53,6 +53,7 @@ class TestInfo():
         utils.ISI_SDK_VERSION_9 = MagicMock(return_value=True)
         gatherfacts_module_mock.api_client = MagicMock()
         gatherfacts_module_mock.isi_sdk = MagicMock()
+        gatherfacts_module_mock.cluster_ip = "xx.xx.xx.xx"
         return gatherfacts_module_mock
 
     def test_empty_gather_subset(self, gatherfacts_module_mock):
@@ -429,8 +430,7 @@ class TestInfo():
             'zone': "System",
             "filters": input_params.get('filters')
         })
-        cluster_ip = 'xx.xx.xx.xx'
-        gatherfacts_module_mock.cluster_api.get_cluster_external_ips = MagicMock(return_value=[cluster_ip])
+        gatherfacts_module_mock.cluster_api.get_cluster_external_ips = MagicMock(return_value=[gatherfacts_module_mock.cluster_ip])
         gatherfacts_module_mock.module.params = self.get_module_args
         gatherfacts_module_mock.api_client = utils.get_powerscale_connection(self.get_module_args)
         gatherfacts_module_mock.isi_sdk.ProtocolsApi = MagicMock(return_value=gatherfacts_module_mock.protocol_api)
@@ -441,7 +441,7 @@ class TestInfo():
         module_output = MockGatherfactsApi.get_gather_facts_module_response(
             gather_subset)
         for file in module_output:
-            file['node'] = cluster_ip
+            file['node'] = gatherfacts_module_mock.cluster_ip
         assert module_output == gatherfacts_module_mock.module.exit_json.call_args[1][return_key]
 
     def test_get_facts_smb_files_module_with_resume(self, gatherfacts_module_mock, mocker):
@@ -452,8 +452,7 @@ class TestInfo():
             'gather_subset': [gather_subset],
             'zone': "System"
         })
-        cluster_ip = 'xx.xx.xx.xx'
-        gatherfacts_module_mock.cluster_api.get_cluster_external_ips = MagicMock(return_value=[cluster_ip])
+        gatherfacts_module_mock.cluster_api.get_cluster_external_ips = MagicMock(return_value=[gatherfacts_module_mock.cluster_ip])
         gatherfacts_module_mock.module.params = self.get_module_args
         gatherfacts_module_mock.api_client = utils.get_powerscale_connection(self.get_module_args)
         gatherfacts_module_mock.isi_sdk.ProtocolsApi = MagicMock(return_value=gatherfacts_module_mock.protocol_api)
@@ -470,7 +469,7 @@ class TestInfo():
         module_output = MockGatherfactsApi.get_gather_facts_module_response(
             "smb_files_with_resume")
         for file in module_output:
-            file['node'] = cluster_ip
+            file['node'] = gatherfacts_module_mock.cluster_ip
         assert module_output == gatherfacts_module_mock.module.exit_json.call_args[1][return_key]
 
     @pytest.mark.parametrize("gather_subset", [
@@ -519,10 +518,9 @@ class TestInfo():
             'gather_subset': [gather_subset],
             'zone': "System",
         })
-        cluster_ip = 'xx.xx.xx.xx'
-        gatherfacts_module_mock.cluster_api.get_cluster_external_ips = MagicMock(return_value=[cluster_ip])
+        gatherfacts_module_mock.cluster_api.get_cluster_external_ips = MagicMock(return_value=[gatherfacts_module_mock.cluster_ip])
         gatherfacts_module_mock.module.params = self.get_module_args
-        gatherfacts_module_mock.api_client.to_dict.onefs_host = MagicMock(return_value=cluster_ip)
+        gatherfacts_module_mock.api_client.to_dict.onefs_host = MagicMock(return_value=gatherfacts_module_mock.cluster_ip)
         gatherfacts_module_mock.isi_sdk.ProtocolsApi = MagicMock(return_value=gatherfacts_module_mock.protocol_api)
         gatherfacts_module_mock.protocol_api.get_smb_openfiles = MagicMock(
             side_effect=MockApiException)
