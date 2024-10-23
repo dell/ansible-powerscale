@@ -429,7 +429,7 @@ class TestInfo():
             'zone': "System",
             "filters": input_params.get('filters')
         })
-        cluster_ip = '192.168.0.1'
+        cluster_ip = 'xx.xx.xx.xx'
         gatherfacts_module_mock.cluster_api.get_cluster_external_ips = MagicMock(return_value=[cluster_ip])
         gatherfacts_module_mock.module.params = self.get_module_args
         gatherfacts_module_mock.api_client = utils.get_powerscale_connection(self.get_module_args)
@@ -519,9 +519,10 @@ class TestInfo():
             'gather_subset': [gather_subset],
             'zone': "System",
         })
-        gatherfacts_module_mock.cluster_api.get_cluster_external_ips = MagicMock(return_value=['192.168.0.1'])
+        cluster_ip = 'xx.xx.xx.xx'
+        gatherfacts_module_mock.cluster_api.get_cluster_external_ips = MagicMock(return_value=[cluster_ip])
         gatherfacts_module_mock.module.params = self.get_module_args
-        gatherfacts_module_mock.api_client.to_dict.onefs_host = MagicMock(return_value='192.168.0.1')
+        gatherfacts_module_mock.api_client.to_dict.onefs_host = MagicMock(return_value=cluster_ip)
         gatherfacts_module_mock.isi_sdk.ProtocolsApi = MagicMock(return_value=gatherfacts_module_mock.protocol_api)
         gatherfacts_module_mock.protocol_api.get_smb_openfiles = MagicMock(
             side_effect=MockApiException)
