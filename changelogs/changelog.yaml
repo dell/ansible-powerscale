@@ -319,3 +319,9 @@ releases:
         - ADS module has been enhanced to support the additional parameters.
         - NFS module is enhanced to remove masked paths in response and also added declarative approach of managing clients.
     release_date: '2024-09-30'
+  3.5.0:
+    changes:
+      minor_changes:
+        - Added support to make listing of SMB open files cluster aware.
+        - Added fix for making the ACL trustee zone-aware for filesystem module.
+    release_date: '2024-10-28'
