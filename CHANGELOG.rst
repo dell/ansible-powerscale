@@ -4,6 +4,15 @@ Dellemc.Powerscale Change Logs
 
 .. contents:: Topics
 
+v3.5.0
+======
+
+Minor Changes
+-------------
+
+- Added support to make listing of SMB open files cluster aware.
+- Added fix for making the ACL trustee zone-aware for filesystem module.
+
 v3.4.0
 ======
 
