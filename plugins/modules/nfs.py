@@ -200,9 +200,17 @@ options:
       set, sub-directories will not be mountable.
     - This setting can be modified any time.
     type: bool
-
+attributes:
+  check_mode:
+    description:
+    - Runs task to validate without performing action on the target machine.
+    support: full
+  diff_mode:
+    description:
+    - Runs the task to report the changes made or to be made.
+    support: full
 notes:
-  - The I(check_mode) is supported.
+  - As I(ignore_unresolvable_hosts) is input only parameter, therefore idempotency is not supported for it.
 '''
 
 EXAMPLES = r'''
