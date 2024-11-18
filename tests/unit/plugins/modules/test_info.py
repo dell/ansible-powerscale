@@ -570,7 +570,7 @@ class TestInfo():
             gatherfacts_module_mock.perform_module_operation()
         assert MockGatherfactsApi.get_gather_facts_error_response(
             gather_subset) == gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
-    
+
     @pytest.mark.parametrize("input_params", [
         {"gather_subset": "alert_settings", "return_key": "alert_settings"}
     ]
