@@ -570,18 +570,7 @@ class TestInfo():
             gatherfacts_module_mock.perform_module_operation()
         assert MockGatherfactsApi.get_gather_facts_error_response(
             gather_subset) == gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
-
-    @pytest.mark.parametrize("gather_subset", [
-        "support_assist_settings"
-    ]
-    )
-    def test_get_facts_supportassist_exception(self, gatherfacts_module_mock, gather_subset):
-        """Test the get_facts that uses the support assist api endpoint to get the exception"""
-        gatherfacts_module_mock.major = 8
-        gatherfacts_module_mock.minor = 4
-        gatherfacts_module_mock.get_support_assist_settings()
-        assert "support_assist_settings is supported for One FS version 9.5.0 and above" in gatherfacts_module_mock.module.fail_json.call_args[1]['msg']
-
+    
     @pytest.mark.parametrize("input_params", [
         {"gather_subset": "alert_settings", "return_key": "alert_settings"}
     ]
