@@ -17,6 +17,9 @@ NFS_ID_1 = "205"
 NFS_ID_2 = "206"
 SYS_ZONE = "system"
 PATH_1 = "/ifs/test_sample_nfs"
+SAMPLE_ZONE = "sample_zone"
+STATE_P = "present"
+STATE_A = "absent"
 
 NFS_COMMON_ARGS = {
     "path": None,
@@ -243,3 +246,12 @@ def modify_nfs_failed_msg():
 
 def delete_nfs_failed_msg():
     return 'Delete NFS export with path: V, zone: system, id: 205 failed with error'
+
+
+def get_failed_msgs(response_type):
+    err_msg_dict = {
+        "az_path_err": "Unable to fetch base path of Access Zone sample_zone failed with error: SDK Error message",
+        "id_err": "Got error Test Exception while getting NFS export details for ID: 123 and access zone: system",
+        "multiple_nfs_err": "Multiple NFS Exports found",
+    }
+    return err_msg_dict.get(response_type)

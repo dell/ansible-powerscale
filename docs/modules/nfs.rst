@@ -40,7 +40,7 @@ Parameters
 
     This list can be changed anytime during the lifetime of the NFS export.
 
-    If the clients list needs to be replaced, \ :literal:`client\_state`\  should not be provided.
+    \ :emphasis:`client\_state`\  is not provided, then the host machine will replicate the values provided in the \ :emphasis:`clients`\ .
 
 
   client_state (optional, str, None)
@@ -150,7 +150,7 @@ Parameters
 
     This list can be changed anytime during the lifetime of the NFS export.
 
-    If the read\_only\_clients list needs to be replaced, \ :literal:`client\_state`\  should not be provided.
+    \ :emphasis:`client\_state`\  is not provided, then the host machine will replicate the values provided in the \ :emphasis:`read\_only\_clients`\ .
 
 
   read_write_clients (optional, list, None)
@@ -158,7 +158,7 @@ Parameters
 
     This list can be changed anytime during the lifetime of the NFS export.
 
-    If the read\_write\_clients list needs to be replaced, \ :literal:`client\_state`\  should not be provided.
+    \ :emphasis:`client\_state`\  is not provided, then the host machine will replicate the values provided in the \ :emphasis:`read\_write\_clients`\ .
 
 
   root_clients (optional, list, None)
@@ -166,7 +166,7 @@ Parameters
 
     This list can be changed anytime during the lifetime of the NFS export.
 
-    If the root\_clients list needs to be replaced, \ :literal:`client\_state`\  should not be provided.
+    \ :emphasis:`client\_state`\  is not provided, then the host machine will replicate the values provided in the \ :emphasis:`root\_clients`\ .
 
 
   security_flavors (optional, list, None)
@@ -218,7 +218,7 @@ Notes
 -----
 
 .. note::
-   - The \ :emphasis:`check\_mode`\  is supported.
+   - As \ :emphasis:`ignore\_unresolvable\_hosts`\  is input only parameter, therefore idempotency is not supported for it.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
