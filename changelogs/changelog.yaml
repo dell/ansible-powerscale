@@ -325,3 +325,9 @@ releases:
         - Added support to make listing of SMB open files cluster aware.
         - Added fix for making the ACL trustee zone-aware for filesystem module.
     release_date: '2024-10-28'
+  3.6.0:
+    changes:
+      minor_changes:
+        - Added diff mode support for NFS module.
+        - Fixed failure of listing support_assist details in info module for oneFS version 9.4.0 and below.
+    release_date: '2024-11-29'
