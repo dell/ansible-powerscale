@@ -201,6 +201,7 @@ notes:
   'writable_snapshots', 'smb_files'.
 - The parameter I(smb_files) would return for all the clusters.
 - When I(gather_subset) is C(smb_files), it is assumed that the credentials of all node is same as the I(hostname).
+- C(support_assist_settings) is supported for One FS version 9.5.0 and above.
 '''
 
 EXAMPLES = r'''
@@ -3957,9 +3958,7 @@ class Info(object):
         if self.major > 9 or (self.major == 9 and self.minor > 4):
             return SupportAssist(self.support_assist_api, self.module).get_support_assist_settings()
         else:
-            error_msg = "support_assist_settings is supported for One FS version 9.5.0 and above."
-            LOG.error(error_msg)
-            self.module.fail_json(msg=error_msg)
+            return {}
 
     def perform_module_operation(self):
         """Perform different actions on Gatherfacts based on user parameter chosen in playbook"""
