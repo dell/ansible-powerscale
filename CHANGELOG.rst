@@ -4,6 +4,15 @@ Dellemc.Powerscale Change Logs
 
 .. contents:: Topics
 
+v3.6.0
+======
+
+Minor Changes
+-------------
+
+- Added diff mode support for NFS module.
+- Fixed failure of listing support_assist details in info module for oneFS version 9.4.0 and below.
+
 v3.5.0
 ======
 
