@@ -82,8 +82,8 @@ This section describes the features of the Ansible Modules for Dell PowerScale f
 
 The Ansible Modules for Dell PowerScale release 3.4.0 supports the following features:
 
-- Added support to make listing of SMB open files cluster aware.
-- Added fix for making the ACL trustee zone-aware for filesystem module.
+- Added diff mode support for NFS module.
+- Fixed failure of listing support_assist details in info module for oneFS version 9.4.0 and below.
 
 Known issues
 ------------
