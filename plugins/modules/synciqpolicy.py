@@ -27,7 +27,7 @@ extends_documentation_fragment:
   - dellemc.powerscale.powerscale
 author:
 - Spandita Panigrahi (@panigs7) <ansible.team@dell.com>
-- - Kritika Bhateja(@Kritika-Bhateja-03) <ansible.team.dell.com>)
+- Kritika Bhateja(@Kritika-Bhateja-03) <ansible.team.dell.com>)
 
 options:
   policy_name:
@@ -1026,7 +1026,7 @@ class SynciqPolicyModifyHandler:
             if policy_modifiable_dict and synciq_params.get("state") == "present":
                 synciq_obj.result['modify_synciq_policy'] = \
                     synciq_obj.modify_synciq_policy(policy_modifiable_dict,
-                                              policy_obj.id)
+                                                    policy_obj.id)
                 synciq_obj.result['changed'] = True
         SynciqPolicyDeleteHandler().handle(synciq_obj, synciq_params, policy_obj, is_target_policy)
 
