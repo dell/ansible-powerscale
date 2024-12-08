@@ -27,6 +27,7 @@ extends_documentation_fragment:
   - dellemc.powerscale.powerscale
 author:
 - Spandita Panigrahi (@panigs7) <ansible.team@dell.com>
+- Kritika Bhateja(@Kritika-Bhateja-03) <ansible.team.dell.com>)
 
 options:
   policy_name:
@@ -238,10 +239,17 @@ options:
     - If set to C(true) then replication policies will connect only to nodes in the specified SmartConnect zone.
     - If set to C(false), replication policies are not restricted to specific nodes on the target cluster.
     type: bool
-
+attributes:
+  check_mode:
+    description:
+    - Runs task to validate without performing action on the target machine.
+    support: full
+  diff_mode:
+    description:
+    - Runs the task to report the changes made or to be made.
+    support: full
 notes:
 - There is a delay to view the jobs running on the policy.
-- The I(check_mode) is not supported.
 '''
 EXAMPLES = r'''
 - name: Create SyncIQ policy
@@ -492,6 +500,16 @@ class SynciqPolicy(object):
 
     def __init__(self):
         """ Define all parameters required by this module"""
+        self.result = {
+            "changed": False,
+            "synciq_policy_details": {},
+            "target_synciq_policy_details": {},
+            "create_synciq_policy": False,
+            "modify_synciq_policy": False,
+            "create_job_synciq_policy": False,
+            "delete_synciq_policy": False,
+            "diff": {}
+        }
         self.module_params = utils.get_powerscale_management_host_parameters()
         self.module_params.update(get_synciqpolicy_parameters())
         mutually_exclusive = [['policy_name', 'policy_id']]
@@ -499,7 +517,7 @@ class SynciqPolicy(object):
         # initialize the Ansible module
         self.module = AnsibleModule(
             argument_spec=self.module_params,
-            supports_check_mode=False,
+            supports_check_mode=True,
             mutually_exclusive=mutually_exclusive
         )
         PREREQS_VALIDATE = utils.validate_module_pre_reqs(self.module.params)
@@ -604,10 +622,14 @@ class SynciqPolicy(object):
         :param: Dictionary of parameters to be set while creating a policy
         :return: Policy ID once creation is successful
         """
+        if self.module._diff:
+            self.result.update({"diff": {"before": {}, "after": policy_param}})
         try:
             LOG.debug("Parameters to set when creating a SyncIQ policy %s", policy_param)
-            policy_id = self.api_instance.create_sync_policy(sync_policy=policy_param)
-            return policy_id
+            if not self.module.check_mode:
+                policy_id = self.api_instance.create_sync_policy(sync_policy=policy_param)
+                return policy_id
+            return True
         except Exception as e:
             error_msg = utils.determine_error(error_obj=e)
             error_message = 'Creating SyncIQ policy %s failed with ' \
@@ -615,18 +637,20 @@ class SynciqPolicy(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
-    def modify_synciq_policy(self, policy_params_dict, policy_id):
+    def modify_synciq_policy(self, policy_params_dict, policy_id, policy_details):
         """
         Modify SyncIQ policy.
         :policy_params_dict: Dictionary of parameters to be modified of a policy
         :policy_id: ID of the policy to be modified
         :return: True if modify is successful
         """
-
+        if self.module._diff:
+            self.result.update({"diff": {"before": policy_details.to_dict(), "after": policy_params_dict}})
         try:
             if policy_params_dict is not None:
                 LOG.debug("Policy parameters being modified : %s", policy_params_dict)
-                self.api_instance.update_sync_policy(sync_policy=policy_params_dict, sync_policy_id=policy_id)
+                if not self.module.check_mode:
+                    self.api_instance.update_sync_policy(sync_policy=policy_params_dict, sync_policy_id=policy_id)
             return True
         except Exception as e:
             error_msg = utils.determine_error(error_obj=e)
@@ -668,9 +692,9 @@ class SynciqPolicy(object):
         """
 
         try:
-            if job_params:
+            if job_params and not self.module.check_mode:
                 sync_job_params = {}
-                sync_job_keys = ['action', 'source_snapshot', 'workers_per_node']
+                sync_job_keys = ['action', 'source_snapshot']
                 sync_job_params['id'] = policy_id
                 for key in sync_job_keys:
                     if key == 'action' and job_params[key] == 'run':
@@ -682,7 +706,6 @@ class SynciqPolicy(object):
                     self.api_instance.create_sync_job(sync_job)
                 else:
                     self.api_instance.create_sync_job(sync_job, async_req=True)
-
             return True
         except Exception as e:
             error_msg = utils.determine_error(error_obj=e)
@@ -691,15 +714,17 @@ class SynciqPolicy(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
-    def delete_synciq_policy(self, policy_id):
+    def delete_synciq_policy(self, policy_id, policy_details):
         """
         Delete SyncIQ policy.
         :param policy_id: ID of SyncIQ policy
         :return: True if deletion is successful
         """
-
+        if self.module._diff:
+            self.result.update({"diff": {"before": policy_details.to_dict(), "after": {}}})
         try:
-            self.api_instance.delete_sync_policy(sync_policy_id=policy_id)
+            if not self.module.check_mode:
+                self.api_instance.delete_sync_policy(sync_policy_id=policy_id)
             return True
         except Exception as e:
             error_msg = utils.determine_error(error_obj=e)
@@ -807,14 +832,17 @@ class SynciqPolicy(object):
                                       'as policy is in disabled state.')
 
     def validate_job_params(self, job_params):
-        if job_params['workers_per_node'] is not None:
+
+        # if not job_params:
+        #     return
+        if job_params.get('workers_per_node') is not None:
             if job_params['action'] not in \
                     ('allow_write', 'allow_write_revert'):
                 self.module.fail_json(msg='workers_per_node is valid '
                                       'only for allow_write and '
                                       'allow_write_revert operation.')
 
-            if job_params['workers_per_node'] <= 0:
+            if job_params.get('workers_per_node') and job_params.get('workers_per_node') <= 0:
                 self.module.fail_json(msg='Please enter a value greater than '
                                       '0 for workers_per_node.')
 
@@ -836,141 +864,6 @@ class SynciqPolicy(object):
     def validate_input(self, policy_id_or_name):
         if not policy_id_or_name or utils.is_input_empty(policy_id_or_name):
             self.module.fail_json(msg='Please specify policy_name or policy_id')
-
-    def perform_module_operation(self):
-        """
-        Perform different actions on SyncIQ policy module based on
-        parameters chosen in playbook
-        """
-
-        policy_name = self.module.params['policy_name']
-        policy_id = self.module.params['policy_id']
-        new_policy_name = self.module.params['new_policy_name']
-        schedule = self.module.params['schedule']
-        run_job = self.module.params['run_job']
-        rpo_alert = self.module.params['rpo_alert']
-        rpo_alert_unit = self.module.params['rpo_alert_unit']
-        target_snapshot = self.module.params['target_snapshot']
-        job_delay = self.module.params['job_delay']
-        job_delay_unit = self.module.params['job_delay_unit']
-        job_params = self.module.params['job_params']
-        state = self.module.params['state']
-
-        # Dictionary of inputs from playbook
-        input_param = {}
-        for param in self.module.params:
-            input_param[param] = self.module.params[param]
-
-        # result is a dictionary that contains changed status and SyncIQ
-        # policy details
-        result = dict(
-            changed=False,
-            synciq_policy_details={},
-            target_synciq_policy_details={},
-            create_synciq_policy=False,
-            modify_synciq_policy=False,
-            create_job_synciq_policy=False,
-            delete_synciq_policy=False
-        )
-        policy_modifiable_dict = {}
-        self.validate_input(policy_name or policy_id)
-        if job_params:
-            self.validate_job_params(job_params)
-
-        # Check if policy exists
-        policy_obj, is_target_policy = \
-            self.get_synciq_policy_details(policy_name, policy_id, job_params)
-        if not is_target_policy:
-            if rpo_alert:
-                rpo_alert = utils.get_time_in_seconds(rpo_alert,
-                                                      rpo_alert_unit)
-
-            if job_delay:
-                job_delay = utils.get_time_in_seconds(job_delay,
-                                                      job_delay_unit)
-
-            if target_snapshot and \
-                    target_snapshot['target_snapshot_expiration'] is not None:
-                target_snapshot['target_snapshot_expiration'] = \
-                    utils.get_time_in_seconds(
-                        target_snapshot['target_snapshot_expiration'],
-                        target_snapshot['exp_time_unit'])
-
-            if run_job == 'when-source-modified' or \
-                    run_job == 'when-snapshot-taken':
-                schedule = run_job
-            elif run_job == 'manual':
-                schedule = ''
-
-            # Construct dictionary of policy parameters to be passed while creating policy
-            policy_param = self.construct_policy_params(input_param, schedule,
-                                                        rpo_alert, job_delay)
-
-            # Form dictionary of modifiable parameters of policy
-            if policy_obj is not None and policy_param:
-                policy_modifiable_dict = \
-                    is_policy_modify(policy_obj, policy_param)
-
-            # Rename policy
-            if new_policy_name is not None and utils.is_input_empty(new_policy_name):
-                self.module.fail_json(msg='new_policy_name cannot be empty. Please provide a valid '
-                                          'new_policy_name to rename policy.')
-            elif new_policy_name and policy_obj and new_policy_name != policy_obj.name:
-                policy_modifiable_dict['name'] = policy_name = new_policy_name
-
-            # Create a policy
-            if policy_obj is None and state == 'present':
-                # Check if all mandatory params are provided
-                self.validate_create_params(policy_param)
-                policy_param['accelerated_failback'] = True if input_param['accelerated_failback'] is None else input_param['accelerated_failback']
-                policy_id = self.create_synciq_policy(policy_param)
-                result['create_synciq_policy'] = True
-                result['changed'] = True
-
-            # Modify SyncIQ policy
-            if policy_modifiable_dict and state == "present":
-                result['modify_synciq_policy'] = \
-                    self.modify_synciq_policy(policy_modifiable_dict,
-                                              policy_obj.id)
-                result['changed'] = True
-
-            # Delete SyncIQ policy
-            if policy_obj and state == "absent":
-                result['delete_synciq_policy'] = \
-                    self.delete_synciq_policy(policy_obj.id)
-                result['changed'] = True
-
-            policy_obj, is_target_policy = \
-                self.get_synciq_policy_details(policy_name, policy_id)
-
-        # Create a job on SyncIQ policy
-        if job_params:
-            if job_params['action'] in ('allow_write', 'allow_write_revert'):
-                if not policy_obj:
-                    name_or_id = policy_name if policy_name else policy_id
-                    self.module.fail_json("Target policy %s is not found to "
-                                          "run failover/failover revert "
-                                          "job." % (name_or_id))
-
-            self.validate_create_job(policy_obj, is_target_policy)
-            if not self.is_job_running(policy_obj, is_target_policy,
-                                       job_params['action']):
-                result['create_job_synciq_policy'] = \
-                    self.create_synciq_job(policy_obj.id, job_params)
-                result['changed'] = True
-
-        # Display policy details
-        if policy_obj:
-            if is_target_policy:
-                result['target_synciq_policy_details'] = policy_obj.to_dict()
-            else:
-                result['synciq_policy_details'] = \
-                    self.get_synciq_policy_display_attributes(
-                        policy_obj)
-                policy_jobs = self.get_policy_jobs(policy_obj.name)
-                result['synciq_policy_details'].update(jobs=policy_jobs)
-
-        self.module.exit_json(**result)
 
 
 def is_policy_modify(policy_obj, policy_param):
@@ -1089,11 +982,156 @@ def get_synciqpolicy_parameters():
     )
 
 
+class SynciqPolicyExitHandler:
+    def handle(self, synciq_obj):
+        synciq_obj.module.exit_json(**synciq_obj.result)
+
+
+class SynciqPolicyGetDetailsHandler:
+    def handle(self, synciq_obj, policy_obj, is_target_policy):
+        if policy_obj:
+            if is_target_policy:
+                synciq_obj.result['target_synciq_policy_details'] = policy_obj.to_dict()
+            else:
+                synciq_obj.result['synciq_policy_details'] = \
+                    synciq_obj.get_synciq_policy_display_attributes(
+                        policy_obj)
+                policy_jobs = synciq_obj.get_policy_jobs(policy_obj.name)
+                synciq_obj.result['synciq_policy_details'].update(jobs=policy_jobs)
+        SynciqPolicyExitHandler().handle(synciq_obj)
+
+
+class SynciqPolicyJobCreateHandler:
+    def handle(self, synciq_obj, synciq_params, policy_obj, is_target_policy):
+        job_params = synciq_params.get('job_params')
+        policy_name = synciq_params.get('policy_name')
+        policy_id = synciq_params.get('policy_id')
+        policy_obj, is_target_policy = \
+            synciq_obj.get_synciq_policy_details(policy_name, policy_id)
+        if job_params:
+            if job_params['action'] in ('allow_write', 'allow_write_revert'):
+                if not policy_obj:
+                    name_or_id = policy_name if policy_name else policy_id
+                    synciq_obj.module.fail_json("Target policy %s is not found to "
+                                                "run failover/failover revert "
+                                                "job." % (name_or_id))
+            synciq_obj.validate_create_job(policy_obj, is_target_policy)
+            if not synciq_obj.is_job_running(policy_obj, is_target_policy,
+                                             job_params['action']):
+                synciq_obj.result['create_job_synciq_policy'] = \
+                    synciq_obj.create_synciq_job(policy_obj.id, job_params)
+                synciq_obj.result['changed'] = True
+        SynciqPolicyGetDetailsHandler().handle(synciq_obj, policy_obj, is_target_policy)
+
+
+class SynciqPolicyDeleteHandler:
+    def handle(self, synciq_obj, synciq_params, policy_obj, is_target_policy):
+        if not is_target_policy and policy_obj:
+            if synciq_params.get("state") == "absent":
+                synciq_obj.result['delete_synciq_policy'] = \
+                    synciq_obj.delete_synciq_policy(policy_obj.id, policy_obj)
+                synciq_obj.result['changed'] = True
+        SynciqPolicyJobCreateHandler().handle(synciq_obj, synciq_params, policy_obj, is_target_policy)
+
+
+class SynciqPolicyModifyHandler:
+    def handle(self, synciq_obj, synciq_params, policy_modifiable_dict, policy_obj, is_target_policy):
+        if not is_target_policy:
+            if policy_modifiable_dict and synciq_params.get("state") == "present":
+                synciq_obj.result['modify_synciq_policy'] = \
+                    synciq_obj.modify_synciq_policy(policy_modifiable_dict,
+                                                    policy_obj.id, policy_obj)
+                synciq_obj.result['changed'] = True
+        SynciqPolicyDeleteHandler().handle(synciq_obj, synciq_params, policy_obj, is_target_policy)
+
+
+class SynciqPolicyCreateHandler:
+    def rename_policy(self, synciq_obj, policy_obj, synciq_params, policy_modifiable_dict):
+        new_policy_name = synciq_params.get('new_policy_name')
+        if new_policy_name is not None and utils.is_input_empty(new_policy_name):
+            synciq_obj.module.fail_json(msg='new_policy_name cannot be empty. Please provide a valid '
+                                        'new_policy_name to rename policy.')
+        elif new_policy_name and policy_obj and new_policy_name != policy_obj.name:
+            policy_modifiable_dict['name'] = policy_name = new_policy_name
+
+    def create_policy(self, synciq_obj, synciq_params, policy_obj, policy_param):
+        state = synciq_params.get('state')
+        if policy_obj is None and state == 'present':
+            # Check if all mandatory params are provided
+            synciq_obj.validate_create_params(policy_param)
+            policy_param['accelerated_failback'] = True if synciq_params.get('accelerated_failback') is None else synciq_params.get('accelerated_failback')
+            policy_id = synciq_obj.create_synciq_policy(policy_param)
+            synciq_obj.result['create_synciq_policy'] = True
+            synciq_obj.result['changed'] = True
+
+    def handle(self, synciq_obj, synciq_params, policy_param, policy_modifiable_dict, policy_obj, is_target_policy):
+        if not is_target_policy:
+            self.rename_policy(synciq_obj, policy_obj, synciq_params, policy_modifiable_dict)
+            self.create_policy(synciq_obj, synciq_params, policy_obj, policy_param)
+
+        SynciqPolicyModifyHandler().handle(synciq_obj, synciq_params, policy_modifiable_dict, policy_obj, is_target_policy)
+
+
+class SynciqPolicyHandler:
+    """SyncIQ Policy Handler"""
+
+    def determine_schedule(self, run_job):
+        """
+        Determine the schedule based on the run_job value.
+        :param run_job: The type of job scheduling
+        :return: The schedule string
+        """
+        schedule = ''
+        if run_job == 'when-source-modified' or run_job == 'when-snapshot-taken':
+            schedule = run_job
+        elif run_job == 'manual':
+            schedule = ''
+        return schedule
+
+    def handle(self, synciq_obj, synciq_params):
+        policy_name = synciq_params.get('policy_name')
+        policy_id = synciq_params.get('policy_id')
+        job_params = synciq_params.get('job_params')
+        run_job = synciq_params.get('run_job')
+        target_snapshot = synciq_params.get('target_snapshot')
+        rpo_alert = synciq_params.get('rpo_alert')
+        rpo_alert_unit = synciq_params.get('rpo_alert_unit')
+        job_delay = synciq_params.get('job_delay')
+        job_delay_unit = synciq_params.get('job_delay_unit')
+        synciq_obj.validate_input(policy_name or policy_id)
+        if job_params:
+            synciq_obj.validate_job_params(job_params)
+
+        policy_obj, is_target_policy = \
+            synciq_obj.get_synciq_policy_details(policy_name, policy_id, job_params)
+        if not is_target_policy:
+            rpo_alert = utils.get_time_in_seconds(rpo_alert, rpo_alert_unit) if rpo_alert else None
+            job_delay = utils.get_time_in_seconds(job_delay, job_delay_unit) if job_delay else None
+
+            if target_snapshot and target_snapshot.get('target_snapshot_expiration') is not None:
+                target_snapshot['target_snapshot_expiration'] = utils.get_time_in_seconds(
+                    target_snapshot['target_snapshot_expiration'],
+                    target_snapshot['exp_time_unit']
+                )
+            schedule = self.determine_schedule(run_job)
+
+            # Construct dictionary of policy parameters to be passed while creating policy
+            policy_param = synciq_obj.construct_policy_params(synciq_params, schedule,
+                                                              rpo_alert, job_delay)
+            # Form dictionary of modifiable parameters of policy
+            policy_modifiable_dict = {}
+            if policy_obj is not None and policy_param:
+                policy_modifiable_dict = \
+                    is_policy_modify(policy_obj, policy_param)
+
+        SynciqPolicyCreateHandler().handle(synciq_obj, synciq_params, policy_param, policy_modifiable_dict, policy_obj, is_target_policy)
+
+
 def main():
     """ Create PowerScale SyncIQ policy object and perform action on it
         based on user input from playbook"""
     obj = SynciqPolicy()
-    obj.perform_module_operation()
+    SynciqPolicyHandler().handle(obj, obj.module.params)
 
 
 if __name__ == '__main__':
