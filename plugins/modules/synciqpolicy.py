@@ -491,6 +491,7 @@ target_synciq_policy_details:
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
+import copy
 
 LOG = utils.get_logger('synciqpolicy')
 
@@ -551,7 +552,7 @@ class SynciqPolicy(object):
         except utils.ApiException as e:
             if str(e.status) == "404":
                 LOG.info("SyncIQ policy %s is not found", name_or_id)
-                return self.get_target_policy(name_or_id, job_params)
+                return self.get_synciq_target_policy(name_or_id, job_params)
         except Exception as e:
             error_msg = utils.determine_error(error_obj=e)
             error_message = 'Get details of SyncIQ policy %s failed with ' \
@@ -559,7 +560,7 @@ class SynciqPolicy(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
-    def get_target_policy(self, policy_id, job_params):
+    def get_synciq_target_policy(self, policy_id, job_params):
         """ Returns details of target syncIQ policy"""
         if job_params and job_params['action'] in \
                 ('allow_write', 'allow_write_revert'):
@@ -596,14 +597,14 @@ class SynciqPolicy(object):
                 policy_details['target_certificate_name'] = \
                     self.get_target_cert_id_name(cert_id=policy_details['target_certificate_id'])
 
-            if policy_details['job_delay'] is not None:
+            if policy_details.get('job_delay') is not None:
                 policy_details['job_delay'] = utils.get_time_with_unit(policy_details['job_delay'])
 
-            if policy_details['target_snapshot_expiration'] is not None:
+            if policy_details.get('target_snapshot_expiration') is not None:
                 policy_details['target_snapshot_expiration'] = \
                     utils.get_time_with_unit(policy_details['target_snapshot_expiration'])
 
-            if policy_details['rpo_alert'] is not None:
+            if policy_details.get('rpo_alert') is not None:
                 policy_details['rpo_alert'] = \
                     utils.get_time_with_unit(policy_details['rpo_alert'])
 
@@ -644,8 +645,12 @@ class SynciqPolicy(object):
         :policy_id: ID of the policy to be modified
         :return: True if modify is successful
         """
+        modified_details = copy.deepcopy(policy_details.to_dict())
+        filtered_dict = {key: value for key, value in policy_params_dict.items() if value is not None}
+        modified_details.update(filtered_dict)
+
         if self.module._diff:
-            self.result.update({"diff": {"before": policy_details.to_dict(), "after": policy_params_dict}})
+            self.result.update({"diff": {"before": policy_details.to_dict(), "after": modified_details}})
         try:
             if policy_params_dict is not None:
                 LOG.debug("Policy parameters being modified : %s", policy_params_dict)
@@ -832,9 +837,6 @@ class SynciqPolicy(object):
                                       'as policy is in disabled state.')
 
     def validate_job_params(self, job_params):
-
-        # if not job_params:
-        #     return
         if job_params.get('workers_per_node') is not None:
             if job_params['action'] not in \
                     ('allow_write', 'allow_write_revert'):
@@ -1002,19 +1004,16 @@ class SynciqPolicyGetDetailsHandler:
 
 
 class SynciqPolicyJobCreateHandler:
-    def handle(self, synciq_obj, synciq_params, policy_obj, is_target_policy):
-        job_params = synciq_params.get('job_params')
-        policy_name = synciq_params.get('policy_name')
-        policy_id = synciq_params.get('policy_id')
+    def handle(self, synciq_obj, synciq_params, policy_name):
         policy_obj, is_target_policy = \
-            synciq_obj.get_synciq_policy_details(policy_name, policy_id)
+            synciq_obj.get_synciq_policy_details(policy_name, "")
+        job_params = synciq_params.get('job_params')
         if job_params:
             if job_params['action'] in ('allow_write', 'allow_write_revert'):
                 if not policy_obj:
-                    name_or_id = policy_name if policy_name else policy_id
                     synciq_obj.module.fail_json("Target policy %s is not found to "
                                                 "run failover/failover revert "
-                                                "job." % (name_or_id))
+                                                "job." % (policy_name))
             synciq_obj.validate_create_job(policy_obj, is_target_policy)
             if not synciq_obj.is_job_running(policy_obj, is_target_policy,
                                              job_params['action']):
@@ -1025,34 +1024,36 @@ class SynciqPolicyJobCreateHandler:
 
 
 class SynciqPolicyDeleteHandler:
-    def handle(self, synciq_obj, synciq_params, policy_obj, is_target_policy):
+    def handle(self, synciq_obj, synciq_params, policy_obj, is_target_policy, policy_name):
         if not is_target_policy and policy_obj:
             if synciq_params.get("state") == "absent":
                 synciq_obj.result['delete_synciq_policy'] = \
                     synciq_obj.delete_synciq_policy(policy_obj.id, policy_obj)
                 synciq_obj.result['changed'] = True
-        SynciqPolicyJobCreateHandler().handle(synciq_obj, synciq_params, policy_obj, is_target_policy)
+        SynciqPolicyJobCreateHandler().handle(synciq_obj, synciq_params, policy_name)
 
 
 class SynciqPolicyModifyHandler:
-    def handle(self, synciq_obj, synciq_params, policy_modifiable_dict, policy_obj, is_target_policy):
+    def handle(self, synciq_obj, synciq_params, policy_modifiable_dict, policy_obj, is_target_policy, policy_name):
         if not is_target_policy:
             if policy_modifiable_dict and synciq_params.get("state") == "present":
                 synciq_obj.result['modify_synciq_policy'] = \
                     synciq_obj.modify_synciq_policy(policy_modifiable_dict,
                                                     policy_obj.id, policy_obj)
                 synciq_obj.result['changed'] = True
-        SynciqPolicyDeleteHandler().handle(synciq_obj, synciq_params, policy_obj, is_target_policy)
+        SynciqPolicyDeleteHandler().handle(synciq_obj, synciq_params, policy_obj, is_target_policy, policy_name)
 
 
 class SynciqPolicyCreateHandler:
     def rename_policy(self, synciq_obj, policy_obj, synciq_params, policy_modifiable_dict):
+        policy_name = synciq_params.get('policy_name')
         new_policy_name = synciq_params.get('new_policy_name')
         if new_policy_name is not None and utils.is_input_empty(new_policy_name):
             synciq_obj.module.fail_json(msg='new_policy_name cannot be empty. Please provide a valid '
                                         'new_policy_name to rename policy.')
         elif new_policy_name and policy_obj and new_policy_name != policy_obj.name:
             policy_modifiable_dict['name'] = policy_name = new_policy_name
+        return policy_name
 
     def create_policy(self, synciq_obj, synciq_params, policy_obj, policy_param):
         state = synciq_params.get('state')
@@ -1065,11 +1066,12 @@ class SynciqPolicyCreateHandler:
             synciq_obj.result['changed'] = True
 
     def handle(self, synciq_obj, synciq_params, policy_param, policy_modifiable_dict, policy_obj, is_target_policy):
+        policy_name = synciq_params.get('policy_name')
         if not is_target_policy:
-            self.rename_policy(synciq_obj, policy_obj, synciq_params, policy_modifiable_dict)
+            policy_name = self.rename_policy(synciq_obj, policy_obj, synciq_params, policy_modifiable_dict)
             self.create_policy(synciq_obj, synciq_params, policy_obj, policy_param)
 
-        SynciqPolicyModifyHandler().handle(synciq_obj, synciq_params, policy_modifiable_dict, policy_obj, is_target_policy)
+        SynciqPolicyModifyHandler().handle(synciq_obj, synciq_params, policy_modifiable_dict, policy_obj, is_target_policy, policy_name)
 
 
 class SynciqPolicyHandler:
