@@ -525,11 +525,12 @@ class SynciqPolicy(object):
         """
         name_or_id = policy_name if policy_name else policy_id
         try:
-            policy = self.api_instance.get_sync_policy(name_or_id).policies
-            if policy:
+            policy_details = self.api_instance.get_sync_policy(name_or_id)
+            if policy_details:
+                policy = policy_details.policies
                 return policy[0], False
-
             return None, False
+ 
         except utils.ApiException as e:
             if str(e.status) == "404":
                 LOG.info("SyncIQ policy %s is not found", name_or_id)
