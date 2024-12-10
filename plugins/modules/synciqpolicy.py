@@ -451,7 +451,7 @@ synciq_policy_details:
         "enabled": true,
         "encryption": false,
         "file_matching_pattern": {
-            "or_criteria": null
+            "or_criteria": None
         },
         "id": "d63b079d34adf2d2ec3ce92f15bfc730",
         "job_delay": "1.0 days",
@@ -623,8 +623,8 @@ class SynciqPolicy(object):
         :param: Dictionary of parameters to be set while creating a policy
         :return: Policy ID once creation is successful
         """
-        if self.module._diff:
-            self.result.update({"diff": {"before": {}, "after": policy_param}})
+        # if self.module._diff:
+        #     self.result.update({"diff": {"before": {}})
         try:
             LOG.debug("Parameters to set when creating a SyncIQ policy %s", policy_param)
             if not self.module.check_mode:
@@ -648,9 +648,6 @@ class SynciqPolicy(object):
         modified_details = copy.deepcopy(policy_details.to_dict())
         filtered_dict = {key: value for key, value in policy_params_dict.items() if value is not None}
         modified_details.update(filtered_dict)
-
-        if self.module._diff:
-            self.result.update({"diff": {"before": policy_details.to_dict(), "after": modified_details}})
         try:
             if policy_params_dict is not None:
                 LOG.debug("Policy parameters being modified : %s", policy_params_dict)
@@ -725,8 +722,6 @@ class SynciqPolicy(object):
         :param policy_id: ID of SyncIQ policy
         :return: True if deletion is successful
         """
-        if self.module._diff:
-            self.result.update({"diff": {"before": policy_details.to_dict(), "after": {}}})
         try:
             if not self.module.check_mode:
                 self.api_instance.delete_sync_policy(sync_policy_id=policy_id)
@@ -844,7 +839,7 @@ class SynciqPolicy(object):
                                       'only for allow_write and '
                                       'allow_write_revert operation.')
 
-            if job_params.get('workers_per_node') and job_params.get('workers_per_node') <= 0:
+            if job_params.get('workers_per_node') is not None and job_params.get('workers_per_node') <= 0:
                 self.module.fail_json(msg='Please enter a value greater than '
                                       '0 for workers_per_node.')
 
@@ -866,6 +861,124 @@ class SynciqPolicy(object):
     def validate_input(self, policy_id_or_name):
         if not policy_id_or_name or utils.is_input_empty(policy_id_or_name):
             self.module.fail_json(msg='Please specify policy_name or policy_id')
+
+    def get_diff_after(self, state, params_dict, policy_details, modify_dict):
+        if state == "absent":
+            return {}
+        else:
+            diff_dict = {}
+            if policy_details is None:
+                diff_dict = {
+                    "accelerated_failback": (
+                        params_dict.get("accelerated_failback")
+                        if params_dict.get("accelerated_failback") is not None else True),
+                    # "accelerated_failback": params_dict.get("accelerated_failback") if params_dict.get("accelerated_failback") is not None else True,
+                    "action": params_dict.get("action"),
+                    "allow_copy_fb": False,
+                    "bandwidth_reservation": None,
+                    "changelist": False,
+                    "check_integrity": True,
+                    "cloud_deep_copy": "deny",
+                    "conflicted": False,
+                    "database_mirrored": False,
+                    "delete_quotas": True,
+                    "description": (
+                        params_dict.get("description")
+                        if params_dict.get("description") is not None else ""),
+                    "disable_file_split": False,
+                    "disable_fofb": False,
+                    "disable_quota_tmp_dir": False,
+                    "disable_stf": False,
+                    "enable_hash_tmpdir": False,
+                    "enabled": (
+                        params_dict.get("enabled")
+                        if params_dict.get("enabled") is not None else True),
+                    "encrypted": False,
+                    "encryption_cipher_list": "",
+                    "expected_dataloss": False,
+                    "file_matching_pattern": {
+                        "or_criteria": None
+                    },
+                    "force_interface": False,
+                    "has_sync_state": False,
+                    "ignore_recursive_quota": False,
+                    "job_delay": params_dict.get("job_delay"),
+                    "jobs": [],
+                    "last_job_state": "unknown",
+                    "last_started": None,
+                    "last_success": None,
+                    "linked_service_policies": [],
+                    "log_level": "notice",
+                    "log_removed_files": False,
+                    "name": params_dict.get("name"),
+                    "next_run": None,
+                    "ocsp_address": "",
+                    "ocsp_issuer_certificate_id": "",
+                    "password_set": False,
+                    "priority": 0,
+                    "report_max_age": 31536000,
+                    "report_max_count": 2000,
+                    "restrict_target_network": (
+                        params_dict.get("restrict_target_network")
+                        if params_dict.get("restrict_target_network") is not None else False),
+                    "rpo_alert": params_dict.get("rpo_alert"),
+                    "schedule": (
+                        params_dict.get("schedule")
+                        if params_dict.get("schedule") is not None else ""),
+                    "service_policy": False,
+                    "skip_lookup": None,
+                    "skip_when_source_unmodified": (
+                        params_dict.get("skip_when_source_unmodified")
+                        if params_dict.get("skip_when_source_unmodified") is not None else False),
+                    "snapshot_sync_existing": False,
+                    "snapshot_sync_pattern": (
+                        params_dict.get("snapshot_sync_pattern")
+                        if params_dict.get("snapshot_sync_pattern") is not None else "*"),
+                    "source_certificate_id": "",
+                    "source_domain_marked": False,
+                    "source_exclude_directories": (
+                        params_dict.get("source_exclude_directories")
+                        if params_dict.get("source_exclude_directories") is not None else []),
+                    "source_include_directories": (
+                        params_dict.get("source_include_directories")
+                        if params_dict.get("source_include_directories") is not None else []),
+                    "source_network": params_dict.get("source_network"),
+                    "source_root_path": (
+                        params_dict.get("source_root_path")
+                        if params_dict.get("source_root_path") is not None else ""),
+                    "source_snapshot_archive": False,
+                    "source_snapshot_expiration": 0,
+                    "source_snapshot_pattern": "",
+                    "sync_existing_snapshot_expiration": False,
+                    "sync_existing_target_snapshot_pattern": "%{SnapName}-%{SnapCreateTime}",
+                    "target_certificate_id": (
+                        params_dict.get("target_certificate_id")
+                        if params_dict.get("target_certificate_id") is not None else ""),
+                    "target_compare_initial_sync": False,
+                    "target_detect_modifications": True,
+                    "target_host": (
+                        params_dict.get("target_host")
+                        if params_dict.get("target_host") else ""),
+                    "target_path": (
+                        params_dict.get("target_path")
+                        if params_dict.get("target_path") else ""),
+                    "target_snapshot_alias": "SIQ-%{SrcCluster}-%{PolicyName}-latest",
+                    "target_snapshot_archive": (
+                        params_dict.get("target_snapshot_archive")
+                        if params_dict.get("target_snapshot_archive") is not None else False),
+                    "target_snapshot_expiration": (
+                        params_dict.get("target_snapshot_expiration")
+                        if params_dict.get("target_snapshot_expiration") is not None else "0.0 days"),
+                    "target_snapshot_pattern": "SIQ-%{SrcCluster}-%{PolicyName}-%Y-%m-%d_%H-%M-%S",
+                    "workers_per_node": (
+                        params_dict.get("workers_per_node")
+                        if params_dict.get("workers_per_node") is not None else 3)
+                }
+            else:
+                diff_dict = copy.deepcopy(policy_details.to_dict())
+                for key in modify_dict.keys():
+                    diff_dict[key] = modify_dict[key]
+        return diff_dict
 
 
 def is_policy_modify(policy_obj, policy_param):
@@ -985,7 +1098,7 @@ def get_synciqpolicy_parameters():
 
 
 class SynciqPolicyExitHandler:
-    def handle(self, synciq_obj):
+    def handle(self, synciq_obj, policy_obj):
         synciq_obj.module.exit_json(**synciq_obj.result)
 
 
@@ -1000,7 +1113,7 @@ class SynciqPolicyGetDetailsHandler:
                         policy_obj)
                 policy_jobs = synciq_obj.get_policy_jobs(policy_obj.name)
                 synciq_obj.result['synciq_policy_details'].update(jobs=policy_jobs)
-        SynciqPolicyExitHandler().handle(synciq_obj)
+        SynciqPolicyExitHandler().handle(synciq_obj, policy_obj)
 
 
 class SynciqPolicyJobCreateHandler:
@@ -1076,19 +1189,16 @@ class SynciqPolicyCreateHandler:
 
 class SynciqPolicyHandler:
     """SyncIQ Policy Handler"""
-
     def determine_schedule(self, run_job):
         """
         Determine the schedule based on the run_job value.
         :param run_job: The type of job scheduling
         :return: The schedule string
         """
-        schedule = ''
         if run_job == 'when-source-modified' or run_job == 'when-snapshot-taken':
-            schedule = run_job
+            return run_job
         elif run_job == 'manual':
-            schedule = ''
-        return schedule
+            return ''
 
     def handle(self, synciq_obj, synciq_params):
         policy_name = synciq_params.get('policy_name')
@@ -1100,12 +1210,16 @@ class SynciqPolicyHandler:
         rpo_alert_unit = synciq_params.get('rpo_alert_unit')
         job_delay = synciq_params.get('job_delay')
         job_delay_unit = synciq_params.get('job_delay_unit')
+        schedule = synciq_params.get('schedule')
+        state = synciq_params.get('state')
         synciq_obj.validate_input(policy_name or policy_id)
         if job_params:
             synciq_obj.validate_job_params(job_params)
 
         policy_obj, is_target_policy = \
             synciq_obj.get_synciq_policy_details(policy_name, policy_id, job_params)
+        policy_param = {}
+        policy_modifiable_dict = {}
         if not is_target_policy:
             rpo_alert = utils.get_time_in_seconds(rpo_alert, rpo_alert_unit) if rpo_alert else None
             job_delay = utils.get_time_in_seconds(job_delay, job_delay_unit) if job_delay else None
@@ -1115,16 +1229,26 @@ class SynciqPolicyHandler:
                     target_snapshot['target_snapshot_expiration'],
                     target_snapshot['exp_time_unit']
                 )
-            schedule = self.determine_schedule(run_job)
+            updated_schedule = self.determine_schedule(run_job)
+            schedule = updated_schedule if updated_schedule else schedule
 
             # Construct dictionary of policy parameters to be passed while creating policy
             policy_param = synciq_obj.construct_policy_params(synciq_params, schedule,
                                                               rpo_alert, job_delay)
             # Form dictionary of modifiable parameters of policy
-            policy_modifiable_dict = {}
             if policy_obj is not None and policy_param:
                 policy_modifiable_dict = \
                     is_policy_modify(policy_obj, policy_param)
+
+        before_dict = {}
+        diff_dict = {}
+        diff_dict = synciq_obj.get_diff_after(state, policy_param, policy_obj, policy_modifiable_dict)
+        if policy_obj is None:
+            before_dict = {}
+        else:
+            before_dict = policy_obj.to_dict()
+        if synciq_obj.module._diff:
+            synciq_obj.result['diff'] = dict(before=before_dict, after=diff_dict)
 
         SynciqPolicyCreateHandler().handle(synciq_obj, synciq_params, policy_param, policy_modifiable_dict, policy_obj, is_target_policy)
 
