@@ -716,7 +716,7 @@ class SynciqPolicy(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
-    def delete_synciq_policy(self, policy_id, policy_details):
+    def delete_synciq_policy(self, policy_id):
         """
         Delete SyncIQ policy.
         :param policy_id: ID of SyncIQ policy
@@ -869,10 +869,7 @@ class SynciqPolicy(object):
             diff_dict = {}
             if policy_details is None:
                 diff_dict = {
-                    "accelerated_failback": (
-                        params_dict.get("accelerated_failback")
-                        if params_dict.get("accelerated_failback") is not None else True),
-                    # "accelerated_failback": params_dict.get("accelerated_failback") if params_dict.get("accelerated_failback") is not None else True,
+                    "accelerated_failback": params_dict.get("accelerated_failback", True),
                     "action": params_dict.get("action"),
                     "allow_copy_fb": False,
                     "bandwidth_reservation": None,
@@ -882,17 +879,13 @@ class SynciqPolicy(object):
                     "conflicted": False,
                     "database_mirrored": False,
                     "delete_quotas": True,
-                    "description": (
-                        params_dict.get("description")
-                        if params_dict.get("description") is not None else ""),
+                    "description": params_dict.get("description", ""),
                     "disable_file_split": False,
                     "disable_fofb": False,
                     "disable_quota_tmp_dir": False,
                     "disable_stf": False,
                     "enable_hash_tmpdir": False,
-                    "enabled": (
-                        params_dict.get("enabled")
-                        if params_dict.get("enabled") is not None else True),
+                    "enabled": params_dict.get("enabled", True),
                     "encrypted": False,
                     "encryption_cipher_list": "",
                     "expected_dataloss": False,
@@ -918,34 +911,20 @@ class SynciqPolicy(object):
                     "priority": 0,
                     "report_max_age": 31536000,
                     "report_max_count": 2000,
-                    "restrict_target_network": (
-                        params_dict.get("restrict_target_network")
-                        if params_dict.get("restrict_target_network") is not None else False),
+                    "restrict_target_network": params_dict.get("restrict_target_network", False),
                     "rpo_alert": params_dict.get("rpo_alert"),
-                    "schedule": (
-                        params_dict.get("schedule")
-                        if params_dict.get("schedule") is not None else ""),
+                    "schedule": params_dict.get("schedule", ""),
                     "service_policy": False,
                     "skip_lookup": None,
-                    "skip_when_source_unmodified": (
-                        params_dict.get("skip_when_source_unmodified")
-                        if params_dict.get("skip_when_source_unmodified") is not None else False),
+                    "skip_when_source_unmodified": params_dict.get("skip_when_source_unmodified", False),
                     "snapshot_sync_existing": False,
-                    "snapshot_sync_pattern": (
-                        params_dict.get("snapshot_sync_pattern")
-                        if params_dict.get("snapshot_sync_pattern") is not None else "*"),
+                    "snapshot_sync_pattern": params_dict.get("snapshot_sync_pattern", "*"),
                     "source_certificate_id": "",
                     "source_domain_marked": False,
-                    "source_exclude_directories": (
-                        params_dict.get("source_exclude_directories")
-                        if params_dict.get("source_exclude_directories") is not None else []),
-                    "source_include_directories": (
-                        params_dict.get("source_include_directories")
-                        if params_dict.get("source_include_directories") is not None else []),
+                    "source_exclude_directories": params_dict.get("source_exclude_directories", []),
+                    "source_include_directories": params_dict.get("source_include_directories", []),
                     "source_network": params_dict.get("source_network"),
-                    "source_root_path": (
-                        params_dict.get("source_root_path")
-                        if params_dict.get("source_root_path") is not None else ""),
+                    "source_root_path": params_dict.get("source_root_path", ""),
                     "source_snapshot_archive": False,
                     "source_snapshot_expiration": 0,
                     "source_snapshot_pattern": "",
@@ -956,23 +935,13 @@ class SynciqPolicy(object):
                         if params_dict.get("target_certificate_id") is not None else ""),
                     "target_compare_initial_sync": False,
                     "target_detect_modifications": True,
-                    "target_host": (
-                        params_dict.get("target_host")
-                        if params_dict.get("target_host") else ""),
-                    "target_path": (
-                        params_dict.get("target_path")
-                        if params_dict.get("target_path") else ""),
+                    "target_host": params_dict.get("target_host", ""),
+                    "target_path": params_dict.get("target_path", ""),
                     "target_snapshot_alias": "SIQ-%{SrcCluster}-%{PolicyName}-latest",
-                    "target_snapshot_archive": (
-                        params_dict.get("target_snapshot_archive")
-                        if params_dict.get("target_snapshot_archive") is not None else False),
-                    "target_snapshot_expiration": (
-                        params_dict.get("target_snapshot_expiration")
-                        if params_dict.get("target_snapshot_expiration") is not None else "0.0 days"),
+                    "target_snapshot_archive": params_dict.get("target_snapshot_archive", False),
+                    "target_snapshot_expiration": params_dict.get("target_snapshot_expiration", "0.0 days"),
                     "target_snapshot_pattern": "SIQ-%{SrcCluster}-%{PolicyName}-%Y-%m-%d_%H-%M-%S",
-                    "workers_per_node": (
-                        params_dict.get("workers_per_node")
-                        if params_dict.get("workers_per_node") is not None else 3)
+                    "workers_per_node": params_dict.get("workers_per_node", 3)
                 }
             else:
                 diff_dict = copy.deepcopy(policy_details.to_dict())
@@ -1098,7 +1067,7 @@ def get_synciqpolicy_parameters():
 
 
 class SynciqPolicyExitHandler:
-    def handle(self, synciq_obj, policy_obj):
+    def handle(self, synciq_obj):
         synciq_obj.module.exit_json(**synciq_obj.result)
 
 
@@ -1113,7 +1082,7 @@ class SynciqPolicyGetDetailsHandler:
                         policy_obj)
                 policy_jobs = synciq_obj.get_policy_jobs(policy_obj.name)
                 synciq_obj.result['synciq_policy_details'].update(jobs=policy_jobs)
-        SynciqPolicyExitHandler().handle(synciq_obj, policy_obj)
+        SynciqPolicyExitHandler().handle(synciq_obj)
 
 
 class SynciqPolicyJobCreateHandler:
@@ -1141,7 +1110,7 @@ class SynciqPolicyDeleteHandler:
         if not is_target_policy and policy_obj:
             if synciq_params.get("state") == "absent":
                 synciq_obj.result['delete_synciq_policy'] = \
-                    synciq_obj.delete_synciq_policy(policy_obj.id, policy_obj)
+                    synciq_obj.delete_synciq_policy(policy_obj.id)
                 synciq_obj.result['changed'] = True
         SynciqPolicyJobCreateHandler().handle(synciq_obj, synciq_params, policy_name)
 
@@ -1154,6 +1123,11 @@ class SynciqPolicyModifyHandler:
                     synciq_obj.modify_synciq_policy(policy_modifiable_dict,
                                                     policy_obj.id, policy_obj)
                 synciq_obj.result['changed'] = True
+        if synciq_obj.result['changed'] and synciq_obj.module._diff:
+            policy_obj, is_target_policy = \
+                synciq_obj.get_synciq_policy_details(policy_name, "")
+            if policy_obj:
+                synciq_obj.result['diff']['after'] = policy_obj.to_dict()
         SynciqPolicyDeleteHandler().handle(synciq_obj, synciq_params, policy_obj, is_target_policy, policy_name)
 
 
@@ -1200,6 +1174,17 @@ class SynciqPolicyHandler:
         elif run_job == 'manual':
             return ''
 
+    def handling_diff(self, synciq_obj, state, policy_param, policy_obj, policy_modifiable_dict):
+        before_dict = {}
+        diff_dict = {}
+        diff_dict = synciq_obj.get_diff_after(state, policy_param, policy_obj, policy_modifiable_dict)
+        if policy_obj is None:
+            before_dict = {}
+        else:
+            before_dict = policy_obj.to_dict()
+        if synciq_obj.module._diff:
+            synciq_obj.result['diff'] = dict(before=before_dict, after=diff_dict)
+
     def handle(self, synciq_obj, synciq_params):
         policy_name = synciq_params.get('policy_name')
         policy_id = synciq_params.get('policy_id')
@@ -1239,17 +1224,7 @@ class SynciqPolicyHandler:
             if policy_obj is not None and policy_param:
                 policy_modifiable_dict = \
                     is_policy_modify(policy_obj, policy_param)
-
-        before_dict = {}
-        diff_dict = {}
-        diff_dict = synciq_obj.get_diff_after(state, policy_param, policy_obj, policy_modifiable_dict)
-        if policy_obj is None:
-            before_dict = {}
-        else:
-            before_dict = policy_obj.to_dict()
-        if synciq_obj.module._diff:
-            synciq_obj.result['diff'] = dict(before=before_dict, after=diff_dict)
-
+        self.handling_diff(synciq_obj, state, policy_param, policy_obj, policy_modifiable_dict)
         SynciqPolicyCreateHandler().handle(synciq_obj, synciq_params, policy_param, policy_modifiable_dict, policy_obj, is_target_policy)
 
 
