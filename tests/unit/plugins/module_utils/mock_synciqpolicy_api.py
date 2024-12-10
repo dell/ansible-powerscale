@@ -110,9 +110,6 @@ class MockSynciqpolicyApi:
     CREATE_JOB_ARGS.update(CREATE_ARGS)
     CREATE_JOB_ARGS.update(JOB_ARGS1)
 
-    CREATE_JOB_ARGS2 = {}
-    CREATE_JOB_ARGS2.update(CREATE_ARGS)
-    CREATE_JOB_ARGS2.update(JOB_ARGS2)
-
     POLICY_ID = 'xx'
     EXCEPTION_MSG = "SyncIQ policy"
+    CERT_NAME = "cert1"

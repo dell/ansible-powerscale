@@ -591,7 +591,9 @@ class SynciqPolicy(object):
         :return: dict with SyncIQ policy details
         """
         try:
-            policy_details = policy_obj.to_dict()
+            policy_details = policy_obj
+            if not isinstance(policy_obj, dict):
+                policy_details = policy_obj.to_dict()
 
             if 'target_certificate_id' in policy_details and policy_details['target_certificate_id']:
                 policy_details['target_certificate_name'] = \
@@ -613,7 +615,7 @@ class SynciqPolicy(object):
         except Exception as e:
             error_msg = utils.determine_error(error_obj=e)
             errormsg = "Display details of SyncIQ policy %s failed with " \
-                       "error %s" % (policy_obj.name, str(error_msg))
+                       "error %s" % (policy_details["name"], str(error_msg))
             LOG.error(errormsg)
             self.module.fail_json(msg=errormsg)
 
@@ -623,8 +625,6 @@ class SynciqPolicy(object):
         :param: Dictionary of parameters to be set while creating a policy
         :return: Policy ID once creation is successful
         """
-        # if self.module._diff:
-        #     self.result.update({"diff": {"before": {}})
         try:
             LOG.debug("Parameters to set when creating a SyncIQ policy %s", policy_param)
             if not self.module.check_mode:
@@ -692,11 +692,10 @@ class SynciqPolicy(object):
         :job_params: Dictionary of parameters for creating a job
         :return: True if job creation is successful
         """
-
         try:
             if job_params and not self.module.check_mode:
                 sync_job_params = {}
-                sync_job_keys = ['action', 'source_snapshot']
+                sync_job_keys = ['action', 'source_snapshot', 'workers_per_node']
                 sync_job_params['id'] = policy_id
                 for key in sync_job_keys:
                     if key == 'action' and job_params[key] == 'run':
@@ -930,16 +929,14 @@ class SynciqPolicy(object):
                     "source_snapshot_pattern": "",
                     "sync_existing_snapshot_expiration": False,
                     "sync_existing_target_snapshot_pattern": "%{SnapName}-%{SnapCreateTime}",
-                    "target_certificate_id": (
-                        params_dict.get("target_certificate_id")
-                        if params_dict.get("target_certificate_id") is not None else ""),
+                    "target_certificate_id": params_dict.get("target_certificate_id", ""),
                     "target_compare_initial_sync": False,
                     "target_detect_modifications": True,
                     "target_host": params_dict.get("target_host", ""),
                     "target_path": params_dict.get("target_path", ""),
                     "target_snapshot_alias": "SIQ-%{SrcCluster}-%{PolicyName}-latest",
                     "target_snapshot_archive": params_dict.get("target_snapshot_archive", False),
-                    "target_snapshot_expiration": params_dict.get("target_snapshot_expiration", "0.0 days"),
+                    "target_snapshot_expiration": params_dict.get("target_snapshot_expiration"),
                     "target_snapshot_pattern": "SIQ-%{SrcCluster}-%{PolicyName}-%Y-%m-%d_%H-%M-%S",
                     "workers_per_node": params_dict.get("workers_per_node", 3)
                 }
@@ -947,7 +944,7 @@ class SynciqPolicy(object):
                 diff_dict = copy.deepcopy(policy_details.to_dict())
                 for key in modify_dict.keys():
                     diff_dict[key] = modify_dict[key]
-        return diff_dict
+        return self.get_synciq_policy_display_attributes(diff_dict)
 
 
 def is_policy_modify(policy_obj, policy_param):
@@ -1116,6 +1113,14 @@ class SynciqPolicyDeleteHandler:
 
 
 class SynciqPolicyModifyHandler:
+    def handle_diff_after(self, synciq_obj, policy_name):
+        if not synciq_obj.module.check_mode and synciq_obj.module._diff:
+            if synciq_obj.result['diff']['after']:
+                policy_obj, is_target_policy = \
+                    synciq_obj.get_synciq_policy_details(policy_name, "")
+                policy_details = synciq_obj.get_synciq_policy_display_attributes(policy_obj)
+                synciq_obj.result['diff']['after'] = policy_details
+
     def handle(self, synciq_obj, synciq_params, policy_modifiable_dict, policy_obj, is_target_policy, policy_name):
         if not is_target_policy:
             if policy_modifiable_dict and synciq_params.get("state") == "present":
@@ -1123,11 +1128,7 @@ class SynciqPolicyModifyHandler:
                     synciq_obj.modify_synciq_policy(policy_modifiable_dict,
                                                     policy_obj.id, policy_obj)
                 synciq_obj.result['changed'] = True
-        if synciq_obj.result['changed'] and synciq_obj.module._diff:
-            policy_obj, is_target_policy = \
-                synciq_obj.get_synciq_policy_details(policy_name, "")
-            if policy_obj:
-                synciq_obj.result['diff']['after'] = policy_obj.to_dict()
+        self.handle_diff_after(synciq_obj, policy_name)
         SynciqPolicyDeleteHandler().handle(synciq_obj, synciq_params, policy_obj, is_target_policy, policy_name)
 
 
@@ -1157,7 +1158,8 @@ class SynciqPolicyCreateHandler:
         if not is_target_policy:
             policy_name = self.rename_policy(synciq_obj, policy_obj, synciq_params, policy_modifiable_dict)
             self.create_policy(synciq_obj, synciq_params, policy_obj, policy_param)
-
+            if synciq_obj.module._diff and synciq_obj.result["diff"]["after"] and policy_name:
+                synciq_obj.result["diff"]["after"]["name"] = policy_name
         SynciqPolicyModifyHandler().handle(synciq_obj, synciq_params, policy_modifiable_dict, policy_obj, is_target_policy, policy_name)
 
 
@@ -1181,7 +1183,7 @@ class SynciqPolicyHandler:
         if policy_obj is None:
             before_dict = {}
         else:
-            before_dict = policy_obj.to_dict()
+            before_dict = synciq_obj.get_synciq_policy_display_attributes(policy_obj)
         if synciq_obj.module._diff:
             synciq_obj.result['diff'] = dict(before=before_dict, after=diff_dict)
 
