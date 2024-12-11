@@ -1087,7 +1087,7 @@ def get_synciqpolicy_parameters():
                                      wait_for_completion=dict(type='bool', default=False))),
         accelerated_failback=dict(type='bool'),
         restrict_target_network=dict(type='bool'),
-        state=dict(required=True, type='str', choices=['present', 'absent'])
+        state=dict(required=True, choices=['present', 'absent'])
     )
 
 
