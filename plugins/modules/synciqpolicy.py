@@ -544,11 +544,13 @@ class SynciqPolicy(object):
         """
         name_or_id = policy_name if policy_name else policy_id
         try:
-            policy = self.api_instance.get_sync_policy(name_or_id).policies
-            if policy:
-                return policy[0], False
-
+            policy_details = self.api_instance.get_sync_policy(name_or_id)
+            if policy_details:
+                policy = policy_details.policies
+                if policy:
+                    return policy[0], False
             return None, False
+
         except utils.ApiException as e:
             if str(e.status) == "404":
                 LOG.info("SyncIQ policy %s is not found", name_or_id)
@@ -1065,6 +1067,17 @@ def get_synciqpolicy_parameters():
 
 class SynciqPolicyExitHandler:
     def handle(self, synciq_obj):
+        calculated_params = ["next_run",
+                             "last_job_state",
+                             "last_started",
+                             "last_success"]
+        if synciq_obj.module._diff:
+            if synciq_obj.result["diff"]["after"]:
+                for param in calculated_params:
+                    synciq_obj.result["diff"]["after"].pop(param, None)
+            if synciq_obj.result["diff"]["before"]:
+                for param in calculated_params:
+                    synciq_obj.result["diff"]["before"].pop(param, None)
         synciq_obj.module.exit_json(**synciq_obj.result)
 
 
