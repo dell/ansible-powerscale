@@ -242,7 +242,7 @@ options:
 attributes:
   check_mode:
     description:
-    - Runs task to validate without performing action on the target machine.
+    - Can run in check_mode and return changed status prediction without modifying target, if not supported the action will be skipped.
     support: full
   diff_mode:
     description:
