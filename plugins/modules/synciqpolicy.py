@@ -246,7 +246,7 @@ attributes:
     support: full
   diff_mode:
     description:
-    - Runs the task to report the changes made or to be made.
+    - Will return details on what has changed (or possibly needs changing in check_mode), when in diff mode
     support: full
 notes:
 - There is a delay to view the jobs running on the policy.
