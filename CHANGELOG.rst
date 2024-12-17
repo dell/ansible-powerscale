@@ -4,6 +4,19 @@ Dellemc.Powerscale Change Logs
 
 .. contents:: Topics
 
+v3.7.0
+======
+
+Minor Changes
+-------------
+
+- Added check and diff mode support for synciqpolicy module.
+
+Bug Fixes
+-------------
+
+- Fixed bugs for synciqpolicy module. (Issues #44 and #130)
+
 v3.6.0
 ======
 
