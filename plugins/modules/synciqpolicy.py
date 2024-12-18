@@ -525,11 +525,13 @@ class SynciqPolicy(object):
         """
         name_or_id = policy_name if policy_name else policy_id
         try:
-            policy = self.api_instance.get_sync_policy(name_or_id).policies
-            if policy:
-                return policy[0], False
-
+            policy_details = self.api_instance.get_sync_policy(name_or_id)
+            if policy_details:
+                policy = policy_details.policies
+                if policy:
+                    return policy[0], False
             return None, False
+
         except utils.ApiException as e:
             if str(e.status) == "404":
                 LOG.info("SyncIQ policy %s is not found", name_or_id)
@@ -879,7 +881,7 @@ class SynciqPolicy(object):
 
         # Check if policy exists
         policy_obj, is_target_policy = \
-            self.get_synciq_policy_details(policy_name, policy_id, job_params)
+            self.get_synciq_policy_details(policy_name=policy_name, policy_id=policy_id, job_params=job_params)
         if not is_target_policy:
             if rpo_alert:
                 rpo_alert = utils.get_time_in_seconds(rpo_alert,
@@ -941,7 +943,7 @@ class SynciqPolicy(object):
                 result['changed'] = True
 
             policy_obj, is_target_policy = \
-                self.get_synciq_policy_details(policy_name, policy_id)
+                self.get_synciq_policy_details(policy_name=policy_name, policy_id=policy_id)
 
         # Create a job on SyncIQ policy
         if job_params:
@@ -1085,7 +1087,7 @@ def get_synciqpolicy_parameters():
                                      wait_for_completion=dict(type='bool', default=False))),
         accelerated_failback=dict(type='bool'),
         restrict_target_network=dict(type='bool'),
-        state=dict(required=True, type='str', choices=['present', 'absent'])
+        state=dict(required=True, choices=['present', 'absent'])
     )
 
 
