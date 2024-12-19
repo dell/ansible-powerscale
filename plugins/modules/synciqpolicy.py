@@ -1210,7 +1210,7 @@ class SynciqPolicyHandler:
         rpo_alert_unit = synciq_params.get('rpo_alert_unit')
         job_delay = synciq_params.get('job_delay')
         job_delay_unit = synciq_params.get('job_delay_unit')
-        schedule = synciq_params.get('schedule')
+        schedule = synciq_params.get('schedule') or ""
         state = synciq_params.get('state')
         synciq_obj.validate_input(policy_name or policy_id)
         if job_params:
