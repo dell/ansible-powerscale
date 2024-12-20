@@ -1162,7 +1162,7 @@ class SynciqPolicyCreateHandler:
             # Check if all mandatory params are provided
             synciq_obj.validate_create_params(policy_param)
             policy_param['accelerated_failback'] = True if synciq_params.get('accelerated_failback') is None else synciq_params.get('accelerated_failback')
-            policy_id = synciq_obj.create_synciq_policy(policy_param)
+            synciq_obj.create_synciq_policy(policy_param)
             synciq_obj.result['create_synciq_policy'] = True
             synciq_obj.result['changed'] = True
 
@@ -1178,7 +1178,7 @@ class SynciqPolicyCreateHandler:
 
 class SynciqPolicyHandler:
     """SyncIQ Policy Handler"""
-    def determine_schedule(self, run_job):
+    def determine_schedule(self, run_job, schedule):
         """
         Determine the schedule based on the run_job value.
         :param run_job: The type of job scheduling
@@ -1188,6 +1188,7 @@ class SynciqPolicyHandler:
             return run_job
         elif run_job == 'manual':
             return ''
+        return schedule
 
     def handling_diff(self, synciq_obj, state, policy_param, policy_obj, policy_modifiable_dict):
         before_dict = {}
@@ -1210,7 +1211,7 @@ class SynciqPolicyHandler:
         rpo_alert_unit = synciq_params.get('rpo_alert_unit')
         job_delay = synciq_params.get('job_delay')
         job_delay_unit = synciq_params.get('job_delay_unit')
-        schedule = synciq_params.get('schedule')
+        schedule = synciq_params.get('schedule') or ""
         state = synciq_params.get('state')
         synciq_obj.validate_input(policy_name or policy_id)
         if job_params:
@@ -1229,9 +1230,7 @@ class SynciqPolicyHandler:
                     target_snapshot['target_snapshot_expiration'],
                     target_snapshot['exp_time_unit']
                 )
-            updated_schedule = self.determine_schedule(run_job)
-            schedule = updated_schedule if updated_schedule else schedule
-
+            schedule = self.determine_schedule(run_job, schedule)
             # Construct dictionary of policy parameters to be passed while creating policy
             policy_param = synciq_obj.construct_policy_params(synciq_params, schedule,
                                                               rpo_alert, job_delay)
