@@ -83,6 +83,7 @@ This section describes the features of the Ansible Modules for Dell PowerScale f
 The Ansible Modules for Dell PowerScale release 3.7.0 supports the following features:
 
 - Added check and diff mode support for synciqpolicy module.
+- Fixed bugs for synciqpolicy module. (Issues #44 and #130)
 
 Known issues
 ------------
