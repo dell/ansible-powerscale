@@ -40,7 +40,8 @@
         target_cluster:
           target_host: "{{ target_host_name }}"
           target_path: "/ifs/target"
-          target_certificate_id: "7a3c579ea8214818a417eb4af31b0c9fc2634852498430b919d93f9ae122d545"
+          target_certificate_id:
+            "7a3c579ea8214818a417eb4af31b0c9fc2634852498430b919d93f9ae122d545"
         target_snapshot:
           target_snapshot_archive: true
           target_snapshot_expiration: 90
