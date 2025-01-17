@@ -36,17 +36,22 @@ def modify_ldap_failed_msg():
 def delete_ldap_failed_msg():
     return 'Deleting LDAP provider failed'
 
+
 def invalid_server_uri_failed_msg():
     return 'The value for server_uris is invalid'
+
 
 def no_server_uri_msg():
     return 'The parameter server_uris is mandatory while creating'
 
+
 def invalid_server_uri_state_msg():
     return 'Please specify the server_uri_state as present-in-ldap.'
 
+
 def no_base_dn_msg():
     return 'The parameter base_dn is mandatory while creating'
+
 
 def ldap_access_msg():
     return 'Update LDAP with access zone details'
