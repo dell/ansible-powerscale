@@ -16,7 +16,7 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shar
 
 from ansible_collections.dellemc.powerscale.plugins.modules.node import ClusterNode
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.\
-    module_utils import mock_ldap_api as MockLdapApi
+    module_utils import mock_node_api as MockNodeApi
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_api_exception \
     import MockApiException
 
@@ -28,7 +28,7 @@ class TestClusterNode():
 
     @pytest.fixture
     def node_module_mock(self, mocker):
-        mocker.patch(MockLdapApi.MODULE_UTILS_PATH +
+        mocker.patch(MockNodeApi.MODULE_UTILS_PATH +
                      '.ApiException', new=MockApiException)
         node_module_mock = ClusterNode()
         node_module_mock.module = MagicMock()
@@ -78,7 +78,7 @@ class TestClusterNode():
             MagicMock(side_effect=utils.ApiException)
         node_module_mock.perform_module_operation()
 
-        assert 'get node info for PowerScale cluster' in \
+        assert MockNodeApi.api_exception_msg() in \
             node_module_mock.module.fail_json.call_args[1]['msg']
 
     def test_get_node_info_absent(self, node_module_mock):
@@ -91,5 +91,5 @@ class TestClusterNode():
             return_value={})
         node_module_mock.perform_module_operation()
 
-        assert 'Please provide a valid Node Id' in node_module_mock.module.fail_json.call_args[
+        assert MockNodeApi.invalid_node_msg() in node_module_mock.module.fail_json.call_args[
             1]['msg']
