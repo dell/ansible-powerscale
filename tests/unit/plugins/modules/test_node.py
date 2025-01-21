@@ -14,7 +14,7 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shar
     import utils
 
 
-from ansible_collections.dellemc.powerscale.plugins.modules.node import ClusterNode
+from ansible_collections.dellemc.powerscale.plugins.modules.node import ClusterNode, main
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.\
     module_utils import mock_node_api as MockNodeApi
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_api_exception \
@@ -93,3 +93,7 @@ class TestClusterNode():
 
         assert MockNodeApi.invalid_node_msg() in node_module_mock.module.fail_json.call_args[
             1]['msg']
+
+    def test_main(self):
+        ob = main()
+        assert  ob is None # nothing to assert as it doesn't return anything
