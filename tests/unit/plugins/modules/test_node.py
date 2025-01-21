@@ -96,4 +96,4 @@ class TestClusterNode():
 
     def test_main(self):
         ob = main()
-        assert  ob is None # nothing to assert as it doesn't return anything
+        assert ob is None  # nothing to assert as it doesn't return anything
