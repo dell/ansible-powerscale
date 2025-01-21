@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ansible-version: [stable-2.17]
+        ansible-version: [stable-2.18]
     steps:
       - name: Check out code
         uses: actions/checkout@v3
@@ -53,8 +53,11 @@ jobs:
           - stable-2.15
           - stable-2.16
           - stable-2.17
+          - stable-2.18
           - devel
         exclude:
+          - ansible: stable-2.18
+            python: '3.10'
           - ansible: devel
             python: '3.10'
 
@@ -63,9 +66,11 @@ jobs:
         uses: ansible-community/ansible-test-gh-action@release/v1
         with:
           testing-type: units
-          coverage: always
+          coverage: ${{ (matrix.python == '3.11' && matrix.ansible == 'stable-2.18') && 'always' ||  'never' }}
           ansible-core-version: ${{ matrix.ansible }}
           target-python-version: ${{ matrix.python }}
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
 
   ###
@@ -85,8 +90,11 @@ jobs:
           - stable-2.15
           - stable-2.16
           - stable-2.17
+          - stable-2.18
           - devel
         exclude:
+          - ansible: stable-2.18
+            python: '3.10'
           - ansible: devel
             python: '3.10'
 
@@ -107,11 +115,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11"]
-        ansible-version: [stable-2.15, stable-2.16, stable-2.17, devel]
-        exclude:
-          - ansible-version: devel
-            python-version: '3.10'
+        python-version: ["3.11"]
+        ansible-version: [stable-2.18, devel]
 
     steps:
       # Important: This sets up your GITHUB_WORKSPACE environment variable
