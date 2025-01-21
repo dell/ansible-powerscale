@@ -69,6 +69,8 @@ jobs:
           coverage: ${{ (matrix.python == '3.11' && matrix.ansible == 'stable-2.18') && 'always' ||  'never' }}
           ansible-core-version: ${{ matrix.ansible }}
           target-python-version: ${{ matrix.python }}
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
 
   ###
