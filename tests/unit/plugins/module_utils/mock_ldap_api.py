@@ -55,3 +55,11 @@ def no_base_dn_msg():
 
 def ldap_access_msg():
     return 'Update LDAP with access zone details'
+
+
+def ldap_exception_msg():
+    return 'SDK Error message'
+
+
+def ldap_exception2_msg():
+    return 'failed with error'
