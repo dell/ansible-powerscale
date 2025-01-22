@@ -14,7 +14,7 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shar
     import utils
 
 
-from ansible_collections.dellemc.powerscale.plugins.modules.ldap import Ldap
+from ansible_collections.dellemc.powerscale.plugins.modules.ldap import Ldap, main
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.\
     module_utils import mock_ldap_api as MockLdapApi
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_api_exception \
@@ -198,7 +198,8 @@ class TestLdap():
         ldap_module_mock.module.params = self.get_ldap_args
         ldap_module_mock.auth_api_instance.get_providers_ldap_by_id = \
             MagicMock(side_effect=utils.ApiException)
-        ldap_module_mock.perform_module_operation()
+        ob = ldap_module_mock.perform_module_operation()
+        assert ob is None  # nothing to assert as it doesn't return anything
 
         # Scneario 2: utils Exception 500
         MockApiException.status = '500'
@@ -206,6 +207,8 @@ class TestLdap():
         ldap_module_mock.auth_api_instance.get_providers_ldap_by_id = \
             MagicMock(side_effect=utils.ApiException)
         ldap_module_mock.perform_module_operation()
+        assert MockLdapApi.ldap_exception_msg() in \
+            ldap_module_mock.module.fail_json.call_args[1]['msg']
 
         # Scneario 3: other Exception 500
         MockApiException.status = '500'
@@ -213,6 +216,8 @@ class TestLdap():
         ldap_module_mock.auth_api_instance.get_providers_ldap_by_id = \
             MagicMock(side_effect=Exception)
         ldap_module_mock.perform_module_operation()
+        assert MockLdapApi.ldap_exception2_msg() in \
+            ldap_module_mock.module.fail_json.call_args[1]['msg']
 
     def test_update_ldap_access_zone_info(self, ldap_module_mock):
         # Scenario 1: utils exception
@@ -226,3 +231,25 @@ class TestLdap():
         ldap_module_mock.perform_module_operation()
         assert MockLdapApi.ldap_access_msg() in \
             ldap_module_mock.module.fail_json.call_args[1]['msg']
+
+    def test_get_modified_ldap(self, ldap_module_mock):
+        self.get_ldap_args.update({
+            "ldap_name": "ldap1",
+            'server_uri_state': 'absent-in-ldap'
+        })
+        ldap_module_mock.module.params = self.get_ldap_args
+        ldap_module_mock.perform_module_operation()
+        assert (
+            ldap_module_mock.module.exit_json.call_args[1]['ldap_provider_details'])
+        assert ldap_module_mock.module.exit_json.call_args[1]['changed'] is True
+
+    def test_main(self, ldap_module_mock):
+        ldap_name = "ldap1"
+        self.get_ldap_args.update({
+            "ldap_name": ldap_name,
+            'server_uri_state': 'absent-in-ldap'
+        })
+        ldap_module_mock.get_ldap_parameters = MagicMock(
+            return_value=MockLdapApi.LDAP)
+        main()
+        ldap_module_mock.get_ldap_details(ldap_name)
