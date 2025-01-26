@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: (c) 2019-2024, Dell Technologies
+# Copyright: (c) 2019-2025, Dell Technologies
 
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
@@ -336,7 +336,9 @@ class Snapshot(object):
     def get_filesystem_snapshot_details(self, snapshot_name):
         """Returns details of a filesystem Snapshot"""
         try:
-            return self.snapshot_api.get_snapshot_snapshot(snapshot_name)
+            snapshot_details = self.snapshot_api.get_snapshot_snapshot(snapshot_name)
+            if snapshot_details:
+                return snapshot_details.to_dict()
         except utils.ApiException as e:
             if str(e.status) == "404":
                 log_msg = "Snapshot {0} status is " \
@@ -459,8 +461,6 @@ class Snapshot(object):
         if snapshot is None:
             self.module.fail_json(msg="Snapshot not found.")
 
-        snapshot = snapshot.to_dict()
-
         if snapshot['snapshots'][0]['name'] == new_name:
             return False
         try:
@@ -517,7 +517,7 @@ class Snapshot(object):
         snapshot_modification_details['is_timestamp_modified'] = False
         snapshot_modification_details['new_expiration_timestamp_value'] = None
 
-        snap_details = snapshot.to_dict()
+        snap_details = snapshot
 
         if effective_path is not None:
             if self.module.params['path'] and \
@@ -820,7 +820,7 @@ class Snapshot(object):
                            '{0} details'.format(snapshot_name)
             LOG.info(info_message)
             result['snapshot_details'] = \
-                self.get_filesystem_snapshot_details(snapshot_name).to_dict()
+                self.get_filesystem_snapshot_details(snapshot_name)
 
         # Finally update the module result!
         self.module.exit_json(**result)
