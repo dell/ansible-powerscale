@@ -8,8 +8,6 @@ from __future__ import (absolute_import, division, print_function)
 
 __metaclass__ = type
 
-import copy
-
 
 class MockSynciqpolicyApi:
     MODULE_UTILS_PATH = 'ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.utils'
@@ -17,7 +15,6 @@ class MockSynciqpolicyApi:
         'onefs_host': '**.***.**.***',
         'policy_name': '',
         'policy_id': '',
-        'new_policy_name': '',
         'schedule': '',
         'run_job': '',
         'rpo_alert': '',
@@ -30,69 +27,89 @@ class MockSynciqpolicyApi:
         'source_cluster': '',
         'state': 'present'
     }
-    GET_SYNCIQPOLICY_RESPONSE = [{
-        'accelerated_failback': False, 'action': 'copy',
-        'bandwidth_reservation': None, 'changelist': False,
-        'check_integrity': True, 'cloud_deep_copy': 'deny',
-        'conflicted': False,
-        'database_mirrored': False,
-        'delete_quotas': True,
-        'description': 'Creating a policy',
-        'disable_file_split': False,
-        'disable_fofb': False,
-        'disable_quota_tmp_dir': False,
-        'disable_stf': False,
-        'enable_hash_tmpdir': False,
-        'enabled': True,
-        'encrypted': False,
-        'encryption_cipher_list': '',
-        'expected_dataloss': False,
-        'file_matching_pattern': {'or_criteria': None},
-        'force_interface': False,
-        'has_sync_state': False,
-        'id': 'policy_id_1',
-        'job_delay': None,
-        'last_job_state': 'unknown',
-        'name': 'Policy_SP',
-        'priority': 0,
-        'restrict_target_network': True,
-        'rpo_alert': None,
-        'schedule': '',
-        'service_policy': False,
-        'skip_lookup': None,
-        'skip_when_source_unmodified': False,
-        'snapshot_sync_existing': False,
-        'snapshot_sync_pattern': '*',
-        'source_certificate_id': 'source_certificate_id_1',
-        'source_domain_marked': False,
-        'source_exclude_directories': [],
-        'source_include_directories': [],
-        'source_network': None,
-        'source_root_path': '/test/home',
-        'source_snapshot_archive': False,
-        'source_snapshot_expiration': 0,
-        'source_snapshot_pattern': '',
-        'target_certificate_id': '',
-        'target_compare_initial_sync': False,
-        'target_detect_modifications': True,
-        'target_host': 'target_host-1',
-        'target_path': '/test/target',
-        'target_snapshot_alias': 'SIQ-%{SrcCluster}-%{PolicyName}-latest',
-        'target_snapshot_archive': False,
-        'target_snapshot_expiration': 0,
-        'target_snapshot_pattern': 'SIQ-%{SrcCluster}-%{PolicyName}-%Y-%m-%d_%H-%M-%S',
-        'workers_per_node': 3
-    }]
 
-    @staticmethod
-    def get_synciqpolicy_modify_response():
-        synciqpolicy_response = copy.deepcopy(MockSynciqpolicyApi.GET_SYNCIQPOLICY_RESPONSE[0])
-        synciqpolicy_response['accelerated_failback'] = True
-        return synciqpolicy_response
+    CREATE_ARGS = {
+        "action": "sync",
+        "description": "Creating a policy",
+        "enabled": False,
+        "policy_name": "Policy1",
+        "run_job": "when-source-modified",
+        "job_delay": 10,
+        "job_delay_unit": "hours",
+        "source_cluster": {
+            "source_root_path": "/test",
+            "source_exclude_directories": "/test/abc2",
+            "source_include_directories": [
+                "/test/abc1"
+            ],
+            "source_network": {
+                "pool": "pool0",
+                "subnet": "subnet0"
+            }
+        },
+        "target_cluster": {
+            "target_host": "xx.xx.xx.xx",
+            "target_path": "/test/system",
+            "target_certificate_id": "xxxxxxx"
+        },
+        "target_snapshot": {
+            "target_snapshot_archive": True,
+            "target_snapshot_expiration": 90,
+            "exp_time_unit": "days"
+        },
+        "state": "present"
+    }
 
-    @staticmethod
-    def get_api_exception_messages(response_type):
-        if response_type == 'create':
-            return 'Creating SyncIQ policy Policy_SP failed with error : SDK Error message'
-        elif response_type == 'modify':
-            return 'Failed to modify SyncIQ policy with error : SDK Error message'
+    DELETE_ARGS = {"policy_name": "Policy1", "state": "absent"}
+
+    JOB_ARGS1 = {
+        "job_params": {
+            "workers_per_node": 3,
+            "action": "allow_write",
+            "source_snapshot": "test_snap",
+            "wait_for_completion": False
+        }
+    }
+
+    JOB_ARGS2 = {
+        "job_params": {
+            "action": "run",
+            "source_snapshot": "test_snap",
+            "wait_for_completion": True
+        }
+    }
+
+    JOB_ARGS3 = {
+        "job_params": {
+            "workers_per_node": 3,
+            "action": "run",
+            "source_snapshot": "test_snap",
+            "wait_for_completion": True
+        }
+    }
+
+    JOB_ARGS4 = {
+        "job_params": {
+            "workers_per_node": 0,
+            "action": "allow_write",
+            "source_snapshot": "test_snap",
+            "wait_for_completion": True
+        }
+    }
+
+    GET_ARGS = {"policy_name": "Policy1"}
+
+    GET_ARGS2 = {}
+    GET_ARGS2.update(GET_ARGS)
+    GET_ARGS2.update({"policy_id": 23})
+
+    CREATE_ARGS2 = CREATE_ARGS.copy()
+    CREATE_ARGS2["run_job"] = "manual"
+
+    CREATE_JOB_ARGS = {}
+    CREATE_JOB_ARGS.update(CREATE_ARGS)
+    CREATE_JOB_ARGS.update(JOB_ARGS1)
+
+    POLICY_ID = 'xx'
+    EXCEPTION_MSG = "SyncIQ policy"
+    CERT_NAME = "cert1"
