@@ -1,0 +1,32 @@
+# nonk8s
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: dell-ansible-powerscale
+  description: "PowerScale (Isilon) Ansible modules"
+  tags:
+    - ansible
+    - automation
+    - storage
+    - isilon
+    - onefs
+    - dellemc
+    - powerscale
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+    github.com/project-slug: dell/ansible-powerscale
+  links:   
+    - url: 'https://galaxy.ansible.com/dellemc/powerscale'
+      title: 'Ansible Galaxy'
+      icon: 'web'
+    - url: 'https://console.redhat.com/ansible/automation-hub/repo/published/dellemc/powerscale'
+      title: 'Automation Hub'
+      icon: 'web'
+    - url: 'https://github.com/dell/ansible-powerscale/issues'
+      title: 'Contact Technical Support'
+      icon: 'help'
+spec:
+  type: service
+  lifecycle: production
+  owner: user:default/sachin.apagundi
+  visibility: all
