@@ -200,9 +200,17 @@ options:
       set, sub-directories will not be mountable.
     - This setting can be modified any time.
     type: bool
-
+attributes:
+  check_mode:
+    description:
+    - Runs task to validate without performing action on the target machine.
+    support: full
+  diff_mode:
+    description:
+    - Runs the task to report the changes made or to be made.
+    support: full
 notes:
-  - The I(check_mode) is supported.
+  - As I(ignore_unresolvable_hosts) is input only parameter, therefore idempotency is not supported for it.
 '''
 
 EXAMPLES = r'''
@@ -489,6 +497,7 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.sh
     import PowerScaleBase
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
+import copy
 
 LOG = utils.get_logger('nfs')
 
@@ -509,7 +518,8 @@ class NfsExport(PowerScaleBase):
         # details
         self.result = {
             "changed": False,
-            "NFS_export_details": {}
+            "NFS_export_details": {},
+            "diff": {}
         }
 
     def get_zone_base_path(self, access_zone):
@@ -625,6 +635,8 @@ class NfsExport(PowerScaleBase):
         nfs_map_non_root = set_nfs_map(self.module.params.get('map_non_root'), 'map_non_root')
         if nfs_map_non_root:
             nfs_export.map_non_root = nfs_map_non_root
+        if self.module._diff:
+            self.result.update({"diff": {"before": {}, "after": nfs_export.to_dict()}})
         try:
             if not self.module.check_mode:
                 msg = ("Creating NFS export with parameters:nfs_export=%s",
@@ -811,9 +823,12 @@ class NfsExport(PowerScaleBase):
         '''
         Modify NFS export in system
         '''
+        nfs_details = copy.deepcopy(self.result.get('NFS_export_details'))
+
         nfs_export = self.isi_sdk.NfsExport()
         client_flag = map_root_flag = map_non_root_flag = False
         client_flag, nfs_export = self._check_client_status(nfs_export)
+
         map_root = set_nfs_map(self.module.params.get('map_root'), 'map_root', self.result.get('NFS_export_details'))
         if map_root:
             nfs_export.map_root = map_root
@@ -834,18 +849,31 @@ class NfsExport(PowerScaleBase):
         if all(
             field_mod_flag is False for field_mod_flag in [
                 client_flag, read_only_flag, all_dirs_flag, description_flag, map_root_flag,
-                map_non_root_flag, security_flag]) and self.module.params['ignore_unresolvable_hosts'] is not True:
+                map_non_root_flag, security_flag]):
             LOG.info(
                 'No change detected for the NFS Export, returning changed = False')
+            if self.module._diff:
+                self.result.update({"diff": {"before": nfs_details, "after": nfs_details}})
             return False
         else:
             nfs_export.read_only = read_only_value if read_only_flag else None
             nfs_export.all_dirs = all_dirs_value if all_dirs_flag else None
             nfs_export.description = description_value if description_flag else None
-            LOG.debug('Modifying NFS Export with  %s details', nfs_export)
-            return self.perform_modify_nfs_export(nfs_export, path, access_zone, ignore_unresolvable_hosts)
 
-    def perform_modify_nfs_export(self, nfs_export, path, access_zone, ignore_unresolvable_hosts):
+            return self.perform_modify_nfs_export(nfs_export, path, access_zone, ignore_unresolvable_hosts, nfs_details)
+
+    def perform_modify_nfs_export(self, nfs_export, path, access_zone, ignore_unresolvable_hosts, nfs_details):
+        '''
+        Modify NFS export in PowerScale system
+        '''
+        modified_details = copy.deepcopy(nfs_details)
+        filtered_dict = {key: value for key, value in nfs_export.to_dict().items() if value is not None}
+        modified_details.update(filtered_dict)
+
+        if self.module._diff:
+            self.result.update({"diff": {"before": nfs_details, "after": modified_details}})
+
+        self.result['NFS_export_details'] = nfs_details
         try:
             if not self.module.check_mode:
                 if ignore_unresolvable_hosts is not True:
@@ -876,6 +904,8 @@ class NfsExport(PowerScaleBase):
         Delete NFS export from system
         '''
         nfs_export = self.result['NFS_export_details']
+        if self.module._diff:
+            self.result.update({"diff": {"before": nfs_export, "after": {}}})
         try:
             if not self.module.check_mode:
                 msg = ('Deleting NFS export with path: {0}, zone: {1} and ID: {2}'.format(
