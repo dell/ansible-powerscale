@@ -32,6 +32,27 @@ SNAPSHOT = {
     ]
 }
 
+SNAPSHOT_WO_EXPIRES = {
+    "snapshots": [
+        {
+            "alias": "alias_name_1",
+            "created": 1628155527,
+            "has_locks": False,
+            "id": 936,
+            "name": "ansible_test_snapshot",
+            "path": "/ifs/ansible_test_snapshot",
+            "pct_filesystem": 2.435778242215747e-06,
+            "pct_reserve": 0.0,
+            "schedule": None,
+            "shadow_bytes": 0,
+            "size": 4096,
+            "state": "active",
+            "target_id": None,
+            "target_name": None
+        }
+    ]
+}
+
 ALIAS = {
     "snapshots": [
         {
