@@ -309,12 +309,6 @@ class SyncIQJob(object):
                                            (error_obj=e))
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
-        except Exception as e:
-            error_message = 'Get details of SyncIQ job %s failed with ' \
-                            'error: %s' % (job_id, utils.determine_error
-                                           (error_obj=e))
-            LOG.error(error_message)
-            self.module.fail_json(msg=error_message)
 
     def modify_job_state(self, job_id, job_state):
         """
@@ -329,12 +323,6 @@ class SyncIQJob(object):
                                                    job_id)
             return True
         except utils.ApiException as e:
-            error_message = 'Modify state of SyncIQ job %s failed with ' \
-                            'error: %s' % (job_id, utils.determine_error
-                                           (error_obj=e))
-            LOG.error(error_message)
-            self.module.fail_json(msg=error_message)
-        except Exception as e:
             error_message = 'Modify state of SyncIQ job %s failed with ' \
                             'error: %s' % (job_id, utils.determine_error
                                            (error_obj=e))
