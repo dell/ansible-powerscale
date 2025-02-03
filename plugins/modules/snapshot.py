@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: (c) 2019-2024, Dell Technologies
+# Copyright: (c) 2019-2025, Dell Technologies
 
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
@@ -336,7 +336,9 @@ class Snapshot(object):
     def get_filesystem_snapshot_details(self, snapshot_name):
         """Returns details of a filesystem Snapshot"""
         try:
-            return self.snapshot_api.get_snapshot_snapshot(snapshot_name)
+            snapshot_details = self.snapshot_api.get_snapshot_snapshot(snapshot_name)
+            if snapshot_details:
+                return snapshot_details.to_dict()
         except utils.ApiException as e:
             if str(e.status) == "404":
                 log_msg = "Snapshot {0} status is " \
@@ -351,12 +353,6 @@ class Snapshot(object):
                                     str(error_msg))
                 LOG.error(error_message)
                 self.module.fail_json(msg=error_message)
-
-        except Exception as e:
-            error_message = "Failed to get details of Snapshot {0} with" \
-                            " error {1} ".format(snapshot_name, str(e))
-            LOG.error(error_message)
-            self.module.fail_json(msg=error_message)
 
     def get_zone_base_path(self, access_zone):
         """Returns the base path of the Access Zone."""
@@ -399,7 +395,7 @@ class Snapshot(object):
                                       "snapshot creation")
 
         if desired_retention and desired_retention.lower() != 'none':
-            if retention_unit is None:
+            if retention_unit is None or retention_unit == 'hours':
                 expiration_timestamp = (datetime.utcnow() +
                                         timedelta(
                                             hours=int(desired_retention))
@@ -411,12 +407,6 @@ class Snapshot(object):
             elif retention_unit == 'days':
                 expiration_timestamp = (datetime.utcnow() + timedelta(
                     days=int(desired_retention)))
-                epoch_expiry_time = calendar.timegm(
-                    time.strptime(str(expiration_timestamp),
-                                  '%Y-%m-%d %H:%M:%S.%f'))
-            elif retention_unit == 'hours':
-                expiration_timestamp = (datetime.utcnow() + timedelta(
-                    hours=int(desired_retention)))
                 epoch_expiry_time = calendar.timegm(
                     time.strptime(str(expiration_timestamp),
                                   '%Y-%m-%d %H:%M:%S.%f'))
@@ -456,10 +446,6 @@ class Snapshot(object):
 
     def rename_filesystem_snapshot(self, snapshot, new_name):
         """Renames a filesystem snapshot"""
-        if snapshot is None:
-            self.module.fail_json(msg="Snapshot not found.")
-
-        snapshot = snapshot.to_dict()
 
         if snapshot['snapshots'][0]['name'] == new_name:
             return False
@@ -517,7 +503,7 @@ class Snapshot(object):
         snapshot_modification_details['is_timestamp_modified'] = False
         snapshot_modification_details['new_expiration_timestamp_value'] = None
 
-        snap_details = snapshot.to_dict()
+        snap_details = snapshot
 
         if effective_path is not None:
             if self.module.params['path'] and \
@@ -549,7 +535,7 @@ class Snapshot(object):
         # creation timestamp of the snapshot to the desired retention
         # specified in the Playbook.
         if desired_retention and desired_retention.lower() != 'none':
-            if retention_unit is None:
+            if retention_unit is None or retention_unit == 'hours':
                 expiration_timestamp = \
                     datetime.fromtimestamp(snap_creation_timestamp) + \
                     timedelta(hours=int(desired_retention))
@@ -560,12 +546,6 @@ class Snapshot(object):
                 expiration_timestamp = \
                     datetime.fromtimestamp(snap_creation_timestamp) + \
                     timedelta(days=int(desired_retention))
-                expiration_timestamp = \
-                    time.mktime(expiration_timestamp.timetuple())
-            elif retention_unit == 'hours':
-                expiration_timestamp = \
-                    datetime.fromtimestamp(snap_creation_timestamp) + \
-                    timedelta(hours=int(desired_retention))
                 expiration_timestamp = \
                     time.mktime(expiration_timestamp.timetuple())
         elif desired_retention and desired_retention.lower() == 'none':
@@ -610,8 +590,11 @@ class Snapshot(object):
         # This is the case when expiration timestamp may not be present
         # in the snapshot details.
         # Expiration timestamp specified in the playbook is not None.
-        elif 'expires' not in snap_details['snapshots'][0] \
-                and expiration_timestamp is not None:
+        elif ('expires' not in snap_details['snapshots'][0]
+                and expiration_timestamp is not None) or \
+                ('expires' in snap_details['snapshots'][0] and
+                 snap_details['snapshots'][0]['expires'] is
+                 None and expiration_timestamp is not None):
             snapshot_modification_details['is_timestamp_modified'] = True
             snapshot_modification_details[
                 'new_expiration_timestamp_value'] = expiration_timestamp
@@ -627,13 +610,6 @@ class Snapshot(object):
                 snapshot_modification_details[
                     'new_expiration_timestamp_value'] = expiration_timestamp
                 modified = True
-        elif 'expires' in snap_details['snapshots'][0] and \
-                snap_details['snapshots'][0]['expires'] is \
-                None and expiration_timestamp is not None:
-            snapshot_modification_details['is_timestamp_modified'] = True
-            snapshot_modification_details[
-                'new_expiration_timestamp_value'] = expiration_timestamp
-            modified = True
 
         snapshot_alias = self.get_snapshot_alias(snapshot_name)
 
@@ -660,10 +636,11 @@ class Snapshot(object):
                 new_timestamp = \
                     snapshot_modification_details[
                         'new_expiration_timestamp_value']
-                snapshot_update_param = self.isi_sdk.SnapshotSnapshot(
-                    expires=int(new_timestamp))
-                self.snapshot_api.update_snapshot_snapshot(
-                    snapshot_update_param, snapshot_name)
+                if new_timestamp is not None:
+                    snapshot_update_param = self.isi_sdk.SnapshotSnapshot(
+                        expires=int(new_timestamp))
+                    self.snapshot_api.update_snapshot_snapshot(
+                        snapshot_update_param, snapshot_name)
                 changed = True
             if snapshot_modification_details['is_alias_modified']:
                 new_alias = \
@@ -820,7 +797,7 @@ class Snapshot(object):
                            '{0} details'.format(snapshot_name)
             LOG.info(info_message)
             result['snapshot_details'] = \
-                self.get_filesystem_snapshot_details(snapshot_name).to_dict()
+                self.get_filesystem_snapshot_details(snapshot_name)
 
         # Finally update the module result!
         self.module.exit_json(**result)
