@@ -122,24 +122,7 @@ SYNCIQ_JOB = {
     ]
 }
 
-ALIAS = {
-    "snapshots": [
-        {
-            "target_name": "ansible_test_snapshot",
-            "name": "alias_name_1"
-        }
-    ]
-}
-
-CREATE_SNAPSHOT_PARAMS = {
-    "name": "ansible_test_snapshot",
-    "path": "/ifs/ansible_test_snapshot",
-    "alias": "snap_alias_1",
-    "expires": 60}
-
 MODIFY_SYNCIQ_JOB_PARAMS = {"state": "pause"}
-
-RENAME_SNAPSHOT_PARAMS = {"name": "renamed_snapshot_name_1"}
 
 
 def create_synciq_job_failed_msg():
@@ -162,41 +145,5 @@ def get_synciq_job_failed_msg():
     return 'Get details of SyncIQ job'
 
 
-def modify_snapshot_wo_desired_retention_failed_msg():
-    return 'Specify desired retention along with retention unit.'
-
-
 def delete_synciq_job_failed_msg():
     return 'Please specify a valid state.'
-
-
-def get_snapshot_alias_failed_msg():
-    return 'Failed to get alias for snapshot'
-
-
-def create_snapshot_wo_retention_failed_msg():
-    return 'Please provide either desired_retention or expiration_timestamp for creating a snapshot'
-
-
-def create_snapshot_with_new_name_failed_msg():
-    return 'Invalid param: new_name while creating a new snapshot.'
-
-
-def create_snapshot_without_path_failed_msg():
-    return 'Please provide a valid path for snapshot creation'
-
-
-def create_snapshot_wo_desired_retention_failed_msg():
-    return 'Desired retention is set to'
-
-
-def create_snapshot_invalid_desired_retention_failed_msg():
-    return 'Please provide a valid integer as the desired retention.'
-
-
-def modify_non_existing_path_failed_msg():
-    return 'specified in the playbook does not match the path of the snapshot'
-
-
-def get_snapshot_failed_msg():
-    return 'Failed to get details of Snapshot'
