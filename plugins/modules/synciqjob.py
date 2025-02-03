@@ -310,7 +310,6 @@ class SyncIQJob(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
-
     def modify_job_state(self, job_id, job_state):
         """
         Modify the state of the SyncIQ job.
@@ -329,7 +328,6 @@ class SyncIQJob(object):
                                            (error_obj=e))
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
-
 
     def validate_module(self, job_id, job_state, state):
         """ Validates the SyncIQ jobs module """

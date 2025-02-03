@@ -152,4 +152,3 @@ class TestSyncIQJob(PowerScaleUnitBase):
             side_effect=utils.ApiException)
         self.capture_fail_json_call(
             MockSyncIQJobApi.modify_synciq_job_failed_msg(), synciq_job_module_mock)
-
