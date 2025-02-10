@@ -42,7 +42,7 @@ options:
       - Event group categories to be alerted.
     type: list
     elements: str
-    choices: ['SYS_DISK_EVENTS', 'NODE_STATUS_EVENTS', 'REBOOT_EVENTS',
+    choices: ['all', 'SYS_DISK_EVENTS', 'NODE_STATUS_EVENTS', 'REBOOT_EVENTS',
       'SW_EVENTS', 'QUOTA_EVENTS', 'SNAP_EVENTS', 'WINNET_EVENTS', 'FILESYS_EVENTS',
       'HW_EVENTS', 'CPOOL_EVENTS']
   channels:
@@ -252,7 +252,7 @@ class AlertRule(PowerScaleBase):
             condition=dict(type='str', choices=['NEW', 'NEW EVENTS', 'ONGOING',
                                                 'SEVERITY INCREASE', 'SEVERITY DECREASE', 'RESOLVED']),
             categories=dict(type='list', elements='str',
-                            choices=['SYS_DISK_EVENTS', 'NODE_STATUS_EVENTS',
+                            choices=['all', 'SYS_DISK_EVENTS', 'NODE_STATUS_EVENTS',
                                      'REBOOT_EVENTS', 'SW_EVENTS', 'QUOTA_EVENTS',
                                      'SNAP_EVENTS', 'WINNET_EVENTS', 'FILESYS_EVENTS',
                                      'HW_EVENTS', 'CPOOL_EVENTS']),
@@ -286,7 +286,12 @@ class AlertRule(PowerScaleBase):
                     break
 
             if alert_rule.get("categories"):
-                categories = sorted([category_dict[key] for key in alert_rule["categories"]], reverse=True)
+                categories = alert_rule["categories"]
+                if "all" in categories:
+                  categories = list(category_dict.keys())
+                else:
+                  categories = sorted([category_dict[key] for key in alert_rule["categories"]], reverse=True)
+                
                 alert_rule.update({"categories": categories})
         return alert_rule
 
@@ -308,12 +313,19 @@ class AlertRule(PowerScaleBase):
             data_dict.update({"exclude_eventgroup_ids": []})
         return data_dict
 
+    def process_categories(self, module_params, alert_data):
+        categories = module_params.get('categories', [])
+        if "all" in categories:
+            alert_data["categories"] = ["all"]
+        return alert_data
+
     def create_alert_condition(self, module_params):
         changed = False
         alert_data = self.get_module_params(module_params)
 
         if not self.module.check_mode:
             try:
+                alert_data = self.process_categories(module_params, alert_data)
                 self.event_api.create_event_alert_condition(alert_data)
                 alert_data = self.get_alert_rule(module_params)
                 changed = True
@@ -362,6 +374,7 @@ class AlertRule(PowerScaleBase):
             try:
                 updated_payload.pop("name")
                 rule_id = updated_payload.pop("id")
+                alert_data = self.process_categories(module_params, alert_data)
                 self.event_api.update_event_alert_condition(updated_payload, rule_id)
                 alert_data = self.get_alert_rule(module_params)
                 changed = True
