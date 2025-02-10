@@ -288,10 +288,10 @@ class AlertRule(PowerScaleBase):
             if alert_rule.get("categories"):
                 categories = alert_rule["categories"]
                 if "all" in categories:
-                  categories = list(category_dict.keys())
+                    categories = ["all"]
                 else:
-                  categories = sorted([category_dict[key] for key in alert_rule["categories"]], reverse=True)
-                
+                    categories = sorted([category_dict[key] for key in alert_rule["categories"]], reverse=True)
+
                 alert_rule.update({"categories": categories})
         return alert_rule
 
