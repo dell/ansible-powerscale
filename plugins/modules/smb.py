@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: (c) 2019-2024, Dell Technologies
+# Copyright: (c) 2019-2025, Dell Technologies
 
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
@@ -1627,11 +1627,12 @@ class SMBExitHandler:
 
 class SMBDeleteHandler:
     def handle(self, smb_obj, smb_params, smb_details):
-        if smb_params['state'] == 'absent' and smb_details:
-            info_msg = f"Deleting SMB share {smb_params['share_name']}"
-            LOG.info(info_msg)
-            smb_obj.delete_smb_share()
-            smb_obj.result['changed'] = True
+        if smb_params['state'] == 'absent':
+            if smb_details:
+                info_msg = f"Deleting SMB share {smb_params['share_name']}"
+                LOG.info(info_msg)
+                smb_obj.delete_smb_share()
+                smb_obj.result['changed'] = True
             smb_details = {}
         SMBExitHandler().handle(smb_obj, smb_details)
 
