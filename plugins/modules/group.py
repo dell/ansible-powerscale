@@ -518,7 +518,8 @@ class Group(object):
         :param group_details: Group details
         :return: True if id exists.
         """
-        if group_name is not None and group_details['gid']['name'] is not None and group_name.lower() == group_details['gid']['name'].lower():
+        if group_name is not None and group_details['gid']['name'] is not None \
+                and group_name.lower() == group_details['gid']['name'].lower():
             return False
         return True
 
@@ -569,7 +570,7 @@ class Group(object):
             else:
                 if group_id and group_name:
                     id_exists = self.check_if_id_exists(group_name, group_details)
-                    if id_exists and group_name is not None:
+                    if id_exists:
                         error_message = f'Group already exists with GID {group_id}'
                         LOG.error(error_message)
                         self.module.fail_json(msg=error_message)
