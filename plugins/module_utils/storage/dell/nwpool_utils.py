@@ -82,7 +82,7 @@ class NetworkPoolAPI(object):
         self.req_session = req_session
         self.session_id = None
         self.protocol = 'https'
-        self._headers = {'Content-Type': 'application/json'}
+        self._headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
 
     def _get_url(self, uri):
         return "{0}://{1}:{2}{3}".format(self.protocol, self.ipaddress, self.port, uri)
