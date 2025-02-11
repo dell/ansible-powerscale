@@ -82,7 +82,7 @@ class NetworkPoolAPI(object):
         self.req_session = req_session
         self.session_id = None
         self.protocol = 'https'
-        self._headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+        self._headers = {'Content-Type': 'application/json'}
 
     def _get_url(self, uri):
         return "{0}://{1}:{2}{3}".format(self.protocol, self.ipaddress, self.port, uri)
@@ -127,16 +127,33 @@ class NetworkPoolAPI(object):
 
     def _args_with_session(self, method, api_timeout, headers=None):
         """Creates an argument spec, in case of authentication with session"""
-        url_kwargs = self._url_common_args_spec(method, api_timeout, headers=headers)
+        session_id, csrf_token = self._create_session()
+        req_header = self._headers
+        req_header.update({'Cookie': session_id, 'X-CSRF-Token': csrf_token,
+                           'Content-Type': 'application/json', 'Referer': self._get_url(''),
+                           })
+        if headers:
+            req_header.update(headers)
+        url_kwargs = self._url_common_args_spec(method, api_timeout, headers=req_header)
         url_kwargs["force_basic_auth"] = False
         return url_kwargs
 
+    def _create_session(self):
+        session_id = None
+        _uri = '/session/1/session'
+        _body = {'username': self.username, 'password': self.password, "services": ["platform", "namespace"]}
+        url = self._build_url(_uri)
+        resp = open_url(url, data=json.dumps(_body), headers=self._headers, method='POST', validate_certs=self.validate_certs)
+        resp_data = OpenURLResponse(resp)
+        if resp_data.success:
+            all_cookie = resp_data.headers._headers[6][1]
+            session_id = all_cookie.split(';')[0]
+            csrf_token = resp_data.headers._headers[8][1]
+        return session_id, csrf_token
+
     def invoke_request(self, uri, method, data=None, query_param=None, headers=None, api_timeout=None, dump=True):
         try:
-            if 'X-Auth-Token' in self._headers:
-                url_kwargs = self._args_with_session(method, api_timeout, headers=headers)
-            else:
-                url_kwargs = self._args_without_session(method, api_timeout, headers=headers)
+            url_kwargs = self._args_with_session(method, api_timeout, headers=headers)
             if data and dump:
                 data = json.dumps(data)
             url = self._build_url(uri, query_param=query_param)
