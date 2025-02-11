@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: (c) 2024, Dell Technologies
+# Copyright: (c) 2024-2025, Dell Technologies
 
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
@@ -20,6 +20,7 @@ extends_documentation_fragment:
   - dellemc.powerscale.powerscale
 author:
   - Felix Stephen (@felixs88) <ansible.team@dell.com>
+  - Saksham Nautiyal (@Saksham-Nautiyal)
 options:
   state:
     description:
