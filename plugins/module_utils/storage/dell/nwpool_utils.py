@@ -127,16 +127,45 @@ class NetworkPoolAPI(object):
 
     def _args_with_session(self, method, api_timeout, headers=None):
         """Creates an argument spec, in case of authentication with session"""
-        url_kwargs = self._url_common_args_spec(method, api_timeout, headers=headers)
+        req_header = self._headers
+        if headers:
+            req_header.update(headers)
+        url_kwargs = self._url_common_args_spec(method, api_timeout, headers=req_header)
         url_kwargs["force_basic_auth"] = False
         return url_kwargs
 
+    def _create_session(self):
+        _uri = '/session/1/session'
+        _body = {'username': self.username, 'password': self.password, "services": ["platform", "namespace"]}
+        url = self._build_url(_uri)
+        resp = open_url(url, data=json.dumps(_body), headers=self._headers, method='POST', validate_certs=self.validate_certs)
+        resp_data = OpenURLResponse(resp)
+        if resp_data.success:
+            all_cookie = resp_data.headers._headers[6][1]
+            self.session_id = all_cookie.split(';')[0]
+            csrf_token = resp_data.headers._headers[8][1]
+        return csrf_token
+
+    def _delete_session(self):
+        _uri = '/session/1/session'
+        session_header = {'Cookie': self.session_id}
+        url = self._build_url(_uri)
+        resp = open_url(url, headers=session_header, method='DELETE', validate_certs=self.validate_certs)
+        resp_data = OpenURLResponse(resp)
+        if resp_data.success:
+            self.session_id = None
+
     def invoke_request(self, uri, method, data=None, query_param=None, headers=None, api_timeout=None, dump=True):
         try:
-            if 'X-Auth-Token' in self._headers:
-                url_kwargs = self._args_with_session(method, api_timeout, headers=headers)
-            else:
-                url_kwargs = self._args_without_session(method, api_timeout, headers=headers)
+            csrf_token = self._create_session()
+            session_header = {'Cookie': self.session_id,
+                              'X-CSRF-Token': csrf_token,
+                              'Content-Type': 'application/json',
+                              'Referer': self._get_url('')
+                              }
+            if headers:
+                session_header.update(headers)
+            url_kwargs = self._args_with_session(method, api_timeout, headers=session_header)
             if data and dump:
                 data = json.dumps(data)
             url = self._build_url(uri, query_param=query_param)
@@ -144,4 +173,5 @@ class NetworkPoolAPI(object):
             resp_data = OpenURLResponse(resp)
         except (HTTPError, URLError, SSLValidationError, ConnectionError) as err:
             raise err
+        self._delete_session()
         return resp_data
