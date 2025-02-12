@@ -774,13 +774,14 @@ class Snapshot(object):
                 snapshot, new_snapshot_name) or result['changed']
             snapshot_name = new_snapshot_name
 
-        if state == 'absent' and snapshot:
-            info_message = "Deleting snapshot {0}".format(
-                snapshot_name)
-            LOG.info(info_message)
-            result['changed'] = \
-                self.delete_filesystem_snapshot(snapshot_name) \
-                or result['changed']
+        if state == 'absent':
+            if snapshot:
+                info_message = "Deleting snapshot {0}".format(
+                    snapshot_name)
+                LOG.info(info_message)
+                result['changed'] = \
+                    self.delete_filesystem_snapshot(snapshot_name) \
+                    or result['changed']
             result['snapshot_details'] = {}
 
         if state == 'present' and is_snap_modified:
