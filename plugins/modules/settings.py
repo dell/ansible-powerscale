@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: (c) 2021-2024, Dell Technologies
+# Copyright: (c) 2021-2025, Dell Technologies
 
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
@@ -781,7 +781,7 @@ class SettingsModifyHandler():
         if settings_params['state'] == 'present' and settings_details['email_settings']:
             modify_email_dict = settings_obj.form_modify_email_dict(settings_params, settings_details['email_settings'])
             if modify_email_dict:
-                settings_params['email_settings'] = settings_obj.update_email_settings(modify_email_dict)
+                settings_details['email_settings'] = settings_obj.update_email_settings(modify_email_dict)
                 settings_obj.result['changed'] = True
 
     def handle_cluster_identity(self, settings_obj, settings_params, settings_details):
