@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: (c) 2019-2024, Dell Technologies
+# Copyright: (c) 2019-2025, Dell Technologies
 
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
@@ -518,7 +518,8 @@ class Group(object):
         :param group_details: Group details
         :return: True if id exists.
         """
-        if group_name is not None and group_name.lower() == group_details['gid']['name'].lower():
+        if group_name is not None and group_details['gid']['name'] is not None \
+                and group_name.lower() == group_details['gid']['name'].lower():
             return False
         return True
 
@@ -567,11 +568,12 @@ class Group(object):
                                   users_list)
                 changed = True
             else:
-                id_exists = self.check_if_id_exists(group_name, group_details)
-                if id_exists and group_name is not None:
-                    error_message = f'Group already exists with GID {group_id}'
-                    LOG.error(error_message)
-                    self.module.fail_json(msg=error_message)
+                if group_id and group_name:
+                    id_exists = self.check_if_id_exists(group_name, group_details)
+                    if id_exists:
+                        error_message = f'Group already exists with GID {group_id}'
+                        LOG.error(error_message)
+                        self.module.fail_json(msg=error_message)
                 if user_state and users:
                     user_modified_flag = False
                     for user in users:
