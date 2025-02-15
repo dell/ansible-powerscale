@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: (c) 2020-2024, Dell Technologies
+# Copyright: (c) 2020-2025, Dell Technologies
 
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
@@ -27,6 +27,7 @@ author:
 - Bhavneet Sharma(@Bhavneet-Sharma) <ansible.team@dell.com>
 - Trisha Datta(@trisha-dell) <ansible.team@dell.com>
 - Kritika Bhateja(@Kritika-Bhateja-03) <ansible.team.dell.com>)
+- Saksham Nautiyal (@Saksham-Nautiyal) <ansible.team@dell.com>
 
 options:
   access_zone:
