@@ -301,7 +301,7 @@ class SMBGlobalSettings(PowerScaleBase):
         """
         return ["access_based_share_enum", "dot_snap_accessible_child",
                 "dot_snap_accessible_root", "dot_snap_visible_child",
-                "dot_snap_visible_root", "enable_security_signatures"
+                "dot_snap_visible_root", "enable_security_signatures",
                 "guest_user", "ignore_eas", "onefs_cpu_multiplier",
                 "onefs_num_workers", "reject_unencrypted_access",
                 "require_security_signatures", "server_side_copy",
