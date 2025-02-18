@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: (c) 2020-2024, Dell Technologies
+# Copyright: (c) 2020-2025, Dell Technologies
 
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
@@ -27,6 +27,7 @@ author:
 - Bhavneet Sharma(@Bhavneet-Sharma) <ansible.team@dell.com>
 - Trisha Datta(@trisha-dell) <ansible.team@dell.com>
 - Kritika Bhateja(@Kritika-Bhateja-03) <ansible.team.dell.com>)
+- Saksham Nautiyal (@Saksham-Nautiyal) <ansible.team@dell.com>
 
 options:
   access_zone:
@@ -739,7 +740,7 @@ class NfsExport(PowerScaleBase):
             return mod_flag, nfs_export
 
         if client_state is None:
-            if playbook_client_dict['read_only_clients'] != current_client_dict['read_only_clients']:
+            if sorted(playbook_client_dict['read_only_clients']) != sorted(current_client_dict['read_only_clients']):
                 current_client_dict['read_only_clients'] = playbook_client_dict['read_only_clients']
                 mod_flag = True
         for client in playbook_client_dict['read_only_clients']:
@@ -766,7 +767,7 @@ class NfsExport(PowerScaleBase):
             return mod_flag, nfs_export
 
         if client_state is None:
-            if playbook_client_dict['root_clients'] != current_client_dict['root_clients']:
+            if sorted(playbook_client_dict['root_clients']) != sorted(current_client_dict['root_clients']):
                 current_client_dict['root_clients'] = playbook_client_dict['root_clients']
                 mod_flag = True
         for client in playbook_client_dict['root_clients']:
