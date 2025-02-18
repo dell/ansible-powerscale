@@ -316,9 +316,8 @@ class AlertRule(PowerScaleBase):
 
     def process_categories(self, module_params, alert_data):
         categories = module_params.get('categories', [])
-        if categories:
-            if "all" in categories:
-                alert_data["categories"] = ["all"]
+        if categories and "all" in categories:
+            alert_data["categories"] = ["all"]
         return alert_data
 
     def create_alert_condition(self, module_params):
