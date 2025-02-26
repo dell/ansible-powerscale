@@ -34,7 +34,7 @@ Parameters
 
 
   name (True, str, None)
-    The *name* of the rule is a unique that cannot be changed.
+    The :emphasis:`name` of the rule is a unique that cannot be changed.
 
 
   condition (optional, str, None)
@@ -60,11 +60,11 @@ Parameters
 
 
   interval (optional, int, None)
-    Required with ``ONGOING`` condition only, period in seconds between alerts of ongoing conditions.
+    Required with :literal:`ONGOING` condition only, period in seconds between alerts of ongoing conditions.
 
 
   limit (optional, int, None)
-    Required with ``NEW EVENTS`` condition only, limits the number of alerts sent as events are added.
+    Required with :literal:`NEW EVENTS` condition only, limits the number of alerts sent as events are added.
 
 
   severities (optional, list, None)
@@ -86,9 +86,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    ``true`` - indicates that the SSL certificate should be verified.
+    :literal:`true` - indicates that the SSL certificate should be verified.
 
-    ``false`` - indicates that the SSL certificate should not be verified.
+    :literal:`false` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -247,4 +247,5 @@ Authors
 ~~~~~~~
 
 - Felix Stephen (@felixs88) <ansible.team@dell.com>
+- Saksham Nautiyal (@Saksham-Nautiyal)
 
