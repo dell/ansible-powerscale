@@ -50,9 +50,9 @@ Parameters
 
 
   scope (optional, str, effective)
-    When specified as ``effective``, or not specified, all fields are returned.
+    When specified as :literal:`effective`\ , or not specified, all fields are returned.
 
-    When specified as ``user``, only fields with non-default values are shown.
+    When specified as :literal:`user`\ , only fields with non-default values are shown.
 
 
   check (optional, bool, False)
@@ -66,9 +66,9 @@ Parameters
   state (optional, str, present)
     Defines whether the NFS alias should exist or not.
 
-    ``present`` indicates that the NFS alias should exist in system.
+    :literal:`present` indicates that the NFS alias should exist in system.
 
-    ``absent`` indicates that the NFS alias should not exist in system.
+    :literal:`absent` indicates that the NFS alias should not exist in system.
 
 
   onefs_host (True, str, None)
@@ -82,9 +82,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    ``true`` - indicates that the SSL certificate should be verified.
+    :literal:`true` - indicates that the SSL certificate should be verified.
 
-    ``false`` - indicates that the SSL certificate should not be verified.
+    :literal:`false` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -102,7 +102,7 @@ Notes
 -----
 
 .. note::
-   - The *check_mode* is supported.
+   - The :emphasis:`check\_mode` is supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 

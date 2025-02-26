@@ -200,6 +200,8 @@
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
+        ads_user: "administrator"
+        ads_password: "Password"
         verify_ssl: "{{ verify_ssl }}"
         domain_name: "{{ domain_name }}"
         spns:
@@ -211,6 +213,8 @@
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
+        ads_user: "administrator"
+        ads_password: "Password"
         verify_ssl: "{{ verify_ssl }}"
         domain_name: "{{ domain_name }}"
         spns:
@@ -233,6 +237,8 @@
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
+        ads_user: "administrator"
+        ads_password: "Password"
         verify_ssl: "{{ verify_ssl }}"
         domain_name: "{{ domain_name }}"
         spn_command: "fix"
