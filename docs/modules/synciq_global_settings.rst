@@ -30,9 +30,9 @@ Parameters
 ----------
 
   service (optional, str, on)
-    Specifies if the SyncIQ service currently ``on``, ``paused``, or ``off``.
+    Specifies if the SyncIQ service currently :literal:`on`\ , :literal:`paused`\ , or :literal:`off`.
 
-    If ``paused``, all sync jobs will be paused. If turned ``off``, all jobs will be canceled.
+    If :literal:`paused`\ , all sync jobs will be paused. If turned :literal:`off`\ , all jobs will be canceled.
 
 
   encryption_required (optional, bool, False)
@@ -50,9 +50,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    ``true`` - indicates that the SSL certificate should be verified.
+    :literal:`true` - indicates that the SSL certificate should be verified.
 
-    ``false`` - indicates that the SSL certificate should not be verified.
+    :literal:`false` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -70,7 +70,7 @@ Notes
 -----
 
 .. note::
-   - The *check_mode* is supported.
+   - The :emphasis:`check\_mode` is supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
