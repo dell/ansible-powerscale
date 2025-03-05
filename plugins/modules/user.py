@@ -735,7 +735,7 @@ class User(object):
 
         if provider_type.lower() != 'local':
             self.module.fail_json(
-                msg="Cannot delete user from %s  provider_type"
+                msg="Cannot delete user from %s provider_type"
                     % provider_type)
         user_details = self.get_user_details(
             auth_user_id, access_zone, provider_type)
