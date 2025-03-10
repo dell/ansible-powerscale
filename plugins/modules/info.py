@@ -3214,6 +3214,7 @@ event_groups:
     }
 '''
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.protocol \
     import Protocol
@@ -3722,7 +3723,15 @@ class Info(object):
             self.module.fail_json(msg=error_msg)
 
     def get_smb_file_for_each_cluster(self, host_ip):
-        """Get the list of smb open files given PowerScale Storage"""
+        """
+        Get the list of smb open files given PowerScale Storage
+        :param host_ip: The IP address used to open SMB files
+        :return: SMB open file list and error message.
+                 If the operation is successful, the error message will be an
+                 empty string. If an error occurs, the file list will be empty
+                 and the error message will contain the details of the error.
+        :rtype: dict, str
+        """
         try:
             params = self.module.params.copy()
             params["onefs_host"] = host_ip
@@ -3737,7 +3746,7 @@ class Info(object):
                 resume = cluster_response.get("resume")
             for file_dict in openfiles:
                 file_dict["node"] = host_ip
-            return openfiles
+            return openfiles, None
         except Exception as e:
             error_msg = (
                 'Getting list of smb open files for PowerScale: {0} failed with'
@@ -3745,23 +3754,13 @@ class Info(object):
                     host_ip,
                     utils.determine_error(e)))
             LOG.error(error_msg)
-            self.module.fail_json(msg=error_msg)
+            return [], error_msg
 
     def get_smb_files(self):
         """Get the list of smb open files given PowerScale Storage"""
+        external_ips = []
         try:
-            api_response = self.cluster_api.get_cluster_external_ips()
-            smb_files_list = []
-            for each_ip in api_response:
-                smb_file = self.get_smb_file_for_each_cluster(each_ip)
-                smb_files_list.extend(smb_file)
-            filtered_smb_files_list = []
-            filters = self.module.params.get('filters')
-            filters_dict = self.get_filters(filters)
-            if filters_dict:
-                filtered_smb_files_list = filter_dict_list(smb_files_list, filters_dict)
-                return filtered_smb_files_list
-            return smb_files_list
+            external_ips = self.cluster_api.get_cluster_external_ips()
         except Exception as e:
             error_msg = (
                 'Getting list of cluster external ips for PowerScale: {0} failed with'
@@ -3770,6 +3769,41 @@ class Info(object):
                     utils.determine_error(e)))
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
+
+        smb_files_list = []
+        non_working_ip_list = []
+
+        with ThreadPoolExecutor(max_workers=max(1, len(external_ips))) as executor:
+            future_to_ip = {
+                executor.submit(self.get_smb_file_for_each_cluster, ip): ip
+                for ip in external_ips
+            }
+
+            for future in as_completed(future_to_ip):
+                ip = future_to_ip[future]
+                try:
+                    file_list, error_msg = future.result()
+                    if error_msg:
+                        non_working_ip_list.append(ip)
+                    else:
+                        smb_files_list.extend(file_list)
+                except Exception as e:
+                    LOG.error(
+                        'Threading error of smb open files for IP: %s failed with error: %s', ip, utils.determine_error(e))
+                    non_working_ip_list.append(ip)
+
+        if non_working_ip_list:
+            self.module.warn(
+                f"Failed to get smb files for IPs: {', '.join(non_working_ip_list)}."
+                " Please check SMB service status or IP connectivity."
+            )
+
+        filters = self.module.params.get('filters')
+        filters_dict = self.get_filters(filters)
+        if filters_dict:
+            filtered_smb_files_list = filter_dict_list(smb_files_list, filters_dict)
+            return filtered_smb_files_list
+        return smb_files_list
 
     def get_ldap_providers(self, scope):
         """Get the list of ldap providers given PowerScale Storage"""

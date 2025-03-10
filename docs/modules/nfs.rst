@@ -36,19 +36,19 @@ Parameters
 
 
   clients (optional, list, None)
-    Specifies the clients to the export. The type of access to clients in this list is determined by the \ :emphasis:`read\_only`\  parameter.
+    Specifies the clients to the export. The type of access to clients in this list is determined by the :emphasis:`read\_only` parameter.
 
     This list can be changed anytime during the lifetime of the NFS export.
 
-    \ :emphasis:`client\_state`\  is not provided, then the host machine will replicate the values provided in the \ :emphasis:`clients`\ .
+    :emphasis:`client\_state` is not provided, then the host machine will replicate the values provided in the :emphasis:`clients`.
 
 
   client_state (optional, str, None)
     Defines whether the clients can access the NFS export.
 
-    Value \ :literal:`present-in-export`\  indicates that the clients can access the NFS export.
+    Value :literal:`present-in-export` indicates that the clients can access the NFS export.
 
-    Value \ :literal:`absent-in-export`\  indicates that the client cannot access the NFS export.
+    Value :literal:`absent-in-export` indicates that the client cannot access the NFS export.
 
     Required when adding or removing access of clients from the export.
 
@@ -150,7 +150,7 @@ Parameters
 
     This list can be changed anytime during the lifetime of the NFS export.
 
-    \ :emphasis:`client\_state`\  is not provided, then the host machine will replicate the values provided in the \ :emphasis:`read\_only\_clients`\ .
+    :emphasis:`client\_state` is not provided, then the host machine will replicate the values provided in the :emphasis:`read\_only\_clients`.
 
 
   read_write_clients (optional, list, None)
@@ -158,7 +158,7 @@ Parameters
 
     This list can be changed anytime during the lifetime of the NFS export.
 
-    \ :emphasis:`client\_state`\  is not provided, then the host machine will replicate the values provided in the \ :emphasis:`read\_write\_clients`\ .
+    :emphasis:`client\_state` is not provided, then the host machine will replicate the values provided in the :emphasis:`read\_write\_clients`.
 
 
   root_clients (optional, list, None)
@@ -166,7 +166,7 @@ Parameters
 
     This list can be changed anytime during the lifetime of the NFS export.
 
-    \ :emphasis:`client\_state`\  is not provided, then the host machine will replicate the values provided in the \ :emphasis:`root\_clients`\ .
+    :emphasis:`client\_state` is not provided, then the host machine will replicate the values provided in the :emphasis:`root\_clients`.
 
 
   security_flavors (optional, list, None)
@@ -176,13 +176,13 @@ Parameters
   state (True, str, None)
     Defines whether the NFS export should exist or not.
 
-    Value \ :literal:`present`\  indicates that the NFS export should exist in system.
+    Value :literal:`present` indicates that the NFS export should exist in system.
 
-    Value \ :literal:`absent`\  indicates that the NFS export should not exist in system.
+    Value :literal:`absent` indicates that the NFS export should not exist in system.
 
 
   sub_directories_mountable (optional, bool, None)
-    \ :literal:`true`\  if all directories under the specified paths are mountable. If not set, sub-directories will not be mountable.
+    :literal:`true` if all directories under the specified paths are mountable. If not set, sub-directories will not be mountable.
 
     This setting can be modified any time.
 
@@ -198,9 +198,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
+    :literal:`true` - indicates that the SSL certificate should be verified.
 
-    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
+    :literal:`false` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -218,7 +218,7 @@ Notes
 -----
 
 .. note::
-   - As \ :emphasis:`ignore\_unresolvable\_hosts`\  is input only parameter, therefore idempotency is not supported for it.
+   - As :emphasis:`ignore\_unresolvable\_hosts` is input only parameter, therefore idempotency is not supported for it.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -385,7 +385,7 @@ NFS_export_details (always, complex, {'all_dir': 'false', 'block_size': 8192, 'c
 
 
   all_dirs (, bool, )
-    \ :emphasis:`sub\_directories\_mountable`\  flag value.
+    :emphasis:`sub\_directories\_mountable` flag value.
 
 
   id (, int, 12)
@@ -504,4 +504,5 @@ Authors
 - Bhavneet Sharma(@Bhavneet-Sharma) <ansible.team@dell.com>
 - Trisha Datta(@trisha-dell) <ansible.team@dell.com>
 - Kritika Bhateja(@Kritika-Bhateja-03) <ansible.team.dell.com>)
+- Saksham Nautiyal (@Saksham-Nautiyal) <ansible.team@dell.com>
 
