@@ -630,6 +630,8 @@ class MockGatherfactsApi:
             ]
         elif response_type == 'cluster_ip_exception':
             return "Getting list of cluster external ips for PowerScale:"
+        elif response_type == 'ip_unreachable':
+            return []
         else:
             return "Getting list of smb open files for PowerScale:"
 

@@ -8,6 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 
 __metaclass__ = type
 
+import copy
 import pytest
 # pylint: disable=unused-import
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.initial_mock \
@@ -267,6 +268,36 @@ class TestAds(PowerScaleUnitBase):
             powerscale_module_mock.check_for_groupnet('groupnet', array_ads, input_ads)
 
         assert exc.value.args[0] == "Modification of groupnet is not supported."
+
+    def test_modify_ads_spn_without_ads_user(self, powerscale_module_mock):
+        self.set_module_params(
+            powerscale_module_mock, self.ads_args,
+            MockAdsApi.MODIFY_ARGS)
+        powerscale_module_mock.ads_name = [MockAdsApi.DOMAIN_NAME]
+        powerscale_module_mock.get_ads_details = MagicMock(
+            return_value=MockAdsApi.ADS_DETAILS["ads"])
+        powerscale_module_mock.module._diff = True
+        AdsHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
+        self.capture_fail_json_call(
+            "The parameter ads_user is mandatory "
+            + "while updating SPNs",
+            powerscale_module_mock, AdsHandler)
+
+    def test_modify_ads_spn_without_ads_password(self, powerscale_module_mock):
+        new_args = copy.deepcopy(MockAdsApi.MODIFY_ARGS)
+        new_args['ad_user'] = 'ad_user'
+        self.set_module_params(
+            powerscale_module_mock, self.ads_args,
+            MockAdsApi.MODIFY_ARGS)
+        powerscale_module_mock.ads_name = [MockAdsApi.DOMAIN_NAME]
+        powerscale_module_mock.get_ads_details = MagicMock(
+            return_value=MockAdsApi.ADS_DETAILS["ads"])
+        powerscale_module_mock.module._diff = True
+        AdsHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
+        self.capture_fail_json_call(
+            "The parameter ads_password is mandatory "
+            + "while updating SPNs",
+            powerscale_module_mock, AdsHandler)
 
     def test_main(self, powerscale_module_mock):
         main()
