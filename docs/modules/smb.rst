@@ -66,15 +66,15 @@ Parameters
 
     This is a list of dictionaries. Each dictionry entry has 3 mandatory values as listed below.
 
-    1)*user_name*/*group_name*/*wellknown* can have actual name of the trustee like ``user``/``group``/``wellknown``.
+    1)\ :emphasis:`user\_name`\ /\ :emphasis:`group\_name`\ /\ :emphasis:`wellknown` can have actual name of the trustee like :literal:`user`\ /\ :literal:`group`\ /\ :literal:`wellknown`.
 
-    2)*permission* can be ``read``/'``write``/``full``.
+    2)\ :emphasis:`permission` can be :literal:`read`\ /'\ :literal:`write`\ /\ :literal:`full`.
 
-    3)*permission_type* can be ``allow``/``deny``.
+    3)\ :emphasis:`permission\_type` can be :literal:`allow`\ /\ :literal:`deny`.
 
-    The fourth entry *provider_type* is optional (default is ``local``).
+    The fourth entry :emphasis:`provider\_type` is optional (default is :literal:`local`\ ).
 
-    4)*provider_type* can be ``local``/``file``/``ads``/``ldap``/``nis``.
+    4)\ :emphasis:`provider\_type` can be :literal:`local`\ /\ :literal:`file`\ /\ :literal:`ads`\ /\ :literal:`ldap`\ /\ :literal:`nis`.
 
 
   access_based_enumeration (optional, bool, None)
@@ -134,7 +134,7 @@ Parameters
 
 
     type (optional, str, deny)
-      Specifies if filter list is for ``deny`` or ``allow``. Default is ``deny``.
+      Specifies if filter list is for :literal:`deny` or :literal:`allow`. Default is :literal:`deny`.
 
 
     state (optional, str, None)
@@ -155,7 +155,7 @@ Parameters
 
 
     unit (optional, str, seconds)
-      Unit of the *ca_timeout*.
+      Unit of the :emphasis:`ca\_timeout`.
 
 
 
@@ -215,7 +215,7 @@ Parameters
     provider_type (optional, str, local)
       Specifies the provider type of persona.
 
-      The supported values for *provider_type* are ``local``, ``file``, ``ldap``, ``nis`` and ``ads``.
+      The supported values for :emphasis:`provider\_type` are :literal:`local`\ , :literal:`file`\ , :literal:`ldap`\ , :literal:`nis` and :literal:`ads`.
 
 
     state (optional, str, allow)
@@ -250,9 +250,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    ``true`` - indicates that the SSL certificate should be verified.
+    :literal:`true` - indicates that the SSL certificate should be verified.
 
-    ``false`` - indicates that the SSL certificate should not be verified.
+    :literal:`false` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -270,7 +270,7 @@ Notes
 -----
 
 .. note::
-   - The *check_mode* is not supported.
+   - The :emphasis:`check\_mode` is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 

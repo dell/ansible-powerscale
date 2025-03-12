@@ -405,6 +405,8 @@ EXAMPLES = r'''
     onefs_host: "{{onefs_host}}"
     api_user: "{{api_user}}"
     api_password: "{{api_password}}"
+    ads_user: "{{ ads_user }}"
+    ads_password: "{{ ads_password }}"
     verify_ssl: "{{verify_ssl}}"
     domain_name: "ansibleneo.com"
     spns:
@@ -416,6 +418,8 @@ EXAMPLES = r'''
     onefs_host: "{{onefs_host}}"
     api_user: "{{api_user}}"
     api_password: "{{api_password}}"
+    ads_user: "{{ ads_user }}"
+    ads_password: "{{ ads_password }}"
     verify_ssl: "{{verify_ssl}}"
     domain_name: "ansibleneo.com"
     spns:
@@ -438,6 +442,8 @@ EXAMPLES = r'''
     onefs_host: "{{onefs_host}}"
     api_user: "{{api_user}}"
     api_password: "{{api_password}}"
+    ads_user: "{{ ads_user }}"
+    ads_password: "{{ ads_password }}"
     verify_ssl: "{{verify_ssl}}"
     domain_name: "ansibleneo.com"
     spn_command: "fix"
@@ -1100,6 +1106,16 @@ class Ads(object):
         if not regexp.search(domain):
             self.module.fail_json(msg='The value for domain_name is invalid')
 
+    def validate_modify_spn_params(self, ads_user, ads_password):
+        """Validates parameters for SPN operation"""
+        if not ads_user:
+            self.module.fail_json(msg="The parameter ads_user is mandatory "
+                                      "while updating SPNs")
+
+        if not ads_password:
+            self.module.fail_json(msg="The parameter ads_password is mandatory "
+                                      "while updating SPNs")
+
     def validate_input(self, ads_details, domain, instance):
         """Validate input parameters"""
         if domain and instance:
@@ -1263,6 +1279,8 @@ class ADSModifyHandler:
         instance = ads_params.get('instance_name')
         ads_parameters = ads_params.get('ads_parameters')
         spn_command = ads_params.get('spn_command')
+        ads_user = ads_params.get('ads_user')
+        ads_password = ads_params.get('ads_password')
         # Modify an Active Directory provider
         check_modification = ads_parameters or ads_params.get('spns') or spn_command == 'fix'
 
@@ -1271,9 +1289,16 @@ class ADSModifyHandler:
 
             if ads_parameters:
                 modified_ads = ads_obj.get_modified_ads(ads_parameters, ads_details)
-            is_spn_modified, spns, extra_spns = ads_obj.perform_spn_operation(ads_details)
 
+            is_spn_modified, spns, extra_spns = ads_obj.perform_spn_operation(
+                ads_details)
             if is_spn_modified:
+                ads_obj.validate_modify_spn_params(ads_user, ads_password)
+                spn_params = {
+                    'user': ads_user,
+                    'password': ads_password
+                }
+                modified_ads.update(spn_params)
                 modified_ads['spns'] = spns
                 modified_ads['extra_expected_spns'] = extra_spns
 
