@@ -30,11 +30,11 @@ Parameters
 ----------
 
   file_id (optional, int, None)
-    Unique id of SMB open file. Mutually exclusive with *file_path*.
+    Unique id of SMB open file. Mutually exclusive with :emphasis:`file\_path`.
 
 
   file_path (optional, str, None)
-    Path of SMB file. Mutually exclusive with *file_id*.
+    Path of SMB file. Mutually exclusive with :emphasis:`file\_id`.
 
     If file path is provided all the open file sessions in the path will be closed.
 
@@ -42,9 +42,9 @@ Parameters
   state (optional, str, present)
     Defines the state of SMB file.
 
-    ``present`` indicates that the SMB file should exist in system.
+    :literal:`present` indicates that the SMB file should exist in system.
 
-    ``absent`` indicates that the SMB file is closed in system.
+    :literal:`absent` indicates that the SMB file is closed in system.
 
 
   onefs_host (True, str, None)
@@ -58,9 +58,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    ``true`` - indicates that the SSL certificate should be verified.
+    :literal:`true` - indicates that the SSL certificate should be verified.
 
-    ``false`` - indicates that the SSL certificate should not be verified.
+    :literal:`false` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -78,8 +78,8 @@ Notes
 -----
 
 .. note::
-   - The *check_mode* is supported.
-   - If *state* is ``absent``, the file will be closed.
+   - The :emphasis:`check\_mode` is supported.
+   - If :emphasis:`state` is :literal:`absent`\ , the file will be closed.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 

@@ -87,65 +87,65 @@ Parameters
 
     List of all PowerScale Storage System entities supported by the module.
 
-    Attributes - \ :literal:`attributes`\ .
+    Attributes - :literal:`attributes`.
 
-    Access zones - \ :literal:`access\_zones`\ .
+    Access zones - :literal:`access\_zones`.
 
-    Nodes - \ :literal:`nodes`\ .
+    Nodes - :literal:`nodes`.
 
-    Providers - \ :literal:`providers`\ .
+    Providers - :literal:`providers`.
 
-    Users - \ :literal:`users`\ .
+    Users - :literal:`users`.
 
-    Groups - \ :literal:`groups`\ .
+    Groups - :literal:`groups`.
 
-    Smb shares - \ :literal:`smb\_shares`\ .
+    Smb shares - :literal:`smb\_shares`.
 
-    Nfs exports - \ :literal:`nfs\_exports`\ .
+    Nfs exports - :literal:`nfs\_exports`.
 
-    Nfs aliases - \ :literal:`nfs\_aliases`\ .
+    Nfs aliases - :literal:`nfs\_aliases`.
 
-    Clients - \ :literal:`clients`\ .
+    Clients - :literal:`clients`.
 
-    Synciq reports - \ :literal:`synciq\_reports`\ .
+    Synciq reports - :literal:`synciq\_reports`.
 
-    Synciq target reports - \ :literal:`synciq\_target\_reports`\ .
+    Synciq target reports - :literal:`synciq\_target\_reports`.
 
-    Synciq policies - \ :literal:`synciq\_policies`\ .
+    Synciq policies - :literal:`synciq\_policies`.
 
-    Synciq target cluster certificates - \ :literal:`synciq\_target\_cluster\_certificates`\ .
+    Synciq target cluster certificates - :literal:`synciq\_target\_cluster\_certificates`.
 
-    Synciq performance rules - \ :literal:`synciq\_performance\_rules`\ .
+    Synciq performance rules - :literal:`synciq\_performance\_rules`.
 
-    Network groupnets - \ :literal:`network\_groupnets`\ .
+    Network groupnets - :literal:`network\_groupnets`.
 
-    Network pools - \ :literal:`network\_pools`\ .
+    Network pools - :literal:`network\_pools`.
 
-    Network rules - \ :literal:`network\_rules`\ .
+    Network rules - :literal:`network\_rules`.
 
-    Network interfaces - \ :literal:`network\_interfaces`\ .
+    Network interfaces - :literal:`network\_interfaces`.
 
-    Network subnets - \ :literal:`network\_subnets`\ .
+    Network subnets - :literal:`network\_subnets`.
 
-    Node pools - \ :literal:`node\_pools`\ .
+    Node pools - :literal:`node\_pools`.
 
-    Storagepool tiers - \ :literal:`storagepool\_tiers`\ .
+    Storagepool tiers - :literal:`storagepool\_tiers`.
 
-    SMB files - \ :literal:`smb\_files`\ .
+    SMB files - :literal:`smb\_files`.
 
-    User mapping rules - \ :literal:`user\_mapping\_rules`\ .
+    User mapping rules - :literal:`user\_mapping\_rules`.
 
-    LDAPs - \ :literal:`ldap`\ .
+    LDAPs - :literal:`ldap`.
 
-    NFS zone settings - \ :literal:`nfs\_zone\_settings`\ .
+    NFS zone settings - :literal:`nfs\_zone\_settings`.
 
-    NFS default settings - \ :literal:`nfs\_default\_settings`\ .
+    NFS default settings - :literal:`nfs\_default\_settings`.
 
-    SyncIQ global settings - \ :literal:`synciq\_global\_settings`\ .
+    SyncIQ global settings - :literal:`synciq\_global\_settings`.
 
-    S3 buckets - \ :literal:`s3\_buckets`\ .
+    S3 buckets - :literal:`s3\_buckets`.
 
-    The list of \ :emphasis:`attributes`\ , \ :emphasis:`access\_zones`\  and \ :emphasis:`nodes`\  is for the entire PowerScale cluster.
+    The list of :emphasis:`attributes`\ , :emphasis:`access\_zones` and :emphasis:`nodes` is for the entire PowerScale cluster.
 
     The list of providers for the entire PowerScale cluster.
 
@@ -165,67 +165,67 @@ Parameters
 
     The list of ldap providers of PowerScale cluster.
 
-    SMB global settings - \ :literal:`smb\_global\_settings`\ .
+    SMB global settings - :literal:`smb\_global\_settings`.
 
-    NTP servers \ :literal:`ntp\_servers`\ .
+    NTP servers :literal:`ntp\_servers`.
 
-    Email settings \ :literal:`email\_settings`\ .
+    Email settings :literal:`email\_settings`.
 
-    Cluster identity \ :literal:`cluster\_identity`\ .
+    Cluster identity :literal:`cluster\_identity`.
 
-    Cluster owner \ :literal:`cluster\_owner`\ .
+    Cluster owner :literal:`cluster\_owner`.
 
-    SNMP settings - \ :literal:`snmp\_settings`\ .
+    SNMP settings - :literal:`snmp\_settings`.
 
-    Server certificate - \ :literal:`server\_certificate`\ .
+    Server certificate - :literal:`server\_certificate`.
 
-    Roles - \ :literal:`roles`\ .
+    Roles - :literal:`roles`.
 
-    Support assist settings- \ :literal:`support\_assist\_settings`\ .
+    Support assist settings- :literal:`support\_assist\_settings`.
 
-    Smartquota- \ :literal:`smartquota`\ .
+    Smartquota- :literal:`smartquota`.
 
-    Filesystem - \ :literal:`filesystem`\ .
+    Filesystem - :literal:`filesystem`.
 
-    Alert settings - \ :literal:`alert\_settings`\ .
+    Alert settings - :literal:`alert\_settings`.
 
-    Alert rules - \ :literal:`alert\_rules`\ .
+    Alert rules - :literal:`alert\_rules`.
 
-    Alert channels - \ :literal:`alert\_channels`\ .
+    Alert channels - :literal:`alert\_channels`.
 
-    Alert categories - \ :literal:`alert\_categories`\ .
+    Alert categories - :literal:`alert\_categories`.
 
-    Event groups - \ :literal:`event\_group`\ .
+    Event groups - :literal:`event\_group`.
 
-    Writable snapshots - \ :literal:`writable\_snapshots`\ .
+    Writable snapshots - :literal:`writable\_snapshots`.
 
 
   include_all_access_zones (optional, bool, None)
     Specifies if requested component details need to be fetched from all access zones.
 
-    It is mutually exclusive with \ :emphasis:`access\_zone`\ .
+    It is mutually exclusive with :emphasis:`access\_zone`.
 
 
   scope (optional, str, effective)
-    The scope of ldap. If no scope is specified, the \ :literal:`effective`\  scope would be taken by default.
+    The scope of ldap. If no scope is specified, the :literal:`effective` scope would be taken by default.
 
-    If specified as \ :literal:`effective`\  or not specified, all fields are returned.
+    If specified as :literal:`effective` or not specified, all fields are returned.
 
-    If specified as \ :literal:`user`\ , only fields with non-default values are shown.
+    If specified as :literal:`user`\ , only fields with non-default values are shown.
 
-    If specified as \ :literal:`default`\ , the original values are returned.
+    If specified as :literal:`default`\ , the original values are returned.
 
 
   query_parameters (optional, dict, None)
-    Contains dictionary of query parameters for specific \ :emphasis:`gather\_subset`\ .
+    Contains dictionary of query parameters for specific :emphasis:`gather\_subset`.
 
-    Applicable to \ :literal:`alert\_rules`\ , \ :literal:`event\_group`\ , \ :literal:`event\_channels`\ , \ :literal:`filesystem`\  and \ :literal:`writable\_snapshots`\ .
+    Applicable to :literal:`alert\_rules`\ , :literal:`event\_group`\ , :literal:`event\_channels`\ , :literal:`filesystem` and :literal:`writable\_snapshots`.
 
-    If \ :literal:`writable\_snapshots`\  is passed as \ :emphasis:`gather\_subset`\ , if \ :emphasis:`wspath`\  is given, all other query parameters inside \ :emphasis:`writable\_snapshots`\  will be ignored.
+    If :literal:`writable\_snapshots` is passed as :emphasis:`gather\_subset`\ , if :emphasis:`wspath` is given, all other query parameters inside :emphasis:`writable\_snapshots` will be ignored.
 
-    To view the list of supported query parameters for \ :literal:`writable\_snapshots`\ .
+    To view the list of supported query parameters for :literal:`writable\_snapshots`.
 
-    Refer Query Parameters section from \ https://developer.dell.com/apis/4088/versions/9.5.0/9.5.0.0_ISLANDER_OAS2.json/%20paths/~1platform~114~1snapshot~1writable/get\ .
+    Refer Query Parameters section from \ `https://developer.dell.com/apis/4088/versions/9.5.0/9.5.0.0\_ISLANDER\_OAS2.json/ paths/~1platform~114~1snapshot~1writable/get <https://developer.dell.com/apis/4088/versions/9.5.0/9.5.0.0_ISLANDER_OAS2.json/%20paths/~1platform~114~1snapshot~1writable/get>`__.
 
 
   onefs_host (True, str, None)
@@ -239,9 +239,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
+    :literal:`true` - indicates that the SSL certificate should be verified.
 
-    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
+    :literal:`false` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -259,11 +259,12 @@ Notes
 -----
 
 .. note::
-   - The parameters \ :emphasis:`access\_zone`\  and \ :emphasis:`include\_all\_access\_zones`\  are mutually exclusive.
-   - The \ :emphasis:`check\_mode`\  is supported.
+   - The parameters :emphasis:`access\_zone` and :emphasis:`include\_all\_access\_zones` are mutually exclusive.
+   - The :emphasis:`check\_mode` is supported.
    - Filter functionality is supported only for the following 'gather\_subset'- 'nfs', 'smartquota', 'filesystem' 'writable\_snapshots', 'smb\_files'.
-   - The parameter \ :emphasis:`smb\_files`\  would return for all the clusters.
-   - When \ :emphasis:`gather\_subset`\  is \ :literal:`smb\_files`\ , it is assumed that the credentials of all node is same as the \ :emphasis:`hostname`\ .
+   - The parameter :emphasis:`smb\_files` would return for all the clusters.
+   - When :emphasis:`gather\_subset` is :literal:`smb\_files`\ , it is assumed that the credentials of all node is same as the :emphasis:`hostname`.
+   - :literal:`support\_assist\_settings` is supported for One FS version 9.5.0 and above.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -1125,7 +1126,7 @@ NfsExports (When C(nfs_exports) is in a given I(gather_subset), list, [{'all_dir
 
 
   all_dirs (, bool, )
-    \ :emphasis:`sub\_directories\_mountable`\  flag value.
+    :emphasis:`sub\_directories\_mountable` flag value.
 
 
   id (, int, 12)
@@ -1232,7 +1233,7 @@ NfsZoneSettings (When C(nfs_zone_settings) is in a given I(gather_subset), dict,
 
 
   nfsv4_allow_numeric_ids (, bool, )
-    If \ :literal:`true`\ , sends owners and groups as UIDs and GIDs when look up fails or if the \ :emphasis:`nfsv4\_no\_names`\  property is set to 1.
+    If :literal:`true`\ , sends owners and groups as UIDs and GIDs when look up fails or if the :emphasis:`nfsv4\_no\_names` property is set to 1.
 
 
   nfsv4_domain (, str, )
@@ -1240,19 +1241,19 @@ NfsZoneSettings (When C(nfs_zone_settings) is in a given I(gather_subset), dict,
 
 
   nfsv4_no_domain (, bool, )
-    If \ :literal:`true`\ , sends owners and groups without a domain name.
+    If :literal:`true`\ , sends owners and groups without a domain name.
 
 
   nfsv4_no_domain_uids (, bool, )
-    If \ :literal:`true`\ , sends UIDs and GIDs without a domain name.
+    If :literal:`true`\ , sends UIDs and GIDs without a domain name.
 
 
   nfsv4_no_names (, bool, )
-    If \ :literal:`true`\ , sends owners and groups as UIDs and GIDs.
+    If :literal:`true`\ , sends owners and groups as UIDs and GIDs.
 
 
   nfsv4_replace_domain (, bool, )
-    If \ :literal:`true`\ , replaces the owner or group domain with an NFS domain name.
+    If :literal:`true`\ , replaces the owner or group domain with an NFS domain name.
 
 
   zone (, str, )
@@ -1861,7 +1862,7 @@ S3_bucket_details (When C(s3_buckets) is in a given I(gather_subset), dict, {'ac
 
 
   path (, str, )
-    Path of S3 bucket with in \ :literal:`'/ifs'`\ .
+    Path of S3 bucket with in :literal:`'/ifs'`.
 
 
   zid (, int, )
@@ -2033,7 +2034,7 @@ ntp_servers (Always, dict, {'servers': [{'id': '10.**.**.**', 'key': None, 'name
 
 
     key (, str, )
-      Key value from \ :emphasis:`key\_file`\  that maps to this server.
+      Key value from :emphasis:`key\_file` that maps to this server.
 
 
     name (, str, )
@@ -2279,11 +2280,11 @@ smart_quota (always, list, [{'container': True, 'description': '', 'efficiency_r
 
 
   container (, bool, True)
-    If \ :literal:`true`\ , SMB shares using the quota directory see the quota thresholds as share size.
+    If :literal:`true`\ , SMB shares using the quota directory see the quota thresholds as share size.
 
 
   thresholds (, dict, {'advisory': 3221225472, 'advisory(GB)': '3.0', 'advisory_exceeded': False, 'advisory_last_exceeded': 0, 'hard': 6442450944, 'hard(GB)': '6.0', 'hard_exceeded': False, 'hard_last_exceeded': 0, 'soft': 5368709120, 'soft(GB)': '5.0', 'soft_exceeded': False, 'soft_grace': 3024000, 'soft_last_exceeded': 0})
-    Includes information about all the limits imposed on quota. The limits are mentioned in bytes and \ :emphasis:`soft\_grace`\  is in seconds.
+    Includes information about all the limits imposed on quota. The limits are mentioned in bytes and :emphasis:`soft\_grace` is in seconds.
 
 
   type (, str, directory)
@@ -2309,7 +2310,7 @@ support_assist_settings (When C(support_assist_settings) is in a given I(gather_
 
 
   automatic_case_creation (, bool, )
-    \ :literal:`True`\  indicates automatic case creation is enabled.
+    :literal:`True` indicates automatic case creation is enabled.
 
 
   connection (, dict, )
@@ -2440,7 +2441,7 @@ support_assist_settings (When C(support_assist_settings) is in a given I(gather_
 
 
   enable_download (, bool, )
-    \ :literal:`True`\  indicates downloads are enabled.
+    :literal:`True` indicates downloads are enabled.
 
 
   enable_remote_support (, bool, )

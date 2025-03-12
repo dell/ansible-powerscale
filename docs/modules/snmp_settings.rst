@@ -32,7 +32,7 @@ Parameters
   read_only_community (optional, str, None)
     SNMP read-only community name.
 
-    The system default value of the read-only community name is ``I$ilonpublic``.
+    The system default value of the read-only community name is :literal:`I$ilonpublic`.
 
     Update the read-only community name while enabling SNMP v2c.
 
@@ -78,7 +78,7 @@ Parameters
     read_only_user (optional, str, None)
       The read-only user for SNMP v3 requests.
 
-      The system default value of read-only user is ``general``.
+      The system default value of read-only user is :literal:`general`.
 
 
 
@@ -107,9 +107,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    ``true`` - indicates that the SSL certificate should be verified.
+    :literal:`true` - indicates that the SSL certificate should be verified.
 
-    ``false`` - indicates that the SSL certificate should not be verified.
+    :literal:`false` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -127,7 +127,7 @@ Notes
 -----
 
 .. note::
-   - The *check_mode* is supported.
+   - The :emphasis:`check\_mode` is supported.
    - Users can configure SNMP version 3 alone or in combination with version 2c.
    - Idempotency is not supported for SNMP v3's password and privacy password.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
