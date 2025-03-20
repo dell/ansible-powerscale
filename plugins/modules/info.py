@@ -692,7 +692,7 @@ EXAMPLES = r'''
         filter_operator: "equal"
         filter_value: "xxx"
 
-- name: Get filesystem from PowerScale cluster
+- name: Get filesystem (/ifs) from PowerScale cluster
   dellemc.powerscale.info:
     onefs_host: "{{ onefs_host }}"
     verify_ssl: "{{ verify_ssl }}"
@@ -700,7 +700,6 @@ EXAMPLES = r'''
     api_password: "{{ api_password }}"
     gather_subset:
       - filesystem
-    path: "<path>"
 
 - name: Get filesystem from PowerScale cluster with query parameters
   dellemc.powerscale.info:
@@ -716,7 +715,7 @@ EXAMPLES = r'''
         quota: true
         acl: true
         snapshot: true
-        path: "<path>"
+        path: "<path>" # If specified, return filesystem details under the specified path
 
 - name: Get filesystem from PowerScale cluster with query parameters along with filters
   dellemc.powerscale.info:
@@ -732,7 +731,7 @@ EXAMPLES = r'''
         quota: true
         acl: true
         snapshot: true
-        path: "<path>"
+        path: "<path>" # If specified, return filesystem details under the specified path
     filters:
       - filter_key: "name"
         filter_operator: "equal"
@@ -2710,7 +2709,10 @@ smart_quota:
     }
     ]
 file_system:
-  description: The filesystem details.
+  description:
+    - The filesystem details.
+    - If path is not specified in query_parameters, the filesystem /ifs details are returned.
+    - If path is specified in query_parameters, the filesystem details under the specified path are returned.
   type: list
   returned: always
   contains:
@@ -3928,10 +3930,17 @@ class Info(object):
                 del query_params["path"]
             return {k: v for k, v in query_params.items() if v is True}
 
+    def determine_path(self, path):
+        """For Filesystem related APIs, the leading '/' is not expected. Hence, we trim it."""
+        if path.startswith('/'):
+            return path[1:]
+        return path
+
     def get_filesystem_list(self, path, query_params=None):
         """Get the filesystem list of a given PowerScale Storage."""
         try:
-            filesystem_list = [{"name": fs.get("name")} for fs in self.list_filesystems(path)]
+            filesystem_list = [{"name": fs.get("name")} for fs in self.list_filesystems(
+                self.determine_path(path))]
             required_params = None
             if not filesystem_list:
                 return filesystem_list
