@@ -118,9 +118,8 @@ class TestSyncIQJob(PowerScaleUnitBase):
         self.get_synciq_job_args.update({"job_id": "non_existing_job",
                                          "state": "present"})
         synciq_job_module_mock.module.params = self.get_synciq_job_args
-        MockApiException.status = '404'
         synciq_job_module_mock.sync_api_instance.list_sync_jobs = MagicMock(
-            side_effect=utils.ApiException)
+            side_effect=MockApiException(404))
         self.capture_fail_json_call(
             MockSyncIQJobApi.create_synciq_job_failed_msg(), synciq_job_module_mock)
 
