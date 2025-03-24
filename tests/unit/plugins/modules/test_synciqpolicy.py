@@ -264,11 +264,10 @@ class TestSynciqPolicy(PowerScaleUnitBase):
             powerscale_module_mock, self.synciqpolicy_args,
             MockSynciqApi.MockSynciqpolicyApi.CREATE_ARGS)
         policy_obj = Policy(name="policy2", id="ab", target_certificate_id=14)
-        MockApiException.status = '404'
         powerscale_module_mock.get_target_policy = MagicMock(
             return_value=(policy_obj, True))
         powerscale_module_mock.api_instance.get_sync_policy = MagicMock(
-            side_effect=utils.ApiException)
+            side_effect=MockApiException(404))
         self.capture_fail_json_call(
             MockSynciqApi.MockSynciqpolicyApi.EXCEPTION_MSG,
             powerscale_module_mock, SynciqPolicyHandler

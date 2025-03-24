@@ -75,7 +75,6 @@ class TestNfsExport(PowerScaleUnitBase):
             {"path": "/sample_file_path1",
              "access_zone": "sample_zone",
              "state": MockNFSApi.STATE_P})
-        powerscale_module_mock.module.params = self.get_nfs_args
         powerscale_module_mock.zones_summary_api.get_zones_summary_zone.to_dict = MagicMock(
             return_value=MockNFSApi.ZONE)
         powerscale_module_mock.protocol_api.list_nfs_exports = MagicMock(
@@ -91,12 +90,10 @@ class TestNfsExport(PowerScaleUnitBase):
             {"path": "/sample_file_path1",
              "access_zone": "sample_zone",
              "state": MockNFSApi.STATE_P})
-        powerscale_module_mock.module.params = self.get_nfs_args
-        MockApiException.status = '404'
         powerscale_module_mock.protocol_api.list_nfs_exports = MagicMock(
             return_value=NFSTestExport(1, MockNFSApi.NFS_1['exports']))
         powerscale_module_mock.zones_summary_api.get_zones_summary_zone.to_dict = MagicMock(
-            side_effect=utils.ApiException)
+            side_effect=MockApiException(404))
         self.capture_fail_json_call(MockNFSApi.get_nfs_failed_msg(), powerscale_module_mock, NFSHandler)
 
     def operation_before_create(self, powerscale_module_mock):
@@ -117,7 +114,6 @@ class TestNfsExport(PowerScaleUnitBase):
                  "enabled": True, "user": "root", "primary_group": "root",
                  "secondary_groups": [{"name": "group1"}, {"name": "group2", "state": MockNFSApi.STATE_A}]},
              "state": MockNFSApi.STATE_P})
-        powerscale_module_mock.module.params = self.get_nfs_args
         powerscale_module_mock.protocol_api.list_nfs_exports = MagicMock(
             return_value=NFSTestExport()
         )
@@ -156,7 +152,6 @@ class TestNfsExport(PowerScaleUnitBase):
              "client_state": "present-in-export",
              "security_flavors": ["kerberos"],
              "state": MockNFSApi.STATE_P})
-        powerscale_module_mock.module.params = self.get_nfs_args
         powerscale_module_mock.protocol_api.list_nfs_exports = MagicMock(
             return_value=NFSTestExport()
         )
@@ -171,7 +166,6 @@ class TestNfsExport(PowerScaleUnitBase):
              "read_only_clients": [MockNFSApi.SAMPLE_IP1],
              "clients": [MockNFSApi.SAMPLE_IP1],
              "state": MockNFSApi.STATE_P})
-        powerscale_module_mock.module.params = self.get_nfs_args
         powerscale_module_mock.protocol_api.list_nfs_exports = MagicMock(
             return_value=NFSTestExport()
         )
@@ -195,7 +189,6 @@ class TestNfsExport(PowerScaleUnitBase):
                  "enabled": True, "user": "root", "primary_group": "root",
                  "secondary_groups": [{"name": "group1", "state": MockNFSApi.STATE_A}, {"name": "group2"}]},
              "map_non_root": {"enabled": False}, "state": MockNFSApi.STATE_P})
-        powerscale_module_mock.module.params = self.get_nfs_args
         powerscale_module_mock.get_nfs_export = MagicMock(
             return_value=MockNFSApi.NFS_1['exports'][0])
         powerscale_module_mock.isi_sdk.NfsExport = MagicMock(
@@ -225,7 +218,6 @@ class TestNfsExport(PowerScaleUnitBase):
              "root_clients": [MockNFSApi.SAMPLE_IP2],
              "client_state": "absent-in-export",
              "state": MockNFSApi.STATE_P})
-        powerscale_module_mock.module.params = self.get_nfs_args
         powerscale_module_mock.get_nfs_export = MagicMock(
             return_value=MockNFSApi.NFS_2['exports'][0])
         powerscale_module_mock.isi_sdk.NfsExport = MagicMock(
@@ -245,7 +237,6 @@ class TestNfsExport(PowerScaleUnitBase):
              "read_write_clients": [MockNFSApi.SAMPLE_IP3],
              "root_clients": [MockNFSApi.SAMPLE_IP1],
              "state": MockNFSApi.STATE_P})
-        powerscale_module_mock.module.params = self.get_nfs_args
         powerscale_module_mock.get_nfs_export = MagicMock(
             return_value=MockNFSApi.NFS_2['exports'][0])
         powerscale_module_mock.isi_sdk.NfsExport = MagicMock(
@@ -261,7 +252,6 @@ class TestNfsExport(PowerScaleUnitBase):
             {"path": MockNFSApi.PATH_1,
              "access_zone": MockNFSApi.SYS_ZONE,
              "state": MockNFSApi.STATE_A})
-        powerscale_module_mock.module.params = self.get_nfs_args
         powerscale_module_mock.get_nfs_export = MagicMock(
             return_value=MockNFSApi.NFS_2['exports'][0])
         NFSHandler().handle(powerscale_module_mock,
@@ -275,7 +265,6 @@ class TestNfsExport(PowerScaleUnitBase):
             {"path": MockNFSApi.PATH_1,
              "access_zone": MockNFSApi.SYS_ZONE,
              "state": MockNFSApi.STATE_A})
-        powerscale_module_mock.module.params = self.get_nfs_args
         powerscale_module_mock.get_nfs_export = MagicMock(
             return_value=MockNFSApi.NFS_2['exports'][0])
         powerscale_module_mock.protocol_api.delete_nfs_export = MagicMock(

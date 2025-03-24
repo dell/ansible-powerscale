@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 import pytest
-from mock.mock import MagicMock
+from mock.mock import patch, MagicMock
 # pylint: disable=unused-import
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.initial_mock \
     import utils
@@ -47,23 +47,23 @@ class TestSMB(PowerScaleUnitBase):
         self.set_module_params(
             powerscale_module_mock, self.smb_args,
             {"share_name": MockSMBApi.SMB_NAME, "state": MockSMBApi.STATE_P})
-        MockApiException.status = '400'
-        powerscale_module_mock.protocol_api.get_smb_share = MagicMock(
-            side_effect=utils.ApiException)
-        self.capture_fail_json_call(
-            MockSMBApi.get_smb_exception_response('get_smb'),
-            powerscale_module_mock, SMBHandler)
+        with patch.object(powerscale_module_mock.protocol_api,
+                          'get_smb_share',
+                          side_effect=MockApiException(400)):
+            self.capture_fail_json_call(
+                MockSMBApi.get_smb_exception_response('get_smb'),
+                powerscale_module_mock, SMBHandler)
 
     def test_create_smb_withoutpath_exception(self, powerscale_module_mock):
         self.set_module_params(
             powerscale_module_mock, self.smb_args,
             {"share_name": MockSMBApi.SMB_NAME, "state": MockSMBApi.STATE_P})
-        MockApiException.status = '404'
-        powerscale_module_mock.protocol_api.get_smb_share = MagicMock(
-            side_effect=utils.ApiException)
-        self.capture_fail_json_call(
-            MockSMBApi.get_smb_exception_response('invalid_path'),
-            powerscale_module_mock, SMBHandler)
+        with patch.object(powerscale_module_mock.protocol_api,
+                          'get_smb_share',
+                          side_effect=MockApiException(404)):
+            self.capture_fail_json_call(
+                MockSMBApi.get_smb_exception_response('invalid_path'),
+                powerscale_module_mock, SMBHandler)
 
     def test_get_smb_by_name_422_exception(self, powerscale_module_mock):
         self.set_module_params(

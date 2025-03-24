@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 import pytest
-from mock.mock import MagicMock
+from mock.mock import patch, MagicMock
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.initial_mock \
     import utils
 
@@ -100,14 +100,13 @@ class TestGroupnet():
             groupnet_module_mock.module.fail_json.call_args[1]['msg']
 
     def test_get_groupnet_404_error(self, groupnet_module_mock):
-        MockApiException.status = '404'
         groupnet_module_mock.module.params = self.groupnet_args
-        groupnet_module_mock.network_api.get_network_groupnet \
-            = MagicMock(side_effect=utils.ApiException)
-        groupnet_module_mock.perform_module_operation()
-
-        assert groupnet_module_mock.module.exit_json.call_args[1]["changed"] is True
-        assert groupnet_module_mock.module.exit_json.call_args[1]["create_groupnet"] is True
+        with patch.object(groupnet_module_mock.network_api,
+                          'get_network_groupnet',
+                          side_effect=MockApiException(404)):
+            groupnet_module_mock.perform_module_operation()
+            assert groupnet_module_mock.module.exit_json.call_args[1]["changed"] is True
+            assert groupnet_module_mock.module.exit_json.call_args[1]["create_groupnet"] is True
 
     def test_create_groupnet(self, groupnet_module_mock):
         groupnet_name = 'new_groupnet'

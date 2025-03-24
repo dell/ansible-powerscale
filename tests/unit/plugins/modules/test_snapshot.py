@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 import pytest
-from mock.mock import MagicMock
+from mock.mock import patch, MagicMock
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.initial_mock \
     import utils
 
@@ -91,14 +91,14 @@ class TestSnapshot(PowerScaleUnitBase):
                                        "alias": "snap_alias_1",
                                        "state": "present"})
         snapshot_module_mock.module.params = self.get_snapshot_args
-        MockApiException.status = '404'
-        snapshot_module_mock.snapshot_api.get_snapshot_snapshot = MagicMock(
-            side_effect=utils.ApiException)
         snapshot_module_mock.isi_sdk.SnapshotSnapshotCreateParams = MagicMock(
             return_value=MockSDKResponse(MockSnapshotApi.CREATE_SNAPSHOT_PARAMS))
-        snapshot_module_mock.perform_module_operation()
-        snapshot_module_mock.snapshot_api.create_snapshot_snapshot.assert_called()
-        assert snapshot_module_mock.module.exit_json.call_args[1]['changed'] is True
+        with patch.object(snapshot_module_mock.snapshot_api,
+                          'get_snapshot_snapshot',
+                          side_effect=MockApiException(404)):
+            snapshot_module_mock.perform_module_operation()
+            snapshot_module_mock.snapshot_api.create_snapshot_snapshot.assert_called()
+            assert snapshot_module_mock.module.exit_json.call_args[1]['changed'] is True
 
     def test_create_snapshot_wo_retention_unit_response(self, snapshot_module_mock):
         self.get_snapshot_args.update({"path": "/ifs/ansible_test_snapshot",
