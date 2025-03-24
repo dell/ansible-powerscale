@@ -5,6 +5,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 __metaclass__ = type
+import copy
 import pytest
 from mock.mock import MagicMock
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_api_exception \
@@ -45,6 +46,8 @@ class PowerScaleUnitBase:
             if error_msg not in fj_object.message:
                 raise AssertionError(fj_object.message)
 
-    def set_module_params(self, module_mock, get_module_args, params):
+    def set_module_params(self, module_mock, get_module_args, params, deep_copy=True):
+        if deep_copy:
+            get_module_args = copy.deepcopy(get_module_args)
         get_module_args.update(params)
         module_mock.module.params = get_module_args
