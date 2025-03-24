@@ -1097,9 +1097,9 @@ class SynciqPolicyGetDetailsHandler:
 
 class SynciqPolicyJobCreateHandler:
     def handle(self, synciq_obj, synciq_params, policy_name):
-        policy_obj, is_target_policy = \
-            synciq_obj.get_synciq_policy_details(policy_name, "")
         job_params = synciq_params.get('job_params')
+        policy_obj, is_target_policy = \
+            synciq_obj.get_synciq_policy_details(policy_name, "", job_params)
         if job_params:
             if job_params['action'] in ('allow_write', 'allow_write_revert'):
                 if not policy_obj:
