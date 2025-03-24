@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 import pytest
-from mock.mock import MagicMock
+from mock.mock import patch, MagicMock
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.initial_mock \
     import utils
 
@@ -57,21 +57,19 @@ class TestNfsAlias():
         self.get_nfs_alias_args.update({"nfs_alias_name": self.nfs_alias_name_1,
                                         "state": "present"})
         nfs_alias_module_mock.module.params = self.get_nfs_alias_args
-        MockApiException.status = '404'
-        nfs_alias_module_mock.protocol_api.get_nfs_alias = MagicMock(
-            side_effect=utils.ApiException)
-        nfs_alias_module_mock.perform_module_operation()
-        nfs_alias_module_mock.protocol_api.get_nfs_alias.assert_called()
+        with patch.object(
+                nfs_alias_module_mock.protocol_api, 'get_nfs_alias', side_effect=MockApiException(404)):
+            nfs_alias_module_mock.perform_module_operation()
+            nfs_alias_module_mock.protocol_api.get_nfs_alias.assert_called()
 
     def test_get_nfs_alias_by_name_422_exception(self, nfs_alias_module_mock):
         self.get_nfs_alias_args.update({"nfs_alias_name": self.nfs_alias_name_1,
                                         "state": "present"})
         nfs_alias_module_mock.module.params = self.get_nfs_alias_args
-        MockApiException.status = '422'
-        nfs_alias_module_mock.protocol_api.get_nfs_alias = MagicMock(
-            side_effect=utils.ApiException)
-        nfs_alias_module_mock.perform_module_operation()
-        nfs_alias_module_mock.protocol_api.get_nfs_alias.assert_called()
+        with patch.object(
+                nfs_alias_module_mock.protocol_api, 'get_nfs_alias', side_effect=MockApiException(422)):
+            nfs_alias_module_mock.perform_module_operation()
+            nfs_alias_module_mock.protocol_api.get_nfs_alias.assert_called()
 
     def test_create_nfs_alias_response(self, nfs_alias_module_mock):
         self.get_nfs_alias_args.update({"nfs_alias_name": self.nfs_alias_name_1,

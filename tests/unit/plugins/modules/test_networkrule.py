@@ -119,13 +119,12 @@ class TestNetworkRule():
 
     def test_get_network_rule_with_404_exception(self, network_module_mock):
         rule_name = 'test_rule'
-        MockApiException.status = '404'
         self.get_network_rule_args.update({
             'rule_name': rule_name,
         })
         network_module_mock.module.params = self.get_network_rule_args
         network_module_mock.network_api_instance.get_pools_pool_rule = \
-            MagicMock(side_effect=utils.ApiException)
+            MagicMock(side_effect=MockApiException(404))
         network_module_mock.perform_module_operation()
 
         assert (network_module_mock.module.exit_json.call_args[1]['create_network_rule'])

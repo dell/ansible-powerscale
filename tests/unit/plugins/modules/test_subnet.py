@@ -121,10 +121,9 @@ class TestSubnet():
             subnet_module_mock.module.fail_json.call_args[1]['msg']
 
     def test_get_subnet_404_error(self, subnet_module_mock):
-        MockApiException.status = '404'
         subnet_module_mock.module.params = self.subnet_args
         subnet_module_mock.groupnet_api.get_groupnet_subnet(self.subnet_name).to_dict \
-            = MagicMock(side_effect=utils.ApiException)
+            = MagicMock(side_effect=MockApiException(404))
         subnet_module_mock.perform_module_operation()
 
         assert subnet_module_mock.module.exit_json.call_args[1]["changed"] is True

@@ -306,7 +306,6 @@ class TestS3Bucket():
                 'zone_exception'), s3bucket_module_mock)
 
     def test_create_s3_bucket_path_exception(self, s3bucket_module_mock):
-        MockApiException.status = '404'
         self.s3bucket_args.update({
             "s3_bucket_name": MockS3BucketeApi.BUCKET_NAME,
             "path": None,
