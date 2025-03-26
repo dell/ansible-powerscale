@@ -1,6 +1,6 @@
 **Ansible Modules for Dell Technologies PowerScale** 
 =========================================
-### Release notes 3.7.0
+### Release notes 3.8.0
 
 >   © 2024 Dell Inc. or its subsidiaries. All rights reserved. Dell
 >   and other trademarks are trademarks of Dell Inc. or its
@@ -27,7 +27,8 @@ Table 1. Revision history
 
 | Revision | Date          | Description                                               |
 |----------|---------------|-----------------------------------------------------------|
-| 01       | December 2024   | Ansible Modules for Dell PowerScale 3.7.0                 |
+| 01       | March 2025      | Ansible Modules for Dell PowerScale 3.8.0                 |
+| 02       | December 2024   | Ansible Modules for Dell PowerScale 3.7.0                 |
 
 
 Product description
@@ -78,12 +79,14 @@ The Ansible modules use playbooks, written in yaml syntax, to list, show, create
 
 New Features and Enhancements
 ---------------------------
-This section describes the features of the Ansible Modules for Dell PowerScale for this release.
+This section describes the features or enhancements of the Ansible Modules for Dell PowerScale for this release.
 
-The Ansible Modules for Dell PowerScale release 3.7.0 supports the following features:
+The Ansible Modules for Dell PowerScale release 3.8.0 provides the following enhancements:
 
-- Added check and diff mode support for synciqpolicy module.
-- Fixed bugs for synciqpolicy module. (Issues #44 and #130)
+- GitHub defect fixes networkpool module for unauthorized error (issue 133), smb share module return error (issue 138)
+  and filesystem modules cannot delete non empty folders and returns invalid error message (issue 148)
+- Internal defect fixes for the modules settings, snapshot, group, nfs, smb, smb_global_settings, alert_rule,
+  filesystem, nfs_alias, synciqpolicy, ads and info.
 
 Known issues
 ------------
