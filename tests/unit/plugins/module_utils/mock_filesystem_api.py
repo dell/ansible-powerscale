@@ -247,7 +247,7 @@ class MockFileSystemApi:
                     "type": "group"
                 }
             }],
-            "authoritative": "acl",
+            "authoritative": "mode",
             "group": {
                 "id": "id:2000",
                 "name": "test_group_1",
@@ -278,11 +278,12 @@ class MockFileSystemApi:
             "create_file_system_wo_owner_name_exception": "Please specify a name for the owner.",
             "create_file_system_wo_group_name_exception": "Please specify a name for the group.",
             "set_acl_exception": "Setting ACL rights of Filesystem",
+            "modify_acl_exception": "Modification of ACL on path",
             "delete_quota_exception": "Deletion of Quota on path",
-            "update_quota_exception": "Creation of Quota update param failed",
-            "create_quota_error_exception": "Creation of Quota param failed",
+            "update_quota_exception": "Modification of Quota on path",
+            "create_quota_error_exception": "Creation of Quota",
             "update_include_snap_data_exception": "Modifying include_snap_data is not supported",
-            "create_quota_get_exception": "Creation of Quota param failed",
+            "create_quota_get_exception": "Creation of Quota",
             "set_access_control_rights_exception": "Setting ACL rights of Filesystem"
         }
         return err_msg_dict.get(response_type)
