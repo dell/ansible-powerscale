@@ -45,7 +45,7 @@ class TestNfsExport(PowerScaleUnitBase):
 
     def test_get_nfs_response(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock, self.get_nfs_args,
+            self.get_nfs_args,
             {"path": MockNFSApi.PATH_1,
              "access_zone": MockNFSApi.SYS_ZONE,
              "state": MockNFSApi.STATE_P})
@@ -57,7 +57,7 @@ class TestNfsExport(PowerScaleUnitBase):
 
     def test_get_nfs_root_response(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock, self.get_nfs_args,
+            self.get_nfs_args,
             {"path": "/",
              "access_zone": "sample-zone",
              "state": MockNFSApi.STATE_P})
@@ -71,12 +71,12 @@ class TestNfsExport(PowerScaleUnitBase):
 
     def test_get_nfs_non_system_az_response(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock, self.get_nfs_args,
+            self.get_nfs_args,
             {"path": "/sample_file_path1",
              "access_zone": "sample_zone",
              "state": MockNFSApi.STATE_P})
         powerscale_module_mock.zones_summary_api.get_zones_summary_zone.to_dict = MagicMock(
-            return_value=MockNFSApi.ZONE)
+            return_value=MockSDKResponse(MockNFSApi.ZONE))
         powerscale_module_mock.protocol_api.list_nfs_exports = MagicMock(
             return_value=NFSTestExport(1, MockNFSApi.NFS_1['exports'])
         )
@@ -86,19 +86,19 @@ class TestNfsExport(PowerScaleUnitBase):
 
     def test_get_nfs_non_system_az_exception(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock, self.get_nfs_args,
+            self.get_nfs_args,
             {"path": "/sample_file_path1",
              "access_zone": "sample_zone",
              "state": MockNFSApi.STATE_P})
         powerscale_module_mock.protocol_api.list_nfs_exports = MagicMock(
             return_value=NFSTestExport(1, MockNFSApi.NFS_1['exports']))
-        powerscale_module_mock.zones_summary_api.get_zones_summary_zone.to_dict = MagicMock(
+        powerscale_module_mock.zones_summary_api.get_zones_summary_zone = MagicMock(
             side_effect=MockApiException(404))
-        self.capture_fail_json_call(MockNFSApi.get_nfs_failed_msg(), powerscale_module_mock, NFSHandler)
+        self.capture_fail_json_call(MockNFSApi.get_nfs_non_zone_failed_msg(), NFSHandler)
 
     def operation_before_create(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock, self.get_nfs_args,
+            self.get_nfs_args,
             {"path": MockNFSApi.PATH_1,
              "access_zone": MockNFSApi.SYS_ZONE,
              "description": "description",
@@ -134,17 +134,17 @@ class TestNfsExport(PowerScaleUnitBase):
             return_value=NFSTestExport(1, MockNFSApi.NFS_1['exports']))
         powerscale_module_mock.protocol_api.create_nfs_export = MagicMock(
             side_effect=utils.ApiException)
-        self.capture_fail_json_call(MockNFSApi.create_nfs_failed_msg(), powerscale_module_mock, NFSHandler)
+        self.capture_fail_json_call(MockNFSApi.create_nfs_failed_msg(), NFSHandler)
 
     def test_create_nfs_params_exception(self, powerscale_module_mock):
         self.operation_before_create(powerscale_module_mock)
         powerscale_module_mock.isi_sdk.NfsExportCreateParams = MagicMock(
             side_effect=utils.ApiException)
-        self.capture_fail_json_call(MockNFSApi.create_nfs_param_failed_msg(), powerscale_module_mock, NFSHandler)
+        self.capture_fail_json_call(MockNFSApi.create_nfs_param_failed_msg(), NFSHandler)
 
     def test_create_nfs_without_clients(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock, self.get_nfs_args,
+            self.get_nfs_args,
             {"path": MockNFSApi.PATH_1,
              "access_zone": MockNFSApi.SYS_ZONE,
              "description": "description",
@@ -155,11 +155,11 @@ class TestNfsExport(PowerScaleUnitBase):
         powerscale_module_mock.protocol_api.list_nfs_exports = MagicMock(
             return_value=NFSTestExport()
         )
-        self.capture_fail_json_call(MockNFSApi.without_clients_failed_msg(), powerscale_module_mock, NFSHandler)
+        self.capture_fail_json_call(MockNFSApi.without_clients_failed_msg(), NFSHandler)
 
     def test_create_nfs_without_client_state(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock, self.get_nfs_args,
+            self.get_nfs_args,
             {"path": MockNFSApi.PATH_1,
              "access_zone": MockNFSApi.SYS_ZONE,
              "read_only": True,
@@ -169,11 +169,13 @@ class TestNfsExport(PowerScaleUnitBase):
         powerscale_module_mock.protocol_api.list_nfs_exports = MagicMock(
             return_value=NFSTestExport()
         )
-        self.capture_fail_json_call(MockNFSApi.without_client_state_failed_msg(), powerscale_module_mock, NFSHandler)
+        NFSHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
+        powerscale_module_mock.protocol_api.create_nfs_export.assert_called()
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
     def operation_before_modify(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock, self.get_nfs_args,
+            self.get_nfs_args,
             {"path": MockNFSApi.PATH_1,
              "access_zone": MockNFSApi.SYS_ZONE,
              "description": "description1",
@@ -205,11 +207,11 @@ class TestNfsExport(PowerScaleUnitBase):
         self.operation_before_modify(powerscale_module_mock)
         powerscale_module_mock.protocol_api.update_nfs_export = MagicMock(
             side_effect=utils.ApiException)
-        self.capture_fail_json_call(MockNFSApi.modify_nfs_failed_msg(), powerscale_module_mock, NFSHandler)
+        self.capture_fail_json_call(MockNFSApi.modify_nfs_failed_msg(), NFSHandler)
 
     def test_remove_clients_nfs(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock, self.get_nfs_args,
+            self.get_nfs_args,
             {"path": MockNFSApi.PATH_1,
              "access_zone": MockNFSApi.SYS_ZONE,
              "read_only_clients": [MockNFSApi.SAMPLE_IP2, MockNFSApi.SAMPLE_IP3],
@@ -229,7 +231,7 @@ class TestNfsExport(PowerScaleUnitBase):
 
     def test_replace_clients_nfs(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock, self.get_nfs_args,
+            self.get_nfs_args,
             {"path": MockNFSApi.PATH_1,
              "access_zone": MockNFSApi.SYS_ZONE,
              "read_only_clients": [MockNFSApi.SAMPLE_IP1],
@@ -248,7 +250,7 @@ class TestNfsExport(PowerScaleUnitBase):
 
     def test_delete_nfs_response(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock, self.get_nfs_args,
+            self.get_nfs_args,
             {"path": MockNFSApi.PATH_1,
              "access_zone": MockNFSApi.SYS_ZONE,
              "state": MockNFSApi.STATE_A})
@@ -261,7 +263,7 @@ class TestNfsExport(PowerScaleUnitBase):
 
     def test_delete_nfs_response_exception(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock, self.get_nfs_args,
+            self.get_nfs_args,
             {"path": MockNFSApi.PATH_1,
              "access_zone": MockNFSApi.SYS_ZONE,
              "state": MockNFSApi.STATE_A})
@@ -269,34 +271,30 @@ class TestNfsExport(PowerScaleUnitBase):
             return_value=MockNFSApi.NFS_2['exports'][0])
         powerscale_module_mock.protocol_api.delete_nfs_export = MagicMock(
             side_effect=utils.ApiException)
-        self.capture_fail_json_call(MockNFSApi.delete_nfs_failed_msg(), powerscale_module_mock, NFSHandler)
+        self.capture_fail_json_call(MockNFSApi.delete_nfs_failed_msg(), NFSHandler)
 
     def test_get_zone_base_path_exception(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock, self.get_nfs_args,
+            self.get_nfs_args,
             {"path": "sample-path",
              "access_zone": MockNFSApi.SAMPLE_ZONE,
              "state": MockNFSApi.STATE_P})
         powerscale_module_mock.zones_summary_api.get_zones_summary_zone = MagicMock(
             side_effect=MockApiException)
-        self.capture_fail_json_call(MockNFSApi.get_failed_msgs("az_path_err"), powerscale_module_mock, NFSHandler)
+        self.capture_fail_json_call(MockNFSApi.get_failed_msgs("az_path_err"), NFSHandler)
 
     def test_multiple_nfs_exception(self, powerscale_module_mock):
         powerscale_module_mock.protocol_api.list_nfs_exports.return_value.total = 2
-        with pytest.raises(Exception) as e:
-            powerscale_module_mock.get_nfs_export('/ifs/test_nfs', MockNFSApi.SYS_ZONE)
-        assert MockNFSApi.get_failed_msgs("multiple_nfs_err") in str(e.value)
+        self.capture_fail_json_call("Multiple NFS Exports found", NFSHandler)
 
     def test_nfs_by_id_exception(self, powerscale_module_mock):
         powerscale_module_mock.protocol_api.get_nfs_export.side_effect = Exception('Test Exception')
-        with pytest.raises(Exception) as e:
-            powerscale_module_mock._get_nfs_export_from_id('123', MockNFSApi.SYS_ZONE)
-        assert str(e.value) == MockNFSApi.get_failed_msgs("id_err")
+        self.capture_fail_json_method("Got error Test Exception while getting NFS export details",
+                                      powerscale_module_mock, "_get_nfs_export_from_id", '123', MockNFSApi.SYS_ZONE)
 
     def test_invalid_path(self, powerscale_module_mock):
-        with pytest.raises(Exception) as e:
-            powerscale_module_mock.effective_path(MockNFSApi.SYS_ZONE, 'path')
-        assert str(e.value) == "Invalid path path, Path must start with '/'"
+        self.capture_fail_json_method("Invalid path path, Path must start with '/'", powerscale_module_mock,
+                                      "effective_path", MockNFSApi.SYS_ZONE, 'path')
 
     @pytest.mark.parametrize(
         "nfs_map_params, nfs_export_details, nfs_export_map, map_type, expected_result",

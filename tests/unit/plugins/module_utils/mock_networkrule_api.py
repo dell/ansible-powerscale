@@ -31,3 +31,7 @@ def modify_rule_failed_msg(rule_name):
 
 def delete_rule_failed_msg(rule_name):
     return 'Unable to delete network rule ' + rule_name + '. failed with error:'
+
+
+def invalid_interface_type_msg():
+    return 'Please provide a valid interface type to create a network rule'

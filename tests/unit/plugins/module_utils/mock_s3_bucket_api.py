@@ -176,8 +176,7 @@ class MockS3BucketeApi:
             return "Failed to get the group id for group wheel in zone " \
                    "sample-zone and provider local due to error SDK Error message"
         elif response_type == "wellknown_exception":
-            return "Failed to get the wellknown id for wellknown wheel due to" \
-                   " error Wellknown wheel does not exist. Provide valid wellknown"
+            return "Wellknown wheel does not exist. Provide valid wellknown"
         elif response_type == "modify_path":
             return "path of the S3 bucket is not modifiable after creation."
         elif response_type == "modify_owner":
