@@ -36,25 +36,22 @@ class TestAlertSettings(PowerScaleUnitBase):
         return AlertSettings
 
     def test_get_alert_settings_response(self, powerscale_module_mock):
-        self.set_module_params(
-            powerscale_module_mock, self.alert_args, {})
+        self.set_module_params(self.alert_args, {})
         AlertSettingsModifyHandler().handle(powerscale_module_mock,
                                             powerscale_module_mock.module.params)
         powerscale_module_mock.event_api.get_event_maintenance.assert_called()
 
     def test_get_alert_settings_exception(self, powerscale_module_mock):
-        self.set_module_params(
-            powerscale_module_mock, self.alert_args, {})
+        self.set_module_params(self.alert_args, {})
         powerscale_module_mock.event_api.get_event_maintenance = MagicMock(
             side_effect=MockApiException)
         self.capture_fail_json_call(
             MockAlertSettingsApi.get_alert_exception_response('get_alert'),
-            powerscale_module_mock, AlertSettingsModifyHandler)
+            AlertSettingsModifyHandler)
 
     def test_modify_maintenance_mode(self, powerscale_module_mock):
-        self.set_module_params(
-            powerscale_module_mock, self.alert_args,
-            {"enable_celog_maintenance_mode": True, "prune": 10})
+        self.set_module_params(self.alert_args,
+                               {"enable_celog_maintenance_mode": True, "prune": 10})
         powerscale_module_mock.get_alert_settings_details = MagicMock(
             return_value=MockAlertSettingsApi.SETTING_DETAILS)
         powerscale_module_mock.isi_sdk.EventMaintenanceExtended = MagicMock(
@@ -64,9 +61,8 @@ class TestAlertSettings(PowerScaleUnitBase):
         powerscale_module_mock.event_api.update_event_maintenance.assert_called()
 
     def test_modify_maintenance_mode_exception(self, powerscale_module_mock):
-        self.set_module_params(
-            powerscale_module_mock, self.alert_args,
-            {"enable_celog_maintenance_mode": True, "prune": 10})
+        self.set_module_params(self.alert_args,
+                               {"enable_celog_maintenance_mode": True, "prune": 10})
         powerscale_module_mock.get_alert_settings_details = MagicMock(
             return_value=MockAlertSettingsApi.SETTING_DETAILS)
         powerscale_module_mock.isi_sdk.EventMaintenanceExtended = MagicMock(
@@ -74,7 +70,7 @@ class TestAlertSettings(PowerScaleUnitBase):
         self.capture_fail_json_call(
             MockAlertSettingsApi.get_alert_exception_response(
                 'modify_exp'),
-            powerscale_module_mock, AlertSettingsModifyHandler)
+            AlertSettingsModifyHandler)
 
     def test_main(self, powerscale_module_mock):
         main()

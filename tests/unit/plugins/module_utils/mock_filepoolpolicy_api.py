@@ -315,7 +315,7 @@ class MockFilepoolpolicyApi:
         tiers_list = MagicMock()
         tiers_list.tiers = MagicMock()
         tier_one = MagicMock()
-        tier_one.name = 'test_ansible_neo_tier'
+        tier_one.name = 'esa_tier'
         tier_one.lnns = [1, 2, 3]
         tiers_list.tiers = [tier_one]
         return tiers_list

@@ -8,46 +8,47 @@ __metaclass__ = type
 import copy
 import pytest
 from mock.mock import MagicMock
+
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_api_exception \
     import MockApiException
-from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library. \
-    fail_json import FailJsonException, fail_json
 
 
 class PowerScaleUnitBase:
 
     '''Powerscale Unit Test Base Class'''
 
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def powerscale_module_mock(self, mocker, module_object):
         exception_class_path = 'ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.utils.ApiException'
         mocker.patch(exception_class_path, new=MockApiException)
-        powerscale_module_mock = module_object()
-        powerscale_module_mock.module = MagicMock()
-        powerscale_module_mock.module.fail_json = fail_json
-        powerscale_module_mock.module.check_mode = False
-        return powerscale_module_mock
+        self.powerscale_module_mock = module_object()
+        self.powerscale_module_mock.module = MagicMock()
+        self.powerscale_module_mock.module.fail_json = MagicMock(
+            side_effect=SystemExit)
+        self.powerscale_module_mock.module.check_mode = False
+        return self.powerscale_module_mock
 
-    def capture_fail_json_call(self, error_msg, module_mock, module_handler=None, invoke_perform_module=False):
-        try:
+    def capture_fail_json_call(self, error_msg, module_handler=None, invoke_perform_module=False):
+        with pytest.raises(SystemExit):
             if not invoke_perform_module:
-                module_handler().handle(module_mock, module_mock.module.params)
+                module_handler().handle(self.powerscale_module_mock,
+                                        self.powerscale_module_mock.module.params)
             else:
-                module_mock.perform_module_operation()
-        except FailJsonException as fj_object:
-            if error_msg not in fj_object.message:
-                raise AssertionError(fj_object.message)
+                self.powerscale_module_mock.perform_module_operation()
+        self.powerscale_module_mock.module.fail_json.assert_called()
+        call_args = self.powerscale_module_mock.module.fail_json.call_args.kwargs
+        assert error_msg in call_args['msg']
 
     def capture_fail_json_method(self, error_msg, module_mock, function_name, *args, **kwargs):
-        try:
+        with pytest.raises(SystemExit):
             func = getattr(module_mock, function_name)
             func(*args, **kwargs)
-        except FailJsonException as fj_object:
-            if error_msg not in fj_object.message:
-                raise AssertionError(fj_object.message)
+        self.powerscale_module_mock.module.fail_json.assert_called()
+        call_args = self.powerscale_module_mock.module.fail_json.call_args.kwargs
+        assert error_msg in call_args['msg']
 
-    def set_module_params(self, module_mock, get_module_args, params, deep_copy=True):
+    def set_module_params(self, get_module_args, params, deep_copy=True):
         if deep_copy:
             get_module_args = copy.deepcopy(get_module_args)
         get_module_args.update(params)
-        module_mock.module.params = get_module_args
+        self.powerscale_module_mock.module.params = get_module_args

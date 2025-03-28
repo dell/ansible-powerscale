@@ -550,17 +550,16 @@ class SynciqPolicy(object):
                 if policy:
                     return policy[0], False
             return None, False
-
-        except utils.ApiException as e:
-            if str(e.status) == "404":
+        except (utils.ApiException, Exception) as e:
+            if isinstance(e, utils.ApiException) and str(e.status) == "404":
                 LOG.info("SyncIQ policy %s is not found", name_or_id)
                 return self.get_synciq_target_policy(name_or_id, job_params)
-        except Exception as e:
-            error_msg = utils.determine_error(error_obj=e)
-            error_message = 'Get details of SyncIQ policy %s failed with ' \
-                            'error : %s' % (name_or_id, str(error_msg))
-            LOG.error(error_message)
-            self.module.fail_json(msg=error_message)
+            else:
+                error_msg = utils.determine_error(error_obj=e)
+                error_message = 'Get details of SyncIQ policy %s failed with ' \
+                                'error : %s' % (name_or_id, str(error_msg))
+                LOG.error(error_message)
+                self.module.fail_json(msg=error_message)
 
     def get_synciq_target_policy(self, policy_id, job_params):
         """ Returns details of target syncIQ policy"""

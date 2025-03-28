@@ -20,43 +20,34 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock
     import MockNFSGlobalSettingsApi
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_api_exception \
     import MockApiException
-from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_fail_json \
-    import FailJsonException, fail_json
+from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.powerscale_unit_base import \
+    PowerScaleUnitBase
 
 
-class TestNFSGlobalSettings():
+class TestNFSGlobalSettings(PowerScaleUnitBase):
     nfs_global_args = MockNFSGlobalSettingsApi.NFS_GLOBAL_COMMON_ARGS
 
     @pytest.fixture
-    def nfs_global_module_mock(self, mocker):
-        mocker.patch(MockNFSGlobalSettingsApi.MODULE_UTILS_PATH + '.ApiException', new=MockApiException)
-        nfs_global_module_mock = NFSGlobalSettings()
-        nfs_global_module_mock.module.check_mode = False
-        nfs_global_module_mock.module.fail_json = fail_json
-        return nfs_global_module_mock
+    def module_object(self):
+        return NFSGlobalSettings
 
-    def capture_fail_json_call(self, error_msg, nfs_global_module_mock):
-        try:
-            NFSGlobalSettingsHandler().handle(nfs_global_module_mock, nfs_global_module_mock.module.params)
-        except FailJsonException as fj_object:
-            assert error_msg in fj_object.message
-
-    def test_get_nfs_global_details(self, nfs_global_module_mock):
+    def test_get_nfs_global_details(self, powerscale_module_mock):
         self.nfs_global_args.update({
         })
-        nfs_global_module_mock.module.params = self.nfs_global_args
-        NFSGlobalSettingsHandler().handle(nfs_global_module_mock, nfs_global_module_mock.module.params)
-        nfs_global_module_mock.protocol_api.get_nfs_settings_global.assert_called()
+        powerscale_module_mock.module.params = self.nfs_global_args
+        NFSGlobalSettingsHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
+        powerscale_module_mock.protocol_api.get_nfs_settings_global.assert_called()
 
-    def test_get_nfs_global_details_exception(self, nfs_global_module_mock):
+    def test_get_nfs_global_details_exception(self, powerscale_module_mock):
         self.nfs_global_args.update({})
-        nfs_global_module_mock.module.params = self.nfs_global_args
-        nfs_global_module_mock.protocol_api.get_nfs_settings_global = MagicMock(
+        powerscale_module_mock.module.params = self.nfs_global_args
+        powerscale_module_mock.protocol_api.get_nfs_settings_global = MagicMock(
             side_effect=MockApiException)
         self.capture_fail_json_call(
-            MockNFSGlobalSettingsApi.get_nfs_global_settings_exception_response('get_details_exception'), nfs_global_module_mock)
+            MockNFSGlobalSettingsApi.get_nfs_global_settings_exception_response('get_details_exception'),
+            NFSGlobalSettingsHandler)
 
-    def test_modify_nfs_global_response(self, nfs_global_module_mock):
+    def test_modify_nfs_global_response(self, powerscale_module_mock):
         self.nfs_global_args.update({
             "service": True,
             "nfsv3": {"nfsv3_enabled": True, "nfsv3_rdma_enabled": None},
@@ -67,15 +58,15 @@ class TestNFSGlobalSettings():
                 "nfsv42_enabled": True
             }
         })
-        nfs_global_module_mock.module.params = self.nfs_global_args
-        nfs_global_module_mock.get_nfs_global_settings_details = MagicMock(
+        powerscale_module_mock.module.params = self.nfs_global_args
+        powerscale_module_mock.get_nfs_global_settings_details = MagicMock(
             return_value=MockNFSGlobalSettingsApi.GET_NFS_GLOBAL_RESPONSE)
-        NFSGlobalSettingsHandler().handle(nfs_global_module_mock,
-                                          nfs_global_module_mock.module.params)
-        assert nfs_global_module_mock.module.exit_json.call_args[1]['changed'] is True
-        nfs_global_module_mock.protocol_api.update_nfs_settings_global.assert_called()
+        NFSGlobalSettingsHandler().handle(powerscale_module_mock,
+                                          powerscale_module_mock.module.params)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        powerscale_module_mock.protocol_api.update_nfs_settings_global.assert_called()
 
-    def test_modify_nfs_global_exception(self, nfs_global_module_mock):
+    def test_modify_nfs_global_exception(self, powerscale_module_mock):
         self.nfs_global_args.update({
             "service": True,
             "nfsv3": {"nfsv3_enabled": True, "nfsv3_rdma_enabled": None},
@@ -86,10 +77,11 @@ class TestNFSGlobalSettings():
                 "nfsv42_enabled": True
             }
         })
-        nfs_global_module_mock.module.params = self.nfs_global_args
-        nfs_global_module_mock.get_nfs_global_settings_details = MagicMock(
+        powerscale_module_mock.module.params = self.nfs_global_args
+        powerscale_module_mock.get_nfs_global_settings_details = MagicMock(
             return_value=MockNFSGlobalSettingsApi.GET_NFS_GLOBAL_RESPONSE)
-        nfs_global_module_mock.protocol_api.update_nfs_settings_global = MagicMock(
+        powerscale_module_mock.protocol_api.update_nfs_settings_global = MagicMock(
             side_effect=MockApiException)
         self.capture_fail_json_call(
-            MockNFSGlobalSettingsApi.get_nfs_global_settings_exception_response('update_exception'), nfs_global_module_mock)
+            MockNFSGlobalSettingsApi.get_nfs_global_settings_exception_response('update_exception'),
+            NFSGlobalSettingsHandler)

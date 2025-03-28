@@ -35,7 +35,7 @@ class TestAlertRule(PowerScaleUnitBase):
             yield MockEvents
 
     def test_get_create_alert_rule(self, powerscale_module_mock, mock_events):
-        self.set_module_params(powerscale_module_mock, self.alert_rule_args,
+        self.set_module_params(self.alert_rule_args,
                                MockAlertRuleApi.UPDATE_ALERT_RULE_OPTIONS)
         mock_event_instance = mock_events.return_value
         mock_event_instance.get_alert_rules = MagicMock(
@@ -47,13 +47,13 @@ class TestAlertRule(PowerScaleUnitBase):
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
     def test_create_alert_rule(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock, self.alert_rule_args, {})
+        self.set_module_params(self.alert_rule_args, {})
         powerscale_module_mock.get_alert_rule = MagicMock(return_value={})
         AlertRuleHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
     def test_create_alert_rule_check_mode(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock, self.alert_rule_args, {})
+        self.set_module_params(self.alert_rule_args, {})
         powerscale_module_mock.module.check_mode = True
         powerscale_module_mock.module._diff = True
         powerscale_module_mock.get_alert_rule = MagicMock(return_value={})
@@ -61,13 +61,13 @@ class TestAlertRule(PowerScaleUnitBase):
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
     def test_create_alert_rule_exception(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock, self.alert_rule_args, {})
+        self.set_module_params(self.alert_rule_args, {})
         powerscale_module_mock.get_alert_rule = MagicMock(return_value={})
         powerscale_module_mock.event_api.create_event_alert_condition = MagicMock(side_effect=MockApiException)
-        self.capture_fail_json_call("Failed to create alert condition: SDK Error message", powerscale_module_mock, AlertRuleHandler)
+        self.capture_fail_json_call("Failed to create alert condition: SDK Error message", AlertRuleHandler)
 
     def test_update_alert_rule(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock, self.alert_rule_args,
+        self.set_module_params(self.alert_rule_args,
                                MockAlertRuleApi.UPDATE_ALERT_RULE_OPTIONS)
         powerscale_module_mock.get_alert_rule = MagicMock(
             return_value=MockAlertRuleApi.EXISTING_ALERT_RULE_OPTIONS)
@@ -75,7 +75,7 @@ class TestAlertRule(PowerScaleUnitBase):
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
     def test_update_alert_rule_check_mode(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock, self.alert_rule_args,
+        self.set_module_params(self.alert_rule_args,
                                MockAlertRuleApi.UPDATE_ALERT_RULE_OPTIONS)
         powerscale_module_mock.module.check_mode = True
         powerscale_module_mock.module._diff = True
@@ -85,15 +85,15 @@ class TestAlertRule(PowerScaleUnitBase):
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
     def test_update_alert_rule_exception(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock, self.alert_rule_args,
+        self.set_module_params(self.alert_rule_args,
                                MockAlertRuleApi.UPDATE_ALERT_RULE_OPTIONS)
         powerscale_module_mock.get_alert_rule = MagicMock(
             return_value=MockAlertRuleApi.EXISTING_ALERT_RULE_OPTIONS)
         powerscale_module_mock.event_api.update_event_alert_condition = MagicMock(side_effect=MockApiException)
-        self.capture_fail_json_call("Failed to update alert condition: SDK Error message", powerscale_module_mock, AlertRuleHandler)
+        self.capture_fail_json_call("Failed to update alert condition: SDK Error message", AlertRuleHandler)
 
     def test_delete_alert_rule(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock, self.alert_rule_args,
+        self.set_module_params(self.alert_rule_args,
                                MockAlertRuleApi.DELETE_ALERT_RULE_OPTIONS)
         powerscale_module_mock.get_alert_rule = MagicMock(
             return_value=MockAlertRuleApi.EXISTING_ALERT_RULE_OPTIONS)
@@ -101,7 +101,7 @@ class TestAlertRule(PowerScaleUnitBase):
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
     def test_delete_alert_rule_check_mode(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock, self.alert_rule_args,
+        self.set_module_params(self.alert_rule_args,
                                MockAlertRuleApi.DELETE_ALERT_RULE_OPTIONS)
         powerscale_module_mock.module.check_mode = True
         powerscale_module_mock.module._diff = True
@@ -111,9 +111,9 @@ class TestAlertRule(PowerScaleUnitBase):
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
     def test_delete_alert_rule_exception(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock, self.alert_rule_args,
+        self.set_module_params(self.alert_rule_args,
                                MockAlertRuleApi.DELETE_ALERT_RULE_OPTIONS)
         powerscale_module_mock.get_alert_rule = MagicMock(
             return_value=MockAlertRuleApi.DELETE_EXISTING_ALERT_RULE_OPTIONS)
         powerscale_module_mock.event_api.delete_event_alert_condition = MagicMock(side_effect=MockApiException)
-        self.capture_fail_json_call("Failed to delete alert condition: SDK Error message", powerscale_module_mock, AlertRuleHandler)
+        self.capture_fail_json_call("Failed to delete alert condition: SDK Error message", AlertRuleHandler)

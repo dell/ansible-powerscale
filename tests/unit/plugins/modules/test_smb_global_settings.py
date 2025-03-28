@@ -34,15 +34,13 @@ class TestSMBGlobalSettings(PowerScaleUnitBase):
         return SMBGlobalSettings
 
     def test_get_smb_global_details(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock,
-                               self.smb_global_args, {})
+        self.set_module_params(self.smb_global_args, {})
         SMBGlobalSettingsHandler().handle(powerscale_module_mock,
                                           powerscale_module_mock.module.params)
         powerscale_module_mock.protocol_api.get_smb_settings_global.assert_called()
 
     def test_get_smb_global_details_empty(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock,
-                               self.smb_global_args, {})
+        self.set_module_params(self.smb_global_args, {})
         powerscale_module_mock.protocol_api.get_smb_settings_global.return_value = MockSDKResponse(None)
         SMBGlobalSettingsHandler().handle(powerscale_module_mock,
                                           powerscale_module_mock.module.params)
@@ -51,21 +49,19 @@ class TestSMBGlobalSettings(PowerScaleUnitBase):
             1]['smb_global_settings_details'] is None
 
     def test_get_smb_global_details_exception(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock,
-                               self.smb_global_args, {})
+        self.set_module_params(self.smb_global_args, {})
         powerscale_module_mock.protocol_api.get_smb_settings_global = MagicMock(
             side_effect=MockApiException)
         self.capture_fail_json_call(
             MockSMBGlobalSettingsApi.get_smb_global_settings_exception_response('get_details_exception'),
-            powerscale_module_mock, SMBGlobalSettingsHandler)
+            SMBGlobalSettingsHandler)
 
     @pytest.mark.parametrize("service_val", [True, False])
     def test_modify_smb_global_response(self, powerscale_module_mock, service_val):
         self.smb_global_args.update({
             "service": service_val
         })
-        self.set_module_params(powerscale_module_mock,
-                               self.smb_global_args, {})
+        self.set_module_params(self.smb_global_args, {})
         powerscale_module_mock.get_smb_global_settings_details = MagicMock(
             return_value=MockSMBGlobalSettingsApi.GET_SMB_GLOBAL_RESPONSE)
         SMBGlobalSettingsHandler().handle(powerscale_module_mock,
@@ -79,8 +75,7 @@ class TestSMBGlobalSettings(PowerScaleUnitBase):
             "service": True
         })
         powerscale_module_mock.module.check_mode = True
-        self.set_module_params(powerscale_module_mock,
-                               self.smb_global_args, {})
+        self.set_module_params(self.smb_global_args, {})
         powerscale_module_mock.get_smb_global_settings_details = MagicMock(
             return_value=MockSMBGlobalSettingsApi.GET_SMB_GLOBAL_RESPONSE)
         SMBGlobalSettingsHandler().handle(powerscale_module_mock,
@@ -89,19 +84,17 @@ class TestSMBGlobalSettings(PowerScaleUnitBase):
 
     def test_modify_smb_global_exception(self, powerscale_module_mock):
         self.smb_global_args.update({"service": True})
-        self.set_module_params(powerscale_module_mock,
-                               self.smb_global_args, {})
+        self.set_module_params(self.smb_global_args, {})
         powerscale_module_mock.get_smb_global_settings_details = MagicMock(
             return_value=MockSMBGlobalSettingsApi.GET_SMB_GLOBAL_RESPONSE)
         powerscale_module_mock.protocol_api.update_smb_settings_global = MagicMock(
             side_effect=MockApiException)
         self.capture_fail_json_call(
             MockSMBGlobalSettingsApi.get_smb_global_settings_exception_response('update_exception'),
-            powerscale_module_mock, SMBGlobalSettingsHandler)
+            SMBGlobalSettingsHandler)
 
     def test_main(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock,
-                               self.smb_global_args, {})
+        self.set_module_params(self.smb_global_args, {})
         powerscale_module_mock.get_smb_global_settings_details = MagicMock(
             return_value=MockSMBGlobalSettingsApi.GET_SMB_GLOBAL_RESPONSE)
         main()

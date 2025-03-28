@@ -46,7 +46,6 @@ class TestAccessZone(PowerScaleUnitBase):
 
     def test_create_access_zone_parmset1(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock,
             self.get_access_zone_args,
             {
                 "az_name": "testaz",
@@ -74,7 +73,6 @@ class TestAccessZone(PowerScaleUnitBase):
 
     def test_create_access_zone_parmset2(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock,
             self.get_access_zone_args,
             {
                 "az_name": "testaz",
@@ -104,7 +102,6 @@ class TestAccessZone(PowerScaleUnitBase):
 
     def test_create_access_zone_parmset3(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock,
             self.get_access_zone_args,
             {
                 "az_name": "testaz",
@@ -132,7 +129,6 @@ class TestAccessZone(PowerScaleUnitBase):
 
     def test_create_access_zone_exception(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock,
             self.get_access_zone_args,
             {
                 "az_name": "testaz",
@@ -163,7 +159,6 @@ class TestAccessZone(PowerScaleUnitBase):
 
     def test_create_access_zone_without_path_exception(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock,
             self.get_access_zone_args,
             {
                 "az_name": "testaz",
@@ -191,7 +186,6 @@ class TestAccessZone(PowerScaleUnitBase):
 
     def test_delete_access_zone(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock,
             self.get_access_zone_args,
             {
                 "az_name": "testaz",
@@ -218,7 +212,6 @@ class TestAccessZone(PowerScaleUnitBase):
 
     def test_delete_access_zone_exception(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock,
             self.get_access_zone_args,
             {
                 "az_name": "testaz",
@@ -251,7 +244,6 @@ class TestAccessZone(PowerScaleUnitBase):
 
     def test_get_access_zone_details(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock,
             self.get_access_zone_args,
             {"az_name": "testaz", "smb": None, "nfs": None, "state": "present"},
         )
@@ -272,7 +264,6 @@ class TestAccessZone(PowerScaleUnitBase):
 
     def test_get_access_zone_details_exception(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock,
             self.get_access_zone_args,
             {"az_name": "testaz", "smb": None, "nfs": None, "state": "present"},
         )
@@ -287,7 +278,6 @@ class TestAccessZone(PowerScaleUnitBase):
 
     def test_get_access_zone_details_api_exception(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock,
             self.get_access_zone_args,
             {"az_name": "testaz", "smb": None, "nfs": None, "state": "present"},
         )
@@ -302,7 +292,6 @@ class TestAccessZone(PowerScaleUnitBase):
 
     def test_add_provider_type_no_exist_exception(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock,
             self.get_access_zone_args,
             {
                 "az_name": "testaz",
@@ -330,7 +319,6 @@ class TestAccessZone(PowerScaleUnitBase):
 
     def test_add_provider1(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock,
             self.get_access_zone_args,
             {
                 "az_name": "testaz",
@@ -365,7 +353,6 @@ class TestAccessZone(PowerScaleUnitBase):
 
     def test_add_provider2(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock,
             self.get_access_zone_args,
             {
                 "az_name": "testaz",
@@ -408,7 +395,6 @@ class TestAccessZone(PowerScaleUnitBase):
 
     def test_add_provider_exception(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock,
             self.get_access_zone_args,
             {
                 "az_name": "testaz",
@@ -451,7 +437,6 @@ class TestAccessZone(PowerScaleUnitBase):
 
     def test_remove_provider_type_no_exist_exception(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock,
             self.get_access_zone_args,
             {
                 "az_name": "testaz",
@@ -479,7 +464,6 @@ class TestAccessZone(PowerScaleUnitBase):
 
     def test_remove_provider(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock,
             self.get_access_zone_args,
             {
                 "az_name": "testaz",
@@ -510,7 +494,6 @@ class TestAccessZone(PowerScaleUnitBase):
 
     def test_modify_smb(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock,
             self.get_access_zone_args,
             {
                 "az_name": "testaz",
@@ -539,7 +522,6 @@ class TestAccessZone(PowerScaleUnitBase):
 
     def test_modify_smb_exception(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock,
             self.get_access_zone_args,
             {
                 "az_name": "testaz",
@@ -576,7 +558,6 @@ class TestAccessZone(PowerScaleUnitBase):
 
     def test_modify_smb_conversion_exception(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock,
             self.get_access_zone_args,
             {
                 "az_name": "testaz",
@@ -611,7 +592,6 @@ class TestAccessZone(PowerScaleUnitBase):
 
     def test_modify_nfs(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock,
             self.get_access_zone_args,
             {
                 "az_name": "testaz",
@@ -637,7 +617,6 @@ class TestAccessZone(PowerScaleUnitBase):
 
     def test_modify_nfs_exception(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock,
             self.get_access_zone_args,
             {
                 "az_name": "testaz",
@@ -671,7 +650,6 @@ class TestAccessZone(PowerScaleUnitBase):
 
     def test_modify_smb_and_nfs(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock,
             self.get_access_zone_args,
             {
                 "az_name": "testaz",

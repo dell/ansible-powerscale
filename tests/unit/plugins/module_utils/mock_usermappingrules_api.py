@@ -99,6 +99,6 @@ class MockUserMappingRuleApi:
         elif response_type == 'invalid_apply_order':
             return "apply_order should be greater than 0."
         elif response_type == 'new_order_error':
-            return "Updating user mapping rule failed with error: new_order should be in range of 1 to 1"
+            return "new_order should be in range of 1 to 1"
         elif response_type == 'outbound_apply_order':
-            return "Fetching user mapping rule failed with error: apply order should be in range of 1 to 1"
+            return "apply order should be in range of 1 to 1"
