@@ -387,9 +387,8 @@ class User(object):
                      access_zone, zone_base_path)
             return zone_base_path
         except Exception as e:
-            error_message = 'Unable to fetch base path of Access Zone %s ' \
-                            ',failed with error: %s', access_zone, \
-                            self.determine_error(e)
+            error_message = 'Unable to fetch base path of Access Zone %s, ' \
+                            'failed with error: %s' % (access_zone, self.determine_error(e))
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
@@ -725,7 +724,7 @@ class User(object):
                 primary_group, home_directory, shell, full_name, email)
 
         password_changed = False
-        if float(self.array_version) < 9.5:
+        if utils.parse_version(self.array_version) < utils.parse_version("9.5"):
             password_changed = self.modify_password(auth_user_id, access_zone)
         return user_details_changed or role_changed or password_changed
 
