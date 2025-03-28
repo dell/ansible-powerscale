@@ -247,7 +247,7 @@ class MockFileSystemApi:
                     "type": "group"
                 }
             }],
-            "authoritative": "mode",
+            "authoritative": "acl",
             "group": {
                 "id": "id:2000",
                 "name": "test_group_1",
@@ -279,6 +279,8 @@ class MockFileSystemApi:
             "create_file_system_wo_group_name_exception": "Please specify a name for the group.",
             "set_acl_exception": "Setting ACL rights of Filesystem",
             "modify_acl_exception": "Modification of ACL on path",
+            "check_acl_modified_exception": "determining if ACLs are modified",
+            "invalid_wellknown_exception": "Provide valid wellknown",
             "delete_quota_exception": "Deletion of Quota on path",
             "update_quota_exception": "Modification of Quota on path",
             "create_quota_error_exception": "Creation of Quota",
