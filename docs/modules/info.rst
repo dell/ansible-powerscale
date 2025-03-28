@@ -763,7 +763,7 @@ Examples
             filter_operator: "equal"
             filter_value: "xxx"
 
-    - name: Get filesystem from PowerScale cluster
+    - name: Get filesystem (/ifs) from PowerScale cluster
       dellemc.powerscale.info:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -771,7 +771,6 @@ Examples
         api_password: "{{ api_password }}"
         gather_subset:
           - filesystem
-        path: "<path>"
 
     - name: Get filesystem from PowerScale cluster with query parameters
       dellemc.powerscale.info:
@@ -787,7 +786,7 @@ Examples
             quota: true
             acl: true
             snapshot: true
-            path: "<path>"
+            path: "<path>" # If specified, return filesystem details under the specified path
 
     - name: Get filesystem from PowerScale cluster with query parameters along with filters
       dellemc.powerscale.info:
@@ -803,7 +802,7 @@ Examples
             quota: true
             acl: true
             snapshot: true
-            path: "<path>"
+            path: "<path>" # If specified, return filesystem details under the specified path
         filters:
           - filter_key: "name"
             filter_operator: "equal"
@@ -2298,6 +2297,10 @@ smart_quota (always, list, [{'container': True, 'description': '', 'efficiency_r
 
 file_system (always, list, [{'name': 'home'}, {'name': 'smb11'}])
   The filesystem details.
+
+  If path is not specified in query\_parameters, the filesystem /ifs details are returned.
+
+  If path is specified in query\_parameters, the filesystem details under the specified path are returned.
 
 
   name (, str, home)

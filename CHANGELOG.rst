@@ -4,6 +4,17 @@ Dellemc.Powerscale Change Logs
 
 .. contents:: Topics
 
+v3.8.0
+======
+
+Bug Fixes
+-------------
+
+- GitHub defect fixes networkpool module for unauthorized error (issue 133), smb share module return error (issue 138)
+  and filesystem modules cannot delete non empty folders and returns invalid error message (issue 148)
+- Internal defect fixes for the modules settings, snapshot, group, nfs, smb, smb_global_settings, alert_rule,
+  filesystem, nfs_alias, synciqpolicy, ads and info.
+
 v3.7.0
 ======
 
