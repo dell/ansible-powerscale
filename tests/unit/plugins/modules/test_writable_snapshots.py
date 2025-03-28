@@ -26,114 +26,120 @@ class TestWritableSnapshot(PowerScaleUnitBase):
     def module_object(self):
         return WritableSnapshot
 
-    def test_create_writable_snapshot_check_mode(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock,
-                               self.writable_snapshot_args,
+    def test_create_writable_snapshot_check_mode(self):
+        self.set_module_params(self.writable_snapshot_args,
                                MockWritableSanpshotsApi.WS_CREATE_ARGS
                                )
-        powerscale_module_mock.check_mode = True
-        powerscale_module_mock.segregate_snapshots = MagicMock(
+        self.powerscale_module_mock.check_mode = True
+        self.powerscale_module_mock.segregate_snapshots = MagicMock(
             return_value=(MockWritableSanpshotsApi.WS_CREATE_ARGS["writable_snapshots"], [], []))
-        powerscale_module_mock.get_writable_snapshot = MagicMock(return_value=(False, []))
-        WritableSnapshotHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        self.powerscale_module_mock.get_writable_snapshot = MagicMock(
+            return_value=(False, []))
+        WritableSnapshotHandler().handle(self.powerscale_module_mock,
+                                         self.powerscale_module_mock.module.params)
+        assert self.powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
-    def test_create_writable_snapshot_with_id(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock,
-                               self.writable_snapshot_args,
+    def test_create_writable_snapshot_with_id(self):
+        self.set_module_params(self.writable_snapshot_args,
                                MockWritableSanpshotsApi.WS_CREATE_ARGS
                                )
-        powerscale_module_mock.check_mode = False
-        powerscale_module_mock._diff = True
-        powerscale_module_mock.get_writable_snapshot = MagicMock(return_value=(False, []))
-        WritableSnapshotHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        self.powerscale_module_mock.check_mode = False
+        self.powerscale_module_mock._diff = True
+        self.powerscale_module_mock.get_writable_snapshot = MagicMock(
+            return_value=(False, []))
+        WritableSnapshotHandler().handle(self.powerscale_module_mock,
+                                         self.powerscale_module_mock.module.params)
+        assert self.powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
-    def test_create_writable_snapshot_with_id_idempotence_mode(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock,
-                               self.writable_snapshot_args,
+    def test_create_writable_snapshot_with_id_idempotence_mode(self):
+        self.set_module_params(self.writable_snapshot_args,
                                MockWritableSanpshotsApi.WS_CREATE_ARGS
                                )
-        powerscale_module_mock.check_mode = False
-        WritableSnapshotHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        self.powerscale_module_mock.check_mode = False
+        WritableSnapshotHandler().handle(self.powerscale_module_mock,
+                                         self.powerscale_module_mock.module.params)
+        assert self.powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
-    def test_create_writable_snapshot_idempotence_mode(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock,
-                               self.writable_snapshot_args,
+    def test_create_writable_snapshot_idempotence_mode(self):
+        self.set_module_params(self.writable_snapshot_args,
                                MockWritableSanpshotsApi.WS_CREATE_ARGS_STR
                                )
-        powerscale_module_mock.check_mode = False
-        WritableSnapshotHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        self.powerscale_module_mock.check_mode = False
+        WritableSnapshotHandler().handle(self.powerscale_module_mock,
+                                         self.powerscale_module_mock.module.params)
+        assert self.powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
-    def test_create_writable_snapshot_exception(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock,
-                               self.writable_snapshot_args,
+    def test_create_writable_snapshot_exception(self):
+        self.set_module_params(self.writable_snapshot_args,
                                MockWritableSanpshotsApi.WS_CREATE_ARGS
                                )
-        powerscale_module_mock.check_mode = False
-        powerscale_module_mock.determine_error = MagicMock()
-        powerscale_module_mock.get_writable_snapshot = MagicMock(return_value=(False, []))
-        powerscale_module_mock.snapshot_api.create_snapshot_writable_item = MagicMock(side_effect=utils.ApiException)
+        self.powerscale_module_mock.check_mode = False
+        self.powerscale_module_mock.determine_error = MagicMock()
+        self.powerscale_module_mock.get_writable_snapshot = MagicMock(
+            return_value=(False, []))
+        self.powerscale_module_mock.snapshot_api.create_snapshot_writable_item = MagicMock(
+            side_effect=utils.ApiException)
         self.capture_fail_json_call(MockWritableSanpshotsApi.get_writeable_snpshots_error_response("create_exception"),
-                                    powerscale_module_mock, WritableSnapshotHandler)
+                                    WritableSnapshotHandler)
 
-    def test_delete_writable_snapshot_check_mode(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock,
-                               self.writable_snapshot_args,
+    def test_delete_writable_snapshot_check_mode(self):
+        self.set_module_params(self.writable_snapshot_args,
                                MockWritableSanpshotsApi.WS_DELETE_ARGS)
-        powerscale_module_mock.check_mode = True
-        powerscale_module_mock.get_writable_snapshot = MagicMock(return_value=(True, []))
-        WritableSnapshotHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        self.powerscale_module_mock.check_mode = True
+        self.powerscale_module_mock.get_writable_snapshot = MagicMock(
+            return_value=(True, []))
+        WritableSnapshotHandler().handle(self.powerscale_module_mock,
+                                         self.powerscale_module_mock.module.params)
+        assert self.powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
-    def test_delete_writable_snapshot(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock,
-                               self.writable_snapshot_args,
+    def test_delete_writable_snapshot(self):
+        self.set_module_params(self.writable_snapshot_args,
                                MockWritableSanpshotsApi.WS_DELETE_ARGS
                                )
-        powerscale_module_mock.check_mode = False
-        powerscale_module_mock.get_writable_snapshot = MagicMock(
+        self.powerscale_module_mock.check_mode = False
+        self.powerscale_module_mock.get_writable_snapshot = MagicMock(
             return_value=(True, MockWritableSanpshotsApi.WS_DELETE_ARGS["writable_snapshots"]))
-        WritableSnapshotHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        WritableSnapshotHandler().handle(self.powerscale_module_mock,
+                                         self.powerscale_module_mock.module.params)
+        assert self.powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
-    def test_delete_writable_snapshot_idempotence_mode(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock,
-                               self.writable_snapshot_args,
+    def test_delete_writable_snapshot_idempotence_mode(self):
+        self.set_module_params(self.writable_snapshot_args,
                                MockWritableSanpshotsApi.WS_DELETE_ARGS
                                )
-        powerscale_module_mock.check_mode = False
-        powerscale_module_mock.get_writable_snapshot = MagicMock(return_value=(False, []))
-        WritableSnapshotHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
+        self.powerscale_module_mock.check_mode = False
+        self.powerscale_module_mock.get_writable_snapshot = MagicMock(
+            return_value=(False, []))
+        WritableSnapshotHandler().handle(self.powerscale_module_mock,
+                                         self.powerscale_module_mock.module.params)
+        assert self.powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
 
-    def test_delete_writable_snapshot_exception(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock,
-                               self.writable_snapshot_args,
+    def test_delete_writable_snapshot_exception(self):
+        self.set_module_params(self.writable_snapshot_args,
                                MockWritableSanpshotsApi.WS_DELETE_ARGS
                                )
-        powerscale_module_mock.check_mode = False
-        powerscale_module_mock.snapshot_api.delete_snapshot_writable_wspath = MagicMock(side_effect=Exception)
+        self.powerscale_module_mock.check_mode = False
+        self.powerscale_module_mock.snapshot_api.delete_snapshot_writable_wspath = MagicMock(
+            side_effect=Exception)
         self.capture_fail_json_call(MockWritableSanpshotsApi.get_writeable_snpshots_error_response("delete_exception"),
-                                    powerscale_module_mock, WritableSnapshotHandler)
+                                    WritableSnapshotHandler)
 
-    def test_get_writable_snapshot_exception(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock,
-                               self.writable_snapshot_args,
+    def test_get_writable_snapshot_exception(self):
+        self.set_module_params(self.writable_snapshot_args,
                                MockWritableSanpshotsApi.WS_DELETE_ARGS
                                )
-        powerscale_module_mock.snapshot_api.get_snapshot_writable_wspath = MagicMock(side_effect=Exception)
-        self.capture_fail_json_call(MockWritableSanpshotsApi.get_writeable_snpshots_error_response("delete_exception"),
-                                    powerscale_module_mock, WritableSnapshotHandler)
+        self.powerscale_module_mock.snapshot_api.get_snapshot_writable_wspath = MagicMock(
+            side_effect=Exception)
+        WritableSnapshotHandler().handle(self.powerscale_module_mock,
+                                         self.powerscale_module_mock.module.params)
+        assert self.powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
 
-    def test_invalid_writable_snapshot(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock,
-                               self.writable_snapshot_args,
+    def test_invalid_writable_snapshot(self):
+        self.set_module_params(self.writable_snapshot_args,
                                MockWritableSanpshotsApi.WS_INVALID_DSTPATH_ARGS
                                )
-        powerscale_module_mock.check_mode = False
-        powerscale_module_mock.validate_src_snap = MagicMock(return_value=(False))
+        self.powerscale_module_mock.check_mode = False
+        self.powerscale_module_mock.validate_src_snap = MagicMock(
+            return_value=(False))
         self.capture_fail_json_call(MockWritableSanpshotsApi.get_writeable_snpshots_error_response("invalid_dstpath"),
-                                    powerscale_module_mock, WritableSnapshotHandler)
+                                    WritableSnapshotHandler)

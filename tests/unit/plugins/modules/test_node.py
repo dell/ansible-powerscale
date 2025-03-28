@@ -17,24 +17,20 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shar
 from ansible_collections.dellemc.powerscale.plugins.modules.node import ClusterNode, main
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.\
     module_utils import mock_node_api as MockNodeApi
-from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_api_exception \
-    import MockApiException
+from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.powerscale_unit_base import \
+    PowerScaleUnitBase
 
 
-class TestClusterNode():
+class TestClusterNode(PowerScaleUnitBase):
     get_node_args = {
         'node_id': None,
     }
 
     @pytest.fixture
-    def node_module_mock(self, mocker):
-        mocker.patch(MockNodeApi.MODULE_UTILS_PATH +
-                     '.ApiException', new=MockApiException)
-        node_module_mock = ClusterNode()
-        node_module_mock.module = MagicMock()
-        return node_module_mock
+    def module_object(self):
+        return ClusterNode
 
-    def test_get_node_info(self, node_module_mock):
+    def test_get_node_info(self, powerscale_module_mock):
         self.get_node_args.update({
             'node_id': 1,
             'state': 'present',
@@ -64,35 +60,30 @@ class TestClusterNode():
                 ]
             }
         }
-        node_module_mock.module.params = self.get_node_args
-        node_module_mock.cluster_api.get_cluster_node = MagicMock(
+        powerscale_module_mock.module.params = self.get_node_args
+        powerscale_module_mock.cluster_api.get_cluster_node = MagicMock(
             return_value=ob)
-        node_module_mock.perform_module_operation()
+        powerscale_module_mock.perform_module_operation()
 
         assert (
-            node_module_mock.module.exit_json.call_args[1]['cluster_node_details'])
-        assert node_module_mock.module.exit_json.call_args[1]['changed'] is False
+            powerscale_module_mock.module.exit_json.call_args[1]['cluster_node_details'])
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
 
         # Scenario 2: When exception occured
-        node_module_mock.cluster_api.get_cluster_node = \
+        powerscale_module_mock.cluster_api.get_cluster_node = \
             MagicMock(side_effect=utils.ApiException)
-        node_module_mock.perform_module_operation()
 
-        assert MockNodeApi.api_exception_msg() in \
-            node_module_mock.module.fail_json.call_args[1]['msg']
+        self.capture_fail_json_call(MockNodeApi.api_exception_msg(), invoke_perform_module=True)
 
-    def test_get_node_info_absent(self, node_module_mock):
+    def test_get_node_info_absent(self, powerscale_module_mock):
         self.get_node_args.update({
             'node_id': 1,
             'state': 'absent',
         })
-        node_module_mock.module.params = self.get_node_args
-        node_module_mock.cluster_api.get_cluster_node = MagicMock(
+        powerscale_module_mock.module.params = self.get_node_args
+        powerscale_module_mock.cluster_api.get_cluster_node = MagicMock(
             return_value={})
-        node_module_mock.perform_module_operation()
-
-        assert MockNodeApi.invalid_node_msg() in node_module_mock.module.fail_json.call_args[
-            1]['msg']
+        self.capture_fail_json_call(MockNodeApi.disallow_delete_node_msg(), invoke_perform_module=True)
 
     def test_main(self):
         ob = main()

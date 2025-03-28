@@ -1,4 +1,4 @@
-# Copyright: (c) 2022-2024, Dell Technologies
+# Copyright: (c) 2023-2024, Dell Technologies
 
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
@@ -117,27 +117,27 @@ NFS_MULTIPLE = {"exports": [{
     "snapshot": None,
     "zone": SYS_ZONE},
     {
-    "all_dirs": False,
-    "block_size": 8192,
-    "case_insensitive": False,
-    "case_preserving": True,
-    "clients": [
-        SAMPLE_IP1
-    ],
-    "description": "description",
-    "id": NFS_ID_2,
-    "name_max_size": 255,
-    "paths": [PATH_1],
-    "read_only": False,
-    "read_only_clients": [],
-    "read_write_clients": [],
-    "readdirplus": True,
-    "root_clients": [],
-    "security_flavors": [
-        "krb5"
-    ],
-    "snapshot": None,
-    "zone": SYS_ZONE}],
+        "all_dirs": False,
+        "block_size": 8192,
+        "case_insensitive": False,
+        "case_preserving": True,
+        "clients": [
+            SAMPLE_IP1
+        ],
+        "description": "description",
+        "id": NFS_ID_2,
+        "name_max_size": 255,
+        "paths": [PATH_1],
+        "read_only": False,
+        "read_only_clients": [],
+        "read_write_clients": [],
+        "readdirplus": True,
+        "root_clients": [],
+        "security_flavors": [
+            "krb5"
+        ],
+        "snapshot": None,
+        "zone": SYS_ZONE}],
     "total": 2}
 
 NFS_2 = {"exports": [{
@@ -220,8 +220,8 @@ def get_nfs_failed_msg():
     return 'Got error SDK Error message while getting NFS export details for path'
 
 
-def get_multiple_nfs_failed_msg():
-    return 'Multiple NFS Exports found'
+def get_nfs_non_zone_failed_msg():
+    return 'Unable to fetch base path of Access Zone'
 
 
 def create_nfs_failed_msg():
