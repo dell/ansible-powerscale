@@ -41,3 +41,7 @@ def api_exception_msg():
 
 def invalid_node_msg():
     return 'Please provide a valid Node Id'
+
+
+def disallow_delete_node_msg():
+    return 'Deletion of node is not allowed through Ansible module'

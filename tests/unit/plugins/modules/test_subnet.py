@@ -20,10 +20,11 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock
     import MockApiException
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils \
     import test_utils
+from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.powerscale_unit_base import \
+    PowerScaleUnitBase
 
 
-class TestSubnet():
-    MODULE_UTILS_PATH = 'ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.utils'
+class TestSubnet(PowerScaleUnitBase):
     subnet_name = 'subnet_test'
     groupnet_name = 'groupnet_test'
     subnet_args = {'subnet_name': subnet_name, 'groupnet_name': groupnet_name,
@@ -34,104 +35,85 @@ class TestSubnet():
                                      'sc_service_addrs_state': None}}
 
     @pytest.fixture
-    def subnet_module_mock(self, mocker):
-        mocker.patch(self.MODULE_UTILS_PATH + '.ApiException', new=MockApiException)
-        subnet_module_mock = Subnet()
-        return subnet_module_mock
+    def module_object(self, mocker):
+        return Subnet
 
-    def test_invalid_subnet_name(self, subnet_module_mock):
+    def test_invalid_subnet_name_exception(self, powerscale_module_mock):
         subnet_name = 'subnet_test_*()'
         self.subnet_args.update({'subnet_name': subnet_name})
-        subnet_module_mock.module.params = self.subnet_args
-        subnet_module_mock.perform_module_operation()
+        powerscale_module_mock.module.params = self.subnet_args
+        self.capture_fail_json_call(MockSubnetApi.get_invalid_subnet(), invoke_perform_module=True)
 
-        assert subnet_module_mock.module.fail_json.call_args[1]['msg'] \
-            == MockSubnetApi.get_invalid_subnet()
-
-    def test_invalid_netmask(self, subnet_module_mock):
+    def test_invalid_netmask_exception(self, powerscale_module_mock):
         self.subnet_args.update({'netmask': '102.33333333333.22.1'})
-        subnet_module_mock.module.params = self.subnet_args
-        subnet_module_mock.perform_module_operation()
+        powerscale_module_mock.module.params = self.subnet_args
+        self.capture_fail_json_call(MockSubnetApi.get_invalid_netmask(), invoke_perform_module=True)
 
-        assert subnet_module_mock.module.fail_json.call_args[1]['msg'] \
-            == MockSubnetApi.get_invalid_netmask()
-
-    def test_invalid_gateway_priority(self, subnet_module_mock):
+    def test_invalid_gateway_priority_exception(self, powerscale_module_mock):
         self.subnet_args.update({'gateway_priority': -1})
-        subnet_module_mock.module.params = self.subnet_args
-        subnet_module_mock.perform_module_operation()
+        powerscale_module_mock.module.params = self.subnet_args
+        self.capture_fail_json_call(MockSubnetApi.get_invalid_gateway_priority(), invoke_perform_module=True)
 
-        assert subnet_module_mock.module.fail_json.call_args[1]['msg'] \
-            == MockSubnetApi.get_invalid_gateway_priority()
-
-    def test_invalid_subnet_name_len(self, subnet_module_mock):
+    def test_invalid_subnet_name_len_exception(self, powerscale_module_mock):
         subnet_name = 'subnet_test_subnet_test_subnet_test_'
         self.subnet_args.update({'subnet_name': subnet_name})
-        subnet_module_mock.module.params = self.subnet_args
-        subnet_module_mock.perform_module_operation()
+        powerscale_module_mock.module.params = self.subnet_args
+        self.capture_fail_json_call(MockSubnetApi.get_invalid_len(), invoke_perform_module=True)
 
-        assert subnet_module_mock.module.fail_json.call_args[1]['msg'] \
-            == MockSubnetApi.get_invalid_len()
-
-    def test_invalid_subnet_desc(self, subnet_module_mock):
+    def test_invalid_subnet_desc_exception(self, powerscale_module_mock):
         self.subnet_args.update({'description': test_utils.get_desc(129)})
-        subnet_module_mock.module.params = self.subnet_args
-        subnet_module_mock.perform_module_operation()
+        powerscale_module_mock.module.params = self.subnet_args
+        self.capture_fail_json_call(MockSubnetApi.get_invalid_desc(), invoke_perform_module=True)
 
-        assert subnet_module_mock.module.fail_json.call_args[1]['msg'] \
-            == MockSubnetApi.get_invalid_desc()
-
-    def test_invalid_mtu(self, subnet_module_mock):
+    def test_invalid_mtu_exception(self, powerscale_module_mock):
         self.subnet_args.update({'subnet_params':
                                 {'gateway': None, 'vlan_id': None, 'mtu': 575,
                                  'vlan_enabled': None, 'sc_service_addrs': [],
                                  'sc_service_addrs_state': None}})
-        subnet_module_mock.module.params = self.subnet_args
-        subnet_module_mock.perform_module_operation()
+        powerscale_module_mock.module.params = self.subnet_args
+        self.capture_fail_json_call(MockSubnetApi.get_invalid_mtu(), invoke_perform_module=True)
 
-        assert subnet_module_mock.module.fail_json.call_args[1]['msg'] \
-            == MockSubnetApi.get_invalid_mtu()
-
-    def test_get_subnet_details(self, subnet_module_mock):
-        subnet_module_mock.module.params = self.subnet_args
-        subnet_module_mock.groupnet_api.get_groupnet_subnet(self.subnet_name).to_dict \
+    def test_get_subnet_details(self, powerscale_module_mock):
+        powerscale_module_mock.module.params = self.subnet_args
+        powerscale_module_mock.groupnet_api.get_groupnet_subnet(self.subnet_name).to_dict \
             = MagicMock(return_value=MockSubnetApi.get_subnet_details(self.subnet_name))
-        subnet_module_mock.perform_module_operation()
+        powerscale_module_mock.perform_module_operation()
 
         assert (MockSubnetApi.get_subnet_details(self.subnet_name)['subnets'][0]
-                == subnet_module_mock.module.exit_json.call_args[1]["subnet_details"])
-        assert subnet_module_mock.module.exit_json.call_args[1]["changed"] is False
+                == powerscale_module_mock.module.exit_json.call_args[1]["subnet_details"])
+        assert powerscale_module_mock.module.exit_json.call_args[1]["changed"] is False
 
-    def test_get_subnet_throws_generic_exception(self, subnet_module_mock):
-        subnet_module_mock.module.params = self.subnet_args
-        subnet_module_mock.groupnet_api.get_groupnet_subnet \
+    def test_get_subnet_throws_generic_exception(self, powerscale_module_mock):
+        powerscale_module_mock.module.params = self.subnet_args
+        powerscale_module_mock.groupnet_api.get_groupnet_subnet \
             = MagicMock(side_effect=Exception)
-        subnet_module_mock.perform_module_operation()
+        self.capture_fail_json_call(MockSubnetApi.get_subnet_ex_msg(self.subnet_name), invoke_perform_module=True)
 
-        assert MockSubnetApi.get_subnet_ex_msg(self.subnet_name) in \
-            subnet_module_mock.module.fail_json.call_args[1]['msg']
-
-    def test_get_subnet_throws_exception(self, subnet_module_mock):
-        subnet_module_mock.module.params = self.subnet_args
-        subnet_module_mock.groupnet_api.get_groupnet_subnet \
+    def test_get_subnet_throws_exception(self, powerscale_module_mock):
+        powerscale_module_mock.module.params = self.subnet_args
+        powerscale_module_mock.groupnet_api.get_groupnet_subnet \
             = MagicMock(side_effect=utils.ApiException)
-        subnet_module_mock.perform_module_operation()
+        self.capture_fail_json_call(MockSubnetApi.get_subnet_ex_msg(self.subnet_name), invoke_perform_module=True)
 
-        assert MockSubnetApi.get_subnet_ex_msg(self.subnet_name) in \
-            subnet_module_mock.module.fail_json.call_args[1]['msg']
-
-    def test_get_subnet_404_error(self, subnet_module_mock):
-        subnet_module_mock.module.params = self.subnet_args
-        subnet_module_mock.groupnet_api.get_groupnet_subnet(self.subnet_name).to_dict \
+    def test_get_subnet_404_error(self, powerscale_module_mock):
+        self.subnet_args.update({'netmask': '255.255.0.0', 'gateway_priority': 1,
+                                 'subnet_params':
+                                     {'gateway': None, 'vlan_id': 5, 'mtu': None,
+                                      'vlan_enabled': True, 'sc_service_addrs':
+                                          [{'start_range': '1.1.1.1', 'end_range': '1.1.1.2'},
+                                           {'start_range': '1.1.1.3', 'end_range': '1.1.1.4'}],
+                                      'sc_service_addrs_state': 'add'}})
+        powerscale_module_mock.module.params = self.subnet_args
+        powerscale_module_mock.groupnet_api.get_groupnet_subnet(self.subnet_name).to_dict \
             = MagicMock(side_effect=MockApiException(404))
-        subnet_module_mock.perform_module_operation()
+        powerscale_module_mock.perform_module_operation()
 
-        assert subnet_module_mock.module.exit_json.call_args[1]["changed"] is True
-        assert subnet_module_mock.module.exit_json.call_args[1]["create_subnet"] is True
+        assert powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
+        assert powerscale_module_mock.module.exit_json.call_args[1]["create_subnet"] is True
 
-    def test_create_subnet_details(self, subnet_module_mock):
+    def test_create_subnet_details(self, powerscale_module_mock):
         subnet_name = 'new_subnet'
-        self.subnet_args.update({'netmask': '1.1.1.1', 'gateway_priority': 1,
+        self.subnet_args.update({'netmask': '255.255.0.0', 'gateway_priority': 1,
                                  'subnet_params':
                                  {'gateway': None, 'vlan_id': 5, 'mtu': None,
                                   'vlan_enabled': True, 'sc_service_addrs':
@@ -139,31 +121,28 @@ class TestSubnet():
                                    {'start_range': '1.1.1.3', 'end_range': '1.1.1.4'}],
                                   'sc_service_addrs_state': 'add'}})
 
-        subnet_module_mock.module.params = self.subnet_args
-        subnet_module_mock.get_subnet_details \
+        powerscale_module_mock.module.params = self.subnet_args
+        powerscale_module_mock.get_subnet_details \
             = MagicMock(return_value=MockSubnetApi.get_subnet_details(subnet_name))
-        subnet_module_mock.groupnet_api.create_groupnet_subnet = MagicMock(return_value=None)
-        subnet_module_mock.perform_module_operation()
+        powerscale_module_mock.groupnet_api.create_groupnet_subnet = MagicMock(return_value=None)
+        powerscale_module_mock.perform_module_operation()
 
-        assert subnet_module_mock.module.exit_json.call_args[1]["changed"] is True
-        assert subnet_module_mock.module.exit_json.call_args[1]["create_subnet"] is True
+        assert powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
+        assert powerscale_module_mock.module.exit_json.call_args[1]["create_subnet"] is True
 
-    def test_create_subnet_throws_exception(self, subnet_module_mock):
+    def test_create_subnet_throws_exception(self, powerscale_module_mock):
         subnet_name = 'new_subnet'
         self.subnet_args.update({'subnet_name': subnet_name,
-                                 'netmask': '1.1.1.1', 'gateway_priority': 1})
-        subnet_module_mock.module.params = self.subnet_args
-        subnet_module_mock.get_subnet_details \
+                                 'netmask': '255.255.0.0', 'gateway_priority': 1})
+        powerscale_module_mock.module.params = self.subnet_args
+        powerscale_module_mock.get_subnet_details \
             = MagicMock(return_value=None)
-        subnet_module_mock.groupnet_api.create_groupnet_subnet \
+        powerscale_module_mock.groupnet_api.create_groupnet_subnet \
             = MagicMock(side_effect=utils.ApiException)
-        subnet_module_mock.perform_module_operation()
+        self.capture_fail_json_call(MockSubnetApi.create_subnet_ex_msg(subnet_name), invoke_perform_module=True)
 
-        assert MockSubnetApi.create_subnet_ex_msg(subnet_name) in \
-            subnet_module_mock.module.fail_json.call_args[1]['msg']
-
-    def test_modify_subnet_details_remove_sc_ips(self, subnet_module_mock):
-        self.subnet_args.update({'netmask': '1.1.1.1', 'gateway_priority': 1,
+    def test_modify_subnet_details_remove_sc_ips(self, powerscale_module_mock):
+        self.subnet_args.update({'netmask': '255.255.0.0', 'gateway_priority': 1,
                                  'new_subnet_name': 'subnet_new',
                                  'subnet_params':
                                  {'gateway': None, 'vlan_id': 3, 'mtu': None,
@@ -171,110 +150,96 @@ class TestSubnet():
                                   [{'start_range': '1.1.1.1', 'end_range': '1.1.1.2'}],
                                   'sc_service_addrs_state': 'remove'}})
 
-        subnet_module_mock.module.params = self.subnet_args
-        subnet_module_mock.get_subnet_details \
+        powerscale_module_mock.module.params = self.subnet_args
+        powerscale_module_mock.get_subnet_details \
             = MagicMock(return_value=MockSubnetApi.get_subnet_details(self.subnet_name)['subnets'][0])
-        subnet_module_mock.groupnet_api.update_groupnet_subnet = MagicMock(return_value=None)
-        subnet_module_mock.perform_module_operation()
+        powerscale_module_mock.groupnet_api.update_groupnet_subnet = MagicMock(return_value=None)
+        powerscale_module_mock.perform_module_operation()
 
-        assert subnet_module_mock.module.exit_json.call_args[1]["changed"] is True
-        assert subnet_module_mock.module.exit_json.call_args[1]["modify_subnet"] is True
+        assert powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
+        assert powerscale_module_mock.module.exit_json.call_args[1]["modify_subnet"] is True
 
-    def test_modify_subnet_add_sc_ips(self, subnet_module_mock):
-        self.subnet_args.update({'netmask': '1.1.1.1', 'gateway_priority': 1,
+    def test_modify_subnet_add_sc_ips(self, powerscale_module_mock):
+        self.subnet_args.update({'netmask': '255.255.0.0', 'gateway_priority': 1,
                                  'subnet_params':
                                  {'gateway': None, 'vlan_id': None, 'mtu': None,
                                   'vlan_enabled': False, 'sc_service_addrs':
                                   [{'start_range': '1.1.1.1', 'end_range': '1.1.1.2'}],
                                   'sc_service_addrs_state': 'add'}})
 
-        subnet_module_mock.module.params = self.subnet_args
-        subnet_module_mock.get_subnet_details \
+        powerscale_module_mock.module.params = self.subnet_args
+        powerscale_module_mock.get_subnet_details \
             = MagicMock(return_value=MockSubnetApi.get_subnet_details(self.subnet_name)['subnets'][0])
-        subnet_module_mock.groupnet_api.update_groupnet_subnet = MagicMock(return_value=None)
-        subnet_module_mock.perform_module_operation()
+        powerscale_module_mock.groupnet_api.update_groupnet_subnet = MagicMock(return_value=None)
+        powerscale_module_mock.perform_module_operation()
 
-        assert subnet_module_mock.module.exit_json.call_args[1]["changed"] is True
-        assert subnet_module_mock.module.exit_json.call_args[1]["modify_subnet"] is True
+        assert powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
+        assert powerscale_module_mock.module.exit_json.call_args[1]["modify_subnet"] is True
 
-    def test_modify_subnet_throws_exception(self, subnet_module_mock):
+    def test_modify_subnet_throws_exception(self, powerscale_module_mock):
         self.subnet_args.update({'gateway_priority': 5})
 
-        subnet_module_mock.module.params = self.subnet_args
-        subnet_module_mock.get_subnet_details \
+        powerscale_module_mock.module.params = self.subnet_args
+        powerscale_module_mock.get_subnet_details \
             = MagicMock(return_value=MockSubnetApi.get_subnet_details(self.subnet_name)['subnets'][0])
-        subnet_module_mock.groupnet_api.update_groupnet_subnet \
+        powerscale_module_mock.groupnet_api.update_groupnet_subnet \
             = MagicMock(side_effect=utils.ApiException)
-        subnet_module_mock.perform_module_operation()
+        self.capture_fail_json_call(MockSubnetApi.modify_subnet_ex_msg(self.subnet_name), invoke_perform_module=True)
 
-        assert MockSubnetApi.modify_subnet_ex_msg(self.subnet_name) in \
-            subnet_module_mock.module.fail_json.call_args[1]['msg']
-
-    def test_modify_subnet_invalid_gateway(self, subnet_module_mock):
+    def test_modify_subnet_invalid_gateway_exception(self, powerscale_module_mock):
         self.subnet_args.update({'subnet_params':
                                 {'gateway': 'a.1.1.1', 'vlan_id': None, 'mtu': None,
                                  'vlan_enabled': None, 'sc_service_addrs': [],
                                  'sc_service_addrs_state': None}})
 
-        subnet_module_mock.module.params = self.subnet_args
-        subnet_module_mock.get_subnet_details \
+        powerscale_module_mock.module.params = self.subnet_args
+        powerscale_module_mock.get_subnet_details \
             = MagicMock(return_value=MockSubnetApi.get_subnet_details(self.subnet_name)['subnets'][0])
-        subnet_module_mock.groupnet_api.update_groupnet_subnet = MagicMock(return_value=None)
-        subnet_module_mock.perform_module_operation()
+        powerscale_module_mock.groupnet_api.update_groupnet_subnet = MagicMock(return_value=None)
+        self.capture_fail_json_call(MockSubnetApi.get_invalid_gateway(), invoke_perform_module=True)
 
-        assert MockSubnetApi.get_invalid_gateway() in \
-            subnet_module_mock.module.fail_json.call_args[1]['msg']
-
-    def test_modify_subnet_invalid_vlan_id(self, subnet_module_mock):
+    def test_modify_subnet_invalid_vlan_id_exception(self, powerscale_module_mock):
         self.subnet_args.update({'subnet_params':
-                                {'gateway': 'a.1.1.1', 'vlan_id': -1, 'mtu': None,
+                                {'gateway': '1.1.1.1', 'vlan_id': -1, 'mtu': None,
                                  'vlan_enabled': True, 'sc_service_addrs': [],
                                  'sc_service_addrs_state': None}})
 
-        subnet_module_mock.module.params = self.subnet_args
-        subnet_module_mock.get_subnet_details \
+        powerscale_module_mock.module.params = self.subnet_args
+        powerscale_module_mock.get_subnet_details \
             = MagicMock(return_value=MockSubnetApi.get_subnet_details(self.subnet_name)['subnets'][0])
-        subnet_module_mock.groupnet_api.update_groupnet_subnet = MagicMock(return_value=None)
-        subnet_module_mock.perform_module_operation()
+        powerscale_module_mock.groupnet_api.update_groupnet_subnet = MagicMock(return_value=None)
+        self.capture_fail_json_call(MockSubnetApi.get_invalid_vlan_id(), invoke_perform_module=True)
 
-        assert MockSubnetApi.get_invalid_vlan_id() in \
-            subnet_module_mock.module.fail_json.call_args[1]['msg']
-
-    def test_modify_subnet_invalid_sc_ip(self, subnet_module_mock):
+    def test_modify_subnet_invalid_sc_ip_exception(self, powerscale_module_mock):
         self.subnet_args.update({'subnet_params':
-                                {'gateway': 'a.1.1.1', 'vlan_id': None, 'mtu': None,
+                                {'gateway': '1.1.1.1', 'vlan_id': None, 'mtu': None,
                                  'vlan_enabled': None,
                                  'sc_service_addrs':
                                  [{'start_range': 'a.1.1.1', 'end_range': '1.1.1.2'}],
                                  'sc_service_addrs_state': 'add'}})
 
-        subnet_module_mock.module.params = self.subnet_args
-        subnet_module_mock.get_subnet_details \
+        powerscale_module_mock.module.params = self.subnet_args
+        powerscale_module_mock.get_subnet_details \
             = MagicMock(return_value=MockSubnetApi.get_subnet_details(self.subnet_name)['subnets'][0])
-        subnet_module_mock.groupnet_api.update_groupnet_subnet = MagicMock(return_value=None)
-        subnet_module_mock.perform_module_operation()
-        assert MockSubnetApi.get_invalid_sc_ip() in \
-            subnet_module_mock.module.fail_json.call_args[1]['msg']
+        powerscale_module_mock.groupnet_api.update_groupnet_subnet = MagicMock(return_value=None)
+        self.capture_fail_json_call(MockSubnetApi.get_invalid_sc_ip(), invoke_perform_module=True)
 
-    def test_delete_subnet_details(self, subnet_module_mock):
+    def test_delete_subnet_details(self, powerscale_module_mock):
         self.subnet_args.update({'state': 'absent'})
-        subnet_module_mock.module.params = self.subnet_args
-        subnet_module_mock.get_subnet_details \
+        powerscale_module_mock.module.params = self.subnet_args
+        powerscale_module_mock.get_subnet_details \
             = MagicMock(return_value=MockSubnetApi.get_subnet_details(self.subnet_name)['subnets'][0])
-        subnet_module_mock.groupnet_api.delete_groupnet_subnet = MagicMock(return_value=None)
-        subnet_module_mock.perform_module_operation()
+        powerscale_module_mock.groupnet_api.delete_groupnet_subnet = MagicMock(return_value=None)
+        powerscale_module_mock.perform_module_operation()
 
-        assert subnet_module_mock.module.exit_json.call_args[1]["changed"] is True
-        assert subnet_module_mock.module.exit_json.call_args[1]["delete_subnet"] is True
+        assert powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
+        assert powerscale_module_mock.module.exit_json.call_args[1]["delete_subnet"] is True
 
-    def test_delete_subnet_throws_exception(self, subnet_module_mock):
+    def test_delete_subnet_throws_exception(self, powerscale_module_mock):
         self.subnet_args.update({'state': 'absent'})
-        subnet_module_mock.module.params = self.subnet_args
-        subnet_module_mock.get_subnet_details \
+        powerscale_module_mock.module.params = self.subnet_args
+        powerscale_module_mock.get_subnet_details \
             = MagicMock(return_value=MockSubnetApi.get_subnet_details(self.subnet_name)['subnets'][0])
-        subnet_module_mock.groupnet_api.delete_groupnet_subnet \
+        powerscale_module_mock.groupnet_api.delete_groupnet_subnet \
             = MagicMock(side_effect=utils.ApiException)
-        subnet_module_mock.perform_module_operation()
-
-        assert MockSubnetApi.delete_subnet_ex_msg(self.subnet_name) in \
-            subnet_module_mock.module.fail_json.call_args[1]['msg']
+        self.capture_fail_json_call(MockSubnetApi.delete_subnet_ex_msg(self.subnet_name), invoke_perform_module=True)

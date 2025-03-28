@@ -19,49 +19,43 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.\
     module_utils import mock_networksettings_api as MockNetworkSettingsApi
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_sdk_response \
     import MockSDKResponse
-from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_api_exception \
-    import MockApiException
+from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.powerscale_unit_base import \
+    PowerScaleUnitBase
 
 
-class TestNetworkSettings():
+class TestNetworkSettings(PowerScaleUnitBase):
     get_network_settings_args = {"enable_source_routing": None,
                                  "state": None}
 
     @pytest.fixture
-    def network_settings_module_mock(self, mocker):
-        mocker.patch(MockNetworkSettingsApi.MODULE_UTILS_PATH + '.ApiException', new=MockApiException)
-        networksettings_module_mock = NetworkSettings()
-        networksettings_module_mock.module = MagicMock()
-        return networksettings_module_mock
+    def module_object(self, mocker):
+        return NetworkSettings
 
-    def test_get_network_setting(self, network_settings_module_mock):
+    def test_get_network_setting(self, powerscale_module_mock):
         self.get_network_settings_args.update({"state": "present"})
-        network_settings_module_mock.module.params = self.get_network_settings_args
-        network_settings_module_mock.network_api.get_network_external = MagicMock(
+        powerscale_module_mock.module.params = self.get_network_settings_args
+        powerscale_module_mock.network_api.get_network_external = MagicMock(
             return_value=MockSDKResponse(MockNetworkSettingsApi.GET_NETWORK_SETTINGS))
-        network_settings_module_mock.perform_module_operation()
-        assert network_settings_module_mock.module.exit_json.call_args[1]['changed'] is False
+        powerscale_module_mock.perform_module_operation()
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
 
-    def test_get_network_settings_with_exception(self, network_settings_module_mock):
+    def test_get_network_settings_with_exception(self, powerscale_module_mock):
         self.get_network_settings_args.update({"state": "present"})
-        network_settings_module_mock.module.params = self.get_network_settings_args
-        network_settings_module_mock.network_api.get_network_external = MagicMock(side_effect=utils.ApiException)
-        network_settings_module_mock.perform_module_operation()
-        assert MockNetworkSettingsApi.get_networksettings_failed_msg() in \
-            network_settings_module_mock.module.fail_json.call_args[1]['msg']
+        powerscale_module_mock.module.params = self.get_network_settings_args
+        powerscale_module_mock.network_api.get_network_external = MagicMock(side_effect=utils.ApiException)
+        self.capture_fail_json_call(MockNetworkSettingsApi.get_networksettings_failed_msg(), invoke_perform_module=True)
 
-    def test_modify_network_settings(self, network_settings_module_mock):
+    def test_modify_network_settings(self, powerscale_module_mock):
         self.get_network_settings_args.update({"state": "present", "enable_source_routing": True})
-        network_settings_module_mock.module.params = self.get_network_settings_args
-        network_settings_module_mock.network_api.update_network_external = MagicMock(
+        powerscale_module_mock.module.params = self.get_network_settings_args
+        powerscale_module_mock.network_api.update_network_external = MagicMock(
             return_value=MockSDKResponse(MockNetworkSettingsApi.UPDATE_NETWORK_SETTINGS))
-        network_settings_module_mock.perform_module_operation()
-        assert network_settings_module_mock.module.exit_json.call_args[1]['changed']
+        powerscale_module_mock.perform_module_operation()
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed']
 
-    def test_modify_network_settings_with_exception(self, network_settings_module_mock):
+    def test_modify_network_settings_with_exception(self, powerscale_module_mock):
         self.get_network_settings_args.update({"state": "present", "enable_source_routing": True})
-        network_settings_module_mock.module.params = self.get_network_settings_args
-        network_settings_module_mock.network_api.update_network_external = MagicMock(side_effect=utils.ApiException)
-        network_settings_module_mock.perform_module_operation()
-        assert MockNetworkSettingsApi.modify_networksettings_failed_msg() in \
-            network_settings_module_mock.module.fail_json.call_args[1]['msg']
+        powerscale_module_mock.module.params = self.get_network_settings_args
+        powerscale_module_mock.network_api.update_network_external = MagicMock(side_effect=utils.ApiException)
+        self.capture_fail_json_call(MockNetworkSettingsApi.modify_networksettings_failed_msg(),
+                                    invoke_perform_module=True)

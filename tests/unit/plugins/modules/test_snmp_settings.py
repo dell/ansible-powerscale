@@ -34,22 +34,19 @@ class TestSNMPSettings(PowerScaleUnitBase):
         return SNMPSettings
 
     def test_get_snmp_settings(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock,
-                               self.snmp_settings_args, {})
+        self.set_module_params(self.snmp_settings_args, {})
         SNMPSettingsHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
         powerscale_module_mock.protocol_api.get_snmp_settings.assert_called()
 
     def test_get_snmp_settings_exception(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock,
-                               self.snmp_settings_args, {})
+        self.set_module_params(self.snmp_settings_args, {})
         powerscale_module_mock.protocol_api.get_snmp_settings = MagicMock(side_effect=MockApiException)
         self.capture_fail_json_call(
             MockSNMPSettingsApi.get_snmpsettings_exception_response('get_resp_exception'),
-            powerscale_module_mock, SNMPSettingsHandler)
+            SNMPSettingsHandler)
 
     def test_modify_snmp_settings(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock,
-                               self.snmp_settings_args,
+        self.set_module_params(self.snmp_settings_args,
                                {"system_contact": "contact@set.set",
                                 "system_location": "location_set",
                                 "snmp_v2c_access": False,
@@ -70,8 +67,7 @@ class TestSNMPSettings(PowerScaleUnitBase):
         powerscale_module_mock.protocol_api.update_snmp_settings.assert_called()
 
     def test_modify_snmp_settings_exception(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock,
-                               self.snmp_settings_args,
+        self.set_module_params(self.snmp_settings_args,
                                {"service": False})
         powerscale_module_mock.protocol_api.get_snmp_settings.to_dict = MagicMock(
             return_value=MockSNMPSettingsApi.GET_SNMP_SETTINGS_RESPONSE)
@@ -79,22 +75,20 @@ class TestSNMPSettings(PowerScaleUnitBase):
             side_effect=MockApiException)
         self.capture_fail_json_call(
             MockSNMPSettingsApi.get_snmpsettings_exception_response('update_exception'),
-            powerscale_module_mock, SNMPSettingsHandler)
+            SNMPSettingsHandler)
 
     def test_validate_params_exception(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock,
-                               self.snmp_settings_args,
+        self.set_module_params(self.snmp_settings_args,
                                {"system_contact": "set   .set"})
         powerscale_module_mock.protocol_api.get_snmp_settings.to_dict = MagicMock(
             return_value=MockSNMPSettingsApi.GET_SNMP_SETTINGS_RESPONSE)
         self.capture_fail_json_call(
-            MockSNMPSettingsApi.get_snmpsettings_exception_response('system_contact_exception'), powerscale_module_mock, SNMPSettingsHandler)
+            MockSNMPSettingsApi.get_snmpsettings_exception_response('system_contact_exception'), SNMPSettingsHandler)
 
     def test_valdiate_sysetm_location_exception(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock,
-                               self.snmp_settings_args,
+        self.set_module_params(self.snmp_settings_args,
                                {"system_location": "  "})
         powerscale_module_mock.protocol_api.get_snmp_settings.to_dict = MagicMock(
             return_value=MockSNMPSettingsApi.GET_SNMP_SETTINGS_RESPONSE)
         self.capture_fail_json_call(
-            MockSNMPSettingsApi.get_snmpsettings_exception_response('system_location_exception'), powerscale_module_mock, SNMPSettingsHandler)
+            MockSNMPSettingsApi.get_snmpsettings_exception_response('system_location_exception'), SNMPSettingsHandler)

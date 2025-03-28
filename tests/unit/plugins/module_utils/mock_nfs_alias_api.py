@@ -29,3 +29,19 @@ def create_nfs_alias_failed_msg():
 
 def modify_nfs_alias_failed_msg():
     return 'failed with error:'
+
+
+def space_in_nfs_alias_name_msg():
+    return 'Spaces are not allowed in NFS alias name. Provide a valid nfs_alias_name'
+
+
+def empty_nfs_alias_name_msg():
+    return 'Provide a valid NFS alias name'
+
+
+def get_nfs_alias_failure_msg():
+    return 'Get details of NFS alias with name:/test_alias_1 failed with error'
+
+
+def new_alias_name_when_creation_msg():
+    return 'new_alias_name should not be provided during the creation of an NFS alias'

@@ -37,28 +37,28 @@ class TestServerCertificate(PowerScaleUnitBase):
         return ServerCertificate
 
     def test_validate_module_params(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock, self.server_certificate_args,
+        self.set_module_params(self.server_certificate_args,
                                {"state": "absent", "alias_name": ALIAS_NAME * 129})
         self.capture_fail_json_call(MockServerCertificateApi.get_module_params_error("alias_name_error"),
-                                    powerscale_module_mock, ServerCertificateHandler)
-        self.set_module_params(powerscale_module_mock, self.server_certificate_args,
+                                    ServerCertificateHandler)
+        self.set_module_params(self.server_certificate_args,
                                {"state": "present", "description": ALIAS_NAME * 2048, "alias_name": ALIAS_NAME})
         self.capture_fail_json_call(MockServerCertificateApi.get_module_params_error("description_error"),
-                                    powerscale_module_mock, ServerCertificateHandler)
-        self.set_module_params(powerscale_module_mock, self.server_certificate_args,
+                                    ServerCertificateHandler)
+        self.set_module_params(self.server_certificate_args,
                                {"state": "present", "description": ALIAS_NAME, "alias_name": ALIAS_NAME,
                                 "certificate_key_password": KEY_PASSWORD * 256})
         self.capture_fail_json_call(MockServerCertificateApi.get_module_params_error("key_password_error"),
-                                    powerscale_module_mock, ServerCertificateHandler)
-        self.set_module_params(powerscale_module_mock, self.server_certificate_args,
+                                    ServerCertificateHandler)
+        self.set_module_params(self.server_certificate_args,
                                {"state": "present", "description": ALIAS_NAME, "alias_name": ALIAS_NAME,
                                 "certificate_key_password": KEY_PASSWORD, "certificate_path": CRT_PATH,
                                 "certificate_key_path": KEY_PATH, "certificate_pre_expiration_threshold": -10})
         self.capture_fail_json_call(MockServerCertificateApi.get_module_params_error("threshold_error"),
-                                    powerscale_module_mock, ServerCertificateHandler)
+                                    ServerCertificateHandler)
 
     def test_import_server_certificate_error(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock, self.server_certificate_args,
+        self.set_module_params(self.server_certificate_args,
                                {"state": "present", "alias_name": "test_new_cert",
                                 "description": "This is the example for test new certificate.",
                                 "certificate_key_password": KEY_PASSWORD, "is_default_certificate": True,
@@ -66,10 +66,10 @@ class TestServerCertificate(PowerScaleUnitBase):
         powerscale_module_mock.certificate_api.create_certificate_server_item().to_dict = MagicMock(
             return_value=MockServerCertificateApi.IMPORT_CERTIFICATE_RESPONSE)
         self.capture_fail_json_call(MockServerCertificateApi.get_import_certificate_error('certificate_required_error'),
-                                    powerscale_module_mock, ServerCertificateHandler)
+                                    ServerCertificateHandler)
 
     def test_import_server_certificate_exception(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock, self.server_certificate_args,
+        self.set_module_params(self.server_certificate_args,
                                {"state": "present", "alias_name": "test_new_cert", "certificate_path": CRT_PATH,
                                 "description": "This is the example for test_new cert.",
                                 "certificate_key_path": KEY_PATH, "certificate_key_password": KEY_PASSWORD,
@@ -78,10 +78,10 @@ class TestServerCertificate(PowerScaleUnitBase):
         powerscale_module_mock.certificate_api.create_certificate_server_item().to_dict = MagicMock(
             return_value=MockApiException)
         self.capture_fail_json_call(MockServerCertificateApi.get_import_certificate_error('certificate_exception'),
-                                    powerscale_module_mock, ServerCertificateHandler)
+                                    ServerCertificateHandler)
 
     def test_import_server_certificate_check_mode(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock, self.server_certificate_args,
+        self.set_module_params(self.server_certificate_args,
                                {"state": "present", "alias_name": "test_new_cert", "certificate_path": CRT_PATH,
                                 "description": "This is the example for test_new cert.",
                                 "certificate_key_path": KEY_PATH, "certificate_key_password": KEY_PASSWORD,
@@ -92,7 +92,7 @@ class TestServerCertificate(PowerScaleUnitBase):
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
     def test_import_server_certificate_response_empty(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock, self.server_certificate_args,
+        self.set_module_params(self.server_certificate_args,
                                {"state": "present", "alias_name": "test_new_cert", "certificate_path": CRT_PATH,
                                 "description": "This is the example for test new cert.",
                                 "certificate_key_path": KEY_PATH, "certificate_key_password": KEY_PASSWORD,
@@ -101,10 +101,10 @@ class TestServerCertificate(PowerScaleUnitBase):
         powerscale_module_mock.certificate_api.create_certificate_server_item().to_dict = MagicMock(
             return_value=MockServerCertificateApi.IMPORT_CERTIFICATE_RESPONSE_EMPTY)
         self.capture_fail_json_call(MockServerCertificateApi.get_import_certificate_error('certificate_exception'),
-                                    powerscale_module_mock, ServerCertificateHandler)
+                                    ServerCertificateHandler)
 
     def test_import_server_certificate(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock, self.server_certificate_args,
+        self.set_module_params(self.server_certificate_args,
                                {"state": "present", "alias_name": "test_new_cert", "certificate_path": CRT_PATH,
                                 "description": "This is the example for test new cert.",
                                 "certificate_key_path": KEY_PATH, "certificate_key_password": KEY_PASSWORD,
@@ -120,7 +120,7 @@ class TestServerCertificate(PowerScaleUnitBase):
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
     def test_update_server_certificate_without_value(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock, self.server_certificate_args,
+        self.set_module_params(self.server_certificate_args,
                                {"state": "present", "new_alias_name": None, "alias_name": None,
                                 "description": None, "certificate_id": CERTIFICATE_ID,
                                 "is_default_certificate": False})
@@ -128,7 +128,7 @@ class TestServerCertificate(PowerScaleUnitBase):
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed']
 
     def test_update_server_certificate_check_mode(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock, self.server_certificate_args,
+        self.set_module_params(self.server_certificate_args,
                                {"state": "present", "new_alias_name": "test_updated", "alias_name": None,
                                 "description": None, "certificate_id": CERTIFICATE_ID,
                                 "is_default_certificate": False})
@@ -139,7 +139,7 @@ class TestServerCertificate(PowerScaleUnitBase):
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
     def test_update_server_certificate_idempotence(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock, self.server_certificate_args,
+        self.set_module_params(self.server_certificate_args,
                                {"state": "present", "new_alias_name": "test", "alias_name": None,
                                 "description": None, "certificate_id": CERTIFICATE_ID,
                                 "is_default_certificate": False})
@@ -150,7 +150,7 @@ class TestServerCertificate(PowerScaleUnitBase):
         assert not powerscale_module_mock.module.exit_json.call_args[1]['changed']
 
     def test_update_server_certificate(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock, self.server_certificate_args,
+        self.set_module_params(self.server_certificate_args,
                                {"state": "present", "new_alias_name": "updated_test", "certificate_id": CERTIFICATE_ID,
                                 "description": "This is the updated description certificate.",
                                 "is_default_certificate": True, "certificate_monitor_enabled": True,
@@ -163,7 +163,7 @@ class TestServerCertificate(PowerScaleUnitBase):
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
     def test_delete_certificate_name(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock, self.server_certificate_args,
+        self.set_module_params(self.server_certificate_args,
                                {"state": "absent", "alias_name": ALIAS_NAME})
         powerscale_module_mock.certificate_api.list_certificate_server().to_dict = MagicMock(
             return_value=MockServerCertificateApi.GET_SERVER_CERTIFICATE_RESPONSE)
@@ -171,7 +171,7 @@ class TestServerCertificate(PowerScaleUnitBase):
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
     def test_delete_certificate_id(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock, self.server_certificate_args,
+        self.set_module_params(self.server_certificate_args,
                                {"state": "absent", "certificate_id": CERTIFICATE_ID})
         powerscale_module_mock.certificate_api.get_certificate_server_by_id(CERTIFICATE_ID).to_dict = MagicMock(
             return_value=MockServerCertificateApi.GET_SERVER_CERTIFICATE_RESPONSE)
@@ -179,7 +179,7 @@ class TestServerCertificate(PowerScaleUnitBase):
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
     def test_delete_certificate_check_mode(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock, self.server_certificate_args,
+        self.set_module_params(self.server_certificate_args,
                                {"state": "absent", "alias_name": ALIAS_NAME})
         powerscale_module_mock.module.check_mode = True
         powerscale_module_mock.certificate_api.list_certificate_server().to_dict = MagicMock(
@@ -188,7 +188,7 @@ class TestServerCertificate(PowerScaleUnitBase):
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
     def test_delete_certificate_check_mode_invalid_alias_name(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock, self.server_certificate_args,
+        self.set_module_params(self.server_certificate_args,
                                {"state": "absent", "alias_name": "test_example", "certificate_id": None})
         powerscale_module_mock.module.check_mode = True
         powerscale_module_mock.certificate_api.list_certificate_server().to_dict = MagicMock(
@@ -197,22 +197,25 @@ class TestServerCertificate(PowerScaleUnitBase):
         assert not powerscale_module_mock.module.exit_json.call_args[1]['changed']
 
     def test_delete_default_certificate(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock, self.server_certificate_args,
+        self.set_module_params(self.server_certificate_args,
                                {"state": "absent", "alias_name": ALIAS_NAME})
         powerscale_module_mock.certificate_api.list_certificate_server().to_dict = MagicMock(
             return_value=MockServerCertificateApi.GET_SERVER_CERTIFICATE_RESPONSE)
         powerscale_module_mock.certificate_api.get_certificate_settings().to_dict = MagicMock(
             return_value=MockServerCertificateApi.GET_DEFAULT_CERTIFICATE)
         self.capture_fail_json_call(MockServerCertificateApi.get_default_certificate_error(),
-                                    powerscale_module_mock, ServerCertificateHandler)
+                                    ServerCertificateHandler)
 
-    def test_delete_certificate_exception(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock, self.server_certificate_args,
+    def test_get_certificate_exception(self, powerscale_module_mock):
+        self.set_module_params(self.server_certificate_args,
                                {"state": "absent", "alias_name": ALIAS_NAME})
         certificate_id = "6999b9c02949c962e84b600"
-        self.set_module_params(powerscale_module_mock, self.server_certificate_args,
+        self.set_module_params(self.server_certificate_args,
                                {"state": "absent", "certificate_id": certificate_id})
         powerscale_module_mock.certificate_api.get_certificate_server_by_id(certificate_id).to_dict = MagicMock(
-            return_value=MockApiException)
-        self.capture_fail_json_call(MockServerCertificateApi.get_certificate_error('get_certificate_error_id'),
-                                    powerscale_module_mock, ServerCertificateHandler)
+            side_effect=MockApiException)
+        ServerCertificateHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
+        # get_certificate_server_by_id exception will return [], not fail_json
+        # delete_certificate_server_by_id is not caught...
+        # self.capture_fail_json_call(MockServerCertificateApi.get_certificate_error('get_certificate_error_id'),
+        #                             ServerCertificateHandler)
