@@ -10,6 +10,5 @@ __metaclass__ = type
 
 
 class MockApiException(Exception):
-    def __init__(self, status=500, body="SDK Error message"):
-        self.status = status
-        self.body = body
+    body = "SDK Error message"
+    status = "500"

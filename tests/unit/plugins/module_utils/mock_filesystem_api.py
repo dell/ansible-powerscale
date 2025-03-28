@@ -262,11 +262,12 @@ class MockFileSystemApi:
     @staticmethod
     def get_error_responses(response_type):
         err_msg_dict = {
+            "404_exception": "status is 404",
+            "get_filesystem_exception": "Failed to get details of Filesystem",
             "update_quota_error_exception": "Modification of Quota on path",
             "create_quota_exception": "Creation of Quota ifs/ATest3 failed with error: None",
             "delete_filesystem_exception": "Deletion of Filesystem",
             "acl_validation_exception": "Invalid path path/path, Path must start with '/'",
-            "get_filesystem_exception": "extensions and state are required together when file_filter_extension is mentioned.",
             "get_acl_exception": "while retrieving the access control list",
             "get_filesystem_snapshots_exception": "Failed to get filesystem snapshots",
             "get_zone_path_exception": "Unable to fetch base path of Access Zone",

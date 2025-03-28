@@ -65,7 +65,9 @@ class TestFileSystem():
         self.get_filesystem_args.update({"path": self.path1,
                                          "access_control": "private", "access_zone": "System", "state": "present"})
         filesystem_module_mock.module.params = self.get_filesystem_args
-        filesystem_module_mock.namespace_api.get_directory_metadata = MagicMock(side_effect=MockApiException(404))
+        error = MockApiException
+        error.status = "404"
+        filesystem_module_mock.namespace_api.get_directory_metadata = MagicMock(side_effect=error)
         FilesystemHandler().handle(
             filesystem_module_mock, filesystem_module_mock.module.params)
         filesystem_module_mock.namespace_api.get_directory_metadata.assert_called()
@@ -359,8 +361,11 @@ class TestFileSystem():
         self.get_filesystem_args.update({"path": self.path1, "access_zone": "System", "state": "present"})
         filesystem_module_mock.module.params = self.get_filesystem_args
         filesystem_module_mock.module.check_mode = False
-        filesystem_module_mock.namespace_api.get_directory_metadata = MagicMock(side_effect=MockApiException)
+        error = MockApiException
+        error.status = "500"
+        filesystem_module_mock.namespace_api.get_directory_metadata = MagicMock(side_effect=error)
         filesystem_module_mock.determine_error = MagicMock()
+        filesystem_module_mock.module.fail_json = fail_json
         self.capture_fail_json_call(
             MockFileSystemApi.get_error_responses(
                 'get_filesystem_exception'), filesystem_module_mock)
