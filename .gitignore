@@ -1,3 +1,7 @@
+.vscode
+test.py
+.env
+.coverage
 output
 __pycache__/
 *.log
