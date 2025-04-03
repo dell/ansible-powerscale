@@ -73,13 +73,17 @@ class MockSyncIQCertificateApi:
     @staticmethod
     def get_synciq_certificate_exception_response(response_type):
         if response_type == 'get_details_exception':
-            return "Fetching SyncIQ certificate failed with error: SDK Error message"
+            return "Fetching SyncIQ certificate failed with error:"
         elif response_type == 'import_exception':
             return "Importing SyncIQ target certificate failed with error:"
         elif response_type == 'delete_exception':
             return "Deleting SyncIQ target certificate failed with error:"
         elif response_type == 'update_exception':
             return "Updating SyncIQ target certificate details failed with error:"
+        elif response_type == 'get_certificate_exception':
+            return "Getting SyncIQ target certificate failed with error:"
+        else:
+            return "certificate_file and alias_name are required for Import certificate operation."
 
     @staticmethod
     def import_certificate_format_error_msg():
