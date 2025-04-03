@@ -38,9 +38,36 @@ class TestSyncIQCertificate(PowerScaleUnitBase):
         SyncIQCertificateHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
         powerscale_module_mock.get_certificate.assert_called()
 
+    def test_get_certificate_id(self, powerscale_module_mock):
+        self.set_module_params(powerscale_module_mock,
+                               self.synciq_certificate_args, {'certificate_id': 'ywqeqwe76898y98wqwe'})
+        certs = MagicMock()
+        certs.to_dict.return_value = MockSyncIQCertificateApi.GET_SYNCIQ_CERTIFICATE_RESPONSE
+        powerscale_module_mock.synciq_api.list_certificates_peer.return_value = certs
+        SyncIQCertificateHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
+        powerscale_module_mock.synciq_api.list_certificates_peer.assert_called()
+
+    def test_get_certificate_id_with_name(self, powerscale_module_mock):
+        self.set_module_params(powerscale_module_mock,
+                               self.synciq_certificate_args, {'alias_name': 'Sample'})
+        certs = MagicMock()
+        certs.to_dict.return_value = MockSyncIQCertificateApi.GET_SYNCIQ_CERTIFICATE_RESPONSE
+        powerscale_module_mock.synciq_api.list_certificates_peer.return_value = certs
+        SyncIQCertificateHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
+        powerscale_module_mock.synciq_api.list_certificates_peer.assert_called()
+
+    def test_get_certificate_id_exception(self, powerscale_module_mock):
+        self.set_module_params(powerscale_module_mock,
+                               self.synciq_certificate_args, {'certificate_id': 'ywqeqwe76898y98wqwe'})
+        powerscale_module_mock.synciq_api.list_certificates_peer = MagicMock(side_effect=MockApiException)
+        self.capture_fail_json_call(
+            MockSyncIQCertificateApi.get_synciq_certificate_exception_response('get_certificate_exception'),
+            powerscale_module_mock, SyncIQCertificateHandler)
+
     def test_get_certificate_exception(self, powerscale_module_mock):
         self.set_module_params(powerscale_module_mock,
-                               self.synciq_certificate_args, {})
+                               self.synciq_certificate_args, {'certificate_id': 'ywqeqwe76898y98wqwe'})
+        powerscale_module_mock.get_certificate_id = MagicMock(return_value="ywqeqwe76898y98wqwe")
         powerscale_module_mock.synciq_api.get_certificates_peer_by_id = MagicMock(side_effect=MockApiException)
         self.capture_fail_json_call(
             MockSyncIQCertificateApi.get_synciq_certificate_exception_response('get_details_exception'),
@@ -48,21 +75,29 @@ class TestSyncIQCertificate(PowerScaleUnitBase):
 
     def test_import_certificate(self, powerscale_module_mock):
         self.set_module_params(powerscale_module_mock, self.synciq_certificate_args, {})
+        powerscale_module_mock.get_cert_details = MagicMock(return_value=("", None))
         powerscale_module_mock.synciq_api.create_certificates_peer_item.to_dict = MagicMock(return_value=MockSyncIQCertificateApi.CREATE_CERTIFICATE_ID)
-        powerscale_module_mock.synciq_api.get_certificate = MagicMock(return_value=MockSyncIQCertificateApi.GET_SYNCIQ_CERTIFICATE_RESPONSE)
+        powerscale_module_mock.get_certificate = MagicMock(return_value=MockSyncIQCertificateApi.GET_SYNCIQ_CERTIFICATE_RESPONSE)
         SyncIQCertificateHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
         powerscale_module_mock.synciq_api.create_certificates_peer_item.assert_called()
 
     def test_import_certificate_exception(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock, self.synciq_certificate_args, {})
+        self.set_module_params(powerscale_module_mock, self.synciq_certificate_args, {"description": None})
+        powerscale_module_mock.get_cert_details = MagicMock(return_value=("", None))
         powerscale_module_mock.synciq_api.create_certificates_peer_item = MagicMock(side_effect=MockApiException)
         self.capture_fail_json_call(
             MockSyncIQCertificateApi.get_synciq_certificate_exception_response('import_exception'),
             powerscale_module_mock, SyncIQCertificateHandler)
 
+    def test_import_certificate_missing_field_exception(self, powerscale_module_mock):
+        self.set_module_params(powerscale_module_mock, self.synciq_certificate_args, {"certificate_file": None})
+        powerscale_module_mock.get_cert_details = MagicMock(return_value=("", None))
+        self.capture_fail_json_call(
+            MockSyncIQCertificateApi.get_synciq_certificate_exception_response('import_missing_exception'),
+            powerscale_module_mock, SyncIQCertificateHandler)
+
     def test_import_certificate_format_error(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock, self.synciq_certificate_args, {})
-        powerscale_module_mock.synciq_api.create_certificates_peer_item = MagicMock()
+        self.set_module_params(powerscale_module_mock, self.synciq_certificate_args, {"certificate_file": "/ifs/server.pem"})
         self.capture_fail_json_call(MockSyncIQCertificateApi.import_certificate_format_error_msg(), powerscale_module_mock, SyncIQCertificateHandler)
 
     def test_import_name_error(self, powerscale_module_mock):
@@ -87,16 +122,25 @@ class TestSyncIQCertificate(PowerScaleUnitBase):
     def test_delete_certificate(self, powerscale_module_mock):
         self.set_module_params(powerscale_module_mock, self.synciq_certificate_args,
                                {"state": "absent"})
-        powerscale_module_mock.synciq_api.get_certificate = MagicMock(return_value=MockSyncIQCertificateApi.GET_SYNCIQ_CERTIFICATE_RESPONSE)
+        powerscale_module_mock.get_certificate = MagicMock(return_value=MockSyncIQCertificateApi.GET_SYNCIQ_CERTIFICATE_RESPONSE)
         powerscale_module_mock.get_certificate_id = MagicMock(return_value="ywqeqwe76898y98wqwe")
         powerscale_module_mock.synciq_api.delete_certificates_peer_by_id = MagicMock()
         SyncIQCertificateHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
         powerscale_module_mock.synciq_api.delete_certificates_peer_by_id.assert_called()
 
+    def test_delete_certificate_id_none(self, powerscale_module_mock):
+        self.set_module_params(powerscale_module_mock, self.synciq_certificate_args,
+                               {"state": "absent"})
+        powerscale_module_mock.get_certificate_id = MagicMock(return_value=None)
+        powerscale_module_mock.synciq_api.delete_certificates_peer_by_id = MagicMock()
+        SyncIQCertificateHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
+
     def test_delete_certificate_exception(self, powerscale_module_mock):
         self.set_module_params(powerscale_module_mock, self.synciq_certificate_args,
                                {"state": "absent"})
-        powerscale_module_mock.synciq_api.get_certificate = MagicMock(return_value=MockSyncIQCertificateApi.GET_SYNCIQ_CERTIFICATE_RESPONSE)
+        powerscale_module_mock.get_certificate = MagicMock(return_value=MockSyncIQCertificateApi.GET_SYNCIQ_CERTIFICATE_RESPONSE)
+        powerscale_module_mock.get_certificate_id = MagicMock(return_value="ywqeqwe76898y98wqwe")
         powerscale_module_mock.synciq_api.delete_certificates_peer_by_id = MagicMock(side_effect=MockApiException)
         self.capture_fail_json_call(
             MockSyncIQCertificateApi.get_synciq_certificate_exception_response('delete_exception'),
@@ -105,17 +149,21 @@ class TestSyncIQCertificate(PowerScaleUnitBase):
     def test_modify_certificate(self, powerscale_module_mock):
         self.set_module_params(powerscale_module_mock, self.synciq_certificate_args,
                                {'new_alias_name': 'new_name',
-                                'description': 'new_description'})
+                                'description': 'new_description',
+                                'state': 'present'})
+        powerscale_module_mock.synciq_api.get_certificates_peer_by_id = MagicMock()
+        powerscale_module_mock.get_certificates = MagicMock(return_value=MockSyncIQCertificateApi.GET_SYNCIQ_CERTIFICATE_RESPONSE)
+        powerscale_module_mock.get_certificate_id = MagicMock(return_value="ywqeqwe76898y98wqwe")
+        powerscale_module_mock.synciq_api.update_certificates_peer_by_id = MagicMock()
         SyncIQCertificateHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
-        powerscale_module_mock.synciq_api.get_certificates_peer_by_id = MagicMock(return_value=MockSyncIQCertificateApi.GET_SYNCIQ_CERTIFICATE_RESPONSE)
-        powerscale_module_mock.synciq_api.update_certificates_peer_by_id = MagicMock(return_value=MockSyncIQCertificateApi.MODIFY_CERTIFICATE_DETAILS)
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
     def test_modify_certificate_exception(self, powerscale_module_mock):
         self.set_module_params(powerscale_module_mock, self.synciq_certificate_args,
                                {'new_alias_name': 'new_name',
                                 'description': 'new_description'})
-        powerscale_module_mock.synciq_api.get_certificate = MagicMock(return_value=MockSyncIQCertificateApi.GET_SYNCIQ_CERTIFICATE_RESPONSE)
+        powerscale_module_mock.get_certificates = MagicMock(return_value=MockSyncIQCertificateApi.GET_SYNCIQ_CERTIFICATE_RESPONSE)
+        powerscale_module_mock.get_certificate_id = MagicMock(return_value="ywqeqwe76898y98wqwe")
         powerscale_module_mock.synciq_api.update_certificates_peer_by_id = MagicMock(side_effect=MockApiException)
         self.capture_fail_json_call(
             MockSyncIQCertificateApi.get_synciq_certificate_exception_response('update_exception'),

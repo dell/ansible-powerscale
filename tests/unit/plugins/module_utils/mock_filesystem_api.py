@@ -262,11 +262,12 @@ class MockFileSystemApi:
     @staticmethod
     def get_error_responses(response_type):
         err_msg_dict = {
+            "404_exception": "status is 404",
+            "get_filesystem_exception": "Failed to get details of Filesystem",
             "update_quota_error_exception": "Modification of Quota on path",
             "create_quota_exception": "Creation of Quota ifs/ATest3 failed with error: None",
             "delete_filesystem_exception": "Deletion of Filesystem",
             "acl_validation_exception": "Invalid path path/path, Path must start with '/'",
-            "get_filesystem_exception": "extensions and state are required together when file_filter_extension is mentioned.",
             "get_acl_exception": "while retrieving the access control list",
             "get_filesystem_snapshots_exception": "Failed to get filesystem snapshots",
             "get_zone_path_exception": "Unable to fetch base path of Access Zone",
@@ -275,14 +276,19 @@ class MockFileSystemApi:
             "invalid_path_exception": "The path provided must start with /",
             "get_group_id_exception": "Failed to get the group id for group",
             "get_owner_id_exception": "Failed to get the owner id",
+            "modify_owner_exception": "Failed to modify owner due to error",
+            "modify_group_exception": "Failed to modify group due to error",
             "create_file_system_wo_owner_name_exception": "Please specify a name for the owner.",
             "create_file_system_wo_group_name_exception": "Please specify a name for the group.",
             "set_acl_exception": "Setting ACL rights of Filesystem",
+            "modify_acl_exception": "Modification of ACL on path",
+            "check_acl_modified_exception": "determining if ACLs are modified",
+            "invalid_wellknown_exception": "Provide valid wellknown",
             "delete_quota_exception": "Deletion of Quota on path",
-            "update_quota_exception": "Creation of Quota update param failed",
-            "create_quota_error_exception": "Creation of Quota param failed",
+            "update_quota_exception": "Modification of Quota on path",
+            "create_quota_error_exception": "Creation of Quota",
             "update_include_snap_data_exception": "Modifying include_snap_data is not supported",
-            "create_quota_get_exception": "Creation of Quota param failed",
+            "create_quota_get_exception": "Creation of Quota",
             "set_access_control_rights_exception": "Setting ACL rights of Filesystem"
         }
         return err_msg_dict.get(response_type)
