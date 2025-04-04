@@ -65,17 +65,17 @@ class MockSmartQuotaApi:
 
     @staticmethod
     def smartquota_create_quota_response(path):
-        return "Create quota for" + path + "failed with"
+        return "Create quota for " + path + " failed with"
 
     @staticmethod
     def smartquota_delete_quota_response(path):
-        return "Delete quota for" + path + "failed with"
+        return "Delete quota for " + path + " failed with"
 
     @staticmethod
     def smartquota_get_sid_exception(name, az, provider):
         return "Failed to get " + name + \
-               "details for AccessZone:" + az + "and Provider:" + provider + \
-               "with error"
+               " details for AccessZone:" + az + " and Provider:" + provider + \
+               " with error"
 
     @staticmethod
     def get_smartquota_dependent_response(response_type):
