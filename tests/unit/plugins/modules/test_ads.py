@@ -23,8 +23,6 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock
     import MockApiException
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.powerscale_unit_base \
     import PowerScaleUnitBase
-from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library. \
-    fail_json import FailJsonException
 
 
 class TestAds(PowerScaleUnitBase):
@@ -37,7 +35,7 @@ class TestAds(PowerScaleUnitBase):
 
     def test_create_ads(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock, self.ads_args,
+            self.ads_args,
             MockAdsApi.CREATE_ARGS)
         powerscale_module_mock.module._diff = True
         powerscale_module_mock.get_ads_details = MagicMock(
@@ -47,7 +45,7 @@ class TestAds(PowerScaleUnitBase):
 
     def test_create_ads_exception(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock, self.ads_args,
+            self.ads_args,
             MockAdsApi.CREATE_ARGS)
         powerscale_module_mock.module._diff = True
         powerscale_module_mock.get_ads_details = MagicMock(
@@ -56,12 +54,12 @@ class TestAds(PowerScaleUnitBase):
             side_effect=MockApiException)
         self.capture_fail_json_call(
             "Add an Active Directory provider failed with SDK Error message",
-            powerscale_module_mock, AdsHandler
+            AdsHandler
         )
 
     def test_modify_ads(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock, self.ads_args,
+            self.ads_args,
             MockAdsApi.MODIFY_ARGS)
         powerscale_module_mock.ads_name = [MockAdsApi.DOMAIN_NAME]
         powerscale_module_mock.module._diff = True
@@ -72,7 +70,7 @@ class TestAds(PowerScaleUnitBase):
 
     def test_modify_ads_exception(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock, self.ads_args,
+            self.ads_args,
             MockAdsApi.MODIFY_ARGS)
         powerscale_module_mock.ads_name = [MockAdsApi.DOMAIN_NAME]
         powerscale_module_mock.get_ads_details = MagicMock(
@@ -81,11 +79,11 @@ class TestAds(PowerScaleUnitBase):
             side_effect=MockApiException)
         self.capture_fail_json_call(
             "Modifying Active Directory provider failed with SDK Error message",
-            powerscale_module_mock, AdsHandler)
+            AdsHandler)
 
     def test_delete_ads(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock, self.ads_args,
+            self.ads_args,
             {"domain_name": MockAdsApi.DOMAIN_NAME, "state": "absent"})
         powerscale_module_mock.ads_name = [MockAdsApi.DOMAIN_NAME]
         powerscale_module_mock.module._diff = True
@@ -96,7 +94,7 @@ class TestAds(PowerScaleUnitBase):
 
     def test_delete_ads_exception(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock, self.ads_args,
+            self.ads_args,
             {"domain_name": MockAdsApi.DOMAIN_NAME, "state": "absent"})
         powerscale_module_mock.ads_name = [MockAdsApi.DOMAIN_NAME]
         powerscale_module_mock.get_ads_details = MagicMock(
@@ -105,11 +103,11 @@ class TestAds(PowerScaleUnitBase):
             side_effect=MockApiException)
         self.capture_fail_json_call(
             "Deleting ADS provider failed with SDK Error message",
-            powerscale_module_mock, AdsHandler)
+            AdsHandler)
 
     def test_get_auth_providers_summary_exception(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock, self.ads_args,
+            self.ads_args,
             {"domain_name": MockAdsApi.DOMAIN_NAME, "state": "absent"})
         powerscale_module_mock.get_ads_details = MagicMock(
             return_value=MockAdsApi.ADS_DETAILS["ads"])
@@ -117,11 +115,11 @@ class TestAds(PowerScaleUnitBase):
             side_effect=MockApiException)
         self.capture_fail_json_call(
             "Get auth providers summary failed with SDK Error message",
-            powerscale_module_mock, AdsHandler)
+            AdsHandler)
 
     def test_update_ads_zone_exception(self, powerscale_module_mock):
         self.set_module_params(
-            powerscale_module_mock, self.ads_args,
+            self.ads_args,
             {"domain_name": MockAdsApi.DOMAIN_NAME, "state": "present"})
         powerscale_module_mock.get_ads_details = MagicMock(
             return_value=MockAdsApi.ADS_DETAILS["ads"])
@@ -129,7 +127,7 @@ class TestAds(PowerScaleUnitBase):
             side_effect=MockApiException)
         self.capture_fail_json_call(
             "Update ADS with access zone details failed with SDK Error message",
-            powerscale_module_mock, AdsHandler)
+            AdsHandler)
 
     def test_get_ads_details(self, powerscale_module_mock, mocker):
         mocker.patch.object(utils, "get_ads_provider_details", return_value={"ads": [{"id": "ads_id"}]})
@@ -141,9 +139,10 @@ class TestAds(PowerScaleUnitBase):
     def test_get_ads_details_exception(self, powerscale_module_mock, mocker):
         mocker.patch.object(utils, "get_ads_provider_details", side_effect=Exception("Test exception"))
         ads_name = ["ads_name"]
-        with pytest.raises(Exception) as exc_info:
+        with pytest.raises(SystemExit):
             powerscale_module_mock.get_ads_details(ads_name)
-        assert str(exc_info.value) == "Get details of ADS provider ['ads_name'] failed with error: Test exception"
+        assert powerscale_module_mock.module.fail_json.call_args[1]['msg'] \
+               == "Get details of ADS provider ['ads_name'] failed with error: Test exception"
 
     def test_get_ads_details_not_found(self, powerscale_module_mock, mocker):
         mocker.patch.object(utils, "get_ads_provider_details", side_effect=Exception("404"))
@@ -158,10 +157,10 @@ class TestAds(PowerScaleUnitBase):
         ads_password = MockAdsApi.PASS1
         ads_parameters = {}
 
-        with pytest.raises(FailJsonException) as exc:
+        with pytest.raises(SystemExit) as exc:
             powerscale_module_mock.validate_create_params(domain, ads_user, ads_password, ads_parameters)
-
-        assert exc.value.args[0] == "The parameter domain_name is mandatory while creating ADS provider"
+        assert powerscale_module_mock.module.fail_json.call_args[1]['msg'] \
+               == "The parameter domain_name is mandatory while creating ADS provider"
 
     def test_validate_create_params_with_invalid_ads_user(self, powerscale_module_mock):
         # Test case: Validate with invalid ads_user
@@ -170,10 +169,10 @@ class TestAds(PowerScaleUnitBase):
         ads_password = MockAdsApi.PASS1
         ads_parameters = {}
 
-        with pytest.raises(FailJsonException) as exc:
+        with pytest.raises(SystemExit):
             powerscale_module_mock.validate_create_params(domain, ads_user, ads_password, ads_parameters)
-
-        assert exc.value.args[0] == "The parameter ads_user is mandatory while creating ADS provider"
+        assert powerscale_module_mock.module.fail_json.call_args[1]['msg'] \
+               == "The parameter ads_user is mandatory while creating ADS provider"
 
     def test_validate_create_params_with_invalid_ads_password(self, powerscale_module_mock):
         # Test case: Validate with invalid ads_password
@@ -182,10 +181,10 @@ class TestAds(PowerScaleUnitBase):
         ads_password = ''
         ads_parameters = {}
 
-        with pytest.raises(FailJsonException) as exc:
+        with pytest.raises(SystemExit):
             powerscale_module_mock.validate_create_params(domain, ads_user, ads_password, ads_parameters)
-
-        assert exc.value.args[0] == "The parameter ads_password is mandatory while creating ADS provider"
+        assert powerscale_module_mock.module.fail_json.call_args[1]['msg'] \
+               == "The parameter ads_password is mandatory while creating ADS provider"
 
     def test_validate_create_params_with_invalid_machine_account(self, powerscale_module_mock):
         # Test case: Validate with invalid machine_account
@@ -194,10 +193,10 @@ class TestAds(PowerScaleUnitBase):
         ads_password = MockAdsApi.PASS1
         ads_parameters = {'machine_account': ''}
 
-        with pytest.raises(FailJsonException) as exc:
+        with pytest.raises(SystemExit):
             powerscale_module_mock.validate_create_params(domain, ads_user, ads_password, ads_parameters)
-
-        assert exc.value.args[0] == "Please specify a valid machine_account"
+        assert powerscale_module_mock.module.fail_json.call_args[1]['msg'] \
+               == "Please specify a valid machine_account"
 
     def test_validate_create_params_with_invalid_organizational_unit(self, powerscale_module_mock):
         # Test case: Validate with invalid organizational_unit
@@ -206,10 +205,10 @@ class TestAds(PowerScaleUnitBase):
         ads_password = MockAdsApi.PASS1
         ads_parameters = {'organizational_unit': ''}
 
-        with pytest.raises(FailJsonException) as exc:
+        with pytest.raises(SystemExit):
             powerscale_module_mock.validate_create_params(domain, ads_user, ads_password, ads_parameters)
-
-        assert exc.value.args[0] == "Please specify a valid organizational_unit"
+        assert powerscale_module_mock.module.fail_json.call_args[1]['msg'] \
+               == "Please specify a valid organizational_unit"
 
     def test_validate_create_params_with_invalid_domain_regex(self, powerscale_module_mock):
         # Test case: Validate with invalid domain regex
@@ -218,30 +217,30 @@ class TestAds(PowerScaleUnitBase):
         ads_password = MockAdsApi.PASS1
         ads_parameters = {}
 
-        with pytest.raises(FailJsonException) as exc:
+        with pytest.raises(SystemExit):
             powerscale_module_mock.validate_create_params(domain, ads_user, ads_password, ads_parameters)
-
-        assert exc.value.args[0] == 'The value for domain_name is invalid'
+        assert powerscale_module_mock.module.fail_json.call_args[1]['msg'] \
+               == "The value for domain_name is invalid"
 
     def test_validate_input_with_domain_and_instance(self, powerscale_module_mock):
         ads_details = []
         domain = MockAdsApi.DOMAIN_NAME
         instance = "example_instance"
 
-        with pytest.raises(FailJsonException) as exc:
+        with pytest.raises(SystemExit):
             powerscale_module_mock.validate_input(ads_details, domain, instance)
-
-        assert exc.value.args[0] == "parameters are mutually exclusive: domain_name|instance_name"
+        assert powerscale_module_mock.module.fail_json.call_args[1]['msg'] \
+               == "parameters are mutually exclusive: domain_name|instance_name"
 
     def test_validate_input_without_domain_and_instance(self, powerscale_module_mock):
         ads_details = []
         domain = None
         instance = None
 
-        with pytest.raises(FailJsonException) as exc:
+        with pytest.raises(SystemExit):
             powerscale_module_mock.validate_input(ads_details, domain, instance)
-
-        assert exc.value.args[0] == "Please specify domain_name or instance_name"
+        assert powerscale_module_mock.module.fail_json.call_args[1]['msg'] \
+               == "Please specify domain_name or instance_name"
 
     def test_validate_input_with_multiple_ads_details(self, powerscale_module_mock):
         ads_details = [
@@ -251,10 +250,10 @@ class TestAds(PowerScaleUnitBase):
         domain = MockAdsApi.DOMAIN_NAME
         instance = None
 
-        with pytest.raises(FailJsonException) as exc:
+        with pytest.raises(SystemExit):
             powerscale_module_mock.validate_input(ads_details, domain, instance)
-
-        assert exc.value.args[0] == "Multiple ADS instances are returned for the given domain_name. Please specify instance_name"
+        assert powerscale_module_mock.module.fail_json.call_args[1]['msg'] \
+               == "Multiple ADS instances are returned for the given domain_name. Please specify instance_name"
 
     def test_check_for_groupnet_with_mismatch(self, powerscale_module_mock):
         array_ads = [{
@@ -264,17 +263,17 @@ class TestAds(PowerScaleUnitBase):
             'groupnet': 'different_groupnet',
         }
 
-        with pytest.raises(FailJsonException) as exc:
+        with pytest.raises(SystemExit) as exc:
             powerscale_module_mock.check_for_groupnet('groupnet', array_ads, input_ads)
-
-        assert exc.value.args[0] == "Modification of groupnet is not supported."
+        assert powerscale_module_mock.module.fail_json.call_args[1]['msg'] \
+               == "Modification of groupnet is not supported."
 
     def test_modify_ads_spn_without_ads_user(self, powerscale_module_mock):
         new_args = copy.deepcopy(MockAdsApi.MODIFY_ARGS)
         if 'ads_user' in new_args:
             del new_args['ads_user']
         self.set_module_params(
-            powerscale_module_mock, self.ads_args,
+            self.ads_args,
             new_args)
         powerscale_module_mock.ads_name = [MockAdsApi.DOMAIN_NAME]
         powerscale_module_mock.get_ads_details = MagicMock(
@@ -283,14 +282,14 @@ class TestAds(PowerScaleUnitBase):
         self.capture_fail_json_call(
             "The parameter ads_user is mandatory "
             + "while updating SPNs",
-            powerscale_module_mock, AdsHandler)
+            AdsHandler)
 
     def test_modify_ads_spn_without_ads_password(self, powerscale_module_mock):
         new_args = copy.deepcopy(MockAdsApi.MODIFY_ARGS)
         if 'ads_password' in new_args:
             del new_args['ads_password']
         self.set_module_params(
-            powerscale_module_mock, self.ads_args,
+            self.ads_args,
             new_args)
         powerscale_module_mock.ads_name = [MockAdsApi.DOMAIN_NAME]
         powerscale_module_mock.get_ads_details = MagicMock(
@@ -299,7 +298,7 @@ class TestAds(PowerScaleUnitBase):
         self.capture_fail_json_call(
             "The parameter ads_password is mandatory "
             + "while updating SPNs",
-            powerscale_module_mock, AdsHandler)
+            AdsHandler)
 
     def test_main(self, powerscale_module_mock):
         main()

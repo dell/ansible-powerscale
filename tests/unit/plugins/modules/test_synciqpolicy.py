@@ -22,8 +22,6 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock
     import MockApiException
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.powerscale_unit_base \
     import PowerScaleUnitBase
-from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library. \
-    fail_json import FailJsonException
 
 
 class Policy:
@@ -49,289 +47,287 @@ class TestSynciqPolicy(PowerScaleUnitBase):
     def module_object(self):
         return SynciqPolicy
 
-    def test_create_synciqpolicy_check_mode(self, powerscale_module_mock):
-        self.set_module_params(
-            powerscale_module_mock, self.synciqpolicy_args,
-            MockSynciqApi.MockSynciqpolicyApi.CREATE_ARGS)
-        powerscale_module_mock.module._diff = True
-        powerscale_module_mock.module.check_mode = True
-        powerscale_module_mock.validate_job_params = MagicMock(
+    def test_create_synciqpolicy_check_mode(self):
+        self.set_module_params(self.synciqpolicy_args,
+                               MockSynciqApi.MockSynciqpolicyApi.CREATE_ARGS)
+        self.powerscale_module_mock.module._diff = True
+        self.powerscale_module_mock.module.check_mode = True
+        self.powerscale_module_mock.validate_job_params = MagicMock(
             return_value=None)
-        powerscale_module_mock.get_target_cert_id_name = MagicMock(
+        self.powerscale_module_mock.get_target_cert_id_name = MagicMock(
             return_value=MockSynciqApi.MockSynciqpolicyApi.CERT_NAME
         )
-        powerscale_module_mock.get_synciq_policy_details = MagicMock(
+        self.powerscale_module_mock.get_synciq_policy_details = MagicMock(
             return_value=(None, False))
-        SynciqPolicyHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
-        assert powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
+        SynciqPolicyHandler().handle(self.powerscale_module_mock,
+                                     self.powerscale_module_mock.module.params)
+        assert self.powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
 
-    def test_create_synciqpolicy_exception(self, powerscale_module_mock):
-        self.set_module_params(
-            powerscale_module_mock, self.synciqpolicy_args,
-            MockSynciqApi.MockSynciqpolicyApi.CREATE_ARGS)
-        powerscale_module_mock.get_target_cert_id_name = MagicMock(
+    def test_create_synciqpolicy_exception(self):
+        self.set_module_params(self.synciqpolicy_args,
+                               MockSynciqApi.MockSynciqpolicyApi.CREATE_ARGS)
+        self.powerscale_module_mock.get_target_cert_id_name = MagicMock(
             return_value=MockSynciqApi.MockSynciqpolicyApi.CERT_NAME
         )
-        powerscale_module_mock.get_synciq_policy_details = MagicMock(
+        self.powerscale_module_mock.get_synciq_policy_details = MagicMock(
             return_value=(None, False))
-        powerscale_module_mock.api_instance.create_sync_policy = MagicMock(
+        self.powerscale_module_mock.api_instance.create_sync_policy = MagicMock(
             side_effect=MockApiException)
         self.capture_fail_json_call(
             "Creating SyncIQ policy",
-            powerscale_module_mock, SynciqPolicyHandler
+            SynciqPolicyHandler
         )
 
-    def test_modify_synciqpolicy(self, powerscale_module_mock):
+    def test_modify_synciqpolicy(self):
         self.set_module_params(
-            powerscale_module_mock, self.synciqpolicy_args,
+            self.synciqpolicy_args,
             MockSynciqApi.MockSynciqpolicyApi.CREATE_ARGS)
-        powerscale_module_mock.module._diff = True
-        powerscale_module_mock.validate_job_params = MagicMock(
+        self.powerscale_module_mock.module._diff = True
+        self.powerscale_module_mock.validate_job_params = MagicMock(
             return_value=None)
-        SynciqPolicyHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
-        assert powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
-        assert powerscale_module_mock.module.exit_json.call_args[1]["create_synciq_policy"] is False
-        assert powerscale_module_mock.module.exit_json.call_args[1]["create_job_synciq_policy"] is False
-        assert powerscale_module_mock.module.exit_json.call_args[1]["delete_synciq_policy"] is False
-        assert powerscale_module_mock.module.exit_json.call_args[1]["modify_synciq_policy"] is True
+        SynciqPolicyHandler().handle(self.powerscale_module_mock,
+                                     self.powerscale_module_mock.module.params)
+        assert self.powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
+        assert self.powerscale_module_mock.module.exit_json.call_args[
+            1]["create_synciq_policy"] is False
+        assert self.powerscale_module_mock.module.exit_json.call_args[
+            1]["create_job_synciq_policy"] is False
+        assert self.powerscale_module_mock.module.exit_json.call_args[
+            1]["delete_synciq_policy"] is False
+        assert self.powerscale_module_mock.module.exit_json.call_args[
+            1]["modify_synciq_policy"] is True
 
-    def test_modify_synciqpolicy_check_mode(self, powerscale_module_mock):
-        self.set_module_params(
-            powerscale_module_mock, self.synciqpolicy_args,
-            MockSynciqApi.MockSynciqpolicyApi.CREATE_ARGS)
-        powerscale_module_mock.module._diff = True
-        powerscale_module_mock.module.check_mode = True
-        powerscale_module_mock.validate_job_params = MagicMock(
+    def test_modify_synciqpolicy_check_mode(self):
+        self.set_module_params(self.synciqpolicy_args,
+                               MockSynciqApi.MockSynciqpolicyApi.CREATE_ARGS)
+        self.powerscale_module_mock.module._diff = True
+        self.powerscale_module_mock.module.check_mode = True
+        self.powerscale_module_mock.validate_job_params = MagicMock(
             return_value=None)
-        SynciqPolicyHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
-        assert powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
+        SynciqPolicyHandler().handle(self.powerscale_module_mock,
+                                     self.powerscale_module_mock.module.params)
+        assert self.powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
 
-    def test_modify_synciqpolicy_exception(self, powerscale_module_mock):
-        self.set_module_params(
-            powerscale_module_mock, self.synciqpolicy_args,
-            MockSynciqApi.MockSynciqpolicyApi.CREATE_ARGS)
-        powerscale_module_mock.module._diff = True
-        powerscale_module_mock.api_instance.update_sync_policy = MagicMock(
+    def test_modify_synciqpolicy_exception(self):
+        self.set_module_params(self.synciqpolicy_args,
+                               MockSynciqApi.MockSynciqpolicyApi.CREATE_ARGS)
+        self.powerscale_module_mock.module._diff = True
+        self.powerscale_module_mock.api_instance.update_sync_policy = MagicMock(
             side_effect=MockApiException)
         self.capture_fail_json_call(
             "Failed to modify SyncIQ policy with error",
-            powerscale_module_mock, SynciqPolicyHandler
+            SynciqPolicyHandler
         )
 
-    def test_delete_synciqpolicy(self, powerscale_module_mock):
-        self.set_module_params(
-            powerscale_module_mock, self.synciqpolicy_args,
-            MockSynciqApi.MockSynciqpolicyApi.DELETE_ARGS)
-        powerscale_module_mock.module._diff = True
-        powerscale_module_mock.validate_job_params = MagicMock(
+    def test_delete_synciqpolicy(self):
+        self.set_module_params(self.synciqpolicy_args,
+                               MockSynciqApi.MockSynciqpolicyApi.DELETE_ARGS)
+        self.powerscale_module_mock.module._diff = True
+        self.powerscale_module_mock.validate_job_params = MagicMock(
             return_value=None)
-        SynciqPolicyHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
-        assert powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
-        assert powerscale_module_mock.module.exit_json.call_args[1]["create_synciq_policy"] is False
-        assert powerscale_module_mock.module.exit_json.call_args[1]["create_job_synciq_policy"] is False
-        assert powerscale_module_mock.module.exit_json.call_args[1]["delete_synciq_policy"] is True
-        assert powerscale_module_mock.module.exit_json.call_args[1]["modify_synciq_policy"] is False
+        SynciqPolicyHandler().handle(self.powerscale_module_mock,
+                                     self.powerscale_module_mock.module.params)
+        assert self.powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
+        assert self.powerscale_module_mock.module.exit_json.call_args[
+            1]["create_synciq_policy"] is False
+        assert self.powerscale_module_mock.module.exit_json.call_args[
+            1]["create_job_synciq_policy"] is False
+        assert self.powerscale_module_mock.module.exit_json.call_args[
+            1]["delete_synciq_policy"] is True
+        assert self.powerscale_module_mock.module.exit_json.call_args[
+            1]["modify_synciq_policy"] is False
 
-    def test_delete_synciqpolicy_checkmode(self, powerscale_module_mock):
-        self.set_module_params(
-            powerscale_module_mock, self.synciqpolicy_args,
-            MockSynciqApi.MockSynciqpolicyApi.DELETE_ARGS)
-        powerscale_module_mock.module._diff = True
-        powerscale_module_mock.module.check_mode = True
-        powerscale_module_mock.validate_job_params = MagicMock(
+    def test_delete_synciqpolicy_checkmode(self):
+        self.set_module_params(self.synciqpolicy_args,
+                               MockSynciqApi.MockSynciqpolicyApi.DELETE_ARGS)
+        self.powerscale_module_mock.module._diff = True
+        self.powerscale_module_mock.module.check_mode = True
+        self.powerscale_module_mock.validate_job_params = MagicMock(
             return_value=None)
-        SynciqPolicyHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
-        assert powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
+        SynciqPolicyHandler().handle(self.powerscale_module_mock,
+                                     self.powerscale_module_mock.module.params)
+        assert self.powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
 
-    def test_delete_synciqpolicy_exception(self, powerscale_module_mock):
-        self.set_module_params(
-            powerscale_module_mock, self.synciqpolicy_args,
-            MockSynciqApi.MockSynciqpolicyApi.DELETE_ARGS)
-        powerscale_module_mock.api_instance.delete_sync_policy = MagicMock(
+    def test_delete_synciqpolicy_exception(self):
+        self.set_module_params(self.synciqpolicy_args,
+                               MockSynciqApi.MockSynciqpolicyApi.DELETE_ARGS)
+        self.powerscale_module_mock.api_instance.delete_sync_policy = MagicMock(
             side_effect=MockApiException)
         self.capture_fail_json_call(
             "Deleting SyncIQ policy",
-            powerscale_module_mock, SynciqPolicyHandler
+            SynciqPolicyHandler
         )
 
     @pytest.mark.parametrize("params",
                              [MockSynciqApi.MockSynciqpolicyApi.CREATE_JOB_ARGS])
-    def test_create_job_on_synciqpolicy(self, params, powerscale_module_mock):
-        self.set_module_params(
-            powerscale_module_mock, self.synciqpolicy_args,
-            params)
-        powerscale_module_mock.module._diff = True
-        SynciqPolicyHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
-        assert powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
-        assert powerscale_module_mock.module.exit_json.call_args[1]["create_synciq_policy"] is False
-        assert powerscale_module_mock.module.exit_json.call_args[1]["create_job_synciq_policy"] is True
-        assert powerscale_module_mock.module.exit_json.call_args[1]["delete_synciq_policy"] is False
-        assert powerscale_module_mock.module.exit_json.call_args[1]["modify_synciq_policy"] is True
+    def test_create_job_on_synciqpolicy(self, params):
+        self.set_module_params(self.synciqpolicy_args,
+                               params)
+        self.powerscale_module_mock.module._diff = True
+        SynciqPolicyHandler().handle(self.powerscale_module_mock,
+                                     self.powerscale_module_mock.module.params)
+        assert self.powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
+        assert self.powerscale_module_mock.module.exit_json.call_args[
+            1]["create_synciq_policy"] is False
+        assert self.powerscale_module_mock.module.exit_json.call_args[
+            1]["create_job_synciq_policy"] is True
+        assert self.powerscale_module_mock.module.exit_json.call_args[
+            1]["delete_synciq_policy"] is False
+        assert self.powerscale_module_mock.module.exit_json.call_args[
+            1]["modify_synciq_policy"] is True
 
-    def test_create_job_on_synciqpolicy_failure_case(self, powerscale_module_mock):
-        self.set_module_params(
-            powerscale_module_mock, self.synciqpolicy_args,
-            MockSynciqApi.MockSynciqpolicyApi.CREATE_JOB_ARGS)
-        powerscale_module_mock.get_synciq_policy_details = MagicMock(
+    def test_create_job_on_synciqpolicy_failure_case(self):
+        self.set_module_params(self.synciqpolicy_args,
+                               MockSynciqApi.MockSynciqpolicyApi.CREATE_JOB_ARGS)
+        self.powerscale_module_mock.get_synciq_policy_details = MagicMock(
             return_value=(None, False))
-        with pytest.raises(FailJsonException) as exc:
-            SynciqPolicyHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
-        assert exc.value.args[0] == "Display details of SyncIQ policy Policy1 "\
-            "failed with error Get certificate None failed with error "\
-            ": Please provide a valid certificate."
+        self.capture_fail_json_call(
+            "Please provide a valid certificate.", SynciqPolicyHandler)
 
-    def test_create_job_on_synciqpolicy_exception(self, powerscale_module_mock):
-        self.set_module_params(
-            powerscale_module_mock, self.synciqpolicy_args,
-            MockSynciqApi.MockSynciqpolicyApi.CREATE_JOB_ARGS)
-        powerscale_module_mock.api_instance.create_sync_job = MagicMock(
+    def test_create_job_on_synciqpolicy_exception(self):
+        self.set_module_params(self.synciqpolicy_args,
+                               MockSynciqApi.MockSynciqpolicyApi.CREATE_JOB_ARGS)
+        self.powerscale_module_mock.api_instance.create_sync_job = MagicMock(
             side_effect=MockApiException)
         self.capture_fail_json_call(
             "Failed to create job on SyncIQ policy with error",
-            powerscale_module_mock, SynciqPolicyHandler
+            SynciqPolicyHandler
         )
 
-    def test_rename_synciqpolicy(self, powerscale_module_mock):
-        self.set_module_params(
-            powerscale_module_mock, self.synciqpolicy_args,
-            {"policy_name": "policy1", "new_policy_name": "new_policy_name"})
-        SynciqPolicyHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
-        assert powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
-        assert powerscale_module_mock.module.exit_json.call_args[1]["create_synciq_policy"] is False
-        assert powerscale_module_mock.module.exit_json.call_args[1]["create_job_synciq_policy"] is False
-        assert powerscale_module_mock.module.exit_json.call_args[1]["delete_synciq_policy"] is False
-        assert powerscale_module_mock.module.exit_json.call_args[1]["modify_synciq_policy"] is True
+    def test_rename_synciqpolicy(self):
+        self.set_module_params(self.synciqpolicy_args,
+                               {"policy_name": "policy1", "new_policy_name": "new_policy_name"})
+        SynciqPolicyHandler().handle(self.powerscale_module_mock,
+                                     self.powerscale_module_mock.module.params)
+        assert self.powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
+        assert self.powerscale_module_mock.module.exit_json.call_args[
+            1]["create_synciq_policy"] is False
+        assert self.powerscale_module_mock.module.exit_json.call_args[
+            1]["create_job_synciq_policy"] is False
+        assert self.powerscale_module_mock.module.exit_json.call_args[
+            1]["delete_synciq_policy"] is False
+        assert self.powerscale_module_mock.module.exit_json.call_args[
+            1]["modify_synciq_policy"] is True
 
-    def test_rename_synciqpolicy_failure_case(self, powerscale_module_mock):
-        self.set_module_params(
-            powerscale_module_mock, self.synciqpolicy_args,
-            {"policy_name": "policy1", "new_policy_name": ""})
-        powerscale_module_mock.module._diff = True
-        with pytest.raises(FailJsonException) as exc:
-            SynciqPolicyHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
-        assert exc.value.args[0] == "new_policy_name cannot be empty. Please provide a valid new_policy_name to rename policy."
+    def test_rename_synciqpolicy_failure_case(self):
+        self.set_module_params(self.synciqpolicy_args,
+                               {"policy_name": "policy1", "new_policy_name": ""})
+        self.powerscale_module_mock.module._diff = True
+        self.capture_fail_json_call(
+            "new_policy_name cannot be empty. Please provide a valid new_policy_name to rename policy.", SynciqPolicyHandler)
 
-    def test_get_synciqpolicy_details(self, powerscale_module_mock, mocker):
-        policy_obj = Policy(name="policy1", id="ab12", target_certificate_id=12)
-        self.set_module_params(
-            powerscale_module_mock, self.synciqpolicy_args,
-            MockSynciqApi.MockSynciqpolicyApi.CREATE_ARGS2)
-        powerscale_module_mock.get_target_cert_id_name = MagicMock(
+    def test_get_synciqpolicy_details(self):
+        policy_obj = Policy(name="policy1", id="ab12",
+                            target_certificate_id=12)
+        self.set_module_params(self.synciqpolicy_args,
+                               MockSynciqApi.MockSynciqpolicyApi.CREATE_ARGS2)
+        self.powerscale_module_mock.get_target_cert_id_name = MagicMock(
             return_value=MockSynciqApi.MockSynciqpolicyApi.CERT_NAME
         )
-        powerscale_module_mock.get_synciq_policy_details = MagicMock(
+        self.powerscale_module_mock.get_synciq_policy_details = MagicMock(
             return_value=(policy_obj, True))
-        powerscale_module_mock.validate_job_params = MagicMock(
+        self.powerscale_module_mock.validate_job_params = MagicMock(
             return_value=None)
-        SynciqPolicyHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
-        assert powerscale_module_mock.module.exit_json.call_args[1]["changed"] is False
+        SynciqPolicyHandler().handle(self.powerscale_module_mock,
+                                     self.powerscale_module_mock.module.params)
+        assert self.powerscale_module_mock.module.exit_json.call_args[1]["changed"] is False
 
-    def test_get_synciqpolicy_details2(self, powerscale_module_mock, mocker):
+    def test_get_synciqpolicy_details2(self):
         policy = PolicyDict({})
-        powerscale_module_mock.api_instance.get_sync_policy = MagicMock(
+        self.powerscale_module_mock.api_instance.get_sync_policy = MagicMock(
             return_value=policy)
-        result = powerscale_module_mock.get_synciq_policy_details(
+        result = self.powerscale_module_mock.get_synciq_policy_details(
             MockSynciqApi.MockSynciqpolicyApi.GET_ARGS2.get("policy_name"),
             MockSynciqApi.MockSynciqpolicyApi.GET_ARGS2.get("policy_id"))
         assert result == (None, False)
 
-    def test_get_synciq_policy_details_exception(self, powerscale_module_mock, mocker):
-        self.set_module_params(
-            powerscale_module_mock, self.synciqpolicy_args,
-            MockSynciqApi.MockSynciqpolicyApi.CREATE_ARGS)
-        powerscale_module_mock.api_instance.get_sync_policy = MagicMock(
+    def test_get_synciq_policy_details_exception(self):
+        self.set_module_params(self.synciqpolicy_args,
+                               MockSynciqApi.MockSynciqpolicyApi.CREATE_ARGS)
+        self.powerscale_module_mock.api_instance.get_sync_policy = MagicMock(
             side_effect=Exception("Test_exception"))
         self.capture_fail_json_call(
             MockSynciqApi.MockSynciqpolicyApi.EXCEPTION_MSG,
-            powerscale_module_mock, SynciqPolicyHandler
+            SynciqPolicyHandler
         )
 
-    def test_get_synciqpolicy_details_apiexception(self, powerscale_module_mock, mocker):
-        self.set_module_params(
-            powerscale_module_mock, self.synciqpolicy_args,
-            MockSynciqApi.MockSynciqpolicyApi.CREATE_ARGS)
-        powerscale_module_mock.get_target_policy = MagicMock(
+    def test_get_synciqpolicy_details_api_exception(self):
+        self.set_module_params(self.synciqpolicy_args,
+                               MockSynciqApi.MockSynciqpolicyApi.CREATE_ARGS)
+        self.powerscale_module_mock.get_target_policy = MagicMock(
             return_value=({}, True))
-        powerscale_module_mock.api_instance.get_synciq_policy_details = MagicMock(
+        self.powerscale_module_mock.api_instance.get_sync_policy = MagicMock(
             side_effect=MockApiException)
         self.capture_fail_json_call(
             MockSynciqApi.MockSynciqpolicyApi.EXCEPTION_MSG,
-            powerscale_module_mock, SynciqPolicyHandler
+            SynciqPolicyHandler
         )
 
-    def test_get_synciqpolicy_details_404error(self, powerscale_module_mock, mocker):
-        self.set_module_params(
-            powerscale_module_mock, self.synciqpolicy_args,
-            MockSynciqApi.MockSynciqpolicyApi.CREATE_ARGS)
+    def test_get_synciqpolicy_details_404error(self):
+        self.set_module_params(self.synciqpolicy_args,
+                               MockSynciqApi.MockSynciqpolicyApi.CREATE_ARGS)
         policy_obj = Policy(name="policy2", id="ab", target_certificate_id=14)
-        powerscale_module_mock.get_target_policy = MagicMock(
+        self.powerscale_module_mock.get_target_policy = MagicMock(
             return_value=(policy_obj, True))
-        powerscale_module_mock.api_instance.get_sync_policy = MagicMock(
+        self.powerscale_module_mock.api_instance.get_sync_policy = MagicMock(
             side_effect=MockApiException(404))
         self.capture_fail_json_call(
-            MockSynciqApi.MockSynciqpolicyApi.EXCEPTION_MSG,
-            powerscale_module_mock, SynciqPolicyHandler
+            "Please provide a valid certificate",
+            SynciqPolicyHandler
         )
 
-    def test_get_policy_jobs_exception_case(self, powerscale_module_mock, mocker):
-        self.set_module_params(
-            powerscale_module_mock, self.synciqpolicy_args,
-            MockSynciqApi.MockSynciqpolicyApi.GET_ARGS)
-        powerscale_module_mock.api_instance.list_sync_jobs = MagicMock(
+    def test_get_policy_jobs_exception_case(self):
+        self.set_module_params(self.synciqpolicy_args,
+                               MockSynciqApi.MockSynciqpolicyApi.GET_ARGS)
+        self.powerscale_module_mock.api_instance.list_sync_jobs = MagicMock(
             side_effect=Exception("Test_exception1"))
         self.capture_fail_json_call(
             MockSynciqApi.MockSynciqpolicyApi.EXCEPTION_MSG,
-            powerscale_module_mock, SynciqPolicyHandler
+            SynciqPolicyHandler
         )
 
-    def test_get_target_policy(self, powerscale_module_mock):
+    def test_get_target_policy(self):
         job_params = MockSynciqApi.MockSynciqpolicyApi.JOB_ARGS1["job_params"]
         policy_id = MockSynciqApi.MockSynciqpolicyApi.POLICY_ID
-        result = powerscale_module_mock.get_synciq_target_policy(policy_id, job_params)
+        result = self.powerscale_module_mock.get_synciq_target_policy(
+            policy_id, job_params)
         assert result[1] is True
         job_params = MockSynciqApi.MockSynciqpolicyApi.JOB_ARGS2["job_params"]
-        result = powerscale_module_mock.get_synciq_target_policy(policy_id, job_params)
+        result = self.powerscale_module_mock.get_synciq_target_policy(
+            policy_id, job_params)
         assert result[1] is False
         assert result[0] is None
 
-    def test_get_target_policy_exception(self, powerscale_module_mock, mocker):
+    def test_get_target_policy_exception(self):
         job_params = MockSynciqApi.MockSynciqpolicyApi.JOB_ARGS1["job_params"]
         policy_id = MockSynciqApi.MockSynciqpolicyApi.POLICY_ID
-        powerscale_module_mock.api_instance.get_target_policy = MagicMock(
+        self.powerscale_module_mock.api_instance.get_target_policy = MagicMock(
             side_effect=MockApiException)
-        with pytest.raises(FailJsonException) as exc:
-            powerscale_module_mock.get_synciq_target_policy(policy_id, job_params)
-        assert exc.value.args[0] == "Get details of target SyncIQ policy {policy_id} failed "\
-            "with error : SDK Error message".format(policy_id=policy_id)
+        self.capture_fail_json_method("Get details of target SyncIQ policy",
+                                      self.powerscale_module_mock, "get_synciq_target_policy", policy_id, job_params)
 
-    def test_get_policy_jobs_exception(self, powerscale_module_mock, mocker):
-        powerscale_module_mock.api_instance.get_policy_jobs = MagicMock(
+    def test_get_policy_jobs_exception(self):
+        self.powerscale_module_mock.api_instance.get_policy_jobs = MagicMock(
             side_effect=Exception("Testexception2"))
         self.capture_fail_json_call(
             "Please specify policy_name or policy_id",
-            powerscale_module_mock, SynciqPolicyHandler
+            SynciqPolicyHandler
         )
 
-    def test_validate_job_params_invalid_mode(self, powerscale_module_mock):
+    def test_validate_job_params_invalid_mode(self):
         job_params = MockSynciqApi.MockSynciqpolicyApi.JOB_ARGS3["job_params"]
-        with pytest.raises(FailJsonException) as exc:
-            powerscale_module_mock.validate_job_params(job_params)
-        assert exc.value.args[0] == 'workers_per_node is valid '\
-                                    'only for allow_write and '\
-                                    'allow_write_revert operation.'
+        self.capture_fail_json_method("workers_per_node is valid only for allow_write and allow_write_revert operation.",
+                                      self.powerscale_module_mock, "validate_job_params", job_params)
 
-    def test_validate_job_params_invalid_workersnode(self, powerscale_module_mock):
+    def test_validate_job_params_invalid_workersnode(self):
         job_params = MockSynciqApi.MockSynciqpolicyApi.JOB_ARGS4["job_params"]
-        with pytest.raises(FailJsonException) as exc:
-            powerscale_module_mock.validate_job_params(job_params)
-        assert exc.value.args[0] == 'Please enter a value greater than '\
-                                    '0 for workers_per_node.'
+        self.capture_fail_json_method("Please enter a value greater than 0 for workers_per_node.",
+                                      self.powerscale_module_mock, "validate_job_params", job_params)
 
-    def test_get_synciq_policy_display_attributes_exception(self, powerscale_module_mock, mocker):
-        policy_obj = Policy(name="policy1", id="ab12", target_certificate_id=12)
-        powerscale_module_mock.api_instance.get_target_cert_id_name = MagicMock(
+    def test_get_synciq_policy_display_attributes_exception(self, mocker):
+        policy_obj = Policy(name="policy1", id="ab12",
+                            target_certificate_id=12)
+        self.powerscale_module_mock.api_instance.get_target_cert_id_name = MagicMock(
             side_effect=Exception("Test exception"))
-        with pytest.raises(FailJsonException) as exc:
-            powerscale_module_mock.get_synciq_policy_display_attributes(policy_obj)
-        assert "Display details of SyncIQ policy {policy_name} "\
-            "failed with error".format(policy_name=policy_obj.name) in exc.value.args[0]
+        self.capture_fail_json_method("Please provide a valid certificate",
+                                      self.powerscale_module_mock, "get_synciq_policy_display_attributes", policy_obj)

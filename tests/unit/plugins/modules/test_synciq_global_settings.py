@@ -32,23 +32,20 @@ class TestSyncIQGlobalSettings(PowerScaleUnitBase):
         return SyncIQGlobalSettings
 
     def test_get_synciq_global_details(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock,
-                               self.synciq_global_args, {})
+        self.set_module_params(self.synciq_global_args, {})
         SyncIQGlobalSettingsHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
         powerscale_module_mock.synciq_api.get_sync_settings.assert_called()
 
     def test_get_synciq_global_details_exception(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock,
-                               self.synciq_global_args, {})
+        self.set_module_params(self.synciq_global_args, {})
         powerscale_module_mock.synciq_api.get_sync_settings = MagicMock(
             side_effect=MockApiException)
         self.capture_fail_json_call(
             MockSyncIQGlobalSettingsApi.get_synciq_global_settings_exception_response('get_details_exception'),
-            powerscale_module_mock, SyncIQGlobalSettingsHandler)
+            SyncIQGlobalSettingsHandler)
 
     def test_modify_synciq_global_response(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock,
-                               self.synciq_global_args,
+        self.set_module_params(self.synciq_global_args,
                                {"service": 'on',
                                 "encryption_required": False})
         powerscale_module_mock.get_synciq_global_settings_details = MagicMock(
@@ -61,8 +58,7 @@ class TestSyncIQGlobalSettings(PowerScaleUnitBase):
         powerscale_module_mock.synciq_api.update_sync_settings.assert_called()
 
     def test_modify_synciq_global_exception(self, powerscale_module_mock):
-        self.set_module_params(powerscale_module_mock,
-                               self.synciq_global_args,
+        self.set_module_params(self.synciq_global_args,
                                {"service": 'on',
                                 "encryption_required": False})
         powerscale_module_mock.get_synciq_global_settings_details = MagicMock(
@@ -70,4 +66,4 @@ class TestSyncIQGlobalSettings(PowerScaleUnitBase):
         powerscale_module_mock.synciq_api.update_sync_settings = MagicMock(
             side_effect=MockApiException)
         self.capture_fail_json_call(
-            MockSyncIQGlobalSettingsApi.get_synciq_global_settings_exception_response('update_exception'), powerscale_module_mock, SyncIQGlobalSettingsHandler)
+            MockSyncIQGlobalSettingsApi.get_synciq_global_settings_exception_response('update_exception'), SyncIQGlobalSettingsHandler)
