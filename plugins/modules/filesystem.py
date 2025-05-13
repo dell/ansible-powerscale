@@ -727,10 +727,13 @@ class FileSystem(object):
             owner_provider = owner['provider_type']
         else:
             owner_provider = 'local'
-        owner_id = self.get_owner_id(
+        owner_details = self.get_owner_id(
             name=owner['name'],
             zone=self.module.params['access_zone'],
-            provider=owner_provider)['users'][0]['uid']['id']
+            provider=owner_provider)
+
+        user = owner_details['users'][0]
+        owner_id = user['sid']['id'] if owner_provider == 'ads' else user['uid']['id']
         create_owner = {'type': 'user', 'id': owner_id,
                         'name': owner['name']}
         return create_owner
@@ -1363,8 +1366,10 @@ class FileSystem(object):
                 zone=self.module.params['access_zone'],
                 provider=owner_provider)
 
-            owner_uid = owner_details['users'][0]['uid']['id']
-            owner_sid = owner_details['users'][0]['sid']['id']
+            # use sid for user in ads provider
+            user = owner_details['users'][0]
+            owner_uid = user['uid']['id'] if owner_provider != 'ads' else user['sid']['id']
+            owner_sid = user['sid']['id']
 
             owner = {'type': 'user', 'id': owner_uid,
                      'name': owner['name']}
