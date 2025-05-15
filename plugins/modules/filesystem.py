@@ -733,7 +733,7 @@ class FileSystem(object):
             provider=owner_provider)
 
         user = owner_details['users'][0]
-        owner_id = user['sid']['id'] if owner_provider == 'ads' else user['uid']['id']
+        owner_id = user['sid']['id'] if owner_provider.lower() == 'ads' else user['uid']['id']
         create_owner = {'type': 'user', 'id': owner_id,
                         'name': owner['name']}
         return create_owner
@@ -1368,7 +1368,7 @@ class FileSystem(object):
 
             # use sid for user in ads provider
             user = owner_details['users'][0]
-            owner_uid = user['uid']['id'] if owner_provider != 'ads' else user['sid']['id']
+            owner_uid = user['uid']['id'] if owner_provider.lower() != 'ads' else user['sid']['id']
             owner_sid = user['sid']['id']
 
             owner = {'type': 'user', 'id': owner_uid,
