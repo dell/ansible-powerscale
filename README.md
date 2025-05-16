@@ -84,49 +84,71 @@ This table provides information about the software prerequisites for the Ansible
 | v3.8.0 | 9.4.x <br> 9.5.x <br> 9.7.x <br> 9.8.x | 3.9 <br> 3.10 <br> 3.11 <br> 3.12 | 0.3.0.1 | 2.15 <br> 2.16 <br> 2.17 |
 
 # List of Ansible modules for Dell PowerScale
-  * [File System Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/filesystem.rst)
-  * [Access Zone Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/accesszone.rst)
-  * [User Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/user.rst)
-  * [Group Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/group.rst)
-  * [Snapshot Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/snapshot.rst)
-  * [Snapshot Schedule Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/snapshotschedule.rst)
-  * [NFS Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/nfs.rst)
-  * [SMB Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/smb.rst)
-  * [Smart Quota Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/smartquota.rst)
-  * [Info Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/info.rst)
-  * [Active Directory Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/ads.rst)
-  * [LDAP Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/ldap.rst)
-  * [Node Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/node.rst)
-  * [SyncIQ Policy Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/synciqpolicy.rst)
-  * [SyncIQ Jobs Module](https://github.com/dell/ansible-powerscale/tree/main/docs/modules/synciqjob.rst)
-  * [SyncIQ Performance Rules Module](https://github.com/dell/ansible-powerscale/tree/main/docs/modules/synciqrules.rst)
-  * [SyncIQ Reports Module](https://github.com/dell/ansible-powerscale/tree/main/docs/modules/synciqreports.rst)
-  * [SyncIQ Target Reports Module](https://github.com/dell/ansible-powerscale/tree/main/docs/modules/synciqtargetreports.rst)
-  * [Groupnet Module](https://github.com/dell/ansible-powerscale/tree/main/docs/modules/groupnet.rst)
-  * [Subnet Module](https://github.com/dell/ansible-powerscale/tree/main/docs/modules/subnet.rst)
-  * [Network Pool Module](https://github.com/dell/ansible-powerscale/tree/main/docs/modules/networkpool.rst)
-  * [Network Rule Module](https://github.com/dell/ansible-powerscale/tree/main/docs/modules/networkrule.rst)
-  * [NFS Alias Module](https://github.com/dell/ansible-powerscale/tree/main/docs/modules/nfs_alias.rst)
-  * [Settings Module](https://github.com/dell/ansible-powerscale/tree/main/docs/modules/settings.rst)
-  * [Network Setting Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/networksettings.rst)
-  * [Smart Pool Setting Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/smartpoolsettings.rst)
-  * [Filepool Policy Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/filepoolpolicy.rst)
-  * [Storagepool Tier Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/storagepooltier.rst)
-  * [SMB File Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/smb_file.rst)
-  * [User Mapping Rule Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/user_mapping_rule.rst)
-  * [S3 Bucket Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/s3_bucket.rst)
-  * [NFS Default Settings Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/nfs_default_settings.rst)
-  * [NFS Global Settings Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/nfs_global_settings.rst)
-  * [NFS Zone Settings Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/nfs_zone_settings.rst)
-  * [SyncIQ Global Settings Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/synciq_global_settings.rst)
-  * [SyncIQ Certificate Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/synciqcertificate.rst)
-  * [SMB Global Settings Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/smb_global_settings.rst)
-  * [SNMP Settings Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/snmp_settings.rst)
-  * [Server Certificate Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/server_certificate.rst)
-  * [Roles](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/roles.rst)
-  * [Support Assist](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/support_assist.rst)
-  * [Alert Settings](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/alert_settings.rst)
 
+### Identity & Access Management
+
+* [User Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/user.rst)
+* [Group Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/group.rst)
+* [Active Directory Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/ads.rst)
+* [LDAP Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/ldap.rst)
+* [User Mapping Rule Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/user_mapping_rule.rst)
+* [Roles](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/roles.rst)
+
+### File System & Data Protection
+
+* [File System Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/filesystem.rst)
+* [Snapshot Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/snapshot.rst)
+* [Snapshot Schedule Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/snapshotschedule.rst)
+* [Smart Quota Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/smartquota.rst)
+
+### Storage Management & Data Placement
+
+* [Smart Pool Setting Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/smartpoolsettings.rst)
+* [Storagepool Tier Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/storagepooltier.rst)
+* [Filepool Policy Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/filepoolpolicy.rst)
+
+### Protocol Services
+
+* [NFS Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/nfs.rst)
+* [NFS Alias Module](https://github.com/dell/ansible-powerscale/tree/main/docs/modules/nfs_alias.rst)
+* [NFS Default Settings Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/nfs_default_settings.rst)
+* [NFS Global Settings Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/nfs_global_settings.rst)
+* [NFS Zone Settings Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/nfs_zone_settings.rst)
+* [SMB Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/smb.rst)
+* [SMB File Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/smb_file.rst)
+* [SMB Global Settings Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/smb_global_settings.rst)
+* [S3 Bucket Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/s3_bucket.rst)
+
+### Network Configuration
+
+* [Groupnet Module](https://github.com/dell/ansible-powerscale/tree/main/docs/modules/groupnet.rst)
+* [Subnet Module](https://github.com/dell/ansible-powerscale/tree/main/docs/modules/subnet.rst)
+* [Network Pool Module](https://github.com/dell/ansible-powerscale/tree/main/docs/modules/networkpool.rst)
+* [Network Rule Module](https://github.com/dell/ansible-powerscale/tree/main/docs/modules/networkrule.rst)
+* [Network Setting Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/networksettings.rst)
+
+### Access Zones & System Settings
+
+* [Access Zone Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/accesszone.rst)
+* [Settings Module](https://github.com/dell/ansible-powerscale/tree/main/docs/modules/settings.rst)
+
+### SyncIQ (Replication)
+
+* [SyncIQ Policy Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/synciqpolicy.rst)
+* [SyncIQ Jobs Module](https://github.com/dell/ansible-powerscale/tree/main/docs/modules/synciqjob.rst)
+* [SyncIQ Performance Rules Module](https://github.com/dell/ansible-powerscale/tree/main/docs/modules/synciqrules.rst)
+* [SyncIQ Reports Module](https://github.com/dell/ansible-powerscale/tree/main/docs/modules/synciqreports.rst)
+* [SyncIQ Target Reports Module](https://github.com/dell/ansible-powerscale/tree/main/docs/modules/synciqtargetreports.rst)
+* [SyncIQ Global Settings Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/synciq_global_settings.rst)
+* [SyncIQ Certificate Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/synciqcertificate.rst)
+
+### System Monitoring & Support
+* [Node Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/node.rst)
+* [SNMP Settings Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/snmp_settings.rst)
+* [Server Certificate Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/server_certificate.rst)
+* [Alert Settings](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/alert_settings.rst)
+* [Support Assist](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/support_assist.rst)
+* [Info Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/info.rst)
 
 ## Installation and execution of Ansible modules for Dell PowerScale
 The installation and execution steps of Ansible modules for Dell PowerScale can be found [here](https://github.com/dell/ansible-powerscale/blob/main/docs/INSTALLATION.md).
