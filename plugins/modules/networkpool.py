@@ -200,14 +200,14 @@ EXAMPLES = r'''
     groupnet_name: "groupnet0"
     subnet_name: "subnet0"
     additional_pool_params:
-        ranges:
+      ranges:
         - low: "10.230.**.***"
-            high: "10.230.**.***"
-        range_state: "add"
-        ifaces:
+          high: "10.230.**.***"
+      range_state: "add"
+      ifaces:
         - iface: "ext-1"
-            lnn: 1
-        iface_state: "add"
+          lnn: 1
+      iface_state: "add"
     sc_params:
       sc_dns_zone: "10.230.**.***"
       sc_connect_policy: "throughput"
