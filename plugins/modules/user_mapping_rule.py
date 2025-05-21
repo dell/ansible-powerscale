@@ -761,7 +761,7 @@ class UserMappingRuleHandler():
             error_message = "apply_order should be greater than 0."
             LOG.error(error_message)
             user_mapping_rule_object.module.fail_json(msg=error_message)
-        if user_mapping_rule_params['apply_order'] is not None and user_mapping_rule_params['state'] == 'present':
+        if 'apply_order' in user_mapping_rule_params and user_mapping_rule_params['apply_order'] is not None and user_mapping_rule_params['state'] == 'present':
             user_mapping_rule_details = user_mapping_rule_object.get_rule_details(
                 user_mapping_rule_params['apply_order'], user_mapping_rule_params['access_zone'])
             user_mapping_rule_object.result['user_mapping_rule_details'] = user_mapping_rule_details
