@@ -158,7 +158,7 @@ Parameters
 
 
     aggregation_mode (optional, str, None)
-      OneFS supports the following :literal:`NIC` aggregation modes.
+      OneFS supports the following \ :literal:`NIC`\  aggregation modes.
 
 
 
@@ -173,9 +173,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    :literal:`true` - indicates that the SSL certificate should be verified.
+    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
 
-    :literal:`false` - indicates that the SSL certificate should not be verified.
+    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -193,9 +193,9 @@ Notes
 -----
 
 .. note::
-   - The :emphasis:`check\_mode` is supported.
-   - The :emphasis:`diff` is supported.
-   - Removal of :emphasis:`sc\_dns\_zone\_aliases` is not supported.
+   - The \ :emphasis:`check\_mode`\  is supported.
+   - The \ :emphasis:`diff`\  is supported.
+   - Removal of \ :emphasis:`sc\_dns\_zone\_aliases`\  is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -213,17 +213,17 @@ Examples
         api_user: "{{api_user}}"
         api_password: "{{api_password}}"
         verify_ssl: "{{verify_ssl}}"
-        groupnet: "groupnet0"
-        subnet: "subnet0"
+        groupnet_name: "groupnet0"
+        subnet_name: "subnet0"
         additional_pool_params:
-        ranges:
-          - low: "10.230.**.***"
-            high: "10.230.**.***"
-        range_state: "add"
-        ifaces:
-          - iface: "ext-1"
-            lnn: 1
-        iface_state: "add"
+          ranges:
+            - low: "10.230.**.***"
+              high: "10.230.**.***"
+          range_state: "add"
+          ifaces:
+            - iface: "ext-1"
+              lnn: 1
+          iface_state: "add"
         sc_params:
           sc_dns_zone: "10.230.**.***"
           sc_connect_policy: "throughput"
@@ -239,7 +239,7 @@ Examples
               prefix_len: 21
               subnet: "10.**.**.**"
               route_state: "add"
-        pool: "Test_Pool_2"
+        pool_name: "Test_Pool_2"
         access_zone: "system"
         state: "present"
 
@@ -249,9 +249,9 @@ Examples
         api_user: "{{api_user}}"
         api_password: "{{api_password}}"
         verify_ssl: "{{verify_ssl}}"
-        groupnet: "groupnet0"
-        subnet: "subnet0"
-        pool: "Test_Pool_2"
+        groupnet_name: "groupnet0"
+        subnet_name: "subnet0"
+        pool_name: "Test_Pool_2"
         state: "present"
 
     - name: Modify Network Pool
@@ -260,9 +260,9 @@ Examples
         api_user: "{{api_user}}"
         api_password: "{{api_password}}"
         verify_ssl: "{{verify_ssl}}"
-        groupnet: "groupnet0"
-        subnet: "subnet0"
-        pool: "Test_Pool_2"
+        groupnet_name: "groupnet0"
+        subnet_name: "subnet0"
+        pool_name: "Test_Pool_2"
         additional_pool_params:
           ranges:
             - low: "10.230.**.***"
@@ -301,9 +301,9 @@ Examples
         api_user: "{{api_user}}"
         api_password: "{{api_password}}"
         verify_ssl: "{{verify_ssl}}"
-        groupnet: "groupnet0"
-        subnet: "subnet0"
-        pool: "Test_Pool_2"
+        groupnet_name: "groupnet0"
+        subnet_name: "subnet0"
+        pool_name: "Test_Pool_2"
         state: "absent"
 
     - name: Rename a network Pool

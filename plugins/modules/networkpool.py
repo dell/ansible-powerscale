@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: (c) 2021-2024, Dell Technologies
+# Copyright: (c) 2021-2025, Dell Technologies
 
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
@@ -197,17 +197,17 @@ EXAMPLES = r'''
     api_user: "{{api_user}}"
     api_password: "{{api_password}}"
     verify_ssl: "{{verify_ssl}}"
-    groupnet: "groupnet0"
-    subnet: "subnet0"
+    groupnet_name: "groupnet0"
+    subnet_name: "subnet0"
     additional_pool_params:
-    ranges:
-      - low: "10.230.**.***"
-        high: "10.230.**.***"
-    range_state: "add"
-    ifaces:
-      - iface: "ext-1"
-        lnn: 1
-    iface_state: "add"
+      ranges:
+        - low: "10.230.**.***"
+          high: "10.230.**.***"
+      range_state: "add"
+      ifaces:
+        - iface: "ext-1"
+          lnn: 1
+      iface_state: "add"
     sc_params:
       sc_dns_zone: "10.230.**.***"
       sc_connect_policy: "throughput"
@@ -223,7 +223,7 @@ EXAMPLES = r'''
           prefix_len: 21
           subnet: "10.**.**.**"
           route_state: "add"
-    pool: "Test_Pool_2"
+    pool_name: "Test_Pool_2"
     access_zone: "system"
     state: "present"
 
@@ -233,9 +233,9 @@ EXAMPLES = r'''
     api_user: "{{api_user}}"
     api_password: "{{api_password}}"
     verify_ssl: "{{verify_ssl}}"
-    groupnet: "groupnet0"
-    subnet: "subnet0"
-    pool: "Test_Pool_2"
+    groupnet_name: "groupnet0"
+    subnet_name: "subnet0"
+    pool_name: "Test_Pool_2"
     state: "present"
 
 - name: Modify Network Pool
@@ -244,9 +244,9 @@ EXAMPLES = r'''
     api_user: "{{api_user}}"
     api_password: "{{api_password}}"
     verify_ssl: "{{verify_ssl}}"
-    groupnet: "groupnet0"
-    subnet: "subnet0"
-    pool: "Test_Pool_2"
+    groupnet_name: "groupnet0"
+    subnet_name: "subnet0"
+    pool_name: "Test_Pool_2"
     additional_pool_params:
       ranges:
         - low: "10.230.**.***"
@@ -285,9 +285,9 @@ EXAMPLES = r'''
     api_user: "{{api_user}}"
     api_password: "{{api_password}}"
     verify_ssl: "{{verify_ssl}}"
-    groupnet: "groupnet0"
-    subnet: "subnet0"
-    pool: "Test_Pool_2"
+    groupnet_name: "groupnet0"
+    subnet_name: "subnet0"
+    pool_name: "Test_Pool_2"
     state: "absent"
 
 - name: Rename a network Pool
