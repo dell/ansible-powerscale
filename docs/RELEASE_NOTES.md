@@ -1,6 +1,6 @@
 **Ansible Modules for Dell Technologies PowerScale** 
 =========================================
-### Release notes 3.8.0.1
+### Release notes 3.8.1
 
 >   © 2025 Dell Inc. or its subsidiaries. All rights reserved. Dell
 >   and other trademarks are trademarks of Dell Inc. or its
@@ -27,7 +27,7 @@ Table 1. Revision history
 
 | Revision | Date            | Description                                               |
 |----------|-----------------|-----------------------------------------------------------|
-| 01       | May 2025        | Ansible Modules for Dell PowerScale 3.8.0.1               |
+| 01       | May 2025        | Ansible Modules for Dell PowerScale 3.8.1                 |
 | 02       | March 2025      | Ansible Modules for Dell PowerScale 3.8.0                 |
 | 03       | December 2024   | Ansible Modules for Dell PowerScale 3.7.0                 |
 

@@ -4,7 +4,7 @@ Dellemc.Powerscale Change Logs
 
 .. contents:: Topics
 
-v3.8.0.1
+v3.8.1
 ======
 
 Bug Fixes

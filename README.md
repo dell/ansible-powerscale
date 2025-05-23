@@ -74,14 +74,14 @@ The tasks can be executed by running simple playbooks written in yaml syntax.
 Ansible collection for PowerScale is released and licensed under the GPL-3.0 license. See [LICENSE](https://github.com/dell/ansible-powerscale/blob/main/LICENSE) for the full terms.
 
 ## Supported platforms
-  * Dell PowerScale OneFS versions 9.4.x, 9.5.x, 9.7.x, and 9.8.x
+  * Dell PowerScale OneFS versions 9.5.x, 9.7.x, and 9.8.x
 
 ## Prerequisites
 This table provides information about the software prerequisites for the Ansible Modules for Dell PowerScale.
 
 | **Ansible Modules** | **OneFS Version** | **Python version** | **Python SDK version** | **Ansible**              |
 |---------------------|-----------------------|--------------------|----------------------------|--------------------------|
-| v3.8.0.1 | 9.4.x <br> 9.5.x <br> 9.7.x <br> 9.8.x | 3.9 <br> 3.10 <br> 3.11 <br> 3.12 | 0.3.0.1 | 2.15 <br> 2.16 <br> 2.17 |
+| v3.8.1 | 9.5.x <br> 9.7.x <br> 9.8.x | 3.9 <br> 3.10 <br> 3.11 <br> 3.12 | 0.3.0.1 | 2.15 <br> 2.16 <br> 2.17 <br> 2.18 |
 
 # List of Ansible modules for Dell PowerScale
 
