@@ -29,7 +29,7 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.15 or later.
+- Ansible-core 2.16 or later.
 - Python 3.10, 3.11 or 3.12.
 
 

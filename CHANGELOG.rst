@@ -4,6 +4,14 @@ Dellemc.Powerscale Change Logs
 
 .. contents:: Topics
 
+v3.8.1
+======
+
+Bug Fixes
+-------------
+
+- GitHub defect fixes for filesystem module. (Issues # 38, # 121 and # 174)
+
 v3.8.0
 ======
 
