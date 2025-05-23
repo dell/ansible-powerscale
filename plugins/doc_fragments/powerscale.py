@@ -44,7 +44,7 @@ class ModuleDocFragment(object):
             required: true
     requirements:
       - A Dell PowerScale Storage system.
-      - Ansible-core 2.15 or later.
+      - Ansible-core 2.16 or later.
       - Python 3.10, 3.11 or 3.12.
     notes:
       - The modules present in this collection named as 'dellemc.powerscale'
