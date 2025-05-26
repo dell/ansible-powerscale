@@ -82,7 +82,7 @@ New Features and Enhancements
 ---------------------------
 This section describes the features or enhancements of the Ansible Modules for Dell PowerScale for this release.
 
-The Ansible Modules for Dell PowerScale release 3.8.0.1 provides the following enhancements:
+The Ansible Modules for Dell PowerScale release 3.8.1 provides the following enhancements:
 
 - GitHub defect fixes for filesystem module. (Issues # 38, # 121 and # 174)
 
