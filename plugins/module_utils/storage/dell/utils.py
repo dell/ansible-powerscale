@@ -282,9 +282,9 @@ def find_compatible_powerscale_sdk(module_params):
     error_message = ""
 
     powerscale_packages = [pkg for pkg in pkg_resources.working_set
-                           if pkg.key.startswith("isi_sdk")]
+                           if pkg.key.startswith("isi-sdk")]
     if powerscale_packages:
-        import_powerscale_sdk(powerscale_packages[0].key)
+        import_powerscale_sdk(powerscale_packages[0].key.replace('-', '_'))
         try:
             HAS_POWERSCALE_SDK = True
             api_client = get_powerscale_connection(module_params)
