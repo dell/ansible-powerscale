@@ -300,7 +300,7 @@ def find_compatible_powerscale_sdk(module_params):
             minor = str(parse_version(cluster_api.get_cluster_config().to_dict()['onefs_version']['release'].split('.')[1]))
             array_version = major + "_" + minor + "_0"
 
-            if int(minor) >= 5:
+            if int(minor) >= 10:
                 compatible_powerscale_sdk = "isilon_sdk.v9_10_0"
             else:
                 compatible_powerscale_sdk = "isilon_sdk.v" + array_version
