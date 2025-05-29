@@ -21,7 +21,7 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.15 or later.
+- Ansible-core 2.16 or later.
 - Python 3.10, 3.11 or 3.12.
 
 
@@ -54,21 +54,21 @@ Parameters
 
 
     directory_create_mask (optional, str, None)
-      Specifies the :literal:`UNIX` mask bits (octal) that are removed when a directory is created, restricting permissions.
+      Specifies the \ :literal:`UNIX`\  mask bits (octal) that are removed when a directory is created, restricting permissions.
 
       Mask bits are applied before mode bits are applied.
 
 
     directory_create_mode (optional, str, None)
-      Specifies the :literal:`UNIX` mode bits (octal) that are added when a directory is created, enabling permissions.
+      Specifies the \ :literal:`UNIX`\  mode bits (octal) that are added when a directory is created, enabling permissions.
 
 
     file_create_mask (optional, str, None)
-      Specifies the :literal:`UNIX` mask bits (octal) that are removed when a file is created, restricting permissions.
+      Specifies the \ :literal:`UNIX`\  mask bits (octal) that are removed when a file is created, restricting permissions.
 
 
     file_create_mode (optional, str, None)
-      Specifies the :literal:`UNIX` mode bits (octal) that are added when a file is created, enabling permissions.
+      Specifies the \ :literal:`UNIX`\  mode bits (octal) that are added when a file is created, enabling permissions.
 
 
     access_based_enumeration (optional, bool, None)
@@ -93,7 +93,7 @@ Parameters
 
 
     commit_asynchronous (optional, bool, None)
-      Set to :literal:`true` if NFS commit requests execute asynchronously.
+      Set to \ :literal:`true`\  if NFS commit requests execute asynchronously.
 
 
     nfsv4_domain (optional, str, None)
@@ -101,36 +101,36 @@ Parameters
 
 
     nfsv4_allow_numeric_ids (optional, bool, None)
-      If :literal:`true`\ , sends owners and groups as UIDs and GIDs when look up fails or if the :emphasis:`nfsv4\_no\_name` property is set to 1.
+      If \ :literal:`true`\ , sends owners and groups as UIDs and GIDs when look up fails or if the \ :emphasis:`nfsv4\_no\_name`\  property is set to 1.
 
 
     nfsv4_no_domain (optional, bool, None)
-      If :literal:`true`\ , sends owners and groups without a domain name.
+      If \ :literal:`true`\ , sends owners and groups without a domain name.
 
 
     nfsv4_no_domain_uids (optional, bool, None)
-      If :literal:`true`\ , sends UIDs and GIDs without a domain name.
+      If \ :literal:`true`\ , sends UIDs and GIDs without a domain name.
 
 
     nfsv4_no_names (optional, bool, None)
-      If :literal:`true`\ , sends owners and groups as UIDs and GIDs.
+      If \ :literal:`true`\ , sends owners and groups as UIDs and GIDs.
 
 
 
   provider_state (False, str, None)
     Defines whether the auth providers should be added or removed from access zone.
 
-    If :emphasis:`auth\_providers` are given, then :emphasis:`provider\_state` should also be specified.
+    If \ :emphasis:`auth\_providers`\  are given, then \ :emphasis:`provider\_state`\  should also be specified.
 
-    :literal:`add` - indicates that the auth providers should be added to the access zone.
+    \ :literal:`add`\  - indicates that the auth providers should be added to the access zone.
 
-    :literal:`remove` - indicates that auth providers should be removed from the access zone.
+    \ :literal:`remove`\  - indicates that auth providers should be removed from the access zone.
 
 
   auth_providers (optional, list, None)
     Specifies the auth providers which need to be added or removed from access zone.
 
-    If :emphasis:`auth\_providers` are given, then :emphasis:`provider\_state` should also be specified.
+    If \ :emphasis:`auth\_providers`\  are given, then \ :emphasis:`provider\_state`\  should also be specified.
 
 
     provider_name (True, str, None)
@@ -144,18 +144,18 @@ Parameters
     priority (optional, int, None)
       Specifies the order of priority of the auth provider which needs to be added to access zone.
 
-      :literal:`1` denotes the topmost priority.
+      \ :literal:`1`\  denotes the topmost priority.
 
-      If :emphasis:`priority` is not provided, authentication provider will have lowest priority.
+      If \ :emphasis:`priority`\  is not provided, authentication provider will have lowest priority.
 
 
 
   state (True, str, None)
     Defines whether the access zone should exist or not.
 
-    :literal:`present` - indicates that the access zone should exist on the system.
+    \ :literal:`present`\  - indicates that the access zone should exist on the system.
 
-    :literal:`absent` - indicates that the access zone should not exist on the system.
+    \ :literal:`absent`\  - indicates that the access zone should not exist on the system.
 
 
   onefs_host (True, str, None)
@@ -169,9 +169,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    :literal:`true` - indicates that the SSL certificate should be verified.
+    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
 
-    :literal:`false` - indicates that the SSL certificate should not be verified.
+    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -189,7 +189,7 @@ Notes
 -----
 
 .. note::
-   - The :emphasis:`check\_mode` is not supported.
+   - The \ :emphasis:`check\_mode`\  is not supported.
    - Built-in System zone cannot be deleted.
    - When access zone is deleted, all associated authentication providers remain available to other zones, the IP addresses are not reassigned to other zones.
    - When access zone is deleted, SMB shares, NFS exports, and HDFS data paths are deleted, the directories and data still exist, and  new shares, exports, or paths can be mapped in another access zone.
@@ -399,7 +399,7 @@ access_zone_details (When access zone exists, complex, {'nfs_settings': {'export
 
 
       commit_asynchronous (, bool, )
-        Set to :literal:`true` if NFS commit requests execute asynchronously
+        Set to \ :literal:`true`\  if NFS commit requests execute asynchronously
 
 
 
@@ -412,19 +412,19 @@ access_zone_details (When access zone exists, complex, {'nfs_settings': {'export
 
 
       nfsv4_allow_numeric_ids (, bool, )
-        If :literal:`true`\ , sends owners and groups as UIDs and GIDs when look up fails or if the 'nfsv4\_no\_name' property is set to 1
+        If \ :literal:`true`\ , sends owners and groups as UIDs and GIDs when look up fails or if the 'nfsv4\_no\_name' property is set to 1
 
 
       nfsv4_no_domain (, bool, )
-        If :literal:`true`\ , sends owners and groups without a domain name
+        If \ :literal:`true`\ , sends owners and groups without a domain name
 
 
       nfsv4_no_domain_uids (, bool, )
-        If :literal:`true`\ , sends UIDs and GIDs without a domain name
+        If \ :literal:`true`\ , sends UIDs and GIDs without a domain name
 
 
       nfsv4_no_names (, bool, )
-        If :literal:`true`\ , sends owners and groups as UIDs and GIDs
+        If \ :literal:`true`\ , sends owners and groups as UIDs and GIDs
 
 
 

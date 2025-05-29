@@ -21,7 +21,7 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.15 or later.
+- Ansible-core 2.16 or later.
 - Python 3.10, 3.11 or 3.12.
 
 
@@ -34,17 +34,17 @@ Parameters
 
 
   group_id (optional, int, None)
-    The :emphasis:`group\_id` is auto generated or can be assigned at the time of creation.
+    The \ :emphasis:`group\_id`\  is auto generated or can be assigned at the time of creation.
 
-    For all other operations either :emphasis:`group\_name` or :emphasis:`group\_id` is needed.
+    For all other operations either \ :emphasis:`group\_name`\  or \ :emphasis:`group\_id`\  is needed.
 
 
   access_zone (optional, str, system)
     This option mentions the zone in which a group is created.
 
-    For creation, :emphasis:`access\_zone` acts as an attribute for the group.
+    For creation, \ :emphasis:`access\_zone`\  acts as an attribute for the group.
 
-    For all other operations :emphasis:`access\_zone` acts as a filter.
+    For all other operations \ :emphasis:`access\_zone`\  acts as a filter.
 
 
   provider_type (optional, str, local)
@@ -54,7 +54,7 @@ Parameters
 
     Details of groups of all provider types can be fetched.
 
-    If the :emphasis:`provider\_type` is :literal:`ads` then the domain name of the Active Directory Server has to be mentioned in the group\_name. The format for the group\_name should be 'DOMAIN\_NAME\\group\_name' or "DOMAIN\_NAME\\\\group\_name".
+    If the \ :emphasis:`provider\_type`\  is \ :literal:`ads`\  then the domain name of the Active Directory Server has to be mentioned in the group\_name. The format for the group\_name should be 'DOMAIN\_NAME\\group\_name' or "DOMAIN\_NAME\\\\group\_name".
 
     This option acts as a filter for all operations except creation.
 
@@ -64,13 +64,13 @@ Parameters
 
 
   users (optional, list, None)
-    Either :emphasis:`user\_name` or :emphasis:`user\_id` is needed to add or remove the user from the group.
+    Either \ :emphasis:`user\_name`\  or \ :emphasis:`user\_id`\  is needed to add or remove the user from the group.
 
     Users can be part of multiple groups.
 
 
   user_state (optional, str, None)
-    The :emphasis:`user\_state` option is used to  determine whether the users will exist for a particular group or not.
+    The \ :emphasis:`user\_state`\  option is used to  determine whether the users will exist for a particular group or not.
 
     It is required when users are added or removed from a group.
 
@@ -86,9 +86,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    :literal:`true` - indicates that the SSL certificate should be verified.
+    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
 
-    :literal:`false` - indicates that the SSL certificate should not be verified.
+    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -106,7 +106,7 @@ Notes
 -----
 
 .. note::
-   - The :emphasis:`check\_mode` is not supported.
+   - The \ :emphasis:`check\_mode`\  is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 

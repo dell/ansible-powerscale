@@ -21,7 +21,7 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.15 or later.
+- Ansible-core 2.16 or later.
 - Python 3.10, 3.11 or 3.12.
 
 
@@ -36,9 +36,9 @@ Parameters
   enabled (optional, bool, None)
     Enable or disable the channel.
 
-    :literal:`True` indicates the channel is enabled.
+    \ :literal:`True`\  indicates the channel is enabled.
 
-    :literal:`False` indicates the channel is disabled.
+    \ :literal:`False`\  indicates the channel is disabled.
 
     If not specified when creating the channel, it will be enabled by default.
 
@@ -60,7 +60,7 @@ Parameters
   smtp_parameters (optional, dict, None)
     Parameters to be used for an SMTP channel.
 
-    The :emphasis:`smtp\_parameters` is required when :emphasis:`type` is :literal:`smtp`.
+    The \ :emphasis:`smtp\_parameters`\  is required when \ :emphasis:`type`\  is \ :literal:`smtp`\ .
 
 
     address (optional, list, None)
@@ -94,15 +94,15 @@ Parameters
     smtp_use_auth (optional, bool, None)
       Enable SMTP authentication.
 
-      If :emphasis:`smtp\_use\_auth` is not set during creation, then it defaults set to :literal:`false`.
+      If \ :emphasis:`smtp\_use\_auth`\  is not set during creation, then it defaults set to \ :literal:`false`\ .
 
 
     smtp_username (optional, str, None)
-      Username for SMTP authentication, only if :emphasis:`smtp\_use\_auth` is :literal:`true`.
+      Username for SMTP authentication, only if \ :emphasis:`smtp\_use\_auth`\  is \ :literal:`true`\ .
 
 
     smtp_password (optional, str, None)
-      Password for SMTP authentication, only if :emphasis:`smtp\_use\_auth` is :literal:`true`.
+      Password for SMTP authentication, only if \ :emphasis:`smtp\_use\_auth`\  is \ :literal:`true`\ .
 
 
     smtp_security (optional, str, None)
@@ -110,13 +110,13 @@ Parameters
 
 
     update_password (optional, str, always)
-      This parameter controls the way the :emphasis:`smtp\_password` is updated during the creation and modification of alert channel.
+      This parameter controls the way the \ :emphasis:`smtp\_password`\  is updated during the creation and modification of alert channel.
 
-      :literal:`always` will update password for each execution.
+      \ :literal:`always`\  will update password for each execution.
 
-      :literal:`on\_create` will only set while creating a alert channel.
+      \ :literal:`on\_create`\  will only set while creating a alert channel.
 
-      For modifying :emphasis:`smtp\_password`\ , set the :emphasis:`update\_password` to :literal:`always`.
+      For modifying \ :emphasis:`smtp\_password`\ , set the \ :emphasis:`update\_password`\  to \ :literal:`always`\ .
 
 
 
@@ -127,9 +127,9 @@ Parameters
   type (optional, str, None)
     Type of the channel.
 
-    If :emphasis:`type` is :literal:`smtp`\ , then :emphasis:`smtp\_parameters` is required.
+    If \ :emphasis:`type`\  is \ :literal:`smtp`\ , then \ :emphasis:`smtp\_parameters`\  is required.
 
-    If :emphasis:`type` is not set during creation, then it defaults to :literal:`connectemc`.
+    If \ :emphasis:`type`\  is not set during creation, then it defaults to \ :literal:`connectemc`\ .
 
 
   onefs_host (True, str, None)
@@ -143,9 +143,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    :literal:`true` - indicates that the SSL certificate should be verified.
+    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
 
-    :literal:`false` - indicates that the SSL certificate should not be verified.
+    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -163,7 +163,7 @@ Notes
 -----
 
 .. note::
-   - Idempotency is not supported with :emphasis:`send\_test\_alert` option.
+   - Idempotency is not supported with \ :emphasis:`send\_test\_alert`\  option.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 

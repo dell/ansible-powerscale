@@ -21,7 +21,7 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.15 or later.
+- Ansible-core 2.16 or later.
 - Python 3.10, 3.11 or 3.12.
 
 
@@ -36,29 +36,29 @@ Parameters
   alias_name (optional, str, None)
     The name of the certificate.
 
-    :emphasis:`alias\_name` is mutually exclusive with :emphasis:`certificate\_id`.
+    \ :emphasis:`alias\_name`\  is mutually exclusive with \ :emphasis:`certificate\_id`\ .
 
-    The maximum length for :emphasis:`alias\_name` is 128.
+    The maximum length for \ :emphasis:`alias\_name`\  is 128.
 
 
   description (optional, str, None)
     The description of the certificate.
 
-    The maximum length for :emphasis:`description` is 2048.
+    The maximum length for \ :emphasis:`description`\  is 2048.
 
     Setting an empty value is necessary to remove the certificate description.
 
 
   new_alias_name (optional, str, None)
-    The :emphasis:`alias\_name` of the certificate.
+    The \ :emphasis:`alias\_name`\  of the certificate.
 
-    The maximum length for :emphasis:`new\_alias\_name` is 128.
+    The maximum length for \ :emphasis:`new\_alias\_name`\  is 128.
 
 
   certificate_id (optional, str, None)
     The ID of the imported certificate.
 
-    :emphasis:`certificate\_id` is mutually exclusive with :emphasis:`alias\_name`.
+    \ :emphasis:`certificate\_id`\  is mutually exclusive with \ :emphasis:`alias\_name`\ .
 
 
   certificate_path (optional, path, None)
@@ -72,13 +72,13 @@ Parameters
   certificate_key_password (optional, str, None)
     The password of the certificate key.
 
-    The maximum length for :emphasis:`certificate\_key\_password` is 256.
+    The maximum length for \ :emphasis:`certificate\_key\_password`\  is 256.
 
 
   is_default_certificate (optional, bool, False)
     To set the certificate as the default.
 
-    If the :literal:`True` is selected, the server certificate is set to default.
+    If the \ :literal:`True`\  is selected, the server certificate is set to default.
 
     Another certificate must be selected as default to designate a certificate as non-default.
 
@@ -86,7 +86,7 @@ Parameters
   certificate_monitor_enabled (optional, bool, None)
     Boolean value indicating whether certificate expiration monitoring is enabled.
 
-    This option is applicable if :emphasis:`is\_default\_certificate` is :literal:`True`.
+    This option is applicable if \ :emphasis:`is\_default\_certificate`\  is \ :literal:`True`\ .
 
 
   certificate_pre_expiration_threshold (optional, int, None)
@@ -94,7 +94,7 @@ Parameters
 
     The range for this value is from 0 to 4294967295.
 
-    This option is applicable if :emphasis:`is\_default\_certificate` is :literal:`True`.
+    This option is applicable if \ :emphasis:`is\_default\_certificate`\  is \ :literal:`True`\ .
 
 
   onefs_host (True, str, None)
@@ -108,9 +108,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    :literal:`true` - indicates that the SSL certificate should be verified.
+    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
 
-    :literal:`false` - indicates that the SSL certificate should not be verified.
+    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -128,8 +128,8 @@ Notes
 -----
 
 .. note::
-   - The :emphasis:`check\_mode` is supported.
-   - The :emphasis:`check\_mode` and idempotency is not supported for :emphasis:`certificate\_path`\ , :emphasis:`certificate\_key\_path`\ , and :emphasis:`certificate\_key\_password` when updating certificates.
+   - The \ :emphasis:`check\_mode`\  is supported.
+   - The \ :emphasis:`check\_mode`\  and idempotency is not supported for \ :emphasis:`certificate\_path`\ , \ :emphasis:`certificate\_key\_path`\ , and \ :emphasis:`certificate\_key\_password`\  when updating certificates.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 

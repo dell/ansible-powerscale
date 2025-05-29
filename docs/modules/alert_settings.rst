@@ -21,7 +21,7 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.15 or later.
+- Ansible-core 2.16 or later.
 - Python 3.10, 3.11 or 3.12.
 
 
@@ -42,9 +42,9 @@ Parameters
   prune (optional, int, None)
     Removes all maintenance mode history that is greater than set number of days.
 
-    Range of :emphasis:`prune` is 0 to 4294967295.
+    Range of \ :emphasis:`prune`\  is 0 to 4294967295.
 
-    If :emphasis:`prune` is set in task, then :emphasis:`changed` will be :literal:`true` always.
+    If \ :emphasis:`prune`\  is set in task, then \ :emphasis:`changed`\  will be \ :literal:`true`\  always.
 
 
   onefs_host (True, str, None)
@@ -58,9 +58,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    :literal:`true` - indicates that the SSL certificate should be verified.
+    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
 
-    :literal:`false` - indicates that the SSL certificate should not be verified.
+    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -78,8 +78,8 @@ Notes
 -----
 
 .. note::
-   - The :emphasis:`check\_mode` and idempotency is supported.
-   - Idempotency is not supported with :emphasis:`prune` option.
+   - The \ :emphasis:`check\_mode`\  and idempotency is supported.
+   - Idempotency is not supported with \ :emphasis:`prune`\  option.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 

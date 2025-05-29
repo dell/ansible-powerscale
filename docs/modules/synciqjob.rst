@@ -21,7 +21,7 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.15 or later.
+- Ansible-core 2.16 or later.
 - Python 3.10, 3.11 or 3.12.
 
 
@@ -40,9 +40,9 @@ Parameters
   state (True, str, None)
     The state of the SyncIQ job after the task is performed.
 
-    :literal:`present` - indicates that the SyncIQ job should exist on the system.
+    \ :literal:`present`\  - indicates that the SyncIQ job should exist on the system.
 
-    :literal:`absent` - indicates that the SyncIQ job should not exist on the system.
+    \ :literal:`absent`\  - indicates that the SyncIQ job should not exist on the system.
 
 
   onefs_host (True, str, None)
@@ -56,9 +56,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    :literal:`true` - indicates that the SSL certificate should be verified.
+    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
 
-    :literal:`false` - indicates that the SSL certificate should not be verified.
+    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -77,8 +77,8 @@ Notes
 
 .. note::
    - There is delay in the actual state change of the SyncIQ job. The state change of jobs in 'scheduled' state is not supported.
-   - To start the SyncIQ job use the :ref:`dellemc.powerscale.synciqpolicy <ansible_collections.dellemc.powerscale.synciqpolicy_module>` module.
-   - The :emphasis:`check\_mode` is not supported.
+   - To start the SyncIQ job use the \ :ref:`dellemc.powerscale.synciqpolicy <ansible_collections.dellemc.powerscale.synciqpolicy_module>`\  module.
+   - The \ :emphasis:`check\_mode`\  is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 

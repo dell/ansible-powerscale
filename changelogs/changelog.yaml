@@ -346,3 +346,8 @@ releases:
         - Internal defect fixes for the modules settings, snapshot, group, nfs, smb, smb_global_settings, alert_rule,
           filesystem, nfs_alias, synciqpolicy, ads and info.
     release_date: '2025-03-28'
+  3.8.1:
+    changes:
+      bug_fixes:
+        - GitHub defect fixes for filesystem module. (Issues # 38, # 121 and # 174)
+    release_date: '2025-05-30'

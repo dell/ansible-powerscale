@@ -23,7 +23,7 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.15 or later.
+- Ansible-core 2.16 or later.
 - Python 3.10, 3.11 or 3.12.
 
 
@@ -44,7 +44,7 @@ Parameters
 
     Get, modify and delete operations can also be performed through instance\_name.
 
-    It is mutually exclusive with :emphasis:`domain\_name` for get, modify and delete operations.
+    It is mutually exclusive with \ :emphasis:`domain\_name`\  for get, modify and delete operations.
 
 
   ads_user (optional, str, None)
@@ -114,13 +114,13 @@ Parameters
     groupnet (optional, str, None)
       Groupnet identifier.
 
-      This is an optional parameter and defaults to :literal:`groupnet0`.
+      This is an optional parameter and defaults to \ :literal:`groupnet0`\ .
 
 
     home_directory_template (optional, str, None)
       Specifies the path to the home directory template.
 
-      This is an optional parameter and defaults to :literal:`/ifs/home/%D/%U`.
+      This is an optional parameter and defaults to \ :literal:`/ifs/home/%D/%U`\ .
 
 
     ignore_all_trusts (optional, bool, None)
@@ -128,17 +128,17 @@ Parameters
 
 
     ignored_trusted_domains (optional, list, None)
-      Includes trusted domains when :emphasis:`ignore\_all\_trusts` is set to :literal:`False`.
+      Includes trusted domains when \ :emphasis:`ignore\_all\_trusts`\  is set to \ :literal:`False`\ .
 
 
     include_trusted_domains (optional, list, None)
-      Includes trusted domains when 'ignore\_all\_trusts' is set to :literal:`True`.
+      Includes trusted domains when 'ignore\_all\_trusts' is set to \ :literal:`True`\ .
 
 
     login_shell (optional, str, None)
       Specifies the login shell path.
 
-      This is an optional parameter and defaults to :literal:`/bin/zsh`.
+      This is an optional parameter and defaults to \ :literal:`/bin/zsh`\ .
 
 
     ldap_sign_and_seal (optional, bool, None)
@@ -168,7 +168,7 @@ Parameters
     machine_account (optional, str, None)
       Specifies the machine account name when creating a SAM account with Active Directory.
 
-      The default cluster name is called :literal:`default`.
+      The default cluster name is called \ :literal:`default`\ .
 
 
     machine_password_changes (optional, bool, None)
@@ -227,26 +227,26 @@ Parameters
     state (optional, str, present)
       The state of the SPN.
 
-      :literal:`present` - indicates that the SPN should exist on the machine account.
+      \ :literal:`present`\  - indicates that the SPN should exist on the machine account.
 
-      :literal:`absent` - indicates that the SPN should not exist on the machine account.
+      \ :literal:`absent`\  - indicates that the SPN should not exist on the machine account.
 
 
 
   spn_command (optional, str, None)
     Specify command of SPN.
 
-    :literal:`check` - Check for missing SPNs for an AD provider.
+    \ :literal:`check`\  - Check for missing SPNs for an AD provider.
 
-    :literal:`fix` - Adds missing SPNs for an AD provider.
+    \ :literal:`fix`\  - Adds missing SPNs for an AD provider.
 
 
   state (True, str, None)
     The state of the ads provider after the task is performed.
 
-    :literal:`present` - indicates that the ADS provider should exist on the system.
+    \ :literal:`present`\  - indicates that the ADS provider should exist on the system.
 
-    :literal:`absent` - indicates that the ADS provider should not exist on the system.
+    \ :literal:`absent`\  - indicates that the ADS provider should not exist on the system.
 
 
   onefs_host (True, str, None)
@@ -260,9 +260,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    :literal:`true` - indicates that the SSL certificate should be verified.
+    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
 
-    :literal:`false` - indicates that the SSL certificate should not be verified.
+    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -546,15 +546,15 @@ ads_provider_details (When Active Directory provider exists, complex, {'ads_prov
 
 
   ignore_all_trusts (, bool, )
-    If set to :literal:`true`\ , ignores all trusted domains.
+    If set to \ :literal:`true`\ , ignores all trusted domains.
 
 
   ignored_trusted_domains (, list, )
-    Includes trusted domains when :emphasis:`ignore\_all\_trusts` is set to :literal:`false.`
+    Includes trusted domains when \ :emphasis:`ignore\_all\_trusts`\  is set to \ :literal:`false.`\ 
 
 
   include_trusted_domains (, list, )
-    Includes trusted domains when :emphasis:`ignore\_all\_trusts` is set to :literal:`true.`
+    Includes trusted domains when \ :emphasis:`ignore\_all\_trusts`\  is set to \ :literal:`true.`\ 
 
 
   instance (, str, )
@@ -658,7 +658,7 @@ ads_provider_details (When Active Directory provider exists, complex, {'ads_prov
 
 
   system (, bool, )
-    If set to :literal:`true`\ , indicates that this provider instance was created by OneFS and cannot be removed.
+    If set to \ :literal:`true`\ , indicates that this provider instance was created by OneFS and cannot be removed.
 
 
   unfindable_groups (, list, )
