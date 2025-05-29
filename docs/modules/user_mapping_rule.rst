@@ -21,7 +21,7 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.15 or later.
+- Ansible-core 2.16 or later.
 - Python 3.10, 3.11 or 3.12.
 
 
@@ -54,7 +54,7 @@ Parameters
 
 
       break_on_match (optional, bool, None)
-        If :literal:`true`\ , and the rule was applied successfuly, stop processing further.
+        If \ :literal:`true`\ , and the rule was applied successfuly, stop processing further.
 
 
       default_user (optional, dict, None)
@@ -71,15 +71,15 @@ Parameters
 
 
       group (optional, bool, None)
-        If :literal:`true`\ , the primary GID and primary group SID should be copied to the existing credential.
+        If \ :literal:`true`\ , the primary GID and primary group SID should be copied to the existing credential.
 
 
       groups (optional, bool, None)
-        If :literal:`true`\ , all additional identifiers should be copied to the existing credential.
+        If \ :literal:`true`\ , all additional identifiers should be copied to the existing credential.
 
 
       user (optional, bool, None)
-        If :literal:`true`\ , the primary UID and primary user SID should be copied to the existing credential.
+        If \ :literal:`true`\ , the primary UID and primary user SID should be copied to the existing credential.
 
 
 
@@ -129,9 +129,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    :literal:`true` - indicates that the SSL certificate should be verified.
+    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
 
-    :literal:`false` - indicates that the SSL certificate should not be verified.
+    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -150,7 +150,7 @@ Notes
 
 .. note::
    - Idempotency is not supported for create and delete operations.
-   - The :emphasis:`check\_mode` is supported.
+   - The \ :emphasis:`check\_mode`\  is supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -246,19 +246,19 @@ user_mapping_rule_details (When a rule exists, dict, {'user_mapping_rule_details
 
 
     _break (, bool, )
-      If :literal:`true`\ , and the rule was applied successfuly, stop processing further.
+      If \ :literal:`true`\ , and the rule was applied successfuly, stop processing further.
 
 
     group (, bool, )
-      If :literal:`true`\ , the primary GID and primary group SID should be copied to the existing credential.
+      If \ :literal:`true`\ , the primary GID and primary group SID should be copied to the existing credential.
 
 
     groups (, bool, )
-      If :literal:`true`\ , all additional identifiers should be copied to the existing credential.
+      If \ :literal:`true`\ , all additional identifiers should be copied to the existing credential.
 
 
     user (, bool, )
-      If :literal:`true`\ , the primary UID and primary user SID should be copied to the existing credential.
+      If \ :literal:`true`\ , the primary UID and primary user SID should be copied to the existing credential.
 
 
     default_user (, dict, )
