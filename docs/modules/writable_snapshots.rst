@@ -27,7 +27,7 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.15 or later.
+- Ansible-core 2.16 or later.
 - Python 3.10, 3.11 or 3.12.
 
 
@@ -42,9 +42,9 @@ Parameters
     state (optional, str, present)
       The state of the writable snapshot to create or delete.
 
-      :emphasis:`state` is :literal:`present` - To create a writable snapshot.
+      \ :emphasis:`state`\  is \ :literal:`present`\  - To create a writable snapshot.
 
-      :emphasis:`state` is :literal:`absent` - To delete the writable snapshot.
+      \ :emphasis:`state`\  is \ :literal:`absent`\  - To delete the writable snapshot.
 
 
     dst_path (True, path, None)
@@ -56,7 +56,7 @@ Parameters
     src_snap (False, str, None)
       The source snapshot name or ID.
 
-      This option is required :emphasis:`state` is :literal:`present`.
+      This option is required \ :emphasis:`state`\  is \ :literal:`present`\ .
 
 
 
@@ -71,9 +71,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    :literal:`true` - indicates that the SSL certificate should be verified.
+    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
 
-    :literal:`false` - indicates that the SSL certificate should not be verified.
+    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -91,7 +91,7 @@ Notes
 -----
 
 .. note::
-   - The :emphasis:`writable\_snapshots` parameter will follow the order of deleting operations before creating operations.
+   - The \ :emphasis:`writable\_snapshots`\  parameter will follow the order of deleting operations before creating operations.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 

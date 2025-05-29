@@ -21,7 +21,7 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.15 or later.
+- Ansible-core 2.16 or later.
 - Python 3.10, 3.11 or 3.12.
 
 
@@ -36,7 +36,7 @@ Parameters
 
     If your access zone is System, and you have 'directory1' in the access zone, the path provided should be '/ifs/directory1'.
 
-    :emphasis:`path` is required while creating a S3 bucket.
+    \ :emphasis:`path`\  is required while creating a S3 bucket.
 
     The S3 bucket path can not be modified after creation.
 
@@ -44,7 +44,7 @@ Parameters
   create_path (optional, bool, None)
     Will create the path if does not exist.
 
-    API default is :literal:`false`.
+    API default is \ :literal:`false`\ .
 
 
   access_zone (optional, str, System)
@@ -56,13 +56,13 @@ Parameters
   s3_bucket_name (True, str, None)
     Name of the S3 bucket.
 
-    :emphasis:`s3\_bucket\_name` while creating the S3 bucket.
+    \ :emphasis:`s3\_bucket\_name`\  while creating the S3 bucket.
 
 
   owner (optional, str, None)
     Specifies the owner of the S3 bucket.
 
-    If :emphasis:`owner` not passed, then :literal:`root` will be default :emphasis:`owner` for :literal:`System` access zone only.
+    If \ :emphasis:`owner`\  not passed, then \ :literal:`root`\  will be default \ :emphasis:`owner`\  for \ :literal:`System`\  access zone only.
 
     If owner belongs to another provider domain, it should be mentioned along with domain name as "DOMAIN\_NAME\\\\username" or DOMAIN\_NAME\\username.
 
@@ -70,7 +70,7 @@ Parameters
   description (optional, str, None)
     Specifies the description of the S3 bucket.
 
-    Pass empty string to remove the :emphasis:`description`.
+    Pass empty string to remove the \ :emphasis:`description`\ .
 
 
   object_acl_policy (optional, str, None)
@@ -84,15 +84,15 @@ Parameters
     permission (True, str, None)
       Specifies the S3 permission being allowed.
 
-      :emphasis:`permission` and :emphasis:`grantee` are required together.
+      \ :emphasis:`permission`\  and \ :emphasis:`grantee`\  are required together.
 
 
     grantee (True, dict, None)
       Specifies the properties of grantee.
 
-      :emphasis:`permission` and :emphasis:`grantee` are required together.
+      \ :emphasis:`permission`\  and \ :emphasis:`grantee`\  are required together.
 
-      It consists of :emphasis:`name`\ , :emphasis:`type`\ , and :emphasis:`provider\_type`.
+      It consists of \ :emphasis:`name`\ , \ :emphasis:`type`\ , and \ :emphasis:`provider\_type`\ .
 
 
       name (True, str, None)
@@ -116,9 +116,9 @@ Parameters
   state (optional, str, present)
     Defines whether the S3 bucket should exist or not.
 
-    Value :literal:`present` indicates that the S3 bucket should exist in system.
+    Value \ :literal:`present`\  indicates that the S3 bucket should exist in system.
 
-    Value :literal:`absent` indicates that the S3 bucket should not exist in system.
+    Value \ :literal:`absent`\  indicates that the S3 bucket should not exist in system.
 
 
   onefs_host (True, str, None)
@@ -132,9 +132,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    :literal:`true` - indicates that the SSL certificate should be verified.
+    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
 
-    :literal:`false` - indicates that the SSL certificate should not be verified.
+    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -153,7 +153,7 @@ Notes
 
 .. note::
    - To delete the S3 bucket, the S3 service must be enabled.
-   - The :emphasis:`check\_mode` is supported.
+   - The \ :emphasis:`check\_mode`\  is supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -320,7 +320,7 @@ S3_bucket_details (always, complex, {'access_zone': 'System', 'acl': [{'grantee'
 
 
   path (, str, )
-    Path of S3 bucket with in :literal:`'/ifs'`.
+    Path of S3 bucket with in \ :literal:`'/ifs'`\ .
 
 
   zid (, int, )

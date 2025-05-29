@@ -21,7 +21,7 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.15 or later.
+- Ansible-core 2.16 or later.
 - Python 3.10, 3.11 or 3.12.
 
 
@@ -46,7 +46,7 @@ Parameters
 
 
   dns_server_state (optional, str, None)
-    Specifies if the :emphasis:`dns\_servers` should be added or removed from the groupnet.
+    Specifies if the \ :emphasis:`dns\_servers`\  should be added or removed from the groupnet.
 
 
   dns_search_suffix (optional, list, None)
@@ -60,9 +60,9 @@ Parameters
   state (True, str, None)
     The state of the groupnet after the task is performed.
 
-    :literal:`present` - indicates that the groupnet should exist on the system.
+    \ :literal:`present`\  - indicates that the groupnet should exist on the system.
 
-    :literal:`absent` - indicates that the groupnet should not exist on the system.
+    \ :literal:`absent`\  - indicates that the groupnet should not exist on the system.
 
 
   onefs_host (True, str, None)
@@ -76,9 +76,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    :literal:`true` - indicates that the SSL certificate should be verified.
+    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
 
-    :literal:`false` - indicates that the SSL certificate should not be verified.
+    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -96,7 +96,7 @@ Notes
 -----
 
 .. note::
-   - The :emphasis:`check\_mode` is not supported.
+   - The \ :emphasis:`check\_mode`\  is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
