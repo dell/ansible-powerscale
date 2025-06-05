@@ -46,13 +46,13 @@ Parameters
   description (optional, str, None)
     Specifies the description of the auth role.
 
-    Pass empty string to remove the \ :emphasis:`description`\ .
+    Pass empty string to remove the :emphasis:`description`.
 
 
   copy_role (optional, bool, None)
     Copy the role
 
-    \ :literal:`true`\  will copy the role from the \ :emphasis:`role\_name`\ .
+    :literal:`true` will copy the role from the :emphasis:`role\_name`.
 
 
   privileges (optional, list, None)
@@ -62,13 +62,15 @@ Parameters
     permission (optional, str, None)
       Specifies the permission being allowed for auth role.
 
-      \ :literal:`r`\  indicates read permission.
+      :literal:`+` indicates enabled permission, only for unary permission.
 
-      \ :literal:`w`\  indicates writepermission.
+      :literal:`r` indicates read permission.
 
-      \ :literal:`x`\  indicates execute permission.
+      :literal:`w` indicates writepermission.
 
-      \ :literal:`-`\  indicates none permission.
+      :literal:`x` indicates execute permission.
+
+      :literal:`-` indicates none permission.
 
 
     name (optional, str, None)
@@ -104,9 +106,9 @@ Parameters
   state (optional, str, present)
     Defines whether the auth role should exist or not.
 
-    Value \ :literal:`present`\  indicates that the auth role should exist in system.
+    Value :literal:`present` indicates that the auth role should exist in system.
 
-    Value \ :literal:`absent`\  indicates that the auth role should not exist in system.
+    Value :literal:`absent` indicates that the auth role should not exist in system.
 
 
   onefs_host (True, str, None)
@@ -120,9 +122,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
+    :literal:`true` - indicates that the SSL certificate should be verified.
 
-    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
+    :literal:`false` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -140,7 +142,7 @@ Notes
 -----
 
 .. note::
-   - The \ :emphasis:`check\_mode`\  is supported.
+   - The :emphasis:`check\_mode` is supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 

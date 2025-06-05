@@ -59,7 +59,7 @@ options:
       permission:
         description:
         - Specifies the permission being allowed for auth role.
-        - c(+) indicates enabled permission, only for unary permission.
+        - C(+) indicates enabled permission, only for unary permission.
         - C(r) indicates read permission.
         - C(w) indicates writepermission.
         - C(x) indicates execute permission.
@@ -529,7 +529,11 @@ class Role(PowerScaleBase):
 
     def get_privileges_to_update(self, existing_privileges, role_params, role_details_draft, existing_privileges_to_update):
         for item in role_params['privileges']:
-            privilege = [p for p in existing_privileges if p['name'] == item['name'] and (p['permission'] != item['permission'] and not (p['permission'] == '+' and item['permission'] != '-'))]
+            privilege = [
+                p for p in existing_privileges if p['name'] == item['name'] and \
+                (p['permission'] != item['permission'] and not \
+                (p['permission'] == '+' and item['permission'] != '-'))
+            ]
             if len(privilege) > 0:
                 item['id'] = privilege[0]['id']
                 existing_privileges_to_update.append(item)
