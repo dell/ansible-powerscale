@@ -530,9 +530,11 @@ class Role(PowerScaleBase):
     def get_privileges_to_update(self, existing_privileges, role_params, role_details_draft, existing_privileges_to_update):
         for item in role_params['privileges']:
             privilege = [
-                p for p in existing_privileges if p['name'] == item['name'] and \
-                (p['permission'] != item['permission'] and not \
-                (p['permission'] == '+' and item['permission'] != '-'))
+                p for p in existing_privileges
+                if p['name'] == item['name'] and (
+                    p['permission'] != item['permission'] and not (
+                        p['permission'] == '+' and item['permission'] != '-')
+                )
             ]
             if len(privilege) > 0:
                 item['id'] = privilege[0]['id']
