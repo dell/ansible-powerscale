@@ -319,6 +319,27 @@ class TestRole(PowerScaleUnitBase):
                              powerscale_module_mock.module.params)
         powerscale_module_mock.auth_api.update_auth_role.assert_called()
 
+    def test_modify_role_priveleges_plus_response(self, powerscale_module_mock):
+        self.set_module_params(self.role_args,
+                               {
+                                   "role_name": "Test_Role2",
+                                   "privileges": [
+                                       {
+                                           "name": "Backup",
+                                           "permission": "r",
+                                           "state": "present"
+                                       }
+                                   ]
+                               })
+        powerscale_module_mock.get_role_details = MagicMock(
+            return_value=MockRoleApi.GET_ROLE_RESPONSE_BACKUP_PLUS_SIG)
+        powerscale_module_mock.module.check_mode = False
+        powerscale_module_mock.auth_api.get_auth_privileges().to_dict = MagicMock(
+            return_value=MockRoleApi.PRIVILEGE_LIST_BACKUP_AUDIT)
+        RoleHandler().handle(powerscale_module_mock,
+                             powerscale_module_mock.module.params)
+        powerscale_module_mock.auth_api.update_auth_role.assert_not_called()
+
     def test_modify_role_priveleges_response_1(self, powerscale_module_mock):
         self.set_module_params(self.role_args,
                                {
