@@ -181,6 +181,36 @@ class MockRoleApi:
         ]
     }
 
+    GET_ROLE_RESPONSE_BACKUP_PLUS_SIG = {
+        "description": "This is role description",
+        "id": "Test_Role2",
+        "members": [
+            {
+                "id": "UID:1XXX",
+                "name": "admin",
+                "type": "user"
+            },
+            {
+                "id": "UID:2XXX",
+                "name": "esa",
+                "type": "user"
+            }
+        ],
+        "name": "Test_Role2",
+        "privileges": [
+            {
+                "id": "ISI_PRIV_AUDIT",
+                "name": "Audit",
+                "permission": "r"
+            },
+            {
+                "id": "ISI_PRIV_IFS_BACKUP",
+                "name": "Backup",
+                "permission": "+"
+            }
+        ]
+    }
+
     GET_EMPTY_ROLE_RESPONSE = {
         "description": "Test_Description",
         "id": "Test_Role1",
@@ -246,6 +276,30 @@ class MockRoleApi:
             "state": "present"
         }
     ]
+    PRIVILEGE_LIST_BACKUP_AUDIT = {
+        "privileges": [
+            {
+                "category": "Configuration",
+                "description": "Configure audit capabilities",
+                "id": "ISI_PRIV_AUDIT",
+                "name": "Audit",
+                "parent_id": "ISI_PRIV_ZERO",
+                "permission": "w",
+                "privilegelevel": "flag",
+                "uri": ""
+            },
+            {
+                "category": "File Access",
+                "description": "Backup files from /ifs",
+                "id": "ISI_PRIV_IFS_BACKUP",
+                "name": "Backup",
+                "parent_id": "ISI_PRIV_ZERO",
+                "permission": "r",
+                "privilegelevel": "flag",
+                "uri": ""
+            },
+        ]
+    }
     PRIVILEGE_LIST = {
         "privileges": [
             {
