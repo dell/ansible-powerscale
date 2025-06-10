@@ -1,1 +1,1 @@
-isilon-sdk @ git+https://github.com/vangork/isilon_sdk_python@v2#egg=isilon_sdk&subdirectory=isilon_sdk
+isilon-sdk @ git+https://github.com/vangork/isilon_sdk_python@v3#egg=isilon_sdk&subdirectory=isilon_sdk
