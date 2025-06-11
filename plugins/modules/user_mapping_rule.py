@@ -495,10 +495,11 @@ class UserMappingRule(object):
     def form_rule_for_user_update(self, key, update_rule, new_rule_data, do_update):
         """
         Check and form rule for user update
+        :param key: The key to check in the rules
         :param update_rule: Updated rule data
         :param new_rule_data: New rule data.
         :param do_update: Is update required.
-        :return: True if update is needed and and the new updated rule.
+        :return: True if update is needed and the new updated rule.
         """
         if 'domain' in new_rule_data[key] and new_rule_data[key]['domain'] != update_rule[key]['domain']:
             update_rule[key]['domain'] = new_rule_data[key]['domain']
@@ -536,6 +537,7 @@ class UserMappingRule(object):
         do_update = False
         new_rule_data = new_rule_params['rule']
         if new_rule_data:
+            self.validate_for_specific_operators(new_rule_data)
             if 'operator' in new_rule_data and new_rule_data['operator'] is not None and new_rule_data['operator'] != rule_details['operator']:
                 update_rule['operator'] = new_rule_data['operator']
                 update_rule = self.form_rule_for_operator_update(update_rule, new_rule_data, rule_details)
@@ -544,7 +546,7 @@ class UserMappingRule(object):
                 do_update, update_rule = self.form_rule_for_operations_update(update_rule, new_rule_data, do_update)
             if 'user1' in new_rule_data and new_rule_data['user1'] is not None:
                 do_update, update_rule = self.form_rule_for_user_update('user1', update_rule, new_rule_data, do_update)
-            if 'user2' in new_rule_data and new_rule_data['user1'] is not None:
+            if 'user2' in new_rule_data and new_rule_data['user2'] is not None:
                 do_update, update_rule = self.form_rule_for_user_update('user2', update_rule, new_rule_data, do_update)
         if 'new_order' in new_rule_params and new_rule_params['new_order'] is not None:
             do_update = self.check_new_order_update(new_rule_params['apply_order'], new_rule_params['new_order'], do_update)
