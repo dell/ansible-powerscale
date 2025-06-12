@@ -227,6 +227,33 @@ class TestUserMappingRule(PowerScaleUnitBase):
         self.capture_fail_json_call(MockUserMappingRuleApi.get_error_responses('trim_update_error'),
                                     powerscale_module_mock)
 
+    def test_update_trim_usermappingrule_user_exception(self, powerscale_module_mock):
+        usermappingrules_details = MockUserMappingRuleApi.GET_USERMAPPINGRULE_RESPONSE_FOR_TRIM
+        usermappingrules_details['rules']['rules'].append(usermappingrules_details['rules']['rules'][0])
+        usermappingrules_details_after_update = copy.deepcopy(usermappingrules_details)
+        new_rule = copy.deepcopy(usermappingrules_details['rules']['rules'][0])
+        new_rule['rule'] = {
+            'operator': 'trim',
+            'options': {
+                'groups': True
+            }
+        }
+        usermappingrules_details_after_update['rules']['rules'][0] = new_rule
+        self.usermappingrules_args.update({
+            'apply_order': 2,
+            'new_order': 1,
+            'rule': new_rule['rule'],
+            'state': 'present'
+        })
+        mock_none_response = MagicMock(return_value=None)
+        powerscale_module_mock.module.params = self.usermappingrules_args
+        powerscale_module_mock.auth_api.get_mapping_users_rules = MagicMock(
+            side_effect=[MockSDKResponse(usermappingrules_details),
+                         MockSDKResponse(usermappingrules_details)])
+        powerscale_module_mock.auth_api.update_mapping_users_rules = mock_none_response
+        self.capture_fail_json_call(MockUserMappingRuleApi.get_error_responses('trim_user_error'),
+                                    powerscale_module_mock)
+
     def test_update_usermappingrule_exception(self, powerscale_module_mock):
         usermappingrules_details = MockUserMappingRuleApi.GET_USERMAPPINGRULE_RESPONSE
         usermappingrules_details['rules']['rules'].append(usermappingrules_details['rules']['rules'][0])
