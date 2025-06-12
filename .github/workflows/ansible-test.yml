@@ -1,6 +1,7 @@
 name: CI
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
   pull_request:
@@ -19,10 +20,10 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v3
 
-      - name: Set up Python 3.11
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.11
+          python-version: 3.12
 
       - name: Install ansible (${{ matrix.ansible-version }})
         run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible-version }}.tar.gz --disable-pip-version-check
@@ -31,7 +32,7 @@ jobs:
         run: ansible-galaxy collection build --output-path "${GITHUB_WORKSPACE}/.cache/collection-tarballs"
 
       - name: Store migrated collection artifacts
-        uses: actions/upload-artifact@v4.4.0
+        uses: actions/upload-artifact@v4
         with:
           name: collection
           path: .cache/collection-tarballs
@@ -106,48 +107,6 @@ jobs:
           pull-request-change-detection: true
           coverage: never
 
-  lint:
-    name: Ansible lint
-    runs-on: ubuntu-latest
+  ansible-lint:
     needs: [build]
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.10", "3.11", "3.12"]
-        ansible-version: [stable-2.17, stable-2.16, stable-2.18, devel]
-        exclude:
-          - ansible-version: stable-2.18
-            python-version: "3.10"
-          - ansible-version: devel
-            python-version: "3.10"
-
-    steps:
-      # Important: This sets up your GITHUB_WORKSPACE environment variable
-      - name: Checkout the source code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0 # needed for progressive mode to work
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install ansible (${{ matrix.ansible-version }}) version
-        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible-version }}.tar.gz --disable-pip-version-check
-
-      - name: Install ansible lint
-        run: pip install ansible-lint --disable-pip-version-check
-
-      - name: Download migrated collection artifacts
-        uses: actions/download-artifact@v4.1.8
-        with:
-          name: collection
-          path: .cache/collection-tarballs
-
-      - name: Install collection build
-        run: ansible-galaxy collection install .cache/collection-tarballs/*.tar.gz
-
-      - name: Run Ansible lint
-        run: ansible-lint --show-relpath
-        working-directory: /home/runner/work/ansible-powerscale/ansible-powerscale
+    uses: ansible/ansible-content-actions/.github/workflows/ansible_lint.yaml@main
