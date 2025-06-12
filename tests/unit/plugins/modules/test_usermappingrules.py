@@ -227,7 +227,7 @@ class TestUserMappingRule(PowerScaleUnitBase):
         self.capture_fail_json_call(MockUserMappingRuleApi.get_error_responses('trim_update_error'),
                                     powerscale_module_mock)
 
-    def test_update_trim_usermappingrule_user_error(self, powerscale_module_mock):
+    def test_update_trim_usermappingrule_user_exception(self, powerscale_module_mock):
         usermappingrules_details = MockUserMappingRuleApi.GET_USERMAPPINGRULE_RESPONSE_FOR_TRIM
         usermappingrules_details['rules']['rules'].append(usermappingrules_details['rules']['rules'][0])
         usermappingrules_details_after_update = copy.deepcopy(usermappingrules_details)
