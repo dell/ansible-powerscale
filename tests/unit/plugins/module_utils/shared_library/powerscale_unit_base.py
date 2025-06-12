@@ -37,7 +37,7 @@ class PowerScaleUnitBase:
                 self.powerscale_module_mock.perform_module_operation()
         self.powerscale_module_mock.module.fail_json.assert_called()
         call_args = self.powerscale_module_mock.module.fail_json.call_args.kwargs
-        assert error_msg in call_args['msg']
+        assert call_args['msg'] is not None and error_msg in call_args['msg']
 
     def capture_fail_json_method(self, error_msg, module_mock, function_name, *args, **kwargs):
         with pytest.raises(SystemExit):
