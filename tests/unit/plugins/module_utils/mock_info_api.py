@@ -1953,6 +1953,7 @@ class MockGatherfactsApi:
             "alert_categories": "get_event_categories",
             "alert_channels": "list_event_channels",
             "alert_settings": "get_event_maintenance",
+            "alert_settings_911": "get_maintenance_settings_details",
             "smartquota": "list_quota_quotas",
             "filesystem": "get_directory_contents",
             "writable_snapshots": "list_snapshot_writable",
