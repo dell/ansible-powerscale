@@ -618,7 +618,7 @@ class TestInfo(PowerScaleUnitBase):
         powerscale_module_mock.major = 9
         powerscale_module_mock.minor = 11
         powerscale_module_mock.module.params = self.get_module_args
-        with patch.object(powerscale_module_mock.event_api,
+        with patch.object(powerscale_module_mock.cluster_api,
                           MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
             mock_method.return_value = MockSDKResponse(api_response)
             powerscale_module_mock.perform_module_operation()
