@@ -601,6 +601,30 @@ class TestInfo(PowerScaleUnitBase):
         assert MockGatherfactsApi.get_gather_facts_module_response(
             gather_subset) == powerscale_module_mock.module.exit_json.call_args[1][return_key]
 
+    @pytest.mark.parametrize("input_params", [
+        {"gather_subset": "alert_settings", "return_key": "alert_settings"}
+    ]
+    )
+    def test_get_facts_alert_settings_api_911_module(self, powerscale_module_mock, input_params):
+        """Test the get_facts that uses the alert settings api endpoint to get the module response"""
+
+        gather_subset = input_params.get('gather_subset')
+        return_key = input_params.get('return_key')
+        api_response = MockGatherfactsApi.get_gather_facts_api_response(
+            gather_subset)
+        self.get_module_args.update({
+            'gather_subset': ['alert_settings']
+        })
+        powerscale_module_mock.major = 9
+        powerscale_module_mock.minor = 11
+        powerscale_module_mock.module.params = self.get_module_args
+        with patch.object(powerscale_module_mock.event_api,
+                          MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
+            mock_method.return_value = MockSDKResponse(api_response)
+            powerscale_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_gather_facts_module_response(
+            gather_subset) == powerscale_module_mock.module.exit_json.call_args[1][return_key]
+
     @pytest.mark.parametrize("gather_subset", ["alert_settings"])
     def test_get_facts_alert_settings_api_exception(self, powerscale_module_mock, gather_subset):
         """Test the get_facts that uses the alert settings api endpoint to get the exception"""
