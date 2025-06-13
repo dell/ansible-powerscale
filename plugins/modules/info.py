@@ -4002,7 +4002,7 @@ class Info(object):
             return SupportAssist(self.support_assist_api, self.module).get_support_assist_settings()
         else:
             return {}
-    
+
     def get_maintenance_settings(self):
         """Get maintenance settings based on the version."""
         if self.major > 9 or (self.major == 9 and self.minor > 9):
