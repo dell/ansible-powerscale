@@ -63,3 +63,16 @@ class Cluster:
             error_message = f"Failed to get the details of cluster owner details with error: {utils.determine_error(e)}"
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
+
+    def get_maintenance_settings_details(self):
+        """
+        Get cluster maintenance settings
+        :return: Cluster maintenance settings details.
+        """
+        try:
+            cluster_maintenance_settings = self.cluster_api.get_maintenance_settings()
+            return cluster_maintenance_settings.to_dict()
+        except Exception as e:
+            error_message = f"Failed to get the details of cluster maintenance settings with error: {utils.determine_error(e)}"
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
