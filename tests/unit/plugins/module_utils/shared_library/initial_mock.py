@@ -11,6 +11,8 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
 
 utils.get_logger = MagicMock()
 utils.isi_sdk = MagicMock()
+utils.isi_sdk.major = 9
+utils.isi_sdk.minor = 11
 utils.ISI_SDK_VERSION_9 = MagicMock(return_value=True)
 PREREQS_VALIDATE = {
     "all_packages_found": True
