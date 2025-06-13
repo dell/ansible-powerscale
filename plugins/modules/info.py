@@ -3270,8 +3270,8 @@ class Info(object):
 
         self.api_client = utils.get_powerscale_connection(self.module.params)
         self.isi_sdk = utils.get_powerscale_sdk()
-        self.major = int(str(self.isi_sdk)[21])
-        self.minor = int(str(self.isi_sdk)[23])
+        self.major = self.isi_sdk.major
+        self.minor = self.isi_sdk.minor
         LOG.info('Got python SDK instance for provisioning on PowerScale ')
 
         self.cluster_api = self.isi_sdk.ClusterApi(self.api_client)
@@ -4002,6 +4002,13 @@ class Info(object):
             return SupportAssist(self.support_assist_api, self.module).get_support_assist_settings()
         else:
             return {}
+    
+    def get_maintenance_settings(self):
+        """Get maintenance settings based on the version."""
+        if self.major > 9 or (self.major == 9 and self.minor > 9):
+            return Cluster(self.cluster_api, self.module).get_maintenance_settings_details()
+        else:
+            return Events(self.event_api, self.module).get_event_maintenance()
 
     def perform_module_operation(self):
         """Perform different actions on Gatherfacts based on user parameter chosen in playbook"""
@@ -4109,7 +4116,7 @@ class Info(object):
             'server_certificate': lambda: Certificate(self.certificate_api, self.module).get_server_certificate_with_default(),
             'roles': lambda: Auth(self.auth_api, self.module).get_auth_roles(access_zone),
             'support_assist_settings': self.get_support_assist_settings,
-            'alert_settings': lambda: Events(self.event_api, self.module).get_event_maintenance(),
+            'alert_settings': self.get_maintenance_settings,
             'alert_rules': lambda: Events(self.event_api, self.module).get_alert_rules(),
             'alert_categories': lambda: Events(self.event_api, self.module).get_alert_categories(),
             'alert_channels': lambda: Events(self.event_api, self.module).get_event_channels(),

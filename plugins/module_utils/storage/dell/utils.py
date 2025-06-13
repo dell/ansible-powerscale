@@ -114,7 +114,7 @@ returns configuration object
 def get_powerscale_connection(module_params):
     if HAS_POWERSCALE_SDK:
         if isi_sdk.__name__ == "isilon_sdk":
-            conn = isi_sdk.v9_5_0.Configuration()
+            conn = isi_sdk.v9_10_0.Configuration()
         else:
             conn = isi_sdk.Configuration()
         if module_params['port_no'] is not None:
@@ -126,7 +126,7 @@ def get_powerscale_connection(module_params):
         conn.username = module_params['api_user']
         conn.password = module_params['api_password']
         if isi_sdk.__name__ == "isilon_sdk":
-            api_client = isi_sdk.v9_5_0.ApiClient(conn)
+            api_client = isi_sdk.v9_10_0.ApiClient(conn)
         else:
             api_client = isi_sdk.ApiClient(conn)
         return api_client
@@ -266,12 +266,14 @@ def validate_module_pre_reqs(module_params):
 ''' Import compatible powerscale sdk based on onefs version '''
 
 
-def import_powerscale_sdk(sdk):
+def import_powerscale_sdk(sdk, major, minor):
     try:
         global isi_sdk
         global ApiException
         global HAS_POWERSCALE_SDK
         isi_sdk = importlib.import_module(sdk)
+        isi_sdk.major = major
+        isi_sdk.minor = minor
         ApiException = getattr(importlib.import_module(sdk + ".rest"),
                                'ApiException')
         HAS_POWERSCALE_SDK = True
@@ -291,7 +293,7 @@ def find_compatible_powerscale_sdk(module_params):
                            if pkg.key.startswith("isilon-sdk")]
     if powerscale_packages:
         powerscale_sdk = powerscale_packages[0].key.replace('-', '_')
-        import_powerscale_sdk(powerscale_sdk + ".v9_5_0")
+        import_powerscale_sdk(powerscale_sdk + ".v9_10_0", 9, 10)
         try:
             HAS_POWERSCALE_SDK = True
             api_client = get_powerscale_connection(module_params)
@@ -300,11 +302,8 @@ def find_compatible_powerscale_sdk(module_params):
             minor = str(parse_version(cluster_api.get_cluster_config().to_dict()['onefs_version']['release'].split('.')[1]))
             array_version = major + "_" + minor + "_0"
 
-            if int(minor) >= 5:
-                compatible_powerscale_sdk = "isilon_sdk.v9_5_0"
-            else:
-                compatible_powerscale_sdk = "isilon_sdk.v" + array_version
-            import_powerscale_sdk(compatible_powerscale_sdk)
+            compatible_powerscale_sdk = "isilon_sdk.v" + array_version
+            import_powerscale_sdk(compatible_powerscale_sdk, int(major), int(minor))
 
         except Exception as e:
             HAS_POWERSCALE_SDK = False
