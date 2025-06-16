@@ -205,10 +205,7 @@ class NFSGlobalSettings:
 
         self.api_client = utils.get_powerscale_connection(self.module.params)
         self.isi_sdk = utils.get_powerscale_sdk()
-        cluster_api = utils.isi_sdk.ClusterApi(self.api_client)
-        major = str(cluster_api.get_cluster_config().to_dict()['onefs_version']['release'].split('.')[0])
-        minor = str(cluster_api.get_cluster_config().to_dict()['onefs_version']['release'].split('.')[1])
-        self.array_version = major + "." + minor
+        self.array_version = f"{self.isi_sdk.major}.{self.isi_sdk.minor}"
 
         LOG.info('Got python SDK instance for provisioning on PowerScale ')
         check_mode_msg = f'Check mode flag is {self.module.check_mode}'
