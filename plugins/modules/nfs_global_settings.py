@@ -41,6 +41,11 @@ options:
     description:
     - Enable/Disable the rquota protocol.
     type: bool
+  nfs_rdma_enabled:
+    description:
+    - Enables or disables RDMA for NFS.
+    - Supported on PowerScale 9.8 and later.
+    type: bool
   nfsv3:
     description:
     - Enable/disable NFSv3 protocol.
@@ -53,6 +58,8 @@ options:
       nfsv3_rdma_enabled:
         description:
         - To enable/disable RDMA for NFSv3 protocol.
+        - For PowerScale 9.8 I(nfsv3_rdma_enabled) is not supported
+          and I(nfs_rdma_enabled) is used for both nfsv3 and nfsv4.
         type: bool
   nfsv4:
     description:
@@ -102,6 +109,7 @@ EXAMPLES = r'''
       nfsv40_enabled: true
       nfsv41_enabled: true
       nfsv42_enabled: false
+    nfs_rdma_enabled: true
     rpc_minthreads: 17
     rpc_maxthreads: 20
     rquota_enabled: true
@@ -197,11 +205,29 @@ class NFSGlobalSettings:
 
         self.api_client = utils.get_powerscale_connection(self.module.params)
         self.isi_sdk = utils.get_powerscale_sdk()
+        self.array_version = f"{self.isi_sdk.major}.{self.isi_sdk.minor}"
+
         LOG.info('Got python SDK instance for provisioning on PowerScale ')
         check_mode_msg = f'Check mode flag is {self.module.check_mode}'
         LOG.info(check_mode_msg)
 
         self.protocol_api = self.isi_sdk.ProtocolsApi(self.api_client)
+
+    def validate_input(self):
+        """
+        Validate the input parameters based on the array version.
+        This method checks whether certain parameters are allowed based on the array version.
+        If the array version is 9.8 or later, the nfsv3.nfsv3_rdma_enabled parameter is not allowed.
+        If the array version is earlier than 9.8, the nfs_rdma_enabled parameter is not allowed.
+        """
+        params = self.module.params
+
+        if utils.parse_version(self.array_version) < utils.parse_version("9.8"):
+            if params.get("nfs_rdma_enabled") is not None:
+                self.module.fail_json(msg="nfs_rdma_enabled is not allowed when array version is earlier than 9.8.")
+        else:
+            if params.get("nfsv3") and params.get("nfsv3").get("nfsv3_rdma_enabled") is not None:
+                self.module.fail_json(msg="nfsv3.nfsv3_rdma_enabled is not allowed when array version is 9.8 or later.")
 
     def get_nfs_global_settings_details(self):
         """
@@ -249,14 +275,14 @@ class NFSGlobalSettings:
         nfsv4_keys = ["nfsv4_enabled", "nfsv40_enabled", "nfsv41_enabled", "nfsv42_enabled"]
         if settings_params["nfsv4"] is not None:
             for key in nfsv4_keys:
-                if settings_params["nfsv4"][key] is not None and \
+                if key in settings_params["nfsv4"] and settings_params["nfsv4"][key] is not None and \
                         settings_details[key] != settings_params["nfsv4"][key]:
                     modify_dict[key] = settings_params["nfsv4"][key]
 
         nfsv3_keys = ["nfsv3_enabled", "nfsv3_rdma_enabled"]
         if settings_params["nfsv3"] is not None:
             for key in nfsv3_keys:
-                if settings_params["nfsv3"][key] is not None and \
+                if key in settings_params["nfsv3"] and settings_params["nfsv3"][key] is not None and \
                         settings_details[key] != settings_params["nfsv3"][key]:
                     modify_dict[key] = settings_params["nfsv3"][key]
 
@@ -267,9 +293,9 @@ class NFSGlobalSettings:
         Check whether modification is required in NFS global settings
         """
         modify_dict = {}
-        keys = ["service", "rpc_maxthreads", "rpc_minthreads", "rquota_enabled"]
+        keys = ["service", "rpc_maxthreads", "rpc_minthreads", "rquota_enabled", "nfs_rdma_enabled"]
         for key in keys:
-            if settings_params[key] is not None and \
+            if key in settings_params and settings_params[key] is not None and \
                     settings_details[key] != settings_params[key]:
                 modify_dict[key] = settings_params[key]
 
@@ -284,6 +310,7 @@ class NFSGlobalSettings:
             service=dict(type='bool'), rpc_maxthreads=dict(type='int'),
             rpc_minthreads=dict(type='int'),
             rquota_enabled=dict(type='bool'),
+            nfs_rdma_enabled=dict(type='bool'),
             nfsv3=dict(
                 type='dict', options=dict(
                     nfsv3_enabled=dict(type='bool'),
@@ -319,6 +346,7 @@ class NFSGlobalSettingsModifyHandler:
 
 class NFSGlobalSettingsHandler:
     def handle(self, nfs_global_obj, nfs_global_params):
+        nfs_global_obj.validate_input()
         nfs_global_details = nfs_global_obj.get_nfs_global_settings_details()
         NFSGlobalSettingsModifyHandler().handle(
             nfs_global_obj=nfs_global_obj, nfs_global_params=nfs_global_params,

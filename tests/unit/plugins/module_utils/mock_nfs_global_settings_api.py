@@ -14,7 +14,6 @@ class MockNFSGlobalSettingsApi:
 
     NFS_GLOBAL_COMMON_ARGS = {
         "onefs_host": "**.***.**.***",
-        "nfsv3_enabled": None,
         "nfsv3": None,
         "nfsv4": None,
         "rpc_maxthreads": 20,
@@ -22,9 +21,44 @@ class MockNFSGlobalSettingsApi:
         "rquota_enabled": None,
         "service": None
     }
+
+    NFS_GLOBAL_97_RDMA_ARGS = {
+        "onefs_host": "**.***.**.**",
+        "nfsv3": {"nfsv3_rdma_enabled": True},
+        "nfsv4": None,
+        "rpc_maxthreads": 20,
+        "rpc_minthreads": 17,
+        "rquota_enabled": None,
+        "service": None
+    }
+
+    NFS_GLOBAL_98_RDMA_ARGS = {
+        "onefs_host": "**.***.**.**",
+        "nfs_rdma_enabled": True,
+        "nfsv3": None,
+        "nfsv4": None,
+        "rpc_maxthreads": 20,
+        "rpc_minthreads": 17,
+        "rquota_enabled": None,
+        "service": None
+    }
+
     GET_NFS_GLOBAL_RESPONSE = {
         "nfsv3_enabled": False,
         "nfsv3_rdma_enabled": True,
+        "nfsv40_enabled": True,
+        "nfsv41_enabled": True,
+        "nfsv42_enabled": False,
+        "nfsv4_enabled": True,
+        "rpc_maxthreads": 20,
+        "rpc_minthreads": 17,
+        "rquota_enabled": True,
+        "service": True
+    }
+
+    GET_NFS_GLOBAL_RESPONSE_RDMA_98 = {
+        "nfsv3_enabled": False,
+        "nfs_rdma_enabled": True,
         "nfsv40_enabled": True,
         "nfsv41_enabled": True,
         "nfsv42_enabled": False,
@@ -41,3 +75,7 @@ class MockNFSGlobalSettingsApi:
             return "Got error SDK Error message while getting NFS global setings details "
         elif response_type == 'update_exception':
             return "Modify NFS global settings failed with error: SDK Error message"
+        elif response_type == 'rdma_exception':
+            return "nfs_rdma_enabled is not allowed when array version is earlier than 9.8."
+        elif response_type == 'rdma_v3_exception':
+            return "nfsv3.nfsv3_rdma_enabled is not allowed when array version is 9.8 or later."

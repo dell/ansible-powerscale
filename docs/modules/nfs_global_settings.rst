@@ -45,6 +45,12 @@ Parameters
     Enable/Disable the rquota protocol.
 
 
+  nfs_rdma_enabled (optional, bool, None)
+    Enables or disables RDMA for NFS.
+
+    Supported on PowerScale 9.8 and later.
+
+
   nfsv3 (optional, dict, None)
     Enable/disable NFSv3 protocol.
 
@@ -55,6 +61,8 @@ Parameters
 
     nfsv3_rdma_enabled (optional, bool, None)
       To enable/disable RDMA for NFSv3 protocol.
+
+      For PowerScale 9.8 :emphasis:`nfsv3\_rdma\_enabled` is not supported and :emphasis:`nfs\_rdma\_enabled` is used for both nfsv3 and nfsv4.
 
 
 
@@ -90,9 +98,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
+    :literal:`true` - indicates that the SSL certificate should be verified.
 
-    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
+    :literal:`false` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -110,7 +118,7 @@ Notes
 -----
 
 .. note::
-   - The \ :emphasis:`check\_mode`\  is supported.
+   - The :emphasis:`check\_mode` is supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -144,6 +152,7 @@ Examples
           nfsv40_enabled: true
           nfsv41_enabled: true
           nfsv42_enabled: false
+        nfs_rdma_enabled: true
         rpc_minthreads: 17
         rpc_maxthreads: 20
         rquota_enabled: true
