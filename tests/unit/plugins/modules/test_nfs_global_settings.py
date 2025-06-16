@@ -22,6 +22,9 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock
     import MockApiException
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.powerscale_unit_base import \
     PowerScaleUnitBase
+from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_sdk_response import (
+    MockSDKResponse,
+)
 
 
 class TestNFSGlobalSettings(PowerScaleUnitBase):
@@ -35,16 +38,42 @@ class TestNFSGlobalSettings(PowerScaleUnitBase):
         self.nfs_global_args.update({
         })
         powerscale_module_mock.module.params = self.nfs_global_args
+        powerscale_module_mock.array_version = "9.7"
         NFSGlobalSettingsHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
         powerscale_module_mock.protocol_api.get_nfs_settings_global.assert_called()
 
     def test_get_nfs_global_details_exception(self, powerscale_module_mock):
         self.nfs_global_args.update({})
         powerscale_module_mock.module.params = self.nfs_global_args
+        powerscale_module_mock.array_version = "9.7"
         powerscale_module_mock.protocol_api.get_nfs_settings_global = MagicMock(
             side_effect=MockApiException)
         self.capture_fail_json_call(
             MockNFSGlobalSettingsApi.get_nfs_global_settings_exception_response('get_details_exception'),
+            NFSGlobalSettingsHandler)
+
+    def test_modify_nfs_rdma_97_exception(self, powerscale_module_mock):
+        self.nfs_global_args.update(MockNFSGlobalSettingsApi.GET_NFS_GLOBAL_RESPONSE_RDMA_98)
+        powerscale_module_mock.module.params = self.nfs_global_args
+        powerscale_module_mock.array_version = "9.7"
+        powerscale_module_mock.protocol_api.get_nfs_settings_global = MagicMock(
+            return_value=MockSDKResponse(
+                MockNFSGlobalSettingsApi.GET_NFS_GLOBAL_RESPONSE_RDMA_98
+            ))
+        self.capture_fail_json_call(
+            MockNFSGlobalSettingsApi.get_nfs_global_settings_exception_response('rdma_exception'),
+            NFSGlobalSettingsHandler)
+
+    def test_modify_nfs_rdma_98_exception(self, powerscale_module_mock):
+        self.nfs_global_args.update(MockNFSGlobalSettingsApi.NFS_GLOBAL_97_RDMA_ARGS)
+        powerscale_module_mock.module.params = self.nfs_global_args
+        powerscale_module_mock.array_version = "9.8"
+        powerscale_module_mock.protocol_api.get_nfs_settings_global = MagicMock(
+            return_value=MockSDKResponse(
+                MockNFSGlobalSettingsApi.GET_NFS_GLOBAL_RESPONSE_RDMA_98
+            ))
+        self.capture_fail_json_call(
+            MockNFSGlobalSettingsApi.get_nfs_global_settings_exception_response('rdma_v3_exception'),
             NFSGlobalSettingsHandler)
 
     def test_modify_nfs_global_response(self, powerscale_module_mock):
@@ -59,6 +88,7 @@ class TestNFSGlobalSettings(PowerScaleUnitBase):
             }
         })
         powerscale_module_mock.module.params = self.nfs_global_args
+        powerscale_module_mock.array_version = "9.7"
         powerscale_module_mock.get_nfs_global_settings_details = MagicMock(
             return_value=MockNFSGlobalSettingsApi.GET_NFS_GLOBAL_RESPONSE)
         NFSGlobalSettingsHandler().handle(powerscale_module_mock,
@@ -78,6 +108,7 @@ class TestNFSGlobalSettings(PowerScaleUnitBase):
             }
         })
         powerscale_module_mock.module.params = self.nfs_global_args
+        powerscale_module_mock.array_version = "9.7"
         powerscale_module_mock.get_nfs_global_settings_details = MagicMock(
             return_value=MockNFSGlobalSettingsApi.GET_NFS_GLOBAL_RESPONSE)
         powerscale_module_mock.protocol_api.update_nfs_settings_global = MagicMock(
