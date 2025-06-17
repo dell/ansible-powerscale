@@ -232,7 +232,69 @@ class TestSupportAssist(PowerScaleUnitBase):
             MockSupportAssistApi.get_support_assist_settings_exception_response('update_exception'),
             SupportAssistHandler)
 
-    def test_empty_gateway_endpoints_exception(self, powerscale_module_mock):
+    def test_modify_mode_from_gateway_to_direct(self, powerscale_module_mock):
+        self.support_assist_args.update(
+            {
+                "connection": {
+                    "mode": "direct"
+                }
+            })
+        self.set_module_params(self.support_assist_args, {})
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+
+    def test_modify_mode_from_direct_to_direct(self, powerscale_module_mock):
+        self.support_assist_args.update(
+            {
+                "connection": {
+                    "mode": "direct"
+                }
+            })
+        self.set_module_params(self.support_assist_args, {})
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE_DIRECT_MODE)
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+
+    def test_add_gateway_endpoints_from_gateway_to_direct(self, powerscale_module_mock):
+        self.support_assist_args.update(
+            {
+                "connection": {
+                    "gateway_endpoints": [
+                        {
+                            "enabled": True,
+                            "gateway_host": "XX.XX.XX.XX",
+                            "gateway_port": 9443,
+                            "priority": 2,
+                            "use_proxy": False,
+                            "validate_ssl": False,
+                            "state": "present"
+                        },
+                        {
+                            "enabled": True,
+                            "gateway_host": "XX.XX.XX.XY",
+                            "gateway_port": 9443,
+                            "priority": 2,
+                            "use_proxy": False,
+                            "validate_ssl": False,
+                            "state": "present"
+                        }
+                    ],
+                    "mode": "gateway"
+                }
+            })
+        self.set_module_params(self.support_assist_args, {})
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE_DIRECT_MODE)
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+
+    def test_empty_gateway_endpoints_exception_1(self, powerscale_module_mock):
         self.support_assist_args.update(
             {
                 "connection": {
@@ -252,6 +314,20 @@ class TestSupportAssist(PowerScaleUnitBase):
         self.set_module_params(self.support_assist_args, {})
         powerscale_module_mock.get_support_assist_details = MagicMock(
             return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
+        self.capture_fail_json_call(
+            MockSupportAssistApi.get_support_assist_settings_exception_response('empty_gateway_exception'),
+            SupportAssistHandler)
+
+    def test_empty_gateway_endpoints_exception_2(self, powerscale_module_mock):
+        self.support_assist_args.update(
+            {
+                "connection": {
+                    "mode": "gateway"
+                }
+            })
+        self.set_module_params(self.support_assist_args, {})
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE_DIRECT_MODE)
         self.capture_fail_json_call(
             MockSupportAssistApi.get_support_assist_settings_exception_response('empty_gateway_exception'),
             SupportAssistHandler)
