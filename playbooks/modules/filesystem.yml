@@ -84,7 +84,7 @@
         recursive: "{{ recursive }}"
         state: "{{ state_present }}"
 
-    - name: Create a filesystem snapshot
+    - name: Create a filesystem snapshot - {{ snapshot_name }}
       dellemc.powerscale.snapshot:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -96,7 +96,7 @@
         desired_retention: "{{ desired_retention }}"
         state: "{{ state_present }}"
 
-    - name: Create a filesystem snapshot
+    - name: Create a filesystem snapshot - {{ snapshot_name_1 }}
       dellemc.powerscale.snapshot:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -238,7 +238,7 @@
           quota_state: "present"
         state: "{{ state_present }}"
 
-    - name: Remove Quota from FS
+    - name: Remove Quota from FS for {{ new_path_ansible_1 }}
       dellemc.powerscale.filesystem:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -250,7 +250,7 @@
           quota_state: "absent"
         state: "{{ state_present }}"
 
-    - name: Remove Quota from FS idempotency check
+    - name: Remove Quota from FS idempotency check for {{ new_path_ansible_1 }}
       dellemc.powerscale.filesystem:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -262,7 +262,7 @@
           quota_state: "absent"
         state: "{{ state_present }}"
 
-    - name: Remove Quota from FS
+    - name: Remove Quota from FS for {{ path_ansible }}
       dellemc.powerscale.filesystem:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -274,7 +274,7 @@
           quota_state: "absent"
         state: "{{ state_present }}"
 
-    - name: Delete filesystem snapshot
+    - name: Delete filesystem snapshot - {{ snapshot_name }}
       dellemc.powerscale.snapshot:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -283,7 +283,7 @@
         snapshot_name: "{{ snapshot_name }}"
         state: "{{ state_absent }}"
 
-    - name: Delete filesystem snapshot
+    - name: Delete filesystem snapshot - {{ snapshot_name_1 }}
       dellemc.powerscale.snapshot:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -292,7 +292,7 @@
         snapshot_name: "{{ snapshot_name_1 }}"
         state: "{{ state_absent }}"
 
-    - name: Delete a filesystem in System Access Zone
+    - name: Delete a filesystem in System Access Zone - {{ path_system }}
       dellemc.powerscale.filesystem:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -302,7 +302,7 @@
         recursive_force_delete: "{{ recursive_force_delete }}"
         state: "{{ state_absent }}"
 
-    - name: Delete a filesystem in System Access Zone idempotency check
+    - name: Delete a filesystem in System Access Zone idempotency check - {{ path_system }}
       dellemc.powerscale.filesystem:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -312,7 +312,7 @@
         recursive_force_delete: "{{ recursive_force_delete }}"
         state: "{{ state_absent }}"
 
-    - name: Delete a filesystem in System Access Zone
+    - name: Delete a filesystem in System Access Zone - {{ new_path_system }}
       dellemc.powerscale.filesystem:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"

@@ -63,7 +63,7 @@
         shell: "{{ shell }}"
         state: "present"
 
-    - name: Setting user id`
+    - name: Setting user id for {{ account_name }}
       ansible.legacy.set_fact:
         sample_zone_user_id: "{{ result.user_details.uid.id.split(':')[1] }}"
 
@@ -105,7 +105,7 @@
         role_state: "present-for-user"
         state: "present"
 
-    - name: Setting user id`
+    - name: Setting user id idempotency check for {{ account_name }}
       ansible.legacy.set_fact:
         system_zone_user_id: "{{ result.user_details.uid.id.split(':')[1] }}"
 

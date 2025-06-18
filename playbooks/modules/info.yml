@@ -206,7 +206,7 @@
         gather_subset:
           - nfs_default_settings
 
-    - name: Get NFS default settings details of the PowerScale cluster
+    - name: Get NFS global settings details of the PowerScale cluster
       dellemc.powerscale.info:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -251,8 +251,8 @@
         gather_subset:
           - server_certificate
 
-    - name: Get attributes, access_zones and nodes of the
-        PowerScale cluster
+    - name: Get ntp_servers, email_settings, cluster_identity and cluster_owner
+        of the PowerScale cluster
       dellemc.powerscale.info:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
