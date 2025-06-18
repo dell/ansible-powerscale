@@ -1340,9 +1340,8 @@ class FileSystem(object):
             return None
         except Exception as e:
             error_msg = self.determine_error(error_obj=e)
-            error_message = 'Failed to get the identity id for ' \
-                            '%s in zone %s due ' \
-                            'to error %s' % (sid, zone, error_msg)
+            error_message = f'Failed to get the identity id for {sid} '\
+                            f'in zone {zone} due to error {error_msg}'
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
