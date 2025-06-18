@@ -510,9 +510,8 @@ Returns sdk AclObject
 
 def get_acl_object():
     try:
-        return getattr(importlib.import_module(isi_sdk.__name__ + ".models.acl_object"),
-                       'AclObject')
-
+        import_obj = importlib.import_module(isi_sdk.__name__ + ".models")
+        return import_obj.AclObject()
     except ImportError:
         return None
 

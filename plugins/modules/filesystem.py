@@ -1308,10 +1308,14 @@ class FileSystem(object):
                     self.get_duplicated_trustee_id(trustee,
                                                    self.module.params['access_zone'],
                                                    acl_rights['trustee']['provider_type'])
-                acl_obj_duplicated = copy.deepcopy(acl_obj)
-                trustee_duplicated = copy.deepcopy(trustee)
-                trustee_duplicated['id'] = trustee_id_duplicated
+                acl_obj_duplicated = utils.get_acl_object()
+                acl_obj_duplicated.op = "delete"
+                trustee_duplicated = {"name": acl_rights['trustee']['name'],
+                                      "id": trustee_id_duplicated, "type": trustee_type}
                 acl_obj_duplicated.trustee = trustee_duplicated
+                acl_obj_duplicated.accesstype = acl_rights['access_type']
+                acl_obj_duplicated.accessrights = acl_rights['access_rights']
+                acl_obj_duplicated.inherit_flags = acl_rights['inherit_flags']
                 permissions.append(acl_obj_duplicated)
 
             return permissions
