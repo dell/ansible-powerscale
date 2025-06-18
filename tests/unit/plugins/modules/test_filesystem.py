@@ -1169,3 +1169,73 @@ class TestFileSystem(PowerScaleUnitBase):
         self.capture_fail_json_call(
             MockFileSystemApi.get_error_responses(
                 'get_quota_update_param_exception'), FilesystemHandler)
+
+    def test_file_system_get_identity_exception(self, powerscale_module_mock):
+        self.set_module_params(self.get_filesystem_args,
+                               {"path": self.path1,
+                                "owner": {"name": "test"},
+                                "group": {"name": "group_test"},
+                                "access_control_rights":
+                                {
+                                    "access_rights": "dir_gen_all",
+                                    "inherit_flags": "container_inherit",
+                                    "access_type": "allow",
+                                    "trustee": {"name": "group_test", "type": "group",
+                                                "provider_type": "local"}},
+                                "state": "present",
+                                "access_control_rights_state": "add"})
+        powerscale_module_mock.module.check_mode = False
+        utils.get_acl_object = MagicMock()
+        powerscale_module_mock.get_filesystem = MagicMock(return_value=None)
+        powerscale_module_mock.get_acl_object = MagicMock(return_value=True)
+        powerscale_module_mock.auth_api.get_mapping_identity = MagicMock(side_effect=MockApiException)
+        self.capture_fail_json_call(
+            MockFileSystemApi.get_error_responses('get_identity_exception'), FilesystemHandler)
+
+    def test_file_system_delete_group_access_control_rights(self, powerscale_module_mock):
+        self.set_module_params(self.get_filesystem_args,
+                               {"path": self.path1,
+                                "access_control_rights":
+                                {
+                                    "access_rights": "dir_gen_all",
+                                    "inherit_flags": "container_inherit",
+                                    "access_type": "allow",
+                                    "trustee": {"name": "group_test", "type": "group",
+                                                "provider_type": "local"}},
+                                "state": "present",
+                                "access_control_rights_state": "remove"})
+        powerscale_module_mock.module.check_mode = False
+        powerscale_module_mock.get_filesystem = MagicMock(return_value=MockFileSystemApi.FILESYSTEM_DETAILS)
+        powerscale_module_mock.get_quota = MagicMock(return_value=MockFileSystemApi.QUOTA_DETAILS_1)
+        powerscale_module_mock.get_acl_object = MagicMock()
+        utils.get_acl_object = MagicMock()
+        powerscale_module_mock.auth_api.get_mapping_identity.to_dict = \
+            MagicMock(return_value=MockFileSystemApi.GROUP_IDENTITY_DETAIL)
+        FilesystemHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
+        print(powerscale_module_mock.module.exit_json.call_args[1])
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] \
+            and powerscale_module_mock.module.exit_json.call_args[1]['modify_filesystem']
+
+    def test_file_system_delete_user_access_control_rights(self, powerscale_module_mock):
+        self.set_module_params(self.get_filesystem_args,
+                               {"path": self.path1,
+                                "access_control_rights":
+                                {
+                                    "access_rights": "dir_gen_all",
+                                    "inherit_flags": "container_inherit",
+                                    "access_type": "allow",
+                                    "trustee": {"name": "test_user", "type": "user",
+                                                "provider_type": "local"}},
+                                "state": "present",
+                                "access_control_rights_state": "remove"})
+        powerscale_module_mock.module.check_mode = False
+        powerscale_module_mock.get_filesystem = MagicMock(return_value=MockFileSystemApi.FILESYSTEM_DETAILS)
+        powerscale_module_mock.get_quota = MagicMock(return_value=MockFileSystemApi.QUOTA_DETAILS_1)
+        powerscale_module_mock.get_acl_object = MagicMock()
+        utils.get_acl_object = MagicMock()
+        powerscale_module_mock.auth_api.get_mapping_identity.to_dict = \
+            MagicMock(return_value=MockFileSystemApi.GROUP_IDENTITY_DETAIL)
+        FilesystemHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
+        print(powerscale_module_mock.module.exit_json.call_args[1])
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] \
+            and powerscale_module_mock.module.exit_json.call_args[1]['modify_filesystem']

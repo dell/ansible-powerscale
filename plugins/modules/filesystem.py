@@ -684,7 +684,7 @@ class FileSystem(object):
         if self.module.params['path']:
             path = self.module.params['path']
         access_zone = self.module.params['access_zone']
-        if access_zone.lower() != 'system' and path:
+        if access_zone and access_zone.lower() != 'system' and path:
             path = self.get_zone_base_path(access_zone) + path
 
         # For Filesystem related APIs, the leading '/' is not expected.
