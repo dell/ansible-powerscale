@@ -30,7 +30,7 @@
     description: "smb description updated"
 
   tasks:
-    - name: Create SMB share for system access zone
+    - name: Create SMB share for system access zone in {{ system_az_path }}
       dellemc.powerscale.smb:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -63,7 +63,7 @@
         inheritable_path_acl: true
         state: "{{ state_present }}"
 
-    - name: Create SMB share for system access zone
+    - name: Create SMB share in /ifs for system access zone
       dellemc.powerscale.smb:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"

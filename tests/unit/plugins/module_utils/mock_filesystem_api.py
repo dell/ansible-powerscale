@@ -229,6 +229,22 @@ class MockFileSystemApi:
     EMPTY_SMB_SHARES = {
         "shares": []
     }
+    GROUP_IDENTITY_DETAIL = {
+        "identities": [
+            {
+                "targets": [
+                    {
+                        "on_disk": True,
+                        "target": {
+                            "id": "id:2000",
+                            "name": "test_group",
+                            "type": "group"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
 
     @staticmethod
     def get_acl_response():
@@ -298,6 +314,7 @@ class MockFileSystemApi:
             "create_quota_get_exception": "Creation of Quota",
             "set_access_control_rights_exception": "Setting ACL rights of Filesystem",
             "is_owner_modified_exception": "Failed to determine if owner is modified",
-            "is_group_modified_exception": "Failed to determine if group is modified"
+            "is_group_modified_exception": "Failed to determine if group is modified",
+            "get_identity_exception": "Failed to get the identity id"
         }
         return err_msg_dict.get(response_type)

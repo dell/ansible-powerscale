@@ -38,7 +38,7 @@
         virtual_hot_spare_hide_spare: true
         state: "{{ state_present }}"
 
-    - name: Modify Smartpool settings
+    - name: Modify Smartpool settings with virtual_hot_spare_hide_spare disabled
       dellemc.powerscale.smartpoolsettings:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"

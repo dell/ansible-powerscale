@@ -72,11 +72,11 @@
         user_state: "present-in-group"
         state: "present"
 
-    - name: Setting group id
+    - name: Setting group id - {{ result.group_details.gid.id }}
       ansible.legacy.set_fact:
         group_id: "{{ result.group_details.gid.id.split(':')[1] }}"
 
-    - name: Fetch user_id using user_name
+    - name: Fetch user_id using user_name {{ user_name_1 }}
       register: result
       dellemc.powerscale.user:
         onefs_host: "{{ onefs_host }}"
@@ -89,11 +89,11 @@
         user_name: "{{ user_name_1 }}"
         state: "present"
 
-    - name: Setting group id
+    - name: Setting user id for {{ user_name_1 }}
       ansible.legacy.set_fact:
         user_id_1: "{{ result.user_details.uid.id.split(':')[1] }}"
 
-    - name: Fetch user_id using user_name
+    - name: Fetch user_id using user_name {{ user_name_2 }}
       register: result
       dellemc.powerscale.user:
         onefs_host: "{{ onefs_host }}"
@@ -106,7 +106,7 @@
         user_name: "{{ user_name_2 }}"
         state: "present"
 
-    - name: Setting group id
+    - name: Setting user id for {{ user_name_2 }}
       ansible.legacy.set_fact:
         user_id_2: "{{ result.user_details.uid.id.split(':')[1] }}"
 
