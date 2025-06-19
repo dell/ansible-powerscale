@@ -168,7 +168,7 @@
         snapshot_name: "{{ new_snapshot_name }}"
         state: "{{ state_absent }}"
 
-    - name: Delete filesystem snapshot
+    - name: Delete filesystem snapshot {{ snapshot_name_1 }}
       dellemc.powerscale.snapshot:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -178,7 +178,7 @@
         snapshot_name: "{{ snapshot_name_1 }}"
         state: "{{ state_absent }}"
 
-    - name: Delete filesystem snapshot
+    - name: Delete filesystem snapshot {{ snapshot_name_2 }}
       dellemc.powerscale.snapshot:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -187,7 +187,7 @@
         snapshot_name: "{{ snapshot_name_2 }}"
         state: "{{ state_absent }}"
 
-    - name: Delete filesystem snapshot
+    - name: Delete filesystem snapshot {{ snapshot_name_3 }}
       dellemc.powerscale.snapshot:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"

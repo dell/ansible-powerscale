@@ -57,7 +57,7 @@
         ignore_unresolvable_hosts: true
         state: 'present'
 
-    - name: Get NFS Export details
+    - name: Get NFS Export details - {{ path }}
       dellemc.powerscale.nfs:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
@@ -83,7 +83,7 @@
           - "kerberos"
         state: 'present'
 
-    - name: Get NFS Export details
+    - name: Get NFS Export details - {{ path_system }}
       dellemc.powerscale.nfs:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"

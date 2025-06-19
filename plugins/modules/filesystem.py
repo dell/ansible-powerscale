@@ -625,7 +625,8 @@ class FileSystem(object):
         """Gets a FileSystem on PowerScale."""
         try:
             resp = self.namespace_api.get_directory_metadata(
-                path,
+                directory_metadata_path=path,
+                zone=self.module.params['access_zone'],
                 metadata=True).to_dict()
             return resp
         except utils.ApiException as e:
@@ -648,8 +649,10 @@ class FileSystem(object):
         try:
             if not self.module.check_mode:
                 filesystem_acl = \
-                    (self.namespace_api.get_acl(effective_path,
-                                                acl=True)).to_dict()
+                    (self.namespace_api.get_acl(
+                        namespace_path=effective_path,
+                        zone=self.module.params['access_zone'],
+                        acl=True)).to_dict()
                 return filesystem_acl
             return True
         except Exception as e:
@@ -681,7 +684,7 @@ class FileSystem(object):
         if self.module.params['path']:
             path = self.module.params['path']
         access_zone = self.module.params['access_zone']
-        if access_zone.lower() != 'system' and path:
+        if access_zone and access_zone.lower() != 'system' and path:
             path = self.get_zone_base_path(access_zone) + path
 
         # For Filesystem related APIs, the leading '/' is not expected.
@@ -727,13 +730,11 @@ class FileSystem(object):
             owner_provider = owner['provider_type']
         else:
             owner_provider = 'local'
-        owner_details = self.get_owner_id(
+        owner_id = self.get_owner_id(
             name=owner['name'],
             zone=self.module.params['access_zone'],
-            provider=owner_provider)
+            provider=owner_provider)['users'][0]['on_disk_user_identity']['id']
 
-        user = owner_details['users'][0]
-        owner_id = user['sid']['id'] if owner_provider.lower() == 'ads' else user['uid']['id']
         create_owner = {'type': 'user', 'id': owner_id,
                         'name': owner['name']}
         return create_owner
@@ -744,11 +745,14 @@ class FileSystem(object):
         else:
             group_provider = 'local'
 
-        group_id = \
+        group_sid = \
             self.get_group_id(
                 name=group['name'],
                 zone=self.module.params['access_zone'],
                 provider=group_provider)['groups'][0]['sid']['id']
+        on_disk_id = self.get_identity_on_disk_id(sid=group_sid,
+                                                  zone=self.module.params['access_zone'])
+        group_id = on_disk_id if on_disk_id else group_sid
 
         create_group = {'type': 'group', 'id': group_id,
                         'name': group['name']}
@@ -787,6 +791,7 @@ class FileSystem(object):
                         owner=create_owner,
                         group=create_group)
                 self.namespace_api.set_acl(namespace_path=path,
+                                           zone=self.module.params['access_zone'],
                                            acl=True,
                                            namespace_acl=permissions)
 
@@ -810,6 +815,7 @@ class FileSystem(object):
                     action="update",
                     acl=acl)
                 self.namespace_api.set_acl(namespace_path=path,
+                                           zone=self.module.params['access_zone'],
                                            acl=True,
                                            namespace_acl=permissions)
             return True
@@ -862,6 +868,7 @@ class FileSystem(object):
                         authoritative='mode',
                         mode=acl)
                     self.namespace_api.set_acl(namespace_path=path,
+                                               zone=self.module.params['access_zone'],
                                                acl=True,
                                                namespace_acl=new_mode)
                 else:
@@ -1249,13 +1256,28 @@ class FileSystem(object):
         if type == 'user':
             return self.get_owner_id(name=trustee_name,
                                      zone=access_zone,
-                                     provider=provider)['users'][0]['sid']['id']
+                                     provider=provider)['users'][0]['on_disk_user_identity']['id']
         elif type == 'group':
-            return self.get_group_id(name=trustee_name,
-                                     zone=access_zone,
-                                     provider=provider)['groups'][0]['sid']['id']
+            group_sid = self.get_group_id(name=trustee_name,
+                                          zone=access_zone,
+                                          provider=provider)['groups'][0]['sid']['id']
+            on_disk_id = self.get_identity_on_disk_id(sid=group_sid, zone=access_zone)
+            return on_disk_id if on_disk_id else group_sid
         else:
             return self.get_wellknown_id(name=trustee_name)['wellknowns'][0]['id']
+
+    def get_duplicated_trustee_id(self, trustee, access_zone, provider):
+        """Returns duplicated trustee id for user or group"""
+        if trustee['type'] == 'user':
+            user = self.get_owner_id(name=trustee['name'],
+                                     zone=access_zone,
+                                     provider=provider)['users'][0]
+            return user['uid']['id'] if user['uid']['id'] != trustee['id'] else user['sid']['id']
+        else:
+            group = self.get_group_id(name=trustee['name'],
+                                      zone=access_zone,
+                                      provider=provider)['groups'][0]
+            return group['gid']['id'] if group['gid']['id'] != trustee['id'] else group['sid']['id']
 
     def get_acl_permissions(self, acl_rights):
         """Returns ACL permissions"""
@@ -1266,17 +1288,36 @@ class FileSystem(object):
             acl_obj.op = "add"
             if acl_state and acl_state == 'remove':
                 acl_obj.op = "delete"
+            trustee_type = acl_rights['trustee']['type']
             trustee_id = \
                 self.get_trustee_id(acl_rights['trustee']['name'],
-                                    acl_rights['trustee']['type'],
+                                    trustee_type,
                                     self.module.params['access_zone'],
                                     acl_rights['trustee']['provider_type'])
-            trustee = {"name": acl_rights['trustee']['name'], "id": trustee_id, "type": "user"}
+            trustee_type = trustee_type if trustee_type else "user"
+            trustee = {"name": acl_rights['trustee']['name'], "id": trustee_id, "type": trustee_type}
             acl_obj.trustee = trustee
             acl_obj.accesstype = acl_rights['access_type']
             acl_obj.accessrights = acl_rights['access_rights']
             acl_obj.inherit_flags = acl_rights['inherit_flags']
             permissions.append(acl_obj)
+
+            # allow customer to remove duplicated trustee
+            if acl_obj.op == "delete" and trustee_type in ['user', 'group']:
+                trustee_id_duplicated = \
+                    self.get_duplicated_trustee_id(trustee,
+                                                   self.module.params['access_zone'],
+                                                   acl_rights['trustee']['provider_type'])
+                acl_obj_duplicated = utils.get_acl_object()
+                acl_obj_duplicated.op = "delete"
+                trustee_duplicated = {"name": acl_rights['trustee']['name'],
+                                      "id": trustee_id_duplicated, "type": trustee_type}
+                acl_obj_duplicated.trustee = trustee_duplicated
+                acl_obj_duplicated.accesstype = acl_rights['access_type']
+                acl_obj_duplicated.accessrights = acl_rights['access_rights']
+                acl_obj_duplicated.inherit_flags = acl_rights['inherit_flags']
+                permissions.append(acl_obj_duplicated)
+
             return permissions
         except Exception as e:
             error_message = 'Error %s while retrieving ACL object instance ' % \
@@ -1290,6 +1331,23 @@ class FileSystem(object):
         else:
             error = str(error_obj)
         return error
+
+    def get_identity_on_disk_id(self, sid, zone):
+        """Get the Identity Details in PowerScale"""
+        try:
+            resp = self.auth_api.get_mapping_identity(
+                mapping_identity_id=sid,
+                zone=zone).to_dict()
+            for identity in resp['identities'][0]['targets']:
+                if identity['on_disk']:
+                    return identity['target']['id']
+            return None
+        except Exception as e:
+            error_msg = self.determine_error(error_obj=e)
+            error_message = f'Failed to get the identity id for {sid} '\
+                            f'in zone {zone} due to error {error_msg}'
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
 
     def get_owner_id(self, name, zone, provider):
         """Get the User Account Details in PowerScale"""
@@ -1361,17 +1419,12 @@ class FileSystem(object):
             else:
                 owner_provider = 'local'
 
-            owner_details = self.get_owner_id(
+            owner_id = self.get_owner_id(
                 name=owner['name'],
                 zone=self.module.params['access_zone'],
-                provider=owner_provider)
+                provider=owner_provider)['users'][0]['on_disk_user_identity']['id']
 
-            # use sid for user in ads provider
-            user = owner_details['users'][0]
-            owner_uid = user['uid']['id'] if owner_provider.lower() != 'ads' else user['sid']['id']
-            owner_sid = user['sid']['id']
-
-            owner = {'type': 'user', 'id': owner_uid,
+            owner = {'type': 'user', 'id': owner_id,
                      'name': owner['name']}
 
             acl = self.get_acl(effective_path)
@@ -1380,14 +1433,9 @@ class FileSystem(object):
                 file_uid = acl['owner']['id']
                 info_message = 'The user ID fetched from playbook is ' \
                                '{0} and the user ID on ' \
-                               'the file is {1}'.format(owner_uid, file_uid)
+                               'the file is {1}'.format(owner_id, file_uid)
                 LOG.info(info_message)
-                if owner_provider.lower() != 'ads' and \
-                        owner_uid != file_uid:
-                    modified = True
-                # For ADS providers, the SID of the owner gets set in the ACL
-                if owner_provider.lower() == 'ads' and owner_sid != file_uid:
-                    modified = True
+                modified = (owner_id != file_uid)
 
             if modified:
                 LOG.info('Modifying owner..')
@@ -1417,15 +1465,16 @@ class FileSystem(object):
             else:
                 group_provider = 'local'
 
-            group_details = self.get_group_id(
+            group_sid = self.get_group_id(
                 name=group['name'],
                 zone=self.module.params['access_zone'],
-                provider=group_provider)
+                provider=group_provider)['groups'][0]['sid']['id']
+            on_disk_id = self.get_identity_on_disk_id(
+                sid=group_sid,
+                zone=self.module.params['access_zone'])
+            group_id = on_disk_id if on_disk_id else group_sid
 
-            group_uid = group_details['groups'][0]['gid']['id']
-            group_sid = group_details['groups'][0]['sid']['id']
-
-            group = {'type': 'group', 'id': group_uid,
+            group = {'type': 'group', 'id': group_id,
                      'name': group['name']}
 
             acl = self.get_acl(effective_path)
@@ -1434,14 +1483,9 @@ class FileSystem(object):
                 file_gid = acl['group']['id']
                 info_message = 'The group ID fetched from playbook is ' \
                                '{0} and the group ID on ' \
-                               'the file is {1}'.format(group_uid, file_gid)
+                               'the file is {1}'.format(group_id, file_gid)
                 LOG.info(info_message)
-                if group_provider.lower() != 'ads' and \
-                        group_uid != file_gid:
-                    modified = True
-                # For ADS providers, the SID of the group gets set in the ACL
-                if group_provider.lower() == 'ads' and group_sid != file_gid:
-                    modified = True
+                modified = (group_id != file_gid)
 
             if modified:
                 LOG.info('Modifying group..')
@@ -1463,6 +1507,7 @@ class FileSystem(object):
                     authoritative='mode',
                     owner=owner)
                 self.namespace_api.set_acl(namespace_path=effective_path,
+                                           zone=self.module.params['access_zone'],
                                            acl=True,
                                            namespace_acl=permissions)
             return True
@@ -1481,6 +1526,7 @@ class FileSystem(object):
                     authoritative='mode',
                     group=group)
                 self.namespace_api.set_acl(namespace_path=effective_path,
+                                           zone=self.module.params['access_zone'],
                                            acl=True,
                                            namespace_acl=permissions)
             return True
