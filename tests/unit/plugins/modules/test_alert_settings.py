@@ -37,12 +37,16 @@ class TestAlertSettings(PowerScaleUnitBase):
 
     def test_get_alert_settings_response(self, powerscale_module_mock):
         self.set_module_params(self.alert_args, {})
+        powerscale_module_mock.major = 9
+        powerscale_module_mock.minor = 7
         AlertSettingsModifyHandler().handle(powerscale_module_mock,
                                             powerscale_module_mock.module.params)
         powerscale_module_mock.event_api.get_event_maintenance.assert_called()
 
     def test_get_alert_settings_exception(self, powerscale_module_mock):
         self.set_module_params(self.alert_args, {})
+        powerscale_module_mock.major = 9
+        powerscale_module_mock.minor = 7
         powerscale_module_mock.event_api.get_event_maintenance = MagicMock(
             side_effect=MockApiException)
         self.capture_fail_json_call(
@@ -52,6 +56,8 @@ class TestAlertSettings(PowerScaleUnitBase):
     def test_modify_maintenance_mode(self, powerscale_module_mock):
         self.set_module_params(self.alert_args,
                                {"enable_celog_maintenance_mode": True, "prune": 10})
+        powerscale_module_mock.major = 9
+        powerscale_module_mock.minor = 7
         powerscale_module_mock.get_alert_settings_details = MagicMock(
             return_value=MockAlertSettingsApi.SETTING_DETAILS)
         powerscale_module_mock.isi_sdk.EventMaintenanceExtended = MagicMock(
@@ -67,10 +73,28 @@ class TestAlertSettings(PowerScaleUnitBase):
             return_value=MockAlertSettingsApi.SETTING_DETAILS)
         powerscale_module_mock.isi_sdk.EventMaintenanceExtended = MagicMock(
             side_effect=MockApiException)
+        powerscale_module_mock.major = 9
+        powerscale_module_mock.minor = 7
         self.capture_fail_json_call(
             MockAlertSettingsApi.get_alert_exception_response(
                 'modify_exp'),
             AlertSettingsModifyHandler)
+
+    def test_modify_maintenance_mode_api_911(self, powerscale_module_mock):
+        self.set_module_params(self.alert_args,
+                               {"enable_celog_maintenance_mode": True, "prune": 10})
+        powerscale_module_mock.major = 9
+        powerscale_module_mock.minor = 11
+        powerscale_module_mock.get_alert_settings_details = MagicMock(
+            return_value=MockAlertSettingsApi.CLUSTER_MAINTENANCE_SETTINGS)
+        powerscale_module_mock.isi_sdk.EventMaintenanceExtended = MagicMock(
+            {"maintenance": True, "prune": 10})
+        powerscale_module_mock.isi_sdk.event_api.update_event_settings = MagicMock(return_value=None)
+        powerscale_module_mock.isi_sdk.cluster_api.update_maintenance_settings = MagicMock(return_value=None)
+        AlertSettingsModifyHandler().handle(powerscale_module_mock,
+                                            powerscale_module_mock.module.params)
+        powerscale_module_mock.event_api.update_event_settings.assert_called()
+        powerscale_module_mock.cluster_api.update_maintenance_settings.assert_called()
 
     def test_main(self, powerscale_module_mock):
         main()
