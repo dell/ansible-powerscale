@@ -25,6 +25,33 @@ class MockAlertSettingsApi:
         "maintenance": "false"
     }
 
+    CLUSTER_MAINTENANCE_SETTINGS = {
+        "active": False,
+        "auto_enable": True,
+        "components": [
+            {
+                "active": False,
+                "enabled": True,
+                "name": "celog"
+            }
+        ],
+        "history": [
+            {
+                "end": 1750140390,
+                "mode": "auto",
+                "start": 1750139155
+            },
+            {
+                "end": 1750344097,
+                "mode": "manual",
+                "start": 1750344011
+            }
+        ],
+        "manual_window_enabled": False,
+        "manual_window_hours": 8,
+        "manual_window_start": 0
+    }
+
     @staticmethod
     def get_alert_exception_response(response_type):
         err_msg_dict = {
