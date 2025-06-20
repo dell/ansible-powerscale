@@ -576,11 +576,33 @@ class SupportAssist(PowerScaleBase):
         """
         Validate gateway connections
         """
-        if ('mode' in connection_dict and connection_dict['mode'] == 'gateway') or (
-                settings_details['connection']['mode'] == 'gateway'):
-            if ('gateway_endpoints' in connection_dict and connection_dict['gateway_endpoints'] == []) or (
-                    settings_details['connection']['gateway_endpoints'] == []):
-                error_msg = "Gateway endpoints cannot be empty when the mode is gateway."
+        is_from_gateway_to_gateway = (
+            'mode' not in connection_dict
+            and settings_details['connection']['mode'] == 'gateway'
+        )
+        is_from_direct_to_gateway = (
+            'mode' in connection_dict
+            and connection_dict['mode'] == 'gateway'
+            and settings_details['connection']['mode'] == 'direct'
+        )
+        is_dict_gateway_empty = (
+            'gateway_endpoints' in connection_dict
+            and connection_dict['gateway_endpoints'] == []
+        )
+        is_array_gateway_empty = (
+            'gateway_endpoints' not in connection_dict
+            and settings_details['connection']['gateway_endpoints'] == []
+        )
+
+        # Refined the verification logic to fix failures while adding gateway endpoints
+        # in certain scenarios (since ansible-powerscale 3.1.0 and powerscale 9.5.0)
+        if 'gateway_endpoints' in connection_dict or 'mode' in connection_dict:
+            if (is_from_gateway_to_gateway or is_from_direct_to_gateway) and (
+                is_dict_gateway_empty or is_array_gateway_empty
+            ):
+                error_msg = (
+                    "Gateway endpoints cannot be empty when the mode is gateway."
+                )
                 LOG.error(error_msg)
                 self.module.fail_json(msg=error_msg)
 
