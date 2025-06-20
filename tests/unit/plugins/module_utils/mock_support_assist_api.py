@@ -103,6 +103,40 @@ class MockSupportAssistApi:
         }
     }
 
+    GET_SUPPORT_ASSIST_RESPONSE_DIRECT_MODE = {
+        "connection": {
+            "gateway_endpoints": [],
+            "mode": "direct",
+            "network_pools": [
+                {
+                    "pool": "pool1",
+                    "subnet": "subnet0"
+                }
+            ]
+        },
+        "connection_state": "disabled",
+        "contact": {
+            "primary": {
+                "email": "p7VYg@example.com",
+                "first_name": "Eric",
+                "last_name": "Nam",
+                "phone": "1234567890"
+            },
+            "secondary": {
+                "email": "kangD@example.com",
+                "first_name": "Daniel",
+                "last_name": "Kang",
+                "phone": "1234567891"
+            }
+        },
+        "telemetry": {
+            "offline_collection_period": 60,
+            "telemetry_enabled": True,
+            "telemetry_persist": True,
+            "telemetry_threads": 10
+        }
+    }
+
     @staticmethod
     def get_support_assist_settings_exception_response(response_type):
         if response_type == 'get_details_exception':
