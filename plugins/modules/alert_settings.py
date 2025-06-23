@@ -166,15 +166,15 @@ class AlertSettings(PowerScaleBase):
             LOG.info(msg)
             if self.major > 9 or (self.major == 9 and self.minor > 9):
                 if modify_dict.get('prune') is not None:
-                  event_settings = self.isi_sdk.EventSettingsSettings(retention_days=modify_dict.get('prune'))
-                  if not self.module.check_mode:
-                    self.event_api.update_event_settings(event_settings=event_settings)
-                  LOG.info("Successfully modified the event settings retention_days.")
+                    event_settings = self.isi_sdk.EventSettingsSettings(retention_days=modify_dict.get('prune'))
+                    if not self.module.check_mode:
+                        self.event_api.update_event_settings(event_settings=event_settings)
+                    LOG.info("Successfully modified the event settings retention_days.")
                 if modify_dict.get('enable_celog_maintenance_mode') is not None:
-                  cluster_maintenance = self.isi_sdk.MaintenanceSettingsExtended(active=modify_dict.get('enable_celog_maintenance_mode'))
-                  if not self.module.check_mode:
-                      self.cluster_api.update_maintenance_settings(maintenance_settings=cluster_maintenance)
-                  LOG.info("Successfully modified the cluster maintenance mode.")
+                    cluster_maintenance = self.isi_sdk.MaintenanceSettingsExtended(active=modify_dict.get('enable_celog_maintenance_mode'))
+                    if not self.module.check_mode:
+                        self.cluster_api.update_maintenance_settings(maintenance_settings=cluster_maintenance)
+                    LOG.info("Successfully modified the cluster maintenance mode.")
             else:
                 event_maintenance = self.isi_sdk.EventMaintenanceExtended(
                     maintenance=modify_dict.get('enable_celog_maintenance_mode'),
@@ -202,9 +202,9 @@ class AlertSettings(PowerScaleBase):
         event_settings_maintenance_resp = settings_details.get('maintenance')
 
         if pb_maintenance is not None:
-          if cluster_maintenance_active_resp is not None and cluster_maintenance_active_resp != pb_maintenance \
-            or event_settings_maintenance_resp is not None and event_settings_maintenance_resp != pb_maintenance:
-              modify_dict['enable_celog_maintenance_mode'] = pb_maintenance
+            if cluster_maintenance_active_resp is not None and cluster_maintenance_active_resp != pb_maintenance \
+                	or event_settings_maintenance_resp is not None and event_settings_maintenance_resp != pb_maintenance:
+                modify_dict['enable_celog_maintenance_mode'] = pb_maintenance
 
         if settings_params.get('prune') is not None:
             modify_dict['prune'] = settings_params.get('prune')
