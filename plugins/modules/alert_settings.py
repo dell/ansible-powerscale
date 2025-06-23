@@ -116,6 +116,8 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.sh
     import PowerScaleBase
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.cluster \
+    import Cluster
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.events \
     import Events
 
@@ -134,6 +136,9 @@ class AlertSettings(PowerScaleBase):
         }
         super().__init__(AnsibleModule, ansible_module_params)
 
+        self.major = self.isi_sdk.major
+        self.minor = self.isi_sdk.minor
+
         # Result is a dictionary that contains changed status and alert
         # settings details
         self.result.update({
@@ -146,7 +151,10 @@ class AlertSettings(PowerScaleBase):
         """
         msg = "Getting alert settings details"
         LOG.info(msg)
-        return Events(self.event_api, self.module).get_event_maintenance()
+        if self.major > 9 or (self.major == 9 and self.minor > 9):
+            return Cluster(self.cluster_api, self.module).get_maintenance_settings_details()
+        else:
+            return Events(self.event_api, self.module).get_event_maintenance()
 
     def modify_alert_settings(self, modify_dict):
         """
@@ -156,13 +164,24 @@ class AlertSettings(PowerScaleBase):
         try:
             msg = "Modifing maintenance mode with parameters"
             LOG.info(msg)
-            event_maintenance = self.isi_sdk.EventMaintenanceExtended(
-                maintenance=modify_dict.get('enable_celog_maintenance_mode'),
-                prune=modify_dict.get('prune'))
-            if not self.module.check_mode:
-                self.event_api.update_event_maintenance(
-                    event_maintenance=event_maintenance)
-                LOG.info("Successfully modified the maintenance mode.")
+            if self.major > 9 or (self.major == 9 and self.minor > 9):
+                if modify_dict.get('prune') is not None:
+                    event_settings = self.isi_sdk.EventSettingsSettings(retention_days=modify_dict.get('prune'))
+                    if not self.module.check_mode:
+                        self.event_api.update_event_settings(event_settings=event_settings)
+                    LOG.info("Successfully modified the event settings retention_days.")
+                if modify_dict.get('enable_celog_maintenance_mode') is not None:
+                    cluster_maintenance = self.isi_sdk.MaintenanceSettingsExtended(active=modify_dict.get('enable_celog_maintenance_mode'))
+                    if not self.module.check_mode:
+                        self.cluster_api.update_maintenance_settings(maintenance_settings=cluster_maintenance)
+                    LOG.info("Successfully modified the cluster maintenance mode.")
+            else:
+                event_maintenance = self.isi_sdk.EventMaintenanceExtended(
+                    maintenance=modify_dict.get('enable_celog_maintenance_mode'),
+                    prune=modify_dict.get('prune'))
+                if not self.module.check_mode:
+                    self.event_api.update_event_maintenance(event_maintenance=event_maintenance)
+                LOG.info("Successfully modified the event maintenance.")
             return True
 
         except Exception as e:
@@ -179,9 +198,15 @@ class AlertSettings(PowerScaleBase):
         """
         modify_dict = {}
         pb_maintenance = settings_params.get('enable_celog_maintenance_mode')
-        if pb_maintenance is not None and \
-                settings_details['maintenance'] != pb_maintenance:
-            modify_dict['enable_celog_maintenance_mode'] = pb_maintenance
+        cluster_maintenance_active_resp = settings_details.get('active')
+        event_settings_maintenance_resp = settings_details.get('maintenance')
+
+        if pb_maintenance is not None:
+            if cluster_maintenance_active_resp is not None \
+                    and cluster_maintenance_active_resp != pb_maintenance \
+                    or event_settings_maintenance_resp is not None \
+                    and event_settings_maintenance_resp != pb_maintenance:
+                modify_dict['enable_celog_maintenance_mode'] = pb_maintenance
 
         if settings_params.get('prune') is not None:
             modify_dict['prune'] = settings_params.get('prune')
