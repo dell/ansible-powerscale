@@ -89,14 +89,14 @@ class TestAlertSettings(PowerScaleUnitBase):
         powerscale_module_mock.isi_sdk.event_api.update_event_settings = MagicMock(return_value=None)
         powerscale_module_mock.isi_sdk.cluster_api.update_maintenance_settings = MagicMock(return_value=None)
         # validate for not modifying maintenance mode
-        self.set_module_params(self.alert_args,{"enable_celog_maintenance_mode": None, "prune": None})
+        self.set_module_params(self.alert_args, {"enable_celog_maintenance_mode": None, "prune": None})
         AlertSettingsModifyHandler().handle(powerscale_module_mock,
                                             powerscale_module_mock.module.params)
         powerscale_module_mock.cluster_api.get_maintenance_settings.assert_called()
         powerscale_module_mock.event_api.update_event_settings.assert_not_called()
         powerscale_module_mock.cluster_api.update_maintenance_settings.assert_not_called()
         # validate for check_mode
-        self.set_module_params(self.alert_args,{"enable_celog_maintenance_mode": True, "prune": 10})
+        self.set_module_params(self.alert_args, {"enable_celog_maintenance_mode": True, "prune": 10})
         powerscale_module_mock.module.check_mode = True
         AlertSettingsModifyHandler().handle(powerscale_module_mock,
                                             powerscale_module_mock.module.params)
@@ -116,7 +116,6 @@ class TestAlertSettings(PowerScaleUnitBase):
                                             powerscale_module_mock.module.params)
         powerscale_module_mock.event_api.update_event_settings.assert_called()
         powerscale_module_mock.cluster_api.update_maintenance_settings.assert_called()
-        
 
     def test_main(self, powerscale_module_mock):
         main()

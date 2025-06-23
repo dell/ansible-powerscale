@@ -202,8 +202,10 @@ class AlertSettings(PowerScaleBase):
         event_settings_maintenance_resp = settings_details.get('maintenance')
 
         if pb_maintenance is not None:
-            if cluster_maintenance_active_resp is not None and cluster_maintenance_active_resp != pb_maintenance \
-                	or event_settings_maintenance_resp is not None and event_settings_maintenance_resp != pb_maintenance:
+            if cluster_maintenance_active_resp is not None \
+                    and cluster_maintenance_active_resp != pb_maintenance \
+                    or event_settings_maintenance_resp is not None \
+                    and event_settings_maintenance_resp != pb_maintenance:
                 modify_dict['enable_celog_maintenance_mode'] = pb_maintenance
 
         if settings_params.get('prune') is not None:
