@@ -1,6 +1,6 @@
 **Ansible Modules for Dell Technologies PowerScale** 
 =========================================
-### Release notes 3.8.1
+### Release notes 3.9.0
 
 >   © 2025 Dell Inc. or its subsidiaries. All rights reserved. Dell
 >   and other trademarks are trademarks of Dell Inc. or its
@@ -25,8 +25,9 @@ The table in this section lists the revision history of this document.
 
 Table 1. Revision history
 
-| Revision | Date          | Description                                               |
-|----------|---------------|-----------------------------------------------------------|
+| Revision | Date            | Description                                               |
+|----------|-----------------|-----------------------------------------------------------|
+| 04       | June 2025       | Ansible Modules for Dell PowerScale 3.9.0                 |
 | 03       | May 2025        | Ansible Modules for Dell PowerScale 3.8.1                 |
 | 02       | March 2025      | Ansible Modules for Dell PowerScale 3.8.0                 |
 | 01       | December 2024   | Ansible Modules for Dell PowerScale 3.7.0                 |
@@ -82,9 +83,12 @@ New Features and Enhancements
 ---------------------------
 This section describes the features or enhancements of the Ansible Modules for Dell PowerScale for this release.
 
-The Ansible Modules for Dell PowerScale release 3.8.1 provides the following enhancements:
+The Ansible Modules for Dell PowerScale release 3.9.0 provides the following enhancements:
 
-- GitHub defect fixes for filesystem module. (Issues # 38, # 121 and # 174).
+- Support to manage RDMA for NFS global settings module on Powerscale 9.8 or later.
+- Add `+` as a permission option for Role module.
+- Fix defect for Support assist module about gateway checking.
+- Some enhancement for User mapping rule, File System, Alert settings, Info modules.
 
 Known issues
 ------------
@@ -92,6 +96,7 @@ Known problems in this release are listed.
 
 | **Issue**        | **Description**           | **Resolution**  |
 | ------------- |-------------| -----|
+| Retrieving snapshot details | An error will be displayed if shadow_bytes exceeds 4294967295: Invalid value for shadow_bytes, must be less than or equal to 4294967295. | This is a known PowerScale Python SDK issue, will address in future release. |
 | Filesystem creation | Creation of a filesystem can fail when api_user: "admin" is used because it is possible that the admin user may not have privileges to set an ACLs. | Assigning privileges ISI_PRIV_IFS_RESTORE and ISI_PRIV_NS_TRAVERSE to the user should enable the creation of filesystem with ACL permissions. |
 | Snapshot creation with alias name | Alias name attribute remains null in spite of creating snapshot with alias name | This is an issue with the PowerScale rest API. Alias name is not getting appended to the attribute in response. |
 | SyncIQ Job creation/modification/retrieval | When SyncIQ policy has any job of the type "resync_prep/allow_write/allow_write_revert" then creation, modification or retrieval of SyncIQ job will fail with an error saying "Invalid value for 'action', must be one of ['copy', 'sync']". | This is an issue in the supported OneFS versions. |

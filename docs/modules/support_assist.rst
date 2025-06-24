@@ -30,7 +30,7 @@ Parameters
 ----------
 
   automatic_case_creation (optional, bool, None)
-    \ :literal:`True`\  indicates automatic case creation is enabled.
+    :literal:`True` indicates automatic case creation is enabled.
 
 
   connection (optional, dict, None)
@@ -152,7 +152,7 @@ Parameters
     telemetry_enabled (optional, bool, None)
       Change the status of telemetry.
 
-      When set to \ :literal:`False`\ , modification of other telemetry suboptions will be idempotent.
+      When set to :literal:`False`\ , modification of other telemetry suboptions will be idempotent.
 
 
     telemetry_persist (optional, bool, None)
@@ -167,7 +167,7 @@ Parameters
 
 
   enable_download (optional, bool, None)
-    \ :literal:`True`\  indicates downloads are enabled.
+    :literal:`True` indicates downloads are enabled.
 
 
   enable_remote_support (optional, bool, None)
@@ -193,9 +193,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
+    :literal:`true` - indicates that the SSL certificate should be verified.
 
-    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
+    :literal:`false` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -213,7 +213,7 @@ Notes
 -----
 
 .. note::
-   - The \ :emphasis:`check\_mode`\  and idempotency is supported.
+   - The :emphasis:`check\_mode` and idempotency is supported.
    - This module is supported for PowerScale One FS version 9.5 and above.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 

@@ -66,16 +66,16 @@ Parameters
 
 
       start_range (True, str, None)
-        Specifies the start range for \ :emphasis:`sc\_service\_addrs`\ .
+        Specifies the start range for :emphasis:`sc\_service\_addrs`.
 
 
       end_range (True, str, None)
-        Specifies the end range for \ :emphasis:`sc\_service\_addrs`\ .
+        Specifies the end range for :emphasis:`sc\_service\_addrs`.
 
 
 
     sc_service_addrs_state (optional, str, None)
-      Specifies if the \ :emphasis:`sc\_service\_addrs`\  range need to be added or removed from the subnet.
+      Specifies if the :emphasis:`sc\_service\_addrs` range need to be added or removed from the subnet.
 
 
     mtu (optional, int, None)
@@ -94,9 +94,9 @@ Parameters
   state (True, str, None)
     The state of the subnet after the task is performed.
 
-    \ :literal:`present`\  - indicates that the subnet should exist on the system.
+    :literal:`present` - indicates that the subnet should exist on the system.
 
-    \ :literal:`absent`\  - indicates that the subnet should not exist on the system.
+    :literal:`absent` - indicates that the subnet should not exist on the system.
 
 
   onefs_host (True, str, None)
@@ -110,9 +110,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
+    :literal:`true` - indicates that the SSL certificate should be verified.
 
-    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
+    :literal:`false` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -130,7 +130,7 @@ Notes
 -----
 
 .. note::
-   - The \ :emphasis:`check\_mode`\  is not supported.
+   - The :emphasis:`check\_mode` is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 

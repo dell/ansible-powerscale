@@ -32,13 +32,13 @@ Parameters
   tier_id (optional, int, None)
     Unique Id of the storage pool tier.
 
-    It is mutually exclusive with \ :emphasis:`tier\_name`\ .
+    It is mutually exclusive with :emphasis:`tier\_name`.
 
 
   tier_name (optional, str, None)
     Unique name of the storage pool tier.
 
-    It is mutually exclusive with \ :emphasis:`tier\_id`\ .
+    It is mutually exclusive with :emphasis:`tier\_id`.
 
     Mandatory for storage pool tier creation.
 
@@ -62,9 +62,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
+    :literal:`true` - indicates that the SSL certificate should be verified.
 
-    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
+    :literal:`false` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -83,7 +83,7 @@ Notes
 
 .. note::
    - Modifying a storage pool tier is not supported.
-   - The \ :emphasis:`check\_mode`\  is supported.
+   - The :emphasis:`check\_mode` is supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 

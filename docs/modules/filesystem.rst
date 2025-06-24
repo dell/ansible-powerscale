@@ -42,35 +42,35 @@ Parameters
 
     This parameter is required when creating a Filesystem.
 
-    The following sub-options are supported for Owner. - \ :emphasis:`name(str`\ ), - \ :emphasis:`provider\_type(str`\ ).
+    The following sub-options are supported for Owner. - :emphasis:`name(str`\ ), - :emphasis:`provider\_type(str`\ ).
 
     If you specify owner, then the corresponding name is mandatory.
 
-    The \ :emphasis:`provider\_type`\  is optional and it defaults to \ :literal:`local`\ .
+    The :emphasis:`provider\_type` is optional and it defaults to :literal:`local`.
 
-    The supported values for \ :emphasis:`provider\_type`\  are \ :literal:`local`\ , \ :literal:`file`\ , \ :literal:`ldap`\  and \ :literal:`ads`\ .
+    The supported values for :emphasis:`provider\_type` are :literal:`local`\ , :literal:`file`\ , :literal:`ldap` and :literal:`ads`.
 
 
   group (optional, dict, None)
     The group of the Filesystem.
 
-    The following sub-options are supported for Group. - \ :emphasis:`name(str`\ ), - \ :emphasis:`provider\_type(str`\ ).
+    The following sub-options are supported for Group. - :emphasis:`name(str`\ ), - :emphasis:`provider\_type(str`\ ).
 
     If you specify  a group, then the corresponding name is mandatory.
 
-    The \ :emphasis:`provider\_type`\  is optional, it defaults to \ :literal:`local`\ .
+    The :emphasis:`provider\_type` is optional, it defaults to :literal:`local`.
 
-    The supported values for \ :emphasis:`provider\_type`\  are \ :literal:`local`\ , \ :literal:`file`\ , \ :literal:`ldap`\  and \ :literal:`ads`\ .
+    The supported values for :emphasis:`provider\_type` are :literal:`local`\ , :literal:`file`\ , :literal:`ldap` and :literal:`ads`.
 
 
   access_control (optional, str, None)
     The ACL value for the directory.
 
-    At the time of creation, users can either provide input such as \ :literal:`private\_read`\  , \ :literal:`private`\  , \ :literal:`public\_read`\ , \ :literal:`public\_read\_write`\ , \ :literal:`public`\  or in \ :literal:`POSIX`\  format (eg 0700).
+    At the time of creation, users can either provide input such as :literal:`private\_read` , :literal:`private` , :literal:`public\_read`\ , :literal:`public\_read\_write`\ , :literal:`public` or in :literal:`POSIX` format (eg 0700).
 
-    Modification of ACL is only supported from \ :literal:`POSIX`\  to \ :literal:`POSIX`\  mode.
+    Modification of ACL is only supported from :literal:`POSIX` to :literal:`POSIX` mode.
 
-    This field is mutually exclusive with \ :emphasis:`access\_control\_rights`\ .
+    This field is mutually exclusive with :emphasis:`access\_control\_rights`.
 
 
   access_control_rights (optional, dict, None)
@@ -90,7 +90,7 @@ Parameters
 
 
     trustee (True, dict, None)
-      Provides the trustee (user or group) name and trustee \ :emphasis:`provider\_type`\ .
+      Provides the trustee (user or group) name and trustee :emphasis:`provider\_type`.
 
 
       name (True, str, None)
@@ -102,9 +102,9 @@ Parameters
 
 
       provider_type (optional, str, local)
-        The \ :emphasis:`provider\_type`\  is optional and it defaults to \ :literal:`local`\ .
+        The :emphasis:`provider\_type` is optional and it defaults to :literal:`local`.
 
-        The supported values for \ :emphasis:`provider\_type`\  are \ :literal:`local`\ , \ :literal:`file`\ , \ :literal:`ldap`\  and \ :literal:`ads`\ .
+        The supported values for :emphasis:`provider\_type` are :literal:`local`\ , :literal:`file`\ , :literal:`ldap` and :literal:`ads`.
 
 
 
@@ -112,15 +112,15 @@ Parameters
   access_control_rights_state (optional, str, None)
     Specifies if the access rights are to be added or deleted for the trustee.
 
-    It is required together with \ :emphasis:`access\_control\_rights`\ .
+    It is required together with :emphasis:`access\_control\_rights`.
 
 
   recursive (optional, bool, True)
-    Creates intermediate folders recursively when set to \ :literal:`true`\ .
+    Creates intermediate folders recursively when set to :literal:`true`.
 
 
   recursive_force_delete (optional, bool, False)
-    Deletes sub files and folders recursively when set to \ :literal:`true`\  even if the filesystem is not empty.
+    Deletes sub files and folders recursively when set to :literal:`true` even if the filesystem is not empty.
 
 
   quota (optional, dict, None)
@@ -142,7 +142,7 @@ Parameters
 
 
     thresholds_on (optional, str, None)
-      For SDK 9.1.0 the parameter \ :emphasis:`include\_overheads`\  is deprecated and \ :emphasis:`thresholds\_on`\  is used.
+      For SDK 9.1.0 the parameter :emphasis:`include\_overheads` is deprecated and :emphasis:`thresholds\_on` is used.
 
 
     advisory_limit_size (optional, int, None)
@@ -150,11 +150,11 @@ Parameters
 
 
     soft_limit_size (optional, int, None)
-      Threshold value after which the soft limit exceeded notification will be sent and the \ :emphasis:`soft\_grace`\  period will start.
+      Threshold value after which the soft limit exceeded notification will be sent and the :emphasis:`soft\_grace` period will start.
 
       Write access will be restricted after the grace period expires.
 
-      Both \ :emphasis:`soft\_grace\_period`\  and \ :emphasis:`soft\_limit\_size`\  are required to modify soft threshold for the quota.
+      Both :emphasis:`soft\_grace\_period` and :emphasis:`soft\_limit\_size` are required to modify soft threshold for the quota.
 
 
     hard_limit_size (optional, int, None)
@@ -170,7 +170,7 @@ Parameters
 
 
     container (optional, bool, False)
-      If \ :literal:`true`\ , SMB shares using the quota directory see the quota thresholds as share size.
+      If :literal:`true`\ , SMB shares using the quota directory see the quota thresholds as share size.
 
 
     quota_state (optional, str, None)
@@ -187,7 +187,7 @@ Parameters
 
 
   list_snapshots (optional, bool, False)
-    If set to \ :literal:`true`\ , the filesystem's snapshots are returned.
+    If set to :literal:`true`\ , the filesystem's snapshots are returned.
 
 
   onefs_host (True, str, None)
@@ -201,9 +201,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
+    :literal:`true` - indicates that the SSL certificate should be verified.
 
-    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
+    :literal:`false` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -221,9 +221,9 @@ Notes
 -----
 
 .. note::
-   - While deleting a filesystem when recursive\_force\_delete is set as \ :literal:`true`\  it deletes all sub files and folders recursively. This is \ :literal:`true`\  even if the filesystem is not empty.
-   - Modification of \ :emphasis:`inherit\_flags`\  of filesystem ACL is successful only if \ :emphasis:`access\_rights`\  is also specified in the \ :emphasis:`access\_control\_rights`\  dictionary.
-   - \ :emphasis:`Check\_mode`\  is supported.
+   - While deleting a filesystem when recursive\_force\_delete is set as :literal:`true` it deletes all sub files and folders recursively. This is :literal:`true` even if the filesystem is not empty.
+   - Modification of :emphasis:`inherit\_flags` of filesystem ACL is successful only if :emphasis:`access\_rights` is also specified in the :emphasis:`access\_control\_rights` dictionary.
+   - :emphasis:`Check\_mode` is supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
