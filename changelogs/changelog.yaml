@@ -351,3 +351,20 @@ releases:
       bug_fixes:
         - GitHub defect fixes for filesystem module. (Issues # 38, # 121 and # 174)
     release_date: '2025-05-30'
+  3.9.0:
+    changes:
+      minor_changes:
+        - Performs operator validation for all updates of User Mapping Rule module.
+        - Avoid to add duplicated trustee for File System module.
+        - Adapt to muliple PowerScale versions for Alert Settings modules.
+        - Adapt to muliple PowerScale versions for Info modules.
+      bug_fixes:
+        - Fix defect for Support Assist module about gateway checking.
+    modules:
+      - description: Support to manage RDMA for NFS Global Settings module on Powerscale 9.8 or later.
+        name: nfs_global_settings
+        namespace: ''
+      - description: Add `+` as a permission option for Role module.
+        name: role
+        namespace: ''
+    release_date: '2025-06-27'

@@ -4,17 +4,17 @@
 This release supports modules mentioned in the Features section for Dell PowerScale.
 
 ## Features
-- Support to manage RDMA for NFS global settings module on Powerscale 9.8 or later.
+- Support to manage RDMA for NFS Global Settings module on Powerscale 9.8 or later.
 - Add `+` as a permission option for Role module.
 
 ## Enhancements
-- Performs operator validation for all updates of User mapping rule module.
+- Performs operator validation for all updates of User Mapping Rule module.
 - Avoid to add duplicated trustee for File System module.
-- Adapt to muliple PowerScale versions for Alert settings modules.
+- Adapt to muliple PowerScale versions for Alert Settings modules.
 - Adapt to muliple PowerScale versions for Info modules.
 
 ## Bug Fixes
-- Fix defect for Support assist module about gateway checking.
+- Fix defect for Support Assist module about gateway checking.
 
 
 # v3.8.1 (May 19, 2025)
@@ -480,7 +480,7 @@ This release supports modules mentioned in the Features section for Dell PowerSc
 N/A
 
 
-# v1.1.0
+# v1.1.0 (Jun 12, 2020)
 
 ## Release Summary
 This release supports modules mentioned in the Features section for Dell PowerScale.
@@ -495,7 +495,7 @@ N/A
 N/A
 
 
-# v1.0.0
+# v1.0.0 (Mar 19, 2020)
 
 ## Release Summary
 This release supports modules mentioned in the Features section for Dell PowerScale.

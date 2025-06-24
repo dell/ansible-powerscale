@@ -85,10 +85,10 @@ This section describes the features or enhancements of the Ansible Modules for D
 
 The Ansible Modules for Dell PowerScale release 3.9.0 provides the following enhancements:
 
-- Support to manage RDMA for NFS global settings module on Powerscale 9.8 or later.
+- Support to manage RDMA for NFS Global Settings module on Powerscale 9.8 or later.
 - Add `+` as a permission option for Role module.
-- Fix defect for Support assist module about gateway checking.
-- Some enhancement for User mapping rule, File System, Alert settings, Info modules.
+- Fix defect for Support Assist module about gateway checking.
+- Some enhancement for User Mapping Rule, File System, Alert Settings, Info modules.
 
 Known issues
 ------------
