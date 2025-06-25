@@ -23,24 +23,24 @@ Minor Changes
 - Performs operator validation for all updates of User Mapping Rule module.
 - Support to manage RDMA for NFS Global Settings module on Powerscale 9.8 or later.
 
-Bugfixes
---------
+Bug Fixes
+---------
 
 - Fix defect for Support Assist module about gateway checking.
 
 v3.8.1
 ======
 
-Bugfixes
---------
+Bug Fixes
+---------
 
 - GitHub defect fixes for filesystem module. (Issues
 
 v3.8.0
 ======
 
-Bugfixes
---------
+Bug Fixes
+---------
 
 - GitHub defect fixes networkpool module for unauthorized error (issue 133), smb share module return error (issue 138) and filesystem modules cannot delete non empty folders and returns invalid error message (issue 148)
 - Internal defect fixes for the modules settings, snapshot, group, nfs, smb, smb_global_settings, alert_rule, filesystem, nfs_alias, synciqpolicy, ads and info.
@@ -53,8 +53,8 @@ Minor Changes
 
 - Added check and diff mode support for synciqpolicy module.
 
-Bugfixes
---------
+Bug Fixes
+---------
 
 - Fixed bugs for synciqpolicy module. (Issues
 
