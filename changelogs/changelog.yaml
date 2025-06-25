@@ -364,7 +364,7 @@ releases:
         - Fix defect for Support Assist module about gateway checking.
       release_summary: '| Release Date: 2025-06-27
 
-        | This release brings several bug fixes and minor changes to the PowerFlex Ansible Modules.
+        | This release brings several bug fixes and minor changes to the PowerScale Ansible Modules.
 
         '
     release_date: '2025-06-27'
