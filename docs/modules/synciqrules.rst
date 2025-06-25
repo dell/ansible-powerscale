@@ -40,7 +40,7 @@ Parameters
   sync_rule_id (optional, str, None)
     This is an auto generated ID at the time of creation of SyncIQ performance rule.
 
-    For get/modify/delete operations \ :emphasis:`sync\_rule\_id`\  is required.
+    For get/modify/delete operations :emphasis:`sync\_rule\_id` is required.
 
     The ID of a performance rule is not absolute to a particular existing rule configuration. The IDs are auto-sequenced during creation/deletion of a performance rule.
 
@@ -101,9 +101,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
+    :literal:`true` - indicates that the SSL certificate should be verified.
 
-    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
+    :literal:`false` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -122,7 +122,7 @@ Notes
 
 .. note::
    - Operations performed in parallel from other interfaces apart from playbook cannot guarantee desirable results.
-   - The \ :emphasis:`check\_mode`\  is not supported.
+   - The :emphasis:`check\_mode` is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 

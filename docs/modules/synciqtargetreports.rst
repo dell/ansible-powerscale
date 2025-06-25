@@ -60,9 +60,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
+    :literal:`true` - indicates that the SSL certificate should be verified.
 
-    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
+    :literal:`false` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -80,7 +80,7 @@ Notes
 -----
 
 .. note::
-   - The \ :emphasis:`check\_mode`\  is not supported.
+   - The :emphasis:`check\_mode` is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 

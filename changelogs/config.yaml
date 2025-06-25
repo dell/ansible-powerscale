@@ -25,7 +25,7 @@ sections:
   - - security_fixes
     - Security Fixes
   - - bugfixes
-    - Bugfixes
+    - Bug Fixes
   - - known_issues
     - Known Issues
 title: Dellemc.Powerscale

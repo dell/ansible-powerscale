@@ -32,21 +32,21 @@ Parameters
   policy_name (optional, str, None)
     The name of the policy.
 
-    Required at the time of policy creation, for the rest of the operations either \ :emphasis:`policy\_name`\  or \ :emphasis:`policy\_id`\  is required.
+    Required at the time of policy creation, for the rest of the operations either :emphasis:`policy\_name` or :emphasis:`policy\_id` is required.
 
 
   policy_id (optional, str, None)
-    The \ :emphasis:`policy\_id`\  is auto generated at the time of creation.
+    The :emphasis:`policy\_id` is auto generated at the time of creation.
 
-    For get/modify operations either \ :emphasis:`policy\_name`\  or \ :emphasis:`policy\_id`\  is needed.
+    For get/modify operations either :emphasis:`policy\_name` or :emphasis:`policy\_id` is needed.
 
-    Parameters \ :emphasis:`policy\_name`\  and \ :emphasis:`policy\_id`\  are mutually exclusive.
+    Parameters :emphasis:`policy\_name` and :emphasis:`policy\_id` are mutually exclusive.
 
 
   new_policy_name (optional, str, None)
     The new name of the policy while renaming an existing policy.
 
-    \ :emphasis:`policy\_name`\  or \ :emphasis:`policy\_id`\  is required together with \ :emphasis:`new\_policy\_name`\ .
+    :emphasis:`policy\_name` or :emphasis:`policy\_id` is required together with :emphasis:`new\_policy\_name`.
 
 
   action (optional, str, None)
@@ -70,35 +70,35 @@ Parameters
 
 
   job_delay (optional, int, None)
-    If \ :emphasis:`run\_job`\  is set to \ :literal:`when-source-modified`\ , \ :emphasis:`job\_delay`\  is the duration to wait before triggering a job once there is modification on source.
+    If :emphasis:`run\_job` is set to :literal:`when-source-modified`\ , :emphasis:`job\_delay` is the duration to wait before triggering a job once there is modification on source.
 
 
   job_delay_unit (optional, str, seconds)
-    Unit for \ :emphasis:`job\_delay`\ .
+    Unit for :emphasis:`job\_delay`.
 
 
   rpo_alert (optional, int, None)
-    If \ :emphasis:`run\_job`\  is set to \ :literal:`on-schedule`\  it is set to time/date, an alert is created if the specified RPO for this policy is exceeded.
+    If :emphasis:`run\_job` is set to :literal:`on-schedule` it is set to time/date, an alert is created if the specified RPO for this policy is exceeded.
 
     The default value is 0, which will not generate RPO alerts.
 
 
   rpo_alert_unit (optional, str, minutes)
-    Unit for \ :emphasis:`rpo\_alert`\ .
+    Unit for :emphasis:`rpo\_alert`.
 
 
   snapshot_sync_pattern (optional, str, None)
-    The naming pattern that a snapshot must match to trigger a sync when the schedule is \ :literal:`when-snapshot-taken`\ .
+    The naming pattern that a snapshot must match to trigger a sync when the schedule is :literal:`when-snapshot-taken`.
 
 
   skip_when_source_unmodified (optional, bool, None)
     If true and schedule is set , the policy will not run if no changes have been made to the contents of the source directory since the last job successfully completed.
 
-    Option modifiable when \ :emphasis:`run\_job`\  is \ :literal:`on-schedule`\ .
+    Option modifiable when :emphasis:`run\_job` is :literal:`on-schedule`.
 
 
   schedule (optional, str, None)
-    Schedule set when \ :emphasis:`run\_policy`\  is \ :literal:`on-schedule`\ .
+    Schedule set when :emphasis:`run\_policy` is :literal:`on-schedule`.
 
     It must be in isidate format.
 
@@ -106,25 +106,25 @@ Parameters
 
 
   source_cluster (optional, dict, None)
-    Defines the details of \ :emphasis:`source\_cluster`\ .
+    Defines the details of :emphasis:`source\_cluster`.
 
 
     source_root_path (optional, str, None)
       The root directory on the source cluster where the files will be synced from.
 
-      Source root path should begin with /ifs. For example, if we want to create a synciq policy for the directory 'source' in the base path /ifs, then the \ :emphasis:`source\_root\_path`\  will be '/ifs/source'.
+      Source root path should begin with /ifs. For example, if we want to create a synciq policy for the directory 'source' in the base path /ifs, then the :emphasis:`source\_root\_path` will be '/ifs/source'.
 
 
     source_exclude_directories (optional, list, None)
       List of path to the directories that should be excluded while running a policy.
 
-      For example, if we want to exclude directory 'exclude1' at location '/ifs/source', then the \ :emphasis:`source\_exclude\_directories`\  will be '/ifs/source/exclude1'.
+      For example, if we want to exclude directory 'exclude1' at location '/ifs/source', then the :emphasis:`source\_exclude\_directories` will be '/ifs/source/exclude1'.
 
 
     source_include_directories (optional, list, None)
       List of path to the directories that should be included while running a policy
 
-      For example, if we want to include directory 'include1' at location '/ifs/source', then the \ :emphasis:`source\_exclude\_directories`\  will be '/ifs/source/include1'.
+      For example, if we want to include directory 'include1' at location '/ifs/source', then the :emphasis:`source\_exclude\_directories` will be '/ifs/source/include1'.
 
 
     source_network (optional, dict, None)
@@ -162,7 +162,7 @@ Parameters
     target_certificate_name (optional, str, None)
       The name of the target cluster certificate being used for encryption
 
-      Parameters \ :emphasis:`target\_certficate\_name`\  and \ :emphasis:`target\_certificate\_id`\  are mutually exclusive
+      Parameters :emphasis:`target\_certficate\_name` and :emphasis:`target\_certificate\_id` are mutually exclusive
 
       This parameter is not supported by isi\_sdk\_8\_1\_1
 
@@ -183,7 +183,7 @@ Parameters
 
 
     exp_time_unit (optional, str, years)
-      Unit of \ :emphasis:`target\_snapshot`\  expiration time.
+      Unit of :emphasis:`target\_snapshot` expiration time.
 
 
 
@@ -204,22 +204,22 @@ Parameters
 
 
     workers_per_node (optional, int, None)
-      Specifies the desired workers per node. This parameter is valid for \ :emphasis:`allow\_write`\ , and \ :emphasis:`allow\_write\_revert`\  operation. This is an optional parameter and it defaults to 3.
+      Specifies the desired workers per node. This parameter is valid for :emphasis:`allow\_write`\ , and :emphasis:`allow\_write\_revert` operation. This is an optional parameter and it defaults to 3.
 
 
 
   accelerated_failback (optional, bool, None)
-    If set to \ :literal:`true`\ , SyncIQ will perform failback configuration tasks during the next job run, rather than waiting to perform those tasks during the failback process.
+    If set to :literal:`true`\ , SyncIQ will perform failback configuration tasks during the next job run, rather than waiting to perform those tasks during the failback process.
 
     Performing these tasks ahead of time will increase the speed of failback operations.
 
-    It defaults to \ :literal:`true`\ , if not specified.
+    It defaults to :literal:`true`\ , if not specified.
 
 
   restrict_target_network (optional, bool, None)
-    If set to \ :literal:`true`\  then replication policies will connect only to nodes in the specified SmartConnect zone.
+    If set to :literal:`true` then replication policies will connect only to nodes in the specified SmartConnect zone.
 
-    If set to \ :literal:`false`\ , replication policies are not restricted to specific nodes on the target cluster.
+    If set to :literal:`false`\ , replication policies are not restricted to specific nodes on the target cluster.
 
 
   onefs_host (True, str, None)
@@ -233,9 +233,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    \ :literal:`true`\  - indicates that the SSL certificate should be verified.
+    :literal:`true` - indicates that the SSL certificate should be verified.
 
-    \ :literal:`false`\  - indicates that the SSL certificate should not be verified.
+    :literal:`false` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)

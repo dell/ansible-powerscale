@@ -14,7 +14,7 @@ name: powerscale
 
 # The version of the collection.
 # Must be compatible with semantic versioning
-version: 3.8.1
+version: 3.9.0
 
 # The path to the Markdown (.md) readme file.
 # This path is relative to the root of the collection.
@@ -40,6 +40,13 @@ authors:
   - Pavan Mudunuri <ansible.team@dell.com>
   - Sachin Apagundi <ansible.team@dell.com>
   - Kritika Bhateja <ansible.team@dell.com>
+  - Forrest Xia <ansible.team@dell.com>
+  - Yiming Bao <ansible.team@dell.com>
+  - Tao He <ansible.team@dell.com>
+  - Peter Cao <ansible.team@dell.com>
+  - Haiming Tan <ansible.team@dell.com>
+  - Ray Liu <ansible.team@dell.com>
+  - Luis Liu <ansible.team@dell.com>
 
 ### OPTIONAL but strongly recommended
 
