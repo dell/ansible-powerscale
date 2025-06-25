@@ -11,7 +11,7 @@ Release Summary
 ---------------
 
 | Release Date: 2025-06-27
-| This release brings several bug fixes and minor changes to the PowerFlex Ansible Modules.
+| This release brings several bug fixes and minor changes to the PowerScale Ansible Modules.
 
 Minor Changes
 -------------
