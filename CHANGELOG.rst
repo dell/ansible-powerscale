@@ -1,27 +1,49 @@
 ================================
-Dellemc.Powerscale Change Logs
+Dellemc.Powerscale Release Notes
 ================================
 
 .. contents:: Topics
+
+v3.9.0
+======
+
+Release Summary
+---------------
+
+| Release Date: 2025-06-27
+| This release brings several bug fixes and minor changes to the PowerFlex Ansible Modules.
+
+Minor Changes
+-------------
+
+- Adapt to muliple PowerScale versions for Alert Settings modules.
+- Adapt to muliple PowerScale versions for Info modules.
+- Add `+` as a permission option for Role module.
+- Avoid adding duplicated trustee for File System module.
+- Performs operator validation for all updates of User Mapping Rule module.
+- Support to manage RDMA for NFS Global Settings module on Powerscale 9.8 or later.
+
+Bug Fixes
+---------
+
+- Fix defect for Support Assist module about gateway checking.
 
 v3.8.1
 ======
 
 Bug Fixes
--------------
+---------
 
-- GitHub defect fixes for filesystem module. (Issues # 38, # 121 and # 174)
+- GitHub defect fixes for filesystem module. (Issues
 
 v3.8.0
 ======
 
 Bug Fixes
--------------
+---------
 
-- GitHub defect fixes networkpool module for unauthorized error (issue 133), smb share module return error (issue 138)
-  and filesystem modules cannot delete non empty folders and returns invalid error message (issue 148)
-- Internal defect fixes for the modules settings, snapshot, group, nfs, smb, smb_global_settings, alert_rule,
-  filesystem, nfs_alias, synciqpolicy, ads and info.
+- GitHub defect fixes networkpool module for unauthorized error (issue 133), smb share module return error (issue 138) and filesystem modules cannot delete non empty folders and returns invalid error message (issue 148)
+- Internal defect fixes for the modules settings, snapshot, group, nfs, smb, smb_global_settings, alert_rule, filesystem, nfs_alias, synciqpolicy, ads and info.
 
 v3.7.0
 ======
@@ -32,9 +54,9 @@ Minor Changes
 - Added check and diff mode support for synciqpolicy module.
 
 Bug Fixes
--------------
+---------
 
-- Fixed bugs for synciqpolicy module. (Issues #44 and #130)
+- Fixed bugs for synciqpolicy module. (Issues 44 and 130)
 
 v3.6.0
 ======
@@ -51,8 +73,8 @@ v3.5.0
 Minor Changes
 -------------
 
-- Added support to make listing of SMB open files cluster aware.
 - Added fix for making the ACL trustee zone-aware for filesystem module.
+- Added support to make listing of SMB open files cluster aware.
 
 v3.4.0
 ======

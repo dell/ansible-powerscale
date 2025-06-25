@@ -81,7 +81,7 @@ This table provides information about the software prerequisites for the Ansible
 
 | **Ansible Modules** | **OneFS Version** | **Python version** | **Python SDK version** | **Ansible**              |
 |---------------------|-----------------------|--------------------|----------------------------|--------------------------|
-| v3.8.1 | 9.5.x <br> 9.7.x <br> 9.8.x | 3.10 <br> 3.11 <br> 3.12 | 0.3.0.1 | 2.16 <br> 2.17 <br> 2.18 |
+| v3.9.0 | 9.7.x <br> 9.10.x <br> 9.11.x | 3.10 <br> 3.11 <br> 3.12 | 0.6.0 | 2.16 <br> 2.17 <br> 2.18 |
 
 # List of Ansible modules for Dell PowerScale
 
