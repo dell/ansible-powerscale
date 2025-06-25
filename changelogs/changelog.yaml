@@ -336,7 +336,7 @@ releases:
       minor_changes:
         - Added check and diff mode support for synciqpolicy module.
       bugfixes:
-        - Fixed bugs for synciqpolicy module. (Issues # 44 and # 130)
+        - Fixed bugs for synciqpolicy module. (Issues 44 and 130)
     release_date: '2024-12-24'
   3.8.0:
     changes:

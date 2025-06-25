@@ -56,7 +56,7 @@ Minor Changes
 Bug Fixes
 ---------
 
-- Fixed bugs for synciqpolicy module. (Issues
+- Fixed bugs for synciqpolicy module. (Issues 44 and 130)
 
 v3.6.0
 ======
