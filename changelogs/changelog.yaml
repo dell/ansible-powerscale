@@ -335,12 +335,12 @@ releases:
     changes:
       minor_changes:
         - Added check and diff mode support for synciqpolicy module.
-      bug_fixes:
+      bugfixes:
         - Fixed bugs for synciqpolicy module. (Issues # 44 and # 130)
     release_date: '2024-12-24'
   3.8.0:
     changes:
-      bug_fixes:
+      bugfixes:
         - GitHub defect fixes networkpool module for unauthorized error (issue 133), smb share module return error (issue 138)
           and filesystem modules cannot delete non empty folders and returns invalid error message (issue 148)
         - Internal defect fixes for the modules settings, snapshot, group, nfs, smb, smb_global_settings, alert_rule,
@@ -348,7 +348,7 @@ releases:
     release_date: '2025-03-28'
   3.8.1:
     changes:
-      bug_fixes:
+      bugfixes:
         - GitHub defect fixes for filesystem module. (Issues # 38, # 121 and # 174)
     release_date: '2025-05-30'
   3.9.0:
@@ -360,6 +360,11 @@ releases:
         - Adapt to muliple PowerScale versions for Info modules.
         - Performs operator validation for all updates of User Mapping Rule module.
         - Support to manage RDMA for NFS Global Settings module on Powerscale 9.8 or later.
-      bug_fixes:
+      bugfixes:
         - Fix defect for Support Assist module about gateway checking.
+      release_summary: '| Release Date: 2025-06-27
+
+        | This release brings several bug fixes and minor changes to the PowerFlex Ansible Modules.
+
+        '
     release_date: '2025-06-27'
