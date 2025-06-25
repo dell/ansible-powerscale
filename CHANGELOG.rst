@@ -19,7 +19,7 @@ Minor Changes
 - Adapt to muliple PowerScale versions for Alert Settings modules.
 - Adapt to muliple PowerScale versions for Info modules.
 - Add `+` as a permission option for Role module.
-- Avoid to add duplicated trustee for File System module.
+- Avoid adding duplicated trustee for File System module.
 - Performs operator validation for all updates of User Mapping Rule module.
 - Support to manage RDMA for NFS Global Settings module on Powerscale 9.8 or later.
 
