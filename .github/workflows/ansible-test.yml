@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ansible-version: [stable-2.18]
+        ansible-version: [stable-2.19]
     steps:
       - name: Check out code
         uses: actions/checkout@v3
@@ -51,12 +51,14 @@ jobs:
       matrix:
         python: ['3.10', '3.11', '3.12']
         ansible:
-          - stable-2.16
           - stable-2.17
           - stable-2.18
+          - stable-2.19
           - devel
         exclude:
           - ansible: stable-2.18
+            python: '3.10'
+          - ansible: stable-2.19
             python: '3.10'
           - ansible: devel
             python: '3.10'
@@ -66,7 +68,7 @@ jobs:
         uses: ansible-community/ansible-test-gh-action@release/v1
         with:
           testing-type: units
-          coverage: ${{ (matrix.python == '3.11' && matrix.ansible == 'stable-2.18') && 'always' ||  'never' }}
+          coverage: ${{ (matrix.python == '3.12' && matrix.ansible == 'stable-2.19') && 'always' ||  'never' }}
           ansible-core-version: ${{ matrix.ansible }}
           target-python-version: ${{ matrix.python }}
         env:
@@ -87,12 +89,14 @@ jobs:
       matrix:
         python: ['3.10', '3.11', '3.12']
         ansible:
-          - stable-2.16
           - stable-2.17
           - stable-2.18
+          - stable-2.19
           - devel
         exclude:
           - ansible: stable-2.18
+            python: '3.10'
+          - ansible: stable-2.19
             python: '3.10'
           - ansible: devel
             python: '3.10'
