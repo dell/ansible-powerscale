@@ -21,8 +21,8 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.16 or later.
-- Python 3.10, 3.11 or 3.12.
+- Ansible-core 2.17 or later.
+- Python 3.11, 3.12 or 3.13.
 
 
 

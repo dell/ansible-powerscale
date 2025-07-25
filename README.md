@@ -2,8 +2,8 @@
 
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](https://github.com/dell/ansible-powerscale/blob/main/docs/CODE_OF_CONDUCT.md)
 [![License](https://img.shields.io/github/license/dell/ansible-powerscale)](https://github.com/dell/ansible-powerscale/blob/main/LICENSE)
-[![Python version](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Ansible version](https://img.shields.io/badge/ansible-2.16+-blue.svg)](https://pypi.org/project/ansible/)
+[![Python version](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Ansible version](https://img.shields.io/badge/ansible-2.17+-blue.svg)](https://pypi.org/project/ansible/)
 [![isilon-sdk](https://img.shields.io/github/v/release/dell/python-powerscale?include_prereleases&label=isilon-sdk&style=flat-square)](https://github.com/Isilon/isilon_sdk_python)
 [![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/dell/ansible-powerscale?include_prereleases&label=latest&style=flat-square)](https://github.com/dell/ansible-powerscale/releases)
 [![codecov](https://codecov.io/gh/dell/ansible-powerscale/branch/main/graph/badge.svg)](https://app.codecov.io/gh/dell/ansible-powerscale)
@@ -81,7 +81,7 @@ This table provides information about the software prerequisites for the Ansible
 
 | **Ansible Modules** | **OneFS Version** | **Python version** | **Python SDK version** | **Ansible**              |
 |---------------------|-----------------------|--------------------|----------------------------|--------------------------|
-| v3.9.0 | 9.7.x <br> 9.10.x <br> 9.11.x | 3.10 <br> 3.11 <br> 3.12 | 0.6.0 | 2.16 <br> 2.17 <br> 2.18 |
+| v3.9.0 | 9.7.x <br> 9.10.x <br> 9.11.x | 3.11 <br> 3.12 <br> 3.13 | 0.6.0 | 2.17 <br> 2.18 <br> 2.19 |
 
 # List of Ansible modules for Dell PowerScale
 
