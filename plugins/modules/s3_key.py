@@ -301,8 +301,8 @@ class S3KeyDeleteHandler():
                 key_details = key_object.delete_key()
                 key_object.result["changed"] = True
             else:
-                msg = f"Skipping S3 key deletion for user {key_params.get("user")} in" \
-                      f" access zone {key_params.get("access_zone")} since key does not exist"
+                msg = f"Skipping S3 key deletion for user {key_params.get('user')} in" \
+                      f" access zone {key_params.get('access_zone')} since key does not exist"
                 LOG.info(msg)
         S3KeyExitHandler().handle(key_object, key_details)
 
@@ -314,9 +314,9 @@ class S3KeyCreateHandler():
                 key_details = key_object.create_key()
                 key_object.result["changed"] = True
             else:
-                msg = f"Skipping S3 key creation for user {key_params.get("user")} in access zone" \
-                      f" {key_params.get("access_zone")} since key exists and param" \
-                      f" existing_key_overwrite is {key_params.get("existing_key_overwrite")}" 
+                msg = f"Skipping S3 key creation for user {key_params.get('user')} in access zone" \
+                      f" {key_params.get('access_zone')} since key exists and param" \
+                      f" existing_key_overwrite is {key_params.get('existing_key_overwrite')}" 
                 LOG.info(msg)
         S3KeyDeleteHandler().handle(
             key_object=key_object, key_params=key_params,
