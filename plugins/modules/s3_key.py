@@ -27,16 +27,20 @@ author:
 options:
     user:
         description:
-            - Specifies the user that owns the S3 key.
-            - If users belongs to another provider domain, it should be mentioned along
-            with domain name as "DOMAIN_NAME\\username" or DOMAIN_NAME\username.
+        - Specifies the user that owns the S3 key.
+        - If users belongs to another provider domain, it should be mentioned along
+          with domain name as "DOMAIN_NAME\\username" or DOMAIN_NAME\username.
         required: true
         type: str
-    existing_key_overwrite:
-        description: Wether existing S3 keys should be replaced by new ones.
+    generate_new_key:
+        description: 
+        - Wether a new S3 keys should be generated.
+        - Value C(if_not_present) indicates that a new S3 key is only generated if there is no existing key.
+        - Value C(always) indicates that a new S3 key is always generated, even if there is an existing key.
         required: false
-        type: bool
-        default: false
+        type: str
+        default: if_not_present
+        choices: ['if_not_present', 'always']
     existing_key_expiry_minutes:
         description: Duration in minutes for which old key should remain valid.
         required: false
@@ -80,7 +84,7 @@ EXAMPLES = r"""
     access_zone: "sample-zone"
     user: "sample-user"
     state: "present"
-    existing_key_overwrite: true
+    generate_new_key: "always"
     existing_key_expiry_minutes: 30
 
 - name: Delete S3 Key
@@ -111,7 +115,7 @@ S3_key_details:
         secret_key:
             description: S3 secret key.
             type: str
-        secret_key_timestamp
+        secret_key_timestamp:
             description: Creation timestamp of S3 secret key.
             type: str
         old_key_expiry:
@@ -269,13 +273,10 @@ class S3Key(object):
         """Get module specific parameters"""
         return dict(
             user=dict(type="str", required=True),
-            existing_key_overwrite=dict(
-                choices=[True, False], type="bool", required=False, default=False
-            ),
+            generate_new_key=dict(type="str", choices=["if_not_present", "always"], default="if_not_present"),
             existing_key_expiry_minutes=dict(type="int", required=False, default=0),
             access_zone=dict(type="str", default="System"),
-            state=dict(type="str", choices=["present", "absent"],
-                       default="present")
+            state=dict(type="str", choices=["present", "absent"], default="present")
         )
     
     def validate_params(self):
@@ -310,13 +311,13 @@ class S3KeyDeleteHandler():
 class S3KeyCreateHandler():
     def handle(self, key_object, key_params, key_exists, key_details):
         if key_params["state"] == "present":
-            if not key_exists or (key_exists and key_params.get("existing_key_overwrite")):
+            if not key_exists or (key_exists and key_params.get("generate_new_key") == "always"):
                 key_details = key_object.create_key()
                 key_object.result["changed"] = True
             else:
                 msg = f"Skipping S3 key creation for user {key_params.get('user')} in access zone" \
                       f" {key_params.get('access_zone')} since key exists and param" \
-                      f" existing_key_overwrite is {key_params.get('existing_key_overwrite')}" 
+                      f" generate_new_key is {key_params.get('generate_new_key')}" 
                 LOG.info(msg)
         S3KeyDeleteHandler().handle(
             key_object=key_object, key_params=key_params,
