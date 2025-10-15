@@ -14,7 +14,7 @@ DOCUMENTATION = r"""
 module: s3_key
 version_added: "3.10.0"
 short_description: Manage S3 Keys on a PowerScale Storage System
-description: 
+description:
 - Managing S3 Keys on an PowerScale system includes retrieving details of
   S3 keys, creating S3 keys and deleting S3 keys.
 
@@ -23,7 +23,7 @@ extends_documentation_fragment:
 
 author:
     - Fabian Brauner (@fpfuetsch)
-  
+
 options:
     user:
         description:
@@ -33,7 +33,7 @@ options:
         required: true
         type: str
     generate_new_key:
-        description: 
+        description:
         - Wether a new S3 keys should be generated.
         - Value C(if_not_present) indicates that a new S3 key is only generated if there is no existing key.
         - Value C(always) indicates that a new S3 key is always generated, even if there is an existing key.
@@ -66,7 +66,7 @@ options:
 
 EXAMPLES = r"""
 - name: Create S3 Key - Check_mode
-  powerscale_s3_key:
+  dellemc.powerscale.s3_key:
     onefs_host: "{{onefs_host}}"
     port_no: "{{port_no}}"
     api_user: "{{api_user}}"
@@ -78,7 +78,7 @@ EXAMPLES = r"""
   check_mode: true
 
 - name: Create S3 Key - if not present
-  powerscale_s3_key:
+  dellemc.powerscale.s3_key:
     onefs_host: "{{onefs_host}}"
     port_no: "{{port_no}}"
     api_user: "{{api_user}}"
@@ -90,7 +90,7 @@ EXAMPLES = r"""
     generate_new_key: "if_not_present"
 
 - name: Create S3 Key - even if already present
-  powerscale_s3_key:
+  dellemc.powerscale.s3_key:
     onefs_host: "{{onefs_host}}"
     port_no: "{{port_no}}"
     api_user: "{{api_user}}"
@@ -102,7 +102,7 @@ EXAMPLES = r"""
     generate_new_key: "always"
 
 - name: Create S3 Key - even if already present, expire old key after 30 min
-  powerscale_s3_key:
+  dellemc.powerscale.s3_key:
     onefs_host: "{{onefs_host}}"
     port_no: "{{port_no}}"
     api_user: "{{api_user}}"
@@ -115,7 +115,7 @@ EXAMPLES = r"""
     existing_key_expiry_minutes: 30
 
 - name: Delete S3 Key
-  powerscale_s3_key:
+  dellemc.powerscale.s3_key:
     onefs_host: "{{onefs_host}}"
     port_no: "{{port_no}}"
     api_user: "{{api_user}}"
@@ -288,7 +288,7 @@ class S3Key(object):
             if not self.module.check_mode:
                 self.protocol_api.delete_s3_key(s3_key_id=user, zone=access_zone)
                 msg = f"Successfully deleted the S3 key for user {user} and zone {access_zone}"
-                LOG.info(f"Successfully deleted the S3 key for user {user}")
+                LOG.info(msg)
             return self.get_key_details()
 
         except Exception as e:
@@ -303,15 +303,24 @@ class S3Key(object):
     def get_s3_key_parameters(self):
         """Get module specific parameters"""
         return {
-            "user":{"type":"str", "required":True},
-            "generate_new_key":{
-                "type":"str",
-                "choices":["if_not_present", "always"],
-                "default":"if_not_present",
+            "user": {"type": "str", "required": True},
+            "generate_new_key": {
+                "type": "str",
+                "choices": ["if_not_present", "always"],
+                "default": "if_not_present",
             },
-            "existing_key_expiry_minutes":{"type":"int", "required":False, "default":0},
-            "access_zone":{"type":"str", "default":"System"},
-            "state":{"type":"str", "choices":["present", "absent"], "default":"present"},
+            "existing_key_expiry_minutes": {
+                "type": "int",
+                "required": False,
+                "default": 0,
+                "no_log": False,
+            },
+            "access_zone": {"type": "str", "default": "System"},
+            "state": {
+                "type": "str",
+                "choices": ["present", "absent"],
+                "default": "present",
+            },
         }
 
     def validate_params(self):
@@ -328,6 +337,7 @@ class S3Key(object):
 
 class S3KeyExitHandler:
     """Handle exit"""
+
     def handle(self, key_object, key_details):
         """Handle exit"""
         key_object.result["S3_key_details"] = key_details
@@ -336,6 +346,7 @@ class S3KeyExitHandler:
 
 class S3KeyDeleteHandler:
     """Handle deletion of S3 Key"""
+
     def handle(self, key_object, key_params, key_exists, key_details):
         """Handle deletion of S3 Key"""
         if key_params["state"] == "absent":
@@ -351,8 +362,9 @@ class S3KeyDeleteHandler:
         S3KeyExitHandler().handle(key_object, key_details)
 
 
-class S3KeyCreateHandler:#
+class S3KeyCreateHandler:
     """Handle creation of S3 Key"""
+
     def handle(self, key_object, key_params, key_exists, key_details):
         """Handle creation of S3 Key"""
         if key_params["state"] == "present":
@@ -378,6 +390,7 @@ class S3KeyCreateHandler:#
 
 class S3KeyHandler:
     """Handle S3 Key module"""
+
     def handle(self, key_object, key_params):
         """Handle S3 Key module"""
         key_object.validate_params()
