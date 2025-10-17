@@ -22,7 +22,7 @@ extends_documentation_fragment:
   - dellemc.powerscale.powerscale
 
 author:
-    - Fabian Brauner (@fpfuetsch)
+    - Fabian B. (@fpfuetsch)
 
 options:
     user:
@@ -67,62 +67,62 @@ options:
 EXAMPLES = r"""
 - name: Create S3 Key - Check_mode
   dellemc.powerscale.s3_key:
-    onefs_host: "{{onefs_host}}"
-    port_no: "{{port_no}}"
-    api_user: "{{api_user}}"
-    api_password: "{{api_password}}"
-    verify_ssl: "{{verify_ssl}}"
-    access_zone: "{{access_zone}}"
-    user: "{{user}}"
+    onefs_host: "{{ onefs_host }}"
+    port_no: "{{ port_no }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    verify_ssl: "{{ verify_ssl }}"
+    access_zone: "{{ access_zone }}"
+    user: "{{ user }}"
     state: "present"
   check_mode: true
 
 - name: Create S3 Key - if not present
   dellemc.powerscale.s3_key:
-    onefs_host: "{{onefs_host}}"
-    port_no: "{{port_no}}"
-    api_user: "{{api_user}}"
-    api_password: "{{api_password}}"
-    verify_ssl: "{{verify_ssl}}"
-    access_zone: "{{access_zone}}"
-    user: "{{user}}"
+    onefs_host: "{{ onefs_host }}"
+    port_no: "{{ port_no }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    verify_ssl: "{{ verify_ssl }}"
+    access_zone: "{{ access_zone }}"
+    user: "{{ user }}"
     state: "present"
     generate_new_key: "if_not_present"
 
 - name: Create S3 Key - even if already present
   dellemc.powerscale.s3_key:
-    onefs_host: "{{onefs_host}}"
-    port_no: "{{port_no}}"
-    api_user: "{{api_user}}"
-    api_password: "{{api_password}}"
-    verify_ssl: "{{verify_ssl}}"
-    access_zone: "{{access_zone}}"
-    user: "{{user}}"
+    onefs_host: "{{ onefs_host }}"
+    port_no: "{{ port_no }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    verify_ssl: "{{ verify_ssl }}"
+    access_zone: "{{ access_zone }}"
+    user: "{{ user }}"
     state: "present"
     generate_new_key: "always"
 
 - name: Create S3 Key - even if already present, expire old key after 30 min
   dellemc.powerscale.s3_key:
-    onefs_host: "{{onefs_host}}"
-    port_no: "{{port_no}}"
-    api_user: "{{api_user}}"
-    api_password: "{{api_password}}"
-    verify_ssl: "{{verify_ssl}}"
-    access_zone: "{{access_zone}}"
-    user: "{{user}}"
+    onefs_host: "{{ onefs_host }}"
+    port_no: "{{ port_no }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    verify_ssl: "{{ verify_ssl }}"
+    access_zone: "{{ access_zone }}"
+    user: "{{ user }}"
     state: "present"
     generate_new_key: "always"
     existing_key_expiry_minutes: 30
 
 - name: Delete S3 Key
   dellemc.powerscale.s3_key:
-    onefs_host: "{{onefs_host}}"
-    port_no: "{{port_no}}"
-    api_user: "{{api_user}}"
-    api_password: "{{api_password}}"
-    verify_ssl: "{{verify_ssl}}"
-    access_zone: "{{access_zone}}"
-    user: "{{user}}"
+    onefs_host: "{{ onefs_host }}"
+    port_no: "{{ port_no }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    verify_ssl: "{{ verify_ssl }}"
+    access_zone: "{{ access_zone }}"
+    user: "{{ user }}"
     state: "absent"
 """
 
