@@ -249,6 +249,8 @@ class TestGroup(PowerScaleUnitBase):
         self.set_module_params(self.group_args, MockGroupApi.get_update_group_payload())
         self.update_group(powerscale_module_mock)
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed']
+        # when adding a group member, no auth provider should be set as a filter
+        assert 'provider' not in powerscale_module_mock.group_api_instance.create_group_member.call_args[1]
 
     def test_update_group_with_add_user_exception(self, powerscale_module_mock):
         self.set_module_params(self.group_args, MockGroupApi.get_update_group_payload())

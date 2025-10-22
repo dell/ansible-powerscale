@@ -66,6 +66,8 @@ options:
     description:
     - Either I(user_name) or I(user_id) is needed to add or remove the user
       from the group.
+    - If users belongs to another provider domain, it should be mentioned along
+      with domain name as "DOMAIN_NAME\\username" or DOMAIN_NAME\username.
     - Users can be part of multiple groups.
     type: list
     elements: dict
@@ -428,7 +430,7 @@ class Group(object):
             group_member = utils.isi_sdk.AuthAccessAccessItemFileGroup(user)
             provider = self.check_provider_type(provider, 'Add User to')
             api_response = self.group_api_instance.create_group_member(
-                group_member, group, zone=zone, provider=provider)
+                group_member, group, zone=zone)
             LOG.info(api_response)
             return True
         except Exception as e:
