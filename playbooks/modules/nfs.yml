@@ -55,6 +55,55 @@
         clients: ["{{ client3 }}"]
         client_state: 'present-in-export'
         ignore_unresolvable_hosts: true
+        map_lookup_uid: true
+        map_failure:
+          enabled: false
+        file_name_max_size:
+          size_value: 255
+          size_unit: B
+        block_size:
+          size_value: 8192
+          size_unit: B
+        directory_transfer_size:
+          size_value: 4096
+          size_unit: B
+        read_transfer_max_size:
+          size_value: 65536
+          size_unit: B
+        read_transfer_multiple:
+          size_value: 4096
+          size_unit: B
+        read_transfer_size:
+          size_value: 32768
+          size_unit: B
+        write_transfer_max_size:
+          size_value: 65536
+          size_unit: B
+        write_transfer_multiple:
+          size_value: 4096
+          size_unit: B
+        write_transfer_size:
+          size_value: 32768
+          size_unit: B
+        max_file_size:
+          size_value: 1099511627776
+          size_unit: B
+        commit_asynchronous: false
+        setattr_asynchronous: false
+        readdirplus: true
+        return_32bit_file_ids: false
+        can_set_time: true
+        symlinks: true
+        write_filesync_action: FILESYNC
+        write_filesync_reply: FILESYNC
+        write_datasync_action: DATASYNC
+        write_datasync_reply: DATASYNC
+        write_unstable_action: UNSTABLE
+        write_unstable_reply: UNSTABLE
+        encoding: utf-8
+        time_delta:
+          time_value: 1.0
+          time_unit: seconds
         state: 'present'
 
     - name: Get NFS Export details - {{ path }}
@@ -81,6 +130,13 @@
         security_flavors:
           - "unix"
           - "kerberos"
+        map_lookup_uid: false
+        block_size:
+          size_value: 4096
+          size_unit: B
+        time_delta:
+          time_value: 0.5
+          time_unit: seconds
         state: 'present'
 
     - name: Get NFS Export details - {{ path_system }}

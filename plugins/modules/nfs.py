@@ -201,6 +201,280 @@ options:
       set, sub-directories will not be mountable.
     - This setting can be modified any time.
     type: bool
+  map_failure:
+    description:
+    - Specifies the user/group mapping to apply after a failed auth attempt for this export.
+    type: dict
+    suboptions:
+      enabled:
+        description:
+        - True if the user mapping is applied.
+        type: bool
+        default: true
+      primary_group:
+        description:
+        - Specifies the primary group name.
+        type: str
+      secondary_groups:
+        description:
+        - Specifies the secondary groups.
+        type: list
+        elements: dict
+        suboptions:
+          name:
+            description:
+            - Specifies the group name.
+            type: str
+            required: true
+          state:
+            description:
+            - Specifies the group state.
+            type: str
+            choices: [absent, present]
+            default: present
+      user:
+        description:
+        - Specifies the persona name.
+        type: str
+  file_name_max_size:
+    description:
+    - Specifies the reported maximum length of a file name (size dict).
+    type: dict
+    suboptions:
+      size_value:
+        description:
+        - Size value.
+        type: int
+        required: true
+      size_unit:
+        description:
+        - Unit for the size value.
+        type: str
+        required: true
+        choices: ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+  block_size:
+    description:
+    - Specifies the block size returned by the NFS statfs procedure (size dict).
+    type: dict
+    suboptions:
+      size_value:
+        description:
+        - Size value.
+        type: int
+        required: true
+      size_unit:
+        description:
+        - Unit for the size value.
+        type: str
+        required: true
+        choices: ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+  directory_transfer_size:
+    description:
+    - Specifies the preferred size for directory read operations (size dict).
+    type: dict
+    suboptions:
+      size_value:
+        description:
+        - Size value.
+        type: int
+        required: true
+      size_unit:
+        description:
+        - Unit for the size value.
+        type: str
+        required: true
+        choices: ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+  read_transfer_max_size:
+    description:
+    - Specifies the maximum buffer size that clients should use on NFS read requests (size dict).
+    type: dict
+    suboptions:
+      size_value:
+        description:
+        - Size value.
+        type: int
+        required: true
+      size_unit:
+        description:
+        - Unit for the size value.
+        type: str
+        required: true
+        choices: ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+  read_transfer_multiple:
+    description:
+    - Specifies the preferred multiple size for NFS read requests (size dict).
+    type: dict
+    suboptions:
+      size_value:
+        description:
+        - Size value.
+        type: int
+        required: true
+      size_unit:
+        description:
+        - Unit for the size value.
+        type: str
+        required: true
+        choices: ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+  read_transfer_size:
+    description:
+    - Specifies the preferred size for NFS read requests (size dict).
+    type: dict
+    suboptions:
+      size_value:
+        description:
+        - Size value.
+        type: int
+        required: true
+      size_unit:
+        description:
+        - Unit for the size value.
+        type: str
+        required: true
+        choices: ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+  write_transfer_max_size:
+    description:
+    - Specifies the maximum buffer size that clients should use on NFS write requests (size dict).
+    type: dict
+    suboptions:
+      size_value:
+        description:
+        - Size value.
+        type: int
+        required: true
+      size_unit:
+        description:
+        - Unit for the size value.
+        type: str
+        required: true
+        choices: ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+  write_transfer_multiple:
+    description:
+    - Specifies the preferred multiple size for NFS write requests (size dict).
+    type: dict
+    suboptions:
+      size_value:
+        description:
+        - Size value.
+        type: int
+        required: true
+      size_unit:
+        description:
+        - Unit for the size value.
+        type: str
+        required: true
+        choices: ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+  write_transfer_size:
+    description:
+    - Specifies the preferred multiple size for NFS write requests (size dict).
+    type: dict
+    suboptions:
+      size_value:
+        description:
+        - Size value.
+        type: int
+        required: true
+      size_unit:
+        description:
+        - Unit for the size value.
+        type: str
+        required: true
+        choices: ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+  max_file_size:
+    description:
+    - Specifies the maximum file size for any file accessed from the export (size dict).
+    type: dict
+    suboptions:
+      size_value:
+        description:
+        - Size value.
+        type: int
+        required: true
+      size_unit:
+        description:
+        - Unit for the size value.
+        type: str
+        required: true
+        choices: ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+  commit_asynchronous:
+    description:
+    - True if NFS commit requests execute asynchronously.
+    type: bool
+  setattr_asynchronous:
+    description:
+    - True if set attribute operations execute asynchronously.
+    type: bool
+  readdirplus:
+    description:
+    - True if 'readdirplus' requests are enabled. Enabling this property might improve network performance and is only available for NFSv3.
+    type: bool
+  return_32bit_file_ids:
+    description:
+    - Limits the size of file identifiers returned by NFSv3+ to 32-bit values (may require remount).
+    type: bool
+  can_set_time:
+    description:
+    - True if the client can set file times through the NFS set attribute request.
+    type: bool
+  map_lookup_uid:
+    description:
+    - True if incoming user IDs (UIDs) are mapped to users in the OneFS user database.
+    - When set to False, incoming UIDs are applied directly to file operations.
+    type: bool
+  symlinks:
+    description:
+    - True if symlinks are supported.
+    type: bool
+  write_datasync_action:
+    description:
+    - Specifies the synchronization type for datasync action.
+    type: str
+    choices: ['DATASYNC', 'FILESYNC', 'UNSTABLE']
+  write_datasync_reply:
+    description:
+    - Specifies the synchronization type for datasync reply.
+    type: str
+    choices: ['DATASYNC', 'FILESYNC', 'UNSTABLE']
+  write_filesync_action:
+    description:
+    - Specifies the synchronization type for filesync action.
+    type: str
+    choices: ['DATASYNC', 'FILESYNC', 'UNSTABLE']
+  write_filesync_reply:
+    description:
+    - Specifies the synchronization type for filesync reply.
+    type: str
+    choices: ['DATASYNC', 'FILESYNC', 'UNSTABLE']
+  write_unstable_action:
+    description:
+    - Specifies the synchronization type for unstable action.
+    type: str
+    choices: ['DATASYNC', 'FILESYNC', 'UNSTABLE']
+  write_unstable_reply:
+    description:
+    - Specifies the synchronization type for unstable reply.
+    type: str
+    choices: ['DATASYNC', 'FILESYNC', 'UNSTABLE']
+  encoding:
+    description:
+    - Encoding type for filenames returned to clients.
+    type: str
+  time_delta:
+    description:
+    - Time delta object expressing time skew; expects a dict with time_value and time_unit.
+    type: dict
+    suboptions:
+      time_value:
+        description:
+        - Numeric time value.
+        type: float
+        required: true
+      time_unit:
+        description:
+        - Unit for time_value.
+        type: str
+        required: true
+        choices: ['seconds', 'nanoseconds', 'milliseconds', 'microseconds']
 attributes:
   check_mode:
     description:
@@ -355,6 +629,29 @@ EXAMPLES = r'''
     path: "<path>"
     access_zone: "{{access_zone}}"
     state: 'absent'
+
+- name: Create NFS Export with advanced settings
+  dellemc.powerscale.nfs:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    path: "<path>"
+    access_zone: "{{access_zone}}"
+    read_only: false
+    clients:
+      - "10.0.0.10"
+    map_lookup_uid: true
+    block_size:
+      size_value: 8192
+      size_unit: 'B'
+    map_failure:
+      enabled: false
+    write_filesync_action: 'FILESYNC'
+    time_delta:
+      time_value: 1.0
+      time_unit: 'seconds'
+    state: 'present'
 '''
 
 RETURN = r'''
@@ -453,7 +750,113 @@ NFS_export_details:
                 secondary_groups:
                     description: Specifies the secondary groups details.
                     type: list
-
+        map_failure:
+            description: Mapping of users to a specific user and/or group ID after a failed auth attempt.
+            type: dict
+        name_max_size:
+            description: Specifies the reported maximum length of a file name. This parameter does
+                not affect server behavior, but is included to accommodate legacy client
+                requirements.
+            type: dict
+        block_size:
+            description: Specifies the block size returned by the NFS statfs procedure.
+            type: dict
+        directory_transfer_size:
+            description: Specifies the preferred size for directory read operations. This value is
+                used to advise the client of optimal settings for the server, but is not
+                enforced.
+            type: dict
+        read_transfer_max_size:
+            description: Specifies the maximum buffer size that clients should use on NFS read
+                requests. This value is used to advise the client of optimal settings for
+                the server, but is not enforced.
+            type: dict
+        read_transfer_multiple:
+            description: Specifies the preferred multiple size for NFS read requests. This value is
+                used to advise the client of optimal settings for the server, but is not
+                enforced.
+            type: dict
+        read_transfer_size:
+            description: Specifies the preferred size for NFS read requests. This value is used to
+                advise the client of optimal settings for the server, but is not enforced.
+            type: dict
+        write_transfer_max_size:
+            description: Specifies the maximum buffer size that clients should use on NFS write
+                requests. This value is used to advise the client of optimal settings for
+                the server, but is not enforced.
+            type: dict
+        write_transfer_multiple:
+            description: Specifies the preferred multiple size for NFS write requests. This value is
+                used to advise the client of optimal settings for the server, but is not
+                enforced.
+            type: dict
+        write_transfer_size:
+            description: Specifies the preferred multiple size for NFS write requests. This value is
+                used to advise the client of optimal settings for the server, but is not
+                enforced.
+            type: dict
+        max_file_size:
+            description: Specifies the maximum file size for any file accessed from the export. This
+                parameter does not affect server behavior, but is included to accommodate
+                legacy client requirements.
+            type: dict
+        security_flavors:
+            description: Specifies the authentication types that are supported for this export.
+            type: list
+        commit_asynchronous:
+            description: True if NFS commit requests execute asynchronously.
+            type: bool
+        setattr_asynchronous:
+            description: True if set attribute operations execute asynchronously.
+            type: bool
+        readdirplus:
+            description: True if 'readdirplus' requests are enabled. Enabling this property might
+                improve network performance and is only available for NFSv3.
+            type: bool
+        return_32bit_file_ids:
+            description: Limits the size of file identifiers returned by NFSv3+ to 32-bit values (may
+                require remount).
+            type: bool
+        can_set_time:
+            description: True if the client can set file times through the NFS set attribute
+                request. This parameter does not affect server behavior, but is included to
+                accommodate legacy client requirements.
+            type: bool
+        map_lookup_uid:
+            description: True if incoming user IDs (UIDs) are mapped to users in the OneFS user
+                database. When set to False, incoming UIDs are applied directly to file
+                operations.
+            type: bool
+        symlinks:
+            description: True if symlinks are supported. This value is used to advise the client of
+                optimal settings for the server, but is not enforced.
+            type: bool
+        write_datasync_action:
+            description: Specifies the synchronization type for data sync action.
+            type: str
+        write_datasync_reply:
+            description: Specifies the synchronization type for data sync reply.
+            type: str
+        write_filesync_action:
+            description: Specifies the synchronization type for file sync action.
+            type: str
+        write_filesync_reply:
+            description: Specifies the synchronization type for file sync reply.
+            type: str
+        write_unstable_action:
+            description: Specifies the synchronization type for unstable action.
+            type: str
+        write_unstable_reply:
+            description: Specifies the synchronization type for unstable reply.
+            type: str
+        encoding:
+            description: Specifies the default character set encoding of the clients connecting to
+                the export, unless otherwise specified.
+            type: str
+        time_delta:
+            description: Specifies the resolution of all time values that are returned to the
+                clients.
+            type: dict
     sample: {
         "all_dir": "false",
         "block_size": 8192,
@@ -489,7 +892,45 @@ NFS_export_details:
                 "name": null,
                 "type": null
             }
-        }
+        },
+        'map_failure': {
+            'enabled': False,
+            'primary_group': {
+                'id': None,
+                'name': None,
+                'type': None
+            },
+            'secondary_groups': [],
+            'user': {
+                'id': 'USER:nobody',
+                'name': None,
+                'type': None
+            }
+        },
+        'name_max_size': 255,
+        'commit_asynchronous': False,
+        'directory_transfer_size': 131072,
+        'read_transfer_max_size': 1048576,
+        'read_transfer_multiple': 512,
+        'read_transfer_size': 131072,
+        'setattr_asynchronous': False,
+        'write_datasync_action': 'DATASYNC',
+        'write_datasync_reply': 'DATASYNC',
+        'write_filesync_action': 'FILESYNC',
+        'write_filesync_reply': 'FILESYNC',
+        'write_transfer_max_size': 1048576,
+        'write_transfer_multiple': 512,
+        'write_transfer_size': 524288,
+        'write_unstable_action': 'UNSTABLE',
+        'write_unstable_reply': 'UNSTABLE',
+        'max_file_size': 9223372036854775807,
+        'readdirplus': True,
+        'return_32bit_file_ids': False,
+        'can_set_time': True,
+        'encoding': 'DEFAULT',
+        'map_lookup_uid': False,
+        'symlinks': True,
+        'time_delta': 1e-09,
     }
 '''
 
@@ -617,6 +1058,46 @@ class NfsExport(PowerScaleBase):
                 security_flavors=get_security_keys(
                     self.module.params['security_flavors']),
                 zone=self.module.params['access_zone'])
+            # Apply advanced per-export settings if provided
+            nfs_map_root = set_nfs_map(self.module.params.get('map_root'), 'map_root')
+            if nfs_map_root:
+                nfs_export.map_root = nfs_map_root
+            nfs_map_non_root = set_nfs_map(self.module.params.get('map_non_root'), 'map_non_root')
+            if nfs_map_non_root:
+                nfs_export.map_non_root = nfs_map_non_root
+            nfs_map_failure = set_nfs_map(self.module.params.get('map_failure'), 'map_failure')
+            if nfs_map_failure:
+                nfs_export.map_failure = nfs_map_failure
+
+            # Size fields (convert to integer bytes using utils.get_size_bytes)
+            for size_field in ['file_name_max_size', 'block_size', 'directory_transfer_size',
+                               'read_transfer_max_size', 'read_transfer_multiple', 'read_transfer_size',
+                               'write_transfer_max_size', 'write_transfer_multiple', 'write_transfer_size',
+                               'max_file_size']:
+                size_param = self.module.params.get(size_field)
+                if size_param is not None:
+                    try:
+                        size_val = utils.get_size_bytes(size_param['size_value'], size_param['size_unit'])
+                    except Exception:
+                        size_val = None
+                    if size_val is not None:
+                        setattr(nfs_export, size_field, size_val)
+
+            # Simple booleans / strings
+            for simple_field in ['commit_asynchronous', 'setattr_asynchronous', 'readdirplus',
+                                 'return_32bit_file_ids', 'can_set_time', 'map_lookup_uid', 'symlinks',
+                                 'encoding', 'write_datasync_action', 'write_datasync_reply',
+                                 'write_filesync_action', 'write_filesync_reply', 'write_unstable_action',
+                                 'write_unstable_reply']:
+                if self.module.params.get(simple_field) is not None:
+                    setattr(nfs_export, simple_field, self.module.params.get(simple_field))
+
+            # time_delta expects a numeric seconds value in the SDK; convert if provided
+            if self.module.params.get('time_delta') is not None:
+                td = self.module.params.get('time_delta')
+                td_seconds = utils.convert_to_seconds(td.get('time_value'), td.get('time_unit'))
+                setattr(nfs_export, 'time_delta', td_seconds)
+
             return nfs_export
         except Exception as e:
             error_msg = 'Create NfsExportCreateParams object for path {0}' \
@@ -800,13 +1281,25 @@ class NfsExport(PowerScaleBase):
 
     def _check_mod_field(self, field_name_playbook, field_name_powerscale):
         _field_mod = False
-        if self.module.params[field_name_playbook] is None:
-            field_value = self.result['NFS_export_details'][field_name_powerscale]
-        elif self.module.params[field_name_playbook] == \
-                self.result['NFS_export_details'][field_name_powerscale]:
-            field_value = self.result['NFS_export_details'][field_name_powerscale]
+        # Use .get to avoid KeyError when optional playbook fields are not present
+        play_val = self.module.params.get(field_name_playbook, None)
+        # Safe read from result in case the powerscale field is absent
+        res_details = self.result.get('NFS_export_details', {}) or {}
+        res_val = res_details.get(field_name_powerscale, None)
+        # Special handling for time_delta: convert playbook dict to seconds before compare
+        if field_name_playbook == 'time_delta' and play_val is not None:
+            try:
+                play_val_converted = utils.convert_to_seconds(play_val.get('time_value'), play_val.get('time_unit'))
+            except Exception:
+                play_val_converted = play_val
+            play_val = play_val_converted
+
+        if play_val is None:
+            field_value = res_val
+        elif play_val == res_val:
+            field_value = res_val
         else:
-            field_value = self.module.params[field_name_playbook]
+            field_value = play_val
             _field_mod = True
         return _field_mod, field_value
 
@@ -838,19 +1331,75 @@ class NfsExport(PowerScaleBase):
         if map_non_root:
             nfs_export.map_non_root = map_non_root
             map_non_root_flag = True
+        map_failure = set_nfs_map(self.module.params.get('map_failure'), 'map_failure', self.result.get('NFS_export_details'))
+        if map_failure:
+            nfs_export.map_failure = map_failure
+            map_failure_flag = True
+        else:
+            map_failure_flag = False
+
+        # size fields: if provided in playbook, convert to bytes and compare to existing
+        size_fields = ['file_name_max_size', 'block_size', 'directory_transfer_size',
+                       'read_transfer_max_size', 'read_transfer_multiple', 'read_transfer_size',
+                       'write_transfer_max_size', 'write_transfer_multiple', 'write_transfer_size',
+                       'max_file_size']
+        size_flags = []
+        for sz in size_fields:
+            param = self.module.params.get(sz)
+            if param is not None:
+                try:
+                    val = utils.get_size_bytes(param['size_value'], param['size_unit'])
+                except Exception:
+                    val = None
+                # existing size keys in NFS export details sometimes differ (file_name_max_size -> name_max_size)
+                existing_key = 'name_max_size' if sz == 'file_name_max_size' else sz
+                existing_val = None
+                if self.result.get('NFS_export_details'):
+                    existing_val = self.result['NFS_export_details'].get(existing_key)
+                # consider modified only if the converted value differs from existing
+                if val is None or existing_val is None or val != existing_val:
+                    nfs_export.__setattr__(sz, val)
+                    size_flags.append(True)
+                else:
+                    size_flags.append(False)
+            else:
+                size_flags.append(False)
+
+        # simple fields that can be compared using _check_mod_field
         read_only_flag, read_only_value = self._check_mod_field(
             'read_only', 'read_only')
         all_dirs_flag, all_dirs_value = self._check_mod_field(
             'sub_directories_mountable', 'all_dirs')
         description_flag, description_value = self._check_mod_field(
             'description', 'description')
+        map_lookup_uid_flag, map_lookup_uid_value = self._check_mod_field(
+            'map_lookup_uid', 'map_lookup_uid')
+        commit_flag, commit_value = self._check_mod_field('commit_asynchronous', 'commit_asynchronous')
+        setattr_flag, setattr_value = self._check_mod_field('setattr_asynchronous', 'setattr_asynchronous')
+        readdir_flag, readdir_value = self._check_mod_field('readdirplus', 'readdirplus')
+        return32_flag, return32_value = self._check_mod_field('return_32bit_file_ids', 'return_32bit_file_ids')
+        can_set_time_flag, can_set_time_value = self._check_mod_field('can_set_time', 'can_set_time')
+        symlinks_flag, symlinks_value = self._check_mod_field('symlinks', 'symlinks')
+        encoding_flag, encoding_value = self._check_mod_field('encoding', 'encoding')
+        write_datasync_action_flag, write_datasync_action_value = self._check_mod_field('write_datasync_action', 'write_datasync_action')
+        write_datasync_reply_flag, write_datasync_reply_value = self._check_mod_field('write_datasync_reply', 'write_datasync_reply')
+        write_filesync_action_flag, write_filesync_action_value = self._check_mod_field('write_filesync_action', 'write_filesync_action')
+        write_filesync_reply_flag, write_filesync_reply_value = self._check_mod_field('write_filesync_reply', 'write_filesync_reply')
+        write_unstable_action_flag, write_unstable_action_value = self._check_mod_field('write_unstable_action', 'write_unstable_action')
+        write_unstable_reply_flag, write_unstable_reply_value = self._check_mod_field('write_unstable_reply', 'write_unstable_reply')
+        time_delta_flag, time_delta_value = self._check_mod_field('time_delta', 'time_delta')
         security_flag, nfs_export = self._is_security_flavour_mod(
             self.module.params['security_flavors'], nfs_export)
 
-        if all(
-            field_mod_flag is False for field_mod_flag in [
-                client_flag, read_only_flag, all_dirs_flag, description_flag, map_root_flag,
-                map_non_root_flag, security_flag]):
+        # consider changed if any of our flags are True
+        all_flags = [client_flag, read_only_flag, all_dirs_flag, description_flag, map_root_flag,
+                     map_non_root_flag, map_failure_flag, security_flag, map_lookup_uid_flag,
+                     commit_flag, setattr_flag, readdir_flag, return32_flag, can_set_time_flag,
+                     symlinks_flag, encoding_flag, write_datasync_action_flag, write_datasync_reply_flag,
+                     write_filesync_action_flag, write_filesync_reply_flag, write_unstable_action_flag,
+                     write_unstable_reply_flag, time_delta_flag] + size_flags
+
+        if all(field_mod_flag is False for field_mod_flag in all_flags):
             LOG.info(
                 'No change detected for the NFS Export, returning changed = False')
             if self.module._diff:
@@ -860,6 +1409,38 @@ class NfsExport(PowerScaleBase):
             nfs_export.read_only = read_only_value if read_only_flag else None
             nfs_export.all_dirs = all_dirs_value if all_dirs_flag else None
             nfs_export.description = description_value if description_flag else None
+            # apply simple fields
+            if map_lookup_uid_flag:
+                nfs_export.map_lookup_uid = map_lookup_uid_value
+            if commit_flag:
+                nfs_export.commit_asynchronous = commit_value
+            if setattr_flag:
+                nfs_export.setattr_asynchronous = setattr_value
+            if readdir_flag:
+                nfs_export.readdirplus = readdir_value
+            if return32_flag:
+                nfs_export.return_32bit_file_ids = return32_value
+            if can_set_time_flag:
+                nfs_export.can_set_time = can_set_time_value
+            if symlinks_flag:
+                nfs_export.symlinks = symlinks_value
+            if encoding_flag:
+                nfs_export.encoding = encoding_value
+            if write_datasync_action_flag:
+                nfs_export.write_datasync_action = write_datasync_action_value
+            if write_datasync_reply_flag:
+                nfs_export.write_datasync_reply = write_datasync_reply_value
+            if write_filesync_action_flag:
+                nfs_export.write_filesync_action = write_filesync_action_value
+            if write_filesync_reply_flag:
+                nfs_export.write_filesync_reply = write_filesync_reply_value
+            if write_unstable_action_flag:
+                nfs_export.write_unstable_action = write_unstable_action_value
+            if write_unstable_reply_flag:
+                nfs_export.write_unstable_reply = write_unstable_reply_value
+            if time_delta_flag:
+                nfs_export.time_delta = time_delta_value
+            # sizes already set above when present
 
             return self.perform_modify_nfs_export(nfs_export, path, access_zone, ignore_unresolvable_hosts, nfs_details)
 
@@ -950,6 +1531,26 @@ class NfsExport(PowerScaleBase):
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
+    def get_size_paramters(self):
+        """Return the Ansible argument spec for size parameters (value + unit)."""
+        return dict(type='dict', options=dict(
+                    size_value=dict(type='int', required=True),
+                    size_unit=dict(type='str', required=True, choices=['B', 'KB', 'MB', 'GB', 'TB', 'PB'])))
+
+    def get_nfs_map_parameters(self):
+        """Return the Ansible argument spec for NFS map parameters."""
+        return dict(type='dict', options=dict(
+            enabled=dict(type='bool', default=True),
+            primary_group=dict(),
+            secondary_groups=dict(type='list', elements='dict', options=dict(
+                                  name=dict(required=True),
+                                  state=dict(choices=['present', 'absent'], default='present'))),
+            user=dict()))
+
+    def get_sync_parameters(self):
+        """Return the Ansible argument spec for write sync choice parameters."""
+        return dict(type='str', choices=['DATASYNC', 'FILESYNC', 'UNSTABLE'])
+
     def get_nfs_parameters(self):
         return dict(
             path=dict(required=True, type='str'),
@@ -969,22 +1570,37 @@ class NfsExport(PowerScaleBase):
                 type='list', elements='str',
                 choices=['unix', 'kerberos', 'kerberos_integrity',
                          'kerberos_privacy']),
-            map_root=dict(type='dict', options=dict(
-                enabled=dict(type='bool', default=True),
-                primary_group=dict(),
-                secondary_groups=dict(type='list', elements='dict', options=dict(
-                                      name=dict(required=True),
-                                      state=dict(choices=['present', 'absent'], default='present'))),
-                user=dict())
-            ),
-            map_non_root=dict(type='dict', options=dict(
-                enabled=dict(type='bool', default=True),
-                primary_group=dict(),
-                secondary_groups=dict(type='list', elements='dict', options=dict(
-                                      name=dict(required=True),
-                                      state=dict(choices=['present', 'absent'], default='present'))),
-                user=dict())
-            ),
+            # Advanced per-export NFS settings (mirror of nfs_default_settings)
+            map_failure=self.get_nfs_map_parameters(),
+            file_name_max_size=self.get_size_paramters(),
+            block_size=self.get_size_paramters(),
+            directory_transfer_size=self.get_size_paramters(),
+            read_transfer_max_size=self.get_size_paramters(),
+            read_transfer_multiple=self.get_size_paramters(),
+            read_transfer_size=self.get_size_paramters(),
+            write_transfer_max_size=self.get_size_paramters(),
+            write_transfer_multiple=self.get_size_paramters(),
+            write_transfer_size=self.get_size_paramters(),
+            max_file_size=self.get_size_paramters(),
+            commit_asynchronous=dict(type='bool'),
+            setattr_asynchronous=dict(type='bool'),
+            readdirplus=dict(type='bool'),
+            return_32bit_file_ids=dict(type='bool'),
+            can_set_time=dict(type='bool'),
+            map_lookup_uid=dict(type='bool'),
+            symlinks=dict(type='bool'),
+            write_datasync_action=self.get_sync_parameters(),
+            write_datasync_reply=self.get_sync_parameters(),
+            write_filesync_action=self.get_sync_parameters(),
+            write_filesync_reply=self.get_sync_parameters(),
+            write_unstable_action=self.get_sync_parameters(),
+            write_unstable_reply=self.get_sync_parameters(),
+            encoding=dict(type='str'),
+            time_delta=dict(type='dict', options=dict(
+                time_value=dict(type='float', required=True),
+                time_unit=dict(type='str', required=True, choices=['seconds', 'nanoseconds', 'milliseconds', 'microseconds']))),
+            map_root=self.get_nfs_map_parameters(),
+            map_non_root=self.get_nfs_map_parameters(),
             state=dict(required=True, type='str', choices=['present',
                                                            'absent'])
         )
