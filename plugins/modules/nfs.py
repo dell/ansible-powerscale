@@ -1081,7 +1081,12 @@ class NfsExport(PowerScaleBase):
                     except Exception:
                         size_val = None
                     if size_val is not None:
-                        setattr(nfs_export, size_field, size_val)
+                        setattr(
+                            nfs_export,
+                            # keys in NFS export details sometimes differ (file_name_max_size -> name_max_size)
+                            size_field if size_field != 'file_name_max_size' else 'name_max_size',
+                            size_val,
+                        )
 
             # Simple booleans / strings
             for simple_field in ['commit_asynchronous', 'setattr_asynchronous', 'readdirplus',
@@ -1348,17 +1353,17 @@ class NfsExport(PowerScaleBase):
             param = self.module.params.get(sz)
             if param is not None:
                 try:
-                    val = utils.get_size_bytes(param['size_value'], param['size_unit'])
+                    new_val = utils.get_size_bytes(param['size_value'], param['size_unit'])
                 except Exception:
-                    val = None
-                # existing size keys in NFS export details sometimes differ (file_name_max_size -> name_max_size)
-                existing_key = 'name_max_size' if sz == 'file_name_max_size' else sz
-                existing_val = None
+                    new_val = None
+                # keys in NFS export details sometimes differ (file_name_max_size -> name_max_size)
+                export_key = 'name_max_size' if sz == 'file_name_max_size' else sz
+                export_value = None
                 if self.result.get('NFS_export_details'):
-                    existing_val = self.result['NFS_export_details'].get(existing_key)
+                    export_value = self.result['NFS_export_details'].get(export_key)
                 # consider modified only if the converted value differs from existing
-                if val is None or existing_val is None or val != existing_val:
-                    nfs_export.__setattr__(sz, val)
+                if new_val is None or export_value is None or new_val != export_value:
+                    nfs_export.__setattr__(export_key, new_val)
                     size_flags.append(True)
                 else:
                     size_flags.append(False)
