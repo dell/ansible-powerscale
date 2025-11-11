@@ -368,3 +368,7 @@ releases:
 
         '
     release_date: '2025-06-27'
+  3.10.0:
+    changes:
+      minor_changes:
+        - Added support for target_compare_initial_sync parameter in SyncIQ policy module to enable data comparison during initial sync.

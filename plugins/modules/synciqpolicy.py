@@ -239,6 +239,13 @@ options:
     - If set to C(true) then replication policies will connect only to nodes in the specified SmartConnect zone.
     - If set to C(false), replication policies are not restricted to specific nodes on the target cluster.
     type: bool
+  target_compare_initial_sync:
+    description:
+    - If set to C(true), the initial sync will compare data between source and target to avoid re-transferring data that already exists at the target.
+    - This can significantly reduce initial sync time if the target already contains some or all of the source data.
+    - If set to C(false), the initial sync will transfer all source data to the target without comparison.
+    - It defaults to C(false), if not specified.
+    type: bool
 attributes:
   check_mode:
     description:
@@ -283,6 +290,7 @@ EXAMPLES = r'''
       exp_time_unit: "day"
     accelerated_failback: false
     restrict_target_network: true
+    target_compare_initial_sync: true
     state: "present"
 
 - name: Modify SyncIQ policy
@@ -312,6 +320,7 @@ EXAMPLES = r'''
       target_snapshot_archive: false
     accelerated_failback: true
     restrict_target_network: false
+    target_compare_initial_sync: false
     state: "present"
 
 - name: Rename a SyncIQ policy
@@ -773,7 +782,7 @@ class SynciqPolicy(object):
                              'source_include_directories', 'source_exclude_directories',
                              'target_host', 'target_path', 'target_certificate_id', 'target_snapshot_archive',
                              'target_snapshot_expiration', 'snapshot_sync_pattern', 'accelerated_failback',
-                             'restrict_target_network'
+                             'restrict_target_network', 'target_compare_initial_sync'
                              ]
 
         for param in input_param:
@@ -931,7 +940,7 @@ class SynciqPolicy(object):
                     "sync_existing_snapshot_expiration": False,
                     "sync_existing_target_snapshot_pattern": "%{SnapName}-%{SnapCreateTime}",
                     "target_certificate_id": params_dict.get("target_certificate_id", ""),
-                    "target_compare_initial_sync": False,
+                    "target_compare_initial_sync": params_dict.get("target_compare_initial_sync", False),
                     "target_detect_modifications": True,
                     "target_host": params_dict.get("target_host", ""),
                     "target_path": params_dict.get("target_path", ""),
@@ -1060,6 +1069,7 @@ def get_synciqpolicy_parameters():
                                      wait_for_completion=dict(type='bool', default=False))),
         accelerated_failback=dict(type='bool'),
         restrict_target_network=dict(type='bool'),
+        target_compare_initial_sync=dict(type='bool'),
         state=dict(required=True, choices=['present', 'absent'])
     )
 
