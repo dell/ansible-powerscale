@@ -46,6 +46,7 @@
           target_snapshot_archive: true
           target_snapshot_expiration: 90
           exp_time_unit: 'days'
+        target_compare_initial_sync: true
         state: 'present'
 
     - name: Get SyncIQ policy details
@@ -71,6 +72,7 @@
         schedule: "every 1 days every 12 hours between 12:00 AM and 11:59 PM"
         target_snapshot:
           target_snapshot_archive: false
+        target_compare_initial_sync: false
         state: 'present'
 
     - name: Rename a SyncIQ policy
