@@ -222,6 +222,16 @@ Parameters
     If set to :literal:`false`\ , replication policies are not restricted to specific nodes on the target cluster.
 
 
+  target_compare_initial_sync (optional, bool, None)
+    If set to :literal:`true`\ , the initial sync will compare data between source and target to avoid re-transferring data that already exists at the target.
+
+    This can significantly reduce initial sync time if the target already contains some or all of the source data.
+
+    If set to :literal:`false`\ , the initial sync will transfer all source data to the target without comparison.
+
+    It defaults to :literal:`false`\ , if not specified.
+
+
   onefs_host (True, str, None)
     IP address or FQDN of the PowerScale cluster.
 
@@ -296,6 +306,7 @@ Examples
           exp_time_unit: "day"
         accelerated_failback: false
         restrict_target_network: true
+        target_compare_initial_sync: true
         state: "present"
 
     - name: Modify SyncIQ policy
@@ -325,6 +336,7 @@ Examples
           target_snapshot_archive: false
         accelerated_failback: true
         restrict_target_network: false
+        target_compare_initial_sync: false
         state: "present"
 
     - name: Rename a SyncIQ policy
