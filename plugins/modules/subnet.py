@@ -635,7 +635,7 @@ def get_subnet_create_params(subnet_params):
             if sc_service_addrs:
                 sc_service_addrs_list = []
                 for i in range(len(sc_service_addrs)):
-                    network_range = utils.isi_sdk.ConfigNetworkRange()
+                    network_range = utils.isi_sdk.ConfigNetworkNetworkRange()
                     network_range.low = sc_service_addrs[i]['start_range']
                     network_range.high = sc_service_addrs[i]['end_range']
                     sc_service_addrs_list.append(network_range)
