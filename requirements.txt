@@ -1,1 +1,2 @@
 isilon-sdk==0.6.0
+packaging
