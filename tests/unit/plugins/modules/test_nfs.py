@@ -128,6 +128,58 @@ class TestNfsExport(PowerScaleUnitBase):
         powerscale_module_mock.protocol_api.create_nfs_export.assert_called()
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
+    def test_create_with_advanced_settings(self, powerscale_module_mock):
+        self.set_module_params(
+            self.get_nfs_args,
+            {
+                "path": MockNFSApi.PATH_1,
+                "access_zone": MockNFSApi.SYS_ZONE,
+                "description": "description",
+                "read_only": True,
+                "read_only_clients": [MockNFSApi.SAMPLE_IP1],
+                "clients": [MockNFSApi.SAMPLE_IP1],
+                "client_state": "present-in-export",
+                "security_flavors": ["kerberos"],
+                "map_root": {"enabled": True, "user": "root", "primary_group": "root"},
+                "map_non_root": {"enabled": True, "user": "root", "primary_group": "root"},
+                "map_failure": {"enabled": False},
+                "map_lookup_uid": True,
+                "file_name_max_size": {"size_value": 255, "size_unit": "B"},
+                "block_size": {"size_value": 8192, "size_unit": "B"},
+                "directory_transfer_size": {"size_value": 4096, "size_unit": "B"},
+                "read_transfer_max_size": {"size_value": 65536, "size_unit": "B"},
+                "read_transfer_multiple": {"size_value": 4096, "size_unit": "B"},
+                "read_transfer_size": {"size_value": 32768, "size_unit": "B"},
+                "write_transfer_max_size": {"size_value": 65536, "size_unit": "B"},
+                "write_transfer_multiple": {"size_value": 4096, "size_unit": "B"},
+                "write_transfer_size": {"size_value": 32768, "size_unit": "B"},
+                "max_file_size": {"size_value": 1099511627776, "size_unit": "B"},
+                "commit_asynchronous": False,
+                "setattr_asynchronous": False,
+                "readdirplus": True,
+                "return_32bit_file_ids": False,
+                "can_set_time": True,
+                "symlinks": True,
+                "write_datasync_action": "DATASYNC",
+                "write_datasync_reply": "DATASYNC",
+                "write_filesync_action": "FILESYNC",
+                "write_filesync_reply": "FILESYNC",
+                "write_unstable_action": "UNSTABLE",
+                "write_unstable_reply": "UNSTABLE",
+                "encoding": "utf-8",
+                "time_delta": {"time_value": 1.0, "time_unit": "seconds"},
+                "state": MockNFSApi.STATE_P,
+            },
+        )
+        powerscale_module_mock.protocol_api.list_nfs_exports = MagicMock(
+            return_value=NFSTestExport()
+        )
+        powerscale_module_mock.isi_sdk.NfsExportCreateParams.to_dict = MagicMock(
+            return_value=MockSDKResponse(MockNFSApi.CREATE_NFS_PARAMS))
+        NFSHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
+        powerscale_module_mock.protocol_api.create_nfs_export.assert_called()
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+
     def test_create_nfs_exception(self, powerscale_module_mock):
         self.operation_before_create(powerscale_module_mock)
         powerscale_module_mock.protocol_api.list_nfs_exports = MagicMock(
@@ -202,6 +254,96 @@ class TestNfsExport(PowerScaleUnitBase):
                             powerscale_module_mock.module.params)
         powerscale_module_mock.protocol_api.update_nfs_export.assert_called()
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+
+    def test_modify_nfs_with_advanced_settings(self, powerscale_module_mock):
+        self.set_module_params(
+            self.get_nfs_args,
+            {
+                "path": MockNFSApi.PATH_1,
+                "access_zone": MockNFSApi.SYS_ZONE,
+                "security_flavors": ["kerberos_integrity"],
+                "map_root": {"enabled": True, "user": "nfs", "primary_group": "nfs"},
+                "map_non_root": {"enabled": True, "user": "super", "primary_group": "root"},
+                "map_failure": {"enabled": True, "user": "root", "primary_group": "nonroot"},
+                "map_lookup_uid": True,
+                "file_name_max_size": {"size_value": 255, "size_unit": "B"},
+                "block_size": {"size_value": 100, "size_unit": "B"},
+                "directory_transfer_size": {"size_value": 4096, "size_unit": "B"},
+                "read_transfer_max_size": {"size_value": 1241, "size_unit": "B"},
+                "read_transfer_multiple": {"size_value": 2, "size_unit": "KB"},
+                "read_transfer_size": {"size_value": 1241, "size_unit": "B"},
+                "write_transfer_max_size": {"size_value": 65536, "size_unit": "B"},
+                "write_transfer_multiple": {"size_value": 1000, "size_unit": "GB"},
+                "write_transfer_size": {"size_value": 23, "size_unit": "B"},
+                "max_file_size": {"size_value": 881241, "size_unit": "TB"},
+                "commit_asynchronous": True,
+                "setattr_asynchronous": True,
+                "readdirplus": True,
+                "return_32bit_file_ids": True,
+                "can_set_time": True,
+                "symlinks": False,
+                "write_datasync_action": "DATASYNC",
+                "write_datasync_reply": "FILESYNC",
+                "write_filesync_action": "UNSTABLE",
+                "write_filesync_reply": "DATASYNC",
+                "write_unstable_action": "FILESYNC",
+                "write_unstable_reply": "UNSTABLE",
+                "encoding": "utf-8",
+                "time_delta": {"time_value": 7.0, "time_unit": "seconds"},
+                "state": MockNFSApi.STATE_P,
+            },
+        )
+        powerscale_module_mock.get_nfs_export = MagicMock(
+            return_value=MockNFSApi.NFS_1['exports'][0]
+        )
+        powerscale_module_mock.isi_sdk.NfsExport = MagicMock(
+            return_value=MagicMock()
+        )
+        NFSHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
+        powerscale_module_mock.protocol_api.update_nfs_export.assert_called()
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+
+    def test_modify_nfs_diff(self, powerscale_module_mock):
+        # Verify that when diff mode is requested, the handler populates a before/after diff
+        self.set_module_params(
+            self.get_nfs_args,
+            {
+                "path": MockNFSApi.PATH_1,
+                "access_zone": MockNFSApi.SYS_ZONE,
+                "description": "description1",
+                "map_lookup_uid": True,
+                "encoding": "utf-8",
+                "time_delta": {"time_value": 1.0, "time_unit": "seconds"},
+                "read_only": True,
+                "state": MockNFSApi.STATE_P,
+            },
+        )
+        # simulate diff mode requested by caller
+        powerscale_module_mock.module._diff = True
+
+        # existing export details returned from API
+        powerscale_module_mock.get_nfs_export = MagicMock(
+            return_value=MockNFSApi.NFS_1['exports'][0]
+        )
+
+        # nfs_export SDK object should provide a to_dict() used for 'after' diff
+        nfs_export_mock = MagicMock()
+        nfs_export_mock.to_dict = MagicMock(return_value={"read_only": True})
+        powerscale_module_mock.isi_sdk.NfsExport = MagicMock(return_value=nfs_export_mock)
+
+        # Ensure update call does not raise
+        powerscale_module_mock.protocol_api.update_nfs_export = MagicMock()
+
+        NFSHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
+
+        powerscale_module_mock.protocol_api.update_nfs_export.assert_called()
+        exit_args = powerscale_module_mock.module.exit_json.call_args[1]
+        assert exit_args['changed'] is True
+        assert 'diff' in exit_args
+        assert isinstance(exit_args['diff'], dict)
+        assert 'before' in exit_args['diff'] and 'after' in exit_args['diff']
+        assert isinstance(exit_args['diff']['before'], dict)
+        assert isinstance(exit_args['diff']['after'], dict)
 
     def test_modify_nfs_response_exception(self, powerscale_module_mock):
         self.operation_before_modify(powerscale_module_mock)
