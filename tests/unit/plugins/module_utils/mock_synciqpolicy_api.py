@@ -57,6 +57,7 @@ class MockSynciqpolicyApi:
             "target_snapshot_expiration": 90,
             "exp_time_unit": "days"
         },
+        "target_compare_initial_sync": True,
         "state": "present"
     }
 
