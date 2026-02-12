@@ -66,6 +66,8 @@ options:
     description:
     - Either I(user_name) or I(user_id) is needed to add or remove the user
       from the group.
+    - If users belongs to another provider domain, it should be mentioned along
+      with domain name as "DOMAIN_NAME\\username" or DOMAIN_NAME\username.
     - Users can be part of multiple groups.
     type: list
     elements: dict
@@ -372,7 +374,7 @@ class Group(object):
                 LOG.info("Group Details: %s", str(api_response))
                 api_response_dict = api_response.groups[0].to_dict()
                 group_user_details = self.get_group_members(
-                    group, zone, provider)
+                    group, zone)
                 if group_user_details:
                     api_response_dict['members'] = group_user_details
                 else:
@@ -402,13 +404,12 @@ class Group(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
-    def get_group_members(self, group, zone, provider):
+    def get_group_members(self, group, zone):
         """Get the Group Member Details in PowerScale"""
         try:
             LOG.info("Getting members of group %s", group)
-            provider = 'local' if not provider else provider
             api_response = self.group_api_instance.list_group_members(
-                group, zone=zone, provider=provider)
+                group, zone=zone)
             api_response_dict = api_response.to_dict()
             LOG.info("Group Members: %s", api_response_dict['members'])
             return api_response_dict['members']
@@ -428,7 +429,7 @@ class Group(object):
             group_member = utils.isi_sdk.AuthAccessAccessItemFileGroup(user)
             provider = self.check_provider_type(provider, 'Add User to')
             api_response = self.group_api_instance.create_group_member(
-                group_member, group, zone=zone, provider=provider)
+                group_member, group, zone=zone)
             LOG.info(api_response)
             return True
         except Exception as e:
@@ -445,7 +446,7 @@ class Group(object):
             LOG.info(message)
             provider = self.check_provider_type(provider, 'Remove User from')
             self.group_api_instance.delete_group_member(
-                user, group, zone=zone, provider=provider)
+                user, group, zone=zone)
             return True
 
         except Exception as e:
@@ -471,12 +472,12 @@ class Group(object):
             self.module.fail_json(msg=error_message)
 
     def is_user_part_of_group(
-            self, group, user_name, user_id, zone, provider):
+            self, group, user_name, user_id, zone):
         """Check if Member is part of the Group or not"""
         if user_id:
             LOG.info("User Id given, getting corresponding User name")
             user_name = self.get_user_name(user_id, zone)
-        group_members = self.get_group_members(group, zone, provider)
+        group_members = self.get_group_members(group, zone)
         if len(group_members) == 0:
             return False
         for user_details in group_members:
@@ -490,7 +491,7 @@ class Group(object):
         """Update the group members in PowerScale"""
         changed = False
         user_flag = self.is_user_part_of_group(group, user_name, user_id,
-                                               access_zone, provider_type)
+                                               access_zone)
 
         user = "USER:" + user_name if user_name else "UID:" + user_id
         if user_state == 'present-in-group' and not user_flag:
