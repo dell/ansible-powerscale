@@ -83,6 +83,27 @@ This table provides information about the software prerequisites for the Ansible
 |---------------------|-----------------------|--------------------|----------------------------|--------------------------|
 | v3.9.0 | 9.7.x <br> 9.10.x <br> 9.11.x | 3.11 <br> 3.12 <br> 3.13 | 0.6.0 | 2.17 <br> 2.18 <br> 2.19 |
 
+## Warning
+
+Starting with setuptools 82.0.0+ and/or environments using Python 3.12+, users may encounter:
+
+**ModuleNotFoundError: No module named 'pkg_resources'**
+
+This can cause tasks in the affected Ansible Collections to fail at runtime. The root cause is the deprecation/removal of `pkg_resources` usage in conjunction with changes in Python packaging tooling.
+
+We are implementing a permanent fix to remove dependencies on `pkg_resources` and adopt modern Python alternatives. Until then, please follow the guidance below.
+
+Users are requested to pin setuptools to a version lower than 82.0.0 on the Ansible control machine's Python environment:
+
+```bash
+### If you use virtualenv/venv, activate it first
+python3 -m pip install --upgrade "setuptools<82.0.0"
+```
+
+Add this guidance to your environment bootstrap scripts or CI pipelines to ensure consistent behavior until the permanent fix is released.
+
+> **Note:** If your environment mandates Python 3.12+, ensure you apply the pin in the relevant virtual environment(s) used by Ansible.
+
 # List of Ansible modules for Dell PowerScale
 
 ### Identity & Access Management
