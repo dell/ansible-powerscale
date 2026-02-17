@@ -28,7 +28,7 @@ python3 -m pip install --upgrade "setuptools<82.0.0"
 Add this guidance to your environment bootstrap scripts or CI pipelines to ensure consistent behavior until the permanent fix is released.
 
 > **Note:** If your environment mandates Python 3.12+, ensure you apply the pin in the relevant virtual environment(s) used by Ansible.
-
+---
 The Ansible Modules for Dell Technologies (Dell) PowerScale allow Data Center and IT administrators to use RedHat Ansible to automate and orchestrate the configuration and management of Dell PowerScale arrays.
 
 The Ansible Modules for Dell PowerScale support the following features:
