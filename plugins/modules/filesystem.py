@@ -758,6 +758,12 @@ class FileSystem(object):
                         'name': group['name']}
         return create_group
 
+    def _get_authoritative(self, owner_id):
+        """Returns 'acl' if owner_id starts with 'SID', else 'mode'."""
+        if owner_id and owner_id.upper().startswith('SID'):
+            return 'acl'
+        return 'mode'
+
     def create_filesystem(self, path, recursive, acl, acl_rights, quota, owner, group):
         """Creates a FileSystem on PowerScale."""
         try:
@@ -785,9 +791,10 @@ class FileSystem(object):
                         overwrite=False)
                 if quota is not None and quota['quota_state'] == 'present':
                     self.create_quota(quota, path)
+                authoritative = self._get_authoritative(create_owner['id'])
                 permissions = \
                     self.isi_sdk.NamespaceAcl(
-                        authoritative='mode',
+                        authoritative=authoritative,
                         owner=create_owner,
                         group=create_group)
                 self.namespace_api.set_acl(namespace_path=path,
@@ -1503,8 +1510,9 @@ class FileSystem(object):
         """Modifies the FS owner"""
         try:
             if not self.module.check_mode:
+                authoritative = self._get_authoritative(owner['id'])
                 permissions = self.isi_sdk.NamespaceAcl(
-                    authoritative='mode',
+                    authoritative=authoritative,
                     owner=owner)
                 self.namespace_api.set_acl(namespace_path=effective_path,
                                            zone=self.module.params['access_zone'],
@@ -1522,8 +1530,11 @@ class FileSystem(object):
         """Modifies the FS group"""
         try:
             if not self.module.check_mode:
+                acl = self.get_acl(effective_path)
+                owner_id = acl['owner']['id'] if isinstance(acl, dict) else None
+                authoritative = self._get_authoritative(owner_id)
                 permissions = self.isi_sdk.NamespaceAcl(
-                    authoritative='mode',
+                    authoritative=authoritative,
                     group=group)
                 self.namespace_api.set_acl(namespace_path=effective_path,
                                            zone=self.module.params['access_zone'],
