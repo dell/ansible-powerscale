@@ -8,6 +8,7 @@
 [![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/dell/ansible-powerscale?include_prereleases&label=latest&style=flat-square)](https://github.com/dell/ansible-powerscale/releases)
 [![codecov](https://codecov.io/gh/dell/ansible-powerscale/branch/main/graph/badge.svg)](https://app.codecov.io/gh/dell/ansible-powerscale)
 
+---
 ## Warning
 
 Starting with setuptools 82.0.0+ and/or environments using Python 3.12+, users may encounter:
