@@ -8,6 +8,28 @@
 [![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/dell/ansible-powerscale?include_prereleases&label=latest&style=flat-square)](https://github.com/dell/ansible-powerscale/releases)
 [![codecov](https://codecov.io/gh/dell/ansible-powerscale/branch/main/graph/badge.svg)](https://app.codecov.io/gh/dell/ansible-powerscale)
 
+---
+## Warning
+
+Starting with setuptools 82.0.0+ and/or environments using Python 3.12+, users may encounter:
+
+**ModuleNotFoundError: No module named 'pkg_resources'**
+
+This can cause tasks in the affected Ansible Collections to fail at runtime. The root cause is the deprecation/removal of `pkg_resources` usage in conjunction with changes in Python packaging tooling.
+
+We are implementing a permanent fix to remove dependencies on `pkg_resources` and adopt modern Python alternatives. Until then, please follow the guidance below.
+
+Users are requested to pin setuptools to a version lower than 82.0.0 on the Ansible control machine's Python environment:
+
+```bash
+### If you use virtualenv/venv, activate it first
+python3 -m pip install --upgrade "setuptools<82.0.0"
+```
+
+Add this guidance to your environment bootstrap scripts or CI pipelines to ensure consistent behavior until the permanent fix is released.
+
+> **Note:** If your environment mandates Python 3.12+, ensure you apply the pin in the relevant virtual environment(s) used by Ansible.
+---
 The Ansible Modules for Dell Technologies (Dell) PowerScale allow Data Center and IT administrators to use RedHat Ansible to automate and orchestrate the configuration and management of Dell PowerScale arrays.
 
 The Ansible Modules for Dell PowerScale support the following features:
