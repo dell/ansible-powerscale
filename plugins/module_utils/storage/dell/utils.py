@@ -10,7 +10,6 @@ IMPORT_PKGS_FAIL = []
 
 try:
     from packaging.version import parse as parse_version
-    import packaging
     HAS_PKG_RESOURCES = True
 except ImportError:
     HAS_PKG_RESOURCES = False
@@ -292,13 +291,13 @@ def find_compatible_powerscale_sdk(module_params):
     # Try to find isilon-sdk packages using importlib.metadata
     powerscale_packages = []
     try:
-        import importlib.metadata as metadata
+        from importlib import metadata
         for dist in metadata.distributions():
             if dist.metadata["name"] and dist.metadata["name"].startswith("isilon-sdk"):
                 powerscale_packages.append(dist.metadata["name"])
     except (ImportError, AttributeError):
         powerscale_packages = []
-    
+
     if powerscale_packages:
         powerscale_sdk = powerscale_packages[0].replace('-', '_')
         import_powerscale_sdk(powerscale_sdk + ".v9_10_0", 9, 10)

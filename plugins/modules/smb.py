@@ -530,16 +530,16 @@ smb_details:
         browsable:
             description: Share is visible in net view and the browse list.
             type: bool
-        file_create_mask(octal):
+        file_create_mask_octal:
             description: File create mask bit for SMB Share in octal format.
             type: str
-        file_create_mode(octal):
+        file_create_mode_octal:
             description: File create mode bit for SMB Share in octal format.
             type: str
-        directory_create_mask(octal):
+        directory_create_mask_octal:
             description: Directory create mask bit for SMB Share in octal format.
             type: str
-        directory_create_mode(octal):
+        directory_create_mode_octal:
             description: Directory create mode bit for SMB Share in octal format.
             type: str
         inheritable_path_acl:
@@ -576,13 +576,13 @@ smb_details:
                 "csc_policy": "manual",
                 "description": "smb description updated",
                 "directory_create_mask": 448,
-                "directory_create_mask(octal)": "700",
+                "directory_create_mask_octal": "700",
                 "directory_create_mode": 0,
-                "directory_create_mode(octal)": "0",
+                "directory_create_mode_octal": "0",
                 "file_create_mask": 448,
-                "file_create_mask(octal)": "700",
+                "file_create_mask_octal": "700",
                 "file_create_mode": 64,
-                "file_create_mode(octal)": "100",
+                "file_create_mode_octal": "100",
                 "file_filter_extensions": [
                     "sample_extension_1"
                 ],
@@ -1550,7 +1550,7 @@ class SMB(PowerScaleBase):
         """Format the output"""
         for key in ('directory_create_mask', 'directory_create_mode', 'file_create_mask', 'file_create_mode'):
             if smb_details['shares'][0].get(key):
-                smb_details['shares'][0][f"{key}(octal)"] = "{0:o}".format(int(smb_details['shares'][0][key]))
+                smb_details['shares'][0][f"{key}_octal"] = "{0:o}".format(int(smb_details['shares'][0][key]))
 
         LOG.debug('SMB Details : %s', smb_details)
         return smb_details
