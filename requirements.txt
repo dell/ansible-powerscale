@@ -1,3 +1,2 @@
-urllib3>=2.6.3
 isilon-sdk==0.6.0
 packaging
