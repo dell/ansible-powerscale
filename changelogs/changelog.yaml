@@ -195,7 +195,7 @@ releases:
           Enabled the path parameter of Smart Quota module to be consistent with
           other modules.
     modules:
-      - description: Find and close SMB open files on a PowerScale Storage 
+      - description: Find and close SMB open files on a PowerScale Storage
           system.
         name: smb_file
         namespace: ''
@@ -206,7 +206,7 @@ releases:
         - Added support for PowerScale OneFS 9.5 Islander release.
         - Added support for everyone user in filesystem module.
         - Added support for ignoring unresolvable hosts for NFS Export.
-        - Added support for listing LDAP auth providers and user mapping rules 
+        - Added support for listing LDAP auth providers and user mapping rules
           in Info module.
         - >-
           For the execution of the PowerScale Ansible modules, python library
@@ -236,7 +236,7 @@ releases:
     changes:
       minor_changes:
         - >-
-          Added support for listing NFS default settings, NFS global settings 
+          Added support for listing NFS default settings, NFS global settings
           and NFS zone settings in Info module.
         - >-
           Added support for specifying the users and groups to which non-root
@@ -255,7 +255,7 @@ releases:
   2.3.0:
     changes:
       minor_changes:
-        - Added support for listing SynciqGlobalSettings and S3 buckets in Info 
+        - Added support for listing SynciqGlobalSettings and S3 buckets in Info
             module.
         - Added support for manually running a SyncIQ policy.
     modules:
@@ -321,7 +321,7 @@ releases:
       - description: Manage auth roles on a PowerScale Storage System.
         name: roles
         namespace: ''
-      - description: Manage support assist settings on a PowerScale Storage 
+      - description: Manage support assist settings on a PowerScale Storage
           System.
         name: support_assist
         namespace: ''
@@ -330,7 +330,9 @@ releases:
     changes:
       minor_changes:
         - Added support for check mode and diff mode in network pool module.
-        - Added support for check mode in Filesystem, NFS and Smart Quota modules.
+        - >-
+          Added support for check mode in Filesystem, NFS and Smart Quota
+          modules.
         - >-
           Added support for listing filesystems, smart quotas, alert_settings,
           alert_rules, alert_categories, event_groups and alert_channels in
@@ -360,7 +362,7 @@ releases:
   3.4.0:
     changes:
       minor_changes:
-        - Added support to list all the paginated data for the users in Info 
+        - Added support to list all the paginated data for the users in Info
           module.
         - ADS module has been enhanced to support the additional parameters.
         - >-
@@ -406,7 +408,8 @@ releases:
   3.8.1:
     changes:
       bugfixes:
-        - GitHub defect fixes for filesystem module. 
+        - >-
+          GitHub defect fixes for filesystem module.
           (Issues # 38, # 121 and # 174)
     release_date: '2025-05-30'
   3.9.0:
