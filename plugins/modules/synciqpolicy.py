@@ -1138,7 +1138,7 @@ class SynciqPolicyModifyHandler:
     def handle_diff_after(self, synciq_obj, policy_name):
         if not synciq_obj.module.check_mode and synciq_obj.module._diff:
             if synciq_obj.result['diff']['after']:
-                policy_obj, is_target_policy = \
+                policy_obj, _ = \
                     synciq_obj.get_synciq_policy_details(policy_name, "")
                 policy_details = synciq_obj.get_synciq_policy_display_attributes(policy_obj)
                 synciq_obj.result['diff']['after'] = policy_details
