@@ -103,6 +103,20 @@ class MockSupportAssistApi:
         }
     }
 
+    GET_SUPPORT_ASSIST_TERMS_RESPONSE = {
+        "terms": {
+            "accepted": False,
+            "terms_and_conditions": "Terms and conditions text"
+        }
+    }
+
+    GET_SUPPORT_ASSIST_TERMS_ACCEPTED_RESPONSE = {
+        "terms": {
+            "accepted": True,
+            "terms_and_conditions": "Terms and conditions text"
+        }
+    }
+
     GET_SUPPORT_ASSIST_RESPONSE_DIRECT_MODE = {
         "connection": {
             "gateway_endpoints": [],
@@ -149,3 +163,5 @@ class MockSupportAssistApi:
             return 'Gateway endpoints cannot be empty when the mode is gateway.'
         elif response_type == 'empty_network_pools_exception':
             return 'Network pool list cannot be empty.'
+        elif response_type == 'get_terms_exception':
+            return 'Got error SDK Error message while getting support assist terms details '
