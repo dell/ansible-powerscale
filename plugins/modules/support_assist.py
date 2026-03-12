@@ -683,12 +683,12 @@ class SupportAssist(PowerScaleBase):
         if settings_params['contact']:
             if settings_params['contact']['primary']:
                 if settings_params['contact']['primary'] != settings_details['contact']['primary']:
-                    self.validate_phone(phone=settings_params['contact']['primary']['phone'])
-                    contact['primary'] = settings_params['contact']['primary']
+                    self.validate_phone(phone=settings_params['contact']['primary'].get('phone'))
+                    contact['primary'] = {k: v for k, v in settings_params['contact']['primary'].items() if v is not None}
             if settings_params['contact']['secondary']:
                 if settings_params['contact']['secondary'] != settings_details['contact']['secondary']:
-                    self.validate_phone(phone=settings_params['contact']['secondary']['phone'])
-                    contact['secondary'] = settings_params['contact']['secondary']
+                    self.validate_phone(phone=settings_params['contact']['secondary'].get('phone'))
+                    contact['secondary'] = {k: v for k, v in settings_params['contact']['secondary'].items() if v is not None}
         if contact != {}:
             modify_dict['contact'] = contact
 

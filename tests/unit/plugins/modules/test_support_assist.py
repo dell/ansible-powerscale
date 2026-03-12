@@ -139,6 +139,34 @@ class TestSupportAssist(PowerScaleUnitBase):
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
         powerscale_module_mock.support_assist_api.update_supportassist_settings.assert_called()
 
+    def test_modify_support_assist_contact_without_phone(self, powerscale_module_mock):
+        self.set_module_params(self.support_assist_args,
+                               {
+                                   "contact": {
+                                       "primary": {
+                                           "email": "primary@example.com",
+                                           "first_name": "Jane",
+                                           "last_name": "Doe"
+                                       },
+                                       "secondary": {
+                                           "email": "secondary@example.com",
+                                           "first_name": "John",
+                                           "last_name": "Doe"
+                                       }
+                                   }
+                               })
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
+        powerscale_module_mock.module.check_mode = False
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        powerscale_module_mock.support_assist_api.update_supportassist_settings.assert_called()
+        call_args = powerscale_module_mock.support_assist_api.update_supportassist_settings.call_args
+        modify_dict = call_args.kwargs.get('supportassist_settings') or call_args[1].get('supportassist_settings')
+        assert 'phone' not in modify_dict['contact']['primary']
+        assert 'phone' not in modify_dict['contact']['secondary']
+
     def test_modify_support_assist_telemetry_response(self, powerscale_module_mock):
         self.set_module_params(self.support_assist_args,
                                {
