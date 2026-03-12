@@ -236,7 +236,12 @@ class TestSupportAssist(PowerScaleUnitBase):
                                {
                                    "accepted_terms": True,
                                    "contact": {"primary": None, "secondary": None},
-                                   "telemetry": {"offline_collection_period": None, "telemetry_enabled": None, "telemetry_persist": None, "telemetry_threads": None}
+                                   "telemetry": {
+                                       "offline_collection_period": None,
+                                       "telemetry_enabled": None,
+                                       "telemetry_persist": None,
+                                       "telemetry_threads": None
+                                   }
                                })
         powerscale_module_mock.get_support_assist_details = MagicMock(
             return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
@@ -253,7 +258,12 @@ class TestSupportAssist(PowerScaleUnitBase):
                                {
                                    "accepted_terms": False,
                                    "contact": {"primary": None, "secondary": None},
-                                   "telemetry": {"offline_collection_period": None, "telemetry_enabled": None, "telemetry_persist": None, "telemetry_threads": None}
+                                   "telemetry": {
+                                       "offline_collection_period": None,
+                                       "telemetry_enabled": None,
+                                       "telemetry_persist": None,
+                                       "telemetry_threads": None
+                                   }
                                })
         powerscale_module_mock.get_support_assist_details = MagicMock(
             return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
@@ -417,7 +427,12 @@ class TestSupportAssist(PowerScaleUnitBase):
                                {
                                    "accepted_terms": True,
                                    "contact": {"primary": None, "secondary": None},
-                                   "telemetry": {"offline_collection_period": None, "telemetry_enabled": None, "telemetry_persist": None, "telemetry_threads": None}
+                                   "telemetry": {
+                                       "offline_collection_period": None,
+                                       "telemetry_enabled": None,
+                                       "telemetry_persist": None,
+                                       "telemetry_threads": None
+                                   }
                                })
         powerscale_module_mock.get_support_assist_details = MagicMock(
             return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
@@ -434,7 +449,12 @@ class TestSupportAssist(PowerScaleUnitBase):
                                {
                                    "accepted_terms": True,
                                    "contact": {"primary": None, "secondary": None},
-                                   "telemetry": {"offline_collection_period": None, "telemetry_enabled": None, "telemetry_persist": None, "telemetry_threads": None}
+                                   "telemetry": {
+                                       "offline_collection_period": None,
+                                       "telemetry_enabled": None,
+                                       "telemetry_persist": None,
+                                       "telemetry_threads": None
+                                   }
                                })
         powerscale_module_mock.get_support_assist_details = MagicMock(
             return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
