@@ -4,6 +4,25 @@ Dellemc.Powerscale Release Notes
 
 .. contents:: Topics
 
+v3.9.1
+======
+
+Release Summary
+---------------
+
+| Release Date: 2026-03-17
+| This release brings several bug fixes and minor changes to the PowerScale Ansible Modules.
+
+Minor Changes
+-------------
+
+- Added support for PowerScale 9.13.
+
+Bug Fixes
+---------
+
+- Fix typo in sdk call in subnet.py
+
 v3.9.0
 ======
 

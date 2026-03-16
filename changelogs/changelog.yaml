@@ -441,3 +441,17 @@ releases:
         - >-
           Added support for target_compare_initial_sync parameter in SyncIQ
           policy module to enable data comparison during initial sync.
+  3.9.1:
+    changes:
+      minor_changes:
+        - Added support for PowerScale 9.13.
+      bugfixes:
+        - Fix typo in sdk call in subnet.py
+      release_summary: '| Release Date: 2026-03-17
+
+        | >-
+          This release brings several bug fixes and minor changes to the
+          PowerScale Ansible Modules.
+
+        '
+    release_date: '2026-03-17'
