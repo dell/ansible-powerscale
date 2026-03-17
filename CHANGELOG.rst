@@ -4,6 +4,14 @@ Dellemc.Powerscale Release Notes
 
 .. contents:: Topics
 
+v3.10.0
+=======
+
+Minor Changes
+-------------
+
+- Added support for target_compare_initial_sync parameter in SyncIQ policy module to enable data comparison during initial sync.
+
 v3.9.1
 ======
 
@@ -11,12 +19,13 @@ Release Summary
 ---------------
 
 | Release Date: 2026-03-17
-| This release brings several bug fixes and minor changes to the PowerScale Ansible Modules.
+| >- This release brings several bug fixes and minor changes to the PowerScale Ansible Modules.
 
 Minor Changes
 -------------
 
 - Added support for PowerScale 9.13.
+- Added support for target_compare_initial_sync parameter in SyncIQ policy module to enable data comparison during initial sync.
 
 Bug Fixes
 ---------
@@ -30,7 +39,7 @@ Release Summary
 ---------------
 
 | Release Date: 2025-06-27
-| This release brings several bug fixes and minor changes to the PowerScale Ansible Modules.
+| >- This release brings several bug fixes and minor changes to the PowerScale Ansible Modules.
 
 Minor Changes
 -------------
@@ -53,7 +62,7 @@ v3.8.1
 Bug Fixes
 ---------
 
-- GitHub defect fixes for filesystem module. (Issues
+- GitHub defect fixes for filesystem module. (Issues # 38, # 121 and # 174)
 
 v3.8.0
 ======
