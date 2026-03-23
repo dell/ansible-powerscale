@@ -4,14 +4,6 @@ Dellemc.Powerscale Release Notes
 
 .. contents:: Topics
 
-v3.10.0
-=======
-
-Minor Changes
--------------
-
-- Added support for target_compare_initial_sync parameter in SyncIQ policy module to enable data comparison during initial sync.
-
 v3.9.1
 ======
 
