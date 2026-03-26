@@ -302,7 +302,8 @@
         recursive_force_delete: "{{ recursive_force_delete }}"
         state: "{{ state_absent }}"
 
-    - name: Delete a filesystem in System Access Zone idempotency check - {{ path_system }}
+    - name: Delete a filesystem in System Access Zone idempotency check -
+            "{{ path_system }}"
       dellemc.powerscale.filesystem:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"

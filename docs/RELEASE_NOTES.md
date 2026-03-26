@@ -1,8 +1,8 @@
 **Ansible Modules for Dell Technologies PowerScale** 
 =========================================
-### Release notes 3.9.0
+### Release notes 3.9.1
 
->   © 2025 Dell Inc. or its subsidiaries. All rights reserved. Dell
+>   © 2026 Dell Inc. or its subsidiaries. All rights reserved. Dell
 >   and other trademarks are trademarks of Dell Inc. or its
 >   subsidiaries. Other trademarks may be trademarks of their respective
 >   owners.
@@ -27,6 +27,7 @@ Table 1. Revision history
 
 | Revision | Date            | Description                                               |
 |----------|-----------------|-----------------------------------------------------------|
+| 05       | March 2026      | Ansible Modules for Dell PowerScale 3.9.1                 |
 | 04       | June 2025       | Ansible Modules for Dell PowerScale 3.9.0                 |
 | 03       | May 2025        | Ansible Modules for Dell PowerScale 3.8.1                 |
 | 02       | March 2025      | Ansible Modules for Dell PowerScale 3.8.0                 |
@@ -83,12 +84,11 @@ New Features and Enhancements
 ---------------------------
 This section describes the features or enhancements of the Ansible Modules for Dell PowerScale for this release.
 
-The Ansible Modules for Dell PowerScale release 3.9.0 provides the following enhancements:
+The Ansible Modules for Dell PowerScale release 3.9.1 provides the following enhancements:
 
-- Support to manage RDMA for NFS Global Settings module on Powerscale 9.8 or later.
-- Add `+` as a permission option for Role module.
-- Fix defect for Support Assist module about gateway checking.
-- Some enhancement for User Mapping Rule, File System, Alert Settings, Info modules.
+- Added support for PowerScale 9.13.
+- Added support for target_compare_initial_sync parameter in SyncIQ policy module to enable data comparison during initial sync.
+- Fixed typo in SDK call in subnet module.
 
 Known issues
 ------------
