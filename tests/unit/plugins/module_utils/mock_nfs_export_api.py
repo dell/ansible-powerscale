@@ -87,12 +87,6 @@ NFS_1 = {"exports": [{
             "type": None
         }
     },
-    "map_failure": {
-        "enabled": False,
-        "primary_group": {},
-        "secondary_groups": [],
-        "user": {},
-    },
     "snapshot": None,
     "zone": SYS_ZONE}]}
 
