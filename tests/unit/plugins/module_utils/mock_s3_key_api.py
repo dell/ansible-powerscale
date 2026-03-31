@@ -1,8 +1,8 @@
-# Copyright: (c) 2023-2024, Dell Technologies
+# Copyright: (c) 2025, Dell Technologies
 
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-"""Mock Api response for Unit tests of S3 bucket module on PowerScale"""
+"""Mock Api response for Unit tests of S3 Key module on PowerScale"""
 
 from __future__ import absolute_import, division, print_function
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell import (
@@ -26,6 +26,8 @@ class MockS3KeyApi:
         "access_zone": ZONE,
         "user": USER,
         "state": STATE,
+        "generate_new_key": "if_not_present",
+        "existing_key_expiry_minutes": 0,
     }
 
     S3_GET_DETAILS_EXISTING_RESPONSE = {
@@ -49,6 +51,15 @@ class MockS3KeyApi:
         "old_key_expiry": None,
         "old_key_timestamp": None,
         "old_secret_key": None,
+        "secret_key": "1234567890asdfhjkl",
+        "secret_key_timestamp": 1755782540,
+    }
+
+    S3_CREATE_KEY_WITH_ROTATION_RESPONSE = {
+        "access_id": "sample_user_accid",
+        "old_key_expiry": 1755783140,
+        "old_key_timestamp": 1755781594,
+        "old_secret_key": "****************************",
         "secret_key": "1234567890asdfhjkl",
         "secret_key_timestamp": 1755782540,
     }
