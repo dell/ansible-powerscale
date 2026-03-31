@@ -34,7 +34,7 @@ options:
         type: str
     generate_new_key:
         description:
-        - Wether a new S3 keys should be generated.
+        - Whether a new S3 key should be generated.
         - Value C(if_not_present) indicates that a new S3 key is only generated if there is no existing key.
         - Value C(always) indicates that a new S3 key is always generated, even if there is an existing key.
         required: false
@@ -62,6 +62,10 @@ options:
         type: str
         default: present
         choices: ['absent', 'present']
+notes:
+    - The I(check_mode) is supported.
+    - The modules present in this collection named as 'dellemc.powerscale'
+      are built to support the Dell PowerScale storage platform.
 """
 
 EXAMPLES = r"""

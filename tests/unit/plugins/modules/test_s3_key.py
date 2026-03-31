@@ -8,6 +8,7 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
+import copy
 import pytest
 from mock.mock import MagicMock
 
@@ -44,16 +45,38 @@ class TestS3Key(PowerScaleUnitBase):
     def module_object(self):
         return S3Key
 
+    def _get_args(self, overrides=None):
+        """Return a fresh copy of args with optional overrides."""
+        args = copy.deepcopy(MockS3KeyApi.S3_KEY_COMMON_ARGS)
+        if overrides:
+            args.update(overrides)
+        return args
+
+    @staticmethod
+    def _make_get_s3_key_mock(response_dict):
+        """Create a fresh get_s3_key MagicMock that returns the given response dict."""
+        s3_key_obj = MagicMock()
+        keys_mock = MagicMock()
+        keys_mock.to_dict.return_value = response_dict
+        s3_key_obj.keys = keys_mock
+        return MagicMock(return_value=s3_key_obj)
+
+    @staticmethod
+    def _make_create_s3_key_mock(response_dict):
+        """Create a fresh create_s3_key MagicMock that returns the given response dict."""
+        s3_key_obj = MagicMock()
+        keys_mock = MagicMock()
+        keys_mock.to_dict.return_value = response_dict
+        s3_key_obj.keys = keys_mock
+        return MagicMock(return_value=s3_key_obj)
+
     def test_get_s3_key_details(self, powerscale_module_mock):
-        # set module params
-        powerscale_module_mock.module.params = self.s3_key_args
+        powerscale_module_mock.module.params = self._get_args()
 
         # existing key details are returned
-        s3_key_obj_mock = MagicMock()
-        keys_mock = MagicMock()
-        keys_mock.to_dict.return_value = MockS3KeyApi.S3_GET_DETAILS_EXISTING_RESPONSE
-        s3_key_obj_mock.keys = keys_mock
-        powerscale_module_mock.protocol_api.get_s3_key.return_value = s3_key_obj_mock
+        powerscale_module_mock.protocol_api.get_s3_key = self._make_get_s3_key_mock(
+            MockS3KeyApi.S3_GET_DETAILS_EXISTING_RESPONSE
+        )
 
         S3KeyHandler().handle(
             powerscale_module_mock, powerscale_module_mock.module.params
@@ -66,7 +89,7 @@ class TestS3Key(PowerScaleUnitBase):
         powerscale_module_mock.protocol_api.get_s3_key.assert_called()
 
     def test_get_s3_key_details_exception(self, powerscale_module_mock):
-        powerscale_module_mock.module.params = self.s3_key_args
+        powerscale_module_mock.module.params = self._get_args()
         powerscale_module_mock.protocol_api.get_s3_key = MagicMock(
             side_effect=MockApiException
         )
@@ -76,11 +99,9 @@ class TestS3Key(PowerScaleUnitBase):
         )
 
     def test_create_s3_key_no_existing(self, powerscale_module_mock):
-        # set module params
-        self.s3_key_args.update(
+        powerscale_module_mock.module.params = self._get_args(
             {"user": "test-user", "access_zone": "test-zone", "state": "present"}
         )
-        powerscale_module_mock.module.params = self.s3_key_args
 
         # key is not present
         powerscale_module_mock.get_key_details = MagicMock(
@@ -88,11 +109,9 @@ class TestS3Key(PowerScaleUnitBase):
         )
 
         # new key is created
-        s3_key_obj_mock = MagicMock()
-        keys_mock = MagicMock()
-        keys_mock.to_dict.return_value = MockS3KeyApi.S3_CREATE_KEY_RESPONSE
-        s3_key_obj_mock.keys = keys_mock
-        powerscale_module_mock.protocol_api.create_s3_key.return_value = s3_key_obj_mock
+        powerscale_module_mock.protocol_api.create_s3_key = self._make_create_s3_key_mock(
+            MockS3KeyApi.S3_CREATE_KEY_RESPONSE
+        )
 
         S3KeyHandler().handle(
             powerscale_module_mock, powerscale_module_mock.module.params
@@ -105,9 +124,8 @@ class TestS3Key(PowerScaleUnitBase):
         )
 
     def test_create_s3_key_replace_existing(self, powerscale_module_mock):
-        # set module params
         existing_key_expire_time = 42
-        self.s3_key_args.update(
+        powerscale_module_mock.module.params = self._get_args(
             {
                 "user": "test-user",
                 "access_zone": "test-zone",
@@ -116,7 +134,6 @@ class TestS3Key(PowerScaleUnitBase):
                 "existing_key_expiry_minutes": existing_key_expire_time,
             }
         )
-        powerscale_module_mock.module.params = self.s3_key_args
 
         # key is present
         powerscale_module_mock.get_key_details = MagicMock(
@@ -129,11 +146,9 @@ class TestS3Key(PowerScaleUnitBase):
         }
 
         # new key is created
-        s3_key_obj_mock = MagicMock()
-        keys_mock = MagicMock()
-        keys_mock.to_dict.return_value = MockS3KeyApi.S3_CREATE_KEY_RESPONSE
-        s3_key_obj_mock.keys = keys_mock
-        powerscale_module_mock.protocol_api.create_s3_key.return_value = s3_key_obj_mock
+        powerscale_module_mock.protocol_api.create_s3_key = self._make_create_s3_key_mock(
+            MockS3KeyApi.S3_CREATE_KEY_RESPONSE
+        )
 
         S3KeyHandler().handle(
             powerscale_module_mock, powerscale_module_mock.module.params
@@ -156,21 +171,19 @@ class TestS3Key(PowerScaleUnitBase):
         )
 
     def test_create_s3_key_exception(self, powerscale_module_mock):
-        # set module params
-        self.s3_key_args.update(
+        powerscale_module_mock.module.params = self._get_args(
             {
                 "state": "present",
                 "generate_new_key": "always",
             }
         )
-        powerscale_module_mock.module.params = self.s3_key_args
 
         # key is present
         powerscale_module_mock.get_key_details = MagicMock(
             return_value=MockS3KeyApi.S3_GET_DETAILS_EXISTING_RESPONSE
         )
 
-        # raise execption
+        # raise exception
         powerscale_module_mock.protocol_api.create_s3_key = MagicMock(
             side_effect=MockApiException
         )
@@ -180,16 +193,17 @@ class TestS3Key(PowerScaleUnitBase):
         )
 
     def test_delete_s3_key_no_existing(self, powerscale_module_mock):
-        # set module params
-        self.s3_key_args.update(
+        powerscale_module_mock.module.params = self._get_args(
             {"user": "test-user", "access_zone": "test-zone", "state": "absent"}
         )
-        powerscale_module_mock.module.params = self.s3_key_args
 
         # key is not present
         powerscale_module_mock.get_key_details = MagicMock(
             return_value=MockS3KeyApi.S3_GET_DETAILS_NO_EXISTING_RESPONSE
         )
+
+        # reset delete mock to track calls from this test only
+        powerscale_module_mock.protocol_api.delete_s3_key = MagicMock()
 
         S3KeyHandler().handle(
             powerscale_module_mock, powerscale_module_mock.module.params
@@ -202,11 +216,9 @@ class TestS3Key(PowerScaleUnitBase):
         )
 
     def test_delete_s3_key(self, powerscale_module_mock):
-        # set module params
-        self.s3_key_args.update(
+        powerscale_module_mock.module.params = self._get_args(
             {"user": "test-user", "access_zone": "test-zone", "state": "absent"}
         )
-        powerscale_module_mock.module.params = self.s3_key_args
 
         # key is present and then absent
         powerscale_module_mock.get_key_details = MagicMock(
@@ -217,8 +229,8 @@ class TestS3Key(PowerScaleUnitBase):
         )
 
         # key is deleted
-        powerscale_module_mock.protocol_api.delete_s3_key.return_value = (
-            MockS3KeyApi.S3_GET_DETAILS_NO_EXISTING_RESPONSE
+        powerscale_module_mock.protocol_api.delete_s3_key = MagicMock(
+            return_value=MockS3KeyApi.S3_GET_DETAILS_NO_EXISTING_RESPONSE
         )
 
         S3KeyHandler().handle(
@@ -232,20 +244,18 @@ class TestS3Key(PowerScaleUnitBase):
         )
 
     def test_delete_s3_key_exception(self, powerscale_module_mock):
-        # set module params
-        self.s3_key_args.update(
+        powerscale_module_mock.module.params = self._get_args(
             {
                 "state": "absent",
             }
         )
-        powerscale_module_mock.module.params = self.s3_key_args
 
         # key is present
         powerscale_module_mock.get_key_details = MagicMock(
             return_value=MockS3KeyApi.S3_GET_DETAILS_EXISTING_RESPONSE
         )
 
-        # raise execption
+        # raise exception
         powerscale_module_mock.protocol_api.delete_s3_key = MagicMock(
             side_effect=MockApiException
         )
@@ -255,51 +265,198 @@ class TestS3Key(PowerScaleUnitBase):
         )
 
     def test_validate_params_invalid_user(self, powerscale_module_mock):
-        self.s3_key_args.update(
+        powerscale_module_mock.module.params = self._get_args(
             {
                 "user": " ",
                 "access_zone": "test-zone",
                 "state": "absent",
             }
         )
-        powerscale_module_mock.module.params = self.s3_key_args
         self.capture_fail_json_call(
             "Invalid user provided. Provide valid user.", S3KeyHandler
         )
 
-        self.s3_key_args.update(
+        powerscale_module_mock.module.params = self._get_args(
             {
                 "user": "in valid",
                 "access_zone": "test-zone",
                 "state": "absent",
             }
         )
-        powerscale_module_mock.module.params = self.s3_key_args
         self.capture_fail_json_call(
             "Invalid user provided. Provide valid user.", S3KeyHandler
         )
 
     def test_validate_params_invalid_access_zone(self, powerscale_module_mock):
-        self.s3_key_args.update(
+        powerscale_module_mock.module.params = self._get_args(
             {
                 "user": "test-user",
                 "access_zone": " ",
                 "state": "absent",
             }
         )
-        powerscale_module_mock.module.params = self.s3_key_args
         self.capture_fail_json_call(
             "Invalid access_zone provided. Provide valid access_zone.", S3KeyHandler
         )
 
-        self.s3_key_args.update(
+        powerscale_module_mock.module.params = self._get_args(
             {
                 "user": "test-user",
                 "access_zone": "in valid",
                 "state": "absent",
             }
         )
-        powerscale_module_mock.module.params = self.s3_key_args
         self.capture_fail_json_call(
             "Invalid access_zone provided. Provide valid access_zone.", S3KeyHandler
         )
+
+    def test_get_s3_key_details_404(self, powerscale_module_mock):
+        """Test that 404 is handled gracefully (key does not exist)."""
+        powerscale_module_mock.module.params = self._get_args(
+            {"user": "test-user", "access_zone": "test-zone", "state": "present"}
+        )
+
+        # API returns 404
+        powerscale_module_mock.protocol_api.get_s3_key = MagicMock(
+            side_effect=MockApiException(404)
+        )
+
+        # key creation is triggered after 404
+        powerscale_module_mock.protocol_api.create_s3_key = self._make_create_s3_key_mock(
+            MockS3KeyApi.S3_CREATE_KEY_RESPONSE
+        )
+
+        S3KeyHandler().handle(
+            powerscale_module_mock, powerscale_module_mock.module.params
+        )
+        assert powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
+        powerscale_module_mock.protocol_api.create_s3_key.assert_called()
+
+    def test_create_s3_key_if_not_present_existing_key(self, powerscale_module_mock):
+        """Test idempotency: generate_new_key=if_not_present when key already exists."""
+        powerscale_module_mock.module.params = self._get_args(
+            {
+                "user": "test-user",
+                "access_zone": "test-zone",
+                "state": "present",
+                "generate_new_key": "if_not_present",
+            }
+        )
+
+        # key already exists - use fresh mock to avoid side_effect leakage
+        powerscale_module_mock.protocol_api.get_s3_key = self._make_get_s3_key_mock(
+            MockS3KeyApi.S3_GET_DETAILS_EXISTING_RESPONSE
+        )
+
+        # reset create_s3_key to a fresh mock for clean call tracking
+        powerscale_module_mock.protocol_api.create_s3_key = MagicMock()
+
+        S3KeyHandler().handle(
+            powerscale_module_mock, powerscale_module_mock.module.params
+        )
+        assert powerscale_module_mock.module.exit_json.call_args[1]["changed"] is False
+        powerscale_module_mock.protocol_api.create_s3_key.assert_not_called()
+        assert (
+            powerscale_module_mock.module.exit_json.call_args[1]["S3_key_details"]
+            == MockS3KeyApi.S3_GET_DETAILS_EXISTING_RESPONSE
+        )
+
+    def test_create_s3_key_check_mode(self, powerscale_module_mock):
+        """Test that check mode does not make API calls."""
+        powerscale_module_mock.module.params = self._get_args(
+            {
+                "user": "test-user",
+                "access_zone": "test-zone",
+                "state": "present",
+                "generate_new_key": "always",
+            }
+        )
+        powerscale_module_mock.module.check_mode = True
+
+        # key is present
+        powerscale_module_mock.get_key_details = MagicMock(
+            return_value=MockS3KeyApi.S3_GET_DETAILS_EXISTING_RESPONSE
+        )
+
+        # reset create_s3_key to a fresh mock for clean call tracking
+        powerscale_module_mock.protocol_api.create_s3_key = MagicMock()
+
+        S3KeyHandler().handle(
+            powerscale_module_mock, powerscale_module_mock.module.params
+        )
+        assert powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
+        powerscale_module_mock.protocol_api.create_s3_key.assert_not_called()
+
+    def test_delete_s3_key_check_mode(self, powerscale_module_mock):
+        """Test that check mode does not make delete API calls."""
+        powerscale_module_mock.module.params = self._get_args(
+            {
+                "user": "test-user",
+                "access_zone": "test-zone",
+                "state": "absent",
+            }
+        )
+        powerscale_module_mock.module.check_mode = True
+
+        # key is present
+        powerscale_module_mock.get_key_details = MagicMock(
+            return_value=MockS3KeyApi.S3_GET_DETAILS_EXISTING_RESPONSE
+        )
+
+        # reset delete_s3_key to a fresh mock for clean call tracking
+        powerscale_module_mock.protocol_api.delete_s3_key = MagicMock()
+
+        S3KeyHandler().handle(
+            powerscale_module_mock, powerscale_module_mock.module.params
+        )
+        assert powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
+        powerscale_module_mock.protocol_api.delete_s3_key.assert_not_called()
+
+    def test_get_s3_key_details_generic_exception(self, powerscale_module_mock):
+        """Test generic (non-API) exception during get_key_details."""
+        powerscale_module_mock.module.params = self._get_args(
+            {"user": "test-user", "access_zone": "test-zone", "state": "present"}
+        )
+        powerscale_module_mock.protocol_api.get_s3_key = MagicMock(
+            side_effect=Exception("Connection error")
+        )
+        self.capture_fail_json_call(
+            "Got error", S3KeyHandler
+        )
+
+    def test_create_s3_key_with_rotation_response(self, powerscale_module_mock):
+        """Test key creation with rotation preserves old key info."""
+        existing_key_expire_time = 30
+        powerscale_module_mock.module.params = self._get_args(
+            {
+                "user": "test-user",
+                "access_zone": "test-zone",
+                "state": "present",
+                "generate_new_key": "always",
+                "existing_key_expiry_minutes": existing_key_expire_time,
+            }
+        )
+
+        # key is present
+        powerscale_module_mock.get_key_details = MagicMock(
+            return_value=MockS3KeyApi.S3_GET_DETAILS_EXISTING_RESPONSE
+        )
+
+        # mock S3Key SDK object
+        powerscale_module_mock.isi_sdk.S3Key.return_value = {
+            "existing_key_expiry_time": existing_key_expire_time
+        }
+
+        # new key is created with rotation response - use fresh mock
+        powerscale_module_mock.protocol_api.create_s3_key = self._make_create_s3_key_mock(
+            MockS3KeyApi.S3_CREATE_KEY_WITH_ROTATION_RESPONSE
+        )
+
+        S3KeyHandler().handle(
+            powerscale_module_mock, powerscale_module_mock.module.params
+        )
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert result["changed"] is True
+        assert result["S3_key_details"]["old_key_expiry"] is not None
+        assert result["S3_key_details"]["old_key_timestamp"] is not None
+        assert result["S3_key_details"]["old_secret_key"] is not None
