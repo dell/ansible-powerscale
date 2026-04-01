@@ -27,7 +27,62 @@ class MockSmartQuotaApi:
         "provider_type": None,
         "quota": None,
         "list_snapshots": None,
-        "state": None
+        "state": None,
+        "description": None,
+        "labels": None,
+        "force": None
+    }
+
+    GET_QUOTA_WITH_NEW_PARAMS = {
+        "id": "2nQKAAEAAAAAAAAAAAAAQIMCAAAAAAAA",
+        "path": "/ifs/Test/Test1",
+        "type": "directory",
+        "enforced": True,
+        "container": False,
+        "include_snapshots": False,
+        "description": "Test quota description",
+        "labels": "test,prod",
+        "thresholds": {
+            "advisory": 3221225472,
+            "hard": 10737418240,
+            "soft": 5368709120,
+            "soft_grace": 86400,
+            "percent_soft": 80.0,
+            "percent_advisory": 50.0,
+            "advisory_exceeded": False,
+            "advisory_last_exceeded": 0,
+            "hard_exceeded": False,
+            "hard_last_exceeded": 0,
+            "soft_exceeded": False,
+            "soft_last_exceeded": 0
+        },
+        "thresholds_on": "fs_logical_size"
+    }
+
+    GET_DEFAULT_DIRECTORY_QUOTA = {
+        "id": "3nQKAAEAAAAAAAAAAAAAQIMCAAAAAAAA",
+        "path": "/ifs/Test/Test1",
+        "type": "default-directory",
+        "enforced": True,
+        "container": False,
+        "include_snapshots": False,
+        "description": "",
+        "labels": "",
+        "thresholds": {
+            "advisory": None,
+            "hard": 10737418240,
+            "soft": None,
+            "soft_grace": None,
+            "percent_soft": None,
+            "percent_advisory": None,
+            "advisory_exceeded": False,
+            "advisory_last_exceeded": None,
+            "hard_exceeded": False,
+            "hard_last_exceeded": None,
+            "soft_exceeded": False,
+            "soft_last_exceeded": None
+        },
+        "thresholds_on": "fs_logical_size"
     }
 
     @staticmethod
