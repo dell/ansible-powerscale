@@ -12,7 +12,7 @@ __metaclass__ = type
 DOCUMENTATION = r"""
 ---
 module: ipmi
-version_added: "3.10.0"
+version_added: '3.10.0'
 short_description: Manage IPMI configuration on a PowerScale Storage System
 description:
 - Managing IPMI (Intelligent Platform Management Interface) configuration on
@@ -93,7 +93,6 @@ options:
                 description:
                 - The BMC password.
                 type: str
-                no_log: true
     features:
         description:
         - List of IPMI features to configure.
@@ -121,6 +120,14 @@ options:
         type: str
         default: present
         choices: ['present']
+attributes:
+    check_mode:
+        description: Runs task to validate without performing action on the target
+                     machine.
+        support: full
+    diff_mode:
+        description: Runs the task to report the changes made or to be made.
+        support: full
 notes:
     - The I(check_mode) is supported.
     - The I(diff) mode is supported.
@@ -237,7 +244,7 @@ changed:
     sample: false
 diff:
     description: The differences between the before and after states.
-    returned: when diff mode is enabled and changes are made
+    returned: when check mode is not enabled and changes are made
     type: dict
     contains:
         before:
