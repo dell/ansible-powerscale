@@ -1,0 +1,131 @@
+name: 🐛 Bug Report
+description: File a bug report
+title: "[BUG]: "
+labels: ["type/bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a bug. Please provide the information below.
+        
+        ## Community Note
+        * Please vote on this issue by adding a 👍 [reaction](https://blog.github.com/2016-03-10-add-reactions-to-pull-requests-issues-and-comments/) to help prioritize this request
+        * Please do not leave "+1" or other comments that do not add relevant new information or questions
+        * If you are interested in working on this issue or have submitted a pull request, please leave a comment
+
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is
+    validations:
+      required: true
+
+  - type: dropdown
+    id: product-category
+    attributes:
+      label: Product Category
+      description: Select the relevant Dell product category
+      options:
+        - Ansible Collection
+        - Terraform Provider
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component/Provider
+      description: Select the specific component or provider
+      options:
+        - Ansible Collection:
+          - dellemc-openmanage-ansible-modules
+          - ansible-powerscale
+          - ansible-powermax
+          - ansible-powerstore
+          - ansible-powerflex
+          - ansible-unity
+        - Terraform Provider:
+          - PowerScale
+          - PowerFlex
+          - PowerMax
+          - PowerStore
+          - OME
+          - Redfish
+        - Other:
+          - Other (specify in description)
+    validations:
+      required: true
+
+  - type: input
+    id: tool-version
+    attributes:
+      label: Tool Version
+      description: Ansible version OR Terraform version
+      placeholder: "Ansible 2.12 OR Terraform 1.5"
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment Information
+      description: |
+        For Ansible: OS, Python, iDRAC/OME/OME-M versions
+        For Terraform: OS, Golang, Storage array versions
+        Example:
+        - OS: RHEL 8.5
+        - Python: 3.9
+        - iDRAC: 5.10.00.00
+        - OME: 3.8.4
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: |
+        Include playbook OR terraform configuration. 
+        Please be sure to remove all sensitive data such as IP addresses, host names, credentials, etc.
+        
+        Example:
+        1. Run 'ansible-playbook site.yml'
+        2. Execute module 'dellemc_idrac_user_info'
+        3. Observe error...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: A clear and concise description of what you expected to happen
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: A clear and concise description of what actually happened
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs/Output
+      description: Copy/paste any relevant log output. Please be sure to remove all sensitive data
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other context about the problem
+    validations:
+      required: false
+    
