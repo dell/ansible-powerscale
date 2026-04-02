@@ -64,6 +64,11 @@ class MockS3KeyApi:
         "secret_key_timestamp": 1755782540,
     }
 
+    PREREQS_VALIDATE_FAILURE = {
+        "all_packages_found": False,
+        "error_message": "Required SDK packages not found",
+    }
+
     @staticmethod
     def get_s3_key_exception_response(response_type):
         if response_type == "get_details_exception":
