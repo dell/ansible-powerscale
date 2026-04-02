@@ -41,7 +41,12 @@ def _patch_ansible_for_unit_tests(monkeypatch, mocker):
         f'{UTILS_PATH}.get_powerscale_connection',
         return_value=MagicMock()
     )
+    # Create SDK mock with proper major/minor attributes
+    from mock.mock import PropertyMock
+    sdk_mock = MagicMock()
+    type(sdk_mock).major = PropertyMock(return_value=9)
+    type(sdk_mock).minor = PropertyMock(return_value=7)
     mocker.patch(
         f'{UTILS_PATH}.get_powerscale_sdk',
-        return_value=MagicMock()
+        return_value=sdk_mock
     )
