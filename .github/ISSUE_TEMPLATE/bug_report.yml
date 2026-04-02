@@ -1,12 +1,12 @@
-name: 🐛 Bug Report
-description: File a bug report
+name: 🐛 Ansible Bug Report
+description: File a bug report for Dell Ansible Collections
 title: "[BUG]: "
-labels: ["type/bug", "needs-triage"]
+labels: ["type/bug", "needs-triage", "ansible"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thank you for reporting a bug. Please provide the information below.
+        Thank you for reporting a bug in Dell Ansible Collections. Please provide the information below.
         
         ## Community Note
         * Please vote on this issue by adding a 👍 [reaction](https://blog.github.com/2016-03-10-add-reactions-to-pull-requests-issues-and-comments/) to help prioritize this request
@@ -22,83 +22,108 @@ body:
       required: true
 
   - type: dropdown
-    id: product-category
+    id: ansible-collection
     attributes:
-      label: Product Category
-      description: Select the relevant Dell product category
+      label: Ansible Collection
+      description: Select the Dell Ansible Collection
       options:
-        - Ansible Collection
-        - Terraform Provider
-        - Other
-    validations:
-      required: true
-
-  - type: dropdown
-    id: component
-    attributes:
-      label: Component/Provider
-      description: Select the specific component or provider
-      options:
-        - Ansible Collection:
-          - dellemc-openmanage-ansible-modules
-          - ansible-powerscale
-          - ansible-powermax
-          - ansible-powerstore
-          - ansible-powerflex
-          - ansible-unity
-        - Terraform Provider:
-          - PowerScale
-          - PowerFlex
-          - PowerMax
-          - PowerStore
-          - OME
-          - Redfish
-        - Other:
-          - Other (specify in description)
+        - dellemc.openmanage
+        - dellemc.powerscale
+        - dellemc.powermax
+        - dellemc.powerstore
+        - dellemc.powerflex
+        - dellemc.unity
+        - Other (specify in description)
     validations:
       required: true
 
   - type: input
-    id: tool-version
+    id: module-name
     attributes:
-      label: Tool Version
-      description: Ansible version OR Terraform version
-      placeholder: "Ansible 2.12 OR Terraform 1.5"
+      label: Module Name
+      description: Enter the specific module name (e.g., dellemc_idrac_user_info)
+      placeholder: "dellemc_idrac_user_info"
     validations:
       required: true
 
   - type: textarea
-    id: environment
+    id: ansible-environment
     attributes:
-      label: Environment Information
+      label: Ansible Environment
       description: |
-        For Ansible: OS, Python, iDRAC/OME/OME-M versions
-        For Terraform: OS, Golang, Storage array versions
-        Example:
-        - OS: RHEL 8.5
-        - Python: 3.9
-        - iDRAC: 5.10.00.00
-        - OME: 3.8.4
+        Please provide your Ansible environment details:
+        - Ansible Version: [e.g. 2.12, 2.13]
+        - Python Version: [e.g. 3.9, 3.10]
+        - Ansible Controller Version (if applicable): [e.g. Tower 3.8, AWX 19]
+        - Collection Version: [e.g. 6.0.0, 1.2.0]
+      placeholder: |
+        Ansible: 2.12.5
+        Python: 3.9.10
+        Controller: AWX 19.0.0
+        Collection: dellemc.openmanage 6.0.0
     validations:
       required: true
 
   - type: textarea
-    id: reproduction
+    id: target-environment
     attributes:
-      label: Steps to Reproduce
+      label: Target Environment
       description: |
-        Include playbook OR terraform configuration. 
+        Please provide details about the target environment:
+        - Operating System: [e.g. RHEL 8.5, Ubuntu 20.04, Windows Server 2019]
+        - Dell Hardware/Software Version: [e.g. iDRAC 5.10.00.00, OME 3.8.4, PowerScale 9.2.0.0]
+        - Network Configuration: [e.g. VPN, direct connection, proxy]
+        - Authentication Method: [e.g. username/password, API key, certificate]
+      placeholder: |
+        OS: RHEL 8.5
+        iDRAC: 5.10.00.00
+        Network: Direct connection
+        Auth: Username/password
+    validations:
+      required: true
+
+  - type: textarea
+    id: playbook-content
+    attributes:
+      label: Playbook/Task Content
+      description: |
+        Include the complete playbook or task that reproduces the issue.
         Please be sure to remove all sensitive data such as IP addresses, host names, credentials, etc.
         
         Example:
-        1. Run 'ansible-playbook site.yml'
-        2. Execute module 'dellemc_idrac_user_info'
-        3. Observe error...
+        ```yaml
+        ---
+        - hosts: localhost
+          collections:
+            - dellemc.openmanage
+          tasks:
+            - name: Get iDRAC user info
+              dellemc.openmanage.idrac_user_info:
+                idrac_ip: "{{ idrac_ip }}"
+                idrac_user: "{{ idrac_user }}"
+                idrac_password: "{{ idrac_password }}"
+                validate_certs: false
+        ```
+      render: markdown
     validations:
       required: true
 
   - type: textarea
-    id: expected
+    id: execution-steps
+    attributes:
+      label: Execution Steps
+      description: |
+        Provide the exact commands used to run the playbook and the complete output.
+        
+        Example:
+        ```bash
+        ansible-playbook -i inventory site.yml -vvv
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
     attributes:
       label: Expected Behavior
       description: A clear and concise description of what you expected to happen
@@ -106,7 +131,7 @@ body:
       required: true
 
   - type: textarea
-    id: actual
+    id: actual-behavior
     attributes:
       label: Actual Behavior
       description: A clear and concise description of what actually happened
@@ -114,10 +139,18 @@ body:
       required: true
 
   - type: textarea
-    id: logs
+    id: error-output
     attributes:
-      label: Logs/Output
-      description: Copy/paste any relevant log output. Please be sure to remove all sensitive data
+      label: Complete Error Output
+      description: Copy/paste the complete error message including traceback. Remove sensitive data.
+    validations:
+      required: false
+
+  - type: textarea
+    id: troubleshooting
+    attributes:
+      label: Troubleshooting Steps Taken
+      description: What have you tried so far to resolve this issue?
     validations:
       required: false
 
@@ -125,7 +158,6 @@ body:
     id: additional-context
     attributes:
       label: Additional Context
-      description: Any other context about the problem
+      description: Any other context about the problem, such as related documentation, similar issues, etc.
     validations:
       required: false
-    
