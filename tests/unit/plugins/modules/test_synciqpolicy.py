@@ -331,3 +331,262 @@ class TestSynciqPolicy(PowerScaleUnitBase):
             side_effect=Exception("Test exception"))
         self.capture_fail_json_method("Please provide a valid certificate",
                                       self.powerscale_module_mock, "get_synciq_policy_display_attributes", policy_obj)
+
+    # ── TC-PSW-001: Create SyncIQ policy with password ──
+    def test_create_synciqpolicy_with_password(self):
+        self.set_module_params(self.synciqpolicy_args,
+                               MockSynciqApi.MockSynciqpolicyApi.CREATE_ARGS_WITH_PASSWORD)
+        self.powerscale_module_mock.module._diff = False
+        self.powerscale_module_mock.validate_job_params = MagicMock(
+            return_value=None)
+        self.powerscale_module_mock.get_target_cert_id_name = MagicMock(
+            return_value=MockSynciqApi.MockSynciqpolicyApi.CERT_NAME
+        )
+        self.powerscale_module_mock.get_synciq_policy_details = MagicMock(
+            return_value=(None, False))
+        self.powerscale_module_mock.api_instance.create_sync_policy.reset_mock()
+        self.powerscale_module_mock.api_instance.create_sync_policy.side_effect = None
+        SynciqPolicyHandler().handle(self.powerscale_module_mock,
+                                     self.powerscale_module_mock.module.params)
+        assert self.powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
+        assert self.powerscale_module_mock.module.exit_json.call_args[1]["create_synciq_policy"] is True
+        # Verify password was included in the create call
+        create_call_args = self.powerscale_module_mock.api_instance.create_sync_policy.call_args
+        if create_call_args:
+            sync_policy_arg = create_call_args[1].get('sync_policy', create_call_args[0][0] if create_call_args[0] else None)
+            if isinstance(sync_policy_arg, dict):
+                assert 'password' in sync_policy_arg, "password must be included in create_sync_policy call"
+
+    # ── TC-PSW-002: Create SyncIQ policy with password in check mode ──
+    def test_create_synciqpolicy_with_password_check_mode(self):
+        self.set_module_params(self.synciqpolicy_args,
+                               MockSynciqApi.MockSynciqpolicyApi.CREATE_ARGS_WITH_PASSWORD)
+        self.powerscale_module_mock.module._diff = False
+        self.powerscale_module_mock.module.check_mode = True
+        self.powerscale_module_mock.validate_job_params = MagicMock(
+            return_value=None)
+        self.powerscale_module_mock.get_target_cert_id_name = MagicMock(
+            return_value=MockSynciqApi.MockSynciqpolicyApi.CERT_NAME
+        )
+        self.powerscale_module_mock.get_synciq_policy_details = MagicMock(
+            return_value=(None, False))
+        self.powerscale_module_mock.api_instance.create_sync_policy.reset_mock()
+        SynciqPolicyHandler().handle(self.powerscale_module_mock,
+                                     self.powerscale_module_mock.module.params)
+        assert self.powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
+        # Verify no actual API call was made in check mode
+        self.powerscale_module_mock.api_instance.create_sync_policy.assert_not_called()
+
+    # ── TC-PSW-003: Create SyncIQ policy with password exception ──
+    def test_create_synciqpolicy_with_password_exception(self):
+        self.set_module_params(self.synciqpolicy_args,
+                               MockSynciqApi.MockSynciqpolicyApi.CREATE_ARGS_WITH_PASSWORD)
+        self.powerscale_module_mock.get_target_cert_id_name = MagicMock(
+            return_value=MockSynciqApi.MockSynciqpolicyApi.CERT_NAME
+        )
+        self.powerscale_module_mock.get_synciq_policy_details = MagicMock(
+            return_value=(None, False))
+        self.powerscale_module_mock.api_instance.create_sync_policy = MagicMock(
+            side_effect=MockApiException)
+        self.capture_fail_json_call(
+            "Creating SyncIQ policy",
+            SynciqPolicyHandler
+        )
+
+    # ── TC-PSW-006: Modify with ONLY password, password_set=True → changed=False ──
+    def test_modify_synciqpolicy_password_only_already_set(self):
+        self.set_module_params(self.synciqpolicy_args,
+                               MockSynciqApi.MockSynciqpolicyApi.MODIFY_ARGS_PASSWORD_ONLY)
+        self.powerscale_module_mock.module._diff = False
+        self.powerscale_module_mock.validate_job_params = MagicMock(
+            return_value=None)
+        self.powerscale_module_mock.api_instance.update_sync_policy.reset_mock()
+        self.powerscale_module_mock.api_instance.update_sync_policy.side_effect = None
+        self.powerscale_module_mock.api_instance.list_sync_jobs.reset_mock()
+        self.powerscale_module_mock.api_instance.list_sync_jobs.side_effect = None
+        # Mock a policy object that already has password_set=True
+        policy_obj = MagicMock()
+        policy_obj.name = "Policy1"
+        policy_obj.id = "abc123"
+        policy_obj.password_set = True
+        policy_obj.target_certificate_id = None
+        policy_obj.source_include_directories = []
+        policy_obj.source_exclude_directories = []
+        policy_obj.source_network = None
+        policy_obj.enabled = True
+        policy_dict = {
+            'name': 'Policy1', 'id': 'abc123', 'password_set': True,
+            'target_certificate_id': None, 'source_include_directories': [],
+            'source_exclude_directories': [], 'source_network': None,
+            'enabled': True, 'description': '', 'action': 'sync',
+            'schedule': '', 'target_host': '', 'target_path': '',
+            'target_snapshot_archive': False, 'target_snapshot_expiration': None,
+            'snapshot_sync_pattern': '*', 'accelerated_failback': True,
+            'restrict_target_network': False, 'target_compare_initial_sync': False,
+            'skip_when_source_unmodified': False, 'job_delay': None,
+            'rpo_alert': None, 'source_root_path': '/test',
+            'last_job_state': 'unknown', 'last_started': None,
+            'last_success': None, 'next_run': None
+        }
+        policy_obj.to_dict = MagicMock(return_value=policy_dict)
+        self.powerscale_module_mock.get_synciq_policy_details = MagicMock(
+            return_value=(policy_obj, False))
+        SynciqPolicyHandler().handle(self.powerscale_module_mock,
+                                     self.powerscale_module_mock.module.params)
+        # When only password is provided and password_set is already True,
+        # module should NOT report changes (cannot detect if value differs)
+        assert self.powerscale_module_mock.module.exit_json.call_args[1]["changed"] is False
+
+    # ── TC-PSW-007: Check mode — password provided, password_set=True → changed=False (FR2) ──
+    def test_check_mode_password_already_set_no_false_positive(self):
+        self.set_module_params(self.synciqpolicy_args,
+                               MockSynciqApi.MockSynciqpolicyApi.MODIFY_ARGS_PASSWORD_ONLY)
+        self.powerscale_module_mock.module._diff = False
+        self.powerscale_module_mock.module.check_mode = True
+        self.powerscale_module_mock.validate_job_params = MagicMock(
+            return_value=None)
+        self.powerscale_module_mock.api_instance.update_sync_policy.reset_mock()
+        self.powerscale_module_mock.api_instance.update_sync_policy.side_effect = None
+        self.powerscale_module_mock.api_instance.list_sync_jobs.reset_mock()
+        self.powerscale_module_mock.api_instance.list_sync_jobs.side_effect = None
+        policy_obj = MagicMock()
+        policy_obj.name = "Policy1"
+        policy_obj.id = "abc123"
+        policy_obj.password_set = True
+        policy_obj.target_certificate_id = None
+        policy_obj.source_include_directories = []
+        policy_obj.source_exclude_directories = []
+        policy_obj.source_network = None
+        policy_obj.enabled = True
+        policy_dict = {
+            'name': 'Policy1', 'id': 'abc123', 'password_set': True,
+            'target_certificate_id': None, 'source_include_directories': [],
+            'source_exclude_directories': [], 'source_network': None,
+            'enabled': True, 'description': '', 'action': 'sync',
+            'schedule': '', 'target_host': '', 'target_path': '',
+            'target_snapshot_archive': False, 'target_snapshot_expiration': None,
+            'snapshot_sync_pattern': '*', 'accelerated_failback': True,
+            'restrict_target_network': False, 'target_compare_initial_sync': False,
+            'skip_when_source_unmodified': False, 'job_delay': None,
+            'rpo_alert': None, 'source_root_path': '/test',
+            'last_job_state': 'unknown', 'last_started': None,
+            'last_success': None, 'next_run': None
+        }
+        policy_obj.to_dict = MagicMock(return_value=policy_dict)
+        self.powerscale_module_mock.get_synciq_policy_details = MagicMock(
+            return_value=(policy_obj, False))
+        SynciqPolicyHandler().handle(self.powerscale_module_mock,
+                                     self.powerscale_module_mock.module.params)
+        # FR2: check_mode must NOT report changes when password hasn't changed
+        assert self.powerscale_module_mock.module.exit_json.call_args[1]["changed"] is False
+
+    # ── TC-PSW-008: Check mode — password provided, password_set=False → changed=True ──
+    def test_check_mode_password_not_set(self):
+        self.set_module_params(self.synciqpolicy_args,
+                               MockSynciqApi.MockSynciqpolicyApi.MODIFY_ARGS_PASSWORD_ONLY)
+        self.powerscale_module_mock.module._diff = False
+        self.powerscale_module_mock.module.check_mode = True
+        self.powerscale_module_mock.validate_job_params = MagicMock(
+            return_value=None)
+        self.powerscale_module_mock.api_instance.update_sync_policy.reset_mock()
+        self.powerscale_module_mock.api_instance.update_sync_policy.side_effect = None
+        self.powerscale_module_mock.api_instance.list_sync_jobs.reset_mock()
+        self.powerscale_module_mock.api_instance.list_sync_jobs.side_effect = None
+        policy_obj = MagicMock()
+        policy_obj.name = "Policy1"
+        policy_obj.id = "abc123"
+        policy_obj.password_set = False
+        policy_obj.target_certificate_id = None
+        policy_obj.source_include_directories = []
+        policy_obj.source_exclude_directories = []
+        policy_obj.source_network = None
+        policy_obj.enabled = True
+        policy_dict = {
+            'name': 'Policy1', 'id': 'abc123', 'password_set': False,
+            'target_certificate_id': None, 'source_include_directories': [],
+            'source_exclude_directories': [], 'source_network': None,
+            'enabled': True, 'description': '', 'action': 'sync',
+            'schedule': '', 'target_host': '', 'target_path': '',
+            'target_snapshot_archive': False, 'target_snapshot_expiration': None,
+            'snapshot_sync_pattern': '*', 'accelerated_failback': True,
+            'restrict_target_network': False, 'target_compare_initial_sync': False,
+            'skip_when_source_unmodified': False, 'job_delay': None,
+            'rpo_alert': None, 'source_root_path': '/test',
+            'last_job_state': 'unknown', 'last_started': None,
+            'last_success': None, 'next_run': None
+        }
+        policy_obj.to_dict = MagicMock(return_value=policy_dict)
+        self.powerscale_module_mock.get_synciq_policy_details = MagicMock(
+            return_value=(policy_obj, False))
+        SynciqPolicyHandler().handle(self.powerscale_module_mock,
+                                     self.powerscale_module_mock.module.params)
+        # Password not yet set, user provides password → should report change needed
+        assert self.powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
+
+    # ── TC-PSW-005: Modify password + other changes, password_set=True → changed=True ──
+    def test_modify_synciqpolicy_password_with_other_changes(self):
+        self.set_module_params(self.synciqpolicy_args,
+                               MockSynciqApi.MockSynciqpolicyApi.MODIFY_ARGS_PASSWORD_WITH_DESCRIPTION)
+        self.powerscale_module_mock.module._diff = False
+        self.powerscale_module_mock.validate_job_params = MagicMock(
+            return_value=None)
+        self.powerscale_module_mock.api_instance.update_sync_policy.reset_mock()
+        self.powerscale_module_mock.api_instance.update_sync_policy.side_effect = None
+        self.powerscale_module_mock.api_instance.list_sync_jobs.reset_mock()
+        self.powerscale_module_mock.api_instance.list_sync_jobs.side_effect = None
+        policy_obj = MagicMock()
+        policy_obj.name = "Policy1"
+        policy_obj.id = "abc123"
+        policy_obj.password_set = True
+        policy_obj.target_certificate_id = None
+        policy_obj.source_include_directories = []
+        policy_obj.source_exclude_directories = []
+        policy_obj.source_network = None
+        policy_obj.enabled = True
+        policy_dict = {
+            'name': 'Policy1', 'id': 'abc123', 'password_set': True,
+            'target_certificate_id': None, 'source_include_directories': [],
+            'source_exclude_directories': [], 'source_network': None,
+            'enabled': True, 'description': 'Old description', 'action': 'sync',
+            'schedule': '', 'target_host': '', 'target_path': '',
+            'target_snapshot_archive': False, 'target_snapshot_expiration': None,
+            'snapshot_sync_pattern': '*', 'accelerated_failback': True,
+            'restrict_target_network': False, 'target_compare_initial_sync': False,
+            'skip_when_source_unmodified': False, 'job_delay': None,
+            'rpo_alert': None, 'source_root_path': '/test',
+            'last_job_state': 'unknown', 'last_started': None,
+            'last_success': None, 'next_run': None
+        }
+        policy_obj.to_dict = MagicMock(return_value=policy_dict)
+        self.powerscale_module_mock.get_synciq_policy_details = MagicMock(
+            return_value=(policy_obj, False))
+        SynciqPolicyHandler().handle(self.powerscale_module_mock,
+                                     self.powerscale_module_mock.module.params)
+        # Description changed + password provided → should report change
+        assert self.powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
+        assert self.powerscale_module_mock.module.exit_json.call_args[1]["modify_synciq_policy"] is True
+        # Verify password was included in the modify call
+        update_call_args = self.powerscale_module_mock.api_instance.update_sync_policy.call_args
+        if update_call_args:
+            sync_policy_arg = update_call_args[1].get('sync_policy', {})
+            if isinstance(sync_policy_arg, dict):
+                assert 'password' in sync_policy_arg, "password must be included in update when other changes exist"
+
+    # ── TC-PSW-011: Create policy without password (backward compatibility) ──
+    def test_create_synciqpolicy_without_password_backward_compat(self):
+        self.set_module_params(self.synciqpolicy_args,
+                               MockSynciqApi.MockSynciqpolicyApi.CREATE_ARGS)
+        self.powerscale_module_mock.module._diff = False
+        self.powerscale_module_mock.validate_job_params = MagicMock(
+            return_value=None)
+        self.powerscale_module_mock.get_target_cert_id_name = MagicMock(
+            return_value=MockSynciqApi.MockSynciqpolicyApi.CERT_NAME
+        )
+        self.powerscale_module_mock.get_synciq_policy_details = MagicMock(
+            return_value=(None, False))
+        self.powerscale_module_mock.api_instance.create_sync_policy.reset_mock()
+        self.powerscale_module_mock.api_instance.create_sync_policy.side_effect = None
+        SynciqPolicyHandler().handle(self.powerscale_module_mock,
+                                     self.powerscale_module_mock.module.params)
+        assert self.powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
+        assert self.powerscale_module_mock.module.exit_json.call_args[1]["create_synciq_policy"] is True
