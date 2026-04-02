@@ -63,7 +63,7 @@ The tasks can be executed by running simple playbooks written in yaml syntax.
 * [Branching strategy](https://github.com/dell/ansible-powerscale/blob/main/docs/BRANCHING.md)
 * [List of adopters](https://github.com/dell/ansible-powerscale/blob/main/docs/ADOPTERS.md)
 * [Maintainers](https://github.com/dell/ansible-powerscale/blob/main/docs/MAINTAINERS.md)
-* [Support](https://github.com/dell/ansible-powerscale/blob/main/docs/SUPPORT.md)
+* [Support](#support)
 * [Security](https://github.com/dell/ansible-powerscale/blob/main/docs/SECURITY.md)
 * [License](#license)
 * [Supported platforms](#supported-platforms)
@@ -158,5 +158,13 @@ This table provides information about the software prerequisites for the Ansible
 ## Installation and execution of Ansible modules for Dell PowerScale
 The installation and execution steps of Ansible modules for Dell PowerScale can be found [here](https://github.com/dell/ansible-powerscale/blob/main/docs/INSTALLATION.md).
 
+
+## Support
+
+The support is available through [GitHub Issues](https://github.com/dell/ansible-powerscale/issues) or at [Dell Community forum](https://www.dell.com/community/Automation/bd-p/Automation).
+
+As Red Hat Ansible Certified Content, this collection is entitled to support through the Ansible Automation Platform (AAP) using the **Create issue** button on the top right corner. If a support case cannot be opened with Red Hat, and the collection was obtained from Ansible Galaxy or GitHub, you can seek community support through the [Ansible Forum](https://forum.ansible.com/).
+
 ## Maintenance
+
 Ansible Modules for Dell Technologies PowerScale deprecation cycle is aligned with [Ansible](https://docs.ansible.com/ansible/latest/dev_guide/module_lifecycle.html).
