@@ -161,10 +161,9 @@ The installation and execution steps of Ansible modules for Dell PowerScale can 
 
 ## Support
 
-As Red Hat Ansible Certified Content, this collection is entitled to support through the Ansible Automation Platform (AAP) using the **Create issue** button on the top right corner. If a support case cannot be opened with Red Hat and the collection has been obtained either from Galaxy or GitHub, there may be community help available on [GitHub Issues](https://github.com/dell/ansible-powerscale/issues) or the [Dell Community forum](https://www.dell.com/community/Automation/bd-p/Automation).
+The support is available through [GitHub Issues](https://github.com/dell/ansible-powerscale/issues) or at [Dell Community forum](https://www.dell.com/community/Automation/bd-p/Automation).
 
-Alternatively, the support is available through [GitHub Issues](https://github.com/dell/ansible-powerscale/issues) or at [Dell Community forum](https://www.dell.com/community/Automation/bd-p/Automation).
-
+As Red Hat Ansible Certified Content, this collection is entitled to support through the Ansible Automation Platform (AAP) using the **Create issue** button on the top right corner. If a support case cannot be opened with Red Hat, and the collection was obtained from Ansible Galaxy or GitHub, you can seek community support through the [Ansible Forum](https://forum.ansible.com/).
 
 ## Maintenance
 
