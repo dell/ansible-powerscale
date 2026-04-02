@@ -1,12 +1,12 @@
-name: 🚀 Feature Request
-description: Suggest an enhancement or new feature
+name: 🚀 Ansible Feature Request
+description: Suggest an enhancement for Dell Ansible Collections
 title: "[FEATURE]: "
-labels: ["type/feature-request", "needs-triage"]
+labels: ["type/feature-request", "needs-triage", "ansible"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thank you for suggesting a feature enhancement!
+        Thank you for suggesting a feature enhancement for Dell Ansible Collections!
         
         ## Community Note
         * Please vote on this issue by adding a 👍 [reaction](https://blog.github.com/2016-03-10-add-reactions-to-pull-requests-issues-and-comments/) to help prioritize this request
@@ -14,39 +14,45 @@ body:
         * If you are interested in working on this issue or have submitted a pull request, please leave a comment
 
   - type: dropdown
-    id: product-category
+    id: ansible-collection
     attributes:
-      label: Product Category
-      description: Select the relevant Dell product category
+      label: Ansible Collection
+      description: Select the Dell Ansible Collection
       options:
-        - Ansible Collection
-        - Terraform Provider
-        - Other
+        - dellemc.openmanage
+        - dellemc.powerscale
+        - dellemc.powermax
+        - dellemc.powerstore
+        - dellemc.powerflex
+        - dellemc.unity
+        - New Collection (specify in description)
+        - Multiple Collections (specify in description)
     validations:
       required: true
 
-  - type: dropdown
-    id: component
+  - type: input
+    id: module-name
     attributes:
-      label: Component/Provider
-      description: Select the specific component or provider
+      label: Module Name (if applicable)
+      description: Enter the specific module name this relates to (e.g., dellemc_idrac_user_info)
+      placeholder: "dellemc_idrac_user_info"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: request-type
+    attributes:
+      label: Request Type
+      description: What type of enhancement are you requesting?
       options:
-        - Ansible Collection:
-          - dellemc-openmanage-ansible-modules
-          - ansible-powerscale
-          - ansible-powermax
-          - ansible-powerstore
-          - ansible-powerflex
-          - ansible-unity
-        - Terraform Provider:
-          - PowerScale
-          - PowerFlex
-          - PowerMax
-          - PowerStore
-          - OME
-          - Redfish
-        - Other:
-          - Other (specify in description)
+        - New Module
+        - New Module Parameter
+        - Module Enhancement
+        - Documentation Improvement
+        - Performance Improvement
+        - Error Handling Improvement
+        - Integration Enhancement
+        - Other (specify in description)
     validations:
       required: true
 
@@ -67,20 +73,58 @@ body:
       required: true
 
   - type: textarea
-    id: alternatives
+    id: ansible-use-case
     attributes:
-      label: Alternative Solutions Considered
-      description: A clear and concise description of any alternative solutions or features you've considered
+      label: Ansible Use Case
+      description: |
+        Describe how this feature would be used in Ansible automation.
+        Include example playbook or task if possible.
+        
+        Example:
+        ```yaml
+        - name: Proposed new functionality
+          dellemc.openmanage.new_module:
+            parameter1: value1
+            parameter2: value2
+        ```
+      render: markdown
     validations:
       required: false
 
   - type: textarea
-    id: use-cases
+    id: alternatives
     attributes:
-      label: Use Cases
-      description: Describe specific use cases where this feature would be valuable
+      label: Alternative Solutions Considered
+      description: A clear and concise description of any alternative solutions or workarounds you've considered
     validations:
       required: false
+
+  - type: textarea
+    id: api-considerations
+    attributes:
+      label: API/Backend Considerations
+      description: |
+        If this feature involves API calls, describe:
+        - Relevant API endpoints (if known)
+        - API version requirements
+        - Authentication considerations
+        - Rate limiting or performance concerns
+    validations:
+      required: false
+
+  - type: dropdown
+    id: contribution-interest
+    attributes:
+      label: Contribution Interest
+      description: Would you be interested in contributing to this feature?
+      options:
+        - Yes, I can implement this feature
+        - Yes, I can help with testing
+        - Yes, I can help with documentation
+        - No, but I can provide guidance
+        - No contribution interest at this time
+    validations:
+      required: true
 
   - type: textarea
     id: additional-context
