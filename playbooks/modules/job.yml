@@ -1,0 +1,136 @@
+---
+- name: Job Module Operations on PowerScale Storage
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: "10.**.**.**"
+    api_user: "user"
+    api_password: "password"  # example
+    verify_ssl: false
+    job_id: 12345
+
+  tasks:
+    - name: Create a TreeDelete job - Check mode
+      dellemc.powerscale.job:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        job_type: "TreeDelete"
+        paths:
+          - "/ifs/data/cleanup"
+        state: "present"
+      check_mode: true
+
+    - name: Create a TreeDelete job
+      dellemc.powerscale.job:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        job_type: "TreeDelete"
+        paths:
+          - "/ifs/data/cleanup"
+        state: "present"
+
+    - name: Create a QuotaScan job with policy and priority
+      dellemc.powerscale.job:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        job_type: "QuotaScan"
+        paths:
+          - "/ifs/data"
+        policy: "LOW"
+        priority: 5
+        state: "present"
+
+    - name: Get job details
+      dellemc.powerscale.job:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        job_id: "{{ job_id }}"
+        state: "present"
+
+    - name: Pause a running job
+      dellemc.powerscale.job:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        job_id: "{{ job_id }}"
+        job_state: "pause"
+        state: "present"
+
+    - name: Pause a running job - Idempotency
+      dellemc.powerscale.job:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        job_id: "{{ job_id }}"
+        job_state: "pause"
+        state: "present"
+
+    - name: Resume a paused job
+      dellemc.powerscale.job:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        job_id: "{{ job_id }}"
+        job_state: "run"
+        state: "present"
+
+    - name: Cancel a job
+      dellemc.powerscale.job:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        job_id: "{{ job_id }}"
+        job_state: "cancel"
+        state: "present"
+
+    - name: Gather job events
+      dellemc.powerscale.job:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        gather_subset:
+          - "events"
+
+    - name: Gather all job types
+      dellemc.powerscale.job:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        gather_subset:
+          - "types"
+        show_all: true
+
+    - name: Gather recent job reports
+      dellemc.powerscale.job:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        gather_subset:
+          - "recent"
+        limit: 10
+        sort_dir: "DESC"
+
+    - name: List running jobs
+      dellemc.powerscale.job:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        gather_subset:
+          - "jobs"
+        filter_state: "running"

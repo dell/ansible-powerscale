@@ -1,0 +1,67 @@
+---
+- name: S3 Zone Settings Module Operations on PowerScale Storage
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: "10.**.**.**"
+    port_no: "8080"
+    api_user: "user"
+    api_password: "password"  # example
+    verify_ssl: false
+    access_zone: "sample-zone"
+
+  tasks:
+    - name: Get S3 zone settings
+      dellemc.powerscale.s3_zone_settings:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        access_zone: "{{ access_zone }}"
+
+    - name: Modify S3 zone settings - Check mode
+      dellemc.powerscale.s3_zone_settings:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        access_zone: "{{ access_zone }}"
+        base_domain: "s3.example.com"
+        root_path: "/ifs/data/s3"
+        object_acl_policy: "replace"
+        bucket_directory_create_mode: 448
+        use_md5_for_etag: true
+        validate_content_md5: true
+      check_mode: true
+
+    - name: Modify S3 zone settings
+      dellemc.powerscale.s3_zone_settings:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        access_zone: "{{ access_zone }}"
+        base_domain: "s3.example.com"
+        root_path: "/ifs/data/s3"
+        object_acl_policy: "replace"
+        bucket_directory_create_mode: 448
+        use_md5_for_etag: true
+        validate_content_md5: true
+
+    - name: Modify S3 zone settings - Idempotency
+      dellemc.powerscale.s3_zone_settings:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        access_zone: "{{ access_zone }}"
+        base_domain: "s3.example.com"
+        root_path: "/ifs/data/s3"
+        object_acl_policy: "replace"
+        bucket_directory_create_mode: 448
+        use_md5_for_etag: true
+        validate_content_md5: true

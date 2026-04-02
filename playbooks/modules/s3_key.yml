@@ -1,0 +1,109 @@
+---
+- name: S3 Key Module Operations on PowerScale Storage
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: "10.**.**.**"
+    api_user: "user"
+    api_password: "password"  # example
+    verify_ssl: false
+    s3_user: "s3user1"
+    access_zone: "System"
+
+  tasks:
+    - name: Generate S3 key for a user - Check mode
+      dellemc.powerscale.s3_key:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        user_name: "{{ s3_user }}"
+        access_zone: "{{ access_zone }}"
+        state: "present"
+      check_mode: true
+
+    - name: Generate S3 key for a user
+      dellemc.powerscale.s3_key:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        user_name: "{{ s3_user }}"
+        access_zone: "{{ access_zone }}"
+        state: "present"
+
+    - name: Generate S3 key for a user - Idempotency
+      dellemc.powerscale.s3_key:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        user_name: "{{ s3_user }}"
+        access_zone: "{{ access_zone }}"
+        state: "present"
+
+    - name: Get S3 key details for a user
+      dellemc.powerscale.s3_key:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        user_name: "{{ s3_user }}"
+        access_zone: "{{ access_zone }}"
+        state: "present"
+
+    - name: Force regenerate S3 key - Check mode
+      dellemc.powerscale.s3_key:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        user_name: "{{ s3_user }}"
+        access_zone: "{{ access_zone }}"
+        state: "present"
+        force: true
+        existing_key_expiry_time: 60
+      check_mode: true
+
+    - name: Force regenerate S3 key
+      dellemc.powerscale.s3_key:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        user_name: "{{ s3_user }}"
+        access_zone: "{{ access_zone }}"
+        state: "present"
+        force: true
+        existing_key_expiry_time: 60
+
+    - name: Delete S3 key - Check mode
+      dellemc.powerscale.s3_key:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        user_name: "{{ s3_user }}"
+        access_zone: "{{ access_zone }}"
+        state: "absent"
+      check_mode: true
+
+    - name: Delete S3 key
+      dellemc.powerscale.s3_key:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        user_name: "{{ s3_user }}"
+        access_zone: "{{ access_zone }}"
+        state: "absent"
+
+    - name: Delete S3 key - Idempotency
+      dellemc.powerscale.s3_key:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        user_name: "{{ s3_user }}"
+        access_zone: "{{ access_zone }}"
+        state: "absent"

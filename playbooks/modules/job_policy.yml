@@ -1,0 +1,139 @@
+---
+- name: Job Policy Module Operations on PowerScale Storage
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: "10.**.**.**"
+    api_user: "user"
+    api_password: "password"  # example
+    verify_ssl: false
+    policy_name: "LOW_IMPACT"
+
+  tasks:
+    - name: Create a job impact policy - Check mode
+      dellemc.powerscale.job_policy:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        policy_name: "{{ policy_name }}"
+        intervals:
+          - begin: "Monday 18:00"
+            end: "Monday 06:00"
+            impact: "Low"
+        state: "present"
+      check_mode: true
+
+    - name: Create a job impact policy
+      dellemc.powerscale.job_policy:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        policy_name: "{{ policy_name }}"
+        intervals:
+          - begin: "Monday 18:00"
+            end: "Monday 06:00"
+            impact: "Low"
+        state: "present"
+
+    - name: Create a job impact policy - Idempotency
+      dellemc.powerscale.job_policy:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        policy_name: "{{ policy_name }}"
+        intervals:
+          - begin: "Monday 18:00"
+            end: "Monday 06:00"
+            impact: "Low"
+        state: "present"
+
+    - name: Get a job impact policy by name
+      dellemc.powerscale.job_policy:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        policy_name: "{{ policy_name }}"
+        state: "present"
+
+    - name: Modify a job impact policy - Check mode
+      dellemc.powerscale.job_policy:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        policy_name: "{{ policy_name }}"
+        description: "Updated low-impact policy for off-hours"
+        intervals:
+          - begin: "Monday 20:00"
+            end: "Tuesday 08:00"
+            impact: "Low"
+        state: "present"
+      check_mode: true
+
+    - name: Modify a job impact policy
+      dellemc.powerscale.job_policy:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        policy_name: "{{ policy_name }}"
+        description: "Updated low-impact policy for off-hours"
+        intervals:
+          - begin: "Monday 20:00"
+            end: "Tuesday 08:00"
+            impact: "Low"
+        state: "present"
+
+    - name: Modify a job impact policy - Idempotency
+      dellemc.powerscale.job_policy:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        policy_name: "{{ policy_name }}"
+        description: "Updated low-impact policy for off-hours"
+        intervals:
+          - begin: "Monday 20:00"
+            end: "Tuesday 08:00"
+            impact: "Low"
+        state: "present"
+
+    - name: List all job impact policies
+      dellemc.powerscale.job_policy:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        state: "present"
+
+    - name: Delete a job impact policy - Check mode
+      dellemc.powerscale.job_policy:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        policy_name: "{{ policy_name }}"
+        state: "absent"
+      check_mode: true
+
+    - name: Delete a job impact policy
+      dellemc.powerscale.job_policy:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        policy_name: "{{ policy_name }}"
+        state: "absent"
+
+    - name: Delete a job impact policy - Idempotency
+      dellemc.powerscale.job_policy:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        policy_name: "{{ policy_name }}"
+        state: "absent"
