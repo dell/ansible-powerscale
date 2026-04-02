@@ -1,0 +1,91 @@
+name: 🚀 Feature Request
+description: Suggest an enhancement or new feature
+title: "[FEATURE]: "
+labels: ["type/feature-request", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a feature enhancement!
+        
+        ## Community Note
+        * Please vote on this issue by adding a 👍 [reaction](https://blog.github.com/2016-03-10-add-reactions-to-pull-requests-issues-and-comments/) to help prioritize this request
+        * Please do not leave "+1" or other comments that do not add relevant new information or questions
+        * If you are interested in working on this issue or have submitted a pull request, please leave a comment
+
+  - type: dropdown
+    id: product-category
+    attributes:
+      label: Product Category
+      description: Select the relevant Dell product category
+      options:
+        - Ansible Collection
+        - Terraform Provider
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component/Provider
+      description: Select the specific component or provider
+      options:
+        - Ansible Collection:
+          - dellemc-openmanage-ansible-modules
+          - ansible-powerscale
+          - ansible-powermax
+          - ansible-powerstore
+          - ansible-powerflex
+          - ansible-unity
+        - Terraform Provider:
+          - PowerScale
+          - PowerFlex
+          - PowerMax
+          - PowerStore
+          - OME
+          - Redfish
+        - Other:
+          - Other (specify in description)
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem-statement
+    attributes:
+      label: Problem Statement
+      description: What problem are you trying to solve with this feature request?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: A clear and concise description of what you want to happen
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Solutions Considered
+      description: A clear and concise description of any alternative solutions or features you've considered
+    validations:
+      required: false
+
+  - type: textarea
+    id: use-cases
+    attributes:
+      label: Use Cases
+      description: Describe specific use cases where this feature would be valuable
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other context, screenshots, or examples about the feature request
+    validations:
+      required: false
