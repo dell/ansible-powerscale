@@ -1,5 +1,20 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Ansible mailing list
-    alias: ansible.team@dell.com
-    about: Please ask and answer usage questions and report security issues here.
+  - name: 📚 Ansible Documentation
+    url: https://github.com/dell/dellemc-openmanage-ansible-modules/wiki
+    about: Check documentation for Ansible usage guides and examples
+  - name: 🤖 Terraform Documentation  
+    url: https://github.com/dell/dell-terraform-providers/wiki
+    about: Check documentation for Terraform provider guides and examples
+  - name: 💬 GitHub Discussions
+    url: https://github.com/orgs/dell/discussions
+    about: Ask and answer usage questions in community discussions
+  - name: 🔒 Security Issues
+    url: mailto:security@dell.com
+    about: Please report security vulnerabilities privately and responsibly
+  - name: 📧 Ansible Support
+    url: mailto:OpenManageAnsible@Dell.com
+    about: Contact Dell OpenManage Ansible team for enterprise support
+  - name: 📧 General Inquiries
+    url: mailto:ansible.team@dell.com
+    about: Contact Dell team for general questions and inquiries
