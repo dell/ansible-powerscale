@@ -9,12 +9,11 @@ IMPORT_PKGS_FAIL = []
 
 
 try:
-    from pkg_resources import parse_version
-    import pkg_resources
+    from packaging.version import parse as parse_version
     HAS_PKG_RESOURCES = True
 except ImportError:
     HAS_PKG_RESOURCES = False
-    IMPORT_PKGS_FAIL.append("pkg_resources")
+    IMPORT_PKGS_FAIL.append("packaging")
 
 try:
     import importlib
@@ -289,10 +288,18 @@ def find_compatible_powerscale_sdk(module_params):
     global HAS_POWERSCALE_SDK
     error_message = ""
 
-    powerscale_packages = [pkg for pkg in pkg_resources.working_set
-                           if pkg.key.startswith("isilon-sdk")]
+    # Try to find isilon-sdk packages using importlib.metadata
+    powerscale_packages = []
+    try:
+        from importlib import metadata
+        for dist in metadata.distributions():
+            if dist.metadata["name"] and dist.metadata["name"].startswith("isilon-sdk"):
+                powerscale_packages.append(dist.metadata["name"])
+    except (ImportError, AttributeError):
+        powerscale_packages = []
+
     if powerscale_packages:
-        powerscale_sdk = powerscale_packages[0].key.replace('-', '_')
+        powerscale_sdk = powerscale_packages[0].replace('-', '_')
         import_powerscale_sdk(powerscale_sdk + ".v9_10_0", 9, 10)
         try:
             HAS_POWERSCALE_SDK = True
@@ -303,7 +310,12 @@ def find_compatible_powerscale_sdk(module_params):
             array_version = major + "_" + minor + "_0"
 
             compatible_powerscale_sdk = "isilon_sdk.v" + array_version
-            import_powerscale_sdk(compatible_powerscale_sdk, int(major), int(minor))
+            # Pin to 9.10 if version is greater than 9.10
+            if int(major) > 9 or (int(major) == 9 and int(minor) > 10):
+                compatible_powerscale_sdk = "isilon_sdk.v9_10_0"
+                import_powerscale_sdk(compatible_powerscale_sdk, 9, 10)
+            else:
+                import_powerscale_sdk(compatible_powerscale_sdk, int(major), int(minor))
 
         except Exception as e:
             HAS_POWERSCALE_SDK = False
@@ -535,7 +547,7 @@ def get_nfs_map_object():
 
 
 def is_email_address_valid(address):
-    if address is not None and re.search(r'^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$', address) is None:
+    if address is not None and re.search(r'^\w+(?:[\.-]\w+)*@\w+(?:[\.-]\w+)*(?:\.\w{2,3})+$', address) is None:
         return True
 
 

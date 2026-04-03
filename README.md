@@ -46,8 +46,10 @@ The Ansible Modules for Dell PowerScale support the following features:
 - Get details, import, modify, setting default and delete server certificates.
 - Get details, create, modify, and delete auth roles.
 - Get details, and modify support assist settings.
+- Get details, create, modify, and delete Alert Channel.
+- Get details, create, modify, and delete Alert Rule.
+- Get details, create, and delete Writable Snapshots.
 - Get details and modify alert settings.
-- Get details of filesystems, smart quotas, alert_settings, alert_rules, alert_categories, event_groups and alert_channels using Info module.
 - Use query parameters and filters for Info module.
 
 The tasks can be executed by running simple playbooks written in yaml syntax.
@@ -61,7 +63,7 @@ The tasks can be executed by running simple playbooks written in yaml syntax.
 * [Branching strategy](https://github.com/dell/ansible-powerscale/blob/main/docs/BRANCHING.md)
 * [List of adopters](https://github.com/dell/ansible-powerscale/blob/main/docs/ADOPTERS.md)
 * [Maintainers](https://github.com/dell/ansible-powerscale/blob/main/docs/MAINTAINERS.md)
-* [Support](https://github.com/dell/ansible-powerscale/blob/main/docs/SUPPORT.md)
+* [Support](#support)
 * [Security](https://github.com/dell/ansible-powerscale/blob/main/docs/SECURITY.md)
 * [License](#license)
 * [Supported platforms](#supported-platforms)
@@ -74,14 +76,14 @@ The tasks can be executed by running simple playbooks written in yaml syntax.
 Ansible collection for PowerScale is released and licensed under the GPL-3.0 license. See [LICENSE](https://github.com/dell/ansible-powerscale/blob/main/LICENSE) for the full terms.
 
 ## Supported platforms
-  * Dell PowerScale OneFS versions 9.5.x, 9.7.x, and 9.8.x
+  * Dell PowerScale OneFS versions 9.10.x, 9.11.x, and 9.13.x
 
 ## Prerequisites
 This table provides information about the software prerequisites for the Ansible Modules for Dell PowerScale.
 
 | **Ansible Modules** | **OneFS Version** | **Python version** | **Python SDK version** | **Ansible**              |
 |---------------------|-----------------------|--------------------|----------------------------|--------------------------|
-| v3.9.0 | 9.7.x <br> 9.10.x <br> 9.11.x | 3.11 <br> 3.12 <br> 3.13 | 0.6.0 | 2.17 <br> 2.18 <br> 2.19 |
+| v3.9.1 | 9.11.x <br> 9.12.x <br> 9.13.x | 3.13 <br> 3.14 | 0.6.0 | 2.18 <br> 2.19 <br> 2.20 |
 
 # List of Ansible modules for Dell PowerScale
 
@@ -147,11 +149,22 @@ This table provides information about the software prerequisites for the Ansible
 * [SNMP Settings Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/snmp_settings.rst)
 * [Server Certificate Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/server_certificate.rst)
 * [Alert Settings](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/alert_settings.rst)
+* [Alert Channel](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/alert_channel.rst)
+* [Alert Rule](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/alert_rule.rst)
+* [Writable Snapshots](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/writable_snapshots.rst)
 * [Support Assist](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/support_assist.rst)
 * [Info Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/info.rst)
 
 ## Installation and execution of Ansible modules for Dell PowerScale
 The installation and execution steps of Ansible modules for Dell PowerScale can be found [here](https://github.com/dell/ansible-powerscale/blob/main/docs/INSTALLATION.md).
 
+
+## Support
+
+The support is available through [GitHub Issues](https://github.com/dell/ansible-powerscale/issues) or at [Dell Community forum](https://www.dell.com/community/Automation/bd-p/Automation).
+
+As Red Hat Ansible Certified Content, this collection is entitled to support through the Ansible Automation Platform (AAP) using the **Create issue** button on the top right corner. If a support case cannot be opened with Red Hat, and the collection was obtained from Ansible Galaxy or GitHub, you can seek community support through the [Ansible Forum](https://forum.ansible.com/).
+
 ## Maintenance
+
 Ansible Modules for Dell Technologies PowerScale deprecation cycle is aligned with [Ansible](https://docs.ansible.com/ansible/latest/dev_guide/module_lifecycle.html).

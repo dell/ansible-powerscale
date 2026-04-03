@@ -467,6 +467,25 @@ class SupportAssist(PowerScaleBase):
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
+    def get_support_assist_terms(self):
+        """
+        Get the current support assist terms acceptance status
+        """
+        msg = "Getting support assist terms details"
+        LOG.info(msg)
+        try:
+            terms_obj = self.support_assist_api.get_supportassist_terms().to_dict()
+            if terms_obj:
+                msg = f"support assist terms details are: {terms_obj}"
+                LOG.info(msg)
+                return terms_obj
+
+        except Exception as e:
+            error_msg = f"Got error {utils.determine_error(e)} while getting" \
+                        f" support assist terms details "
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
+
     def accept_support_assist_terms(self, support_assist_params):
         """
         Accept or reject the support assist terms
@@ -683,12 +702,12 @@ class SupportAssist(PowerScaleBase):
         if settings_params['contact']:
             if settings_params['contact']['primary']:
                 if settings_params['contact']['primary'] != settings_details['contact']['primary']:
-                    self.validate_phone(phone=settings_params['contact']['primary']['phone'])
-                    contact['primary'] = settings_params['contact']['primary']
+                    self.validate_phone(phone=settings_params['contact']['primary'].get('phone'))
+                    contact['primary'] = {k: v for k, v in settings_params['contact']['primary'].items() if v is not None}
             if settings_params['contact']['secondary']:
                 if settings_params['contact']['secondary'] != settings_details['contact']['secondary']:
-                    self.validate_phone(phone=settings_params['contact']['secondary']['phone'])
-                    contact['secondary'] = settings_params['contact']['secondary']
+                    self.validate_phone(phone=settings_params['contact']['secondary'].get('phone'))
+                    contact['secondary'] = {k: v for k, v in settings_params['contact']['secondary'].items() if v is not None}
         if contact != {}:
             modify_dict['contact'] = contact
 
@@ -757,8 +776,11 @@ class SupportAssistExitHandler:
 class SupportAssistAcceptTermsHandler:
     def handle(self, support_assist_obj, support_assist_params, support_assist_details):
         if support_assist_params['accepted_terms'] is not None:
-            support_assist_obj.result["changed"] = support_assist_obj.accept_support_assist_terms(
-                support_assist_params=support_assist_params)
+            current_terms = support_assist_obj.get_support_assist_terms()
+            current_accepted = current_terms.get('terms', {}).get('accepted', None) if current_terms else None
+            if current_accepted != support_assist_params['accepted_terms']:
+                support_assist_obj.result["changed"] = support_assist_obj.accept_support_assist_terms(
+                    support_assist_params=support_assist_params)
 
         SupportAssistExitHandler().handle(support_assist_obj, support_assist_details)
 
