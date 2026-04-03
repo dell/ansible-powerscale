@@ -767,7 +767,7 @@ class SupportAssist(PowerScaleBase):
                     mode=dict(type='str', choices=['direct', 'gateway']),
                     network_pools=dict(type='list', elements='dict', options=dict(
                         pool_name=dict(type='str'),
-                        state=dict(type='str', choices=['present', 'absent'], default='present')))
+                        state=dict(type='str', choices=['present', 'absent'])))
                 )
             ),
             connection_state=dict(type='str', choices=['enabled', 'disabled']),
