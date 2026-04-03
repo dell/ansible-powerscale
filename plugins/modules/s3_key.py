@@ -232,14 +232,14 @@ class S3Key(object):
                     f"Failed to get details of S3 Key"
                     f" for user {user} in access zone {access_zone}"
                 )
-                LOG.error(f"{error_message} with error: {error_msg}")
+                LOG.error("%s with error: %s", error_message, error_msg)
                 self.module.fail_json(msg=error_message)
         except Exception as e:
             error_message = (
                 f"Got error while getting S3 Key details"
                 f" for user {user} in access zone: {access_zone}"
             )
-            LOG.error(f"{error_message}: {utils.determine_error(e)}")
+            LOG.error("%s: %s", error_message, utils.determine_error(e))
             self.module.fail_json(msg=error_message)
 
     def create_key(self):
@@ -277,7 +277,7 @@ class S3Key(object):
                 f"Create S3 Key for user {user} in access zone"
                 f" {access_zone} failed"
             )
-            LOG.error(f"{error_message} with error: {utils.determine_error(e)}")
+            LOG.error("%s with error: %s", error_message, utils.determine_error(e))
             self.module.fail_json(msg=error_message)
 
     def delete_key(self):
@@ -298,7 +298,7 @@ class S3Key(object):
                 f"Delete S3 Key for user {user} in access zone"
                 f" {access_zone} failed"
             )
-            LOG.error(f"{error_message} with error: {utils.determine_error(e)}")
+            LOG.error("%s with error: %s", error_message, utils.determine_error(e))
             self.module.fail_json(msg=error_message)
 
     def get_s3_key_parameters(self):
