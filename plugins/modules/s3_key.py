@@ -314,6 +314,7 @@ class S3Key(object):
                 "type": "int",
                 "required": False,
                 "default": 0,
+                "no_log": False,
             },
             "access_zone": {"type": "str", "default": "System"},
             "state": {
