@@ -51,7 +51,7 @@ class MockS3KeyApi:
         "old_key_expiry": None,
         "old_key_timestamp": None,
         "old_secret_key": None,
-        "secret_key": "1234567890asdfhjkl",
+        "secret_key": "********************",
         "secret_key_timestamp": 1755782540,
     }
 
@@ -60,7 +60,7 @@ class MockS3KeyApi:
         "old_key_expiry": 1755783140,
         "old_key_timestamp": 1755781594,
         "old_secret_key": "****************************",
-        "secret_key": "1234567890asdfhjkl",
+        "secret_key": "********************",
         "secret_key_timestamp": 1755782540,
     }
 
@@ -74,15 +74,15 @@ class MockS3KeyApi:
         if response_type == "get_details_exception":
             return (
                 "Failed to get details of S3 Key for user sample-user"
-                " in access zone sample-zone with error: SDK Error message"
+                " in access zone sample-zone"
             )
         elif response_type == "create_exception":
             return (
                 "Create S3 Key for user sample-user in access zone sample-zone"
-                " failed with error: SDK Error message"
+                " failed"
             )
         elif response_type == "delete_exception":
             return (
                 "Delete S3 Key for user sample-user in access zone sample-zone"
-                " failed with error: SDK Error message"
+                " failed"
             )
