@@ -29,6 +29,11 @@ class Policy:
         self.name = name
         self.id = id
         self.target_certificate_id = target_certificate_id
+        self.source_include_directories = []
+        self.source_exclude_directories = []
+        self.source_network = None
+        self.password_set = False
+        self.enabled = True
 
     def to_dict(self):
         return vars(self)
@@ -166,10 +171,15 @@ class TestSynciqPolicy(PowerScaleUnitBase):
         self.powerscale_module_mock.module._diff = True
         self.powerscale_module_mock.validate_job_params = MagicMock(
             return_value=None)
+        # Create a mock policy object since job creation requires existing policy
+        policy_obj = Policy(name="Policy1", id="test_id", target_certificate_id=None)
         self.powerscale_module_mock.get_synciq_policy_details = MagicMock(
-            return_value=(None, False))
+            return_value=(policy_obj, False))
         self.powerscale_module_mock.get_target_cert_id_name = MagicMock(
             return_value=MockSynciqApi.MockSynciqpolicyApi.CERT_NAME)
+        # Mock update_sync_policy to prevent side_effect exception
+        self.powerscale_module_mock.api_instance.update_sync_policy = MagicMock(
+            return_value=None)
         SynciqPolicyHandler().handle(self.powerscale_module_mock,
                                      self.powerscale_module_mock.module.params)
         assert self.powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
@@ -195,8 +205,10 @@ class TestSynciqPolicy(PowerScaleUnitBase):
                                MockSynciqApi.MockSynciqpolicyApi.CREATE_JOB_ARGS)
         self.powerscale_module_mock.api_instance.create_sync_job = MagicMock(
             side_effect=MockApiException)
+        # Create a mock policy object since job creation requires existing policy
+        policy_obj = Policy(name="Policy1", id="test_id", target_certificate_id=None)
         self.powerscale_module_mock.get_synciq_policy_details = MagicMock(
-            return_value=(None, False))
+            return_value=(policy_obj, False))
         self.powerscale_module_mock.validate_job_params = MagicMock(
             return_value=None)
         self.powerscale_module_mock.get_target_cert_id_name = MagicMock(
@@ -240,6 +252,9 @@ class TestSynciqPolicy(PowerScaleUnitBase):
             return_value=(policy_obj, False))
         self.powerscale_module_mock.api_instance.get_sync_policy = MagicMock(
             return_value=MagicMock(id="test_id"))
+        # Mock update_sync_policy to prevent side_effect exception
+        self.powerscale_module_mock.api_instance.update_sync_policy = MagicMock(
+            return_value=None)
         SynciqPolicyHandler().handle(self.powerscale_module_mock,
                                      self.powerscale_module_mock.module.params)
         assert self.powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
