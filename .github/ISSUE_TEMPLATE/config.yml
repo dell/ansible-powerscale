@@ -1,5 +1,26 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Ansible mailing list
-    alias: ansible.team@dell.com
-    about: Please ask and answer usage questions and report security issues here.
+  - name: 📚 Ansible Documentation
+    url: https://docs.ansible.com/
+    about: Official Ansible documentation and guides
+  - name: 📦 Ansible Galaxy - Dell Collections
+    url: https://galaxy.ansible.com/dell
+    about: Browse and install Dell Ansible collections
+  - name: 📖 Dell Ansible Collections
+    url: https://github.com/dell?tab=repositories&q=ansible&type=&language=&sort=
+    about: Dell Ansible collection repositories and documentation
+  - name: 💬 GitHub Discussions
+    url: https://github.com/orgs/dell/discussions
+    about: Ask and answer Ansible questions in community discussions
+  - name: 🏛️ Dell Community Forum
+    url: https://www.dell.com/community/
+    about: Dell community forums for product-specific discussions
+  - name: 🔒 Security Issues
+    url: mailto:security@dell.com
+    about: Please report security vulnerabilities privately and responsibly
+  - name: 📧 Ansible Support
+    url: mailto:OpenManageAnsible@Dell.com
+    about: Contact Dell OpenManage Ansible team for enterprise support
+  - name: 📧 General Ansible Inquiries
+    url: mailto:ansible.team@dell.com
+    about: Contact Dell team for general Ansible questions and inquiries
