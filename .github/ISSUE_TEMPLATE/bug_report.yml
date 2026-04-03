@@ -21,22 +21,6 @@ body:
     validations:
       required: true
 
-  - type: dropdown
-    id: ansible-collection
-    attributes:
-      label: Ansible Collection
-      description: Select the Dell Ansible Collection
-      options:
-        - dellemc.openmanage
-        - dellemc.powerscale
-        - dellemc.powermax
-        - dellemc.powerstore
-        - dellemc.powerflex
-        - dellemc.unity
-        - Other (specify in description)
-    validations:
-      required: true
-
   - type: input
     id: module-name
     attributes:
