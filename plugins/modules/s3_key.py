@@ -164,7 +164,7 @@ S3_key_details:
         "old_key_expiry": 1755783140,
         "old_key_timestamp": 1755781594,
         "old_secret_key": "****************************",
-        "secret_key": "1234567890asdfhjkl",
+        "secret_key": "********************",
         "secret_key_timestamp": 1755782540
     }
 """
@@ -231,18 +231,16 @@ class S3Key(object):
                 error_message = (
                     f"Failed to get details of S3 Key"
                     f" for user {user} in access zone {access_zone}"
-                    f" with error: {str(error_msg)}"
                 )
-                LOG.error(error_message)
+                LOG.error(f"{error_message} with error: {error_msg}")
                 self.module.fail_json(msg=error_message)
         except Exception as e:
-            error_msg = (
-                f"Got error {utils.determine_error(e)} while getting"
-                f" S3 Key details for user {user} in"
-                f" access zone: {access_zone}"
+            error_message = (
+                f"Got error while getting S3 Key details"
+                f" for user {user} in access zone: {access_zone}"
             )
-            LOG.error(error_msg)
-            self.module.fail_json(msg=error_msg)
+            LOG.error(f"{error_message}: {utils.determine_error(e)}")
+            self.module.fail_json(msg=error_message)
 
     def create_key(self):
         """Create S3 key"""
@@ -258,7 +256,7 @@ class S3Key(object):
             "force": True,
         }
         try:
-            msg = f"Creating S3 Key with parameters: {s3_key_params})"
+            msg = f"Creating S3 Key for user {user} in access zone {access_zone}"
             LOG.info(msg)
             key_details = {}
             if not self.module.check_mode:
@@ -268,19 +266,19 @@ class S3Key(object):
                 if response:
                     key_details = response.keys.to_dict()
                 msg = (
-                    f"Successfully created the S3 key with params: " f"{s3_key_params}"
+                    f"Successfully created the S3 key for user"
+                    f" {user} in access zone {access_zone}"
                 )
                 LOG.info(msg)
             return key_details
 
         except Exception as e:
-            error_msg = (
+            error_message = (
                 f"Create S3 Key for user {user} in access zone"
-                f" {access_zone} failed with error:"
-                f" {utils.determine_error(e)}"
+                f" {access_zone} failed"
             )
-            LOG.error(error_msg)
-            self.module.fail_json(msg=error_msg)
+            LOG.error(f"{error_message} with error: {utils.determine_error(e)}")
+            self.module.fail_json(msg=error_message)
 
     def delete_key(self):
         """Delete the S3 key"""
@@ -296,13 +294,12 @@ class S3Key(object):
             return self.get_key_details()
 
         except Exception as e:
-            error_msg = (
+            error_message = (
                 f"Delete S3 Key for user {user} in access zone"
-                f" {access_zone} failed with "
-                f"error: {utils.determine_error(e)}"
+                f" {access_zone} failed"
             )
-            LOG.error(error_msg)
-            self.module.fail_json(msg=error_msg)
+            LOG.error(f"{error_message} with error: {utils.determine_error(e)}")
+            self.module.fail_json(msg=error_message)
 
     def get_s3_key_parameters(self):
         """Get module specific parameters"""
@@ -317,7 +314,6 @@ class S3Key(object):
                 "type": "int",
                 "required": False,
                 "default": 0,
-                "no_log": False,
             },
             "access_zone": {"type": "str", "default": "System"},
             "state": {

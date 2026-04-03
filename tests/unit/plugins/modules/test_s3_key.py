@@ -421,7 +421,7 @@ class TestS3Key(PowerScaleUnitBase):
             side_effect=Exception("Connection error")
         )
         self.capture_fail_json_call(
-            "Got error", S3KeyHandler
+            "Got error while getting S3 Key details", S3KeyHandler
         )
 
     def test_prereqs_validation_failure(self, powerscale_module_mock):
