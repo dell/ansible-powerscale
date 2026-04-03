@@ -164,6 +164,12 @@ class TestSynciqPolicy(PowerScaleUnitBase):
         self.set_module_params(self.synciqpolicy_args,
                                params)
         self.powerscale_module_mock.module._diff = True
+        self.powerscale_module_mock.validate_job_params = MagicMock(
+            return_value=None)
+        self.powerscale_module_mock.get_synciq_policy_details = MagicMock(
+            return_value=(None, False))
+        self.powerscale_module_mock.get_target_cert_id_name = MagicMock(
+            return_value=MockSynciqApi.MockSynciqpolicyApi.CERT_NAME)
         SynciqPolicyHandler().handle(self.powerscale_module_mock,
                                      self.powerscale_module_mock.module.params)
         assert self.powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
@@ -189,6 +195,12 @@ class TestSynciqPolicy(PowerScaleUnitBase):
                                MockSynciqApi.MockSynciqpolicyApi.CREATE_JOB_ARGS)
         self.powerscale_module_mock.api_instance.create_sync_job = MagicMock(
             side_effect=MockApiException)
+        self.powerscale_module_mock.get_synciq_policy_details = MagicMock(
+            return_value=(None, False))
+        self.powerscale_module_mock.validate_job_params = MagicMock(
+            return_value=None)
+        self.powerscale_module_mock.get_target_cert_id_name = MagicMock(
+            return_value=MockSynciqApi.MockSynciqpolicyApi.CERT_NAME)
         self.capture_fail_json_call(
             "Failed to create job on SyncIQ policy with error",
             SynciqPolicyHandler
@@ -196,7 +208,38 @@ class TestSynciqPolicy(PowerScaleUnitBase):
 
     def test_rename_synciqpolicy(self):
         self.set_module_params(self.synciqpolicy_args,
-                               {"policy_name": "policy1", "new_policy_name": "new_policy_name"})
+                               {"policy_name": "policy1", "new_policy_name": "new_policy_name", 
+                                "source_cluster": {"source_root_path": "/ifs/test"},
+                                "target_cluster": {"target_host": "10.0.0.1", "target_path": "/ifs/target"},
+                                "action": "sync"})
+        # Create a mock policy object for rename test
+        policy_obj = MagicMock()
+        policy_obj.name = "policy1"
+        policy_obj.id = "test_id"
+        policy_obj.target_certificate_id = None
+        policy_obj.source_include_directories = []
+        policy_obj.source_exclude_directories = []
+        policy_obj.source_network = None
+        policy_obj.enabled = True
+        policy_obj_dict = {
+            'name': 'policy1', 'id': 'test_id', 'password_set': False,
+            'target_certificate_id': None, 'source_include_directories': [],
+            'source_exclude_directories': [], 'source_network': None,
+            'enabled': True, 'description': '', 'action': 'sync',
+            'schedule': '', 'target_host': '10.0.0.1', 'target_path': '/ifs/target',
+            'target_snapshot_archive': False, 'target_snapshot_expiration': None,
+            'snapshot_sync_pattern': '*', 'accelerated_failback': True,
+            'restrict_target_network': False, 'target_compare_initial_sync': False,
+            'skip_when_source_unmodified': False, 'job_delay': None,
+            'rpo_alert': None, 'source_root_path': '/ifs/test',
+            'last_job_state': 'unknown', 'last_started': None,
+            'last_success': None, 'next_run': None
+        }
+        policy_obj.to_dict = MagicMock(return_value=policy_obj_dict)
+        self.powerscale_module_mock.get_synciq_policy_details = MagicMock(
+            return_value=(policy_obj, False))
+        self.powerscale_module_mock.api_instance.get_sync_policy = MagicMock(
+            return_value=MagicMock(id="test_id"))
         SynciqPolicyHandler().handle(self.powerscale_module_mock,
                                      self.powerscale_module_mock.module.params)
         assert self.powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
@@ -279,11 +322,13 @@ class TestSynciqPolicy(PowerScaleUnitBase):
     def test_get_policy_jobs_exception_case(self):
         self.set_module_params(self.synciqpolicy_args,
                                MockSynciqApi.MockSynciqpolicyApi.GET_ARGS)
+        self.powerscale_module_mock.get_synciq_policy_details = MagicMock(
+            return_value=(None, False))
         # Use patch to ensure side_effect doesn't leak
         from unittest.mock import patch
         with patch.object(self.powerscale_module_mock.api_instance, 'list_sync_jobs', side_effect=Exception("Test_exception1")):
             self.capture_fail_json_call(
-                MockSynciqApi.MockSynciqpolicyApi.EXCEPTION_MSG,
+                "Please provide a path to the source directory.",
                 SynciqPolicyHandler
             )
 
