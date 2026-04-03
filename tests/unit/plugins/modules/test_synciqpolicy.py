@@ -220,7 +220,7 @@ class TestSynciqPolicy(PowerScaleUnitBase):
 
     def test_rename_synciqpolicy(self):
         self.set_module_params(self.synciqpolicy_args,
-                               {"policy_name": "policy1", "new_policy_name": "new_policy_name", 
+                               {"policy_name": "policy1", "new_policy_name": "new_policy_name",
                                 "source_cluster": {"source_root_path": "/ifs/test"},
                                 "target_cluster": {"target_host": "10.0.0.1", "target_path": "/ifs/target"},
                                 "action": "sync"})
