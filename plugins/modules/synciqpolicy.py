@@ -1042,8 +1042,8 @@ def is_policy_modify(policy_obj, policy_param):
         if not policy_obj_dict.get('password_set', False):
             # Password not yet set on the policy — needs to be set
             modify_policy_dict['password'] = policy_param['password']
-        elif 'password' in policy_param:
-            # Password modification requested — include password in the update
+        elif modify_policy_dict:
+            # Other changes detected — include password in the update
             modify_policy_dict['password'] = policy_param['password']
 
     return modify_policy_dict
