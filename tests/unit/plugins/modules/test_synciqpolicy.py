@@ -300,50 +300,50 @@ class TestSynciqPolicy(PowerScaleUnitBase):
 
     def test_get_modified_source_network(self):
         from ansible_collections.dellemc.powerscale.plugins.modules.synciqpolicy import get_modified_source_network
-        
+
         # Test when policy_obj_source_network exists and matches
         class MockSourceNetwork:
             def __init__(self, pool, subnet):
                 self.pool = pool
                 self.subnet = subnet
-        
+
         obj_network = MockSourceNetwork("pool1", "subnet1")
         param_network = {"pool": "pool1", "subnet": "subnet1"}
         result = get_modified_source_network(obj_network, param_network)
         assert result is None  # No change when networks match
-        
+
         # Test when policy_obj_source_network exists but differs
         param_network_diff = {"pool": "pool2", "subnet": "subnet2"}
         result = get_modified_source_network(obj_network, param_network_diff)
         assert result == param_network_diff  # Return param when networks differ
-        
+
         # Test when policy_obj_source_network is None
         result = get_modified_source_network(None, param_network)
         assert result == param_network  # Return param when obj_network is None
 
     def test_handle_diff_after(self):
         from ansible_collections.dellemc.powerscale.plugins.modules.synciqpolicy import SynciqPolicyModifyHandler
-        
+
         # Create synciq_obj mock
         synciq_obj = MagicMock()
         synciq_obj.module.check_mode = False
         synciq_obj.module._diff = True
         synciq_obj.result = {'diff': {'after': {'some': 'data'}}}
-        
+
         # Mock the methods called by handle_diff_after
         mock_policy_obj = MagicMock()
         synciq_obj.get_synciq_policy_details = MagicMock(return_value=(mock_policy_obj, False))
         synciq_obj.get_synciq_policy_display_attributes = MagicMock(return_value={'policy': 'details'})
-        
+
         # Test the method
         handler = SynciqPolicyModifyHandler()
         handler.handle_diff_after(synciq_obj, "test_policy")
-        
+
         # Verify calls
         synciq_obj.get_synciq_policy_details.assert_called_once_with("test_policy", "")
         synciq_obj.get_synciq_policy_display_attributes.assert_called_once_with(mock_policy_obj)
         assert synciq_obj.result['diff']['after'] == {'policy': 'details'}
-        
+
         # Test when check_mode is True (should not update diff)
         synciq_obj.module.check_mode = True
         synciq_obj.result['diff']['after'] = {'original': 'data'}
@@ -351,7 +351,7 @@ class TestSynciqPolicy(PowerScaleUnitBase):
         # Should not have called the methods again
         assert synciq_obj.get_synciq_policy_details.call_count == 1
         assert synciq_obj.result['diff']['after'] == {'original': 'data'}
-        
+
         # Test when _diff is False (should not update diff)
         synciq_obj.module.check_mode = False
         synciq_obj.module._diff = False
@@ -361,20 +361,20 @@ class TestSynciqPolicy(PowerScaleUnitBase):
 
     def test_rename_policy(self):
         from ansible_collections.dellemc.powerscale.plugins.modules.synciqpolicy import SynciqPolicyCreateHandler
-        
+
         # Create synciq_obj mock
         synciq_obj = MagicMock()
         synciq_obj.module.fail_json = MagicMock(side_effect=SystemExit)
-        
+
         handler = SynciqPolicyCreateHandler()
-        
+
         # Test when new_policy_name is None
         sync_params = {'policy_name': 'old_name', 'new_policy_name': None}
         policy_obj = MagicMock()
         policy_obj.name = 'old_name'
         result = handler.rename_policy(synciq_obj, policy_obj, sync_params, {})
         assert result == 'old_name'
-        
+
         # Test when new_policy_name is empty string
         sync_params = {'policy_name': 'old_name', 'new_policy_name': ''}
         with pytest.raises(SystemExit):
@@ -382,7 +382,7 @@ class TestSynciqPolicy(PowerScaleUnitBase):
         synciq_obj.module.fail_json.assert_called_with(
             msg='new_policy_name cannot be empty. Please provide a valid new_policy_name to rename policy.'
         )
-        
+
         # Test when new_policy_name is different from policy_obj.name
         sync_params = {'policy_name': 'old_name', 'new_policy_name': 'new_name'}
         policy_obj.name = 'old_name'
@@ -390,7 +390,7 @@ class TestSynciqPolicy(PowerScaleUnitBase):
         result = handler.rename_policy(synciq_obj, policy_obj, sync_params, policy_modifiable_dict)
         assert result == 'new_name'
         assert policy_modifiable_dict['name'] == 'new_name'
-        
+
         # Test when new_policy_name is same as policy_obj.name
         sync_params = {'policy_name': 'old_name', 'new_policy_name': 'old_name'}
         policy_obj.name = 'old_name'
