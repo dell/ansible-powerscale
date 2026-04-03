@@ -549,18 +549,49 @@ class SupportAssist(PowerScaleBase):
             existing_pool_list.append(pool_name)
         return existing_pool_list
 
+    def _is_declarative_network_pools(self, network_pools):
+        """Return True when no pool carries a 'state' key (declarative mode)."""
+        return all(pool.get('state') is None for pool in network_pools)
+
+    def _declarative_network_pools(self, settings_params, settings_details, connection_dict):
+        """Declarative convergence: desired list replaces current list."""
+        try:
+            existing_pools = self.prepare_existing_network_pool_list(settings_details=settings_details)
+            desired_pools = list(dict.fromkeys(
+                pool['pool_name'] for pool in settings_params['connection']['network_pools']))
+        except (KeyError, TypeError) as e:
+            error_msg = f"Failed to compute declarative network pools: {e}"
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
+        if not desired_pools:
+            error_msg = "Network pool list cannot be empty."
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
+        if set(existing_pools) != set(desired_pools):
+            # Populate diff output when diff mode is enabled
+            if getattr(self.module, '_diff', False):
+                self.result.setdefault('diff', {})
+                self.result['diff']['before'] = {'network_pools': sorted(existing_pools)}
+                self.result['diff']['after'] = {'network_pools': sorted(desired_pools)}
+            connection_dict['network_pools'] = desired_pools
+        return connection_dict
+
     def add_or_remove_network_pools(self, settings_params, settings_details, connection_dict):
         """
-        Add or remove a network pool parameter to/from the connection
+        Add or remove a network pool parameter to/from the connection.
+        Supports both legacy (per-pool state) and declarative (no state) modes.
         """
+        network_pools = settings_params['connection']['network_pools']
+        if self._is_declarative_network_pools(network_pools):
+            return self._declarative_network_pools(settings_params, settings_details, connection_dict)
         pool_list = self.prepare_existing_network_pool_list(settings_details=settings_details)
         connection = settings_params['connection']
         existing_network_pools = copy.deepcopy(pool_list)
         for pool in range(len(settings_params['connection']['network_pools'])):
-            if connection.get('network_pools')[pool]['state'] == 'present' and \
+            if connection.get('network_pools')[pool].get('state') == 'present' and \
                     connection.get('network_pools')[pool]['pool_name'] not in existing_network_pools:
                 pool_list.append(connection.get('network_pools')[pool]['pool_name'])
-            if connection.get('network_pools')[pool]['state'] == 'absent' and \
+            if connection.get('network_pools')[pool].get('state') == 'absent' and \
                     connection.get('network_pools')[pool]['pool_name'] in existing_network_pools:
                 pool_list.remove(connection.get('network_pools')[pool]['pool_name'])
         if set(existing_network_pools) != set(pool_list):
@@ -638,7 +669,11 @@ class SupportAssist(PowerScaleBase):
                                                                 connection_dict=connection_dict)
             if connection.get('mode') and settings_params['connection']['mode'] != settings_details['connection']['mode']:
                 connection_dict['mode'] = settings_params['connection']['mode']
-            if connection.get('network_pools'):
+            if connection.get('network_pools') is not None:
+                if len(connection['network_pools']) == 0:
+                    error_msg = "Network pool list cannot be empty."
+                    LOG.error(error_msg)
+                    self.module.fail_json(msg=error_msg)
                 connection_dict = self.add_or_remove_network_pools(settings_params=settings_params,
                                                                    settings_details=settings_details,
                                                                    connection_dict=connection_dict)
@@ -732,7 +767,7 @@ class SupportAssist(PowerScaleBase):
                     mode=dict(type='str', choices=['direct', 'gateway']),
                     network_pools=dict(type='list', elements='dict', options=dict(
                         pool_name=dict(type='str'),
-                        state=dict(type='str', choices=['present', 'absent'], default='present')))
+                        state=dict(type='str', choices=['present', 'absent'])))
                 )
             ),
             connection_state=dict(type='str', choices=['enabled', 'disabled']),
