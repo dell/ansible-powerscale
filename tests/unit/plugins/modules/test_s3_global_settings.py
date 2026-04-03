@@ -1,4 +1,4 @@
-# Copyright: (c) 2024, Dell Technologies
+# Copyright: (c) 2026, Dell Technologies
 
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
@@ -9,6 +9,8 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 import pytest
+import copy
+from unittest.mock import patch
 from mock.mock import MagicMock
 # pylint: disable=unused-import
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.initial_mock \
@@ -16,6 +18,7 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shar
 
 from ansible_collections.dellemc.powerscale.plugins.modules.s3_global_settings import S3GlobalSettings
 from ansible_collections.dellemc.powerscale.plugins.modules.s3_global_settings import S3GlobalSettingsHandler
+from ansible_collections.dellemc.powerscale.plugins.modules.s3_global_settings import main as s3_global_main
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_s3_global_settings_api \
     import MockS3GlobalSettingsApi
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_api_exception \
@@ -320,3 +323,44 @@ class TestS3GlobalSettings(PowerScaleUnitBase):
         self.capture_fail_json_call(
             MockS3GlobalSettingsApi.get_s3_global_settings_exception_response('general_update_exception'),
             S3GlobalSettingsHandler)
+
+    # U-SGS-028: PREREQS - Module fails when SDK prerequisites are missing
+    def test_prereqs_validation_failure(self, powerscale_module_mock):
+        """Test module fails when SDK prerequisites are missing."""
+        original_return = utils.validate_module_pre_reqs.return_value
+        utils.validate_module_pre_reqs.return_value = (
+            MockS3GlobalSettingsApi.PREREQS_VALIDATE_FAILURE
+        )
+        mock_module = MagicMock()
+        mock_module.params = copy.deepcopy(
+            MockS3GlobalSettingsApi.S3_GLOBAL_COMMON_ARGS)
+        mock_module.check_mode = False
+        mock_module.fail_json = MagicMock(side_effect=SystemExit)
+        mock_am = MagicMock(return_value=mock_module)
+        try:
+            with patch(
+                'ansible_collections.dellemc.powerscale.plugins.modules'
+                '.s3_global_settings.AnsibleModule', mock_am
+            ):
+                with pytest.raises(SystemExit):
+                    S3GlobalSettings()
+            mock_module.fail_json.assert_called_once()
+            assert "Required SDK packages not found" in str(
+                mock_module.fail_json.call_args)
+        finally:
+            utils.validate_module_pre_reqs.return_value = original_return
+
+    # U-SGS-029: MAIN - Test main() entry point
+    def test_main(self, powerscale_module_mock):
+        """Test main function entry point."""
+        mock_module = MagicMock()
+        mock_module.params = copy.deepcopy(
+            MockS3GlobalSettingsApi.S3_GLOBAL_COMMON_ARGS)
+        mock_module.check_mode = False
+        mock_module._diff = False
+        mock_am = MagicMock(return_value=mock_module)
+        with patch(
+            'ansible_collections.dellemc.powerscale.plugins.modules'
+            '.s3_global_settings.AnsibleModule', mock_am
+        ):
+            s3_global_main()

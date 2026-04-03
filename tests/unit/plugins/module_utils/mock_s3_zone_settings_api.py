@@ -1,4 +1,4 @@
-# Copyright: (c) 2024, Dell Technologies
+# Copyright: (c) 2026, Dell Technologies
 
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
@@ -71,6 +71,11 @@ class MockS3ZoneSettingsApi:
         "bucket_directory_create_mode": 511
     }
 
+    PREREQS_VALIDATE_FAILURE = {
+        "all_packages_found": False,
+        "error_message": "Required SDK packages not found",
+    }
+
     @staticmethod
     def get_s3_zone_settings_exception_response(response_type):
         """Get s3 zone settings exception response."""
@@ -79,6 +84,8 @@ class MockS3ZoneSettingsApi:
             'update_exception': "Modify S3 zone settings failed with error:",
             'domain_length_error': "base_domain must not exceed 255 characters",
             'mode_range_error': "bucket_directory_create_mode is not in the valid range",
+            'root_path_length_error': "root_path must not exceed 4096 characters",
+            'empty_access_zone_error': "Invalid access zone provided",
             'general_get_exception': "getting S3 zone settings",
             'general_update_exception': "Modify S3 zone settings failed",
         }

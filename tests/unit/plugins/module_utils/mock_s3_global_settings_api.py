@@ -1,4 +1,4 @@
-# Copyright: (c) 2024, Dell Technologies
+# Copyright: (c) 2026, Dell Technologies
 
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
@@ -57,6 +57,11 @@ class MockS3GlobalSettingsApi:
 
     MODIFY_S3_GLOBAL_BOUNDARY_HIGH_ARGS = {
         "http_port": 65535
+    }
+
+    PREREQS_VALIDATE_FAILURE = {
+        "all_packages_found": False,
+        "error_message": "Required SDK packages not found",
     }
 
     @staticmethod
