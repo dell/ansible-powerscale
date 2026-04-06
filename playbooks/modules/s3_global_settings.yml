@@ -1,0 +1,56 @@
+---
+- name: S3 Global Settings Module Operations on PowerScale Storage
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: "10.**.**.**"
+    port_no: "8080"
+    api_user: "user"
+    api_password: "password"  # example
+    verify_ssl: false
+
+  tasks:
+    - name: Get S3 global settings
+      dellemc.powerscale.s3_global_settings:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+
+    - name: Update S3 global settings - Check mode
+      dellemc.powerscale.s3_global_settings:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        http_port: 9020
+        https_port: 9021
+        https_only: true
+        service: true
+      check_mode: true
+
+    - name: Update S3 global settings
+      dellemc.powerscale.s3_global_settings:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        http_port: 9020
+        https_port: 9021
+        https_only: true
+        service: true
+
+    - name: Update S3 global settings - Idempotency
+      dellemc.powerscale.s3_global_settings:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        http_port: 9020
+        https_port: 9021
+        https_only: true
+        service: true

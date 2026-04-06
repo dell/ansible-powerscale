@@ -10,6 +10,7 @@ __metaclass__ = type
 
 import copy
 import pytest
+from unittest.mock import patch
 from mock.mock import MagicMock
 
 # pylint: disable=unused-import
@@ -27,6 +28,7 @@ basic.AnsibleModule = MagicMock()
 from ansible_collections.dellemc.powerscale.plugins.modules.s3_key import (
     S3Key,
     S3KeyHandler,
+    main as s3_key_main,
 )
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_s3_key_api import (
     MockS3KeyApi,
@@ -523,3 +525,18 @@ class TestS3Key(PowerScaleUnitBase):
         assert result["S3_key_details"]["old_key_expiry"] is not None
         assert result["S3_key_details"]["old_key_timestamp"] is not None
         assert result["S3_key_details"]["old_secret_key"] is not None
+
+    def test_main(self, powerscale_module_mock):
+        """Test main function entry point."""
+        mock_module = MagicMock()
+        mock_module.params = self._get_args(
+            {"user": "test-user", "access_zone": "System", "state": "present"}
+        )
+        mock_module.check_mode = False
+        mock_module._diff = False
+        mock_am = MagicMock(return_value=mock_module)
+        with patch(
+            'ansible_collections.dellemc.powerscale.plugins.modules'
+            '.s3_key.AnsibleModule', mock_am
+        ):
+            s3_key_main()
