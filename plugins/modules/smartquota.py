@@ -118,16 +118,16 @@ options:
         - Threshold value after which the soft limit exceeded notification
           will be sent and the I(soft_grace) period will start.
         - Write access will be restricted after the grace period expires.
-        - Both I(soft_grace_period) and I(soft_limit_size) are required to
-          modify soft threshold for the quota.
+        - Both I(soft_grace_period) and either I(soft_limit_size) or
+          I(percent_soft) are required to modify soft threshold for the quota.
+        - Mutually exclusive with I(percent_soft).
         type: float
       soft_grace_period:
         description:
         - Grace Period after the soft limit for quota is exceeded.
         - After the grace period, the write access to the quota will be
           restricted.
-        - Both I(soft_grace_period) and I(soft_limit_size) are required
-          to modify soft threshold for the quota.
+        - Required when I(soft_limit_size) or I(percent_soft) is set.
         type: int
       period_unit:
         description:
@@ -156,6 +156,8 @@ options:
         - Must be between 0.01 and 99.99.
         - Mutually exclusive with I(soft_limit_size).
         - Requires I(hard_limit_size) to be set.
+        - Both I(soft_grace_period) and either I(soft_limit_size) or
+          I(percent_soft) are required to modify soft threshold for the quota.
         type: float
       percent_advisory:
         description:
