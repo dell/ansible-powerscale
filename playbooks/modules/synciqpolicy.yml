@@ -12,8 +12,42 @@
     target_host_name: 'vpi1157-c1-1'
     policy_name: "Policy_SP"
     new_policy_name: "Renamed_Policy"
+    target_cluster_password: 'target_password'
 
   tasks:
+    - name: Create SyncIQ policy with target password
+      register: result
+      dellemc.powerscale.synciqpolicy:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        action: 'copy'
+        description: 'Creating a policy with target password'
+        enabled: false
+        policy_name: "{{ policy_name }}"
+        run_job: "when-source-modified"
+        job_delay: 10
+        job_delay_unit: "hours"
+        source_cluster:
+          source_root_path: '/ifs/source'
+        target_cluster:
+          target_host: "{{ target_host_name }}"
+          target_path: "/ifs/target"
+          password: "{{ target_cluster_password }}"
+        state: 'present'
+
+    - name: Modify SyncIQ policy target password
+      dellemc.powerscale.synciqpolicy:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        policy_name: "{{ policy_name }}"
+        target_cluster:
+          password: "{{ target_cluster_password }}"
+        state: 'present'
+
     - name: Create SyncIQ policy
       register: result
       dellemc.powerscale.synciqpolicy:
