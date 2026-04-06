@@ -111,6 +111,57 @@ class MockSynciqpolicyApi:
     CREATE_JOB_ARGS.update(CREATE_ARGS)
     CREATE_JOB_ARGS.update(JOB_ARGS1)
 
+    CREATE_ARGS_WITH_PASSWORD = {
+        "action": "sync",
+        "description": "Creating a policy with password",
+        "enabled": False,
+        "policy_name": "Policy_with_password",
+        "run_job": "when-source-modified",
+        "job_delay": 10,
+        "job_delay_unit": "hours",
+        "source_cluster": {
+            "source_root_path": "/test",
+            "source_exclude_directories": "/test/abc2",
+            "source_include_directories": [
+                "/test/abc1"
+            ],
+            "source_network": {
+                "pool": "pool0",
+                "subnet": "subnet0"
+            }
+        },
+        "target_cluster": {
+            "target_host": "xx.xx.xx.xx",
+            "target_path": "/test/system",
+            "target_certificate_id": "xxxxxxx",
+            "password": "tgt1"
+        },
+        "target_snapshot": {
+            "target_snapshot_archive": True,
+            "target_snapshot_expiration": 90,
+            "exp_time_unit": "days"
+        },
+        "target_compare_initial_sync": True,
+        "state": "present"
+    }
+
+    MODIFY_ARGS_PASSWORD_ONLY = {
+        "policy_name": "Policy1",
+        "target_cluster": {
+            "password": "np1"
+        },
+        "state": "present"
+    }
+
+    MODIFY_ARGS_PASSWORD_WITH_DESCRIPTION = {
+        "policy_name": "Policy1",
+        "description": "Updated description",
+        "target_cluster": {
+            "password": "np1"
+        },
+        "state": "present"
+    }
+
     POLICY_ID = 'xx'
     EXCEPTION_MSG = "SyncIQ policy"
     CERT_NAME = "cert1"

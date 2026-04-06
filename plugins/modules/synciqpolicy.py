@@ -179,6 +179,15 @@ options:
             - Parameters I(target_certficate_name) and I(target_certificate_id) are mutually exclusive
             - This parameter is not supported by isi_sdk_8_1_1
             type: str
+        password:
+            description:
+            - The password for the target cluster.
+            - This is used for authentication when establishing replication to the target.
+            - This field is not readable and will not be returned in the module output.
+            - When a password is already set on the policy, providing the password
+              parameter alone will not report changes, as the current password value
+              cannot be compared.
+            type: str
   target_snapshot:
     description:
     - Details of snapshots to be created at the target.
@@ -405,6 +414,37 @@ EXAMPLES = r'''
     policy_name: "Policy_rename"
     state: "absent"
 
+- name: Create SyncIQ policy with target password
+  dellemc.powerscale.synciqpolicy:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    action: "copy"
+    description: "Policy with target password"
+    enabled: true
+    policy_name: "Policy_with_password"
+    run_job: "on-schedule"
+    schedule: "every 1 days at 12:00 PM"
+    source_cluster:
+      source_root_path: "/ifs/source"
+    target_cluster:
+      target_host: "198.10.xxx.xxx"
+      target_path: "/ifs/target"
+      password: "{{target_cluster_password}}"
+    state: "present"
+
+- name: Modify SyncIQ policy target password
+  dellemc.powerscale.synciqpolicy:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    policy_name: "Policy_with_password"
+    target_cluster:
+      password: "{{new_target_cluster_password}}"
+    state: "present"
+
 - name: Delete SyncIQ policy by policy ID
   dellemc.powerscale.synciqpolicy:
     onefs_host: "{{onefs_host}}"
@@ -450,6 +490,9 @@ synciq_policy_details:
         target_path:
             description: The target directory where source is replicated
             type: str
+        password_set:
+            description: Indicates if a password is set for accessing the target cluster.
+            type: bool
         jobs:
             description: List of jobs running on the policy
             type: list
@@ -782,7 +825,8 @@ class SynciqPolicy(object):
                              'source_include_directories', 'source_exclude_directories',
                              'target_host', 'target_path', 'target_certificate_id', 'target_snapshot_archive',
                              'target_snapshot_expiration', 'snapshot_sync_pattern', 'accelerated_failback',
-                             'restrict_target_network', 'target_compare_initial_sync'
+                             'restrict_target_network', 'target_compare_initial_sync',
+                             'password'
                              ]
 
         for param in input_param:
@@ -967,7 +1011,7 @@ def is_policy_modify(policy_obj, policy_param):
     """
     modify_policy_dict = {}
 
-    exclude_key = ['source_include_directories', 'source_exclude_directories', 'source_network']
+    exclude_key = ['source_include_directories', 'source_exclude_directories', 'source_network', 'password']
 
     if 'source_include_directories' in policy_param and \
             set(policy_obj.source_include_directories) != set(policy_param['source_include_directories']):
@@ -983,11 +1027,24 @@ def is_policy_modify(policy_obj, policy_param):
         if modified_source_network:
             modify_policy_dict['source_network'] = modified_source_network
 
-    policy_obj = policy_obj.to_dict()
+    policy_obj_dict = policy_obj.to_dict()
 
     for param in policy_param:
-        if policy_obj[param] != policy_param[param] and param not in exclude_key:
+        if param in exclude_key:
+            continue
+        if param in policy_obj_dict and policy_obj_dict[param] != policy_param[param]:
             modify_policy_dict[param] = policy_param[param]
+
+    # Special handling for write-only password field.
+    # The API never returns the password value (only password_set boolean),
+    # so standard comparison is impossible.
+    if 'password' in policy_param:
+        if not policy_obj_dict.get('password_set', False):
+            # Password not yet set on the policy — needs to be set
+            modify_policy_dict['password'] = policy_param['password']
+        elif modify_policy_dict:
+            # Other changes detected — include password in the update
+            modify_policy_dict['password'] = policy_param['password']
 
     return modify_policy_dict
 
@@ -1051,7 +1108,8 @@ def get_synciqpolicy_parameters():
         target_cluster=dict(type='dict', options=dict(target_host=dict(type='str', no_log=True),
                                                       target_path=dict(type='str', no_log=True),
                                                       target_certificate_id=dict(type='str'),
-                                                      target_certificate_name=dict(type='str')),
+                                                      target_certificate_name=dict(type='str'),
+                                                      password=dict(type='str', no_log=True)),
                             mutually_exclusive=[['target_certificate_id', 'target_certificate_name']]),
         target_snapshot=dict(type='dict', options=dict(target_snapshot_archive=dict(type='bool'),
                                                        target_snapshot_expiration=dict(type='int'),
