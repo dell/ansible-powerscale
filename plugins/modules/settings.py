@@ -608,6 +608,17 @@ class Settings(PowerScaleBase):
                 ntp_server_list_system.append(ntp_servers['servers'][index]['name'])
         return ntp_server_list_system
 
+    def compute_ntp_servers_to_remove(self, desired_servers):
+        """Compute NTP servers to remove for declarative convergence.
+        Returns servers currently configured but not in the desired list."""
+        try:
+            current_servers = self.getting_configured_ntp_server()
+            return list(set(current_servers) - set(desired_servers))
+        except Exception as e:
+            error_msg = f"Failed to compute NTP servers to remove: {e}"
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
+
     def construct_ntp_server_payload(self, ntp_server_details, ntp_server):
         """
         Constructs NTP server body
@@ -760,6 +771,8 @@ class SettingsExitHandler():
         settings_obj.result["cluster_owner"] = settings_details['cluster_owner_details']
         settings_obj.result["email_settings"] = settings_details['email_settings']
         settings_obj.result["ntp_servers"] = settings_details['ntp_server_details']
+        if hasattr(settings_obj, '_ntp_diff'):
+            settings_obj.result['diff'] = settings_obj._ntp_diff
         settings_obj.module.exit_json(**settings_obj.result)
 
 
@@ -772,6 +785,16 @@ class SettingsDeleteHandler():
                 settings_obj.delete_ntp_server(ntp_server)
                 settings_obj.result['changed'] = True
             settings_details['ntp_server_details'] = settings_obj.get_ntp_servers()
+
+        # Declarative removal: when state=present, remove extra servers not in desired list
+        if settings_params['state'] == 'present' and settings_params['ntp_servers']:
+            servers_to_remove = settings_obj.compute_ntp_servers_to_remove(
+                settings_params['ntp_servers'])
+            for ntp_server in servers_to_remove:
+                settings_obj.delete_ntp_server(ntp_server)
+                settings_obj.result['changed'] = True
+            if servers_to_remove:
+                settings_details['ntp_server_details'] = settings_obj.get_ntp_servers()
 
         SettingsExitHandler().handle(settings_obj, settings_details)
 
@@ -834,6 +857,14 @@ class SettingsHandler():
     def handle(self, settings_obj, settings_params):
         settings_obj.validate_input(settings_params)
         settings_details = self.set_initial_data(settings_obj)
+        # Capture diff data for NTP servers when diff mode is enabled
+        if settings_obj.module._diff and settings_params.get('ntp_servers'):
+            before_servers = settings_obj.getting_configured_ntp_server()
+            desired_servers = list(set(settings_params['ntp_servers']))
+            settings_obj._ntp_diff = {
+                'before': {'ntp_servers': before_servers},
+                'after': {'ntp_servers': desired_servers}
+            }
         SettingsCreateHandler().handle(settings_obj, settings_params, settings_details)
 
 

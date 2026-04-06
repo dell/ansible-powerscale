@@ -117,5 +117,10 @@ class TestAlertSettings(PowerScaleUnitBase):
         powerscale_module_mock.event_api.update_event_settings.assert_called()
         powerscale_module_mock.cluster_api.update_maintenance_settings.assert_called()
 
-    def test_main(self, powerscale_module_mock):
+    def test_main(self, powerscale_module_mock, mocker):
+        self.set_module_params(self.alert_args, {})
+        powerscale_module_mock.major = 9
+        powerscale_module_mock.minor = 7
+        mocker.patch('ansible_collections.dellemc.powerscale.plugins.modules.alert_settings.AlertSettings',
+                     return_value=powerscale_module_mock)
         main()

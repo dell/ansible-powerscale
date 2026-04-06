@@ -65,6 +65,43 @@ class MockSettingsApi:
                                  'mail_sender': 'lab-a2@dell.com',
                                  'mail_subject': 'lab-alerts'}}
 
+    # Declarative NTP mock data — multiple current servers
+    NTP_SERVERS_TWO_CURRENT = {
+        "resume": None,
+        "servers": [
+            {"id": "ntp1.example.com", "key": None, "name": "ntp1.example.com"},
+            {"id": "ntp-old.example.com", "key": None, "name": "ntp-old.example.com"}
+        ],
+        "total": 2
+    }
+
+    NTP_SERVERS_MATCHING = {
+        "resume": None,
+        "servers": [
+            {"id": "ntp1.example.com", "key": None, "name": "ntp1.example.com"},
+            {"id": "ntp2.example.com", "key": None, "name": "ntp2.example.com"}
+        ],
+        "total": 2
+    }
+
+    NTP_SERVERS_THREE = {
+        "resume": None,
+        "servers": [
+            {"id": "ntp1.example.com", "key": None, "name": "ntp1.example.com"},
+            {"id": "ntp2.example.com", "key": None, "name": "ntp2.example.com"},
+            {"id": "ntp3.example.com", "key": None, "name": "ntp3.example.com"}
+        ],
+        "total": 3
+    }
+
+    NTP_SERVERS_SINGLE = {
+        "resume": None,
+        "servers": [
+            {"id": "ntp-old.example.com", "key": None, "name": "ntp-old.example.com"}
+        ],
+        "total": 1
+    }
+
     @staticmethod
     def get_settings_exception_response(response_type):
         if response_type == 'update_email_exception':
