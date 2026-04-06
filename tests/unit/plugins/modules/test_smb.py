@@ -164,7 +164,7 @@ class TestSMB(PowerScaleUnitBase):
             MockSMBApi.get_smb_exception_response('rar_obj_err'),
             SMBHandler)
 
-    def test_permission_dict_exception(self, powerscale_module_mock):
+    def test_permission_dict_exception(self, powerscale_module_mock, mocker):
         self.set_module_params(self.smb_args,
                                {"share_name": MockSMBApi.SMB_NAME, "state": MockSMBApi.STATE_P,
                                 "path": MockSMBApi.PATH1,
@@ -172,8 +172,8 @@ class TestSMB(PowerScaleUnitBase):
                                                  "permission_type": MockSMBApi.DENY_TYPE}]})
         powerscale_module_mock.protocol_api.get_smb_share = MagicMock(
             return_value=None)
-        powerscale_module_mock.isi_sdk.SmbSharePermission = MagicMock(
-            side_effect=MockApiException)
+        mocker.patch('ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.utils.isi_sdk.SmbSharePermission',
+                     side_effect=MockApiException)
         self.capture_fail_json_call(
             MockSMBApi.get_smb_exception_response('permission_dict_err'),
             SMBHandler)
