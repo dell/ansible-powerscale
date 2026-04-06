@@ -346,6 +346,8 @@ EXAMPLES = r'''
       cap_unit: "TB"
       percent_soft: 80.0
       percent_advisory: 50.0
+      soft_grace_period: 14
+      period_unit: "days"
       include_snapshots: false
     state: "present"
 
