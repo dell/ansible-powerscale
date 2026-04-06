@@ -18,6 +18,7 @@ Minor Changes
 
 - Added support for PowerScale 9.13.
 - Added support for target_compare_initial_sync parameter in SyncIQ policy module to enable data comparison during initial sync.
+- Added new cluster_services module to manage NFS, SMB, S3, HDFS, and Antivirus services on PowerScale arrays.
 
 Bug Fixes
 ---------
