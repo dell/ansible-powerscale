@@ -136,7 +136,7 @@ class IpmiApi(object):
         try:
             self._request(
                 f"{IPMI_BASE_URI}/settings", method='PUT',
-                data={'settings': settings_params}
+                data=settings_params
             )
         except Exception as e:
             error_msg = (
@@ -149,9 +149,17 @@ class IpmiApi(object):
         """Get IPMI network configuration."""
         try:
             result = self._request(f"{IPMI_BASE_URI}/network")
-            return result.get('network', {})
+            network = result.get('network', {})
+            # Map API field 'ranges' to module field 'ip_ranges'
+            if 'ranges' in network:
+                network['ip_ranges'] = network.pop('ranges')
+            return network
         except Exception as e:
-            if 'not configured' in str(e).lower():
+            error_str = str(e).lower()
+            if 'not configured' in error_str or \
+               'not set to' in error_str or \
+               'allocation type' in error_str or \
+               'disabled' in error_str:
                 return {}
             error_msg = f"Failed to get IPMI network config: {str(e)}"
             LOG.error(error_msg)
@@ -160,9 +168,13 @@ class IpmiApi(object):
     def update_ipmi_network(self, network_params):
         """Update IPMI network configuration."""
         try:
+            # Map module field 'ip_ranges' to API field 'ranges'
+            api_params = dict(network_params)
+            if 'ip_ranges' in api_params:
+                api_params['ranges'] = api_params.pop('ip_ranges')
             self._request(
                 f"{IPMI_BASE_URI}/network", method='PUT',
-                data={'network': network_params}
+                data=api_params
             )
         except Exception as e:
             error_msg = (
@@ -177,7 +189,9 @@ class IpmiApi(object):
             result = self._request(f"{IPMI_BASE_URI}/user")
             return result.get('user', {})
         except Exception as e:
-            if 'not configured' in str(e).lower():
+            error_str = str(e).lower()
+            if 'not configured' in error_str or \
+               'disabled' in error_str:
                 return {}
             error_msg = f"Failed to get IPMI user config: {str(e)}"
             LOG.error(error_msg)
@@ -188,7 +202,7 @@ class IpmiApi(object):
         try:
             self._request(
                 f"{IPMI_BASE_URI}/user", method='PUT',
-                data={'user': user_params}
+                data=user_params
             )
         except Exception as e:
             error_msg = (
@@ -203,7 +217,9 @@ class IpmiApi(object):
             result = self._request(f"{IPMI_BASE_URI}/features")
             return result.get('features', [])
         except Exception as e:
-            if 'not configured' in str(e).lower():
+            error_str = str(e).lower()
+            if 'not configured' in error_str or \
+               'disabled' in error_str:
                 return []
             error_msg = f"Failed to get IPMI features: {str(e)}"
             LOG.error(error_msg)
@@ -230,7 +246,10 @@ class IpmiApi(object):
             result = self._request("/platform/10/ipmi/nodes")
             return result.get('nodes', [])
         except Exception as e:
-            if 'not configured' in str(e).lower():
+            error_str = str(e).lower()
+            if 'not configured' in error_str or \
+               'not found' in error_str or \
+               '404' in error_str:
                 return []
             error_msg = f"Failed to get IPMI nodes: {str(e)}"
             LOG.error(error_msg)
