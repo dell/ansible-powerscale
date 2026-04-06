@@ -81,7 +81,6 @@ options:
             description: State of the network pool.
             type: str
             choices: ['absent', 'present']
-            default: 'present'
   connection_state:
     description: Set connectivity state.
     type: str
