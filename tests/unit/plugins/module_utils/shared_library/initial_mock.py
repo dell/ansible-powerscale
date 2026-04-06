@@ -5,14 +5,14 @@
 from __future__ import (absolute_import, division, print_function)
 
 __metaclass__ = type
-from mock.mock import MagicMock
+from mock.mock import MagicMock, PropertyMock
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
 
 utils.get_logger = MagicMock()
 utils.isi_sdk = MagicMock()
-utils.isi_sdk.major = 9
-utils.isi_sdk.minor = 7
+type(utils.isi_sdk).major = PropertyMock(return_value=9)
+type(utils.isi_sdk).minor = PropertyMock(return_value=7)
 utils.ISI_SDK_VERSION_9 = MagicMock(return_value=True)
 PREREQS_VALIDATE = {
     "all_packages_found": True

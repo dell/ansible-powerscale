@@ -36,7 +36,42 @@ NFS_COMMON_ARGS = {
     "sub_directories_mountable": None,
     "security_flavors": None,
     "ignore_unresolvable_hosts": None,
-    "state": None
+    "state": None,
+    # --- Advanced Performance Fields ---
+    "read_transfer_size": None,
+    "read_transfer_max_size": None,
+    "read_transfer_multiple": None,
+    "write_transfer_size": None,
+    "write_transfer_max_size": None,
+    "write_transfer_multiple": None,
+    "directory_transfer_size": None,
+    "block_size": None,
+    "max_file_size": None,
+    "file_name_max_size": None,
+    # --- Advanced Sync/Async Fields ---
+    "commit_asynchronous": None,
+    "setattr_asynchronous": None,
+    "readdirplus": None,
+    "write_filesync_action": None,
+    "write_filesync_reply": None,
+    "write_datasync_action": None,
+    "write_datasync_reply": None,
+    "write_unstable_action": None,
+    "write_unstable_reply": None,
+    # --- Advanced Identity/Mapping Fields ---
+    "map_all": None,
+    "map_failure": None,
+    "map_full": None,
+    "map_lookup_uid": None,
+    "map_retry": None,
+    # --- Advanced Other Fields ---
+    "snapshot": None,
+    "encoding": None,
+    "symlinks": None,
+    "no_truncate": None,
+    "return_32bit_file_ids": None,
+    "can_set_time": None,
+    "time_delta": None,
 }
 
 NFS_1 = {"exports": [{
@@ -261,3 +296,196 @@ def get_failed_msgs(response_type):
         "multiple_nfs_err": "Multiple NFS Exports found",
     }
     return err_msg_dict.get(response_type)
+
+
+# ---------------------------------------------------------------------------
+# Advanced NFS export mock data
+# ---------------------------------------------------------------------------
+
+NFS_ADVANCED_EXPORT = {"exports": [{
+    # Existing fields
+    "all_dirs": False,
+    "clients": [SAMPLE_IP1],
+    "description": "advanced export",
+    "id": NFS_ID_1,
+    "paths": [PATH_1],
+    "read_only": False,
+    "read_only_clients": [],
+    "read_write_clients": [],
+    "root_clients": [],
+    "security_flavors": ["unix"],
+    "zone": SYS_ZONE,
+    "map_root": {
+        "enabled": True,
+        "primary_group": {"id": "GROUP:group1", "name": None, "type": None},
+        "secondary_groups": [],
+        "user": {"id": "USER:user", "name": None, "type": None}
+    },
+    "map_non_root": {
+        "enabled": False,
+        "primary_group": {"id": None, "name": None, "type": None},
+        "secondary_groups": [],
+        "user": {"id": "USER:nobody", "name": None, "type": None}
+    },
+    # Advanced Performance Fields (API defaults)
+    "read_transfer_size": 524288,
+    "read_transfer_max_size": 1048576,
+    "read_transfer_multiple": 512,
+    "write_transfer_size": 524288,
+    "write_transfer_max_size": 1048576,
+    "write_transfer_multiple": 512,
+    "directory_transfer_size": 131072,
+    "block_size": 8192,
+    "max_file_size": 9223372036854775807,
+    "name_max_size": 255,
+    # Advanced Sync/Async Fields (API defaults)
+    "commit_asynchronous": False,
+    "setattr_asynchronous": False,
+    "readdirplus": True,
+    "write_filesync_action": "DATASYNC",
+    "write_filesync_reply": "FILESYNC",
+    "write_datasync_action": "DATASYNC",
+    "write_datasync_reply": "DATASYNC",
+    "write_unstable_action": "DATASYNC",
+    "write_unstable_reply": "UNSTABLE",
+    # Advanced Identity/Mapping Fields (API defaults)
+    "map_all": {
+        "enabled": False,
+        "primary_group": {"id": None, "name": None, "type": None},
+        "secondary_groups": [],
+        "user": {"id": "USER:nobody", "name": None, "type": None}
+    },
+    "map_failure": {
+        "enabled": False,
+        "primary_group": {"id": None, "name": None, "type": None},
+        "secondary_groups": [],
+        "user": {"id": "USER:nobody", "name": None, "type": None}
+    },
+    "map_full": True,
+    "map_lookup_uid": False,
+    "map_retry": True,
+    # Advanced Other Fields (API defaults)
+    "snapshot": None,
+    "encoding": "DEFAULT",
+    "symlinks": True,
+    "no_truncate": False,
+    "return_32bit_file_ids": False,
+    "can_set_time": True,
+    "time_delta": 1e-09,
+    "case_insensitive": False,
+    "case_preserving": True,
+}]}
+
+
+NFS_ADVANCED_MODIFIED = {"exports": [{
+    # Same structure but with modified values
+    "all_dirs": False,
+    "clients": [SAMPLE_IP1],
+    "description": "advanced export",
+    "id": NFS_ID_1,
+    "paths": [PATH_1],
+    "read_only": False,
+    "read_only_clients": [],
+    "read_write_clients": [],
+    "root_clients": [],
+    "security_flavors": ["unix"],
+    "zone": SYS_ZONE,
+    "map_root": {
+        "enabled": True,
+        "primary_group": {"id": "GROUP:group1", "name": None, "type": None},
+        "secondary_groups": [],
+        "user": {"id": "USER:user", "name": None, "type": None}
+    },
+    "map_non_root": {
+        "enabled": False,
+        "primary_group": {"id": None, "name": None, "type": None},
+        "secondary_groups": [],
+        "user": {"id": "USER:nobody", "name": None, "type": None}
+    },
+    # Modified performance fields
+    "read_transfer_size": 1048576,
+    "read_transfer_max_size": 2097152,
+    "read_transfer_multiple": 1024,
+    "write_transfer_size": 1048576,
+    "write_transfer_max_size": 2097152,
+    "write_transfer_multiple": 1024,
+    "directory_transfer_size": 262144,
+    "block_size": 16384,
+    "max_file_size": 9223372036854775807,
+    "name_max_size": 255,
+    # Modified sync/async fields
+    "commit_asynchronous": True,
+    "setattr_asynchronous": True,
+    "readdirplus": True,
+    "write_filesync_action": "FILESYNC",
+    "write_filesync_reply": "FILESYNC",
+    "write_datasync_action": "FILESYNC",
+    "write_datasync_reply": "FILESYNC",
+    "write_unstable_action": "FILESYNC",
+    "write_unstable_reply": "FILESYNC",
+    # Identity fields (unchanged)
+    "map_all": {
+        "enabled": False,
+        "primary_group": {"id": None, "name": None, "type": None},
+        "secondary_groups": [],
+        "user": {"id": "USER:nobody", "name": None, "type": None}
+    },
+    "map_failure": {
+        "enabled": False,
+        "primary_group": {"id": None, "name": None, "type": None},
+        "secondary_groups": [],
+        "user": {"id": "USER:nobody", "name": None, "type": None}
+    },
+    "map_full": True,
+    "map_lookup_uid": False,
+    "map_retry": True,
+    # Modified other fields
+    "snapshot": "weekly_snap",
+    "encoding": "UTF-8",
+    "symlinks": True,
+    "no_truncate": False,
+    "return_32bit_file_ids": False,
+    "can_set_time": False,
+    "time_delta": 0.001,
+    "case_insensitive": False,
+    "case_preserving": True,
+}]}
+
+
+# Convenience field-name lists for parametrized tests
+ADVANCED_PERFORMANCE_FIELDS = [
+    "read_transfer_size", "read_transfer_max_size", "read_transfer_multiple",
+    "write_transfer_size", "write_transfer_max_size", "write_transfer_multiple",
+    "directory_transfer_size", "block_size", "max_file_size", "file_name_max_size"
+]
+
+ADVANCED_SYNC_FIELDS = [
+    "commit_asynchronous", "setattr_asynchronous", "readdirplus",
+    "write_filesync_action", "write_filesync_reply",
+    "write_datasync_action", "write_datasync_reply",
+    "write_unstable_action", "write_unstable_reply"
+]
+
+ADVANCED_BOOLEAN_FIELDS = [
+    "commit_asynchronous", "setattr_asynchronous", "readdirplus",
+    "map_lookup_uid", "symlinks", "no_truncate",
+    "return_32bit_file_ids", "can_set_time"
+]
+
+ADVANCED_SYNC_CHOICE_FIELDS = [
+    "write_filesync_action", "write_filesync_reply",
+    "write_datasync_action", "write_datasync_reply",
+    "write_unstable_action", "write_unstable_reply"
+]
+
+
+def modify_nfs_advanced_failed_msg():
+    return 'Modify NFS export for path: /ifs/test_sample_nfs and access zone: system failed with error'
+
+
+def create_nfs_advanced_api_failed_msg():
+    return 'Create NFS export for path: /ifs/test_sample_nfs and access zone: system failed'
+
+
+def get_nfs_advanced_failed_msg():
+    return 'Got error'
