@@ -856,6 +856,11 @@ class SmartQuota(object):
         if quota:
             self._validate_percent_field(quota, 'percent_soft')
             self._validate_percent_field(quota, 'percent_advisory')
+            has_soft = quota.get('soft_limit_size') or quota.get('percent_soft')
+            if has_soft and not quota.get('soft_grace_period'):
+                self.module.fail_json(
+                    msg="soft_grace_period is required when "
+                        "soft_limit_size or percent_soft is set")
 
     def validate_zone_path_params(self):
         """Validate path and access zone parameters"""
@@ -1085,8 +1090,7 @@ def get_smartquota_parameters():
                                 cap_unit=dict(type='str', choices=['GB', 'TB']),
                                 percent_soft=dict(type='float'),
                                 percent_advisory=dict(type='float')),
-                   required_together=[['soft_grace_period', 'period_unit'],
-                                      ['soft_grace_period', 'soft_limit_size']],
+                   required_together=[['soft_grace_period', 'period_unit']],
                    mutually_exclusive=[['soft_limit_size', 'percent_soft'],
                                        ['advisory_limit_size', 'percent_advisory']]),
         state=dict(required=True, type='str', choices=['present', 'absent'])

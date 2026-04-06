@@ -414,6 +414,8 @@ class TestSmartQuota(PowerScaleUnitBase):
                 "cap_unit": "GB",
                 "percent_soft": 80.0,
                 "percent_advisory": 50.0,
+                "soft_grace_period": 14,
+                "period_unit": "days",
                 "include_snapshots": False,
             },
             "state": "present"})
@@ -508,6 +510,8 @@ class TestSmartQuota(PowerScaleUnitBase):
                 "cap_unit": "GB",
                 "percent_soft": 85.0,
                 "percent_advisory": 55.0,
+                "soft_grace_period": 14,
+                "period_unit": "days",
                 "include_snapshots": False,
             },
             "state": "present"})
@@ -578,6 +582,8 @@ class TestSmartQuota(PowerScaleUnitBase):
                 "cap_unit": "GB",
                 "percent_soft": 80.0,
                 "percent_advisory": 50.0,
+                "soft_grace_period": 1,
+                "period_unit": "days",
                 "include_snapshots": False,
             },
             "state": "present"})
@@ -604,6 +610,8 @@ class TestSmartQuota(PowerScaleUnitBase):
                 "cap_unit": "GB",
                 "percent_soft": 80.0,
                 "percent_advisory": 50.0,
+                "soft_grace_period": 14,
+                "period_unit": "days",
                 "include_snapshots": False,
             },
             "state": "present"})
@@ -633,6 +641,8 @@ class TestSmartQuota(PowerScaleUnitBase):
                 "cap_unit": "GB",
                 "percent_soft": 80.0,
                 "percent_advisory": 50.0,
+                "soft_grace_period": 14,
+                "period_unit": "days",
                 "include_snapshots": False,
             },
             "state": "present"})
