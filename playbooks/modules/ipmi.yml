@@ -1,0 +1,152 @@
+# Copyright: (c) 2026, Dell Technologies
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: IPMI Configuration Operations on PowerScale Storage
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: "**.**.**.**"
+    port_no: "8080"
+    api_user: "user"
+    api_password: "password"
+    verify_ssl: false
+
+  tasks:
+    - name: Get current IPMI configuration
+      dellemc.powerscale.ipmi:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+      register: ipmi_config
+
+    - name: Display IPMI configuration
+      ansible.builtin.debug:
+        var: ipmi_config.ipmi_details
+
+    - name: Enable IPMI with DHCP allocation - Check Mode
+      dellemc.powerscale.ipmi:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        settings:
+          enabled: true
+          allocation_type: "dhcp"
+        state: "present"
+      check_mode: true
+
+    - name: Enable IPMI with static allocation
+      dellemc.powerscale.ipmi:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        settings:
+          enabled: true
+          allocation_type: "static"
+        state: "present"
+
+    - name: Configure IPMI network with gateway and IP ranges
+      dellemc.powerscale.ipmi:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        network:
+          gateway: "10.0.0.1"
+          prefixlen: 24
+          ip_ranges:
+            - low: "10.0.0.100"
+              high: "10.0.0.200"
+        state: "present"
+
+    - name: Configure IPMI BMC user
+      dellemc.powerscale.ipmi:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        user:
+          username: "admin"
+          password: "{{ vault_ipmi_password | default('SecureP@ss123') }}"
+        state: "present"
+
+    - name: Enable power control feature
+      dellemc.powerscale.ipmi:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        features:
+          - id: "power_control"
+            enabled: true
+        state: "present"
+
+    - name: Enable Serial over LAN feature
+      dellemc.powerscale.ipmi:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        features:
+          - id: "sol"
+            enabled: true
+        state: "present"
+
+    - name: Configure all IPMI domains at once
+      dellemc.powerscale.ipmi:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        settings:
+          enabled: true
+          allocation_type: "static"
+        network:
+          gateway: "10.0.0.1"
+          prefixlen: 24
+          ip_ranges:
+            - low: "10.0.0.100"
+              high: "10.0.0.200"
+        user:
+          username: "admin"
+          password: "{{ vault_ipmi_password | default('SecureP@ss123') }}"
+        features:
+          - id: "power_control"
+            enabled: true
+          - id: "sol"
+            enabled: true
+        state: "present"
+
+    - name: Configure IPMI with diff mode to see changes
+      dellemc.powerscale.ipmi:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        settings:
+          enabled: true
+          allocation_type: "dhcp"
+        state: "present"
+      diff: true
+
+    - name: Disable IPMI
+      dellemc.powerscale.ipmi:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        settings:
+          enabled: false
+        state: "present"

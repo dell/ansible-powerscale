@@ -50,6 +50,7 @@ The Ansible Modules for Dell PowerScale support the following features:
 - Get details, create, modify, and delete Alert Rule.
 - Get details, create, and delete Writable Snapshots.
 - Get details and modify alert settings.
+- Get details and modify IPMI configuration settings.
 - Use query parameters and filters for Info module.
 
 The tasks can be executed by running simple playbooks written in yaml syntax.
@@ -153,6 +154,7 @@ This table provides information about the software prerequisites for the Ansible
 * [Alert Rule](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/alert_rule.rst)
 * [Writable Snapshots](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/writable_snapshots.rst)
 * [Support Assist](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/support_assist.rst)
+* [IPMI Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/ipmi.rst)
 * [Info Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/info.rst)
 
 ## Installation and execution of Ansible modules for Dell PowerScale
