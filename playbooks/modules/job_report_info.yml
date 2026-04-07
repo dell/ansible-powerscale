@@ -1,0 +1,64 @@
+---
+- name: Sample playbook for retrieving Job Report information on Dell EMC PowerScale.
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.**'
+    verify_ssl: false
+    api_user: 'user'
+    api_password: 'password'
+    job_id: 42
+    job_type: "SmartPools"
+    begin_time: 1700000000
+    end_time: 1700002000
+
+  tasks:
+    - name: Get all job reports
+      dellemc.powerscale.job_report_info:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+
+    - name: Get reports filtered by job type
+      dellemc.powerscale.job_report_info:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        job_type: "{{ job_type }}"
+
+    - name: Get reports filtered by job ID
+      dellemc.powerscale.job_report_info:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        job_id: "{{ job_id }}"
+
+    - name: Get reports with time range and verbose output
+      dellemc.powerscale.job_report_info:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        begin: "{{ begin_time }}"
+        end: "{{ end_time }}"
+        verbose: true
+
+    - name: Get reports for last phase only with limit
+      dellemc.powerscale.job_report_info:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        last_phase_only: true
+        limit: 10
+
+    - name: Get reports filtered by event key
+      dellemc.powerscale.job_report_info:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        event_key: "phase_complete"

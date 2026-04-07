@@ -55,6 +55,7 @@ class PowerScaleBase:
         self._support_assist_api = None
         self._event_api = None
         self._snapshot_api = None
+        self._job_api = None
 
     @property
     def protocol_api(self):
@@ -155,3 +156,13 @@ class PowerScaleBase:
         if self._snapshot_api is None:
             self._snapshot_api = self.isi_sdk.SnapshotApi(self.api_client)
         return self._snapshot_api
+
+    @property
+    def job_api(self):
+        """Returns the job API object.
+        :return: The job API object.
+        :rtype: isi_sdk.JobApi
+        """
+        if self._job_api is None:
+            self._job_api = self.isi_sdk.JobApi(self.api_client)
+        return self._job_api
