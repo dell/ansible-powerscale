@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: (c) 2019-2024, Dell Technologies
+# Copyright: (c) 2019-2026, Dell Technologies
 
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
@@ -38,6 +38,7 @@ description:
 - Retrieve a list of server certificate details.
 - Get support assist settings details of the PowerScale cluster.
 - Get list of alert rules, alert channels, alert categories, event groups and alert settings.
+- Get IPMI configuration details of the PowerScale cluster.
 
 extends_documentation_fragment:
   - dellemc.powerscale.powerscale
@@ -153,6 +154,7 @@ options:
     - Alert categories - C(alert_categories).
     - Event groups - C(event_group).
     - Writable snapshots - C(writable_snapshots).
+    - IPMI configuration - C(ipmi_config).
     required: true
     choices: [attributes, access_zones, nodes, providers, users, groups,
               smb_shares, nfs_exports, nfs_aliases, clients, synciq_reports, synciq_target_reports,
@@ -162,7 +164,7 @@ options:
               nfs_zone_settings, nfs_default_settings, nfs_global_settings, synciq_global_settings, s3_buckets,
               smb_global_settings, ntp_servers, email_settings, cluster_identity, cluster_owner, snmp_settings,
               server_certificate, roles, support_assist_settings, smartquota, filesystem, alert_settings,
-              alert_rules, alert_channels, alert_categories, event_group, writable_snapshots]
+              alert_rules, alert_channels, alert_categories, event_group, writable_snapshots, ipmi_config]
     type: list
     elements: str
   include_all_access_zones:
@@ -3240,6 +3242,8 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.sh
     import Quota
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.snapshot \
     import Snapshot
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.ipmi \
+    import IpmiApi
 
 
 LOG = utils.get_logger('info')
@@ -4123,7 +4127,8 @@ class Info(object):
             'event_group': lambda: Events(self.event_api, self.module).get_event_groups(),
             'smartquota': self.get_smartquota_list,
             'filesystem': lambda: self.get_filesystem_list(path, query_params),
-            'writable_snapshots': self.get_writable_snapshots
+            'writable_snapshots': self.get_writable_snapshots,
+            'ipmi_config': lambda: IpmiApi(self.module).get_all_ipmi_config(),
         }
 
         key_mapping = {
@@ -4167,7 +4172,8 @@ class Info(object):
             'event_group': 'event_groups',
             'smartquota': 'smart_quota',
             'filesystem': 'file_system',
-            'writable_snapshots': 'writable_snapshots'
+            'writable_snapshots': 'writable_snapshots',
+            'ipmi_config': 'IpmiConfig',
         }
 
         # Map the subset to the appropriate Key
@@ -4179,7 +4185,7 @@ class Info(object):
                        'nfs_default_settings', 'nfs_global_settings', 'synciq_global_settings', 's3_buckets',
                        'smb_global_settings', 'ntp_servers', 'email_settings', 'cluster_identity', 'cluster_owner',
                        'snmp_settings', 'server_certificate', 'event_group', 'smartquota', 'filesystem',
-                       'writable_snapshots', 'users']
+                       'writable_snapshots', 'users', 'ipmi_config']
         for key in subset:
             if key not in subset_list:
                 result[key] = subset_mapping[key]()
@@ -4231,7 +4237,8 @@ def get_info_parameters():
                      'snmp_settings', 'server_certificate', 'roles',
                      'support_assist_settings', 'alert_settings', 'alert_rules',
                      'alert_channels', 'alert_categories', 'event_group',
-                     'filesystem', 'smartquota', 'writable_snapshots']),
+                     'filesystem', 'smartquota', 'writable_snapshots',
+                     'ipmi_config']),
         filters=dict(type='list',
                      required=False,
                      elements='dict',
