@@ -25,7 +25,7 @@ extends_documentation_fragment:
   - dellemc.powerscale.powerscale
 
 author:
-- "Saksham Nautiyal (@Saksham-Nautiyal)"
+- Saksham Nautiyal (@Saksham-Nautiyal) <ansible.team@dell.com>
 
 options:
   nfs_service:
@@ -253,7 +253,7 @@ class ClusterServices:
             if not self.module.check_mode:
                 kwargs = {svc['update_kwarg']: {'service': enabled}}
                 update_method(**kwargs)
-                LOG.info(f"Successfully modified the {label} service.")
+                LOG.info("Successfully modified the %s service.", label)
             return True
         except Exception as e:
             error_msg = f"Modify {label} service failed with " \

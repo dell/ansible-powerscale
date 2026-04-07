@@ -9,9 +9,6 @@
     api_user: "{{ vault_api_user }}"
     api_password: "{{ vault_api_password }}"  # example
 
-  collections:
-    - dellemc.powerscale
-
   tasks:
     - name: Get all cluster service states (facts gathering)
       dellemc.powerscale.cluster_services:
