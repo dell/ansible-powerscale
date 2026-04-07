@@ -348,8 +348,8 @@ class TestClusterServices(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockClusterServicesApi.GET_HDFS_RESPONSE))
         powerscale_module_mock.antivirus_api.get_antivirus_settings = MagicMock(
             return_value=MockSDKResponse(MockClusterServicesApi.GET_ANTIVIRUS_DISABLED_RESPONSE))
-        for method in ['update_nfs_settings_global', 'update_smb_settings_global',
-                        'update_s3_settings_global', 'update_hdfs_settings']:
+        for method in ('update_nfs_settings_global', 'update_smb_settings_global',
+                       'update_s3_settings_global', 'update_hdfs_settings'):
             setattr(powerscale_module_mock.protocol_api, method, MagicMock(return_value=None))
         powerscale_module_mock.antivirus_api.update_antivirus_settings = MagicMock(return_value=None)
         ClusterServicesHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
@@ -370,8 +370,8 @@ class TestClusterServices(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockClusterServicesApi.GET_HDFS_ENABLED_RESPONSE))
         powerscale_module_mock.antivirus_api.get_antivirus_settings = MagicMock(
             return_value=MockSDKResponse(MockClusterServicesApi.GET_ANTIVIRUS_RESPONSE))
-        for method in ['update_nfs_settings_global', 'update_smb_settings_global',
-                        'update_s3_settings_global', 'update_hdfs_settings']:
+        for method in ('update_nfs_settings_global', 'update_smb_settings_global',
+                       'update_s3_settings_global', 'update_hdfs_settings'):
             setattr(powerscale_module_mock.protocol_api, method, MagicMock(return_value=None))
         powerscale_module_mock.antivirus_api.update_antivirus_settings = MagicMock(return_value=None)
         ClusterServicesHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
@@ -488,8 +488,8 @@ class TestClusterServices(PowerScaleUnitBase):
         powerscale_module_mock.module.exit_json.reset_mock()
         self.set_module_params(MockClusterServicesApi.CLUSTER_SERVICES_COMMON_ARGS,
                                MockClusterServicesApi.ENABLE_ALL_ARGS)
-        for method in ['update_nfs_settings_global', 'update_smb_settings_global',
-                        'update_s3_settings_global', 'update_hdfs_settings']:
+        for method in ('update_nfs_settings_global', 'update_smb_settings_global',
+                       'update_s3_settings_global', 'update_hdfs_settings'):
             setattr(powerscale_module_mock.protocol_api, method, MagicMock(return_value=None))
         powerscale_module_mock.antivirus_api.update_antivirus_settings = MagicMock(return_value=None)
         ClusterServicesHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
