@@ -1,26 +1,23 @@
 blank_issues_enabled: false
 contact_links:
-  - name: 📚 Ansible Documentation
-    url: https://docs.ansible.com/
-    about: Official Ansible documentation and guides
-  - name: 📦 Ansible Galaxy - Dell Collections
-    url: https://galaxy.ansible.com/dell
-    about: Browse and install Dell Ansible collections
-  - name: 📖 Dell Ansible Collections
-    url: https://github.com/dell?tab=repositories&q=ansible&type=&language=&sort=
-    about: Dell Ansible collection repositories and documentation
-  - name: 💬 GitHub Discussions
+  - name: "PowerScale Ansible Documentation"
+    url: https://github.com/dell/ansible-powerscale
+    about: Official PowerScale Ansible modules documentation and examples
+  - name: "PowerScale OneFS Documentation"
+    url: https://www.dell.com/support/manuals/en-us/powerscale-onefs/
+    about: Official PowerScale OneFS documentation and API references
+  - name: "Ansible Galaxy - PowerScale Collection"
+    url: https://galaxy.ansible.com/dell/powerscale
+    about: Browse and install the PowerScale Ansible collection
+  - name: "GitHub Discussions"
     url: https://github.com/orgs/dell/discussions
-    about: Ask and answer Ansible questions in community discussions
-  - name: 🏛️ Dell Community Forum
-    url: https://www.dell.com/community/
-    about: Dell community forums for product-specific discussions
-  - name: 🔒 Security Issues
+    about: Ask and answer PowerScale Ansible questions in community discussions
+  - name: "Dell PowerScale Community"
+    url: https://www.dell.com/community/powerscale
+    about: PowerScale community discussions and best practices
+  - name: "Security Issues"
     url: mailto:security@dell.com
     about: Please report security vulnerabilities privately and responsibly
-  - name: 📧 Ansible Support
-    url: mailto:OpenManageAnsible@Dell.com
-    about: Contact Dell OpenManage Ansible team for enterprise support
-  - name: 📧 General Ansible Inquiries
+  - name: "PowerScale Support"
     url: mailto:ansible.team@dell.com
-    about: Contact Dell team for general Ansible questions and inquiries
+    about: Contact Dell team for PowerScale Ansible support and inquiries
