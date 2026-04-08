@@ -1,12 +1,21 @@
-name: 🐛 Ansible Bug Report
-description: File a bug report for Dell Ansible Collections
+name: 🐛 PowerScale Ansible Bug Report
+description: File a bug report for Dell PowerScale Ansible Modules
 title: "[BUG]: "
 labels: ["type/bug", "needs-triage", "ansible"]
 body:
+  - type: input
+    id: title
+    attributes:
+      label: Title
+      description: "[BUG]: prefix is required and cannot be removed"
+      value: "[BUG]: "
+    validations:
+      required: true
+
   - type: markdown
     attributes:
       value: |
-        Thank you for reporting a bug in Dell Ansible Collections. Please provide the information below.
+        Thank you for reporting a bug in Dell PowerScale Ansible Modules. Please provide the information below.
         
         ## Community Note
         * Please vote on this issue by adding a 👍 [reaction](https://blog.github.com/2016-03-10-add-reactions-to-pull-requests-issues-and-comments/) to help prioritize this request
@@ -25,8 +34,8 @@ body:
     id: module-name
     attributes:
       label: Module Name
-      description: Enter the specific module name (e.g., dellemc_idrac_user_info)
-      placeholder: "dellemc_idrac_user_info"
+      description: Enter the specific PowerScale module name (e.g., powerscale_filesystem, powerscale_nfs, powerscale_user)
+      placeholder: "powerscale_filesystem"
     validations:
       required: true
 
@@ -44,7 +53,7 @@ body:
         Ansible: 2.12.5
         Python: 3.9.10
         Controller: AWX 19.0.0
-        Collection: dellemc.openmanage 6.0.0
+        Collection: dell.powerscale 1.2.0
     validations:
       required: true
 
@@ -55,12 +64,12 @@ body:
       description: |
         Please provide details about the target environment:
         - Operating System: [e.g. RHEL 8.5, Ubuntu 20.04, Windows Server 2019]
-        - Dell Hardware/Software Version: [e.g. iDRAC 5.10.00.00, OME 3.8.4, PowerScale 9.2.0.0]
+        - PowerScale OneFS Version: [e.g. 9.2.0.0, 9.1.0.0]
         - Network Configuration: [e.g. VPN, direct connection, proxy]
         - Authentication Method: [e.g. username/password, API key, certificate]
       placeholder: |
         OS: RHEL 8.5
-        iDRAC: 5.10.00.00
+        PowerScale: 9.2.0.0
         Network: Direct connection
         Auth: Username/password
     validations:
@@ -79,13 +88,17 @@ body:
         ---
         - hosts: localhost
           collections:
-            - dellemc.openmanage
+            - dell.powerscale
           tasks:
-            - name: Get iDRAC user info
-              dellemc.openmanage.idrac_user_info:
-                idrac_ip: "{{ idrac_ip }}"
-                idrac_user: "{{ idrac_user }}"
-                idrac_password: "{{ idrac_password }}"
+            - name: Create PowerScale filesystem
+              dell.powerscale.powerscale_filesystem:
+                name: "test_fs"
+                access_zone: "System"
+                size: 100
+                size_unit: "GB"
+                api_host: "{{ powerscale_host }}"
+                api_user: "{{ powerscale_user }}"
+                api_password: "{{ powerscale_password }}"
                 validate_certs: false
         ```
       render: markdown
