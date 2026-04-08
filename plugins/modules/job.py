@@ -382,7 +382,8 @@ class Job(object):
         try:
             update_params = {}
             if 'control' in kwargs and kwargs['control'] is not None:
-                update_params['control'] = kwargs['control']
+                # SDK uses 'state' to control job (pause, resume, cancel)
+                update_params['state'] = kwargs['control']
             if 'priority' in kwargs and kwargs['priority'] is not None:
                 update_params['priority'] = kwargs['priority']
             if 'policy' in kwargs and kwargs['policy'] is not None:
@@ -433,14 +434,10 @@ class Job(object):
         priority = self.module.params.get('priority')
 
         if job_type:
-            if paths is None:
-                self.module.fail_json(
-                    msg="The paths parameter is required when starting "
-                        "a job with job_type.")
             if isinstance(paths, list) and len(paths) == 0:
                 self.module.fail_json(
                     msg="The paths parameter must contain at least "
-                        "one path.")
+                        "one path if provided.")
 
         if priority is not None and (priority < 1 or priority > 10):
             self.module.fail_json(
@@ -566,7 +563,7 @@ class Job(object):
                             'after': dict(before_details, state='running')
                         }
                     if not self.module.check_mode:
-                        self.modify_job(job_id, control='resume')
+                        self.modify_job(job_id, control='run')
                         job_details = self.get_job_details(job_id)
                         if self.module._diff and job_details:
                             diff_dict['after'] = job_details

@@ -266,7 +266,7 @@ class JobInfo(object):
         :return: Dict with 'jobs' key containing list of recent job dicts
         """
         try:
-            api_response = self.job_api.list_job_recent()
+            api_response = self.job_api.get_job_recent()
             return api_response.to_dict()
         except utils.ApiException as e:
             error_message = 'Failed to get recent jobs with error: %s' \
@@ -319,8 +319,6 @@ class JobInfo(object):
         else:
             # Build filter parameters for list_job_jobs
             params = {}
-            if state_filter:
-                params['state'] = ','.join(state_filter)
             if sort:
                 params['sort'] = sort
             if dir_param:
@@ -328,8 +326,28 @@ class JobInfo(object):
             if limit is not None:
                 params['limit'] = limit
 
-            jobs_response = self.list_jobs(**params)
-            job_details = jobs_response.get('jobs', []) if jobs_response else []
+            # Handle multiple state filters by making separate calls
+            if state_filter and len(state_filter) > 1:
+                job_details = []
+                seen_ids = set()
+                for s in state_filter:
+                    state_params = dict(params, state=s)
+                    jobs_response = self.list_jobs(**state_params)
+                    for job in (jobs_response.get('jobs', [])
+                                if jobs_response else []):
+                        jid = job.get('id')
+                        if jid not in seen_ids:
+                            seen_ids.add(jid)
+                            job_details.append(job)
+            elif state_filter:
+                params['state'] = state_filter[0]
+                jobs_response = self.list_jobs(**params)
+                job_details = jobs_response.get('jobs', []) \
+                    if jobs_response else []
+            else:
+                jobs_response = self.list_jobs(**params)
+                job_details = jobs_response.get('jobs', []) \
+                    if jobs_response else []
 
             # Apply client-side job_type filter
             if job_type_filter and job_details:

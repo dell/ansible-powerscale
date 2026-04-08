@@ -195,8 +195,14 @@ class JobTypeInfo(object):
         :return: List of job type dicts
         """
         try:
-            api_response = self.job_api.get_job_types(
-                show_all=include_hidden, sort=sort, dir=dir)
+            api_params = {}
+            if include_hidden is not None:
+                api_params['show_all'] = include_hidden
+            if sort is not None:
+                api_params['sort'] = sort
+            if dir is not None:
+                api_params['dir'] = dir
+            api_response = self.job_api.get_job_types(**api_params)
             response_dict = api_response.to_dict()
             return response_dict.get('types', [])
         except utils.ApiException as e:

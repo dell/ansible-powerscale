@@ -428,6 +428,20 @@ class JobPolicy(object):
 
         return True
 
+    def _policy_equal(self, before, after):
+        """
+        Compare two policy dicts returned by the API to check for
+        actual changes (handles API normalization of intervals).
+        :param before: Policy dict before modification.
+        :param after: Policy dict after modification.
+        :return: True if policies are equivalent.
+        """
+        if before.get('description', '') != after.get('description', ''):
+            return False
+        before_intervals = before.get('intervals', [])
+        after_intervals = after.get('intervals', [])
+        return self._intervals_equal(before_intervals, after_intervals)
+
     def validate_intervals(self, intervals):
         """
         Validate the interval format.
@@ -505,21 +519,32 @@ class JobPolicy(object):
                                 "System policies are read-only."
                                 % policy_name)
 
-                    if self.module._diff:
-                        diff_dict = {
-                            'before': existing,
-                            'after': dict(existing, **changes)
-                        }
-
                     if not self.module.check_mode:
                         self.modify_policy(existing['id'], **changes)
 
+                        # Re-fetch to check if API actually changed
+                        updated = self.get_policy_by_name(policy_name)
+                        if updated and self._policy_equal(existing, updated):
+                            changed = False
+                            LOG.info(
+                                "Job policy %s: API normalized values "
+                                "match existing state. No real change.",
+                                policy_name)
+                        else:
+                            changed = True
+                            if self.module._diff:
+                                diff_dict = {
+                                    'before': existing,
+                                    'after': updated if updated else
+                                    dict(existing, **changes)
+                                }
+                    else:
+                        changed = True
                         if self.module._diff:
-                            updated = self.get_policy_by_name(policy_name)
-                            if updated:
-                                diff_dict['after'] = updated
-
-                    changed = True
+                            diff_dict = {
+                                'before': existing,
+                                'after': dict(existing, **changes)
+                            }
                 else:
                     LOG.info("Job policy %s is already in the desired state.",
                              policy_name)

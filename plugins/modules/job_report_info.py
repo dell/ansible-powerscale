@@ -240,7 +240,7 @@ class JobReportInfo(object):
         if job_id is not None:
             params['job_id'] = job_id
         if event_key is not None:
-            params['event_key'] = event_key
+            params['key'] = event_key
         if begin is not None:
             params['begin'] = begin
         if end is not None:
@@ -259,14 +259,16 @@ class JobReportInfo(object):
         all_reports.extend(reports)
 
         # Handle pagination: keep fetching while resume token exists
-        resume = response.get('resume') if response else None
-        while resume:
-            paginated_params = dict(params)
-            paginated_params['resume'] = resume
-            response = self.get_reports(**paginated_params)
-            reports = response.get('reports', []) if response else []
-            all_reports.extend(reports)
+        # (skip pagination if limit was set by user)
+        if limit is None:
             resume = response.get('resume') if response else None
+            while resume:
+                paginated_params = dict(params)
+                paginated_params['resume'] = resume
+                response = self.get_reports(**paginated_params)
+                reports = response.get('reports', []) if response else []
+                all_reports.extend(reports)
+                resume = response.get('resume') if response else None
 
         result = dict(
             changed=False,

@@ -317,7 +317,7 @@ class JobEventInfo(object):
         :return: Dict with 'events' and 'resume' keys
         """
         try:
-            api_response = self.job_api.list_job_events(**params)
+            api_response = self.job_api.get_job_events(**params)
             return api_response.to_dict()
         except utils.ApiException as e:
             error_message = 'Failed to get job events with ' \
@@ -373,15 +373,15 @@ class JobEventInfo(object):
         if state is not None:
             api_params['state'] = state
         if parsed_begin_time is not None:
-            api_params['begin_time'] = parsed_begin_time
+            api_params['begin'] = parsed_begin_time
         if parsed_end_time is not None:
-            api_params['end_time'] = parsed_end_time
+            api_params['end'] = parsed_end_time
         if job_id is not None:
             api_params['job_id'] = job_id
         if job_type is not None:
             api_params['job_type'] = job_type
         if event_key is not None:
-            api_params['event_key'] = event_key
+            api_params['key'] = event_key
         if ended_jobs_only is not None:
             api_params['ended_jobs_only'] = ended_jobs_only
         if limit is not None:
@@ -392,11 +392,12 @@ class JobEventInfo(object):
         response = self.list_job_events(**api_params)
         all_events.extend(response.get('events', []))
 
-        # Handle pagination via resume token
-        while response.get('resume') is not None:
-            api_params['resume'] = response['resume']
-            response = self.list_job_events(**api_params)
-            all_events.extend(response.get('events', []))
+        # Handle pagination via resume token (skip if limit was set)
+        if limit is None:
+            while response.get('resume') is not None:
+                api_params['resume'] = response['resume']
+                response = self.list_job_events(**api_params)
+                all_events.extend(response.get('events', []))
 
         result['job_events'] = all_events
         result['total_events'] = len(all_events)
