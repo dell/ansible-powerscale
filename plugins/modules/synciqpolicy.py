@@ -27,7 +27,8 @@ extends_documentation_fragment:
   - dellemc.powerscale.powerscale
 author:
 - Spandita Panigrahi (@panigs7) <ansible.team@dell.com>
-- Kritika Bhateja(@Kritika-Bhateja-03) <ansible.team.dell.com>)
+- Kritika Bhateja(@Kritika-Bhateja-03) <ansible.team.dell.com>
+- Saksham Nautiyal (@Saksham-Nautiyal) <ansible.team@dell.com>
 
 options:
   policy_name:
