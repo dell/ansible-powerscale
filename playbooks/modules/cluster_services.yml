@@ -1,0 +1,78 @@
+---
+- name: PowerScale Cluster Services Management
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: "{{ vault_onefs_host }}"
+    port_no: "{{ vault_port_no | default('8080') }}"
+    verify_ssl: "{{ vault_verify_ssl | default(false) }}"
+    api_user: "{{ vault_api_user }}"
+    api_password: "{{ vault_api_password }}"  # example
+
+  tasks:
+    - name: Get all cluster service states (facts gathering)
+      dellemc.powerscale.cluster_services:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+      register: cluster_services_result
+
+    - name: Display cluster services details
+      ansible.builtin.debug:
+        var: cluster_services_result.cluster_services_details
+
+    - name: Enable NFS and S3 services
+      dellemc.powerscale.cluster_services:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        nfs_service: true
+        s3_service: true
+
+    - name: Disable HDFS service
+      dellemc.powerscale.cluster_services:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        hdfs_service: false
+
+    - name: Enable Antivirus service
+      dellemc.powerscale.cluster_services:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        antivirus_service: true
+
+    - name: Enable all cluster services
+      dellemc.powerscale.cluster_services:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        nfs_service: true
+        smb_service: true
+        s3_service: true
+        hdfs_service: true
+        antivirus_service: true
+
+    - name: Disable all cluster services
+      dellemc.powerscale.cluster_services:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"  # example
+        verify_ssl: "{{ verify_ssl }}"
+        nfs_service: false
+        smb_service: false
+        s3_service: false
+        hdfs_service: false
+        antivirus_service: false
