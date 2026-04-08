@@ -1,41 +1,33 @@
-name: 🚀 Ansible Feature Request
-description: Suggest an enhancement for Dell Ansible Collections
+name: 🚀 PowerScale Ansible Feature Request
+description: Suggest an enhancement for Dell PowerScale Ansible Modules
 title: "[FEATURE]: "
 labels: ["type/feature-request", "needs-triage", "ansible"]
 body:
+  - type: input
+    id: title
+    attributes:
+      label: Title
+      description: "[FEATURE]: prefix is required and cannot be removed"
+      value: "[FEATURE]: "
+    validations:
+      required: true
+
   - type: markdown
     attributes:
       value: |
-        Thank you for suggesting a feature enhancement for Dell Ansible Collections!
+        Thank you for suggesting a feature enhancement for Dell PowerScale Ansible Modules!
         
         ## Community Note
         * Please vote on this issue by adding a 👍 [reaction](https://blog.github.com/2016-03-10-add-reactions-to-pull-requests-issues-and-comments/) to help prioritize this request
         * Please do not leave "+1" or other comments that do not add relevant new information or questions
         * If you are interested in working on this issue or have submitted a pull request, please leave a comment
 
-  - type: dropdown
-    id: ansible-collection
-    attributes:
-      label: Ansible Collection
-      description: Select the Dell Ansible Collection
-      options:
-        - dellemc.openmanage
-        - dellemc.powerscale
-        - dellemc.powermax
-        - dellemc.powerstore
-        - dellemc.powerflex
-        - dellemc.unity
-        - New Collection (specify in description)
-        - Multiple Collections (specify in description)
-    validations:
-      required: true
-
   - type: input
     id: module-name
     attributes:
       label: Module Name (if applicable)
-      description: Enter the specific module name this relates to (e.g., dellemc_idrac_user_info)
-      placeholder: "dellemc_idrac_user_info"
+      description: Enter the specific PowerScale module name this relates to (e.g., powerscale_filesystem, powerscale_nfs, powerscale_user)
+      placeholder: "powerscale_filesystem"
     validations:
       required: false
 
@@ -82,10 +74,14 @@ body:
         
         Example:
         ```yaml
-        - name: Proposed new functionality
-          dellemc.openmanage.new_module:
-            parameter1: value1
-            parameter2: value2
+        - name: Proposed new PowerScale functionality
+          dell.powerscale.powerscale_new_module:
+            name: "example_resource"
+            access_zone: "System"
+            api_host: "{{ powerscale_host }}"
+            api_user: "{{ powerscale_user }}"
+            api_password: "{{ powerscale_password }}"
+            validate_certs: false
         ```
       render: markdown
     validations:
