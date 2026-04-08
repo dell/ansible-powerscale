@@ -21,7 +21,7 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.17 or later.
+- Ansible\-core 2.17 or later.
 - Python 3.11, 3.12 or 3.13.
 
 
@@ -50,7 +50,7 @@ Parameters
   access_zone (optional, str, system)
     This option mentions the zone in which the user/group exists.
 
-    For a non-system access zone, the path relative to the non-system Access Zone's base directory has to be given.
+    For a non\-system access zone, the path relative to the non\-system Access Zone's base directory has to be given.
 
     For a system access zone, the absolute path has to be given.
 
@@ -61,6 +61,22 @@ Parameters
     If the :emphasis:`provider\_type` is 'ads' then the domain name of the Active Directory Server has to be mentioned in the :emphasis:`user\_name`. The format for the :emphasis:`user\_name` should be 'DOMAIN\_NAME\\user\_name' or "DOMAIN\_NAME\\\\user\_name".
 
     This option acts as a filter for all operations except creation.
+
+
+  description (optional, str, None)
+    A description of the quota.
+
+    Maximum length is 1024 characters.
+
+
+  labels (optional, str, None)
+    A string of labels for the quota, comma\-separated.
+
+    Maximum length is 1024 characters.
+
+
+  force (optional, bool, None)
+    Whether to force creation of a quota on the root of /ifs.
 
 
   quota (optional, dict, None)
@@ -92,7 +108,9 @@ Parameters
 
       Write access will be restricted after the grace period expires.
 
-      Both :emphasis:`soft\_grace\_period` and :emphasis:`soft\_limit\_size` are required to modify soft threshold for the quota.
+      Both :emphasis:`soft\_grace\_period` and either :emphasis:`soft\_limit\_size` or :emphasis:`percent\_soft` are required to modify soft threshold for the quota.
+
+      Mutually exclusive with :emphasis:`percent\_soft`.
 
 
     soft_grace_period (optional, int, None)
@@ -100,7 +118,7 @@ Parameters
 
       After the grace period, the write access to the quota will be restricted.
 
-      Both :emphasis:`soft\_grace\_period` and :emphasis:`soft\_limit\_size` are required to modify soft threshold for the quota.
+      Required when :emphasis:`soft\_limit\_size` or :emphasis:`percent\_soft` is set.
 
 
     period_unit (optional, str, None)
@@ -123,6 +141,28 @@ Parameters
       This parameter is required if any of the hard, soft or advisory limits is specified.
 
 
+    percent_soft (optional, float, None)
+      The soft threshold as a percentage of the hard limit.
+
+      Must be between 0.01 and 99.99.
+
+      Mutually exclusive with :emphasis:`soft\_limit\_size`.
+
+      Requires :emphasis:`hard\_limit\_size` to be set.
+
+      Both :emphasis:`soft\_grace\_period` and either :emphasis:`soft\_limit\_size` or :emphasis:`percent\_soft` are required to modify soft threshold for the quota.
+
+
+    percent_advisory (optional, float, None)
+      The advisory threshold as a percentage of the hard limit.
+
+      Must be between 0.01 and 99.99.
+
+      Mutually exclusive with :emphasis:`advisory\_limit\_size`.
+
+      Requires :emphasis:`hard\_limit\_size` to be set.
+
+
     container (optional, bool, False)
       If :literal:`true`\ , SMB shares using the quota directory see the quota thresholds as share size.
 
@@ -131,9 +171,9 @@ Parameters
   state (True, str, None)
     Define whether the Smart Quota should exist or not.
 
-    :literal:`present` - indicates that the Smart Quota should exist on the system.
+    :literal:`present` \- indicates that the Smart Quota should exist on the system.
 
-    :literal:`absent` - indicates that the Smart Quota should not exist on the system.
+    :literal:`absent` \- indicates that the Smart Quota should not exist on the system.
 
 
   onefs_host (True, str, None)
@@ -147,9 +187,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    :literal:`true` - indicates that the SSL certificate should be verified.
+    :literal:`true` \- indicates that the SSL certificate should be verified.
 
-    :literal:`false` - indicates that the SSL certificate should not be verified.
+    :literal:`false` \- indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -169,7 +209,7 @@ Notes
 .. note::
    - To perform any operation, path, quota\_type and state are mandatory parameters.
    - There can be two quotas for each type per directory, one with snapshots included and one without snapshots included.
-   - The :emphasis:`check\_mode` is not supported.
+   - The :emphasis:`check\_mode` is supported.
    - Once the limits are assigned, then the quota cannot be converted to accounting. Only modification to the threshold limits is permitted.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
@@ -305,6 +345,57 @@ Examples
         quota:
           include_snapshots: true
         state: "absent"
+
+    - name: Create a default-directory Quota with description and labels
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "<path>"
+        quota_type: "default-directory"
+        description: "Production data quota"
+        labels: "prod,tier1"
+        quota:
+          thresholds_on: "fs_logical_size"
+          hard_limit_size: 10
+          cap_unit: "TB"
+          include_snapshots: false
+        state: "present"
+
+    - name: Create a Quota with percent-based thresholds and force
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "<path>"
+        quota_type: "directory"
+        force: true
+        quota:
+          thresholds_on: "fs_logical_size"
+          hard_limit_size: 10
+          cap_unit: "TB"
+          percent_soft: 80.0
+          percent_advisory: 50.0
+          soft_grace_period: 14
+          period_unit: "days"
+          include_snapshots: false
+        state: "present"
+
+    - name: Update description and labels on an existing Quota
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "<path>"
+        quota_type: "directory"
+        description: "Updated quota description"
+        labels: "updated,labels"
+        quota:
+          include_snapshots: false
+        state: "present"
 
 
 
