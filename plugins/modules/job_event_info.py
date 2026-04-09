@@ -432,7 +432,7 @@ def get_job_event_info_parameters():
         )),
         job_id=dict(type='int'),
         job_type=dict(type='str'),
-        event_key=dict(type='str'),
+        event_key=dict(type='str', no_log=False),
         ended_jobs_only=dict(type='bool'),
         limit=dict(type='int')
     )

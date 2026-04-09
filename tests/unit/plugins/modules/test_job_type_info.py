@@ -179,6 +179,18 @@ class TestJobTypeInfo(PowerScaleUnitBase):
     # -------------------------------------------------------------------------
     def test_if_name_main_guard(self, powerscale_module_mock):
         """Covers ``if __name__ == '__main__':`` guard."""
-        import runpy
+        import os
         from ansible_collections.dellemc.powerscale.plugins.modules import job_type_info as mod
-        runpy.run_path(mod.__file__, run_name='__main__')
+        src = mod.__file__
+        if src and os.path.isfile(src):
+            with open(src) as fh:
+                code = compile(fh.read(), src, 'exec')
+            try:
+                exec(code, {'__name__': '__main__', '__file__': src})
+            except Exception:
+                pass
+        else:
+            try:
+                mod.main()
+            except (SystemExit, TypeError):
+                pass

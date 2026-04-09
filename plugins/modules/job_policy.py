@@ -27,7 +27,7 @@ extends_documentation_fragment:
   - dellemc.powerscale.powerscale
 
 author:
-- Dell EMC Ansible Team <ansible.team@dell.com>
+- Shrinidhi Rao (@shrinidhirao) <ansible.team@dell.com>
 
 notes:
 - Refer to JIRA ECS02C-982 for feature details.

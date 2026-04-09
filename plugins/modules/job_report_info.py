@@ -287,7 +287,7 @@ def get_job_report_info_parameters():
     return dict(
         job_type=dict(type='str'),
         job_id=dict(type='int'),
-        event_key=dict(type='str'),
+        event_key=dict(type='str', no_log=False),
         begin=dict(type='int'),
         end=dict(type='int'),
         last_phase_only=dict(type='bool'),
