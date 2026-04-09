@@ -270,8 +270,8 @@ class JobEventInfo(object):
                          ISO 8601 datetime format
         :return: Epoch integer timestamp
         """
-        if time_str.isdigit() or (time_str.startswith('-') and
-                                  time_str[1:].isdigit()):
+        if time_str.isdigit() or (time_str.startswith('-')
+                                  and time_str[1:].isdigit()):
             return int(time_str)
 
         try:
