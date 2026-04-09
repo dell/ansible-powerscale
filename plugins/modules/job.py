@@ -334,7 +334,7 @@ class Job(object):
                 if response_dict and 'jobs' in response_dict:
                     for job in response_dict['jobs']:
                         if job.get('type') == job_type and job.get(
-                            'state') in RUNNING_STATES + PAUSED_STATES:
+                                'state') in RUNNING_STATES + PAUSED_STATES:
                             return job
             return None
         except utils.ApiException as e:

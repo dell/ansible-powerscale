@@ -52,7 +52,7 @@ class TestJobReportInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobReportInfoApi.REPORTS_ALL))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # U-JR-002: Get reports filtered by job type
@@ -64,7 +64,7 @@ class TestJobReportInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobReportInfoApi.REPORTS_BY_TYPE))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # U-JR-003: Get reports filtered by job ID
@@ -76,7 +76,7 @@ class TestJobReportInfo(PowerScaleUnitBase):
                 MockJobReportInfoApi.REPORTS_BY_JOB_ID))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # U-JR-004: Get reports filtered by event key
@@ -89,7 +89,7 @@ class TestJobReportInfo(PowerScaleUnitBase):
                 MockJobReportInfoApi.REPORTS_BY_EVENT_KEY))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # U-JR-005: Get reports with time range
@@ -101,7 +101,7 @@ class TestJobReportInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobReportInfoApi.REPORTS_ALL))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # U-JR-006: Get reports for last phase only
@@ -113,7 +113,7 @@ class TestJobReportInfo(PowerScaleUnitBase):
                 MockJobReportInfoApi.REPORTS_LAST_PHASE))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # U-JR-007: Get reports with verbose output
@@ -124,7 +124,7 @@ class TestJobReportInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobReportInfoApi.REPORTS_VERBOSE))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # U-JR-008: Get reports with limit
@@ -135,7 +135,7 @@ class TestJobReportInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobReportInfoApi.REPORTS_LIMITED))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # U-JR-009: Get reports with pagination
@@ -149,7 +149,7 @@ class TestJobReportInfo(PowerScaleUnitBase):
             ])
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # U-JR-010: Get reports - empty result
@@ -160,7 +160,7 @@ class TestJobReportInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobReportInfoApi.REPORTS_EMPTY))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # U-JR-011: Get reports - exception
@@ -170,8 +170,8 @@ class TestJobReportInfo(PowerScaleUnitBase):
         powerscale_module_mock.job_api.get_job_reports = MagicMock(
             side_effect=MockApiException)
         self.capture_fail_json_call(
-    MockJobReportInfoApi.get_reports_failed_msg(),
-     invoke_perform_module=True)
+            MockJobReportInfoApi.get_reports_failed_msg(),
+            invoke_perform_module=True)
 
     # U-JR-012: Check mode - no changes
     def test_check_mode(self, powerscale_module_mock):
@@ -182,7 +182,7 @@ class TestJobReportInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobReportInfoApi.REPORTS_ALL))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # U-JR-E01: Empty result returns total_reports=0
@@ -193,7 +193,7 @@ class TestJobReportInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobReportInfoApi.REPORTS_EMPTY))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # U-JR-C01: Test main() entry point
@@ -201,7 +201,7 @@ class TestJobReportInfo(PowerScaleUnitBase):
         """U-JR-C01: Test main() function."""
         from unittest.mock import patch
         _p = ('ansible_collections.dellemc.powerscale.p'
-             'lugins.modules.job_report_info.JobReportInfo')
+              'lugins.modules.job_report_info.JobReportInfo')
         with patch(_p) as MockCls:
             mock_inst = MagicMock()
             MockCls.return_value = mock_inst
@@ -250,4 +250,3 @@ class TestJobReportInfo(PowerScaleUnitBase):
                 mod.main()
             except (SystemExit, TypeError):
                 pass
-

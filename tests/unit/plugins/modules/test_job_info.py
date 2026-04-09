@@ -52,10 +52,10 @@ class TestJobInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobInfoApi.JOB_1))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
         ea = (powerscale_module_mock.module
-            .exit_json.call_args[1])
+              .exit_json.call_args[1])
         assert ea['job_details'] is not None
 
     # U-JI-002: Get a specific job by ID - not found
@@ -66,7 +66,7 @@ class TestJobInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(None))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # U-JI-003: Get a specific job by ID - exception
@@ -76,8 +76,8 @@ class TestJobInfo(PowerScaleUnitBase):
         powerscale_module_mock.job_api.get_job_job = MagicMock(
             side_effect=MockApiException)
         self.capture_fail_json_call(
-    MockJobInfoApi.get_job_by_id_failed_msg(),
-     invoke_perform_module=True)
+            MockJobInfoApi.get_job_by_id_failed_msg(),
+            invoke_perform_module=True)
 
     # U-JI-004: List all jobs with no filters
     def test_list_jobs_no_filters(self, powerscale_module_mock):
@@ -87,7 +87,7 @@ class TestJobInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobInfoApi.JOBS_LIST))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # U-JI-005: List jobs filtered by state
@@ -98,7 +98,7 @@ class TestJobInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobInfoApi.JOBS_RUNNING))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # U-JI-006: List jobs filtered by type (client-side filter)
@@ -110,7 +110,7 @@ class TestJobInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobInfoApi.JOBS_LIST))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # U-JI-007: List jobs sorted ascending
@@ -122,7 +122,7 @@ class TestJobInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobInfoApi.JOBS_SORTED_ASC))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # U-JI-008: List jobs sorted descending
@@ -134,7 +134,7 @@ class TestJobInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobInfoApi.JOBS_SORTED_DESC))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # U-JI-009: List jobs with limit
@@ -145,7 +145,7 @@ class TestJobInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobInfoApi.JOBS_LIMITED))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # U-JI-010: List jobs with combined filters
@@ -157,7 +157,7 @@ class TestJobInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobInfoApi.JOBS_RUNNING))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # U-JI-011: List jobs with no results
@@ -169,7 +169,7 @@ class TestJobInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobInfoApi.JOBS_EMPTY))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # U-JI-012: List jobs - exception
@@ -191,7 +191,7 @@ class TestJobInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobInfoApi.RECENT_JOBS))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # U-JI-014: Get recent jobs - exception
@@ -203,8 +203,8 @@ class TestJobInfo(PowerScaleUnitBase):
         powerscale_module_mock.job_api.get_job_recent = MagicMock(
             side_effect=MockApiException)
         self.capture_fail_json_call(
-    MockJobInfoApi.get_recent_jobs_failed_msg(),
-     invoke_perform_module=True)
+            MockJobInfoApi.get_recent_jobs_failed_msg(),
+            invoke_perform_module=True)
 
     # U-JI-015: Get job summary - success
     def test_get_job_summary_success(self, powerscale_module_mock):
@@ -216,7 +216,7 @@ class TestJobInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobInfoApi.JOB_SUMMARY))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # U-JI-016: Get job summary - exception
@@ -228,8 +228,8 @@ class TestJobInfo(PowerScaleUnitBase):
         powerscale_module_mock.job_api.get_job_job_summary = MagicMock(
             side_effect=MockApiException)
         self.capture_fail_json_call(
-    MockJobInfoApi.get_job_summary_failed_msg(),
-     invoke_perform_module=True)
+            MockJobInfoApi.get_job_summary_failed_msg(),
+            invoke_perform_module=True)
 
     # U-JI-017: Check mode - no changes
     def test_check_mode(self, powerscale_module_mock):
@@ -240,7 +240,7 @@ class TestJobInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobInfoApi.JOB_1))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # U-JI-E01: job_id=None with no filters lists all jobs
@@ -251,7 +251,7 @@ class TestJobInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobInfoApi.JOBS_LIST))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # U-JI-E02: Jobs with null fields should not crash
@@ -262,7 +262,7 @@ class TestJobInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobInfoApi.JOBS_NULL_FIELDS))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # U-JI-E03: Empty result returns empty list
@@ -273,7 +273,7 @@ class TestJobInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobInfoApi.JOBS_EMPTY))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # U-JI-E04: Large limit value
@@ -284,7 +284,7 @@ class TestJobInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobInfoApi.JOBS_LIST))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # U-JI-E05: Minimum limit value
@@ -295,7 +295,7 @@ class TestJobInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobInfoApi.JOBS_LIMITED))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # U-JI-E06: Invalid job ID triggers error
@@ -305,8 +305,8 @@ class TestJobInfo(PowerScaleUnitBase):
         powerscale_module_mock.job_api.get_job_job = MagicMock(
             side_effect=MockApiException(404, "Not Found"))
         self.capture_fail_json_call(
-    MockJobInfoApi.get_job_by_id_failed_msg(),
-     invoke_perform_module=True)
+            MockJobInfoApi.get_job_by_id_failed_msg(),
+            invoke_perform_module=True)
 
     # U-JI-C01: List jobs with multiple state filters
     def test_list_jobs_multiple_states(self, powerscale_module_mock):
@@ -321,14 +321,14 @@ class TestJobInfo(PowerScaleUnitBase):
             ])
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # U-JI-C02: Test main() entry point
     def test_main_entry_point(self, powerscale_module_mock):
         from unittest.mock import patch
         _p = ('ansible_collections.dellemc.powerscale.p'
-             'lugins.modules.job_info.JobInfo')
+              'lugins.modules.job_info.JobInfo')
         with patch(_p) as MockCls:
             mock_inst = MagicMock()
             MockCls.return_value = mock_inst

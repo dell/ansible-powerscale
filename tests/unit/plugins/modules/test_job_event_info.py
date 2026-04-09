@@ -49,10 +49,10 @@ class TestJobEventInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobEventInfoApi.EVENTS_ALL))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
         ea = (powerscale_module_mock.module
-            .exit_json.call_args[1])
+              .exit_json.call_args[1])
         events = ea['job_events']
         assert len(events) == 4
 
@@ -63,10 +63,10 @@ class TestJobEventInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobEventInfoApi.EVENTS_RUNNING))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
         ea = (powerscale_module_mock.module
-            .exit_json.call_args[1])
+              .exit_json.call_args[1])
         events = ea['job_events']
         assert len(events) == 2
         for event in events:
@@ -81,10 +81,10 @@ class TestJobEventInfo(PowerScaleUnitBase):
                 MockJobEventInfoApi.EVENTS_TIME_RANGE))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
         ea = (powerscale_module_mock.module
-            .exit_json.call_args[1])
+              .exit_json.call_args[1])
         events = ea['job_events']
         assert len(events) == 2
 
@@ -97,10 +97,10 @@ class TestJobEventInfo(PowerScaleUnitBase):
                 MockJobEventInfoApi.EVENTS_TIME_RANGE))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
         ea = (powerscale_module_mock.module
-            .exit_json.call_args[1])
+              .exit_json.call_args[1])
         events = ea['job_events']
         assert len(events) == 2
 
@@ -112,10 +112,10 @@ class TestJobEventInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobEventInfoApi.EVENTS_ALL))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
         ea = (powerscale_module_mock.module
-            .exit_json.call_args[1])
+              .exit_json.call_args[1])
         events = ea['job_events']
         assert len(events) == 4
 
@@ -128,10 +128,10 @@ class TestJobEventInfo(PowerScaleUnitBase):
                 MockJobEventInfoApi.EVENTS_TIME_RANGE))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
         ea = (powerscale_module_mock.module
-            .exit_json.call_args[1])
+              .exit_json.call_args[1])
         events = ea['job_events']
         assert len(events) == 2
 
@@ -142,10 +142,10 @@ class TestJobEventInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobEventInfoApi.EVENTS_BY_JOB_ID))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
         ea = (powerscale_module_mock.module
-            .exit_json.call_args[1])
+              .exit_json.call_args[1])
         events = ea['job_events']
         assert len(events) == 2
         for event in events:
@@ -159,10 +159,10 @@ class TestJobEventInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobEventInfoApi.EVENTS_BY_TYPE))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
         ea = (powerscale_module_mock.module
-            .exit_json.call_args[1])
+              .exit_json.call_args[1])
         events = ea['job_events']
         assert len(events) == 2
         for event in events:
@@ -175,10 +175,10 @@ class TestJobEventInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobEventInfoApi.EVENTS_ENDED))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
         ea = (powerscale_module_mock.module
-            .exit_json.call_args[1])
+              .exit_json.call_args[1])
         events = ea['job_events']
         assert len(events) == 2
 
@@ -192,10 +192,10 @@ class TestJobEventInfo(PowerScaleUnitBase):
             ])
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
         ea = (powerscale_module_mock.module
-            .exit_json.call_args[1])
+              .exit_json.call_args[1])
         events = ea['job_events']
         assert len(events) == 4
 
@@ -206,10 +206,10 @@ class TestJobEventInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobEventInfoApi.EVENTS_EMPTY))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
         ea = (powerscale_module_mock.module
-            .exit_json.call_args[1])
+              .exit_json.call_args[1])
         events = ea['job_events']
         assert len(events) == 0
 
@@ -219,15 +219,15 @@ class TestJobEventInfo(PowerScaleUnitBase):
         powerscale_module_mock.job_api.get_job_events = MagicMock(
             side_effect=MockApiException)
         self.capture_fail_json_call(
-    MockJobEventInfoApi.get_events_failed_msg(),
-     invoke_perform_module=True)
+            MockJobEventInfoApi.get_events_failed_msg(),
+            invoke_perform_module=True)
 
     def test_invalid_time_format(self, powerscale_module_mock):
         """U-JE-013: Invalid time format triggers failure."""
         self.set_module_params(self.get_module_args, {"begin_time": "invalid"})
         self.capture_fail_json_call(
-    MockJobEventInfoApi.invalid_time_format_msg(),
-     invoke_perform_module=True)
+            MockJobEventInfoApi.invalid_time_format_msg(),
+            invoke_perform_module=True)
 
     def test_check_mode(self, powerscale_module_mock):
         """U-JE-014: Check mode does not make changes."""
@@ -237,7 +237,7 @@ class TestJobEventInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobEventInfoApi.EVENTS_ALL))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     def test_events_none_filters(self, powerscale_module_mock):
@@ -251,10 +251,10 @@ class TestJobEventInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobEventInfoApi.EVENTS_ALL))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
         ea = (powerscale_module_mock.module
-            .exit_json.call_args[1])
+              .exit_json.call_args[1])
         events = ea['job_events']
         assert len(events) == 4
 
@@ -267,10 +267,10 @@ class TestJobEventInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobEventInfoApi.EVENTS_EMPTY))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
         ea = (powerscale_module_mock.module
-            .exit_json.call_args[1])
+              .exit_json.call_args[1])
         events = ea['job_events']
         assert len(events) == 0
 
@@ -281,10 +281,10 @@ class TestJobEventInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobEventInfoApi.EVENTS_ALL))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
         ea = (powerscale_module_mock.module
-            .exit_json.call_args[1])
+              .exit_json.call_args[1])
         events = ea['job_events']
         assert len(events) == 4
 
@@ -293,15 +293,15 @@ class TestJobEventInfo(PowerScaleUnitBase):
         self.set_module_params(self.get_module_args,
                                {"begin_time": "not-a-time"})
         self.capture_fail_json_call(
-    MockJobEventInfoApi.invalid_time_format_msg(),
-     invoke_perform_module=True)
+            MockJobEventInfoApi.invalid_time_format_msg(),
+            invoke_perform_module=True)
 
     def test_negative_limit_reject(self, powerscale_module_mock):
         """U-JE-E05: Negative limit value triggers failure."""
         self.set_module_params(self.get_module_args, {"limit": -1})
         self.capture_fail_json_call(
-    MockJobEventInfoApi.negative_limit_msg(),
-     invoke_perform_module=True)
+            MockJobEventInfoApi.negative_limit_msg(),
+            invoke_perform_module=True)
 
     def test_list_events_iso_time_without_tz(self, powerscale_module_mock):
         """U-JE-C01: ISO time without timezone info to trigger tzinfo
@@ -313,7 +313,7 @@ class TestJobEventInfo(PowerScaleUnitBase):
                 MockJobEventInfoApi.EVENTS_TIME_RANGE))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     def test_list_events_with_event_key(self, powerscale_module_mock):
@@ -324,7 +324,7 @@ class TestJobEventInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobEventInfoApi.EVENTS_ALL))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     def test_list_events_with_positive_limit(self, powerscale_module_mock):
@@ -334,14 +334,14 @@ class TestJobEventInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobEventInfoApi.EVENTS_ALL))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     def test_main_entry_point(self, powerscale_module_mock):
         """U-JE-C04: Test main() function."""
         from unittest.mock import patch
         _p = ('ansible_collections.dellemc.powerscale.p'
-             'lugins.modules.job_event_info.JobEventInfo')
+              'lugins.modules.job_event_info.JobEventInfo')
         with patch(_p) as MockCls:
             mock_inst = MagicMock()
             MockCls.return_value = mock_inst

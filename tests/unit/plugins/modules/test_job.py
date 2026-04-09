@@ -59,7 +59,7 @@ class TestJob(PowerScaleUnitBase):
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.create_job_job.assert_called()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
@@ -81,7 +81,7 @@ class TestJob(PowerScaleUnitBase):
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.create_job_job.assert_called()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
@@ -103,7 +103,7 @@ class TestJob(PowerScaleUnitBase):
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.create_job_job.assert_called()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
@@ -125,7 +125,7 @@ class TestJob(PowerScaleUnitBase):
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.create_job_job.assert_called()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
@@ -147,7 +147,7 @@ class TestJob(PowerScaleUnitBase):
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.create_job_job.assert_called()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
@@ -164,7 +164,7 @@ class TestJob(PowerScaleUnitBase):
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.create_job_job.assert_not_called()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # -------------------------------------------------------------------------
@@ -196,7 +196,7 @@ class TestJob(PowerScaleUnitBase):
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.get_job_job.assert_called()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # -------------------------------------------------------------------------
@@ -228,7 +228,7 @@ class TestJob(PowerScaleUnitBase):
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.update_job_job.assert_called()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
@@ -245,7 +245,7 @@ class TestJob(PowerScaleUnitBase):
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.update_job_job.assert_not_called()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # -------------------------------------------------------------------------
@@ -264,7 +264,7 @@ class TestJob(PowerScaleUnitBase):
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.update_job_job.assert_called()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
@@ -281,7 +281,7 @@ class TestJob(PowerScaleUnitBase):
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.update_job_job.assert_not_called()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     # -------------------------------------------------------------------------
@@ -300,7 +300,7 @@ class TestJob(PowerScaleUnitBase):
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.update_job_job.assert_called()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
@@ -319,7 +319,7 @@ class TestJob(PowerScaleUnitBase):
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.update_job_job.assert_called()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
@@ -338,7 +338,7 @@ class TestJob(PowerScaleUnitBase):
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.update_job_job.assert_called()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
@@ -356,7 +356,7 @@ class TestJob(PowerScaleUnitBase):
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.create_job_job.assert_not_called()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
@@ -374,7 +374,7 @@ class TestJob(PowerScaleUnitBase):
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.update_job_job.assert_not_called()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
@@ -396,7 +396,7 @@ class TestJob(PowerScaleUnitBase):
             return_value=None)
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is True
         call_kwargs = powerscale_module_mock.module.exit_json.call_args[1]
         assert 'diff' in call_kwargs
@@ -423,7 +423,7 @@ class TestJob(PowerScaleUnitBase):
             ])
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
@@ -522,7 +522,7 @@ class TestJob(PowerScaleUnitBase):
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.create_job_job.assert_called()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
@@ -544,7 +544,7 @@ class TestJob(PowerScaleUnitBase):
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.create_job_job.assert_called()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
@@ -608,8 +608,8 @@ class TestJob(PowerScaleUnitBase):
             "state": "present"
         })
         self.capture_fail_json_call(
-    MockJobApi.negative_priority_error_msg(),
-     invoke_perform_module=True)
+            MockJobApi.negative_priority_error_msg(),
+            invoke_perform_module=True)
 
     # -------------------------------------------------------------------------
     # U-JB-E10: Pause a completed job should fail
@@ -674,10 +674,10 @@ class TestJob(PowerScaleUnitBase):
             return_value=None)
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is True
         ea = (powerscale_module_mock.module
-            .exit_json.call_args[1])
+              .exit_json.call_args[1])
         assert ea['job_details'] is None
 
     # -------------------------------------------------------------------------
@@ -720,7 +720,7 @@ class TestJob(PowerScaleUnitBase):
             ])
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
@@ -763,7 +763,7 @@ class TestJob(PowerScaleUnitBase):
             return_value=None)
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is True
         call_kwargs = powerscale_module_mock.module.exit_json.call_args[1]
         assert 'diff' in call_kwargs
@@ -775,7 +775,7 @@ class TestJob(PowerScaleUnitBase):
         """U-JB-C07: Test main() function."""
         from unittest.mock import patch
         _p = ('ansible_collections.dellemc.powerscale.p'
-             'lugins.modules.job.Job')
+              'lugins.modules.job.Job')
         with patch(_p) as MockJobClass:
             mock_instance = MagicMock()
             MockJobClass.return_value = mock_instance

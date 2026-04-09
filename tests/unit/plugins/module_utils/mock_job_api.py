@@ -11,7 +11,7 @@ __metaclass__ = type
 
 
 MODULE_UTILS_PATH = ('ansible_collections.dellemc.powerscale.'
-    'plugins.modules.job.utils')
+                     'plugins.modules.job.utils')
 
 COMMON_ARGS = {
     "onefs_host": "test.example.com",

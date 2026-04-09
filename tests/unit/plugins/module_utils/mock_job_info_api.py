@@ -10,7 +10,7 @@ __metaclass__ = type
 
 
 MODULE_UTILS_PATH = ('ansible_collections.dellemc.powerscale.'
-    'plugins.modules.job_info.utils')
+                     'plugins.modules.job_info.utils')
 
 COMMON_ARGS = {
     "onefs_host": "test.example.com",
@@ -86,17 +86,17 @@ JOBS_SORTED_DESC = {"jobs": [JOB_3, JOB_2, JOB_1], "resume": None}
 JOBS_LIMITED = {"jobs": [JOB_1], "resume": None}
 JOBS_EMPTY = {"jobs": [], "resume": None}
 JOBS_NULL_FIELDS = {"jobs": [{"id": 50,
-    "type": "SmartPools",
-    "state": None,
-    "priority": None,
-    "policy": None,
-    "description": None,
-    "start_time": None,
-    "end_time": None,
-    "progress": None,
-    "paths": None,
-    "parameters": None}],
-     "resume": None}
+                              "type": "SmartPools",
+                              "state": None,
+                              "priority": None,
+                              "policy": None,
+                              "description": None,
+                              "start_time": None,
+                              "end_time": None,
+                              "progress": None,
+                              "paths": None,
+                              "parameters": None}],
+                    "resume": None}
 
 RECENT_JOBS = {"jobs": [
     {"id": 40,

@@ -271,8 +271,12 @@ class JobEventInfo(object):
                          ISO 8601 datetime format
         :return: Epoch integer timestamp
         """
-        if time_str.isdigit() or (time_str.startswith('-')
-                                  and time_str[1:].isdigit()):
+        is_numeric = (
+            time_str.isdigit()
+            or (time_str.startswith('-')
+                and time_str[1:].isdigit())
+        )
+        if is_numeric:
             return int(time_str)
 
         try:

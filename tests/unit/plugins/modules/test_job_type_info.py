@@ -49,10 +49,10 @@ class TestJobTypeInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobTypeInfoApi.TYPES_VISIBLE))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
         ea = (powerscale_module_mock.module
-            .exit_json.call_args[1])
+              .exit_json.call_args[1])
         job_types = ea['job_types']
         assert len(job_types) == 2
 
@@ -63,10 +63,10 @@ class TestJobTypeInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobTypeInfoApi.TYPES_ALL))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
         ea = (powerscale_module_mock.module
-            .exit_json.call_args[1])
+              .exit_json.call_args[1])
         job_types = ea['job_types']
         assert len(job_types) == 3
 
@@ -78,10 +78,10 @@ class TestJobTypeInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobTypeInfoApi.TYPE_TREE_DELETE))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
         ea = (powerscale_module_mock.module
-            .exit_json.call_args[1])
+              .exit_json.call_args[1])
         job_type_details = ea['job_types']
         assert job_type_details['id'] == 'TreeDelete'
 
@@ -94,10 +94,10 @@ class TestJobTypeInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(None))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
         ea = (powerscale_module_mock.module
-            .exit_json.call_args[1])
+              .exit_json.call_args[1])
         job_types = ea['job_types']
         assert not job_types
 
@@ -108,10 +108,10 @@ class TestJobTypeInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobTypeInfoApi.TYPES_SORTED))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
         ea = (powerscale_module_mock.module
-            .exit_json.call_args[1])
+              .exit_json.call_args[1])
         job_types = ea['job_types']
         assert len(job_types) == 2
         assert job_types[0]['id'] == 'SmartPools'
@@ -124,10 +124,10 @@ class TestJobTypeInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobTypeInfoApi.TYPES_EMPTY))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
         ea = (powerscale_module_mock.module
-            .exit_json.call_args[1])
+              .exit_json.call_args[1])
         job_types = ea['job_types']
         assert len(job_types) == 0
 
@@ -137,8 +137,8 @@ class TestJobTypeInfo(PowerScaleUnitBase):
         powerscale_module_mock.job_api.get_job_types = MagicMock(
             side_effect=MockApiException)
         self.capture_fail_json_call(
-    MockJobTypeInfoApi.get_job_types_failed_msg(),
-     invoke_perform_module=True)
+            MockJobTypeInfoApi.get_job_types_failed_msg(),
+            invoke_perform_module=True)
 
     def test_check_mode(self, powerscale_module_mock):
         """U-JT-008: Check mode does not make changes."""
@@ -148,7 +148,7 @@ class TestJobTypeInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobTypeInfoApi.TYPES_VISIBLE))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     def test_types_empty_without_hidden(self, powerscale_module_mock):
@@ -159,10 +159,10 @@ class TestJobTypeInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobTypeInfoApi.TYPES_EMPTY))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
         ea = (powerscale_module_mock.module
-            .exit_json.call_args[1])
+              .exit_json.call_args[1])
         job_types = ea['job_types']
         assert len(job_types) == 0
 
@@ -173,7 +173,7 @@ class TestJobTypeInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobTypeInfoApi.TYPES_VISIBLE))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
 
     def test_get_type_non_404_exception(self, powerscale_module_mock):
@@ -184,14 +184,14 @@ class TestJobTypeInfo(PowerScaleUnitBase):
             side_effect=MockApiException(status=500,
                                          body="Internal server error"))
         self.capture_fail_json_call(
-    MockJobTypeInfoApi.get_job_type_failed_msg(),
-     invoke_perform_module=True)
+            MockJobTypeInfoApi.get_job_type_failed_msg(),
+            invoke_perform_module=True)
 
     def test_main_entry_point(self, powerscale_module_mock):
         """U-JT-C03: Test main() function."""
         from unittest.mock import patch
         _p = ('ansible_collections.dellemc.powerscale.p'
-             'lugins.modules.job_type_info.JobTypeInfo')
+              'lugins.modules.job_type_info.JobTypeInfo')
         with patch(_p) as MockCls:
             mock_inst = MagicMock()
             MockCls.return_value = mock_inst
@@ -210,10 +210,10 @@ class TestJobTypeInfo(PowerScaleUnitBase):
             side_effect=MockApiException(status=404, body="Not found"))
         powerscale_module_mock.perform_module_operation()
         exit_args = (powerscale_module_mock
-            .module.exit_json.call_args[1])
+                     .module.exit_json.call_args[1])
         assert exit_args['changed'] is False
         ea = (powerscale_module_mock.module
-            .exit_json.call_args[1])
+              .exit_json.call_args[1])
         job_types = ea['job_types']
         assert job_types == {}
 
