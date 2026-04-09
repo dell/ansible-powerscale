@@ -271,7 +271,7 @@ class JobEventInfo(object):
         :return: Epoch integer timestamp
         """
         if time_str.isdigit() or (time_str.startswith('-') and
-                                   time_str[1:].isdigit()):
+                                  time_str[1:].isdigit()):
             return int(time_str)
 
         try:

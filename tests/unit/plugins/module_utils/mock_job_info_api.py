@@ -83,7 +83,10 @@ JOBS_SORTED_ASC = {"jobs": [JOB_1, JOB_2, JOB_3], "resume": None}
 JOBS_SORTED_DESC = {"jobs": [JOB_3, JOB_2, JOB_1], "resume": None}
 JOBS_LIMITED = {"jobs": [JOB_1], "resume": None}
 JOBS_EMPTY = {"jobs": [], "resume": None}
-JOBS_NULL_FIELDS = {"jobs": [{"id": 50, "type": "SmartPools", "state": None, "priority": None, "policy": None, "description": None, "start_time": None, "end_time": None, "progress": None, "paths": None, "parameters": None}], "resume": None}
+JOBS_NULL_FIELDS = {"jobs": [{"id": 50, "type": "SmartPools", "state": None,
+                             "priority": None, "policy": None, "description": None,
+                             "start_time": None, "end_time": None, "progress": None,
+                             "paths": None, "parameters": None}], "resume": None}
 
 RECENT_JOBS = {"jobs": [
     {"id": 40, "type": "SmartPools", "state": "succeeded", "end_time": 1699999000},
