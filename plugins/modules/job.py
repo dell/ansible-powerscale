@@ -434,10 +434,10 @@ class Job(object):
         priority = self.module.params.get('priority')
 
         if job_type:
-            if isinstance(paths, list) and len(paths) == 0:
+            if paths is None or (isinstance(paths, list) and len(paths) == 0):
                 self.module.fail_json(
-                    msg="The paths parameter must contain at least "
-                        "one path if provided.")
+                    msg="The paths parameter is required when starting "
+                        "a job and must contain at least one path.")
 
         if priority is not None and (priority < 1 or priority > 10):
             self.module.fail_json(

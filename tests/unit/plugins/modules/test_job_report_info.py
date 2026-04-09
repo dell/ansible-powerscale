@@ -154,3 +154,39 @@ class TestJobReportInfo(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobReportInfoApi.REPORTS_EMPTY))
         powerscale_module_mock.perform_module_operation()
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
+
+    # U-JR-C01: Test main() entry point
+    def test_main_entry_point(self, powerscale_module_mock):
+        """U-JR-C01: Test main() function."""
+        from unittest.mock import patch
+        with patch('ansible_collections.dellemc.powerscale.plugins.modules.job_report_info.JobReportInfo') as MockCls:
+            mock_inst = MagicMock()
+            MockCls.return_value = mock_inst
+            from ansible_collections.dellemc.powerscale.plugins.modules.job_report_info import main
+            main()
+            MockCls.assert_called_once()
+            mock_inst.perform_module_operation.assert_called_once()
+
+    # U-JR-C02: Test prereqs validation failure in __init__ (covers line 199)
+    def test_prereqs_validation_failure(self, powerscale_module_mock):
+        """U-JR-C02: Test __init__ fails when prereqs validation fails."""
+        from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
+            import utils as real_utils
+        original_return = real_utils.validate_module_pre_reqs.return_value
+        real_utils.validate_module_pre_reqs.return_value = {
+            "all_packages_found": False,
+            "error_message": "Missing required packages"
+        }
+        try:
+            obj = JobReportInfo()
+            obj.module.fail_json.assert_any_call(
+                msg="Missing required packages")
+        finally:
+            real_utils.validate_module_pre_reqs.return_value = original_return
+
+    # U-JR-C03: Test if __name__ == '__main__' guard (covers line 307)
+    def test_if_name_main_guard(self, powerscale_module_mock):
+        """U-JR-C03: Cover if __name__ == '__main__': main() guard."""
+        import runpy
+        import ansible_collections.dellemc.powerscale.plugins.modules.job_report_info as mod
+        runpy.run_path(mod.__file__, run_name='__main__')

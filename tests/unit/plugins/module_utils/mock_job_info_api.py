@@ -68,6 +68,15 @@ JOB_3 = {
 }
 
 JOBS_LIST = {"jobs": [JOB_1, JOB_2, JOB_3], "resume": None}
+JOBS_PAUSED_LIST = {
+    "jobs": [{
+        "id": 99,
+        "type": "TreeDelete",
+        "state": "paused_user",
+        "priority": 3
+    }],
+    "resume": None
+}
 JOBS_RUNNING = {"jobs": [JOB_1], "resume": None}
 JOBS_SMARTPOOLS = {"jobs": [JOB_1, JOB_3], "resume": None}
 JOBS_SORTED_ASC = {"jobs": [JOB_1, JOB_2, JOB_3], "resume": None}

@@ -35,7 +35,7 @@ class TestJobEventInfo(PowerScaleUnitBase):
     def test_list_events_no_filters(self, powerscale_module_mock):
         """U-JE-001: List all events without any filters."""
         self.set_module_params(self.get_module_args, {})
-        powerscale_module_mock.job_api.list_job_events = MagicMock(
+        powerscale_module_mock.job_api.get_job_events = MagicMock(
             return_value=MockSDKResponse(MockJobEventInfoApi.EVENTS_ALL))
         powerscale_module_mock.perform_module_operation()
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
@@ -45,7 +45,7 @@ class TestJobEventInfo(PowerScaleUnitBase):
     def test_list_events_filter_by_state(self, powerscale_module_mock):
         """U-JE-002: Filter events by running state."""
         self.set_module_params(self.get_module_args, {"state": "running"})
-        powerscale_module_mock.job_api.list_job_events = MagicMock(
+        powerscale_module_mock.job_api.get_job_events = MagicMock(
             return_value=MockSDKResponse(MockJobEventInfoApi.EVENTS_RUNNING))
         powerscale_module_mock.perform_module_operation()
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
@@ -57,7 +57,7 @@ class TestJobEventInfo(PowerScaleUnitBase):
     def test_list_events_begin_time_epoch(self, powerscale_module_mock):
         """U-JE-003: Filter events by begin_time as epoch timestamp."""
         self.set_module_params(self.get_module_args, {"begin_time": "1700000000"})
-        powerscale_module_mock.job_api.list_job_events = MagicMock(
+        powerscale_module_mock.job_api.get_job_events = MagicMock(
             return_value=MockSDKResponse(MockJobEventInfoApi.EVENTS_TIME_RANGE))
         powerscale_module_mock.perform_module_operation()
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
@@ -67,7 +67,7 @@ class TestJobEventInfo(PowerScaleUnitBase):
     def test_list_events_begin_time_iso(self, powerscale_module_mock):
         """U-JE-004: Filter events by begin_time as ISO format."""
         self.set_module_params(self.get_module_args, {"begin_time": "2026-01-01T00:00:00Z"})
-        powerscale_module_mock.job_api.list_job_events = MagicMock(
+        powerscale_module_mock.job_api.get_job_events = MagicMock(
             return_value=MockSDKResponse(MockJobEventInfoApi.EVENTS_TIME_RANGE))
         powerscale_module_mock.perform_module_operation()
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
@@ -77,7 +77,7 @@ class TestJobEventInfo(PowerScaleUnitBase):
     def test_list_events_end_time(self, powerscale_module_mock):
         """U-JE-005: Filter events by end_time."""
         self.set_module_params(self.get_module_args, {"end_time": "1700003000"})
-        powerscale_module_mock.job_api.list_job_events = MagicMock(
+        powerscale_module_mock.job_api.get_job_events = MagicMock(
             return_value=MockSDKResponse(MockJobEventInfoApi.EVENTS_ALL))
         powerscale_module_mock.perform_module_operation()
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
@@ -87,7 +87,7 @@ class TestJobEventInfo(PowerScaleUnitBase):
     def test_list_events_duration(self, powerscale_module_mock):
         """U-JE-006: Filter events by duration."""
         self.set_module_params(self.get_module_args, {"duration": {"value": 24, "unit": "hours"}})
-        powerscale_module_mock.job_api.list_job_events = MagicMock(
+        powerscale_module_mock.job_api.get_job_events = MagicMock(
             return_value=MockSDKResponse(MockJobEventInfoApi.EVENTS_TIME_RANGE))
         powerscale_module_mock.perform_module_operation()
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
@@ -97,7 +97,7 @@ class TestJobEventInfo(PowerScaleUnitBase):
     def test_list_events_filter_by_job_id(self, powerscale_module_mock):
         """U-JE-007: Filter events by job_id."""
         self.set_module_params(self.get_module_args, {"job_id": 42})
-        powerscale_module_mock.job_api.list_job_events = MagicMock(
+        powerscale_module_mock.job_api.get_job_events = MagicMock(
             return_value=MockSDKResponse(MockJobEventInfoApi.EVENTS_BY_JOB_ID))
         powerscale_module_mock.perform_module_operation()
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
@@ -109,7 +109,7 @@ class TestJobEventInfo(PowerScaleUnitBase):
     def test_list_events_filter_by_type(self, powerscale_module_mock):
         """U-JE-008: Filter events by job_type."""
         self.set_module_params(self.get_module_args, {"job_type": "SmartPools"})
-        powerscale_module_mock.job_api.list_job_events = MagicMock(
+        powerscale_module_mock.job_api.get_job_events = MagicMock(
             return_value=MockSDKResponse(MockJobEventInfoApi.EVENTS_BY_TYPE))
         powerscale_module_mock.perform_module_operation()
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
@@ -121,7 +121,7 @@ class TestJobEventInfo(PowerScaleUnitBase):
     def test_list_events_ended_jobs_only(self, powerscale_module_mock):
         """U-JE-009: Filter events for ended jobs only."""
         self.set_module_params(self.get_module_args, {"ended_jobs_only": True})
-        powerscale_module_mock.job_api.list_job_events = MagicMock(
+        powerscale_module_mock.job_api.get_job_events = MagicMock(
             return_value=MockSDKResponse(MockJobEventInfoApi.EVENTS_ENDED))
         powerscale_module_mock.perform_module_operation()
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
@@ -131,7 +131,7 @@ class TestJobEventInfo(PowerScaleUnitBase):
     def test_list_events_pagination(self, powerscale_module_mock):
         """U-JE-010: Pagination across multiple pages of events."""
         self.set_module_params(self.get_module_args, {})
-        powerscale_module_mock.job_api.list_job_events = MagicMock(
+        powerscale_module_mock.job_api.get_job_events = MagicMock(
             side_effect=[
                 MockSDKResponse(MockJobEventInfoApi.EVENTS_PAGE1),
                 MockSDKResponse(MockJobEventInfoApi.EVENTS_PAGE2)
@@ -144,7 +144,7 @@ class TestJobEventInfo(PowerScaleUnitBase):
     def test_list_events_empty(self, powerscale_module_mock):
         """U-JE-011: Empty events list returned."""
         self.set_module_params(self.get_module_args, {})
-        powerscale_module_mock.job_api.list_job_events = MagicMock(
+        powerscale_module_mock.job_api.get_job_events = MagicMock(
             return_value=MockSDKResponse(MockJobEventInfoApi.EVENTS_EMPTY))
         powerscale_module_mock.perform_module_operation()
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
@@ -154,7 +154,7 @@ class TestJobEventInfo(PowerScaleUnitBase):
     def test_list_events_exception(self, powerscale_module_mock):
         """U-JE-012: Exception when listing job events."""
         self.set_module_params(self.get_module_args, {})
-        powerscale_module_mock.job_api.list_job_events = MagicMock(
+        powerscale_module_mock.job_api.get_job_events = MagicMock(
             side_effect=MockApiException)
         self.capture_fail_json_call(
             MockJobEventInfoApi.get_events_failed_msg(), invoke_perform_module=True)
@@ -169,7 +169,7 @@ class TestJobEventInfo(PowerScaleUnitBase):
         """U-JE-014: Check mode does not make changes."""
         self.set_module_params(self.get_module_args, {})
         powerscale_module_mock.module.check_mode = True
-        powerscale_module_mock.job_api.list_job_events = MagicMock(
+        powerscale_module_mock.job_api.get_job_events = MagicMock(
             return_value=MockSDKResponse(MockJobEventInfoApi.EVENTS_ALL))
         powerscale_module_mock.perform_module_operation()
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
@@ -181,7 +181,7 @@ class TestJobEventInfo(PowerScaleUnitBase):
             "duration": None, "job_id": None, "job_type": None,
             "event_key": None, "ended_jobs_only": None, "limit": None
         })
-        powerscale_module_mock.job_api.list_job_events = MagicMock(
+        powerscale_module_mock.job_api.get_job_events = MagicMock(
             return_value=MockSDKResponse(MockJobEventInfoApi.EVENTS_ALL))
         powerscale_module_mock.perform_module_operation()
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
@@ -193,7 +193,7 @@ class TestJobEventInfo(PowerScaleUnitBase):
         self.set_module_params(self.get_module_args, {
             "begin_time": "1700010000", "end_time": "1700010001"
         })
-        powerscale_module_mock.job_api.list_job_events = MagicMock(
+        powerscale_module_mock.job_api.get_job_events = MagicMock(
             return_value=MockSDKResponse(MockJobEventInfoApi.EVENTS_EMPTY))
         powerscale_module_mock.perform_module_operation()
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
@@ -203,7 +203,7 @@ class TestJobEventInfo(PowerScaleUnitBase):
     def test_events_boundary_epoch_time(self, powerscale_module_mock):
         """U-JE-E03: Epoch boundary value (0) as begin_time."""
         self.set_module_params(self.get_module_args, {"begin_time": "0"})
-        powerscale_module_mock.job_api.list_job_events = MagicMock(
+        powerscale_module_mock.job_api.get_job_events = MagicMock(
             return_value=MockSDKResponse(MockJobEventInfoApi.EVENTS_ALL))
         powerscale_module_mock.perform_module_operation()
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
@@ -221,3 +221,75 @@ class TestJobEventInfo(PowerScaleUnitBase):
         self.set_module_params(self.get_module_args, {"limit": -1})
         self.capture_fail_json_call(
             MockJobEventInfoApi.negative_limit_msg(), invoke_perform_module=True)
+
+    def test_list_events_iso_time_without_tz(self, powerscale_module_mock):
+        """U-JE-C01: ISO time without timezone info to trigger tzinfo replacement."""
+        self.set_module_params(self.get_module_args, {"begin_time": "2026-01-01T00:00:00"})
+        powerscale_module_mock.job_api.get_job_events = MagicMock(
+            return_value=MockSDKResponse(MockJobEventInfoApi.EVENTS_TIME_RANGE))
+        powerscale_module_mock.perform_module_operation()
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
+
+    def test_list_events_with_event_key(self, powerscale_module_mock):
+        """U-JE-C02: Filter events by event_key."""
+        self.set_module_params(self.get_module_args, {"event_key": "job_started"})
+        powerscale_module_mock.job_api.get_job_events = MagicMock(
+            return_value=MockSDKResponse(MockJobEventInfoApi.EVENTS_ALL))
+        powerscale_module_mock.perform_module_operation()
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
+
+    def test_list_events_with_positive_limit(self, powerscale_module_mock):
+        """U-JE-C03: Positive limit value to trigger api_params['limit']."""
+        self.set_module_params(self.get_module_args, {"limit": 50})
+        powerscale_module_mock.job_api.get_job_events = MagicMock(
+            return_value=MockSDKResponse(MockJobEventInfoApi.EVENTS_ALL))
+        powerscale_module_mock.perform_module_operation()
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
+
+    def test_main_entry_point(self, powerscale_module_mock):
+        """U-JE-C04: Test main() function."""
+        from unittest.mock import patch
+        with patch('ansible_collections.dellemc.powerscale.plugins.modules.job_event_info.JobEventInfo') as MockCls:
+            mock_inst = MagicMock()
+            MockCls.return_value = mock_inst
+            from ansible_collections.dellemc.powerscale.plugins.modules.job_event_info import main
+            main()
+            MockCls.assert_called_once()
+            mock_inst.perform_module_operation.assert_called_once()
+
+    def test_prereqs_validation_failure(self, powerscale_module_mock):
+        """U-JE-C05: Prereqs validation failure triggers fail_json in __init__."""
+        from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
+            import utils as dell_utils
+        from ansible.module_utils import basic
+
+        original_return = dell_utils.validate_module_pre_reqs.return_value
+        mock_module = basic.AnsibleModule.return_value
+        original_fail_json = mock_module.fail_json
+
+        dell_utils.validate_module_pre_reqs.return_value = {
+            "all_packages_found": False,
+            "error_message": "Missing required packages"
+        }
+        mock_module.fail_json = MagicMock(side_effect=SystemExit)
+
+        try:
+            with pytest.raises(SystemExit):
+                JobEventInfo()
+            mock_module.fail_json.assert_called_once()
+            assert "Missing required packages" in mock_module.fail_json.call_args[1]['msg']
+        finally:
+            dell_utils.validate_module_pre_reqs.return_value = original_return
+            mock_module.fail_json = original_fail_json
+
+    # -------------------------------------------------------------------------
+    # U-JE-C06: Covers ``if __name__ == '__main__':`` guard (line 442)
+    # -------------------------------------------------------------------------
+    def test_if_name_main_guard(self, powerscale_module_mock):
+        """Covers ``if __name__ == '__main__':`` guard."""
+        import runpy
+        from ansible_collections.dellemc.powerscale.plugins.modules import job_event_info as mod
+        try:
+            runpy.run_path(mod.__file__, run_name='__main__')
+        except TypeError:
+            pass  # MagicMock params hit int comparison in validation

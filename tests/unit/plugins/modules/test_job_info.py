@@ -160,7 +160,7 @@ class TestJobInfo(PowerScaleUnitBase):
         powerscale_module_mock.job_api = MagicMock()
         powerscale_module_mock.job_api.list_job_jobs = MagicMock(
             return_value=MockSDKResponse(MockJobInfoApi.JOBS_LIST))
-        powerscale_module_mock.job_api.list_job_recent = MagicMock(
+        powerscale_module_mock.job_api.get_job_recent = MagicMock(
             side_effect=MockApiException)
         self.capture_fail_json_call(
             MockJobInfoApi.get_recent_jobs_failed_msg(), invoke_perform_module=True)
@@ -250,3 +250,63 @@ class TestJobInfo(PowerScaleUnitBase):
             side_effect=MockApiException(404, "Not Found"))
         self.capture_fail_json_call(
             MockJobInfoApi.get_job_by_id_failed_msg(), invoke_perform_module=True)
+
+    # U-JI-C01: List jobs with multiple state filters
+    def test_list_jobs_multiple_states(self, powerscale_module_mock):
+        self.set_module_params(self.get_module_args, {
+            "state": ["running", "paused_user"]
+        })
+        powerscale_module_mock.job_api = MagicMock()
+        powerscale_module_mock.job_api.list_job_jobs = MagicMock(
+            side_effect=[
+                MockSDKResponse(MockJobInfoApi.JOBS_LIST),
+                MockSDKResponse(MockJobInfoApi.JOBS_PAUSED_LIST)
+            ])
+        powerscale_module_mock.perform_module_operation()
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
+
+    # U-JI-C02: Test main() entry point
+    def test_main_entry_point(self, powerscale_module_mock):
+        from unittest.mock import patch
+        with patch('ansible_collections.dellemc.powerscale.plugins.modules.job_info.JobInfo') as MockCls:
+            mock_inst = MagicMock()
+            MockCls.return_value = mock_inst
+            from ansible_collections.dellemc.powerscale.plugins.modules.job_info import main
+            main()
+            MockCls.assert_called_once()
+            mock_inst.perform_module_operation.assert_called_once()
+
+    # U-JI-C03: Prereqs validation failure (line 224)
+    def test_prereqs_validation_failure(self, powerscale_module_mock):
+        """U-JI-C03: Prereqs validation failure triggers fail_json in __init__."""
+        from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
+            import utils as dell_utils
+        from ansible.module_utils import basic
+
+        original_return = dell_utils.validate_module_pre_reqs.return_value
+        mock_module = basic.AnsibleModule.return_value
+        original_fail_json = mock_module.fail_json
+
+        dell_utils.validate_module_pre_reqs.return_value = {
+            "all_packages_found": False,
+            "error_message": "Missing required packages"
+        }
+        mock_module.fail_json = MagicMock(side_effect=SystemExit)
+
+        try:
+            with pytest.raises(SystemExit):
+                JobInfo()
+            mock_module.fail_json.assert_called_once()
+            assert "Missing required packages" in mock_module.fail_json.call_args[1]['msg']
+        finally:
+            dell_utils.validate_module_pre_reqs.return_value = original_return
+            mock_module.fail_json = original_fail_json
+
+    # -------------------------------------------------------------------------
+    # U-JI-C04: Covers ``if __name__ == '__main__':`` guard (line 400)
+    # -------------------------------------------------------------------------
+    def test_if_name_main_guard(self, powerscale_module_mock):
+        """Covers ``if __name__ == '__main__':`` guard."""
+        import runpy
+        from ansible_collections.dellemc.powerscale.plugins.modules import job_info as mod
+        runpy.run_path(mod.__file__, run_name='__main__')

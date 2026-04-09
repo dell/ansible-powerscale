@@ -588,3 +588,175 @@ class TestJob(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobApi.JOB_CANCELLED))
         self.capture_fail_json_call(
             MockJobApi.wrong_state_error_msg(), invoke_perform_module=True)
+
+    # =========================================================================
+    # Coverage Gap Tests
+    # =========================================================================
+
+    # -------------------------------------------------------------------------
+    # U-JB-C01: find_job_by_type raises exception (lines 336-340)
+    # -------------------------------------------------------------------------
+    def test_find_job_by_type_exception(self, powerscale_module_mock):
+        """U-JB-C01: find_job_by_type raises exception."""
+        self.set_module_params(self.get_module_args, {
+            "job_type": "TreeDelete",
+            "paths": ["/ifs"],
+            "state": "present"
+        })
+        powerscale_module_mock.job_api.list_job_jobs = MagicMock(
+            side_effect=MockApiException)
+        self.capture_fail_json_call(
+            'Failed to list jobs', invoke_perform_module=True)
+
+    # -------------------------------------------------------------------------
+    # U-JB-C02: start_job returns None (lines 367, 517)
+    # -------------------------------------------------------------------------
+    def test_start_job_returns_none(self, powerscale_module_mock):
+        """U-JB-C02: start_job returns None (no response from API)."""
+        self.set_module_params(self.get_module_args, {
+            "job_type": "TreeDelete",
+            "paths": ["/ifs/data"],
+            "state": "present"
+        })
+        powerscale_module_mock.job_api.list_job_jobs = MagicMock(
+            return_value=MockSDKResponse(MockJobApi.JOBS_LIST_EMPTY))
+        powerscale_module_mock.job_api.create_job_job = MagicMock(
+            return_value=None)
+        powerscale_module_mock.perform_module_operation()
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        assert powerscale_module_mock.module.exit_json.call_args[1]['job_details'] is None
+
+    # -------------------------------------------------------------------------
+    # U-JB-C03: modify_job raises exception (lines 395-399)
+    # -------------------------------------------------------------------------
+    def test_modify_job_exception(self, powerscale_module_mock):
+        """U-JB-C03: modify_job raises exception."""
+        self.set_module_params(self.get_module_args, {
+            "job_id": 42,
+            "priority": 2,
+            "state": "present"
+        })
+        powerscale_module_mock.job_api.get_job_job = MagicMock(
+            return_value=MockSDKResponse(MockJobApi.JOB_RUNNING))
+        powerscale_module_mock.job_api.update_job_job = MagicMock(
+            side_effect=MockApiException)
+        self.capture_fail_json_call(
+            'Failed to modify job', invoke_perform_module=True)
+
+    # -------------------------------------------------------------------------
+    # U-JB-C04: Job not found during wait_for_completion (lines 413-414)
+    # -------------------------------------------------------------------------
+    def test_wait_job_not_found_during_wait(self, powerscale_module_mock):
+        """U-JB-C04: Job not found during wait_for_completion."""
+        self.set_module_params(self.get_module_args, {
+            "job_type": "TreeDelete",
+            "paths": ["/ifs/data"],
+            "wait": True,
+            "wait_timeout": 30,
+            "state": "present"
+        })
+        powerscale_module_mock.job_api.list_job_jobs = MagicMock(
+            return_value=MockSDKResponse(MockJobApi.JOBS_LIST_EMPTY))
+        powerscale_module_mock.job_api.create_job_job = MagicMock(
+            return_value=MockSDKResponse(MockJobApi.CREATE_JOB_RESPONSE))
+        powerscale_module_mock.job_api.get_job_job = MagicMock(
+            side_effect=[
+                MockSDKResponse(MockJobApi.JOB_CREATED),
+                MockSDKResponse({"jobs": []})
+            ])
+        powerscale_module_mock.perform_module_operation()
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+
+    # -------------------------------------------------------------------------
+    # U-JB-C05: get_job_details returns None - empty response (lines 312, 527)
+    # -------------------------------------------------------------------------
+    def test_control_job_not_found_empty_response(self, powerscale_module_mock):
+        """U-JB-C05: Control scenario: get_job_details returns None (empty response)."""
+        self.set_module_params(self.get_module_args, {
+            "job_id": 42,
+            "job_state": "paused",
+            "state": "present"
+        })
+        powerscale_module_mock.job_api.get_job_job = MagicMock(
+            return_value=MockSDKResponse({"jobs": []}))
+        self.capture_fail_json_call(
+            'not found', invoke_perform_module=True)
+
+    # -------------------------------------------------------------------------
+    # U-JB-C06: Pause + modify priority with diff mode (line 625)
+    # -------------------------------------------------------------------------
+    def test_pause_and_modify_priority_with_diff(self, powerscale_module_mock):
+        """U-JB-C06: Pause job + modify priority with diff mode to trigger diff_dict update."""
+        self.set_module_params(self.get_module_args, {
+            "job_id": 42,
+            "job_state": "paused",
+            "priority": 2,
+            "state": "present"
+        })
+        powerscale_module_mock.module._diff = True
+        powerscale_module_mock.job_api.get_job_job = MagicMock(
+            side_effect=[
+                MockSDKResponse(MockJobApi.JOB_RUNNING),
+                MockSDKResponse(MockJobApi.JOB_PAUSED),
+                MockSDKResponse(MockJobApi.JOB_MODIFIED_PRIORITY)
+            ])
+        powerscale_module_mock.job_api.update_job_job = MagicMock(
+            return_value=None)
+        powerscale_module_mock.perform_module_operation()
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        call_kwargs = powerscale_module_mock.module.exit_json.call_args[1]
+        assert 'diff' in call_kwargs
+
+    # -------------------------------------------------------------------------
+    # U-JB-C07: Test main() function (lines 674-675, 679)
+    # -------------------------------------------------------------------------
+    def test_main_entry_point(self, powerscale_module_mock):
+        """U-JB-C07: Test main() function."""
+        from unittest.mock import patch
+        with patch('ansible_collections.dellemc.powerscale.plugins.modules.job.Job') as MockJobClass:
+            mock_instance = MagicMock()
+            MockJobClass.return_value = mock_instance
+            from ansible_collections.dellemc.powerscale.plugins.modules.job import main
+            main()
+            MockJobClass.assert_called_once()
+            mock_instance.perform_module_operation.assert_called_once()
+
+    # -------------------------------------------------------------------------
+    # U-JB-C08: Prereqs validation failure (line 291)
+    # -------------------------------------------------------------------------
+    def test_prereqs_validation_failure(self, powerscale_module_mock):
+        """U-JB-C08: Prereqs validation failure triggers fail_json in __init__."""
+        from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
+            import utils as dell_utils
+        from ansible.module_utils import basic
+
+        original_return = dell_utils.validate_module_pre_reqs.return_value
+        mock_module = basic.AnsibleModule.return_value
+        original_fail_json = mock_module.fail_json
+
+        dell_utils.validate_module_pre_reqs.return_value = {
+            "all_packages_found": False,
+            "error_message": "Missing required packages"
+        }
+        mock_module.fail_json = MagicMock(side_effect=SystemExit)
+
+        try:
+            with pytest.raises(SystemExit):
+                Job()
+            mock_module.fail_json.assert_called_once()
+            assert "Missing required packages" in mock_module.fail_json.call_args[1]['msg']
+        finally:
+            dell_utils.validate_module_pre_reqs.return_value = original_return
+            mock_module.fail_json = original_fail_json
+
+    # -------------------------------------------------------------------------
+    # U-JB-C09: Covers ``if __name__ == '__main__':`` guard (line 679)
+    # -------------------------------------------------------------------------
+    def test_if_name_main_guard(self, powerscale_module_mock):
+        """Covers ``if __name__ == '__main__':`` guard."""
+        import runpy
+        from ansible_collections.dellemc.powerscale.plugins.modules import job as mod
+        try:
+            runpy.run_path(mod.__file__, run_name='__main__')
+        except TypeError:
+            pass  # MagicMock params hit int comparison in validation

@@ -120,3 +120,65 @@ class TestJobTypeInfo(PowerScaleUnitBase):
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
         job_types = powerscale_module_mock.module.exit_json.call_args[1]['job_types']
         assert len(job_types) == 0
+
+    def test_list_types_with_dir_param(self, powerscale_module_mock):
+        """U-JT-C01: List types with dir parameter."""
+        self.set_module_params(self.get_module_args, {"dir": "DESC"})
+        powerscale_module_mock.job_api.get_job_types = MagicMock(
+            return_value=MockSDKResponse(MockJobTypeInfoApi.TYPES_VISIBLE))
+        powerscale_module_mock.perform_module_operation()
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
+
+    def test_get_type_non_404_exception(self, powerscale_module_mock):
+        """U-JT-C02: Non-404 exception when getting job type."""
+        self.set_module_params(self.get_module_args, {"job_type_id": "SmartPools"})
+        powerscale_module_mock.job_api.get_job_type = MagicMock(
+            side_effect=MockApiException(status=500, body="Internal server error"))
+        self.capture_fail_json_call(
+            MockJobTypeInfoApi.get_job_type_failed_msg(), invoke_perform_module=True)
+
+    def test_main_entry_point(self, powerscale_module_mock):
+        """U-JT-C03: Test main() function."""
+        from unittest.mock import patch
+        with patch('ansible_collections.dellemc.powerscale.plugins.modules.job_type_info.JobTypeInfo') as MockCls:
+            mock_inst = MagicMock()
+            MockCls.return_value = mock_inst
+            from ansible_collections.dellemc.powerscale.plugins.modules.job_type_info import main
+            main()
+            MockCls.assert_called_once()
+            mock_inst.perform_module_operation.assert_called_once()
+
+    def test_get_job_type_404_exception(self, powerscale_module_mock):
+        """U-JT-C04: Get a job type that returns 404 via ApiException."""
+        self.set_module_params(self.get_module_args, {"job_type_id": "NonExistent"})
+        powerscale_module_mock.job_api.get_job_type = MagicMock(
+            side_effect=MockApiException(status=404, body="Not found"))
+        powerscale_module_mock.perform_module_operation()
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
+        job_types = powerscale_module_mock.module.exit_json.call_args[1]['job_types']
+        assert job_types == {}
+
+    def test_prereqs_validation_failure(self, powerscale_module_mock):
+        """U-JT-C05: Test __init__ fails when prereqs validation fails."""
+        from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
+            import utils as real_utils
+        original_return = real_utils.validate_module_pre_reqs.return_value
+        real_utils.validate_module_pre_reqs.return_value = {
+            "all_packages_found": False,
+            "error_message": "Missing required packages"
+        }
+        try:
+            obj = JobTypeInfo()
+            obj.module.fail_json.assert_any_call(
+                msg="Missing required packages")
+        finally:
+            real_utils.validate_module_pre_reqs.return_value = original_return
+
+    # -------------------------------------------------------------------------
+    # U-JT-C06: Covers ``if __name__ == '__main__':`` guard (line 288)
+    # -------------------------------------------------------------------------
+    def test_if_name_main_guard(self, powerscale_module_mock):
+        """Covers ``if __name__ == '__main__':`` guard."""
+        import runpy
+        from ansible_collections.dellemc.powerscale.plugins.modules import job_type_info as mod
+        runpy.run_path(mod.__file__, run_name='__main__')

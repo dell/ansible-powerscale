@@ -67,6 +67,8 @@ POLICY_MODIFIED = {
     ]
 }
 
+POLICIES_LIST_MODIFIED = {"policies": [POLICY_MODIFIED, POLICY_SYSTEM, POLICY_2]}
+
 
 def create_policy_failed_msg():
     return 'Failed to create job policy'
