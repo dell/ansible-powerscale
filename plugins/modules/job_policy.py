@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # Copyright: (c) 2024, Dell Technologies
 
-# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+# GNU General Public License v3.0+ (see COPYING or
+# https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """Ansible module for managing job policies on PowerScale"""
 
@@ -346,7 +347,8 @@ class JobPolicy(object):
         """
         Modify an existing job policy.
         :param policy_id: The policy ID to modify.
-        :param kwargs: Keyword arguments for modification (description, intervals).
+        :param kwargs: Keyword arguments for modification (description,
+            intervals).
         :return: True if modification is successful.
         """
         try:

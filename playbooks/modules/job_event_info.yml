@@ -1,5 +1,5 @@
 ---
-- name: Sample playbook for retrieving Job Event information on Dell EMC PowerScale.
+- name: Sample playbook for retrieving Job Event information.
   hosts: localhost
   connection: local
   vars:

@@ -1,6 +1,7 @@
 # Copyright: (c) 2025, Dell Technologies
 
-# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+# GNU General Public License v3.0+ (see COPYING or
+# https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """Mock API responses for PowerScale Job Info module"""
 
@@ -8,7 +9,8 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 
-MODULE_UTILS_PATH = 'ansible_collections.dellemc.powerscale.plugins.modules.job_info.utils'
+MODULE_UTILS_PATH = ('ansible_collections.dellemc.powerscale.'
+    'plugins.modules.job_info.utils')
 
 COMMON_ARGS = {
     "onefs_host": "test.example.com",
@@ -83,14 +85,28 @@ JOBS_SORTED_ASC = {"jobs": [JOB_1, JOB_2, JOB_3], "resume": None}
 JOBS_SORTED_DESC = {"jobs": [JOB_3, JOB_2, JOB_1], "resume": None}
 JOBS_LIMITED = {"jobs": [JOB_1], "resume": None}
 JOBS_EMPTY = {"jobs": [], "resume": None}
-JOBS_NULL_FIELDS = {"jobs": [{"id": 50, "type": "SmartPools", "state": None,
-                              "priority": None, "policy": None, "description": None,
-                              "start_time": None, "end_time": None, "progress": None,
-                              "paths": None, "parameters": None}], "resume": None}
+JOBS_NULL_FIELDS = {"jobs": [{"id": 50,
+    "type": "SmartPools",
+    "state": None,
+    "priority": None,
+    "policy": None,
+    "description": None,
+    "start_time": None,
+    "end_time": None,
+    "progress": None,
+    "paths": None,
+    "parameters": None}],
+     "resume": None}
 
 RECENT_JOBS = {"jobs": [
-    {"id": 40, "type": "SmartPools", "state": "succeeded", "end_time": 1699999000},
-    {"id": 41, "type": "TreeDelete", "state": "succeeded", "end_time": 1699998000}
+    {"id": 40,
+     "type": "SmartPools",
+     "state": "succeeded",
+     "end_time": 1699999000},
+    {"id": 41,
+     "type": "TreeDelete",
+     "state": "succeeded",
+     "end_time": 1699998000}
 ]}
 
 JOB_SUMMARY = {

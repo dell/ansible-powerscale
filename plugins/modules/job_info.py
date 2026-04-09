@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # Copyright: (c) 2025, Dell Technologies
 
-# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+# GNU General Public License v3.0+ (see COPYING or
+# https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """Ansible module for retrieving job information on PowerScale"""
 
@@ -40,7 +41,8 @@ options:
     - Multiple states can be specified to match any of the given states.
     type: list
     elements: str
-    choices: ['running', 'paused_user', 'paused_system', 'paused_policy', 'paused_priority']
+    choices: ['running', 'paused_user', 'paused_system', 'paused_policy',
+        'paused_priority']
 
   job_type:
     description:
@@ -314,7 +316,9 @@ class JobInfo(object):
         if job_id is not None:
             job_details = self.get_job_details(job_id)
             if job_details is not None:
-                result['job_details'] = [job_details] if not isinstance(job_details, list) else job_details
+                result['job_details'] = [job_details] if not isinstance(
+                    job_details,
+                    list) else job_details
                 result['total_jobs'] = len(result['job_details'])
         else:
             # Build filter parameters for list_job_jobs

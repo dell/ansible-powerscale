@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # Copyright: (c) 2024, Dell Technologies
 
-# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+# GNU General Public License v3.0+ (see COPYING or
+# https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """Ansible module for managing jobs on PowerScale"""
 
@@ -260,7 +261,10 @@ LOG = utils.get_logger('job')
 TERMINAL_STATES = ('succeeded', 'failed', 'cancelled_user', 'cancelled_system')
 
 # Paused states
-PAUSED_STATES = ('paused_user', 'paused_system', 'paused_policy', 'paused_priority')
+PAUSED_STATES = ('paused_user',
+                 'paused_system',
+                 'paused_policy',
+                 'paused_priority')
 
 # Running states
 RUNNING_STATES = ('running',)
@@ -329,8 +333,8 @@ class Job(object):
                 response_dict = api_response.to_dict()
                 if response_dict and 'jobs' in response_dict:
                     for job in response_dict['jobs']:
-                        if job.get('type') == job_type \
-                                and job.get('state') in RUNNING_STATES + PAUSED_STATES:
+                        if job.get('type') == job_type and job.get(
+                            'state') in RUNNING_STATES + PAUSED_STATES:
                             return job
             return None
         except utils.ApiException as e:
@@ -376,7 +380,8 @@ class Job(object):
         """
         Modify an existing job.
         :param job_id: The job ID to modify.
-        :param kwargs: Keyword arguments for modification (control, priority, policy).
+        :param kwargs: Keyword arguments for modification (control, priority,
+            policy).
         :return: True if modification is successful.
         """
         try:

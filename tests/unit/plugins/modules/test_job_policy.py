@@ -1,6 +1,7 @@
 # Copyright: (c) 2025, Dell Technologies
 
-# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+# GNU General Public License v3.0+ (see COPYING or
+# https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """Unit Tests for Job Policy module on PowerScale"""
 
@@ -11,17 +12,26 @@ __metaclass__ = type
 import pytest
 from mock.mock import MagicMock
 # pylint: disable=unused-import
-from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.initial_mock \
+from ansible_collections.dellemc.powerscale\
+    .tests.unit.plugins.module_utils\
+    .shared_library.initial_mock \
     import utils
 
-from ansible_collections.dellemc.powerscale.plugins.modules.job_policy import JobPolicy
+from ansible_collections.dellemc.powerscale.plugins.modules.job_policy \
+    import JobPolicy
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.\
     module_utils import mock_job_policy_api as MockJobPolicyApi
-from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_sdk_response \
+from ansible_collections.dellemc.powerscale\
+    .tests.unit.plugins.module_utils\
+    .mock_sdk_response \
     import MockSDKResponse
-from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_api_exception \
+from ansible_collections.dellemc.powerscale\
+    .tests.unit.plugins.module_utils\
+    .mock_api_exception \
     import MockApiException
-from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.powerscale_unit_base \
+from ansible_collections.dellemc.powerscale\
+    .tests.unit.plugins.module_utils\
+    .shared_library.powerscale_unit_base \
     import PowerScaleUnitBase
 
 
@@ -39,19 +49,24 @@ class TestJobPolicy(PowerScaleUnitBase):
         self.set_module_params(self.get_module_args, {
             "policy_name": "TestPolicy",
             "intervals": [
-                {"begin": "Monday 08:00", "end": "Friday 17:00", "impact": "Low"}
+                {"begin": "Monday 08:00",
+                 "end": "Friday 17:00",
+                 "impact": "Low"}
             ],
             "state": "present"
         })
         powerscale_module_mock.job_api.list_job_policies = MagicMock(
             return_value=MockSDKResponse(MockJobPolicyApi.POLICIES_LIST))
         powerscale_module_mock.job_api.create_job_policy = MagicMock(
-            return_value=MockSDKResponse(MockJobPolicyApi.CREATE_POLICY_RESPONSE))
+            return_value=MockSDKResponse(
+                MockJobPolicyApi.CREATE_POLICY_RESPONSE))
         powerscale_module_mock.job_api.get_job_policy = MagicMock(
             return_value=MockSDKResponse(MockJobPolicyApi.POLICY_1))
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.create_job_policy.assert_called()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
     # U-JP-002: Create policy that already exists (idempotent)
@@ -61,8 +76,12 @@ class TestJobPolicy(PowerScaleUnitBase):
             "policy_name": "BusinessHours",
             "description": "Low impact during business hours",
             "intervals": [
-                {"begin": "Monday 08:00", "end": "Friday 17:00", "impact": "Low"},
-                {"begin": "Saturday 00:00", "end": "Sunday 23:59", "impact": "High"}
+                {"begin": "Monday 08:00",
+                 "end": "Friday 17:00",
+                 "impact": "Low"},
+                {"begin": "Saturday 00:00",
+                 "end": "Sunday 23:59",
+                 "impact": "High"}
             ],
             "state": "present"
         })
@@ -70,7 +89,9 @@ class TestJobPolicy(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobPolicyApi.POLICIES_LIST))
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.create_job_policy.assert_not_called()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is False
 
     # -------------------------------------------------------------------------
     # U-JP-003: Create policy raises exception on SDK error
@@ -79,7 +100,9 @@ class TestJobPolicy(PowerScaleUnitBase):
         self.set_module_params(self.get_module_args, {
             "policy_name": "TestPolicy",
             "intervals": [
-                {"begin": "Monday 08:00", "end": "Friday 17:00", "impact": "Low"}
+                {"begin": "Monday 08:00",
+                 "end": "Friday 17:00",
+                 "impact": "Low"}
             ],
             "state": "present"
         })
@@ -88,7 +111,8 @@ class TestJobPolicy(PowerScaleUnitBase):
         powerscale_module_mock.job_api.create_job_policy = MagicMock(
             side_effect=MockApiException)
         self.capture_fail_json_call(
-            MockJobPolicyApi.create_policy_failed_msg(), invoke_perform_module=True)
+    MockJobPolicyApi.create_policy_failed_msg(),
+     invoke_perform_module=True)
 
     # -------------------------------------------------------------------------
     # U-JP-004: Modify policy description
@@ -109,7 +133,9 @@ class TestJobPolicy(PowerScaleUnitBase):
             return_value=None)
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.update_job_policy.assert_called()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
     # U-JP-005: Modify policy intervals
@@ -118,7 +144,9 @@ class TestJobPolicy(PowerScaleUnitBase):
         self.set_module_params(self.get_module_args, {
             "policy_name": "BusinessHours",
             "intervals": [
-                {"begin": "Monday 09:00", "end": "Friday 18:00", "impact": "Medium"}
+                {"begin": "Monday 09:00",
+                 "end": "Friday 18:00",
+                 "impact": "Medium"}
             ],
             "state": "present"
         })
@@ -132,7 +160,9 @@ class TestJobPolicy(PowerScaleUnitBase):
             return_value=None)
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.update_job_policy.assert_called()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
     # U-JP-006: Modify policy with no actual change (idempotent)
@@ -142,8 +172,12 @@ class TestJobPolicy(PowerScaleUnitBase):
             "policy_name": "BusinessHours",
             "description": "Low impact during business hours",
             "intervals": [
-                {"begin": "Monday 08:00", "end": "Friday 17:00", "impact": "Low"},
-                {"begin": "Saturday 00:00", "end": "Sunday 23:59", "impact": "High"}
+                {"begin": "Monday 08:00",
+                 "end": "Friday 17:00",
+                 "impact": "Low"},
+                {"begin": "Saturday 00:00",
+                 "end": "Sunday 23:59",
+                 "impact": "High"}
             ],
             "state": "present"
         })
@@ -151,7 +185,9 @@ class TestJobPolicy(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobPolicyApi.POLICIES_LIST))
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.update_job_policy.assert_not_called()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is False
 
     # -------------------------------------------------------------------------
     # U-JP-007: Modify policy raises exception on SDK error
@@ -167,7 +203,8 @@ class TestJobPolicy(PowerScaleUnitBase):
         powerscale_module_mock.job_api.update_job_policy = MagicMock(
             side_effect=MockApiException)
         self.capture_fail_json_call(
-            MockJobPolicyApi.modify_policy_failed_msg(), invoke_perform_module=True)
+    MockJobPolicyApi.modify_policy_failed_msg(),
+     invoke_perform_module=True)
 
     # -------------------------------------------------------------------------
     # U-JP-008: Delete policy successfully
@@ -183,7 +220,9 @@ class TestJobPolicy(PowerScaleUnitBase):
             return_value=None)
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.delete_job_policy.assert_called()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
     # U-JP-009: Delete policy that does not exist (idempotent)
@@ -197,7 +236,9 @@ class TestJobPolicy(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobPolicyApi.POLICIES_LIST))
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.delete_job_policy.assert_not_called()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is False
 
     # -------------------------------------------------------------------------
     # U-JP-010: Delete policy raises exception on SDK error
@@ -212,7 +253,8 @@ class TestJobPolicy(PowerScaleUnitBase):
         powerscale_module_mock.job_api.delete_job_policy = MagicMock(
             side_effect=MockApiException)
         self.capture_fail_json_call(
-            MockJobPolicyApi.delete_policy_failed_msg(), invoke_perform_module=True)
+    MockJobPolicyApi.delete_policy_failed_msg(),
+     invoke_perform_module=True)
 
     # -------------------------------------------------------------------------
     # U-JP-011: Delete system policy should be rejected
@@ -225,7 +267,8 @@ class TestJobPolicy(PowerScaleUnitBase):
         powerscale_module_mock.job_api.list_job_policies = MagicMock(
             return_value=MockSDKResponse(MockJobPolicyApi.POLICIES_LIST))
         self.capture_fail_json_call(
-            MockJobPolicyApi.system_policy_protect_msg(), invoke_perform_module=True)
+    MockJobPolicyApi.system_policy_protect_msg(),
+     invoke_perform_module=True)
 
     # -------------------------------------------------------------------------
     # U-JP-012: Get policy details by name
@@ -239,7 +282,9 @@ class TestJobPolicy(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobPolicyApi.POLICIES_LIST))
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.list_job_policies.assert_called()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is False
 
     # -------------------------------------------------------------------------
     # U-JP-013: Check mode for create policy (no API calls made)
@@ -248,7 +293,9 @@ class TestJobPolicy(PowerScaleUnitBase):
         self.set_module_params(self.get_module_args, {
             "policy_name": "NewPolicy",
             "intervals": [
-                {"begin": "Monday 08:00", "end": "Friday 17:00", "impact": "Low"}
+                {"begin": "Monday 08:00",
+                 "end": "Friday 17:00",
+                 "impact": "Low"}
             ],
             "state": "present"
         })
@@ -257,7 +304,9 @@ class TestJobPolicy(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobPolicyApi.POLICIES_LIST))
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.create_job_policy.assert_not_called()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
     # U-JP-014: Check mode for delete policy (no API calls made)
@@ -272,7 +321,9 @@ class TestJobPolicy(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobPolicyApi.POLICIES_LIST))
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.delete_job_policy.assert_not_called()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
     # U-JP-015: Diff mode returns before/after diff on modify
@@ -293,7 +344,9 @@ class TestJobPolicy(PowerScaleUnitBase):
         powerscale_module_mock.job_api.update_job_policy = MagicMock(
             return_value=None)
         powerscale_module_mock.perform_module_operation()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
         call_kwargs = powerscale_module_mock.module.exit_json.call_args[1]
         assert 'diff' in call_kwargs
 
@@ -308,12 +361,15 @@ class TestJobPolicy(PowerScaleUnitBase):
         self.set_module_params(self.get_module_args, {
             "policy_name": None,
             "intervals": [
-                {"begin": "Monday 08:00", "end": "Friday 17:00", "impact": "Low"}
+                {"begin": "Monday 08:00",
+                 "end": "Friday 17:00",
+                 "impact": "Low"}
             ],
             "state": "present"
         })
         self.capture_fail_json_call(
-            MockJobPolicyApi.missing_policy_name_msg(), invoke_perform_module=True)
+    MockJobPolicyApi.missing_policy_name_msg(),
+     invoke_perform_module=True)
 
     # -------------------------------------------------------------------------
     # U-JP-E02: Create policy with empty intervals list
@@ -327,7 +383,8 @@ class TestJobPolicy(PowerScaleUnitBase):
         powerscale_module_mock.job_api.list_job_policies = MagicMock(
             return_value=MockSDKResponse(MockJobPolicyApi.POLICIES_LIST))
         powerscale_module_mock.job_api.create_job_policy = MagicMock(
-            return_value=MockSDKResponse(MockJobPolicyApi.CREATE_POLICY_RESPONSE))
+            return_value=MockSDKResponse(
+                MockJobPolicyApi.CREATE_POLICY_RESPONSE))
         powerscale_module_mock.job_api.get_job_policy = MagicMock(
             return_value=MockSDKResponse({
                 "id": "policy_003",
@@ -338,7 +395,9 @@ class TestJobPolicy(PowerScaleUnitBase):
             }))
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.create_job_policy.assert_called()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
     # U-JP-E03: Modify system policy should be rejected
@@ -352,7 +411,8 @@ class TestJobPolicy(PowerScaleUnitBase):
         powerscale_module_mock.job_api.list_job_policies = MagicMock(
             return_value=MockSDKResponse(MockJobPolicyApi.POLICIES_LIST))
         self.capture_fail_json_call(
-            MockJobPolicyApi.system_policy_protect_msg(), invoke_perform_module=True)
+    MockJobPolicyApi.system_policy_protect_msg(),
+     invoke_perform_module=True)
 
     # -------------------------------------------------------------------------
     # U-JP-E04: Invalid interval format should fail validation
@@ -368,7 +428,8 @@ class TestJobPolicy(PowerScaleUnitBase):
         powerscale_module_mock.job_api.list_job_policies = MagicMock(
             return_value=MockSDKResponse(MockJobPolicyApi.POLICIES_LIST))
         self.capture_fail_json_call(
-            MockJobPolicyApi.invalid_interval_format_msg(), invoke_perform_module=True)
+    MockJobPolicyApi.invalid_interval_format_msg(),
+     invoke_perform_module=True)
 
     # -------------------------------------------------------------------------
     # U-JP-E05: Delete system policy should be rejected (explicit edge case)
@@ -381,7 +442,8 @@ class TestJobPolicy(PowerScaleUnitBase):
         powerscale_module_mock.job_api.list_job_policies = MagicMock(
             return_value=MockSDKResponse(MockJobPolicyApi.POLICIES_LIST))
         self.capture_fail_json_call(
-            MockJobPolicyApi.system_policy_protect_msg(), invoke_perform_module=True)
+    MockJobPolicyApi.system_policy_protect_msg(),
+     invoke_perform_module=True)
 
     # -------------------------------------------------------------------------
     # U-JP-E06: Invalid impact value should fail validation
@@ -390,14 +452,17 @@ class TestJobPolicy(PowerScaleUnitBase):
         self.set_module_params(self.get_module_args, {
             "policy_name": "BadPolicy",
             "intervals": [
-                {"begin": "Monday 08:00", "end": "Friday 17:00", "impact": "INVALID"}
+                {"begin": "Monday 08:00",
+                 "end": "Friday 17:00",
+                 "impact": "INVALID"}
             ],
             "state": "present"
         })
         powerscale_module_mock.job_api.list_job_policies = MagicMock(
             return_value=MockSDKResponse(MockJobPolicyApi.POLICIES_LIST))
         self.capture_fail_json_call(
-            MockJobPolicyApi.bad_impact_value_msg(), invoke_perform_module=True)
+    MockJobPolicyApi.bad_impact_value_msg(),
+     invoke_perform_module=True)
 
     # =========================================================================
     # Coverage Tests for Missing Lines
@@ -427,12 +492,16 @@ class TestJobPolicy(PowerScaleUnitBase):
             "state": "absent"
         })
         powerscale_module_mock.job_api.get_job_policy = MagicMock(
-            return_value=MockSDKResponse({"policies": [MockJobPolicyApi.POLICY_1]}))
+            return_value=MockSDKResponse(
+                {"policies": [MockJobPolicyApi.POLICY_1]}))
         powerscale_module_mock.job_api.delete_job_policy = MagicMock(
             return_value=None)
         powerscale_module_mock.perform_module_operation()
-        powerscale_module_mock.job_api.get_job_policy.assert_called_once_with("policy_001")
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        powerscale_module_mock.job_api.get_job_policy.assert_called_once_with(
+            "policy_001")
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
     # U-JP-C03: get_policy_details 404 exception returns None (lines 309-311)
@@ -446,12 +515,15 @@ class TestJobPolicy(PowerScaleUnitBase):
         powerscale_module_mock.job_api.get_job_policy = MagicMock(
             side_effect=MockApiException(status=404, body="Not found"))
         powerscale_module_mock.perform_module_operation()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is False
 
     # -------------------------------------------------------------------------
     # U-JP-C04: get_policy_details non-404 exception (lines 312-316)
     # -------------------------------------------------------------------------
-    def test_get_policy_details_non_404_exception(self, powerscale_module_mock):
+    def test_get_policy_details_non_404_exception(self,
+                                                  powerscale_module_mock):
         self.set_module_params(self.get_module_args, {
             "policy_name": None,
             "policy_id": "policy_001",
@@ -480,7 +552,9 @@ class TestJobPolicy(PowerScaleUnitBase):
             return_value=None)
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.update_job_policy.assert_called()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is False
 
     # -------------------------------------------------------------------------
     # U-JP-C06: Check mode with diff for modify (lines 542-544)
@@ -496,11 +570,14 @@ class TestJobPolicy(PowerScaleUnitBase):
         powerscale_module_mock.job_api.list_job_policies = MagicMock(
             return_value=MockSDKResponse(MockJobPolicyApi.POLICIES_LIST))
         powerscale_module_mock.perform_module_operation()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
         call_kwargs = powerscale_module_mock.module.exit_json.call_args[1]
         assert 'diff' in call_kwargs
         assert 'job_policy_details' in call_kwargs
-        assert call_kwargs['job_policy_details']['description'] == 'Updated description'
+        assert call_kwargs['job_policy_details']['description'] \
+            == 'Updated description'
 
     # -------------------------------------------------------------------------
     # U-JP-C07: Create policy with diff mode (line 569)
@@ -510,15 +587,19 @@ class TestJobPolicy(PowerScaleUnitBase):
             "policy_name": "NewPolicy",
             "description": "A new policy",
             "intervals": [
-                {"begin": "Monday 08:00", "end": "Friday 17:00", "impact": "Low"}
+                {"begin": "Monday 08:00",
+                 "end": "Friday 17:00",
+                 "impact": "Low"}
             ],
             "state": "present"
         })
         powerscale_module_mock.module._diff = True
         new_policy = {
-            "id": "policy_003", "name": "NewPolicy", "description": "A new policy",
+            "id": "policy_003", "name": "NewPolicy",
+                "description": "A new policy",
             "system": False,
-            "intervals": [{"begin": "Monday 08:00", "end": "Friday 17:00", "impact": "Low"}]
+            "intervals": [{"begin": "Monday 08:00", "end": "Friday 17:00",
+                "impact": "Low"}]
         }
         policies_with_new = {
             "policies": [
@@ -533,9 +614,12 @@ class TestJobPolicy(PowerScaleUnitBase):
                 MockSDKResponse(policies_with_new)
             ])
         powerscale_module_mock.job_api.create_job_policy = MagicMock(
-            return_value=MockSDKResponse(MockJobPolicyApi.CREATE_POLICY_RESPONSE))
+            return_value=MockSDKResponse(
+                MockJobPolicyApi.CREATE_POLICY_RESPONSE))
         powerscale_module_mock.perform_module_operation()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
         call_kwargs = powerscale_module_mock.module.exit_json.call_args[1]
         assert 'diff' in call_kwargs
 
@@ -548,8 +632,12 @@ class TestJobPolicy(PowerScaleUnitBase):
             "policy_name": "BusinessHours",
             "description": "Low impact during business hours",
             "intervals": [
-                {"begin": "Monday 08:00", "end": "Friday 17:00", "impact": "Low"},
-                {"begin": "Saturday 00:00", "end": "Sunday 23:59", "impact": "High"}
+                {"begin": "Monday 08:00",
+                 "end": "Friday 17:00",
+                 "impact": "Low"},
+                {"begin": "Saturday 00:00",
+                 "end": "Sunday 23:59",
+                 "impact": "High"}
             ],
             "state": "present"
         })
@@ -557,8 +645,12 @@ class TestJobPolicy(PowerScaleUnitBase):
         powerscale_module_mock.job_api.list_job_policies = MagicMock(
             return_value=MockSDKResponse(MockJobPolicyApi.POLICIES_LIST))
         powerscale_module_mock.perform_module_operation()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
-        assert powerscale_module_mock.module.exit_json.call_args[1]['job_policy_details'] is not None
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is False
+        ea = (powerscale_module_mock.module
+            .exit_json.call_args[1])
+        assert ea['job_policy_details'] is not None
 
     # -------------------------------------------------------------------------
     # U-JP-C09: Check mode - existing policy, with changes projected
@@ -569,7 +661,9 @@ class TestJobPolicy(PowerScaleUnitBase):
             "policy_name": "BusinessHours",
             "description": "New desc",
             "intervals": [
-                {"begin": "Monday 09:00", "end": "Friday 18:00", "impact": "Medium"}
+                {"begin": "Monday 09:00",
+                 "end": "Friday 18:00",
+                 "impact": "Medium"}
             ],
             "state": "present"
         })
@@ -577,8 +671,12 @@ class TestJobPolicy(PowerScaleUnitBase):
         powerscale_module_mock.job_api.list_job_policies = MagicMock(
             return_value=MockSDKResponse(MockJobPolicyApi.POLICIES_LIST))
         powerscale_module_mock.perform_module_operation()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
-        details = powerscale_module_mock.module.exit_json.call_args[1]['job_policy_details']
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
+        ea = (powerscale_module_mock.module
+            .exit_json.call_args[1])
+        details = ea['job_policy_details']
         assert details['description'] == 'New desc'
         assert len(details['intervals']) == 1
         assert details['intervals'][0]['begin'] == 'Monday 09:00'
@@ -605,8 +703,12 @@ class TestJobPolicy(PowerScaleUnitBase):
         self.set_module_params(self.get_module_args, {
             "policy_name": "BusinessHours",
             "intervals": [
-                {"begin": "Monday 08:00", "end": "Friday 17:00", "impact": "High"},
-                {"begin": "Saturday 00:00", "end": "Sunday 23:59", "impact": "Low"}
+                {"begin": "Monday 08:00",
+                 "end": "Friday 17:00",
+                 "impact": "High"},
+                {"begin": "Saturday 00:00",
+                 "end": "Sunday 23:59",
+                 "impact": "Low"}
             ],
             "state": "present"
         })
@@ -618,13 +720,21 @@ class TestJobPolicy(PowerScaleUnitBase):
         powerscale_module_mock.job_api.list_job_policies = MagicMock(
             side_effect=[
                 MockSDKResponse(MockJobPolicyApi.POLICIES_LIST),
-                MockSDKResponse({"policies": [modified_policy, MockJobPolicyApi.POLICY_SYSTEM, MockJobPolicyApi.POLICY_2]}),
-                MockSDKResponse({"policies": [modified_policy, MockJobPolicyApi.POLICY_SYSTEM, MockJobPolicyApi.POLICY_2]})
+                MockSDKResponse({"policies": [
+                                modified_policy,
+                                    MockJobPolicyApi.POLICY_SYSTEM,
+                                    MockJobPolicyApi.POLICY_2]}),
+                MockSDKResponse({"policies": [
+                                modified_policy,
+                                    MockJobPolicyApi.POLICY_SYSTEM,
+                                    MockJobPolicyApi.POLICY_2]})
             ])
         powerscale_module_mock.job_api.update_job_policy = MagicMock(
             return_value=None)
         powerscale_module_mock.perform_module_operation()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
     # U-JP-C12: Modify policy - only end time differs in intervals (line 425)
@@ -634,26 +744,40 @@ class TestJobPolicy(PowerScaleUnitBase):
         self.set_module_params(self.get_module_args, {
             "policy_name": "BusinessHours",
             "intervals": [
-                {"begin": "Monday 08:00", "end": "Friday 18:00", "impact": "Low"},
-                {"begin": "Saturday 00:00", "end": "Sunday 23:59", "impact": "High"}
+                {"begin": "Monday 08:00",
+                 "end": "Friday 18:00",
+                 "impact": "Low"},
+                {"begin": "Saturday 00:00",
+                 "end": "Sunday 23:59",
+                 "impact": "High"}
             ],
             "state": "present"
         })
         modified_policy = dict(MockJobPolicyApi.POLICY_1)
         modified_policy["intervals"] = [
             {"begin": "Monday 08:00", "end": "Friday 18:00", "impact": "Low"},
-            {"begin": "Saturday 00:00", "end": "Sunday 23:59", "impact": "High"}
+            {"begin": "Saturday 00:00",
+             "end": "Sunday 23:59",
+             "impact": "High"}
         ]
         powerscale_module_mock.job_api.list_job_policies = MagicMock(
             side_effect=[
                 MockSDKResponse(MockJobPolicyApi.POLICIES_LIST),
-                MockSDKResponse({"policies": [modified_policy, MockJobPolicyApi.POLICY_SYSTEM, MockJobPolicyApi.POLICY_2]}),
-                MockSDKResponse({"policies": [modified_policy, MockJobPolicyApi.POLICY_SYSTEM, MockJobPolicyApi.POLICY_2]})
+                MockSDKResponse({"policies": [
+                                modified_policy,
+                                    MockJobPolicyApi.POLICY_SYSTEM,
+                                    MockJobPolicyApi.POLICY_2]}),
+                MockSDKResponse({"policies": [
+                                modified_policy,
+                                    MockJobPolicyApi.POLICY_SYSTEM,
+                                    MockJobPolicyApi.POLICY_2]})
             ])
         powerscale_module_mock.job_api.update_job_policy = MagicMock(
             return_value=None)
         powerscale_module_mock.perform_module_operation()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
     # U-JP-C13: Modify policy - only begin time differs (line 423)
@@ -663,36 +787,54 @@ class TestJobPolicy(PowerScaleUnitBase):
         self.set_module_params(self.get_module_args, {
             "policy_name": "BusinessHours",
             "intervals": [
-                {"begin": "Monday 09:00", "end": "Friday 17:00", "impact": "Low"},
-                {"begin": "Saturday 00:00", "end": "Sunday 23:59", "impact": "High"}
+                {"begin": "Monday 09:00",
+                 "end": "Friday 17:00",
+                 "impact": "Low"},
+                {"begin": "Saturday 00:00",
+                 "end": "Sunday 23:59",
+                 "impact": "High"}
             ],
             "state": "present"
         })
         modified_policy = dict(MockJobPolicyApi.POLICY_1)
         modified_policy["intervals"] = [
             {"begin": "Monday 09:00", "end": "Friday 17:00", "impact": "Low"},
-            {"begin": "Saturday 00:00", "end": "Sunday 23:59", "impact": "High"}
+            {"begin": "Saturday 00:00",
+             "end": "Sunday 23:59",
+             "impact": "High"}
         ]
         powerscale_module_mock.job_api.list_job_policies = MagicMock(
             side_effect=[
                 MockSDKResponse(MockJobPolicyApi.POLICIES_LIST),
-                MockSDKResponse({"policies": [modified_policy, MockJobPolicyApi.POLICY_SYSTEM, MockJobPolicyApi.POLICY_2]}),
-                MockSDKResponse({"policies": [modified_policy, MockJobPolicyApi.POLICY_SYSTEM, MockJobPolicyApi.POLICY_2]})
+                MockSDKResponse({"policies": [
+                                modified_policy,
+                                    MockJobPolicyApi.POLICY_SYSTEM,
+                                    MockJobPolicyApi.POLICY_2]}),
+                MockSDKResponse({"policies": [
+                                modified_policy,
+                                    MockJobPolicyApi.POLICY_SYSTEM,
+                                    MockJobPolicyApi.POLICY_2]})
             ])
         powerscale_module_mock.job_api.update_job_policy = MagicMock(
             return_value=None)
         powerscale_module_mock.perform_module_operation()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
     # U-JP-C14: Test main() entry point (lines 657-658, 662)
     # -------------------------------------------------------------------------
     def test_main_entry_point(self, powerscale_module_mock):
         from unittest.mock import patch
-        with patch('ansible_collections.dellemc.powerscale.plugins.modules.job_policy.JobPolicy') as MockCls:
+        _p = ('ansible_collections.dellemc.powerscale.p'
+             'lugins.modules.job_policy.JobPolicy')
+        with patch(_p) as MockCls:
             mock_inst = MagicMock()
             MockCls.return_value = mock_inst
-            from ansible_collections.dellemc.powerscale.plugins.modules.job_policy import main
+            from ansible_collections.dellemc\
+                .powerscale.plugins.modules\
+                .job_policy import main
             main()
             MockCls.assert_called_once()
             mock_inst.perform_module_operation.assert_called_once()
@@ -702,8 +844,9 @@ class TestJobPolicy(PowerScaleUnitBase):
     # -------------------------------------------------------------------------
     def test_prereqs_validation_failure(self, powerscale_module_mock):
         """U-JP-C15: Test __init__ fails when prereqs validation fails."""
-        from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
-            import utils as real_utils
+        from ansible_collections.dellemc\
+            .powerscale.plugins.module_utils\
+            .storage.dell import utils as real_utils
         original_return = real_utils.validate_module_pre_reqs.return_value
         real_utils.validate_module_pre_reqs.return_value = {
             "all_packages_found": False,
@@ -722,7 +865,9 @@ class TestJobPolicy(PowerScaleUnitBase):
     def test_if_name_main_guard(self, powerscale_module_mock):
         """U-JP-C16: Cover if __name__ == '__main__': main() guard."""
         import os
-        from ansible_collections.dellemc.powerscale.plugins.modules import job_policy as mod
+        from ansible_collections.dellemc\
+            .powerscale.plugins.modules\
+            import job_policy as mod
         src = mod.__file__
         if src and os.path.isfile(src):
             with open(src) as fh:

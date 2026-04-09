@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # Copyright: (c) 2025, Dell Technologies
 
-# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+# GNU General Public License v3.0+ (see COPYING or
+# https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """Ansible module for retrieving job report information on PowerScale"""
 

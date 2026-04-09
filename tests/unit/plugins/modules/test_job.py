@@ -1,6 +1,7 @@
 # Copyright: (c) 2025, Dell Technologies
 
-# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+# GNU General Public License v3.0+ (see COPYING or
+# https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """Unit Tests for Job module on PowerScale"""
 
@@ -11,17 +12,25 @@ __metaclass__ = type
 import pytest
 from mock.mock import MagicMock
 # pylint: disable=unused-import
-from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.initial_mock \
+from ansible_collections.dellemc.powerscale\
+    .tests.unit.plugins.module_utils\
+    .shared_library.initial_mock \
     import utils
 
 from ansible_collections.dellemc.powerscale.plugins.modules.job import Job
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.\
     module_utils import mock_job_api as MockJobApi
-from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_sdk_response \
+from ansible_collections.dellemc.powerscale\
+    .tests.unit.plugins.module_utils\
+    .mock_sdk_response \
     import MockSDKResponse
-from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_api_exception \
+from ansible_collections.dellemc.powerscale\
+    .tests.unit.plugins.module_utils\
+    .mock_api_exception \
     import MockApiException
-from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.powerscale_unit_base \
+from ansible_collections.dellemc.powerscale\
+    .tests.unit.plugins.module_utils\
+    .shared_library.powerscale_unit_base \
     import PowerScaleUnitBase
 
 
@@ -49,7 +58,9 @@ class TestJob(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobApi.JOB_CREATED))
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.create_job_job.assert_called()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
     # U-JB-002: Start a new job with explicit priority
@@ -69,7 +80,9 @@ class TestJob(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobApi.JOB_CREATED))
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.create_job_job.assert_called()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
     # U-JB-003: Start a new job with explicit policy
@@ -89,7 +102,9 @@ class TestJob(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobApi.JOB_CREATED))
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.create_job_job.assert_called()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
     # U-JB-004: Start a new job with custom parameters
@@ -109,7 +124,9 @@ class TestJob(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobApi.JOB_CREATED))
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.create_job_job.assert_called()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
     # U-JB-005: Start a duplicate job when allow_dup is True
@@ -129,7 +146,9 @@ class TestJob(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobApi.JOB_CREATED))
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.create_job_job.assert_called()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
     # U-JB-006: Start job is idempotent when same type is already running
@@ -144,7 +163,9 @@ class TestJob(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobApi.JOBS_LIST_WITH_RUNNING))
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.create_job_job.assert_not_called()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is False
 
     # -------------------------------------------------------------------------
     # U-JB-007: Start job raises exception on SDK error
@@ -174,7 +195,9 @@ class TestJob(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobApi.JOB_RUNNING))
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.get_job_job.assert_called()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is False
 
     # -------------------------------------------------------------------------
     # U-JB-009: Get job by ID when not found
@@ -204,7 +227,9 @@ class TestJob(PowerScaleUnitBase):
             return_value=None)
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.update_job_job.assert_called()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
     # U-JB-011: Pause an already paused job (idempotent)
@@ -219,7 +244,9 @@ class TestJob(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobApi.JOB_PAUSED))
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.update_job_job.assert_not_called()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is False
 
     # -------------------------------------------------------------------------
     # U-JB-012: Resume a paused job
@@ -236,7 +263,9 @@ class TestJob(PowerScaleUnitBase):
             return_value=None)
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.update_job_job.assert_called()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
     # U-JB-013: Resume an already running job (idempotent)
@@ -251,7 +280,9 @@ class TestJob(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobApi.JOB_RUNNING))
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.update_job_job.assert_not_called()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is False
 
     # -------------------------------------------------------------------------
     # U-JB-014: Cancel a running job
@@ -268,7 +299,9 @@ class TestJob(PowerScaleUnitBase):
             return_value=None)
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.update_job_job.assert_called()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
     # U-JB-015: Modify job priority
@@ -285,7 +318,9 @@ class TestJob(PowerScaleUnitBase):
             return_value=None)
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.update_job_job.assert_called()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
     # U-JB-016: Modify job policy
@@ -302,7 +337,9 @@ class TestJob(PowerScaleUnitBase):
             return_value=None)
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.update_job_job.assert_called()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
     # U-JB-017: Check mode for start job (no API calls made)
@@ -318,7 +355,9 @@ class TestJob(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobApi.JOBS_LIST_EMPTY))
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.create_job_job.assert_not_called()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
     # U-JB-018: Check mode for modify job (no update API call made)
@@ -334,7 +373,9 @@ class TestJob(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobApi.JOB_RUNNING))
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.update_job_job.assert_not_called()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
     # U-JB-019: Diff mode returns before/after diff
@@ -354,7 +395,9 @@ class TestJob(PowerScaleUnitBase):
         powerscale_module_mock.job_api.update_job_job = MagicMock(
             return_value=None)
         powerscale_module_mock.perform_module_operation()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
         call_kwargs = powerscale_module_mock.module.exit_json.call_args[1]
         assert 'diff' in call_kwargs
 
@@ -379,7 +422,9 @@ class TestJob(PowerScaleUnitBase):
                 MockSDKResponse(MockJobApi.JOB_SUCCEEDED)
             ])
         powerscale_module_mock.perform_module_operation()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
     # U-JB-021: Wait for job times out
@@ -476,7 +521,9 @@ class TestJob(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobApi.JOB_CREATED))
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.create_job_job.assert_called()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
     # U-JB-E05: Start job with maximum priority boundary (10)
@@ -496,7 +543,9 @@ class TestJob(PowerScaleUnitBase):
             return_value=MockSDKResponse(MockJobApi.JOB_CREATED))
         powerscale_module_mock.perform_module_operation()
         powerscale_module_mock.job_api.create_job_job.assert_called()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
     # U-JB-E06: Wait with zero timeout boundary
@@ -559,7 +608,8 @@ class TestJob(PowerScaleUnitBase):
             "state": "present"
         })
         self.capture_fail_json_call(
-            MockJobApi.negative_priority_error_msg(), invoke_perform_module=True)
+    MockJobApi.negative_priority_error_msg(),
+     invoke_perform_module=True)
 
     # -------------------------------------------------------------------------
     # U-JB-E10: Pause a completed job should fail
@@ -623,8 +673,12 @@ class TestJob(PowerScaleUnitBase):
         powerscale_module_mock.job_api.create_job_job = MagicMock(
             return_value=None)
         powerscale_module_mock.perform_module_operation()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
-        assert powerscale_module_mock.module.exit_json.call_args[1]['job_details'] is None
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
+        ea = (powerscale_module_mock.module
+            .exit_json.call_args[1])
+        assert ea['job_details'] is None
 
     # -------------------------------------------------------------------------
     # U-JB-C03: modify_job raises exception (lines 395-399)
@@ -665,13 +719,17 @@ class TestJob(PowerScaleUnitBase):
                 MockSDKResponse({"jobs": []})
             ])
         powerscale_module_mock.perform_module_operation()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
 
     # -------------------------------------------------------------------------
     # U-JB-C05: get_job_details returns None - empty response (lines 312, 527)
     # -------------------------------------------------------------------------
-    def test_control_job_not_found_empty_response(self, powerscale_module_mock):
-        """U-JB-C05: Control scenario: get_job_details returns None (empty response)."""
+    def test_control_job_not_found_empty_response(self,
+                                                  powerscale_module_mock):
+        """U-JB-C05: Control scenario: get_job_details returns None (empty
+        response)."""
         self.set_module_params(self.get_module_args, {
             "job_id": 42,
             "job_state": "paused",
@@ -686,7 +744,8 @@ class TestJob(PowerScaleUnitBase):
     # U-JB-C06: Pause + modify priority with diff mode (line 625)
     # -------------------------------------------------------------------------
     def test_pause_and_modify_priority_with_diff(self, powerscale_module_mock):
-        """U-JB-C06: Pause job + modify priority with diff mode to trigger diff_dict update."""
+        """U-JB-C06: Pause job + modify priority with diff mode to trigger
+        diff_dict update."""
         self.set_module_params(self.get_module_args, {
             "job_id": 42,
             "job_state": "paused",
@@ -703,7 +762,9 @@ class TestJob(PowerScaleUnitBase):
         powerscale_module_mock.job_api.update_job_job = MagicMock(
             return_value=None)
         powerscale_module_mock.perform_module_operation()
-        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        exit_args = (powerscale_module_mock
+            .module.exit_json.call_args[1])
+        assert exit_args['changed'] is True
         call_kwargs = powerscale_module_mock.module.exit_json.call_args[1]
         assert 'diff' in call_kwargs
 
@@ -713,10 +774,14 @@ class TestJob(PowerScaleUnitBase):
     def test_main_entry_point(self, powerscale_module_mock):
         """U-JB-C07: Test main() function."""
         from unittest.mock import patch
-        with patch('ansible_collections.dellemc.powerscale.plugins.modules.job.Job') as MockJobClass:
+        _p = ('ansible_collections.dellemc.powerscale.p'
+             'lugins.modules.job.Job')
+        with patch(_p) as MockJobClass:
             mock_instance = MagicMock()
             MockJobClass.return_value = mock_instance
-            from ansible_collections.dellemc.powerscale.plugins.modules.job import main
+            from ansible_collections.dellemc\
+                .powerscale.plugins.modules\
+                .job import main
             main()
             MockJobClass.assert_called_once()
             mock_instance.perform_module_operation.assert_called_once()
@@ -725,9 +790,11 @@ class TestJob(PowerScaleUnitBase):
     # U-JB-C08: Prereqs validation failure (line 291)
     # -------------------------------------------------------------------------
     def test_prereqs_validation_failure(self, powerscale_module_mock):
-        """U-JB-C08: Prereqs validation failure triggers fail_json in __init__."""
-        from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
-            import utils as dell_utils
+        """U-JB-C08: Prereqs validation failure triggers fail_json in
+        __init__."""
+        from ansible_collections.dellemc\
+            .powerscale.plugins.module_utils\
+            .storage.dell import utils as dell_utils
 
         original_return = dell_utils.validate_module_pre_reqs.return_value
         dell_utils.validate_module_pre_reqs.return_value = {
@@ -747,7 +814,9 @@ class TestJob(PowerScaleUnitBase):
     def test_if_name_main_guard(self, powerscale_module_mock):
         """Covers ``if __name__ == '__main__':`` guard."""
         import os
-        from ansible_collections.dellemc.powerscale.plugins.modules import job as mod
+        from ansible_collections.dellemc\
+            .powerscale.plugins.modules \
+            import job as mod
         src = mod.__file__
         if src and os.path.isfile(src):
             with open(src) as fh:

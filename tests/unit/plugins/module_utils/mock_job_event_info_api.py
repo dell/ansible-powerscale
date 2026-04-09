@@ -1,6 +1,7 @@
 # Copyright: (c) 2025, Dell Technologies
 
-# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+# GNU General Public License v3.0+ (see COPYING or
+# https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """Mock API responses for PowerScale Job Event Info module"""
 
@@ -8,7 +9,8 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 
-MODULE_UTILS_PATH = 'ansible_collections.dellemc.powerscale.plugins.modules.job_event_info.utils'
+MODULE_UTILS_PATH = ('ansible_collections.dellemc.powerscale.'
+    'plugins.modules.job_event_info.utils')
 
 COMMON_ARGS = {
     "onefs_host": "test.example.com",
