@@ -1,0 +1,72 @@
+---
+- name: Sample playbook for retrieving Job information on Dell EMC PowerScale.
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.**'
+    verify_ssl: false
+    api_user: 'user'
+    api_password: 'password'
+    job_id: 42
+
+  tasks:
+    - name: Get a specific job by ID
+      dellemc.powerscale.job_info:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        job_id: "{{ job_id }}"
+
+    - name: List all jobs
+      dellemc.powerscale.job_info:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+
+    - name: List running jobs sorted by ID descending
+      dellemc.powerscale.job_info:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        state:
+          - running
+        sort: "id"
+        dir: "DESC"
+        limit: 10
+
+    - name: List jobs filtered by type
+      dellemc.powerscale.job_info:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        job_type:
+          - SmartPools
+
+    - name: Get all jobs with recent jobs included
+      dellemc.powerscale.job_info:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        include_recent: true
+
+    - name: Get all jobs with summary statistics
+      dellemc.powerscale.job_info:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        include_summary: true
+
+    - name: Get all jobs with recent jobs and summary
+      dellemc.powerscale.job_info:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        include_recent: true
+        include_summary: true
