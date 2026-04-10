@@ -223,4 +223,4 @@ Status
 Authors
 ~~~~~~~
 
-- Shrinidhi Rao (@shrinidhirao) <ansible.team@dell.com>
+- Shrinidhi Rao (@ShrinidhiRao15)

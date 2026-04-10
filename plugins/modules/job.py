@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: (c) 2024, Dell Technologies
+# Copyright: (c) 2026, Dell Technologies
 
 # GNU General Public License v3.0+ (see COPYING or
 # https://www.gnu.org/licenses/gpl-3.0.txt)
@@ -28,10 +28,9 @@ extends_documentation_fragment:
   - dellemc.powerscale.powerscale
 
 author:
-- Shrinidhi Rao (@shrinidhirao) <ansible.team@dell.com>
+- Shrinidhi Rao (@ShrinidhiRao15)
 
 notes:
-- Refer to JIRA ECS02C-845 for feature details.
 - The I(check_mode) is supported.
 
 options:
@@ -362,7 +361,8 @@ class Job(object):
             if params.get('allow_dup'):
                 create_params['allow_dup'] = params['allow_dup']
             if params.get('job_params'):
-                create_params['changelistcreate_params'] = params['job_params']
+                params_key = params['job_type'].lower() + '_params'
+                create_params[params_key] = params['job_params']
 
             body = self.isi_sdk.JobJobCreateParams(**create_params)
             api_response = self.job_api.create_job_job(body)
@@ -448,6 +448,11 @@ class Job(object):
             self.module.fail_json(
                 msg="Invalid priority %d. Priority must be between "
                     "1 and 10." % priority)
+
+        wait_interval = self.module.params.get('wait_interval')
+        if wait_interval is not None and wait_interval < 1:
+            self.module.fail_json(
+                msg="wait_interval must be at least 1 second.")
 
     def perform_module_operation(self):
         """
@@ -602,8 +607,10 @@ class Job(object):
                         msg="Cannot cancel job %d in terminal state '%s'."
                             % (job_id, current_state))
 
-            # Handle priority/policy modifications
-            if priority is not None or policy is not None:
+            # Handle priority/policy modifications (skip for terminal states)
+            current_state = job_details.get('state', '') if job_details else ''
+            if (priority is not None or policy is not None) \
+                    and current_state not in TERMINAL_STATES:
                 modify_kwargs = {}
                 needs_modify = False
 

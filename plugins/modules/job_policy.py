@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: (c) 2024, Dell Technologies
+# Copyright: (c) 2026, Dell Technologies
 
 # GNU General Public License v3.0+ (see COPYING or
 # https://www.gnu.org/licenses/gpl-3.0.txt)
@@ -28,10 +28,9 @@ extends_documentation_fragment:
   - dellemc.powerscale.powerscale
 
 author:
-- Shrinidhi Rao (@shrinidhirao) <ansible.team@dell.com>
+- Shrinidhi Rao (@ShrinidhiRao15)
 
 notes:
-- Refer to JIRA ECS02C-982 for feature details.
 - System policies cannot be modified or deleted.
 - The I(check_mode) is supported.
 
@@ -506,7 +505,7 @@ class JobPolicy(object):
             if existing:
                 # Check if modification is needed
                 desired = {}
-                if description:
+                if description is not None:
                     desired['description'] = description
                 if intervals is not None:
                     desired['intervals'] = intervals
@@ -637,7 +636,7 @@ def get_job_policy_parameters():
     return dict(
         policy_name=dict(type='str'),
         policy_id=dict(type='str'),
-        description=dict(type='str', default=''),
+        description=dict(type='str'),
         intervals=dict(
             type='list',
             elements='dict',

@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: (c) 2025, Dell Technologies
+# Copyright: (c) 2026, Dell Technologies
 
 # GNU General Public License v3.0+ (see COPYING or
 # https://www.gnu.org/licenses/gpl-3.0.txt)
@@ -26,7 +26,7 @@ extends_documentation_fragment:
   - dellemc.powerscale.powerscale
 
 author:
-- Shrinidhi Rao (@shrinidhirao) <ansible.team@dell.com>
+- Shrinidhi Rao (@ShrinidhiRao15)
 
 options:
   job_id:
@@ -84,9 +84,6 @@ options:
 notes:
 - This is a read-only info module. It does not modify any resources.
 - The I(check_mode) is supported.
-
-requirements:
-- JIRA ECS02C-841
 '''
 
 EXAMPLES = r'''

@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: (c) 2025, Dell Technologies
+# Copyright: (c) 2026, Dell Technologies
 
 # GNU General Public License v3.0+ (see COPYING or
 # https://www.gnu.org/licenses/gpl-3.0.txt)
@@ -27,7 +27,7 @@ extends_documentation_fragment:
   - dellemc.powerscale.powerscale
 
 author:
-- Shrinidhi Rao (@shrinidhirao) <ansible.team@dell.com>
+- Shrinidhi Rao (@ShrinidhiRao15)
 
 options:
   state:
@@ -100,9 +100,6 @@ notes:
 - The I(check_mode) is supported.
 - When I(duration) is specified, the module calculates a time window
   ending at the current time.
-
-requirements:
-- JIRA ECS02C-844
 '''
 
 EXAMPLES = r'''

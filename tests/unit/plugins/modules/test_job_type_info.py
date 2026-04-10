@@ -1,4 +1,4 @@
-# Copyright: (c) 2025, Dell Technologies
+# Copyright: (c) 2026, Dell Technologies
 
 # GNU General Public License v3.0+ (see COPYING or
 # https://www.gnu.org/licenses/gpl-3.0.txt)
@@ -83,7 +83,9 @@ class TestJobTypeInfo(PowerScaleUnitBase):
         ea = (powerscale_module_mock.module
               .exit_json.call_args[1])
         job_type_details = ea['job_types']
-        assert job_type_details['id'] == 'TreeDelete'
+        assert isinstance(job_type_details, list)
+        assert len(job_type_details) == 1
+        assert job_type_details[0]['id'] == 'TreeDelete'
 
     def test_get_single_type_not_found(self, powerscale_module_mock):
         """U-JT-004: Get a job type that does not exist returns empty
@@ -215,7 +217,7 @@ class TestJobTypeInfo(PowerScaleUnitBase):
         ea = (powerscale_module_mock.module
               .exit_json.call_args[1])
         job_types = ea['job_types']
-        assert job_types == {}
+        assert job_types == []
 
     def test_prereqs_validation_failure(self, powerscale_module_mock):
         """U-JT-C05: Test __init__ fails when prereqs validation fails."""

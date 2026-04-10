@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: (c) 2025, Dell Technologies
+# Copyright: (c) 2026, Dell Technologies
 
 # GNU General Public License v3.0+ (see COPYING or
 # https://www.gnu.org/licenses/gpl-3.0.txt)
@@ -26,7 +26,7 @@ extends_documentation_fragment:
   - dellemc.powerscale.powerscale
 
 author:
-- Shrinidhi Rao (@shrinidhirao) <ansible.team@dell.com>
+- Shrinidhi Rao (@ShrinidhiRao15)
 
 options:
   job_type_id:
@@ -56,9 +56,6 @@ options:
 notes:
 - This is a read-only info module and does not make any changes.
 - The I(check_mode) is supported.
-
-requirements:
-- JIRA ECS02C-843
 '''
 
 EXAMPLES = r'''
@@ -187,12 +184,12 @@ class JobTypeInfo(object):
         self.job_api = self.isi_sdk.JobApi(self.api_client)
         LOG.info('Got the isi_sdk instance for authorization on to PowerScale')
 
-    def get_job_types(self, include_hidden, sort, dir):
+    def get_job_types(self, include_hidden, sort, dir_param):
         """
         Get a list of job types.
         :param include_hidden: Whether to include hidden job types
         :param sort: Field to sort by
-        :param dir: Sort direction
+        :param dir_param: Sort direction
         :return: List of job type dicts
         """
         try:
@@ -201,8 +198,8 @@ class JobTypeInfo(object):
                 api_params['show_all'] = include_hidden
             if sort is not None:
                 api_params['sort'] = sort
-            if dir is not None:
-                api_params['dir'] = dir
+            if dir_param is not None:
+                api_params['dir'] = dir_param
             api_response = self.job_api.get_job_types(**api_params)
             response_dict = api_response.to_dict()
             return response_dict.get('types', [])
@@ -245,7 +242,7 @@ class JobTypeInfo(object):
         job_type_id = self.module.params['job_type_id']
         include_hidden = self.module.params['include_hidden']
         sort = self.module.params['sort']
-        dir = self.module.params['dir']
+        dir_param = self.module.params['dir']
 
         result = dict(
             changed=False,
@@ -255,12 +252,12 @@ class JobTypeInfo(object):
         if job_type_id:
             job_type_details = self.get_job_type(job_type_id)
             if job_type_details:
-                result['job_types'] = job_type_details
+                result['job_types'] = [job_type_details]
             else:
-                result['job_types'] = {}
+                result['job_types'] = []
         else:
             result['job_types'] = self.get_job_types(
-                include_hidden, sort, dir)
+                include_hidden, sort, dir_param)
 
         self.module.exit_json(**result)
 
