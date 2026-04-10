@@ -51,7 +51,6 @@ options:
     description:
     - Description of the job policy.
     type: str
-    default: ''
 
   intervals:
     description:
