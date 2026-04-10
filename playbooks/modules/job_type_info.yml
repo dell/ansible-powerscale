@@ -1,0 +1,43 @@
+---
+- name: Sample playbook for retrieving Job Type information on Dell EMC PowerScale.
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.**'
+    verify_ssl: false
+    api_user: 'user'
+    api_password: 'password'
+    job_type_id: "TreeDelete"
+
+  tasks:
+    - name: Get all visible job types
+      dellemc.powerscale.job_type_info:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+
+    - name: Get all job types including hidden
+      dellemc.powerscale.job_type_info:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        include_hidden: true
+
+    - name: Get a specific job type by ID
+      dellemc.powerscale.job_type_info:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        job_type_id: "{{ job_type_id }}"
+
+    - name: Get job types sorted by priority in descending order
+      dellemc.powerscale.job_type_info:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        sort: "priority"
+        dir: "DESC"

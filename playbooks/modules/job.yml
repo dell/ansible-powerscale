@@ -1,0 +1,94 @@
+---
+- name: Sample playbook for managing Jobs on Dell EMC PowerScale.
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.**'
+    verify_ssl: false
+    api_user: 'user'
+    api_password: 'password'
+    job_type: "SmartPools"
+    paths:
+      - "/ifs/data"
+    priority: 5
+    policy: "LOW"
+    job_id: 12345
+
+  tasks:
+    - name: Start a SmartPools job
+      dellemc.powerscale.job:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        job_type: "{{ job_type }}"
+        paths: "{{ paths }}"
+        priority: "{{ priority }}"
+        state: "present"
+
+    - name: Start a TreeDelete job and wait for completion
+      dellemc.powerscale.job:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        job_type: "TreeDelete"
+        paths:
+          - "/ifs/data/old_dir"
+        wait: true
+        wait_timeout: 600
+        wait_interval: 15
+        state: "present"
+
+    - name: Modify job priority and policy
+      dellemc.powerscale.job:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        job_id: "{{ job_id }}"
+        priority: 3
+        policy: "{{ policy }}"
+        state: "present"
+
+    - name: Pause a running job
+      dellemc.powerscale.job:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        job_id: "{{ job_id }}"
+        job_state: "paused"
+        state: "present"
+
+    - name: Resume a paused job
+      dellemc.powerscale.job:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        job_id: "{{ job_id }}"
+        job_state: "running"
+        state: "present"
+
+    - name: Cancel a running job
+      dellemc.powerscale.job:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        job_id: "{{ job_id }}"
+        job_state: "cancelled"
+        state: "present"
+
+    - name: Start a job with allow duplicate
+      dellemc.powerscale.job:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        job_type: "{{ job_type }}"
+        paths: "{{ paths }}"
+        priority: "{{ priority }}"
+        allow_dup: true
+        state: "present"
