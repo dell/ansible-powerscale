@@ -24,7 +24,7 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shar
 
 CRT_PATH = "/ifs/server.crt"
 KEY_PATH = "/ifs/server.key"
-KEY_PASSWORD = "Secret@123!"
+KEY_PASSWORD = "test_password_123"  # Test-only value, not production
 ALIAS_NAME = "test"
 CERTIFICATE_ID = "6999b9c02949c962e84b600560a8faf001ab24438a474c2f662c95a17cd81034"
 

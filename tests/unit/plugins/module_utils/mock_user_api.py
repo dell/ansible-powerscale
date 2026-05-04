@@ -33,7 +33,7 @@ class MockUserApi:
     CREATE_USER_WITH_ID = {
         'name': 'test_user_1',
         'uid': 7000,
-        'password': '1234567',
+        'password': 'test_password_123',  # Test-only value, not production
         'enabled': False,
         'primary_group': PRIMARY_GROUP,
         'home_directory': None,

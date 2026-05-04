@@ -615,7 +615,7 @@ class Settings(PowerScaleBase):
             current_servers = self.getting_configured_ntp_server()
             return list(set(current_servers) - set(desired_servers))
         except Exception as e:
-            error_msg = f"Failed to compute NTP servers to remove: {e}"
+            error_msg = f"Failed to compute NTP servers to remove: {str(e)}"
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 

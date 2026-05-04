@@ -559,7 +559,7 @@ class SupportAssist(PowerScaleBase):
             desired_pools = list(dict.fromkeys(
                 pool['pool_name'] for pool in settings_params['connection']['network_pools']))
         except (KeyError, TypeError) as e:
-            error_msg = f"Failed to compute declarative network pools: {e}"
+            error_msg = f"Failed to compute declarative network pools: {str(e)}"
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
         if not desired_pools:
