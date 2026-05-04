@@ -223,7 +223,7 @@ class S3Key(object):
             if str(e.status) == "404":
                 log_msg = (
                     f"S3 Key status for user {user} in access zone"
-                    f" {access_zone} is {e.status}"
+                    f" {access_zone} is {str(e.status)}"
                 )
                 LOG.info(log_msg)
             else:

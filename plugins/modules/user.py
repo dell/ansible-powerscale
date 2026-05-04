@@ -639,7 +639,7 @@ class User(object):
                 return self.get_roles_for_user_by_id(user_id, api_response)
         except utils.ApiException as e:
             error_message = "Exception when calling" \
-                            " AuthApi->list_auth_roles: %s\n" % e
+                            " AuthApi->list_auth_roles: %s\n" % str(e)
             LOG.error(error_message)
 
     def collect_user_details(self, auth_user_id, access_zone, provider_type,

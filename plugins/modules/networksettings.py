@@ -145,7 +145,7 @@ class NetworkSettings(object):
             return network_settings.to_dict()
         except Exception as e:
             error_message = 'Retrieving details of network settings failed ' \
-                            'with error: %s ' % (e)
+                            'with error: %s ' % (str(e))
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
@@ -159,7 +159,7 @@ class NetworkSettings(object):
             self.network_api.update_network_external(settings)
         except Exception as e:
             error_message = 'Modifying network settings failed with ' \
-                            'error: %s' % (e)
+                            'error: %s' % (str(e))
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 

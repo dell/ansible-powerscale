@@ -649,7 +649,7 @@ class NetworkPool(object):
             return False
         except Exception as e:
             error_message = 'Failed to update network pool: %s with ' \
-                            'error: %s' % (pool, e)
+                            'error: %s' % (pool, str(e))
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
