@@ -415,13 +415,13 @@ class SynciqRules(object):
         if schedule is None:
             self.module.fail_json(msg="Please provide schedule to "
                                       "create/delete a SyncIQ performance rule.")
-        if schedule['days_of_week'] is None:
+        if schedule is not None and schedule['days_of_week'] is None:
             self.module.fail_json(msg="Please provide days of a week, when an enabled rule is active,"
                                       " to create/delete a SyncIQ performance rule.")
-        if schedule['begin'] is None:
+        if schedule is not None and schedule['begin'] is None:
             self.module.fail_json(msg="Please provide scheduled begin time to "
                                       "create/delete a SyncIQ performance rule.")
-        if schedule['end'] is None:
+        if schedule is not None and schedule['end'] is None:
             self.module.fail_json(msg="Please provide scheduled end time to "
                                       "create/delete a SyncIQ performance rule.")
         if enabled is None:
