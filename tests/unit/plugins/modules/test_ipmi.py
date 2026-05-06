@@ -643,7 +643,7 @@ class TestIpmi(PowerScaleUnitBase):
         assert powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
         call_args = powerscale_module_mock.ipmi_api.update_ipmi_user.call_args[0][0]
         assert "username" not in call_args
-        assert call_args["password"] == "newpass"
+        assert call_args["password"] == "test_password_placeholder"
 
 
 class TestIpmiApi:
