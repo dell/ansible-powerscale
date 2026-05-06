@@ -569,10 +569,10 @@ class Job(object):
     def _apply_modifications(self, job_id, modify_kwargs, job_details, diff_dict):
         """Apply modifications and update job details."""
         self.modify_job(job_id, **modify_kwargs)
-        job_details = self.get_job_details(job_id)
-        if self.module._diff and job_details:
-            diff_dict['after'] = job_details
-        return job_details
+        updated_job_details = self.get_job_details(job_id)
+        if self.module._diff and updated_job_details:
+            diff_dict['after'] = updated_job_details
+        return updated_job_details
 
     def _handle_priority_policy(self, job_id, priority, policy, job_details, before_details, diff_dict, outcome):
         """Handle priority/policy modifications. Returns (changed, outcome, job_details)."""
