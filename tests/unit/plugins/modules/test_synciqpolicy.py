@@ -751,3 +751,87 @@ class TestSynciqPolicy(PowerScaleUnitBase):
                                      self.powerscale_module_mock.module.params)
         assert self.powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
         assert self.powerscale_module_mock.module.exit_json.call_args[1]["create_synciq_policy"] is True
+
+    def test_check_list_fields_include_dirs(self, powerscale_module_mock):
+        """Test _check_list_fields with source include directories."""
+        from ansible_collections.dellemc.powerscale.plugins.modules.synciqpolicy import _check_list_fields
+
+        policy_obj = Policy("Policy1", "abc123", None)
+        policy_obj.source_include_directories = ["/ifs/data1"]
+        policy_obj.source_exclude_directories = []
+
+        policy_param = {
+            "source_include_directories": ["/ifs/data2"],
+            "source_exclude_directories": []
+        }
+
+        modify_dict = {}
+        _check_list_fields(policy_obj, policy_param, modify_dict)
+        assert modify_dict == {"source_include_directories": ["/ifs/data2"]}
+
+    def test_check_list_fields_exclude_dirs(self, powerscale_module_mock):
+        """Test _check_list_fields with source exclude directories."""
+        from ansible_collections.dellemc.powerscale.plugins.modules.synciqpolicy import _check_list_fields
+
+        policy_obj = Policy("Policy1", "abc123", None)
+        policy_obj.source_include_directories = []
+        policy_obj.source_exclude_directories = ["/ifs/exclude1"]
+
+        policy_param = {
+            "source_include_directories": [],
+            "source_exclude_directories": ["/ifs/exclude2"]
+        }
+
+        modify_dict = {}
+        _check_list_fields(policy_obj, policy_param, modify_dict)
+        assert modify_dict == {"source_exclude_directories": ["/ifs/exclude2"]}
+
+    def test_check_list_fields_no_change(self, powerscale_module_mock):
+        """Test _check_list_fields when no changes needed."""
+        from ansible_collections.dellemc.powerscale.plugins.modules.synciqpolicy import _check_list_fields
+
+        policy_obj = Policy("Policy1", "abc123", None)
+        policy_obj.source_include_directories = ["/ifs/data1"]
+        policy_obj.source_exclude_directories = ["/ifs/exclude1"]
+
+        policy_param = {
+            "source_include_directories": ["/ifs/data1"],
+            "source_exclude_directories": ["/ifs/exclude1"]
+        }
+
+        modify_dict = {}
+        _check_list_fields(policy_obj, policy_param, modify_dict)
+        assert modify_dict == {}
+
+    def test_check_password_field_with_password(self, powerscale_module_mock):
+        """Test _check_password_field when password is provided with other modifications."""
+        from ansible_collections.dellemc.powerscale.plugins.modules.synciqpolicy import _check_password_field
+
+        policy_obj_dict = {"password_set": True}
+        policy_param = {"password": "newpassword"}
+
+        modify_dict = {"description": "new description"}
+        _check_password_field(policy_obj_dict, policy_param, modify_dict)
+        assert modify_dict == {"description": "new description", "password": "newpassword"}
+
+    def test_check_password_field_without_password(self, powerscale_module_mock):
+        """Test _check_password_field when password is not provided."""
+        from ansible_collections.dellemc.powerscale.plugins.modules.synciqpolicy import _check_password_field
+
+        policy_obj_dict = {"password_set": True}
+        policy_param = {}
+
+        modify_dict = {}
+        _check_password_field(policy_obj_dict, policy_param, modify_dict)
+        assert modify_dict == {}
+
+    def test_check_password_field_password_not_set(self, powerscale_module_mock):
+        """Test _check_password_field when password not set in policy."""
+        from ansible_collections.dellemc.powerscale.plugins.modules.synciqpolicy import _check_password_field
+
+        policy_obj_dict = {"password_set": False}
+        policy_param = {"password": "newpassword"}
+
+        modify_dict = {}
+        _check_password_field(policy_obj_dict, policy_param, modify_dict)
+        assert modify_dict == {"password": "newpassword"}
