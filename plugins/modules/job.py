@@ -505,8 +505,9 @@ class Job(object):
                 'before': before_details,
                 'after': dict(before_details, state=expected_state)
             })
-        job_details = before_details
-        if not self.module.check_mode:
+        if self.module.check_mode:
+            job_details = before_details
+        else:
             self.modify_job(job_id, control=control)
             job_details = self.get_job_details(job_id)
             if self.module._diff and job_details:
