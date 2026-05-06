@@ -601,6 +601,7 @@ class Job(object):
         if job_details is None:
             self.module.fail_json(
                 msg="Failed to get job details for job %d: not found." % job_id)
+            return None, 'noop', None, {}  # This line should never be reached due to fail_json above
 
         current_state = job_details.get('state', '')
         before_details = dict(job_details)
