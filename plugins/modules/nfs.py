@@ -1318,37 +1318,41 @@ class NfsExport(PowerScaleBase):
                 return True, nfs_export
         return False, nfs_export
 
-    def modify_nfs_export(self, path, access_zone, ignore_unresolvable_hosts):
-        '''
-        Modify NFS export in system
-        '''
-        nfs_details = copy.deepcopy(self.result.get('NFS_export_details'))
-
-        nfs_export = self.isi_sdk.NfsExport()
-        client_flag = map_root_flag = map_non_root_flag = False
-        client_flag, nfs_export = self._check_client_status(nfs_export)
+    def _process_map_fields(self, nfs_export):
+        """Process map fields (map_root, map_non_root, map_failure)."""
+        flags = {}
 
         map_root = set_nfs_map(self.module.params.get('map_root'), 'map_root', self.result.get('NFS_export_details'))
         if map_root:
             nfs_export.map_root = map_root
-            map_root_flag = True
+            flags['map_root'] = True
+        else:
+            flags['map_root'] = False
+
         map_non_root = set_nfs_map(self.module.params.get('map_non_root'), 'map_non_root', self.result.get('NFS_export_details'))
         if map_non_root:
             nfs_export.map_non_root = map_non_root
-            map_non_root_flag = True
+            flags['map_non_root'] = True
+        else:
+            flags['map_non_root'] = False
+
         map_failure = set_nfs_map(self.module.params.get('map_failure'), 'map_failure', self.result.get('NFS_export_details'))
         if map_failure:
             nfs_export.map_failure = map_failure
-            map_failure_flag = True
+            flags['map_failure'] = True
         else:
-            map_failure_flag = False
+            flags['map_failure'] = False
 
-        # size fields: if provided in playbook, convert to bytes and compare to existing
+        return flags
+
+    def _process_size_fields(self, nfs_export):
+        """Process size fields and return modification flags."""
         size_fields = ['file_name_max_size', 'block_size', 'directory_transfer_size',
                        'read_transfer_max_size', 'read_transfer_multiple', 'read_transfer_size',
                        'write_transfer_max_size', 'write_transfer_multiple', 'write_transfer_size',
                        'max_file_size']
         size_flags = []
+
         for sz in size_fields:
             param = self.module.params.get(sz)
             if param is not None:
@@ -1370,39 +1374,97 @@ class NfsExport(PowerScaleBase):
             else:
                 size_flags.append(False)
 
-        # simple fields that can be compared using _check_mod_field
-        read_only_flag, read_only_value = self._check_mod_field(
-            'read_only', 'read_only')
-        all_dirs_flag, all_dirs_value = self._check_mod_field(
-            'sub_directories_mountable', 'all_dirs')
-        description_flag, description_value = self._check_mod_field(
-            'description', 'description')
-        map_lookup_uid_flag, map_lookup_uid_value = self._check_mod_field(
-            'map_lookup_uid', 'map_lookup_uid')
-        commit_flag, commit_value = self._check_mod_field('commit_asynchronous', 'commit_asynchronous')
-        setattr_flag, setattr_value = self._check_mod_field('setattr_asynchronous', 'setattr_asynchronous')
-        readdir_flag, readdir_value = self._check_mod_field('readdirplus', 'readdirplus')
-        return32_flag, return32_value = self._check_mod_field('return_32bit_file_ids', 'return_32bit_file_ids')
-        can_set_time_flag, can_set_time_value = self._check_mod_field('can_set_time', 'can_set_time')
-        symlinks_flag, symlinks_value = self._check_mod_field('symlinks', 'symlinks')
-        encoding_flag, encoding_value = self._check_mod_field('encoding', 'encoding')
-        write_datasync_action_flag, write_datasync_action_value = self._check_mod_field('write_datasync_action', 'write_datasync_action')
-        write_datasync_reply_flag, write_datasync_reply_value = self._check_mod_field('write_datasync_reply', 'write_datasync_reply')
-        write_filesync_action_flag, write_filesync_action_value = self._check_mod_field('write_filesync_action', 'write_filesync_action')
-        write_filesync_reply_flag, write_filesync_reply_value = self._check_mod_field('write_filesync_reply', 'write_filesync_reply')
-        write_unstable_action_flag, write_unstable_action_value = self._check_mod_field('write_unstable_action', 'write_unstable_action')
-        write_unstable_reply_flag, write_unstable_reply_value = self._check_mod_field('write_unstable_reply', 'write_unstable_reply')
-        time_delta_flag, time_delta_value = self._check_mod_field('time_delta', 'time_delta')
+        return size_flags
+
+    def _process_simple_fields(self, nfs_export):
+        """Process simple fields using _check_mod_field. Returns flags and values dict."""
+        field_mappings = [
+            ('read_only', 'read_only'),
+            ('sub_directories_mountable', 'all_dirs'),
+            ('description', 'description'),
+            ('map_lookup_uid', 'map_lookup_uid'),
+            ('commit_asynchronous', 'commit_asynchronous'),
+            ('setattr_asynchronous', 'setattr_asynchronous'),
+            ('readdirplus', 'readdirplus'),
+            ('return_32bit_file_ids', 'return_32bit_file_ids'),
+            ('can_set_time', 'can_set_time'),
+            ('symlinks', 'symlinks'),
+            ('encoding', 'encoding'),
+            ('write_datasync_action', 'write_datasync_action'),
+            ('write_datasync_reply', 'write_datasync_reply'),
+            ('write_filesync_action', 'write_filesync_action'),
+            ('write_filesync_reply', 'write_filesync_reply'),
+            ('write_unstable_action', 'write_unstable_action'),
+            ('write_unstable_reply', 'write_unstable_reply'),
+            ('time_delta', 'time_delta')
+        ]
+
+        flags = {}
+        values = {}
+
+        for param_key, export_key in field_mappings:
+            flag, value = self._check_mod_field(param_key, export_key)
+            flags[param_key] = flag
+            values[export_key] = value
+
+        return flags, values
+
+    def _apply_field_modifications(self, nfs_export, flags, values):
+        """Apply field modifications to nfs_export based on flags and values."""
+        if flags.get('read_only'):
+            nfs_export.read_only = values.get('read_only')
+        if flags.get('all_dirs'):
+            nfs_export.all_dirs = values.get('all_dirs')
+        if flags.get('description'):
+            nfs_export.description = values.get('description')
+        if flags.get('map_lookup_uid'):
+            nfs_export.map_lookup_uid = values.get('map_lookup_uid')
+        if flags.get('commit_asynchronous'):
+            nfs_export.commit_asynchronous = values.get('commit_asynchronous')
+        if flags.get('setattr_asynchronous'):
+            nfs_export.setattr_asynchronous = values.get('setattr_asynchronous')
+        if flags.get('readdirplus'):
+            nfs_export.readdirplus = values.get('readdirplus')
+        if flags.get('return_32bit_file_ids'):
+            nfs_export.return_32bit_file_ids = values.get('return_32bit_file_ids')
+        if flags.get('can_set_time'):
+            nfs_export.can_set_time = values.get('can_set_time')
+        if flags.get('symlinks'):
+            nfs_export.symlinks = values.get('symlinks')
+        if flags.get('encoding'):
+            nfs_export.encoding = values.get('encoding')
+        if flags.get('write_datasync_action'):
+            nfs_export.write_datasync_action = values.get('write_datasync_action')
+        if flags.get('write_datasync_reply'):
+            nfs_export.write_datasync_reply = values.get('write_datasync_reply')
+        if flags.get('write_filesync_action'):
+            nfs_export.write_filesync_action = values.get('write_filesync_action')
+        if flags.get('write_filesync_reply'):
+            nfs_export.write_filesync_reply = values.get('write_filesync_reply')
+        if flags.get('write_unstable_action'):
+            nfs_export.write_unstable_action = values.get('write_unstable_action')
+        if flags.get('write_unstable_reply'):
+            nfs_export.write_unstable_reply = values.get('write_unstable_reply')
+        if flags.get('time_delta'):
+            nfs_export.time_delta = values.get('time_delta')
+
+    def modify_nfs_export(self, path, access_zone, ignore_unresolvable_hosts):
+        '''
+        Modify NFS export in system
+        '''
+        nfs_details = copy.deepcopy(self.result.get('NFS_export_details'))
+
+        nfs_export = self.isi_sdk.NfsExport()
+        client_flag, nfs_export = self._check_client_status(nfs_export)
+
+        map_flags = self._process_map_fields(nfs_export)
+        size_flags = self._process_size_fields(nfs_export)
+        simple_flags, simple_values = self._process_simple_fields(nfs_export)
         security_flag, nfs_export = self._is_security_flavour_mod(
             self.module.params['security_flavors'], nfs_export)
 
-        # consider changed if any of our flags are True
-        all_flags = [client_flag, read_only_flag, all_dirs_flag, description_flag, map_root_flag,
-                     map_non_root_flag, map_failure_flag, security_flag, map_lookup_uid_flag,
-                     commit_flag, setattr_flag, readdir_flag, return32_flag, can_set_time_flag,
-                     symlinks_flag, encoding_flag, write_datasync_action_flag, write_datasync_reply_flag,
-                     write_filesync_action_flag, write_filesync_reply_flag, write_unstable_action_flag,
-                     write_unstable_reply_flag, time_delta_flag] + size_flags
+        # collect all flags to determine if anything changed
+        all_flags = [client_flag, security_flag] + list(map_flags.values()) + size_flags + list(simple_flags.values())
 
         if all(field_mod_flag is False for field_mod_flag in all_flags):
             LOG.info(
@@ -1410,44 +1472,11 @@ class NfsExport(PowerScaleBase):
             if self.module._diff:
                 self.result.update({"diff": {"before": nfs_details, "after": nfs_details}})
             return False
-        else:
-            nfs_export.read_only = read_only_value if read_only_flag else None
-            nfs_export.all_dirs = all_dirs_value if all_dirs_flag else None
-            nfs_export.description = description_value if description_flag else None
-            # apply simple fields
-            if map_lookup_uid_flag:
-                nfs_export.map_lookup_uid = map_lookup_uid_value
-            if commit_flag:
-                nfs_export.commit_asynchronous = commit_value
-            if setattr_flag:
-                nfs_export.setattr_asynchronous = setattr_value
-            if readdir_flag:
-                nfs_export.readdirplus = readdir_value
-            if return32_flag:
-                nfs_export.return_32bit_file_ids = return32_value
-            if can_set_time_flag:
-                nfs_export.can_set_time = can_set_time_value
-            if symlinks_flag:
-                nfs_export.symlinks = symlinks_value
-            if encoding_flag:
-                nfs_export.encoding = encoding_value
-            if write_datasync_action_flag:
-                nfs_export.write_datasync_action = write_datasync_action_value
-            if write_datasync_reply_flag:
-                nfs_export.write_datasync_reply = write_datasync_reply_value
-            if write_filesync_action_flag:
-                nfs_export.write_filesync_action = write_filesync_action_value
-            if write_filesync_reply_flag:
-                nfs_export.write_filesync_reply = write_filesync_reply_value
-            if write_unstable_action_flag:
-                nfs_export.write_unstable_action = write_unstable_action_value
-            if write_unstable_reply_flag:
-                nfs_export.write_unstable_reply = write_unstable_reply_value
-            if time_delta_flag:
-                nfs_export.time_delta = time_delta_value
-            # sizes already set above when present
 
-            return self.perform_modify_nfs_export(nfs_export, path, access_zone, ignore_unresolvable_hosts, nfs_details)
+        # apply field modifications
+        self._apply_field_modifications(nfs_export, simple_flags, simple_values)
+
+        return self.perform_modify_nfs_export(nfs_export, path, access_zone, ignore_unresolvable_hosts, nfs_details)
 
     def perform_modify_nfs_export(self, nfs_export, path, access_zone, ignore_unresolvable_hosts, nfs_details):
         '''
