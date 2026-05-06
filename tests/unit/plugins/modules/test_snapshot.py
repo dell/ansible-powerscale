@@ -437,7 +437,8 @@ class TestSnapshot(PowerScaleUnitBase):
         desired_retention = "2"
         retention_unit = "hours"
 
-        result = Snapshot._compute_expiration(desired_retention, retention_unit, snap_creation_timestamp)
+        result = Snapshot._compute_expiration(
+            desired_retention, retention_unit, snap_creation_timestamp)
         expected = snap_creation_timestamp + (2 * 3600)
         assert abs(result - expected) < 1  # Allow 1 second tolerance
 
@@ -450,7 +451,8 @@ class TestSnapshot(PowerScaleUnitBase):
         desired_retention = "1"
         retention_unit = "days"
 
-        result = Snapshot._compute_expiration(desired_retention, retention_unit, snap_creation_timestamp)
+        result = Snapshot._compute_expiration(
+            desired_retention, retention_unit, snap_creation_timestamp)
         expected = snap_creation_timestamp + (1 * 24 * 3600)
         assert abs(result - expected) < 1  # Allow 1 second tolerance
 
@@ -462,7 +464,8 @@ class TestSnapshot(PowerScaleUnitBase):
         desired_retention = "none"
         retention_unit = "hours"
 
-        result = Snapshot._compute_expiration(desired_retention, retention_unit, snap_creation_timestamp)
+        result = Snapshot._compute_expiration(
+            desired_retention, retention_unit, snap_creation_timestamp)
         assert result is None
 
     def test_compute_expiration_none_value(self, powerscale_module_mock):
@@ -473,7 +476,8 @@ class TestSnapshot(PowerScaleUnitBase):
         desired_retention = None
         retention_unit = "hours"
 
-        result = Snapshot._compute_expiration(desired_retention, retention_unit, snap_creation_timestamp)
+        result = Snapshot._compute_expiration(
+            desired_retention, retention_unit, snap_creation_timestamp)
         assert result is None
 
     def test_compute_expiration_invalid_unit(self, powerscale_module_mock):
@@ -484,7 +488,8 @@ class TestSnapshot(PowerScaleUnitBase):
         desired_retention = "2"
         retention_unit = "invalid"
 
-        result = Snapshot._compute_expiration(desired_retention, retention_unit, snap_creation_timestamp)
+        result = Snapshot._compute_expiration(
+            desired_retention, retention_unit, snap_creation_timestamp)
         assert result is None
 
     def test_check_timestamp_modified_diff(self, powerscale_module_mock):

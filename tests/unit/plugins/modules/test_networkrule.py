@@ -162,11 +162,13 @@ class TestNetworkRule(PowerScaleUnitBase):
         current_rule_details = []
         result = {}
 
-        powerscale_module_mock.get_settings_to_modify = MagicMock(return_value={"iface": iface})
+        powerscale_module_mock.get_settings_to_modify = MagicMock(
+            return_value={"iface": iface})
         powerscale_module_mock.create_network_rule = MagicMock()
 
-        powerscale_module_mock._handle_present_state(groupnet, subnet, pool, rule,
-                                                      iface, new_name, current_rule_details, result)
+        powerscale_module_mock._handle_present_state(
+            groupnet, subnet, pool, rule, iface, new_name,
+            current_rule_details, result)
 
         powerscale_module_mock.create_network_rule.assert_called_once()
         assert result['create_network_rule'] is True
@@ -182,11 +184,13 @@ class TestNetworkRule(PowerScaleUnitBase):
         current_rule_details = [{"name": "rule1"}]
         result = {}
 
-        powerscale_module_mock.get_settings_to_modify = MagicMock(return_value={"description": "new desc"})
+        powerscale_module_mock.get_settings_to_modify = MagicMock(
+            return_value={"description": "new desc"})
         powerscale_module_mock.modify_network_rule = MagicMock()
 
-        powerscale_module_mock._handle_present_state(groupnet, subnet, pool, rule,
-                                                      iface, new_name, current_rule_details, result)
+        powerscale_module_mock._handle_present_state(
+            groupnet, subnet, pool, rule, iface, new_name,
+            current_rule_details, result)
 
         powerscale_module_mock.modify_network_rule.assert_called_once()
         assert result['modify_network_rule'] is True
@@ -202,11 +206,13 @@ class TestNetworkRule(PowerScaleUnitBase):
         current_rule_details = [{"name": "rule1"}]
         result = {}
 
-        powerscale_module_mock.get_settings_to_modify = MagicMock(return_value={})
+        powerscale_module_mock.get_settings_to_modify = MagicMock(
+            return_value={})
         powerscale_module_mock.modify_network_rule = MagicMock()
 
-        powerscale_module_mock._handle_present_state(groupnet, subnet, pool, rule,
-                                                      iface, new_name, current_rule_details, result)
+        powerscale_module_mock._handle_present_state(
+            groupnet, subnet, pool, rule, iface, new_name,
+            current_rule_details, result)
 
         powerscale_module_mock.modify_network_rule.assert_not_called()
         assert 'modify_network_rule' not in result

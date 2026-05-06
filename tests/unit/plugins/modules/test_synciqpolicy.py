@@ -754,7 +754,9 @@ class TestSynciqPolicy(PowerScaleUnitBase):
 
     def test_check_list_fields_include_dirs(self, powerscale_module_mock):
         """Test _check_list_fields with source include directories."""
-        from ansible_collections.dellemc.powerscale.plugins.modules.synciqpolicy import _check_list_fields
+        import ansible_collections.dellemc.powerscale.plugins.modules.\
+            synciqpolicy as synciqpolicy_module
+        _check_list_fields = synciqpolicy_module._check_list_fields
 
         policy_obj = Policy("Policy1", "abc123", None)
         policy_obj.source_include_directories = ["/ifs/data1"]
@@ -771,7 +773,9 @@ class TestSynciqPolicy(PowerScaleUnitBase):
 
     def test_check_list_fields_exclude_dirs(self, powerscale_module_mock):
         """Test _check_list_fields with source exclude directories."""
-        from ansible_collections.dellemc.powerscale.plugins.modules.synciqpolicy import _check_list_fields
+        import ansible_collections.dellemc.powerscale.plugins.modules.\
+            synciqpolicy as synciqpolicy_module
+        _check_list_fields = synciqpolicy_module._check_list_fields
 
         policy_obj = Policy("Policy1", "abc123", None)
         policy_obj.source_include_directories = []
@@ -788,7 +792,9 @@ class TestSynciqPolicy(PowerScaleUnitBase):
 
     def test_check_list_fields_no_change(self, powerscale_module_mock):
         """Test _check_list_fields when no changes needed."""
-        from ansible_collections.dellemc.powerscale.plugins.modules.synciqpolicy import _check_list_fields
+        import ansible_collections.dellemc.powerscale.plugins.modules.\
+            synciqpolicy as synciqpolicy_module
+        _check_list_fields = synciqpolicy_module._check_list_fields
 
         policy_obj = Policy("Policy1", "abc123", None)
         policy_obj.source_include_directories = ["/ifs/data1"]
@@ -804,19 +810,27 @@ class TestSynciqPolicy(PowerScaleUnitBase):
         assert modify_dict == {}
 
     def test_check_password_field_with_password(self, powerscale_module_mock):
-        """Test _check_password_field when password is provided with other modifications."""
-        from ansible_collections.dellemc.powerscale.plugins.modules.synciqpolicy import _check_password_field
+        """Test _check_password_field when password is provided with other
+        modifications."""
+        import ansible_collections.dellemc.powerscale.plugins.modules.\
+            synciqpolicy as synciqpolicy_module
+        _check_password_field = \
+            synciqpolicy_module._check_password_field
 
         policy_obj_dict = {"password_set": True}
         policy_param = {"password": "newpassword"}
 
         modify_dict = {"description": "new description"}
         _check_password_field(policy_obj_dict, policy_param, modify_dict)
-        assert modify_dict == {"description": "new description", "password": "newpassword"}
+        assert modify_dict == {
+            "description": "new description", "password": "newpassword"}
 
     def test_check_password_field_without_password(self, powerscale_module_mock):
         """Test _check_password_field when password is not provided."""
-        from ansible_collections.dellemc.powerscale.plugins.modules.synciqpolicy import _check_password_field
+        import ansible_collections.dellemc.powerscale.plugins.modules.\
+            synciqpolicy as synciqpolicy_module
+        _check_password_field = \
+            synciqpolicy_module._check_password_field
 
         policy_obj_dict = {"password_set": True}
         policy_param = {}
@@ -827,7 +841,10 @@ class TestSynciqPolicy(PowerScaleUnitBase):
 
     def test_check_password_field_password_not_set(self, powerscale_module_mock):
         """Test _check_password_field when password not set in policy."""
-        from ansible_collections.dellemc.powerscale.plugins.modules.synciqpolicy import _check_password_field
+        import ansible_collections.dellemc.powerscale.plugins.modules.\
+            synciqpolicy as synciqpolicy_module
+        _check_password_field = \
+            synciqpolicy_module._check_password_field
 
         policy_obj_dict = {"password_set": False}
         policy_param = {"password": "newpassword"}

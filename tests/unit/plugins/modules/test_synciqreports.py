@@ -1,6 +1,7 @@
 # Copyright: (c) 2025 Dell Technologies
 
-# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+# GNU General Public License v3.0+ (see COPYING or
+# https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """Unit Tests for SyncIQ Reports module on PowerScale"""
 
@@ -10,7 +11,8 @@ __metaclass__ = type
 
 import pytest
 from mock.mock import MagicMock
-from ansible_collections.dellemc.powerscale.plugins.modules.synciqreports import SyncIQReports
+from ansible_collections.dellemc.powerscale.plugins.modules.synciqreports \
+    import SyncIQReports
 
 
 class TestSyncIQReports:
@@ -29,7 +31,7 @@ class TestSyncIQReports:
         module_mock.module.params = {'id': 'report123', 'name': None}
 
         result = SyncIQReports._resolve_report_id(module_mock)
-        
+
         assert result == 'report123'
         module_mock.module.fail_json.assert_not_called()
 
@@ -39,7 +41,7 @@ class TestSyncIQReports:
         module_mock.get_report_id = MagicMock(return_value='report456')
 
         result = SyncIQReports._resolve_report_id(module_mock)
-        
+
         assert result == 'report456'
         module_mock.get_report_id.assert_called_once_with('report_name')
 
@@ -49,6 +51,6 @@ class TestSyncIQReports:
         module_mock.module.fail_json = MagicMock()
 
         SyncIQReports._resolve_report_id(module_mock)
-        
+
         module_mock.module.fail_json.assert_called_once_with(
             msg='Please provide a valid report id or valid report name')

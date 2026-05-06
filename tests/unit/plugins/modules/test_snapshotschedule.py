@@ -1,6 +1,7 @@
 # Copyright: (c) 2025 Dell Technologies
 
-# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+# GNU General Public License v3.0+ (see COPYING or
+# https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """Unit Tests for Snapshot Schedule module on PowerScale"""
 
@@ -10,7 +11,8 @@ __metaclass__ = type
 
 import pytest
 from mock.mock import MagicMock
-from ansible_collections.dellemc.powerscale.plugins.modules.snapshotschedule import SnapshotSchedule
+from ansible_collections.dellemc.powerscale.plugins.modules.snapshotschedule \
+    import SnapshotSchedule
 
 
 class TestSnapshotSchedule:
@@ -32,8 +34,9 @@ class TestSnapshotSchedule:
         snapshot_schedule_modify = {}
 
         result = SnapshotSchedule._check_retention_modified(
-            module_mock, retention_in_sec, snapshot_schedule_details, snapshot_schedule_modify)
-        
+            module_mock, retention_in_sec, snapshot_schedule_details,
+            snapshot_schedule_modify)
+
         assert result is True
         assert snapshot_schedule_modify['duration'] == 7200
 
@@ -46,8 +49,9 @@ class TestSnapshotSchedule:
         snapshot_schedule_modify = {}
 
         result = SnapshotSchedule._check_retention_modified(
-            module_mock, retention_in_sec, snapshot_schedule_details, snapshot_schedule_modify)
-        
+            module_mock, retention_in_sec, snapshot_schedule_details,
+            snapshot_schedule_modify)
+
         assert result is False
         assert snapshot_schedule_modify == {}
 
@@ -62,7 +66,8 @@ class TestSnapshotSchedule:
         module_mock.module.fail_json = MagicMock()
 
         result = SnapshotSchedule._check_retention_modified(
-            module_mock, retention_in_sec, snapshot_schedule_details, snapshot_schedule_modify)
-        
+            module_mock, retention_in_sec, snapshot_schedule_details,
+            snapshot_schedule_modify)
+
         module_mock.module.fail_json.assert_called_once_with(
             msg="The snapshot desired retention must be at least 2 hours")
