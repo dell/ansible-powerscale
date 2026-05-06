@@ -546,6 +546,32 @@ class Job(object):
                     % (cfg['verb'], job_id, current_state))
         return False, 'noop', before_details
 
+    def _build_modify_kwargs(self, priority, policy, job_details):
+        """Build modification kwargs for priority/policy changes."""
+        modify_kwargs = {}
+        if priority is not None and job_details.get('priority') != priority:
+            modify_kwargs['priority'] = priority
+        if policy is not None and job_details.get('policy') != policy:
+            modify_kwargs['policy'] = policy
+        return modify_kwargs
+
+    def _update_diff_dict(self, diff_dict, before_details, job_details, modify_kwargs):
+        """Update diff dictionary with before/after values."""
+        if not diff_dict:
+            diff_dict.update({
+                'before': before_details,
+                'after': dict(job_details or {}, **modify_kwargs)})
+        else:
+            diff_dict['after'].update(modify_kwargs)
+
+    def _apply_modifications(self, job_id, modify_kwargs, job_details, diff_dict):
+        """Apply modifications and update job details."""
+        self.modify_job(job_id, **modify_kwargs)
+        job_details = self.get_job_details(job_id)
+        if self.module._diff and job_details:
+            diff_dict['after'] = job_details
+        return job_details
+
     def _handle_priority_policy(self, job_id, priority, policy, job_details, before_details, diff_dict, outcome):
         """Handle priority/policy modifications. Returns (changed, outcome, job_details)."""
         current_state = job_details.get('state', '') if job_details else ''
@@ -554,28 +580,15 @@ class Job(object):
         if priority is None and policy is None:
             return False, outcome, job_details
 
-        modify_kwargs = {}
-        if priority is not None and job_details.get('priority') != priority:
-            modify_kwargs['priority'] = priority
-        if policy is not None and job_details.get('policy') != policy:
-            modify_kwargs['policy'] = policy
-
+        modify_kwargs = self._build_modify_kwargs(priority, policy, job_details)
         if not modify_kwargs:
             return False, outcome, job_details
 
         if self.module._diff:
-            if not diff_dict:
-                diff_dict.update({
-                    'before': before_details,
-                    'after': dict(job_details or {}, **modify_kwargs)})
-            else:
-                diff_dict['after'].update(modify_kwargs)
+            self._update_diff_dict(diff_dict, before_details, job_details, modify_kwargs)
 
         if not self.module.check_mode:
-            self.modify_job(job_id, **modify_kwargs)
-            job_details = self.get_job_details(job_id)
-            if self.module._diff and job_details:
-                diff_dict['after'] = job_details
+            job_details = self._apply_modifications(job_id, modify_kwargs, job_details, diff_dict)
 
         return True, outcome if outcome != 'noop' else 'modified', job_details
 
