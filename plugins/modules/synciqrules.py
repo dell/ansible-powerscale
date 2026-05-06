@@ -339,6 +339,37 @@ class SynciqRules(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
+    def _check_field_modification(self, existing_rule_dict, input_rule_dict, field_name):
+        """Check if a field has been modified and add to modify parameters."""
+        if field_name in input_rule_dict and input_rule_dict[field_name] != existing_rule_dict[field_name]:
+            return input_rule_dict[field_name]
+        return None
+
+    def _merge_schedule_keys(self, input_rule_dict, existing_rule_dict):
+        """Merge missing schedule keys from existing rule into input rule."""
+        has_schedule_key = ['monday', 'tuesday', 'wednesday', 'thursday',
+                            'friday', 'saturday', 'sunday', 'begin', 'end']
+
+        for key in has_schedule_key:
+            if key not in input_rule_dict['schedule']:
+                input_rule_dict['schedule'].update({key: existing_rule_dict['schedule'][key]})
+
+    def _check_schedule_modification(self, existing_rule_dict, input_rule_dict):
+        """Check if schedule has been modified and return modified schedule."""
+        if 'schedule' not in input_rule_dict:
+            return None
+
+        self._merge_schedule_keys(input_rule_dict, existing_rule_dict)
+
+        if input_rule_dict['schedule'] != existing_rule_dict['schedule']:
+            return input_rule_dict['schedule']
+        return None
+
+    def _validate_type_not_modified(self, existing_rule_dict, input_rule_dict):
+        """Validate that type field is not being modified (not allowed)."""
+        if 'type' in input_rule_dict and input_rule_dict['type'] != existing_rule_dict['type']:
+            self.module.fail_json(msg="rule_type is not modifiable. Please create new SyncIQ rule for the rule_type.")
+
     def is_sync_rule_modifiable(self, existing_rule_dict, input_rule_dict):
         """
         Form dictionary of parameters for performance rule that is modifiable
@@ -346,31 +377,28 @@ class SynciqRules(object):
         :param input_rule_dict: Performance rule details dictionary provided by user
         :return: Dictionary of performance rule parameters that are modifiable
         """
-
         modify_rule_param = {}
 
-        has_schedule_key = ['monday', 'tuesday', 'wednesday', 'thursday',
-                            'friday', 'saturday', 'sunday', 'begin', 'end']
+        # Check simple field modifications
+        description = self._check_field_modification(existing_rule_dict, input_rule_dict, 'description')
+        if description:
+            modify_rule_param['description'] = description
 
-        if 'description' in input_rule_dict and input_rule_dict['description'] != existing_rule_dict['description']:
-            modify_rule_param['description'] = input_rule_dict['description']
+        limit = self._check_field_modification(existing_rule_dict, input_rule_dict, 'limit')
+        if limit:
+            modify_rule_param['limit'] = limit
 
-        if 'limit' in input_rule_dict and input_rule_dict['limit'] != existing_rule_dict['limit']:
-            modify_rule_param['limit'] = input_rule_dict['limit']
+        enabled = self._check_field_modification(existing_rule_dict, input_rule_dict, 'enabled')
+        if enabled:
+            modify_rule_param['enabled'] = enabled
 
-        if 'enabled' in input_rule_dict and input_rule_dict['enabled'] != existing_rule_dict['enabled']:
-            modify_rule_param['enabled'] = input_rule_dict['enabled']
+        # Check schedule modification
+        schedule = self._check_schedule_modification(existing_rule_dict, input_rule_dict)
+        if schedule:
+            modify_rule_param['schedule'] = schedule
 
-        if 'schedule' in input_rule_dict:
-            for key in has_schedule_key:
-                if key not in input_rule_dict['schedule']:
-                    input_rule_dict['schedule'].update({key: existing_rule_dict['schedule'][key]})
-
-            if input_rule_dict['schedule'] != existing_rule_dict['schedule']:
-                modify_rule_param['schedule'] = input_rule_dict['schedule']
-
-        if 'type' in input_rule_dict and input_rule_dict['type'] != existing_rule_dict['type']:
-            self.module.fail_json(msg="rule_type is not modifiable. Please create new SyncIQ rule for the rule_type.")
+        # Validate type is not being modified
+        self._validate_type_not_modified(existing_rule_dict, input_rule_dict)
 
         return modify_rule_param
 
