@@ -387,19 +387,19 @@ class Group(object):
                         return item.to_dict()
         except utils.ApiException as e:
             if str(e.status) == "404":
-                error_message = GET_GROUP_ERR_MSG \
-                                % (group, self.determine_error(e))
+                error_message = GET_GROUP_ERR_MSG % (
+                    group, self.determine_error(e))
                 LOG.info(error_message)
                 return None
             else:
-                error_message = GET_GROUP_ERR_MSG \
-                                % (group, self.determine_error(e))
+                error_message = GET_GROUP_ERR_MSG % (
+                    group, self.determine_error(e))
                 LOG.error(error_message)
                 self.module.fail_json(msg=error_message)
 
         except Exception as e:
-            error_message = GET_GROUP_ERR_MSG \
-                            % (group, self.determine_error(e))
+            error_message = GET_GROUP_ERR_MSG % (
+                group, self.determine_error(e))
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
