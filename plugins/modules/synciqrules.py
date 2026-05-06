@@ -218,6 +218,53 @@ class SynciqRules(object):
         self.api_instance = utils.isi_sdk.SyncApi(self.api_client)
         LOG.info('Got python SDK instance for provisioning on PowerScale')
 
+    def _get_sync_rule_by_id(self, sync_rule_id):
+        """Get sync rule by ID."""
+        sync_rule_obj = self.api_instance.get_sync_rule(sync_rule_id=sync_rule_id).rules[0]
+        return sync_rule_obj.to_dict()
+
+    def _find_matching_sync_rule(self, sync_rule_dict):
+        """Find matching sync rule from list based on dictionary criteria."""
+        duplicate_rule = []
+        sync_rule_list = self.api_instance.list_sync_rules().rules
+
+        for rule in sync_rule_list:
+            rule = rule.to_dict()
+            if all(rule.get(key, None) == val for key, val in sync_rule_dict.items()) \
+                    and rule['schedule'] == sync_rule_dict['schedule']:
+                duplicate_rule.append(rule)
+
+        return duplicate_rule
+
+    def _validate_single_match(self, duplicate_rule):
+        """Validate that only one matching rule exists."""
+        if len(duplicate_rule) > 1:
+            self.module.fail_json("Operation is not successful as "
+                                  "more than one instance of "
+                                  "SyncIQ performance rule is present with same configuration")
+        elif len(duplicate_rule) == 1:
+            return duplicate_rule[0]
+        return None
+
+    def _handle_api_exception(self, e, sync_rule_id):
+        """Handle API exceptions when getting sync rule."""
+        if str(e.status) == '404':
+            error_message = " Sync rule: %s not found." % sync_rule_id
+            LOG.info(error_message)
+            return None
+        else:
+            error_msg = utils.determine_error(error_obj=e)
+            error_message = 'Failed to get SyncIQ rule with error : %s' % str(error_msg)
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    def _handle_general_exception(self, e):
+        """Handle general exceptions when getting sync rule."""
+        error_msg = utils.determine_error(error_obj=e)
+        error_message = 'Failed to get SyncIQ rule with error : %s' % str(error_msg)
+        LOG.error(error_message)
+        self.module.fail_json(msg=error_message)
+
     def get_sync_rule(self, sync_rule_id=None, sync_rule_dict=None):
         """
         Get SyncIQ performance rule details. If multiple instances are found for same
@@ -226,45 +273,19 @@ class SynciqRules(object):
         :param sync_rule_dict: Dictionary of details of a performance rule
         :return: Dictionary of performance rule details if exists else none
         """
-        duplicate_rule = []
         sync_rule_obj = None
 
         try:
             if sync_rule_id:
-                sync_rule_obj = self.api_instance.get_sync_rule(sync_rule_id=sync_rule_id).rules[0]
-                sync_rule_obj = sync_rule_obj.to_dict()
+                sync_rule_obj = self._get_sync_rule_by_id(sync_rule_id)
             else:
-                sync_rule_list = self.api_instance.list_sync_rules().rules
-                for rule in sync_rule_list:
-                    rule = rule.to_dict()
-                    if all(rule.get(key, None) == val for key, val in sync_rule_dict.items()) \
-                            and rule['schedule'] == sync_rule_dict['schedule']:
-                        duplicate_rule.append(rule)
-                if len(duplicate_rule) > 1:
-                    self.module.fail_json("Operation is not successful as "
-                                          "more than one instance of "
-                                          "SyncIQ performance rule is present with same configuration")
-                elif len(duplicate_rule) == 1:
-                    sync_rule_obj = duplicate_rule[0]
+                duplicate_rule = self._find_matching_sync_rule(sync_rule_dict)
+                sync_rule_obj = self._validate_single_match(duplicate_rule)
             return sync_rule_obj
         except utils.ApiException as e:
-            if str(e.status) == '404':
-                error_message = " Sync rule: %s not found." % sync_rule_id
-                LOG.info(error_message)
-                return None
-            else:
-                error_msg = utils.determine_error(error_obj=e)
-                error_message = 'Failed to get SyncIQ rule with ' \
-                                'error : %s' % str(error_msg)
-                LOG.error(error_message)
-                self.module.fail_json(msg=error_message)
-
+            return self._handle_api_exception(e, sync_rule_id)
         except Exception as e:
-            error_msg = utils.determine_error(error_obj=e)
-            error_message = 'Failed to get SyncIQ rule with ' \
-                            'error : %s' % str(error_msg)
-            LOG.error(error_message)
-            self.module.fail_json(msg=error_message)
+            self._handle_general_exception(e)
 
     def create_sync_rule(self, sync_rule_param):
         """
