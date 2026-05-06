@@ -563,7 +563,8 @@ class Job(object):
                 'before': before_details,
                 'after': dict(job_details or {}, **modify_kwargs)})
         else:
-            diff_dict['after'].update(modify_kwargs)
+            if diff_dict.get('after') is not None:
+                diff_dict['after'].update(modify_kwargs)
 
     def _apply_modifications(self, job_id, modify_kwargs, job_details, diff_dict):
         """Apply modifications and update job details."""
