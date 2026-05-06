@@ -374,6 +374,22 @@ class NetworkRule(object):
         if description and len(description) > 128:
             self.module.fail_json(msg="The maximum length for description is 128")
 
+    def _handle_present_state(self, groupnet, subnet, pool, rule,
+                              iface, new_name, current_rule_details, result):
+        """Handle create or modify for present state."""
+        if not current_rule_details:
+            if (iface and utils.is_input_empty(iface)) or not iface:
+                self.module.fail_json(
+                    msg="Please provide a valid interface type to create a network rule.")
+            rule_settings = self.get_settings_to_modify(current_rule_details, new_name)
+            self.create_network_rule(groupnet, subnet, pool, rule_settings)
+            result['create_network_rule'] = True
+        else:
+            rule_settings = self.get_settings_to_modify(current_rule_details, new_name)
+            if rule_settings:
+                self.modify_network_rule(groupnet, subnet, pool, rule, rule_settings)
+                result['modify_network_rule'] = True
+
     def perform_module_operation(self):
         """
         Perform different actions based on parameters chosen in playbook
@@ -410,39 +426,12 @@ class NetworkRule(object):
             self.delete_network_rule(groupnet, subnet, pool, rule)
             result['delete_network_rule'] = True
         elif state == 'present':
-            if not current_rule_details:
-
-                # Validate mandatory parameters to create a network rule
-                if (iface and utils.is_input_empty(iface)) or not iface:
-                    self.module.fail_json(
-                        msg="Please provide a valid interface type to create a network rule.")
-
-                rule_settings_to_modify = \
-                    self.get_settings_to_modify(current_rule_details, new_name)
-                self.create_network_rule(groupnet,
-                                         subnet,
-                                         pool,
-                                         rule_settings_to_modify)
-                result['create_network_rule'] = True
-            else:
-                rule_settings_to_modify = \
-                    self.get_settings_to_modify(current_rule_details, new_name)
-                if rule_settings_to_modify:
-                    self.modify_network_rule(groupnet,
-                                             subnet,
-                                             pool,
-                                             rule,
-                                             rule_settings_to_modify)
-                    result['modify_network_rule'] = True
-
+            self._handle_present_state(groupnet, subnet, pool, rule,
+                                       iface, new_name, current_rule_details, result)
             if new_rule_name and not utils.is_input_empty(new_rule_name):
                 rule = new_rule_name
-
-            current_rule_details = self.get_network_rule(groupnet,
-                                                         subnet,
-                                                         pool,
-                                                         rule)
-            result['network_rule_details'] = current_rule_details
+            result['network_rule_details'] = self.get_network_rule(
+                groupnet, subnet, pool, rule)
         if result['create_network_rule'] or result['modify_network_rule'] or result['delete_network_rule']:
             result['changed'] = True
 

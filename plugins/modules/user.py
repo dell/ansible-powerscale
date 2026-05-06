@@ -858,14 +858,7 @@ class User(object):
         user_details = self.get_user_details(
             auth_user_id, access_zone, provider_type)
         if user_details and access_zone.lower() == 'system':
-            get_roles_flag = True
-            if (not role_name) and (role_state is None) and \
-                    (access_zone.lower() != "system"):
-                get_roles_flag = False
-                user_details['roles'] = []
-            if get_roles_flag:
-                user_details['roles'] = self.get_roles_for_user(
-                    user_name, user_id)
+            user_details['roles'] = self.get_roles_for_user(user_name, user_id)
         self.result["changed"] = changed
         self.result["user_details"] = user_details
         self.module.exit_json(**self.result)

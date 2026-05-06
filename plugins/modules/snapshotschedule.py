@@ -387,23 +387,24 @@ class SnapshotSchedule(object):
             modified = True
 
         if desired_retention is not None:
-            retention_in_sec = 0
-            if retention_unit == 'days':
-                retention_in_sec = desired_retention * 24 * 60 * 60
-            else:
-                retention_in_sec = desired_retention * 60 * 60
-
-            if retention_in_sec != snapshot_schedule_details['schedules'][
-                    0]['duration']:
-                if retention_in_sec < 7200:
-                    self.module.fail_json(msg="The snapshot desired retention"
-                                              " must be at least 2 hours")
-                LOG.info("Retention Modification: new value=%s, old value=%s",
-                         retention_in_sec, snapshot_schedule_details
-                         ['schedules'][0]['duration'])
-                snapshot_schedule_modify['duration'] = retention_in_sec
-                modified = True
+            retention_in_sec = desired_retention * 24 * 60 * 60 if retention_unit == 'days' \
+                else desired_retention * 60 * 60
+            modified = self._check_retention_modified(
+                retention_in_sec, snapshot_schedule_details, snapshot_schedule_modify) or modified
         return modified, snapshot_schedule_modify
+
+    def _check_retention_modified(self, retention_in_sec, snapshot_schedule_details, snapshot_schedule_modify):
+        """Check if retention needs modification. Returns True if modified."""
+        current_duration = snapshot_schedule_details['schedules'][0]['duration']
+        if retention_in_sec == current_duration:
+            return False
+        if retention_in_sec < 7200:
+            self.module.fail_json(msg="The snapshot desired retention"
+                                      " must be at least 2 hours")
+        LOG.info("Retention Modification: new value=%s, old value=%s",
+                 retention_in_sec, current_duration)
+        snapshot_schedule_modify['duration'] = retention_in_sec
+        return True
 
     def create_snapshot_schedule(self, name, alias, effective_path,
                                  desired_retention, retention_unit,

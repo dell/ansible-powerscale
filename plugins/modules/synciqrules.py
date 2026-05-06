@@ -353,6 +353,34 @@ class SynciqRules(object):
 
         return modify_rule_param
 
+    def _validate_sync_rule_params(self, sync_rule_id, rule_type, limit, schedule, enabled, state):
+        """Validate mandatory parameters for creating/deleting a performance rule."""
+        if sync_rule_id is not None and state != 'absent':
+            return
+        if rule_type is None or utils.is_input_empty(rule_type):
+            self.module.fail_json(msg="Please provide rule_type to "
+                                      "create/delete a SyncIQ performance rule.")
+        if limit is None:
+            self.module.fail_json(msg="Please provide limit to "
+                                      "create/delete a SyncIQ performance rule.")
+        if schedule is None:
+            self.module.fail_json(msg="Please provide schedule to "
+                                      "create/delete a SyncIQ performance rule.")
+        if schedule['days_of_week'] is None:
+            self.module.fail_json(msg="Please provide days of a week, when an enabled rule is active,"
+                                      " to create/delete a SyncIQ performance rule.")
+        if schedule['begin'] is None:
+            self.module.fail_json(msg="Please provide scheduled begin time to "
+                                      "create/delete a SyncIQ performance rule.")
+        if schedule['end'] is None:
+            self.module.fail_json(msg="Please provide scheduled end time to "
+                                      "create/delete a SyncIQ performance rule.")
+        if enabled is None:
+            self.module.fail_json(msg="Please provide whether performance rule is "
+                                      "enabled to create/delete a SyncIQ rule.")
+        if sync_rule_id is None and state == 'absent':
+            self.module.fail_json(msg="Please provide sync_rule_id to delete a SyncIQ performance rule.")
+
     def perform_module_operation(self):
         """
         Perform different actions on SyncIQ performance rule module based on
@@ -374,36 +402,7 @@ class SynciqRules(object):
             delete_synciq_rule=False
         )
 
-        # Check mandatory parameters for creating/ deleting a performance rule
-        if sync_rule_id is None or state == 'absent':
-            if rule_type is None or utils.is_input_empty(rule_type):
-                self.module.fail_json(msg="Please provide rule_type to "
-                                          "create/delete a SyncIQ performance rule.")
-            if limit is None:
-                self.module.fail_json(msg="Please provide limit to "
-                                          "create/delete a SyncIQ performance rule.")
-            if schedule is None:
-                self.module.fail_json(msg="Please provide schedule to "
-                                          "create/delete a SyncIQ performance rule.")
-            if schedule is not None:
-                if schedule['days_of_week'] is None:
-                    self.module.fail_json(msg="Please provide days of a week, when an enabled rule is active,"
-                                              " to create/delete a SyncIQ performance rule.")
-
-                if schedule['begin'] is None:
-                    self.module.fail_json(msg="Please provide scheduled begin time to "
-                                              "create/delete a SyncIQ performance rule.")
-
-                if schedule['end'] is None:
-                    self.module.fail_json(msg="Please provide scheduled end time to "
-                                              "create/delete a SyncIQ performance rule.")
-
-            if enabled is None:
-                self.module.fail_json(msg="Please provide whether performance rule is "
-                                          "enabled to create/delete a SyncIQ rule.")
-
-        if sync_rule_id is None and state == 'absent':
-            self.module.fail_json(msg="Please provide sync_rule_id to delete a SyncIQ performance rule.")
+        self._validate_sync_rule_params(sync_rule_id, rule_type, limit, schedule, enabled, state)
 
         # Construct a dictionary for the parameters entered from playbook
         sync_rule_dict = construct_sync_rule_dict(description, rule_type, schedule, limit, enabled)

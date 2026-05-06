@@ -454,207 +454,186 @@ class Job(object):
             self.module.fail_json(
                 msg="wait_interval must be at least 1 second.")
 
+    def _handle_start_job(self, params):
+        """Handle starting a new job by type. Returns (changed, outcome, job_details, diff_dict)."""
+        job_type = params['job_type']
+        allow_dup = params['allow_dup']
+        diff_dict = {}
+
+        existing_job = self.find_job_by_type(job_type)
+        if existing_job and not allow_dup:
+            LOG.info("Job of type %s already running (ID: %s), "
+                     "allow_dup is false. No-op.",
+                     job_type, existing_job.get('id'))
+            return False, 'noop', existing_job, diff_dict
+
+        if self.module._diff:
+            diff_dict = {'before': {}, 'after': {'type': job_type, 'state': 'running'}}
+
+        job_details = None
+        if not self.module.check_mode:
+            start_response = self.start_job({
+                'job_type': job_type,
+                'paths': params['paths'],
+                'priority': params['priority'],
+                'policy': params['policy'],
+                'allow_dup': allow_dup,
+                'job_params': params['job_params']
+            })
+            job_details = self._process_start_response(
+                start_response, params['wait'], params['wait_timeout'],
+                params['wait_interval'], diff_dict)
+
+        return True, 'started', job_details, diff_dict
+
+    def _process_start_response(self, start_response, wait, wait_timeout, wait_interval, diff_dict):
+        """Process the response from starting a job."""
+        if start_response and 'id' in start_response:
+            new_job_id = start_response['id']
+            job_details = self.get_job_details(new_job_id)
+            if wait and job_details:
+                job_details = self.wait_for_completion(new_job_id, wait_timeout, wait_interval)
+            if self.module._diff and job_details:
+                diff_dict['after'] = job_details
+            return job_details
+        return start_response
+
+    def _apply_state_control(self, job_id, control, before_details, diff_dict, expected_state):
+        """Apply a job state control action and return updated job_details."""
+        if self.module._diff:
+            diff_dict.update({
+                'before': before_details,
+                'after': dict(before_details, state=expected_state)
+            })
+        job_details = before_details
+        if not self.module.check_mode:
+            self.modify_job(job_id, control=control)
+            job_details = self.get_job_details(job_id)
+            if self.module._diff and job_details:
+                diff_dict['after'] = job_details
+        return job_details
+
+    def _handle_state_transition(self, job_id, job_state, current_state, before_details, diff_dict):
+        """Handle pause/run/cancel transitions. Returns (changed, outcome, job_details)."""
+        state_map = {
+            'paused': {
+                'actionable': RUNNING_STATES, 'noop': PAUSED_STATES,
+                'control': 'pause', 'outcome': 'paused', 'expected': 'paused_user',
+                'verb': 'pause'},
+            'running': {
+                'actionable': PAUSED_STATES, 'noop': RUNNING_STATES,
+                'control': 'run', 'outcome': 'resumed', 'expected': 'running',
+                'verb': 'resume'},
+            'cancelled': {
+                'actionable': RUNNING_STATES + PAUSED_STATES, 'noop': (),
+                'control': 'cancel', 'outcome': 'cancelled', 'expected': 'cancelled_user',
+                'verb': 'cancel'},
+        }
+        if job_state not in state_map:
+            return False, 'noop', before_details
+
+        cfg = state_map[job_state]
+        if current_state in cfg['actionable']:
+            job_details = self._apply_state_control(
+                job_id, cfg['control'], before_details, diff_dict, cfg['expected'])
+            return True, cfg['outcome'], job_details
+        if current_state in cfg['noop']:
+            LOG.info("Job %s is already in %s state: %s", job_id, job_state, current_state)
+            return False, 'noop', before_details
+        if current_state in TERMINAL_STATES:
+            self.module.fail_json(
+                msg="Cannot %s job %d in terminal state '%s'."
+                    % (cfg['verb'], job_id, current_state))
+        return False, 'noop', before_details
+
+    def _handle_priority_policy(self, job_id, priority, policy, job_details, before_details, diff_dict, outcome):
+        """Handle priority/policy modifications. Returns (changed, outcome, job_details)."""
+        current_state = job_details.get('state', '') if job_details else ''
+        if current_state in TERMINAL_STATES:
+            return False, outcome, job_details
+        if priority is None and policy is None:
+            return False, outcome, job_details
+
+        modify_kwargs = {}
+        if priority is not None and job_details.get('priority') != priority:
+            modify_kwargs['priority'] = priority
+        if policy is not None and job_details.get('policy') != policy:
+            modify_kwargs['policy'] = policy
+
+        if not modify_kwargs:
+            return False, outcome, job_details
+
+        if self.module._diff:
+            if not diff_dict:
+                diff_dict.update({
+                    'before': before_details,
+                    'after': dict(job_details or {}, **modify_kwargs)})
+            else:
+                diff_dict['after'].update(modify_kwargs)
+
+        if not self.module.check_mode:
+            self.modify_job(job_id, **modify_kwargs)
+            job_details = self.get_job_details(job_id)
+            if self.module._diff and job_details:
+                diff_dict['after'] = job_details
+
+        return True, outcome if outcome != 'noop' else 'modified', job_details
+
+    def _handle_control_job(self, params):
+        """Handle controlling an existing job. Returns (changed, outcome, job_details, diff_dict)."""
+        job_id = params['job_id']
+        job_details = self.get_job_details(job_id)
+        if job_details is None:
+            self.module.fail_json(
+                msg="Failed to get job details for job %d: not found." % job_id)
+
+        current_state = job_details.get('state', '')
+        before_details = dict(job_details)
+        diff_dict = {}
+        changed = False
+        outcome = 'noop'
+
+        if params['job_state']:
+            changed, outcome, job_details = self._handle_state_transition(
+                job_id, params['job_state'], current_state, before_details, diff_dict)
+
+        mod_changed, outcome, job_details = self._handle_priority_policy(
+            job_id, params['priority'], params['policy'],
+            job_details, before_details, diff_dict, outcome)
+        changed = changed or mod_changed
+
+        return changed, outcome, job_details, diff_dict
+
     def perform_module_operation(self):
         """
         Perform different actions on job module based on parameters
         chosen in playbook.
         """
-        job_id = self.module.params.get('job_id')
-        job_type = self.module.params.get('job_type')
-        job_state = self.module.params.get('job_state')
-        paths = self.module.params.get('paths')
-        priority = self.module.params.get('priority')
-        policy = self.module.params.get('policy')
-        allow_dup = self.module.params.get('allow_dup')
-        wait = self.module.params.get('wait')
-        wait_timeout = self.module.params.get('wait_timeout')
-        wait_interval = self.module.params.get('wait_interval')
+        p = self.module.params
+        job_id = p.get('job_id')
+        job_type = p.get('job_type')
 
-        changed = False
-        outcome = 'noop'
-        job_details = None
-        diff_dict = {}
-
-        # Validate that either job_id or job_type is provided
         if not job_type and job_id is None:
             self.module.fail_json(
                 msg="Either job_id or job_type must be specified.")
 
-        # Validate input parameters
         self.validate_start_params()
 
-        # Start scenario: job_type provided
         if job_type:
-            existing_job = self.find_job_by_type(job_type)
+            changed, outcome, job_details, diff_dict = self._handle_start_job({
+                'job_type': job_type, 'paths': p.get('paths'),
+                'priority': p.get('priority'), 'policy': p.get('policy'),
+                'allow_dup': p.get('allow_dup'), 'job_params': p.get('job_params'),
+                'wait': p.get('wait'), 'wait_timeout': p.get('wait_timeout'),
+                'wait_interval': p.get('wait_interval')})
+        else:
+            changed, outcome, job_details, diff_dict = self._handle_control_job({
+                'job_id': job_id, 'job_state': p.get('job_state'),
+                'priority': p.get('priority'), 'policy': p.get('policy')})
 
-            if existing_job and not allow_dup:
-                # Job of same type already running and duplicates not allowed
-                LOG.info("Job of type %s already running (ID: %s), "
-                         "allow_dup is false. No-op.",
-                         job_type, existing_job.get('id'))
-                outcome = 'noop'
-                job_details = existing_job
-            else:
-                # Start a new job
-                if self.module._diff:
-                    diff_dict = {
-                        'before': {},
-                        'after': {'type': job_type, 'state': 'running'}
-                    }
-
-                if not self.module.check_mode:
-                    start_response = self.start_job({
-                        'job_type': job_type,
-                        'paths': paths,
-                        'priority': priority,
-                        'policy': policy,
-                        'allow_dup': allow_dup,
-                        'job_params': self.module.params.get('job_params')
-                    })
-
-                    if start_response and 'id' in start_response:
-                        new_job_id = start_response['id']
-                        job_details = self.get_job_details(new_job_id)
-
-                        # Wait for completion if requested
-                        if wait and job_details:
-                            job_details = self.wait_for_completion(
-                                new_job_id, wait_timeout, wait_interval)
-
-                        if self.module._diff and job_details:
-                            diff_dict['after'] = job_details
-                    else:
-                        job_details = start_response
-
-                changed = True
-                outcome = 'started'
-
-        # Control scenario: job_id provided
-        elif job_id:
-            job_details = self.get_job_details(job_id)
-
-            if job_details is None:
-                self.module.fail_json(
-                    msg="Failed to get job details for job %d: "
-                        "not found." % job_id)
-
-            current_state = job_details.get('state', '')
-            before_details = dict(job_details) if job_details else {}
-
-            # Handle job_state transitions
-            if job_state == 'paused':
-                if current_state in RUNNING_STATES:
-                    if self.module._diff:
-                        diff_dict = {
-                            'before': before_details,
-                            'after': dict(before_details, state='paused_user')
-                        }
-                    if not self.module.check_mode:
-                        self.modify_job(job_id, control='pause')
-                        job_details = self.get_job_details(job_id)
-                        if self.module._diff and job_details:
-                            diff_dict['after'] = job_details
-                    changed = True
-                    outcome = 'paused'
-                elif current_state in PAUSED_STATES:
-                    LOG.info("Job %s is already in paused state: %s",
-                             job_id, current_state)
-                    outcome = 'noop'
-                elif current_state in TERMINAL_STATES:
-                    self.module.fail_json(
-                        msg="Cannot pause job %d in terminal state '%s'."
-                            % (job_id, current_state))
-
-            elif job_state == 'running':
-                if current_state in PAUSED_STATES:
-                    if self.module._diff:
-                        diff_dict = {
-                            'before': before_details,
-                            'after': dict(before_details, state='running')
-                        }
-                    if not self.module.check_mode:
-                        self.modify_job(job_id, control='run')
-                        job_details = self.get_job_details(job_id)
-                        if self.module._diff and job_details:
-                            diff_dict['after'] = job_details
-                    changed = True
-                    outcome = 'resumed'
-                elif current_state in RUNNING_STATES:
-                    LOG.info("Job %s is already running.", job_id)
-                    outcome = 'noop'
-                elif current_state in TERMINAL_STATES:
-                    self.module.fail_json(
-                        msg="Cannot resume job %d in terminal state '%s'."
-                            % (job_id, current_state))
-
-            elif job_state == 'cancelled':
-                if current_state in RUNNING_STATES + PAUSED_STATES:
-                    if self.module._diff:
-                        diff_dict = {
-                            'before': before_details,
-                            'after': dict(before_details,
-                                          state='cancelled_user')
-                        }
-                    if not self.module.check_mode:
-                        self.modify_job(job_id, control='cancel')
-                        job_details = self.get_job_details(job_id)
-                        if self.module._diff and job_details:
-                            diff_dict['after'] = job_details
-                    changed = True
-                    outcome = 'cancelled'
-                elif current_state in TERMINAL_STATES:
-                    self.module.fail_json(
-                        msg="Cannot cancel job %d in terminal state '%s'."
-                            % (job_id, current_state))
-
-            # Handle priority/policy modifications (skip for terminal states)
-            current_state = job_details.get('state', '') if job_details else ''
-            if (priority is not None or policy is not None) \
-                    and current_state not in TERMINAL_STATES:
-                modify_kwargs = {}
-                needs_modify = False
-
-                if priority is not None \
-                        and job_details.get('priority') != priority:
-                    modify_kwargs['priority'] = priority
-                    needs_modify = True
-
-                if policy is not None \
-                        and job_details.get('policy') != policy:
-                    modify_kwargs['policy'] = policy
-                    needs_modify = True
-
-                if needs_modify:
-                    if self.module._diff:
-                        if not diff_dict:
-                            diff_dict = {
-                                'before': before_details,
-                                'after': dict(
-                                    job_details if job_details else {},
-                                    **modify_kwargs)
-                            }
-                        else:
-                            diff_dict['after'].update(modify_kwargs)
-
-                    if not self.module.check_mode:
-                        self.modify_job(job_id, **modify_kwargs)
-                        job_details = self.get_job_details(job_id)
-                        if self.module._diff and job_details:
-                            diff_dict['after'] = job_details
-
-                    changed = True
-                    if outcome == 'noop':
-                        outcome = 'modified'
-
-        result = dict(
-            changed=changed,
-            job_details=job_details,
-            outcome=outcome
-        )
-
+        result = dict(changed=changed, job_details=job_details, outcome=outcome)
         if self.module._diff and diff_dict:
             result['diff'] = diff_dict
-
         self.module.exit_json(**result)
 
 

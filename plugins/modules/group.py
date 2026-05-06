@@ -260,6 +260,7 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
 import re
 
 LOG = utils.get_logger('group')
+GET_GROUP_ERR_MSG = "Get Group Details %s failed with %s"
 
 
 class Group(object):
@@ -386,18 +387,18 @@ class Group(object):
                         return item.to_dict()
         except utils.ApiException as e:
             if str(e.status) == "404":
-                error_message = "Get Group Details %s failed with %s" \
+                error_message = GET_GROUP_ERR_MSG \
                                 % (group, self.determine_error(e))
                 LOG.info(error_message)
                 return None
             else:
-                error_message = "Get Group Details %s failed with %s" \
+                error_message = GET_GROUP_ERR_MSG \
                                 % (group, self.determine_error(e))
                 LOG.error(error_message)
                 self.module.fail_json(msg=error_message)
 
         except Exception as e:
-            error_message = "Get Group Details %s failed with %s" \
+            error_message = GET_GROUP_ERR_MSG \
                             % (group, self.determine_error(e))
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
@@ -523,6 +524,63 @@ class Group(object):
             return False
         return True
 
+    def _validate_group_params(self, group, users, user_state):
+        """Validate group module input parameters."""
+        if group is None:
+            self.module.fail_json(msg="Invalid group_name or group_id provided.")
+        if not users and user_state:
+            self.module.fail_json(msg="'user_state' is given,"
+                                      " 'users' are not specified")
+        if not user_state and users:
+            self.module.fail_json(msg="'user_state' is not specified,"
+                                      " 'users' are given")
+
+    def _process_user_entry(self, group, user, user_state, access_zone, provider_type):
+        """Validate and process a single user entry, return True if modified."""
+        if not isinstance(user, dict):
+            self.module.fail_json(
+                msg="Key Value pair is allowed, Provided %s." % user)
+        if len(user.keys()) != 1:
+            self.module.fail_json(
+                msg="One Key per dictionary is allowed, %s"
+                    " given" % list(user.keys()))
+        if 'user_name' in user:
+            return self.update_group(
+                group, user['user_name'], None, user_state, access_zone, provider_type)
+        if 'user_id' in user:
+            return self.update_group(
+                group, None, user['user_id'], user_state, access_zone, provider_type)
+        error = 'user_id or user_name  is expected,' \
+                ' "%s" given.' % list(user.keys())[0]
+        self.module.fail_json(msg=error)
+
+    def _handle_present_state(self, group, group_name, group_id, access_zone, provider_type, users, user_state):
+        """Handle present state logic. Returns (changed, group_details)."""
+        group_details = self.get_group_details(group, access_zone, provider_type)
+        if not group_details:
+            if not group_name:
+                error_message = "Unable to create a group, 'group_name' is missing"
+                LOG.error(error_message)
+                self.module.fail_json(msg=error_message)
+            LOG.info("Create a Group %s ", group_name)
+            users_list = self.create_user_objects(users, user_state)
+            self.create_group(group_name, group_id, access_zone, provider_type, users_list)
+            return True
+
+        if group_id and group_name:
+            if self.check_if_id_exists(group_name, group_details):
+                error_message = f'Group already exists with GID {group_id}'
+                LOG.error(error_message)
+                self.module.fail_json(msg=error_message)
+
+        if user_state and users:
+            changed = False
+            for user in users:
+                if self._process_user_entry(group, user, user_state, access_zone, provider_type):
+                    changed = True
+            return changed
+        return False
+
     def perform_module_operation(self):
         """
         Perform different actions on group module based on parameters
@@ -541,78 +599,17 @@ class Group(object):
         if group_id:
             group = 'GID:' + str(group_id)
 
-        if group is None:
-            self.module.fail_json(msg="Invalid group_name or group_id provided.")
-
-        if not users and user_state:
-            self.module.fail_json(msg="'user_state' is given,"
-                                      " 'users' are not specified")
-
-        if not user_state and users:
-            self.module.fail_json(msg="'user_state' is not specified,"
-                                      " 'users' are given")
+        self._validate_group_params(group, users, user_state)
 
         changed = False
         if state == 'present':
-            group_details = self.get_group_details(
-                group, access_zone, provider_type)
-            if not group_details:
-                if not group_name:
-                    error_message = "Unable to create a group, 'group_name' is"\
-                                    " missing"
-                    LOG.error(error_message)
-                    self.module.fail_json(msg=error_message)
-                LOG.info("Create a Group %s ", group_name)
-                users_list = self.create_user_objects(users, user_state)
-                self.create_group(group_name, group_id, access_zone, provider_type,
-                                  users_list)
-                changed = True
-            else:
-                if group_id and group_name:
-                    id_exists = self.check_if_id_exists(group_name, group_details)
-                    if id_exists:
-                        error_message = f'Group already exists with GID {group_id}'
-                        LOG.error(error_message)
-                        self.module.fail_json(msg=error_message)
-                if user_state and users:
-                    user_modified_flag = False
-                    for user in users:
-                        if not isinstance(user, dict):
-                            self.module.fail_json(
-                                msg="Key Value pair is allowed, Provided %s."
-                                    % user)
-
-                        if len(user.keys()) != 1:
-                            self.module.fail_json(
-                                msg="One Key per dictionary is allowed, %s"
-                                    " given" % list(user.keys()))
-
-                        if 'user_name' in user:
-                            user_modified_flag = self.update_group(
-                                group, user['user_name'],
-                                None, user_state, access_zone, provider_type)
-
-                        elif 'user_id' in user:
-                            user_modified_flag = self.update_group(
-                                group, None, user['user_id'],
-                                user_state, access_zone, provider_type)
-                        else:
-                            error = 'user_id or user_name  is expected,' \
-                                    ' "%s" given.' % list(user.keys())[0]
-                            self.module.fail_json(msg=error)
-
-                        if user_modified_flag and not changed:
-                            changed = True
+            changed = self._handle_present_state(
+                group, group_name, group_id, access_zone, provider_type, users, user_state)
         else:
-            if group_name:
-                LOG.info("Delete Group %s  ", group_name)
-            else:
-                LOG.info("Delete Group %s  ", group_id)
-            group_details = self.get_group_details(
-                group, access_zone, provider_type)
+            LOG.info("Delete Group %s  ", group_name or group_id)
+            group_details = self.get_group_details(group, access_zone, provider_type)
             if group_details:
-                changed = self.delete_group(
-                    group, access_zone, provider_type)
+                changed = self.delete_group(group, access_zone, provider_type)
 
         group_details = self.get_group_details(
             group, access_zone, provider_type)

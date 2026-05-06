@@ -544,6 +544,33 @@ class SmartQuota(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
+    @staticmethod
+    def _build_threshold_kwargs(quota_dict):
+        """Build threshold kwargs from quota_dict."""
+        if not quota_dict:
+            return {}
+        kwargs = {
+            'advisory': quota_dict.get('advisory'),
+            'hard': quota_dict.get('hard'),
+            'soft': quota_dict.get('soft'),
+            'soft_grace': quota_dict.get('soft_grace')
+        }
+        for pct_key in ('percent_soft', 'percent_advisory'):
+            if quota_dict.get(pct_key) is not None:
+                kwargs[pct_key] = quota_dict[pct_key]
+        return kwargs
+
+    @staticmethod
+    def _get_quota_defaults(quota_dict, quota_type):
+        """Get default values for enforced, include_snapshots, and container."""
+        enforced = bool(quota_dict and (
+            quota_dict.get('hard') or quota_dict.get('soft') or quota_dict.get('advisory')))
+        include_snapshots = (quota_dict or {}).get('include_snapshots', False) or False
+        container = False
+        if quota_dict and quota_dict.get('container') is not None and quota_type == "directory":
+            container = quota_dict['container']
+        return enforced, include_snapshots, container
+
     def create(self, path, quota_type, zone,
                quota_dict, persona=None):
         """
@@ -555,36 +582,9 @@ class SmartQuota(object):
         :param persona: User/Group object.
         :return: Quota Id.
         """
-        threshold_kwargs = {}
-        if quota_dict:
-            threshold_kwargs = {
-                'advisory': quota_dict.get('advisory'),
-                'hard': quota_dict.get('hard'),
-                'soft': quota_dict.get('soft'),
-                'soft_grace': quota_dict.get('soft_grace')
-            }
-            if quota_dict.get('percent_soft') is not None:
-                threshold_kwargs['percent_soft'] = quota_dict['percent_soft']
-            if quota_dict.get('percent_advisory') is not None:
-                threshold_kwargs['percent_advisory'] = quota_dict['percent_advisory']
+        threshold_kwargs = self._build_threshold_kwargs(quota_dict)
         threshold_obj = utils.isi_sdk.QuotaQuotaThresholds(**threshold_kwargs)
-
-        enforced = False
-        if quota_dict and (quota_dict.get('hard') or quota_dict.get('soft')
-                           or quota_dict.get('advisory')):
-            enforced = True
-
-        # if not passed during creation of Quota
-        # Set include_snapshots as False
-        if quota_dict is None or quota_dict.get('include_snapshots') is None:
-            include_snapshots = False
-        else:
-            include_snapshots = quota_dict['include_snapshots']
-
-        container = False
-        if quota_dict and 'container' in quota_dict and quota_dict['container'] is not None \
-                and quota_type == "directory":
-            container = quota_dict['container']
+        enforced, include_snapshots, container = self._get_quota_defaults(quota_dict, quota_type)
 
         quota_create_params = {
             'include_snapshots': include_snapshots, 'path': path,
@@ -596,15 +596,10 @@ class SmartQuota(object):
         if quota_dict is not None and quota_dict.get("thresholds_on") is not None:
             quota_create_params["thresholds_on"] = quota_dict["thresholds_on"]
 
-        description = self.module.params.get('description')
-        if description is not None:
-            quota_create_params['description'] = description
-        labels = self.module.params.get('labels')
-        if labels is not None:
-            quota_create_params['labels'] = labels
-        force = self.module.params.get('force')
-        if force is not None:
-            quota_create_params['force'] = force
+        for opt_key in ('description', 'labels', 'force'):
+            opt_val = self.module.params.get(opt_key)
+            if opt_val is not None:
+                quota_create_params[opt_key] = opt_val
 
         quota_params_obj = utils.isi_sdk.QuotaQuotaCreateParams(**quota_create_params)
         try:
@@ -888,6 +883,31 @@ class SmartQuota(object):
                 self.module.fail_json(msg="cap_unit provided, advisory/soft/"
                                           "hard limit not provided")
 
+    def _handle_quota_update(self, quota, quota_details, quota_id, path):
+        """Check if quota needs updating and apply. Returns True if changed."""
+        modify_flag = False
+        if quota:
+            modify_flag = to_modify_quota(
+                quota, quota_details["thresholds"], quota_details["thresholds_on"])
+
+        for field in ('description', 'labels'):
+            val = self.module.params.get(field)
+            if val is not None and val != quota_details.get(field):
+                modify_flag = True
+
+        if not modify_flag:
+            return False
+
+        enforce_limit = bool(
+            quota_details["enforced"] or
+            (quota and (quota.get('advisory') or quota.get('hard') or quota.get('soft'))))
+
+        LOG.info("Updating the Quota")
+        if quota is None:
+            quota = {'advisory': None, 'hard': None, 'soft': None,
+                     'soft_grace': None, 'thresholds_on': None}
+        return self.update(quota, quota_id, enforce_limit, path)
+
     def perform_module_operation(self):
         """
         Perform different actions on Smart Quota module based on parameters
@@ -953,33 +973,8 @@ class SmartQuota(object):
 
         # Update a Quota
         if state == "present" and quota_details:
-            modify_flag = False
-            if quota:
-                modify_flag = to_modify_quota(
-                    quota, quota_details["thresholds"],
-                    quota_details["thresholds_on"])
-
-            # Check if description or labels need updating
-            description = self.module.params.get('description')
-            if description is not None and \
-                    description != quota_details.get("description"):
-                modify_flag = True
-            labels = self.module.params.get('labels')
-            if labels is not None and \
-                    labels != quota_details.get("labels"):
-                modify_flag = True
-
-            enforce_limit = False
-            if quota_details["enforced"] or \
-                    (quota and (quota.get('advisory') or
-                                quota.get('hard') or quota.get('soft'))):
-                enforce_limit = True
-            if modify_flag:
-                LOG.info("Updating the Quota")
-                if quota is None:
-                    quota = {'advisory': None, 'hard': None, 'soft': None,
-                             'soft_grace': None, 'thresholds_on': None}
-                changed = self.update(quota, quota_id, enforce_limit, path)
+            changed = self._handle_quota_update(
+                quota, quota_details, quota_id, path) or changed
 
         # Delete Quota
         if state == "absent" and quota_details:

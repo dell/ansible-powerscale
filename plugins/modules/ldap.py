@@ -390,6 +390,39 @@ class Ldap(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
+    def _filter_ldap_keys(self, input_ldap, array_ldap):
+        """Filter input LDAP dict, removing unchanged/special keys."""
+        if not input_ldap:
+            return {}
+        for key in list(input_ldap):
+            key_lower = key.lower()
+            if key_lower == "groupnet":
+                if input_ldap[key] and input_ldap[key] != array_ldap[key]:
+                    self.module.fail_json(msg='Modification of'
+                                          ' groupnet is not supported.')
+                del input_ldap[key]
+            elif key_lower == "bind_password":
+                del input_ldap[key]
+            elif input_ldap[key] is None or input_ldap[key] == array_ldap[key]:
+                del input_ldap[key]
+        return input_ldap
+
+    def _update_server_uris(self, input_ldap, server_uris, server_uri_state, array_ldap):
+        """Update server URIs in the LDAP dict based on state."""
+        self.validate_input(server_uris)
+        server_uri_exists = all(uri in array_ldap['server_uris'] for uri in server_uris)
+        if server_uri_state == 'present-in-ldap' and not server_uri_exists:
+            input_ldap["server_uris"] = array_ldap['server_uris'] + server_uris
+        elif server_uri_state == 'absent-in-ldap':
+            uris = list(set(array_ldap['server_uris']).difference(server_uris))
+            if not uris:
+                self.module.fail_json(msg='Server_uris is a'
+                                      ' required field. All'
+                                      ' server_uris mapped to the LDAP'
+                                      ' provider cannot be removed.')
+            if server_uri_exists:
+                input_ldap['server_uris'] = uris
+
     def get_modified_ldap(self, server_uris, server_uri_state,
                           base_dn, input_ldap, array_ldap):
         """
@@ -402,41 +435,13 @@ class Ldap(object):
         :param array_ldap: LDAP dictionary returned from the PowerScale array.
         :return: LDAP dictionary with values that are modified.
         """
-        if input_ldap:
-            for key in list(input_ldap):
-                if key.lower() == "groupnet":
-                    if input_ldap[key] and input_ldap[key] != array_ldap[key]:
-                        self.module.fail_json(msg='Modification of'
-                                              ' groupnet is not supported.')
-                    del input_ldap[key]
-                elif key.lower() == "bind_password":
-                    del input_ldap[key]
-                elif input_ldap[key] is None or \
-                        input_ldap[key] == array_ldap[key]:
-                    del input_ldap[key]
-        else:
-            input_ldap = {}
+        input_ldap = self._filter_ldap_keys(input_ldap, array_ldap)
 
         if base_dn and base_dn != array_ldap["base_dn"]:
             input_ldap["base_dn"] = base_dn
 
         if server_uris:
-            self.validate_input(server_uris)
-            server_uri_exists = all(uri in array_ldap['server_uris'] for uri
-                                    in server_uris)
-            if server_uri_state == 'present-in-ldap':
-                if not server_uri_exists:
-                    input_ldap["server_uris"] = array_ldap['server_uris'] + \
-                        server_uris
-            elif server_uri_state == 'absent-in-ldap':
-                uris = list(set(array_ldap['server_uris']).difference(server_uris))
-                if not uris:
-                    self.module.fail_json(msg='Server_uris is a'
-                                          ' required field. All'
-                                          ' server_uris mapped to the LDAP'
-                                          ' provider cannot be removed.')
-                if server_uri_exists:
-                    input_ldap['server_uris'] = uris
+            self._update_server_uris(input_ldap, server_uris, server_uri_state, array_ldap)
 
         return input_ldap
 

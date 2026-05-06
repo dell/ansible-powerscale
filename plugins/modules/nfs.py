@@ -1044,6 +1044,47 @@ class NfsExport(PowerScaleBase):
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
+    def _apply_map_fields(self, nfs_export):
+        """Apply map_root, map_non_root, and map_failure to the export object."""
+        for map_field in ['map_root', 'map_non_root', 'map_failure']:
+            nfs_map = set_nfs_map(self.module.params.get(map_field), map_field)
+            if nfs_map:
+                setattr(nfs_export, map_field, nfs_map)
+
+    def _apply_size_fields(self, nfs_export):
+        """Apply size fields to the export object, converting to bytes."""
+        size_fields = ['file_name_max_size', 'block_size', 'directory_transfer_size',
+                       'read_transfer_max_size', 'read_transfer_multiple', 'read_transfer_size',
+                       'write_transfer_max_size', 'write_transfer_multiple', 'write_transfer_size',
+                       'max_file_size']
+        for size_field in size_fields:
+            size_param = self.module.params.get(size_field)
+            if size_param is None:
+                continue
+            try:
+                size_val = utils.get_size_bytes(size_param['size_value'], size_param['size_unit'])
+            except Exception:
+                size_val = None
+            if size_val is not None:
+                attr_name = 'name_max_size' if size_field == 'file_name_max_size' else size_field
+                setattr(nfs_export, attr_name, size_val)
+
+    def _apply_simple_fields(self, nfs_export):
+        """Apply simple boolean/string fields and time_delta to the export object."""
+        simple_fields = ['commit_asynchronous', 'setattr_asynchronous', 'readdirplus',
+                         'return_32bit_file_ids', 'can_set_time', 'map_lookup_uid', 'symlinks',
+                         'encoding', 'write_datasync_action', 'write_datasync_reply',
+                         'write_filesync_action', 'write_filesync_reply', 'write_unstable_action',
+                         'write_unstable_reply']
+        for simple_field in simple_fields:
+            if self.module.params.get(simple_field) is not None:
+                setattr(nfs_export, simple_field, self.module.params.get(simple_field))
+
+        if self.module.params.get('time_delta') is not None:
+            td = self.module.params.get('time_delta')
+            td_seconds = utils.convert_to_seconds(td.get('time_value'), td.get('time_unit'))
+            setattr(nfs_export, 'time_delta', td_seconds)
+
     def _create_nfs_export_create_params_object(self, path):
         try:
             nfs_export = self.isi_sdk.NfsExportCreateParams(
@@ -1058,50 +1099,9 @@ class NfsExport(PowerScaleBase):
                 security_flavors=get_security_keys(
                     self.module.params['security_flavors']),
                 zone=self.module.params['access_zone'])
-            # Apply advanced per-export settings if provided
-            nfs_map_root = set_nfs_map(self.module.params.get('map_root'), 'map_root')
-            if nfs_map_root:
-                nfs_export.map_root = nfs_map_root
-            nfs_map_non_root = set_nfs_map(self.module.params.get('map_non_root'), 'map_non_root')
-            if nfs_map_non_root:
-                nfs_export.map_non_root = nfs_map_non_root
-            nfs_map_failure = set_nfs_map(self.module.params.get('map_failure'), 'map_failure')
-            if nfs_map_failure:
-                nfs_export.map_failure = nfs_map_failure
-
-            # Size fields (convert to integer bytes using utils.get_size_bytes)
-            for size_field in ['file_name_max_size', 'block_size', 'directory_transfer_size',
-                               'read_transfer_max_size', 'read_transfer_multiple', 'read_transfer_size',
-                               'write_transfer_max_size', 'write_transfer_multiple', 'write_transfer_size',
-                               'max_file_size']:
-                size_param = self.module.params.get(size_field)
-                if size_param is not None:
-                    try:
-                        size_val = utils.get_size_bytes(size_param['size_value'], size_param['size_unit'])
-                    except Exception:
-                        size_val = None
-                    if size_val is not None:
-                        setattr(
-                            nfs_export,
-                            # keys in NFS export details sometimes differ (file_name_max_size -> name_max_size)
-                            size_field if size_field != 'file_name_max_size' else 'name_max_size',
-                            size_val,
-                        )
-
-            # Simple booleans / strings
-            for simple_field in ['commit_asynchronous', 'setattr_asynchronous', 'readdirplus',
-                                 'return_32bit_file_ids', 'can_set_time', 'map_lookup_uid', 'symlinks',
-                                 'encoding', 'write_datasync_action', 'write_datasync_reply',
-                                 'write_filesync_action', 'write_filesync_reply', 'write_unstable_action',
-                                 'write_unstable_reply']:
-                if self.module.params.get(simple_field) is not None:
-                    setattr(nfs_export, simple_field, self.module.params.get(simple_field))
-
-            # time_delta expects a numeric seconds value in the SDK; convert if provided
-            if self.module.params.get('time_delta') is not None:
-                td = self.module.params.get('time_delta')
-                td_seconds = utils.convert_to_seconds(td.get('time_value'), td.get('time_unit'))
-                setattr(nfs_export, 'time_delta', td_seconds)
+            self._apply_map_fields(nfs_export)
+            self._apply_size_fields(nfs_export)
+            self._apply_simple_fields(nfs_export)
 
             return nfs_export
         except Exception as e:
