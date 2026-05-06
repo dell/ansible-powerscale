@@ -430,20 +430,9 @@ class SynciqRules(object):
         if sync_rule_id is None and state == 'absent':
             self.module.fail_json(msg="Please provide sync_rule_id to delete a SyncIQ performance rule.")
 
-    def perform_module_operation(self):
-        """
-        Perform different actions on SyncIQ performance rule module based on
-        parameters chosen in playbook
-        """
-        sync_rule_id = self.module.params['sync_rule_id']
-        description = self.module.params['description']
-        rule_type = self.module.params['rule_type']
-        schedule = self.module.params['schedule']
-        limit = self.module.params['limit']
-        enabled = self.module.params['enabled']
-        state = self.module.params['state']
-
-        result = dict(
+    def _initialize_result_dict(self):
+        """Initialize the result dictionary with default values."""
+        return dict(
             changed=False,
             synciq_rule_details='',
             create_synciq_rule=False,
@@ -451,39 +440,92 @@ class SynciqRules(object):
             delete_synciq_rule=False
         )
 
-        self._validate_sync_rule_params(sync_rule_id, rule_type, limit, schedule, enabled, state)
+    def _get_module_params(self):
+        """Get all module parameters."""
+        return {
+            'sync_rule_id': self.module.params['sync_rule_id'],
+            'description': self.module.params['description'],
+            'rule_type': self.module.params['rule_type'],
+            'schedule': self.module.params['schedule'],
+            'limit': self.module.params['limit'],
+            'enabled': self.module.params['enabled'],
+            'state': self.module.params['state']
+        }
 
-        # Construct a dictionary for the parameters entered from playbook
-        sync_rule_dict = construct_sync_rule_dict(description, rule_type, schedule, limit, enabled)
-
-        rule_details = self.get_sync_rule(sync_rule_id, sync_rule_dict)
-
+    def _resolve_sync_rule_id(self, sync_rule_id, rule_details):
+        """Resolve the sync rule ID based on rule details."""
         if rule_details:
-            sync_rule_id = rule_details['id']
+            return rule_details['id']
         elif rule_details is None and sync_rule_id:
-            sync_rule_id = None
+            return None
+        return sync_rule_id
 
-        # Create a Rule
-        if rule_details is None and state == 'present':
-            sync_rule_id = self.create_sync_rule(sync_rule_dict)
-            result['create_synciq_rule'] = True
-        # Modify a rule
-        elif sync_rule_id and state == 'present':
-            modify_rule_dict = self.is_sync_rule_modifiable(rule_details, sync_rule_dict)
-            if modify_rule_dict:
-                result['modify_synciq_rule'] = self.modify_sync_rule(sync_rule_id, modify_rule_dict)
-        # Delete a rule
-        elif sync_rule_id and state == 'absent':
-            if not self.is_sync_rule_modifiable(rule_details, sync_rule_dict):
-                result['delete_synciq_rule'] = self.delete_sync_rule(sync_rule_id)
+    def _handle_rule_creation(self, sync_rule_dict, result):
+        """Handle sync rule creation when state is present and rule doesn't exist."""
+        sync_rule_id = self.create_sync_rule(sync_rule_dict)
+        result['create_synciq_rule'] = True
+        return sync_rule_id
 
-        # Display rule details
-        if sync_rule_id and state == 'present':
+    def _handle_rule_modification(self, sync_rule_id, rule_details, sync_rule_dict, result):
+        """Handle sync rule modification when state is present and rule exists."""
+        modify_rule_dict = self.is_sync_rule_modifiable(rule_details, sync_rule_dict)
+        if modify_rule_dict:
+            result['modify_synciq_rule'] = self.modify_sync_rule(sync_rule_id, modify_rule_dict)
+
+    def _handle_rule_deletion(self, sync_rule_id, rule_details, sync_rule_dict, result):
+        """Handle sync rule deletion when state is absent and rule exists."""
+        if not self.is_sync_rule_modifiable(rule_details, sync_rule_dict):
+            result['delete_synciq_rule'] = self.delete_sync_rule(sync_rule_id)
+
+    def _update_rule_details_display(self, sync_rule_id, result):
+        """Update result with rule details for display when state is present."""
+        if sync_rule_id:
             rule_details = self.get_sync_rule(sync_rule_id=sync_rule_id)
             result['synciq_rule_details'] = display_rule_details(rule_details)
+
+    def _update_changed_status(self, result):
+        """Update changed status based on operations performed."""
         if result['create_synciq_rule'] or result['modify_synciq_rule'] or result['delete_synciq_rule']:
             result['changed'] = True
 
+    def perform_module_operation(self):
+        """
+        Perform different actions on SyncIQ performance rule module based on
+        parameters chosen in playbook
+        """
+        params = self._get_module_params()
+        result = self._initialize_result_dict()
+
+        self._validate_sync_rule_params(params['sync_rule_id'], params['rule_type'],
+                                        params['limit'], params['schedule'],
+                                        params['enabled'], params['state'])
+
+        # Construct a dictionary for the parameters entered from playbook
+        sync_rule_dict = construct_sync_rule_dict(
+            params['description'], params['rule_type'],
+            params['schedule'], params['limit'],
+            params['enabled'])
+
+        rule_details = self.get_sync_rule(params['sync_rule_id'], sync_rule_dict)
+        sync_rule_id = self._resolve_sync_rule_id(params['sync_rule_id'], rule_details)
+
+        # Create a Rule
+        if rule_details is None and params['state'] == 'present':
+            sync_rule_id = self._handle_rule_creation(sync_rule_dict, result)
+
+        # Modify a rule
+        elif sync_rule_id and params['state'] == 'present':
+            self._handle_rule_modification(sync_rule_id, rule_details, sync_rule_dict, result)
+
+        # Delete a rule
+        elif sync_rule_id and params['state'] == 'absent':
+            self._handle_rule_deletion(sync_rule_id, rule_details, sync_rule_dict, result)
+
+        # Display rule details
+        if params['state'] == 'present':
+            self._update_rule_details_display(sync_rule_id, result)
+
+        self._update_changed_status(result)
         self.module.exit_json(**result)
 
 
