@@ -1,7 +1,7 @@
 #!/usr/bin/python
-# Copyright: (c) 2022, Dell Technologies
+# Copyright: (c) 2022-2024, Dell Technologies
 
-# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """Ansible module for managing file pool policy on PowerScale"""
 
@@ -250,31 +250,31 @@ EXAMPLES = r'''
     file_matching_pattern:
       or_criteria:
         - and_criteria:
-          - type: "file_name"
-            condition: "does_not_match"
-            value: "file_name_test"
-            case_sensitive: true
-          - type: "accessed"
-            condition: "after"
-            datetime_value: "2022-04-04 23:30"
-          - type: "created"
-            condition: "is_newer_than"
-            relative_datetime_count:
-              time_value: 12
-              time_unit: "years"
+            - type: "file_name"
+              condition: "does_not_match"
+              value: "file_name_test"
+              case_sensitive: true
+            - type: "accessed"
+              condition: "after"
+              datetime_value: "2022-04-04 23:30"
+            - type: "created"
+              condition: "is_newer_than"
+              relative_datetime_count:
+                time_value: 12
+                time_unit: "years"
         - and_criteria:
-          - type: "size"
-            condition: "not_equal"
-            size_info:
-              size_value: 60
-              size_unit: "MB"
-          - type: "file_attribute"
-            condition: "does_not_match"
-            field: "test_field"
-            value: "uni"
-          - type: "file_attribute"
-            condition: "exists"
-            field: "test"
+            - type: "size"
+              condition: "not_equal"
+              size_info:
+                size_value: 60
+                size_unit: "MB"
+            - type: "file_attribute"
+              condition: "does_not_match"
+              field: "test_field"
+              value: "uni"
+            - type: "file_attribute"
+              condition: "exists"
+              field: "test"
     state: 'present'
 '''
 

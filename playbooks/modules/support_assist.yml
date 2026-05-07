@@ -1,0 +1,68 @@
+---
+- name: Support assist Module Operations on PowerScale Storage
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: "10.XX.XX.XX"
+    port_no: "8080"
+    api_user: "user"
+    api_password: "password"
+    verify_ssl: false
+
+  tasks:
+    - name: Accept support assist terms
+      dellemc.powerscale.support_assist:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        accepted_terms: true
+
+    - name: Get support assist settings
+      dellemc.powerscale.support_assist:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+
+    - name: Update support assist settings
+      dellemc.powerscale.support_assist:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        enable_download: false
+        enable_remote_support: false
+        automatic_case_creation: false
+        connection:
+          gateway_endpoints:
+            - enabled: true
+              gateway_host: "XX.XX.XX.XX"
+              gateway_port: 9443
+              priority: 2
+              use_proxy: false
+              validate_ssl: false
+          network_pools:
+            - pool_name: "subnet0:pool0"
+              state: absent
+            - pool_name: "subnet0:pool2"
+              state: present
+        contact:
+          primary:
+            first_name: "Eric"
+            last_name: "Nam"
+            email: "eric.nam@example.com"
+            phone: "1234567890"
+          secondary:
+            first_name: "Daniel"
+            last_name: "Kang"
+            email: "kangD@example.com"
+            phone: "1234567891"
+        telemetry:
+          offline_collection_period: 60
+          telemetry_enabled: true
+          telemetry_persist: true
+          telemetry_threads: 10

@@ -21,13 +21,109 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.13 or later.
-- Python 3.9, 3.10 or 3.11.
+- Ansible-core 2.17 or later.
+- Python 3.11, 3.12 or 3.13.
 
 
 
 Parameters
 ----------
+
+  access_zone (optional, str, System)
+    Specifies the zone in which the export is valid.
+
+    Access zone once set cannot be changed.
+
+
+  clients (optional, list, None)
+    Specifies the clients to the export. The type of access to clients in this list is determined by the :emphasis:`read\_only` parameter.
+
+    This list can be changed anytime during the lifetime of the NFS export.
+
+    :emphasis:`client\_state` is not provided, then the host machine will replicate the values provided in the :emphasis:`clients`.
+
+
+  client_state (optional, str, None)
+    Defines whether the clients can access the NFS export.
+
+    Value :literal:`present-in-export` indicates that the clients can access the NFS export.
+
+    Value :literal:`absent-in-export` indicates that the client cannot access the NFS export.
+
+    Required when adding or removing access of clients from the export.
+
+    While removing clients, only the specified clients will be removed from the export, others will remain as is.
+
+
+  description (optional, str, None)
+    Optional description field for the NFS export.
+
+    Can be modified by passing a new value.
+
+
+  ignore_unresolvable_hosts (optional, bool, None)
+    Does not present an error condition on unresolvable hosts when creating or modifying an export.
+
+
+  map_root (optional, dict, None)
+    Specifies the users and groups to which non-root and root clients are mapped.
+
+
+    enabled (optional, bool, True)
+      True if the user mapping is applied.
+
+
+    primary_group (optional, str, None)
+      Specifies the primary group name.
+
+
+    secondary_groups (optional, list, None)
+      Specifies the secondary groups.
+
+
+      name (True, str, None)
+        Specifies the group name.
+
+
+      state (optional, str, present)
+        Specifies the group state.
+
+
+
+    user (optional, str, None)
+      Specifies the persona name.
+
+
+
+  map_non_root (optional, dict, None)
+    Specifies the users and groups to which non-root and root clients are mapped.
+
+
+    enabled (optional, bool, True)
+      True if the user mapping is applied.
+
+
+    primary_group (optional, str, None)
+      Specifies the primary group name.
+
+
+    secondary_groups (optional, list, None)
+      Specifies the secondary groups.
+
+
+      name (True, str, None)
+        Specifies the group name.
+
+
+      state (optional, str, present)
+        Specifies the group state.
+
+
+
+    user (optional, str, None)
+      Specifies the persona name.
+
+
 
   path (True, str, None)
     Specifies the filesystem path. It is the absolute path for System access zone and it is relative if using non-system access zone.
@@ -43,22 +139,10 @@ Parameters
     If there are multiple exports present with the same path, fetching details, creation, modification or deletion of such exports will fail.
 
 
-  access_zone (optional, str, System)
-    Specifies the zone in which the export is valid.
+  read_only (optional, bool, None)
+    Specifies whether the export is read-only or read-write. This parameter only has effect on the 'clients' list and not the other three types of clients.
 
-    Access zone once set cannot be changed.
-
-
-  clients (optional, list, None)
-    Specifies the clients to the export. The type of access to clients in this list is determined by the *read_only* parameter.
-
-    This list can be changed anytime during the lifetime of the NFS export.
-
-
-  root_clients (optional, list, None)
-    Specifies the clients with root access to the export.
-
-    This list can be changed anytime during the lifetime of the NFS export.
+    This setting can be modified any time. If it is not set at the time of creation, the export will be of type read/write.
 
 
   read_only_clients (optional, list, None)
@@ -66,117 +150,41 @@ Parameters
 
     This list can be changed anytime during the lifetime of the NFS export.
 
+    :emphasis:`client\_state` is not provided, then the host machine will replicate the values provided in the :emphasis:`read\_only\_clients`.
+
 
   read_write_clients (optional, list, None)
     Specifies the clients with both read and write access to the export, even when the export is set to read-only.
 
     This list can be changed anytime during the lifetime of the NFS export.
 
-
-  read_only (optional, bool, None)
-    Specifies whether the export is read-only or read-write. This parameter only has effect on the 'clients' list and not the other three types of clients.
-
-    This setting can be modified any time. If it is not set at the time of creation, the export will be of type read/write.
+    :emphasis:`client\_state` is not provided, then the host machine will replicate the values provided in the :emphasis:`read\_write\_clients`.
 
 
-  sub_directories_mountable (optional, bool, None)
-    ``true`` if all directories under the specified paths are mountable. If not set, sub-directories will not be mountable.
+  root_clients (optional, list, None)
+    Specifies the clients with root access to the export.
 
-    This setting can be modified any time.
+    This list can be changed anytime during the lifetime of the NFS export.
 
-
-  description (optional, str, None)
-    Optional description field for the NFS export.
-
-    Can be modified by passing a new value.
-
-
-  state (True, str, None)
-    Defines whether the NFS export should exist or not.
-
-    Value ``present`` indicates that the NFS export should exist in system.
-
-    Value ``absent`` indicates that the NFS export should not exist in system.
-
-
-  client_state (optional, str, None)
-    Defines whether the clients can access the NFS export.
-
-    Value ``present-in-export`` indicates that the clients can access the NFS export.
-
-    Value ``absent-in-export`` indicates that the client cannot access the NFS export.
-
-    Required when adding or removing access of clients from the export.
-
-    While removing clients, only the specified clients will be removed from the export, others will remain as is.
+    :emphasis:`client\_state` is not provided, then the host machine will replicate the values provided in the :emphasis:`root\_clients`.
 
 
   security_flavors (optional, list, None)
     Specifies the authentication types that are supported for this export.
 
 
-  ignore_unresolvable_hosts (optional, bool, None)
-    Does not present an error condition on unresolvable hosts when creating or modifying an export.
+  state (True, str, None)
+    Defines whether the NFS export should exist or not.
+
+    Value :literal:`present` indicates that the NFS export should exist in system.
+
+    Value :literal:`absent` indicates that the NFS export should not exist in system.
 
 
-  map_root (optional, dict, None)
-    Specifies the users and groups to which non-root and root clients are mapped.
+  sub_directories_mountable (optional, bool, None)
+    :literal:`true` if all directories under the specified paths are mountable. If not set, sub-directories will not be mountable.
 
-
-    enabled (optional, bool, True)
-      True if the user mapping is applied.
-
-
-    user (optional, str, None)
-      Specifies the persona name.
-
-
-    primary_group (optional, str, None)
-      Specifies the primary group name.
-
-
-    secondary_groups (optional, list, None)
-      Specifies the secondary groups.
-
-
-      name (True, str, None)
-        Specifies the group name.
-
-
-      state (optional, str, present)
-        Specifies the group state.
-
-
-
-
-  map_non_root (optional, dict, None)
-    Specifies the users and groups to which non-root and root clients are mapped.
-
-
-    enabled (optional, bool, True)
-      True if the user mapping is applied.
-
-
-    user (optional, str, None)
-      Specifies the persona name.
-
-
-    primary_group (optional, str, None)
-      Specifies the primary group name.
-
-
-    secondary_groups (optional, list, None)
-      Specifies the secondary groups.
-
-
-      name (True, str, None)
-        Specifies the group name.
-
-
-      state (optional, str, present)
-        Specifies the group state.
-
-
+    This setting can be modified any time.
 
 
   onefs_host (True, str, None)
@@ -190,9 +198,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    ``true`` - indicates that the SSL certificate should be verified.
+    :literal:`true` - indicates that the SSL certificate should be verified.
 
-    ``false`` - indicates that the SSL certificate should not be verified.
+    :literal:`false` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -210,7 +218,7 @@ Notes
 -----
 
 .. note::
-   - The *check_mode* is not supported.
+   - As :emphasis:`ignore\_unresolvable\_hosts` is input only parameter, therefore idempotency is not supported for it.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -222,136 +230,146 @@ Examples
 .. code-block:: yaml+jinja
 
     
-      - name: Create NFS Export
-        dellemc.powerscale.nfs:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          path: "<path>"
-          access_zone: "{{access_zone}}"
-          read_only_clients:
+    - name: Create NFS Export
+      dellemc.powerscale.nfs:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        path: "<path>"
+        access_zone: "{{access_zone}}"
+        read_only_clients:
           - "{{client1}}"
           - "{{client2}}"
-          read_only: true
-          clients: ["{{client3}}"]
-          client_state: 'present-in-export'
-          state: 'present'
+        read_only: true
+        clients: ["{{client3}}"]
+        client_state: 'present-in-export'
+        state: 'present'
 
-      - name: Get NFS Export
-        dellemc.powerscale.nfs:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          path: "<path>"
-          access_zone: "{{access_zone}}"
-          state: 'present'
+    - name: Get NFS Export
+      dellemc.powerscale.nfs:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        path: "<path>"
+        access_zone: "{{access_zone}}"
+        state: 'present'
 
-      - name: Add a root client
-        dellemc.powerscale.nfs:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          path: "<path>"
-          access_zone: "{{access_zone}}"
-          root_clients:
+    - name: Add a root client
+      dellemc.powerscale.nfs:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        path: "<path>"
+        access_zone: "{{access_zone}}"
+        root_clients:
           - "{{client4}}"
-          client_state: 'present-in-export'
-          state: 'present'
+        client_state: 'present-in-export'
+        state: 'present'
 
-      - name: Set sub_directories_mountable flag to true
-        dellemc.powerscale.nfs:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          path: "<path>"
-          access_zone: "{{access_zone}}"
-          sub_directories_mountable: true
-          state: 'present'
-
-      - name: Remove a root client
-        dellemc.powerscale.nfs:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          path: "<path>"
-          access_zone: "{{access_zone}}"
-          root_clients:
+    - name: Replace existing list of root clients
+      dellemc.powerscale.nfs:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        path: "<path>"
+        access_zone: "{{access_zone}}"
+        root_clients:
           - "{{client4}}"
-          client_state: 'absent-in-export'
-          state: 'present'
+        state: 'present'
 
-      - name: Modify NFS Export
-        dellemc.powerscale.nfs:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          path: "<path>"
-          access_zone: "{{access_zone}}"
-          description: "new description"
-          security_flavors:
+    - name: Set sub_directories_mountable flag to true
+      dellemc.powerscale.nfs:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        path: "<path>"
+        access_zone: "{{access_zone}}"
+        sub_directories_mountable: true
+        state: 'present'
+
+    - name: Remove a root client
+      dellemc.powerscale.nfs:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        path: "<path>"
+        access_zone: "{{access_zone}}"
+        root_clients:
+          - "{{client4}}"
+        client_state: 'absent-in-export'
+        state: 'present'
+
+    - name: Modify NFS Export
+      dellemc.powerscale.nfs:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        path: "<path>"
+        access_zone: "{{access_zone}}"
+        description: "new description"
+        security_flavors:
           - "kerberos_integrity"
           - "kerberos"
+        state: 'present'
+
+    - name: Set read_only flag to false
+      dellemc.powerscale.nfs:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        path: "<path>"
+        access_zone: "{{access_zone}}"
+        read_only: false
+        state: 'present'
+
+    - name: Modify map_root and map_non_root
+      dellemc.powerscale.nfs:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        path: "<path>"
+        access_zone: "{{access_zone}}"
+        map_root:
+          user: "root"
+          primary_group: "root"
+        map_non_root:
+          user: "root"
+          primary_group: "root"
+        secondary_groups:
+          - name: "group_test"
+            state: "absent"
+        state: 'present'
+
+    - name: Disable map_root
+      dellemc.powerscale.nfs:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        path: "<path>"
+        access_zone: "{{access_zone}}"
+        map_root:
+          enabled: false
           state: 'present'
 
-      - name: Set read_only flag to false
-        dellemc.powerscale.nfs:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          path: "<path>"
-          access_zone: "{{access_zone}}"
-          read_only: false
-          state: 'present'
-
-      - name: Modify map_root and map_non_root
-        dellemc.powerscale.nfs:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          path: "<path>"
-          access_zone: "{{access_zone}}"
-          map_root:
-            user: "root"
-            primary_group: "root"
-            secondary_groups:
-              - name: "group_test"
-          map_non_root:
-            user: "root"
-            primary_group: "root"
-            secondary_groups:
-              - name: "group_test"
-                state: "absent"
-          state: 'present'
-
-      - name: Disable map_root
-        dellemc.powerscale.nfs:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          path: "<path>"
-          access_zone: "{{access_zone}}"
-          map_root:
-            enabled: false
-          state: 'present'
-
-      - name: Delete NFS Export
-        dellemc.powerscale.nfs:
-          onefs_host: "{{onefs_host}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          path: "<path>"
-          access_zone: "{{access_zone}}"
-          state: 'absent'
+    - name: Delete NFS Export
+      dellemc.powerscale.nfs:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        path: "<path>"
+        access_zone: "{{access_zone}}"
+        state: 'absent'
 
 
 
@@ -367,7 +385,7 @@ NFS_export_details (always, complex, {'all_dir': 'false', 'block_size': 8192, 'c
 
 
   all_dirs (, bool, )
-    *sub_directories_mountable* flag value.
+    :emphasis:`sub\_directories\_mountable` flag value.
 
 
   id (, int, 12)
@@ -485,4 +503,6 @@ Authors
 - Manisha Agrawal(@agrawm3) <ansible.team@dell.com>
 - Bhavneet Sharma(@Bhavneet-Sharma) <ansible.team@dell.com>
 - Trisha Datta(@trisha-dell) <ansible.team@dell.com>
+- Kritika Bhateja(@Kritika-Bhateja-03) <ansible.team.dell.com>)
+- Saksham Nautiyal (@Saksham-Nautiyal) <ansible.team@dell.com>
 

@@ -1,6 +1,6 @@
-# Copyright: (c) 2023, Dell Technologies
+# Copyright: (c) 2023-2024, Dell Technologies
 
-# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """Mock Api response for Unit tests of S3 bucket module on PowerScale"""
 
@@ -176,8 +176,7 @@ class MockS3BucketeApi:
             return "Failed to get the group id for group wheel in zone " \
                    "sample-zone and provider local due to error SDK Error message"
         elif response_type == "wellknown_exception":
-            return "Failed to get the wellknown id for wellknown wheel due to" \
-                   " error Wellknown wheel does not exist. Provide valid wellknown"
+            return "Wellknown wheel does not exist. Provide valid wellknown"
         elif response_type == "modify_path":
             return "path of the S3 bucket is not modifiable after creation."
         elif response_type == "modify_owner":

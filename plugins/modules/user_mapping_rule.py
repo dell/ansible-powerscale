@@ -1,7 +1,7 @@
 #!/usr/bin/python
-# Copyright: (c) 2023, Dell Technologies
+# Copyright: (c) 2024, Dell Technologies
 
-# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """ Ansible module for managing user mapping rules on PowerScale"""
 
@@ -124,63 +124,63 @@ notes:
 '''
 
 EXAMPLES = r'''
-  - name: Get a user mapping rule
-    dellemc.powerscale.user_mapping_rule:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      apply_order: 1
+- name: Get a user mapping rule
+  dellemc.powerscale.user_mapping_rule:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    apply_order: 1
 
-  - name: Delete a user mapping rule
-    dellemc.powerscale.user_mapping_rule:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      apply_order: 1
-      state: 'absent'
+- name: Delete a user mapping rule
+  dellemc.powerscale.user_mapping_rule:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    apply_order: 1
+    state: 'absent'
 
-  - name: Create a user mapping rule
-    dellemc.powerscale.user_mapping_rule:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      rule:
-        operator: "insert"
-        options:
-          break: false
-          group: true
-          groups: true
-          user: true
-        user1:
-          domain: "ansibleneo.com"
-          user: "test_user"
-        user2:
-          user: "ans_user"
-      state: 'present'
+- name: Create a user mapping rule
+  dellemc.powerscale.user_mapping_rule:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    rule:
+    operator: "insert"
+    options:
+      break: false
+      group: true
+      groups: true
+      user: true
+    user1:
+      domain: "ansibleneo.com"
+      user: "test_user"
+    user2:
+      user: "ans_user"
+    state: 'present'
 
-  - name: Update a user mapping rule
-    dellemc.powerscale.user_mapping_rule:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      apply_order: 1
-      rule:
-        options:
-          break: true
-      state: 'present'
+- name: Update a user mapping rule
+  dellemc.powerscale.user_mapping_rule:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    apply_order: 1
+    rule:
+    options:
+      break: true
+    state: 'present'
 
-  - name: Apply a new order to the user mapping rule
-    dellemc.powerscale.user_mapping_rule:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      apply_order: 1
-      new_order: 2
+- name: Apply a new order to the user mapping rule
+  dellemc.powerscale.user_mapping_rule:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    apply_order: 1
+    new_order: 2
 '''
 
 RETURN = r'''
@@ -368,7 +368,7 @@ class UserMappingRule(object):
                 rule_object_payload['options'] = options_object
             rule_object_payload['user1'] = utils.isi_sdk.MappingUsersRulesRuleUser1(**rule['user1'])
             if rule['user2']:
-                rule_object_payload['user2'] = utils.isi_sdk.MappingUsersRulesRuleUser2Extended(**rule['user2'])
+                rule_object_payload['user2'] = utils.isi_sdk.MappingUsersRulesRuleUser2(**rule['user2'])
             rule_object = utils.isi_sdk.MappingUsersRulesRuleExtended(
                 **rule_object_payload
             )
@@ -495,10 +495,11 @@ class UserMappingRule(object):
     def form_rule_for_user_update(self, key, update_rule, new_rule_data, do_update):
         """
         Check and form rule for user update
+        :param key: The key to check in the rules
         :param update_rule: Updated rule data
         :param new_rule_data: New rule data.
         :param do_update: Is update required.
-        :return: True if update is needed and and the new updated rule.
+        :return: True if update is needed and the new updated rule.
         """
         if 'domain' in new_rule_data[key] and new_rule_data[key]['domain'] != update_rule[key]['domain']:
             update_rule[key]['domain'] = new_rule_data[key]['domain']
@@ -536,6 +537,7 @@ class UserMappingRule(object):
         do_update = False
         new_rule_data = new_rule_params['rule']
         if new_rule_data:
+            self.validate_for_specific_operators(new_rule_data)
             if 'operator' in new_rule_data and new_rule_data['operator'] is not None and new_rule_data['operator'] != rule_details['operator']:
                 update_rule['operator'] = new_rule_data['operator']
                 update_rule = self.form_rule_for_operator_update(update_rule, new_rule_data, rule_details)
@@ -544,7 +546,7 @@ class UserMappingRule(object):
                 do_update, update_rule = self.form_rule_for_operations_update(update_rule, new_rule_data, do_update)
             if 'user1' in new_rule_data and new_rule_data['user1'] is not None:
                 do_update, update_rule = self.form_rule_for_user_update('user1', update_rule, new_rule_data, do_update)
-            if 'user2' in new_rule_data and new_rule_data['user1'] is not None:
+            if 'user2' in new_rule_data and new_rule_data['user2'] is not None:
                 do_update, update_rule = self.form_rule_for_user_update('user2', update_rule, new_rule_data, do_update)
         if 'new_order' in new_rule_params and new_rule_params['new_order'] is not None:
             do_update = self.check_new_order_update(new_rule_params['apply_order'], new_rule_params['new_order'], do_update)
@@ -761,7 +763,7 @@ class UserMappingRuleHandler():
             error_message = "apply_order should be greater than 0."
             LOG.error(error_message)
             user_mapping_rule_object.module.fail_json(msg=error_message)
-        if user_mapping_rule_params['apply_order'] is not None and user_mapping_rule_params['state'] == 'present':
+        if 'apply_order' in user_mapping_rule_params and user_mapping_rule_params['apply_order'] is not None and user_mapping_rule_params['state'] == 'present':
             user_mapping_rule_details = user_mapping_rule_object.get_rule_details(
                 user_mapping_rule_params['apply_order'], user_mapping_rule_params['access_zone'])
             user_mapping_rule_object.result['user_mapping_rule_details'] = user_mapping_rule_details

@@ -1,0 +1,8 @@
+pytest
+pytest-xdist
+mock
+pytest-mock
+pytest-cov
+pytest-forked
+coverage
+setuptools

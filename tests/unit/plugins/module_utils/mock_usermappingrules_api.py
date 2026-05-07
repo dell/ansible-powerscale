@@ -1,6 +1,6 @@
-# Copyright: (c) 2023, Dell Technologies
+# Copyright: (c) 2023-2024, Dell Technologies
 
-# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """Mock Api response for Unit tests of user mapping rules module on PowerScale"""
 
@@ -99,6 +99,6 @@ class MockUserMappingRuleApi:
         elif response_type == 'invalid_apply_order':
             return "apply_order should be greater than 0."
         elif response_type == 'new_order_error':
-            return "Updating user mapping rule failed with error: new_order should be in range of 1 to 1"
+            return "new_order should be in range of 1 to 1"
         elif response_type == 'outbound_apply_order':
-            return "Fetching user mapping rule failed with error: apply order should be in range of 1 to 1"
+            return "apply order should be in range of 1 to 1"

@@ -1,7 +1,7 @@
 #!/usr/bin/python
-# Copyright: (c) 2019, Dell Technologies
+# Copyright: (c) 2024, Dell Technologies
 
-# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """ Ansible module for managing Users on PowerScale"""
 from __future__ import (absolute_import, division, print_function)
@@ -131,138 +131,138 @@ notes:
 '''
 
 EXAMPLES = r'''
-  - name: Get User Details using user name
-    dellemc.powerscale.user:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{port_no}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      access_zone: "{{access_zone}}"
-      provider_type: "{{provider_type}}"
-      user_name: "{{account_name}}"
-      state: "present"
+- name: Get User Details using user name
+  dellemc.powerscale.user:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{port_no}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    access_zone: "{{access_zone}}"
+    provider_type: "{{provider_type}}"
+    user_name: "{{account_name}}"
+    state: "present"
 
-  - name: Create User
-    dellemc.powerscale.user:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{port_no}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      access_zone: "{{access_zone}}"
-      provider_type: "{{provider_type}}"
-      user_name: "{{account_name}}"
-      password: "{{account_password}}"
-      primary_group: "{{primary_group}}"
-      enabled: "{{enabled}}"
-      email: "{{email}}"
-      full_name: "{{full_name}}"
-      home_directory: "{{home_directory}}"
-      shell: "{{shell}}"
-      role_name: "{{role_name}}"
-      role_state: "present-for-user"
-      state: "present"
+- name: Create User
+  dellemc.powerscale.user:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{port_no}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    access_zone: "{{access_zone}}"
+    provider_type: "{{provider_type}}"
+    user_name: "{{account_name}}"
+    password: "{{account_password}}"
+    primary_group: "{{primary_group}}"
+    enabled: "{{enabled}}"
+    email: "{{email}}"
+    full_name: "{{full_name}}"
+    home_directory: "{{home_directory}}"
+    shell: "{{shell}}"
+    role_name: "{{role_name}}"
+    role_state: "present-for-user"
+    state: "present"
 
-  - name: Create User with user id
-    dellemc.powerscale.user:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{port_no}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      access_zone: "{{access_zone}}"
-      provider_type: "{{provider_type}}"
-      user_name: "Test_User"
-      user_id: 7000
-      password: "{{account_password}}"
-      primary_group: "{{primary_group}}"
-      enabled: "{{enabled}}"
-      email: "{{email}}"
-      full_name: "{{full_name}}"
-      home_directory: "{{home_directory}}"
-      shell: "{{shell}}"
-      role_name: "{{role_name}}"
-      role_state: "present-for-user"
-      state: "present"
+- name: Create User with user id
+  dellemc.powerscale.user:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{port_no}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    access_zone: "{{access_zone}}"
+    provider_type: "{{provider_type}}"
+    user_name: "Test_User"
+    user_id: 7000
+    password: "{{account_password}}"
+    primary_group: "{{primary_group}}"
+    enabled: "{{enabled}}"
+    email: "{{email}}"
+    full_name: "{{full_name}}"
+    home_directory: "{{home_directory}}"
+    shell: "{{shell}}"
+    role_name: "{{role_name}}"
+    role_state: "present-for-user"
+    state: "present"
 
-  - name: Update User's Full Name and email using user name
-    dellemc.powerscale.user:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{port_no}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      access_zone: "{{access_zone}}"
-      provider_type: "{{provider_type}}"
-      user_name: "{{account_name}}"
-      email: "{{new_email}}"
-      full_name: "{{full_name}}"
-      state: "present"
+- name: Update User's Full Name and email using user name
+  dellemc.powerscale.user:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{port_no}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    access_zone: "{{access_zone}}"
+    provider_type: "{{provider_type}}"
+    user_name: "{{account_name}}"
+    email: "{{new_email}}"
+    full_name: "{{full_name}}"
+    state: "present"
 
-  - name: Disable User Account using User Id
-    dellemc.powerscale.user:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{port_no}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      access_zone: "{{access_zone}}"
-      provider_type: "{{provider_type}}"
-      user_id: "{{id}}"
-      enabled: false
-      state: "present"
+- name: Disable User Account using User Id
+  dellemc.powerscale.user:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{port_no}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    access_zone: "{{access_zone}}"
+    provider_type: "{{provider_type}}"
+    user_id: "{{id}}"
+    enabled: false
+    state: "present"
 
-  - name: Add user to a role using Username
-    dellemc.powerscale.user:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{port_no}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      user_name: "{{account_name}}"
-      provider_type: "{{provider_type}}"
-      role_name: "{{role_name}}"
-      role_state: "present-for-user"
-      state: "present"
+- name: Add user to a role using Username
+  dellemc.powerscale.user:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{port_no}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    user_name: "{{account_name}}"
+    provider_type: "{{provider_type}}"
+    role_name: "{{role_name}}"
+    role_state: "present-for-user"
+    state: "present"
 
-  - name: Remove user from a role using User id
-    dellemc.powerscale.user:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{port_no}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      user_id: "{{id}}"
-      role_name: "{{role_name}}"
-      role_state: "absent-for-user"
-      state: "present"
+- name: Remove user from a role using User id
+  dellemc.powerscale.user:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{port_no}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    user_id: "{{id}}"
+    role_name: "{{role_name}}"
+    role_state: "absent-for-user"
+    state: "present"
 
-  - name: Delete User using user name
-    dellemc.powerscale.user:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{port_no}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      access_zone: "{{access_zone}}"
-      provider_type: "{{provider_type}}"
-      user_name: "{{account_name}}"
-      state: "absent"
+- name: Delete User using user name
+  dellemc.powerscale.user:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{port_no}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    access_zone: "{{access_zone}}"
+    provider_type: "{{provider_type}}"
+    user_name: "{{account_name}}"
+    state: "absent"
 
-  - name: Modify password in non-system access zone update_password as "always"
-    dellemc.powerscale.user:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{port_no}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      access_zone: "{{access_zone}}"
-      provider_type: "{{provider_type}}"
-      user_name: "{{account_name}}"
-      password: "new_password"
-      update_password: "always"
-      state: "present"
+- name: Modify password in non-system access zone update_password as "always"
+  dellemc.powerscale.user:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{port_no}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    access_zone: "{{access_zone}}"
+    provider_type: "{{provider_type}}"
+    user_name: "{{account_name}}"
+    password: "new_password"
+    update_password: "always"
+    state: "present"
 '''
 
 RETURN = r'''
@@ -367,6 +367,10 @@ class User(object):
 
         self.api_client = utils.get_powerscale_connection(self.module.params)
         self.api_instance = utils.isi_sdk.AuthApi(self.api_client)
+        cluster_api = utils.isi_sdk.ClusterApi(self.api_client)
+        major = str(cluster_api.get_cluster_config().to_dict()['onefs_version']['release'].split('.')[0])
+        minor = str(cluster_api.get_cluster_config().to_dict()['onefs_version']['release'].split('.')[1])
+        self.array_version = major + "." + minor
         self.role_api_instance = utils.isi_sdk.AuthRolesApi(
             self.api_client)
         self.zone_summary_api = utils.isi_sdk.ZonesSummaryApi(self.api_client)
@@ -383,9 +387,8 @@ class User(object):
                      access_zone, zone_base_path)
             return zone_base_path
         except Exception as e:
-            error_message = 'Unable to fetch base path of Access Zone %s ' \
-                            ',failed with error: %s', access_zone, \
-                            self.determine_error(e)
+            error_message = 'Unable to fetch base path of Access Zone %s, ' \
+                            'failed with error: %s' % (access_zone, self.determine_error(e))
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
@@ -720,7 +723,9 @@ class User(object):
                 auth_user_id, access_zone, provider_type, enabled,
                 primary_group, home_directory, shell, full_name, email)
 
-        password_changed = self.modify_password(auth_user_id, access_zone)
+        password_changed = False
+        if utils.parse_version(self.array_version) < utils.parse_version("9.5"):
+            password_changed = self.modify_password(auth_user_id, access_zone)
         return user_details_changed or role_changed or password_changed
 
     def delete_existing_user(self, provider_type, auth_user_id, access_zone,
@@ -729,7 +734,7 @@ class User(object):
 
         if provider_type.lower() != 'local':
             self.module.fail_json(
-                msg="Cannot delete user from %s  provider_type"
+                msg="Cannot delete user from %s provider_type"
                     % provider_type)
         user_details = self.get_user_details(
             auth_user_id, access_zone, provider_type)

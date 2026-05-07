@@ -1,6 +1,6 @@
-# Copyright: (c) 2022, Dell Technologies
+# Copyright: (c) 2022-2024, Dell Technologies
 
-# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """Mock Api response for Unit tests of filepoolpolicy module on PowerScale"""
 
@@ -315,7 +315,7 @@ class MockFilepoolpolicyApi:
         tiers_list = MagicMock()
         tiers_list.tiers = MagicMock()
         tier_one = MagicMock()
-        tier_one.name = 'test_ansible_neo_tier'
+        tier_one.name = 'esa_tier'
         tier_one.lnns = [1, 2, 3]
         tiers_list.tiers = [tier_one]
         return tiers_list

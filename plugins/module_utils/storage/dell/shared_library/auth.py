@@ -1,6 +1,6 @@
-# Copyright: (c) 2023, Dell Technologies
+# Copyright: (c) 2023-2024, Dell Technologies
 
-# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import (absolute_import, division, print_function)
 
@@ -67,6 +67,28 @@ class Auth:
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
+    def get_wellknown_details(self, name):
+        """
+        Get details of the well known
+        :param name: name of the well known
+        """
+        LOG.info("Getting well known user details.")
+        try:
+            resp = self.auth_api.get_auth_wellknowns().to_dict()
+            for wellknown in resp['wellknowns']:
+                if wellknown['name'].lower() == name.lower():
+                    return wellknown
+            error_message = (f'Wellknown {name} does not exist. '
+                             f'Provide valid wellknown.')
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+        except Exception as e:
+            error_msg = utils.determine_error(error_obj=e)
+            error_message = (f'Failed to get the wellknown id for wellknown '
+                             f'{name} due to error {str(error_msg)}.')
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
     def get_group_user_id(self, persona, persona_type, zone):
         """
         :param persona: Name and provider type of user or group
@@ -87,3 +109,54 @@ class Auth:
                 zone=zone,
                 provider=persona['provider_type'])['groups'][0]['gid']
         return details
+
+    def get_auth_roles(self, zone):
+        """
+        Get details of the auth role
+        """
+        LOG.info("Getting auth role details.")
+        try:
+            resp = self.auth_api.list_auth_roles(zone=zone).to_dict()
+            return resp
+        except Exception as e:
+            error_msg = utils.determine_error(error_obj=e)
+            error_message = f'Failed to get the auth role list ' \
+                            f'due to error {error_msg}.'
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    def get_auth_users(self, zone):
+        """
+        Get list of the auth user for a given access zone
+        """
+        LOG.info("Getting list of auth users.")
+        try:
+            query_params = self.module.params.get('query_parameters')
+            auth_user_query_params = []
+            if query_params:
+                auth_user_query_params = query_params.get('users')
+            filter_params = {}
+            if auth_user_query_params:
+                for parm in auth_user_query_params:
+                    for key, value in parm.items():
+                        if key in ['filter']:
+                            filter_params[key] = value
+            user_list = []
+            user_list_details = (self.auth_api.list_auth_users(**filter_params)).to_dict()
+            user_list.extend(user_list_details['users'])
+            resume = user_list_details.get('resume')
+            while resume:
+                user_list_details = (self.auth_api.list_auth_users(resume=resume, **filter_params)).to_dict()
+                user_list.extend(user_list_details['users'])
+                resume = user_list_details['resume']
+            msg = f"Got user list from PowerScale cluster {self.module.params['onefs_host']}"
+            LOG.info(msg)
+            return user_list
+        except Exception as e:
+            error_msg = (
+                'Get Users List for PowerScale cluster: {0} and access zone: {1} '
+                'failed with error: {2}' .format(
+                    self.module.params['onefs_host'], zone,
+                    utils.determine_error(e)))
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)

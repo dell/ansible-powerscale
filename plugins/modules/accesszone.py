@@ -1,7 +1,7 @@
 #!/usr/bin/python
-# Copyright: (c) 2019, Dell Technologies
+# Copyright: (c) 2024, Dell Technologies
 
-# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """Ansible module for managing access zones on PowerScale"""
 
@@ -262,25 +262,25 @@ EXAMPLES = r'''
     az_name: "{{access zone}}"
     provider_state: "add"
     auth_providers:
-       - provider_name: "System"
-         provider_type: "file"
-         priority: 3
-       - provider_name: "ldap-prashant"
-         provider_type: "ldap"
+      - provider_name: "System"
+        provider_type: "file"
+        priority: 3
+      - provider_name: "ldap-prashant"
+        provider_type: "ldap"
     state: "present"
 
 - name: Remove Auth Providers from the  access zone
   dellemc.powerscale.accesszone:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      az_name: "{{access zone}}"
-      provider_state: "remove"
-      auth_providers:
-         - provider_name: "System"
-           provider_type: "file"
-      state: "present"
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    az_name: "{{access zone}}"
+    provider_state: "remove"
+    auth_providers:
+      - provider_name: "System"
+        provider_type: "file"
+    state: "present"
 
 - name: Create New Access Zone
   dellemc.powerscale.accesszone:
@@ -405,16 +405,16 @@ access_zone_details:
             description: SMB settings of access zone
             type: complex
             contains:
-                directory_create_mask(octal):
+                directory_create_mask_octal:
                     description: UNIX mask bits for directory in octal format
                     type: str
-                directory_create_mode(octal):
+                directory_create_mode_octal:
                      description: UNIX mode bits for directory in octal format
                      type: str
-                file_create_mask(octal):
+                file_create_mask_octal:
                     description: UNIX mask bits for file in octal format
                     type: str
-                file_create_mode(octal):
+                file_create_mode_octal:
                      description: UNIX mode bits for file in octal format
                      type: str
     sample:
@@ -521,13 +521,13 @@ access_zone_details:
                 "create_permissions": "default acl",
                 "csc_policy": null,
                 "directory_create_mask": 448,
-                "directory_create_mask(octal)": "700",
+                "directory_create_mask_octal": "700",
                 "directory_create_mode": 0,
-                "directory_create_mode(octal)": "0",
+                "directory_create_mode_octal": "0",
                 "file_create_mask": 448,
-                "file_create_mask(octal)": "700",
+                "file_create_mask_octal": "700",
                 "file_create_mode": 64,
-                "file_create_mode(octal)": "100",
+                "file_create_mode_octal": "100",
                 "file_filter_extensions": [],
                 "file_filter_type": "deny",
                 "file_filtering_enabled": false,
@@ -627,16 +627,16 @@ class AccessZone(object):
             api_response.update(nfs_settings)
             smb_settings = self.api_protocol.get_smb_settings_share(
                 zone=name).to_dict()
-            smb_settings['settings']['directory_create_mask(octal)'] = \
+            smb_settings['settings']['directory_create_mask_octal'] = \
                 "{0:o}".format(smb_settings['settings']
                                ['directory_create_mask'])
-            smb_settings['settings']['directory_create_mode(octal)'] = \
+            smb_settings['settings']['directory_create_mode_octal'] = \
                 "{0:o}".format(smb_settings['settings']
                                ['directory_create_mode'])
-            smb_settings['settings']['file_create_mask(octal)'] = \
+            smb_settings['settings']['file_create_mask_octal'] = \
                 "{0:o}".format(smb_settings['settings']
                                ['file_create_mask'])
-            smb_settings['settings']['file_create_mode(octal)'] = \
+            smb_settings['settings']['file_create_mode_octal'] = \
                 "{0:o}".format(smb_settings['settings']
                                ['file_create_mode'])
             smb_settings['smb_settings'] = smb_settings['settings']
@@ -918,7 +918,7 @@ class AccessZone(object):
 
     def validate_input(self, az_params):
         if not az_params['path']:
-            error_message = 'Please provide a valid path to create an access zone'
+            error_message = 'Provide a valid path to create an access zone'
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 

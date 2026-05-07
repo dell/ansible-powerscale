@@ -1,13 +1,3 @@
-<!--
-Copyright (c) 2022 Dell Inc., or its subsidiaries. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
--->
-
 # Maintainer guidelines
 
 As a Maintainer of this project you have the responsibility of keeping true to the vision of the project with a high-degree quality. Being part of this group is a privilege that requires dedication and time to attend to the daily activities that are associated with the maintenance of this project.
@@ -27,7 +17,7 @@ If a candidate is approved, a Maintainer contacts the candidate to invite them t
 ## Maintainer policies
 
 * Lead by example
-* Follow the [Code of Conduct](https://github.com/dell/ansible-powerscale/blob/2.2.0/docs/CODE_OF_CONDUCT.md) and the guidelines in the [Contributing](https://github.com/dell/ansible-powerscale/blob/2.2.0/docs/CONTRIBUTING.md) and [Committer](https://github.com/dell/ansible-powerscale/blob/2.2.0/docs/COMMITTER_GUIDE.md) guides
+* Follow the [Code of Conduct](https://github.com/dell/ansible-powerscale/blob/main/docs/CODE_OF_CONDUCT.md) and the guidelines in the [Contributing](https://github.com/dell/ansible-powerscale/blob/main/docs/CONTRIBUTING.md) and [Committer](https://github.com/dell/ansible-powerscale/blob/main/docs/COMMITTER_GUIDE.md) guides
 * Promote a friendly and collaborative environment within our community
 * Be actively engaged in discussions, answering questions, updating defects, and reviewing pull requests
 * Criticize code, not people. Ideally, tell the contributor a better way to do what they need.

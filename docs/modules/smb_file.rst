@@ -21,8 +21,8 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.13 or later.
-- Python 3.9, 3.10 or 3.11.
+- Ansible-core 2.17 or later.
+- Python 3.11, 3.12 or 3.13.
 
 
 
@@ -30,11 +30,11 @@ Parameters
 ----------
 
   file_id (optional, int, None)
-    Unique id of SMB open file. Mutually exclusive with *file_path*.
+    Unique id of SMB open file. Mutually exclusive with :emphasis:`file\_path`.
 
 
   file_path (optional, str, None)
-    Path of SMB file. Mutually exclusive with *file_id*.
+    Path of SMB file. Mutually exclusive with :emphasis:`file\_id`.
 
     If file path is provided all the open file sessions in the path will be closed.
 
@@ -42,9 +42,9 @@ Parameters
   state (optional, str, present)
     Defines the state of SMB file.
 
-    ``present`` indicates that the SMB file should exist in system.
+    :literal:`present` indicates that the SMB file should exist in system.
 
-    ``absent`` indicates that the SMB file is closed in system.
+    :literal:`absent` indicates that the SMB file is closed in system.
 
 
   onefs_host (True, str, None)
@@ -58,9 +58,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    ``true`` - indicates that the SSL certificate should be verified.
+    :literal:`true` - indicates that the SSL certificate should be verified.
 
-    ``false`` - indicates that the SSL certificate should not be verified.
+    :literal:`false` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -78,8 +78,8 @@ Notes
 -----
 
 .. note::
-   - The *check_mode* is supported.
-   - If *state* is ``absent``, the file will be closed.
+   - The :emphasis:`check\_mode` is supported.
+   - If :emphasis:`state` is :literal:`absent`\ , the file will be closed.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -91,33 +91,31 @@ Examples
 .. code-block:: yaml+jinja
 
     
+    - name: Get list of SMB files of the PowerScale cluster
+      dellemc.powerscale.smb_file:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        state: "present"
 
-      - name: Get list of SMB files of the PowerScale cluster
-        dellemc.powerscale.smb_file:
-          onefs_host: "{{onefs_host}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          state: "present"
+    - name: Close SMB file of the PowerScale cluster
+      dellemc.powerscale.smb_file:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        file_id: xxx
+        state: "absent"
 
-      - name: Close SMB file of the PowerScale cluster
-        dellemc.powerscale.smb_file:
-          onefs_host: "{{onefs_host}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          file_id: xxx
-          state: "absent"
-
-      - name: Close smb file of the PowerScale cluster
-        dellemc.powerscale.smb_file:
-          onefs_host: "{{onefs_host}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          file_path: "/ifs/ATest"
-          state: "absent"
-
+    - name: Close smb file of the PowerScale cluster
+      dellemc.powerscale.smb_file:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        file_path: "/ifs/ATest"
+        state: "absent"
 
 
 

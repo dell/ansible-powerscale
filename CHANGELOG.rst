@@ -1,9 +1,217 @@
 ================================
-Dellemc.Powerscale Change Logs
+Dellemc.Powerscale Release Notes
 ================================
 
 .. contents:: Topics
 
+v3.9.1
+======
+
+Release Summary
+---------------
+
+| Release Date: 2026-03-17
+| >- This release brings several bug fixes and minor changes to the PowerScale Ansible Modules.
+
+Minor Changes
+-------------
+
+- Added support for PowerScale 9.13.
+- Added support for target_compare_initial_sync parameter in SyncIQ policy module to enable data comparison during initial sync.
+
+Bug Fixes
+---------
+
+- Fix typo in sdk call in subnet.py
+
+v3.9.0
+======
+
+Release Summary
+---------------
+
+| Release Date: 2025-06-27
+| >- This release brings several bug fixes and minor changes to the PowerScale Ansible Modules.
+
+Minor Changes
+-------------
+
+- Adapt to muliple PowerScale versions for Alert Settings modules.
+- Adapt to muliple PowerScale versions for Info modules.
+- Add `+` as a permission option for Role module.
+- Avoid adding duplicated trustee for File System module.
+- Performs operator validation for all updates of User Mapping Rule module.
+- Support to manage RDMA for NFS Global Settings module on Powerscale 9.8 or later.
+
+Bug Fixes
+---------
+
+- Fix defect for Support Assist module about gateway checking.
+
+v3.8.1
+======
+
+Bug Fixes
+---------
+
+- GitHub defect fixes for filesystem module. (Issues # 38, # 121 and # 174)
+
+v3.8.0
+======
+
+Bug Fixes
+---------
+
+- GitHub defect fixes networkpool module for unauthorized error (issue 133), smb share module return error (issue 138) and filesystem modules cannot delete non empty folders and returns invalid error message (issue 148)
+- Internal defect fixes for the modules settings, snapshot, group, nfs, smb, smb_global_settings, alert_rule, filesystem, nfs_alias, synciqpolicy, ads and info.
+
+v3.7.0
+======
+
+Minor Changes
+-------------
+
+- Added check and diff mode support for synciqpolicy module.
+
+Bug Fixes
+---------
+
+- Fixed bugs for synciqpolicy module. (Issues 44 and 130)
+
+v3.6.0
+======
+
+Minor Changes
+-------------
+
+- Added diff mode support for NFS module.
+- Fixed failure of listing support_assist details in info module for oneFS version 9.4.0 and below.
+
+v3.5.0
+======
+
+Minor Changes
+-------------
+
+- Added fix for making the ACL trustee zone-aware for filesystem module.
+- Added support to make listing of SMB open files cluster aware.
+
+v3.4.0
+======
+
+Minor Changes
+-------------
+
+- ADS module has been enhanced to support the additional parameters.
+- Added support to list all the paginated data for the users in Info module.
+- NFS module is enhanced to remove masked paths in response and also added declarative approach of managing clients.
+
+v3.3.0
+======
+
+Minor Changes
+-------------
+
+- Added fix for firewall policy issue for network pool operations.
+- Added support for listing writable snapshots in Info module.
+
+New Modules
+-----------
+
+- dellemc.powerscale.alert_channel - Manage alert channel on a PowerScale Storage System.
+- dellemc.powerscale.alert_rule - Manage alert rule on a PowerScale Storage System.
+- dellemc.powerscale.writable_snapshots - Manage writable snapshots on PowerScale Storage System.
+
+v3.2.0
+======
+
+Minor Changes
+-------------
+
+- Added support for check mode and diff mode in network pool module.
+- Added support for check mode in Filesystem, NFS and Smart Quota modules.
+- Added support for listing filesystems, smart quotas, alert_settings, alert_rules, alert_categories, event_groups and alert_channels in Info module.
+- Added support for query parameters and filters in Info module.
+
+New Modules
+-----------
+
+- dellemc.powerscale.alert_settings - Manage alert settings on a PowerScale Storage System.
+
+v3.1.0
+======
+
+Minor Changes
+-------------
+
+- Added support for OneFS 9.8 Lonestar release.
+- Added support for running as root, along with other boolean flags such as allow_delete_readonly, allow_execute_always, and inheritable_path_acl in SMB module.
+
+New Modules
+-----------
+
+- dellemc.powerscale.roles - Manage auth roles on a PowerScale Storage System.
+- dellemc.powerscale.support_assist - Manage support assist settings on a PowerScale Storage System.
+
+v3.0.0
+======
+
+Minor Changes
+-------------
+
+- Added support for OneFS 9.7 Key West release.
+
+v2.5.0
+======
+
+Minor Changes
+-------------
+
+- Added support for listing server certificates in Info module.
+
+New Modules
+-----------
+
+- dellemc.powerscale.server_certificate - Manage server certificates on a PowerScale Storage System.
+
+v2.4.1
+======
+
+Minor Changes
+-------------
+
+- Document link fixes in README.
+
+v2.4.0
+======
+
+Minor Changes
+-------------
+
+- Added support for getting and modifying cluster owner information and cluster identity information through settings module.
+- Added support for listing SMB global settings, detailed network interfaces, NTP servers, email settings, cluster identity, cluster owner and SNMP settings through info module.
+- Added support for removing the static route for IP address pool through network pool module.
+
+New Modules
+-----------
+
+- dellemc.powerscale.smb_global_settings - Manage SMB global settings on a PowerScale Storage System.
+- dellemc.powerscale.snmp_settings - Manage SNMP settings on a PowerScale Storage System.
+
+v2.3.0
+======
+
+Minor Changes
+-------------
+
+- Added support for listing SynciqGlobalSettings and S3 buckets in Info module.
+- Added support for manually running a SyncIQ policy.
+
+New Modules
+-----------
+
+- dellemc.powerscale.synciq_global_settings - Manage SyncIQ global settings on a PowerScale Storage System.
+- dellemc.powerscale.synciqcertificate - Manage SyncIQ target cluster certificate on a PowerScale Storage System.
 
 v2.2.0
 ======

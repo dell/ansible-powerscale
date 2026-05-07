@@ -1,6 +1,7 @@
-# Copyright: (c) 2023, Dell Technologies
+# Copyright: (c) 2026, Dell Technologies
 
-# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+# GNU General Public License v3.0+ (see COPYING or
+# https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import (absolute_import, division, print_function)
 
@@ -48,6 +49,14 @@ class PowerScaleBase:
         # Using lazy property for accessing the isi_sdk instances
         self._protocol_api = None
         self._auth_api = None
+        self._synciq_api = None
+        self._cluster_api = None
+        self._certificate_api = None
+        self._zones_summary_api = None
+        self._support_assist_api = None
+        self._event_api = None
+        self._snapshot_api = None
+        self._job_api = None
 
     @property
     def protocol_api(self):
@@ -72,3 +81,92 @@ class PowerScaleBase:
         if self._auth_api is None:
             self._auth_api = self.isi_sdk.AuthApi(self.api_client)
         return self._auth_api
+
+    @property
+    def synciq_api(self):
+        """
+        Returns the sync API object.
+
+        :return: The sync API object.
+        :rtype: isi_sdk.AuthApi
+        """
+        if self._synciq_api is None:
+            self._synciq_api = self.isi_sdk.SyncApi(self.api_client)
+        return self._synciq_api
+
+    @property
+    def cluster_api(self):
+        """
+        Returns the cluster API object.
+
+        :return: The cluster API object.
+        :rtype: isi_sdk.ClusterApi
+        """
+        if self._cluster_api is None:
+            self._cluster_api = self.isi_sdk.ClusterApi(self.api_client)
+        return self._cluster_api
+
+    @property
+    def certificate_api(self):
+        """Returns the certificate API object.
+        :return: The certificate API object.
+        :rtype: isi_sdk.CertificateApi
+        """
+        if self._certificate_api is None:
+            self._certificate_api = self.isi_sdk.CertificateApi(
+                self.api_client)
+        return self._certificate_api
+
+    @property
+    def zones_summary_api(self):
+        """Returns the zones summary API object.
+        :return: The zones summary API object.
+        :rtype: isi_sdk.ZonesSummaryApi
+        """
+        if self._zones_summary_api is None:
+            self._zones_summary_api = self.isi_sdk.ZonesSummaryApi(
+                self.api_client)
+        return self._zones_summary_api
+
+    @property
+    def support_assist_api(self):
+        """
+        Returns the support assist API object.
+
+        :return: The support assist API object.
+        :rtype: isi_sdk.SupportassistApi
+        """
+        if self._support_assist_api is None:
+            self._support_assist_api = self.isi_sdk.SupportassistApi(
+                self.api_client)
+        return self._support_assist_api
+
+    @property
+    def event_api(self):
+        """Returns the event API object.
+        :return: The event API object.
+        :rtype: isi_sdk.EventApi
+        """
+        if self._event_api is None:
+            self._event_api = self.isi_sdk.EventApi(self.api_client)
+        return self._event_api
+
+    @property
+    def snapshot_api(self):
+        """Returns the snapshot API object.
+        :return: The snapshot API object.
+        :rtype: isi_sdk.SnapshotApi
+        """
+        if self._snapshot_api is None:
+            self._snapshot_api = self.isi_sdk.SnapshotApi(self.api_client)
+        return self._snapshot_api
+
+    @property
+    def job_api(self):
+        """Returns the job API object.
+        :return: The job API object.
+        :rtype: isi_sdk.JobApi
+        """
+        if self._job_api is None:
+            self._job_api = self.isi_sdk.JobApi(self.api_client)
+        return self._job_api

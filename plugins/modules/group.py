@@ -1,7 +1,7 @@
 #!/usr/bin/python
-# Copyright: (c) 2019, Dell Technologies
+# Copyright: (c) 2019-2025, Dell Technologies
 
-# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """ Ansible module for managing Groups on PowerScale"""
 
@@ -81,98 +81,98 @@ notes:
 '''
 
 EXAMPLES = r'''
-  - name: Create a Group
-    dellemc.powerscale.group:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      access_zone: "{{access_zone}}"
-      provider_type: "{{provider_type}}"
-      group_name: "{{group_name}}"
-      state: "present"
+- name: Create a Group
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    access_zone: "{{access_zone}}"
+    provider_type: "{{provider_type}}"
+    group_name: "{{group_name}}"
+    state: "present"
 
-  - name: Create a Group with group id
-    dellemc.powerscale.group:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      access_zone: "{{access_zone}}"
-      provider_type: "{{provider_type}}"
-      group_name: "Test_group"
-      group_id: 7000
-      state: "present"
+- name: Create a Group with group id
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    access_zone: "{{access_zone}}"
+    provider_type: "{{provider_type}}"
+    group_name: "Test_group"
+    group_id: 7000
+    state: "present"
 
-  - name: Create Group with Users
-    dellemc.powerscale.group:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      provider_type: "{{provider_type}}"
-      access_zone: "{{access_zone}}"
-      group_name: "{{group_name}}"
-      users:
-        - user_name: "{{user_name}}"
-        - user_id: "{{user_id}}"
-        - user_name: "{{user_name_2}}"
-      user_state: "present-in-group"
-      state: "present"
+- name: Create Group with Users
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "{{provider_type}}"
+    access_zone: "{{access_zone}}"
+    group_name: "{{group_name}}"
+    users:
+      - user_name: "{{user_name}}"
+      - user_id: "{{user_id}}"
+      - user_name: "{{user_name_2}}"
+    user_state: "present-in-group"
+    state: "present"
 
-  - name: Get Details of the Group using Group Id
-    dellemc.powerscale.group:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      provider_type: "{{provider_type}}"
-      access_zone: "{{access_zone}}"
-      group_id: "{{group_id}}"
-      state: "present"
+- name: Get Details of the Group using Group Id
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "{{provider_type}}"
+    access_zone: "{{access_zone}}"
+    group_id: "{{group_id}}"
+    state: "present"
 
-  - name: Delete the Group using Group Name
-    dellemc.powerscale.group:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      provider_type: "{{provider_type}}"
-      access_zone: "{{access_zone}}"
-      group_name: "{{group_name}}"
-      state: "absent"
+- name: Delete the Group using Group Name
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "{{provider_type}}"
+    access_zone: "{{access_zone}}"
+    group_name: "{{group_name}}"
+    state: "absent"
 
-  - name: Add Users to a Group
-    dellemc.powerscale.group:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      provider_type: "{{provider_type}}"
-      access_zone: "{{access_zone}}"
-      group_id: "{{group_id}}"
-      users:
-        - user_name: "{{user_name}}"
-        - user_id: "{{user_id}}"
-        - user_name: "{{user_name_2}}"
-      user_state: "present-in-group"
-      state: "present"
+- name: Add Users to a Group
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "{{provider_type}}"
+    access_zone: "{{access_zone}}"
+    group_id: "{{group_id}}"
+    users:
+      - user_name: "{{user_name}}"
+      - user_id: "{{user_id}}"
+      - user_name: "{{user_name_2}}"
+    user_state: "present-in-group"
+    state: "present"
 
-  - name: Remove Users from a Group
-    dellemc.powerscale.group:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      provider_type: "{{provider_type}}"
-      access_zone: "{{access_zone}}"
-      group_id: "{{group_id}}"
-      users:
-        - user_name: "{{user_name_1}}"
-        - user_id: "{{user_id}}"
-        - user_name: "{{user_name_2}}"
-      user_state: "absent-in-group"
-      state: "present"
+- name: Remove Users from a Group
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "{{provider_type}}"
+    access_zone: "{{access_zone}}"
+    group_id: "{{group_id}}"
+    users:
+      - user_name: "{{user_name_1}}"
+      - user_id: "{{user_id}}"
+      - user_name: "{{user_name_2}}"
+    user_state: "absent-in-group"
+    state: "present"
 '''
 
 RETURN = r'''
@@ -518,7 +518,8 @@ class Group(object):
         :param group_details: Group details
         :return: True if id exists.
         """
-        if group_name is not None and group_name.lower() == group_details['gid']['name'].lower():
+        if group_name is not None and group_details['gid']['name'] is not None \
+                and group_name.lower() == group_details['gid']['name'].lower():
             return False
         return True
 
@@ -567,11 +568,12 @@ class Group(object):
                                   users_list)
                 changed = True
             else:
-                id_exists = self.check_if_id_exists(group_name, group_details)
-                if id_exists and group_name is not None:
-                    error_message = f'Group already exists with GID {group_id}'
-                    LOG.error(error_message)
-                    self.module.fail_json(msg=error_message)
+                if group_id and group_name:
+                    id_exists = self.check_if_id_exists(group_name, group_details)
+                    if id_exists:
+                        error_message = f'Group already exists with GID {group_id}'
+                        LOG.error(error_message)
+                        self.module.fail_json(msg=error_message)
                 if user_state and users:
                     user_modified_flag = False
                     for user in users:

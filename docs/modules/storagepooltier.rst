@@ -21,8 +21,8 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.13 or later.
-- Python 3.9, 3.10 or 3.11.
+- Ansible-core 2.17 or later.
+- Python 3.11, 3.12 or 3.13.
 
 
 
@@ -32,13 +32,13 @@ Parameters
   tier_id (optional, int, None)
     Unique Id of the storage pool tier.
 
-    It is mutually exclusive with *tier_name*.
+    It is mutually exclusive with :emphasis:`tier\_name`.
 
 
   tier_name (optional, str, None)
     Unique name of the storage pool tier.
 
-    It is mutually exclusive with *tier_id*.
+    It is mutually exclusive with :emphasis:`tier\_id`.
 
     Mandatory for storage pool tier creation.
 
@@ -62,9 +62,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    ``true`` - indicates that the SSL certificate should be verified.
+    :literal:`true` - indicates that the SSL certificate should be verified.
 
-    ``false`` - indicates that the SSL certificate should not be verified.
+    :literal:`false` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -83,7 +83,7 @@ Notes
 
 .. note::
    - Modifying a storage pool tier is not supported.
-   - The *check_mode* is supported.
+   - The :emphasis:`check\_mode` is supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -112,7 +112,7 @@ Examples
         api_password: "{{api_password}}"
         tier_name: "test_tier"
         nodepools:
-        - "test_nodepool"
+          - "test_nodepool"
         state: 'present'
 
     - name: Delete a storage pool tier

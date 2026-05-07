@@ -21,8 +21,8 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.13 or later.
-- Python 3.9, 3.10 or 3.11.
+- Ansible-core 2.17 or later.
+- Python 3.11, 3.12 or 3.13.
 
 
 
@@ -34,9 +34,9 @@ Parameters
 
 
   user_id (optional, int, None)
-    The *user_id* is auto generated or can be assigned at the time of creation.
+    The :emphasis:`user\_id` is auto generated or can be assigned at the time of creation.
 
-    For all other operations either *user_name* or *user_id* is needed.
+    For all other operations either :emphasis:`user\_name` or :emphasis:`user\_id` is needed.
 
 
   password (optional, str, None)
@@ -50,9 +50,9 @@ Parameters
   access_zone (optional, str, system)
     This option mentions the zone in which a user is created.
 
-    For creation, *access_zone* acts as an attribute for the user.
+    For creation, :emphasis:`access\_zone` acts as an attribute for the user.
 
-    For all other operations *access_zone* acts as a filter.
+    For all other operations :emphasis:`access\_zone` acts as a filter.
 
 
   provider_type (optional, str, local)
@@ -64,7 +64,7 @@ Parameters
 
     Getting user details is allowed for all users.
 
-    If the *provider_type* is 'ads' then domain name of the Active Directory Server has to be mentioned in the *user_name*. The format for the *user_name* should be 'DOMAIN_NAME\user_name' or "DOMAIN_NAME\\user_name".
+    If the :emphasis:`provider\_type` is 'ads' then domain name of the Active Directory Server has to be mentioned in the :emphasis:`user\_name`. The format for the :emphasis:`user\_name` should be 'DOMAIN\_NAME\\user\_name' or "DOMAIN\_NAME\\\\user\_name".
 
     This option acts as a filter for all operations except creation.
 
@@ -96,7 +96,7 @@ Parameters
 
 
   full_name (optional, str, None)
-    The additional information about the user can be provided using full_name option.
+    The additional information about the user can be provided using full\_name option.
 
 
   email (optional, str, None)
@@ -116,19 +116,19 @@ Parameters
 
 
   role_state (optional, str, None)
-    The *role_state* option is used to mention the existence of the role for a particular user.
+    The :emphasis:`role\_state` option is used to mention the existence of the role for a particular user.
 
     It is required when a role is added or removed from user.
 
 
   update_password (optional, str, always)
-    This parameter controls the way the *password* is updated during the creation and modification of a user.
+    This parameter controls the way the :emphasis:`password` is updated during the creation and modification of a user.
 
-    ``always`` will update password for each execution.
+    :literal:`always` will update password for each execution.
 
-    ``on_create`` will only set while creating a user.
+    :literal:`on\_create` will only set while creating a user.
 
-    For modifying *password*, set the *update_password* to ``always``.
+    For modifying :emphasis:`password`\ , set the :emphasis:`update\_password` to :literal:`always`.
 
 
   onefs_host (True, str, None)
@@ -142,9 +142,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    ``true`` - indicates that the SSL certificate should be verified.
+    :literal:`true` - indicates that the SSL certificate should be verified.
 
-    ``false`` - indicates that the SSL certificate should not be verified.
+    :literal:`false` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -162,7 +162,7 @@ Notes
 -----
 
 .. note::
-   - The *check_mode* is not supported.
+   - The :emphasis:`check\_mode` is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -174,138 +174,138 @@ Examples
 .. code-block:: yaml+jinja
 
     
-      - name: Get User Details using user name
-        dellemc.powerscale.user:
-          onefs_host: "{{onefs_host}}"
-          port_no: "{{port_no}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          access_zone: "{{access_zone}}"
-          provider_type: "{{provider_type}}"
-          user_name: "{{account_name}}"
-          state: "present"
+    - name: Get User Details using user name
+      dellemc.powerscale.user:
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{port_no}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        access_zone: "{{access_zone}}"
+        provider_type: "{{provider_type}}"
+        user_name: "{{account_name}}"
+        state: "present"
 
-      - name: Create User
-        dellemc.powerscale.user:
-          onefs_host: "{{onefs_host}}"
-          port_no: "{{port_no}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          access_zone: "{{access_zone}}"
-          provider_type: "{{provider_type}}"
-          user_name: "{{account_name}}"
-          password: "{{account_password}}"
-          primary_group: "{{primary_group}}"
-          enabled: "{{enabled}}"
-          email: "{{email}}"
-          full_name: "{{full_name}}"
-          home_directory: "{{home_directory}}"
-          shell: "{{shell}}"
-          role_name: "{{role_name}}"
-          role_state: "present-for-user"
-          state: "present"
+    - name: Create User
+      dellemc.powerscale.user:
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{port_no}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        access_zone: "{{access_zone}}"
+        provider_type: "{{provider_type}}"
+        user_name: "{{account_name}}"
+        password: "{{account_password}}"
+        primary_group: "{{primary_group}}"
+        enabled: "{{enabled}}"
+        email: "{{email}}"
+        full_name: "{{full_name}}"
+        home_directory: "{{home_directory}}"
+        shell: "{{shell}}"
+        role_name: "{{role_name}}"
+        role_state: "present-for-user"
+        state: "present"
 
-      - name: Create User with user id
-        dellemc.powerscale.user:
-          onefs_host: "{{onefs_host}}"
-          port_no: "{{port_no}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          access_zone: "{{access_zone}}"
-          provider_type: "{{provider_type}}"
-          user_name: "Test_User"
-          user_id: 7000
-          password: "{{account_password}}"
-          primary_group: "{{primary_group}}"
-          enabled: "{{enabled}}"
-          email: "{{email}}"
-          full_name: "{{full_name}}"
-          home_directory: "{{home_directory}}"
-          shell: "{{shell}}"
-          role_name: "{{role_name}}"
-          role_state: "present-for-user"
-          state: "present"
+    - name: Create User with user id
+      dellemc.powerscale.user:
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{port_no}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        access_zone: "{{access_zone}}"
+        provider_type: "{{provider_type}}"
+        user_name: "Test_User"
+        user_id: 7000
+        password: "{{account_password}}"
+        primary_group: "{{primary_group}}"
+        enabled: "{{enabled}}"
+        email: "{{email}}"
+        full_name: "{{full_name}}"
+        home_directory: "{{home_directory}}"
+        shell: "{{shell}}"
+        role_name: "{{role_name}}"
+        role_state: "present-for-user"
+        state: "present"
 
-      - name: Update User's Full Name and email using user name
-        dellemc.powerscale.user:
-          onefs_host: "{{onefs_host}}"
-          port_no: "{{port_no}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          access_zone: "{{access_zone}}"
-          provider_type: "{{provider_type}}"
-          user_name: "{{account_name}}"
-          email: "{{new_email}}"
-          full_name: "{{full_name}}"
-          state: "present"
+    - name: Update User's Full Name and email using user name
+      dellemc.powerscale.user:
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{port_no}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        access_zone: "{{access_zone}}"
+        provider_type: "{{provider_type}}"
+        user_name: "{{account_name}}"
+        email: "{{new_email}}"
+        full_name: "{{full_name}}"
+        state: "present"
 
-      - name: Disable User Account using User Id
-        dellemc.powerscale.user:
-          onefs_host: "{{onefs_host}}"
-          port_no: "{{port_no}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          access_zone: "{{access_zone}}"
-          provider_type: "{{provider_type}}"
-          user_id: "{{id}}"
-          enabled: false
-          state: "present"
+    - name: Disable User Account using User Id
+      dellemc.powerscale.user:
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{port_no}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        access_zone: "{{access_zone}}"
+        provider_type: "{{provider_type}}"
+        user_id: "{{id}}"
+        enabled: false
+        state: "present"
 
-      - name: Add user to a role using Username
-        dellemc.powerscale.user:
-          onefs_host: "{{onefs_host}}"
-          port_no: "{{port_no}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          user_name: "{{account_name}}"
-          provider_type: "{{provider_type}}"
-          role_name: "{{role_name}}"
-          role_state: "present-for-user"
-          state: "present"
+    - name: Add user to a role using Username
+      dellemc.powerscale.user:
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{port_no}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        user_name: "{{account_name}}"
+        provider_type: "{{provider_type}}"
+        role_name: "{{role_name}}"
+        role_state: "present-for-user"
+        state: "present"
 
-      - name: Remove user from a role using User id
-        dellemc.powerscale.user:
-          onefs_host: "{{onefs_host}}"
-          port_no: "{{port_no}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          user_id: "{{id}}"
-          role_name: "{{role_name}}"
-          role_state: "absent-for-user"
-          state: "present"
+    - name: Remove user from a role using User id
+      dellemc.powerscale.user:
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{port_no}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        user_id: "{{id}}"
+        role_name: "{{role_name}}"
+        role_state: "absent-for-user"
+        state: "present"
 
-      - name: Delete User using user name
-        dellemc.powerscale.user:
-          onefs_host: "{{onefs_host}}"
-          port_no: "{{port_no}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          access_zone: "{{access_zone}}"
-          provider_type: "{{provider_type}}"
-          user_name: "{{account_name}}"
-          state: "absent"
+    - name: Delete User using user name
+      dellemc.powerscale.user:
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{port_no}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        access_zone: "{{access_zone}}"
+        provider_type: "{{provider_type}}"
+        user_name: "{{account_name}}"
+        state: "absent"
 
-      - name: Modify password in non-system access zone update_password as "always"
-        dellemc.powerscale.user:
-          onefs_host: "{{onefs_host}}"
-          port_no: "{{port_no}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          verify_ssl: "{{verify_ssl}}"
-          access_zone: "{{access_zone}}"
-          provider_type: "{{provider_type}}"
-          user_name: "{{account_name}}"
-          password: "new_password"
-          update_password: "always"
-          state: "present"
+    - name: Modify password in non-system access zone update_password as "always"
+      dellemc.powerscale.user:
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{port_no}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        access_zone: "{{access_zone}}"
+        provider_type: "{{provider_type}}"
+        user_name: "{{account_name}}"
+        password: "new_password"
+        update_password: "always"
+        state: "present"
 
 
 

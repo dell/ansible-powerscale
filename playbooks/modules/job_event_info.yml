@@ -1,0 +1,79 @@
+---
+- name: Sample playbook for retrieving Job Event information on Dell EMC PowerScale.
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.**'
+    verify_ssl: false
+    api_user: 'user'
+    api_password: 'password'
+    job_id: 42
+    job_type: "SmartPools"
+
+  tasks:
+    - name: Get all job events
+      dellemc.powerscale.job_event_info:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+
+    - name: Get job events filtered by running state
+      dellemc.powerscale.job_event_info:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        state: "running"
+
+    - name: Get job events filtered by succeeded state
+      dellemc.powerscale.job_event_info:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        state: "succeeded"
+
+    - name: Get job events within a time range using epoch timestamps
+      dellemc.powerscale.job_event_info:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        begin_time: "1700000000"
+        end_time: "1700003000"
+
+    - name: Get job events from the last 24 hours
+      dellemc.powerscale.job_event_info:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        duration:
+          value: 24
+          unit: "hours"
+
+    - name: Get job events for a specific job ID
+      dellemc.powerscale.job_event_info:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        job_id: "{{ job_id }}"
+
+    - name: Get job events filtered by job type
+      dellemc.powerscale.job_event_info:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        job_type: "{{ job_type }}"
+
+    - name: Get events for ended jobs only with limit
+      dellemc.powerscale.job_event_info:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        ended_jobs_only: true
+        limit: 100

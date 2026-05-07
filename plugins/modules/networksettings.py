@@ -1,7 +1,7 @@
 #!/usr/bin/python
-# Copyright: (c) 2022, Dell Technologies
+# Copyright: (c) 2022-2024, Dell Technologies
 
-# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """ Ansible module for managing network settings on PowerScale"""
 from __future__ import (absolute_import, division, print_function)
@@ -41,31 +41,31 @@ notes:
 '''
 
 EXAMPLES = r'''
-  - name: Get Network settings
-    dellemc.powerscale.networksettings:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      state: "{{state_present}}"
+- name: Get Network settings
+  dellemc.powerscale.networksettings:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    state: "{{state_present}}"
 
-  - name: Enable source based routing
-    dellemc.powerscale.networksettings:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      enable_source_routing: true
-      state: "{{state_present}}"
+- name: Enable source based routing
+  dellemc.powerscale.networksettings:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    enable_source_routing: true
+    state: "{{state_present}}"
 
-  - name: Disable source based routing
-    dellemc.powerscale.networksettings:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      enable_source_routing: false
-      state: "{{state_present}}"
+- name: Disable source based routing
+  dellemc.powerscale.networksettings:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    enable_source_routing: false
+    state: "{{state_present}}"
 '''
 
 RETURN = r'''

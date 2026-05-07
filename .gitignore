@@ -1,0 +1,10 @@
+.vscode
+test.py
+.env
+.coverage
+output
+__pycache__/
+*.log
+dellemc-powerscale*.tar.gz
+.ansible/collections/ansible_collections/dellemc/powerscale
+module_args

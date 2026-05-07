@@ -14,7 +14,7 @@ name: powerscale
 
 # The version of the collection.
 # Must be compatible with semantic versioning
-version: 2.2.0
+version: 3.9.1
 
 # The path to the Markdown (.md) readme file.
 # This path is relative to the root of the collection.
@@ -38,6 +38,16 @@ authors:
   - Trisha Datta <ansible.team@dell.com>
   - Bhavneet Sharma <ansible.team@dell.com>
   - Pavan Mudunuri <ansible.team@dell.com>
+  - Sachin Apagundi <ansible.team@dell.com>
+  - Kritika Bhateja <ansible.team@dell.com>
+  - Forrest Xia <ansible.team@dell.com>
+  - Yiming Bao <ansible.team@dell.com>
+  - Tao He <ansible.team@dell.com>
+  - Peter Cao <ansible.team@dell.com>
+  - Haiming Tan <ansible.team@dell.com>
+  - Ray Liu <ansible.team@dell.com>
+  - Luis Liu <ansible.team@dell.com>
+  - Shrinidhi Rao K Katte <ansible.team@dell.com>
 
 ### OPTIONAL but strongly recommended
 
@@ -50,7 +60,6 @@ description: Ansible modules for PowerScale
 # This key is mutually exclusive with 'license_file'
 license:
   - GPL-3.0-or-later
-  - Apache-2.0
 
 # A list of tags you want to associate with the collection for
 # indexing/searching. A tag name has the same character
@@ -65,13 +74,13 @@ tags: [storage]
 dependencies: {}
 
 # The URL of the originating SCM repository
-repository: https://github.com/dell/ansible-powerscale/tree/2.2.0
+repository: https://github.com/dell/ansible-powerscale/tree/main
 
 # The URL to any online docs
-documentation: https://github.com/dell/ansible-powerscale/tree/2.2.0/docs
+documentation: https://github.com/dell/ansible-powerscale/tree/main/docs
 
 # The URL to the homepage of the collection/project
-homepage: https://github.com/dell/ansible-powerscale/tree/2.2.0
+homepage: https://github.com/dell/ansible-powerscale/tree/main
 
 # The URL to the collection issue tracker
 issues: https://www.dell.com/community/Automation/bd-p/Automation
@@ -81,4 +90,11 @@ issues: https://www.dell.com/community/Automation/bd-p/Automation
 # the relative path of the file or directory of the collection directory.
 # This uses 'fnmatch' to match the files or directories. Some directories and
 # files like 'galaxy.yml', '*.pyc', '*.retry', and '.git' are always filtered
-build_ignore: []
+build_ignore:
+  - codecov.yml
+  - .venv*
+  - .ansible-lint
+  - .github
+  - .gitignore
+  - catalog-info.yaml
+  - .pytest_cache

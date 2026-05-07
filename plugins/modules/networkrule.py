@@ -1,7 +1,7 @@
 #!/usr/bin/python
-# Copyright: (c) 2021, Dell Technologies
+# Copyright: (c) 2021-2024, Dell Technologies
 
-# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """Ansible module for managing Network Rules on PowerScale"""
 
@@ -82,63 +82,63 @@ notes:
 
 EXAMPLES = r'''
 
-  - name: Get the details of a network rule
-    dellemc.powerscale.networkrule:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{port_no}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      groupnet_name: "groupnet1"
-      subnet_name: "subnet1"
-      pool_name: "pool1"
-      rule_name: "rule1"
-      state: "present"
+- name: Get the details of a network rule
+  dellemc.powerscale.networkrule:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{port_no}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    groupnet_name: "groupnet1"
+    subnet_name: "subnet1"
+    pool_name: "pool1"
+    rule_name: "rule1"
+    state: "present"
 
-  - name: Create a new network provisioning rule
-    dellemc.powerscale.networkrule:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{port_no}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      groupnet_name: "groupnet1"
-      subnet_name: "subnet1"
-      pool_name: "pool1"
-      rule_name: "new_rule"
-      description: "Rename existing rule"
-      iface: "ext1"
-      node_type: "storage"
-      state: "present"
+- name: Create a new network provisioning rule
+  dellemc.powerscale.networkrule:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{port_no}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    groupnet_name: "groupnet1"
+    subnet_name: "subnet1"
+    pool_name: "pool1"
+    rule_name: "new_rule"
+    description: "Rename existing rule"
+    iface: "ext1"
+    node_type: "storage"
+    state: "present"
 
-  - name: Modifying an existing network provisioning rule
-    dellemc.powerscale.networkrule:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{port_no}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      groupnet_name: "groupnet1"
-      subnet_name: "subnet1"
-      pool_name: "pool1"
-      rule_name: "rule_name"
-      description: "Modify rule"
-      iface: "ext1"
-      node_type: "storage"
-      state: "present"
+- name: Modifying an existing network provisioning rule
+  dellemc.powerscale.networkrule:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{port_no}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    groupnet_name: "groupnet1"
+    subnet_name: "subnet1"
+    pool_name: "pool1"
+    rule_name: "rule_name"
+    description: "Modify rule"
+    iface: "ext1"
+    node_type: "storage"
+    state: "present"
 
-  - name: Delete a network provisioning rule
-    dellemc.powerscale.networkrule:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{port_no}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      groupnet_name: "groupnet1"
-      subnet_name: "subnet1"
-      pool_name: "pool1"
-      rule_name: "rule"
-      state: absent
+- name: Delete a network provisioning rule
+  dellemc.powerscale.networkrule:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{port_no}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    groupnet_name: "groupnet1"
+    subnet_name: "subnet1"
+    pool_name: "pool1"
+    rule_name: "rule"
+    state: absent
 '''
 
 RETURN = r'''

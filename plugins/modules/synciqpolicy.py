@@ -1,7 +1,7 @@
 #!/usr/bin/python
-# Copyright: (c) 2021, Dell Technologies
+# Copyright: (c) 2021-2024, Dell Technologies
 
-# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """ Ansible module for managing SyncIQ Policy on PowerScale"""
 
@@ -27,6 +27,8 @@ extends_documentation_fragment:
   - dellemc.powerscale.powerscale
 author:
 - Spandita Panigrahi (@panigs7) <ansible.team@dell.com>
+- Kritika Bhateja(@Kritika-Bhateja-03) <ansible.team.dell.com>
+- Saksham Nautiyal (@Saksham-Nautiyal) <ansible.team@dell.com>
 
 options:
   policy_name:
@@ -70,10 +72,10 @@ options:
     description:
     - Types of scheduling a job on the policy.
     type: str
-    choices: ['on-schedule', 'when-source-modified', 'when-snapshot-taken']
+    choices: ['on-schedule', 'when-source-modified', 'when-snapshot-taken', 'manual']
   job_delay:
     description:
-    - If I(run_job) is set to when-source-modified, I(job_delay) is the
+    - If I(run_job) is set to C(when-source-modified), I(job_delay) is the
       duration to wait before triggering a job once there is modification on source.
     type: int
   job_delay_unit:
@@ -97,7 +99,7 @@ options:
   snapshot_sync_pattern:
     description:
     - The naming pattern that a snapshot must match to trigger
-      a sync when the schedule is when-snapshot-taken.
+      a sync when the schedule is C(when-snapshot-taken).
     type: str
   skip_when_source_unmodified:
     description:
@@ -178,6 +180,15 @@ options:
             - Parameters I(target_certficate_name) and I(target_certificate_id) are mutually exclusive
             - This parameter is not supported by isi_sdk_8_1_1
             type: str
+        password:
+            description:
+            - The password for the target cluster.
+            - This is used for authentication when establishing replication to the target.
+            - This field is not readable and will not be returned in the module output.
+            - When a password is already set on the policy, providing the password
+              parameter alone will not report changes, as the current password value
+              cannot be compared.
+            type: str
   target_snapshot:
     description:
     - Details of snapshots to be created at the target.
@@ -230,172 +241,219 @@ options:
     description:
     - If set to C(true), SyncIQ will perform failback configuration tasks during the next job run,
       rather than waiting to perform those tasks during the failback process.
-      Performing these tasks ahead of time will increase the speed of failback operations.
+    - Performing these tasks ahead of time will increase the speed of failback operations.
     - It defaults to C(true), if not specified.
     type: bool
   restrict_target_network:
     description:
     - If set to C(true) then replication policies will connect only to nodes in the specified SmartConnect zone.
-      If set to C(false), replication policies are not restricted to specific nodes on the target cluster.
+    - If set to C(false), replication policies are not restricted to specific nodes on the target cluster.
     type: bool
-
+  target_compare_initial_sync:
+    description:
+    - If set to C(true), the initial sync will compare data between source and target to avoid re-transferring data that already exists at the target.
+    - This can significantly reduce initial sync time if the target already contains some or all of the source data.
+    - If set to C(false), the initial sync will transfer all source data to the target without comparison.
+    - It defaults to C(false), if not specified.
+    type: bool
+attributes:
+  check_mode:
+    description:
+    - Can run in check_mode and return changed status prediction without modifying target, if not supported the action will be skipped.
+    support: full
+  diff_mode:
+    description:
+    - Will return details on what has changed (or possibly needs changing in check_mode), when in diff mode
+    support: full
 notes:
 - There is a delay to view the jobs running on the policy.
-- The I(check_mode) is not supported.
 '''
 EXAMPLES = r'''
-  - name: Create SyncIQ policy
-    dellemc.powerscale.synciqpolicy:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      action: "copy"
-      description: "Creating a policy"
-      enabled: true
-      policy_name: "New_policy"
-      run_job: "on-schedule"
-      schedule: "every 1 days at 12:00 PM"
-      skip_when_source_unmodified: true
-      rpo_alert: 100
-      source_cluster:
-        source_root_path: "<path_to_source>"
-        source_exclude_directories: "<path_to_exclude>"
-        source_include_directories: "<path_to_include>"
-        source_network:
-          pool: "pool0"
-          subnet: "subnet0"
-      target_cluster:
-        target_host: "198.10.xxx.xxx"
-        target_path: "<path_to_target>"
-        target_certificate_id: "7sdgvejkiau7629903048hdjdkljsbwgsuasj7169823kkckll"
-      target_snapshot:
-        target_snapshot_archive: true
-        target_snapshot_expiration: 90
-        exp_time_unit: "day"
-      accelerated_failback: false
-      restrict_target_network: true
-      state: "present"
+- name: Create SyncIQ policy
+  dellemc.powerscale.synciqpolicy:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    action: "copy"
+    description: "Creating a policy"
+    enabled: true
+    policy_name: "New_policy"
+    run_job: "on-schedule"
+    schedule: "every 1 days at 12:00 PM"
+    skip_when_source_unmodified: true
+    rpo_alert: 100
+    source_cluster:
+      source_root_path: "<path_to_source>"
+      source_exclude_directories: "<path_to_exclude>"
+      source_include_directories: "<path_to_include>"
+      source_network:
+        pool: "pool0"
+        subnet: "subnet0"
+    target_cluster:
+      target_host: "198.10.xxx.xxx"
+      target_path: "<path_to_target>"
+      target_certificate_id: "7sdgvejkiau7629903048hdjdkljsbwgsuasj7169823kkckll"
+    target_snapshot:
+      target_snapshot_archive: true
+      target_snapshot_expiration: 90
+      exp_time_unit: "day"
+    accelerated_failback: false
+    restrict_target_network: true
+    target_compare_initial_sync: true
+    state: "present"
 
-  - name: Modify SyncIQ policy
-    dellemc.powerscale.synciqpolicy:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      policy_name: "New_policy"
-      action: "sync"
-      description: "Creating a policy"
-      enabled: false
-      run_job: "when-snapshot-taken"
-      snapshot_sync_patten: "^snapshot\\-$latest"
-      source_cluster:
-        source_root_path: "<path_to_source>"
-        source_exclude_directories: "<path_to_exclude>"
-        source_include_directories: "<path_to_include>"
-        source_network:
-          pool: "pool1"
-          subnet: "subnet1"
-      target_cluster:
-        target_host: "198.10.xxx.xxx"
-        target_path: "<path_to_target>"
-        target_certificate_id: "7sdgvejkiau7629903048hdjdkljsbwgsuasj716iuhywthsjk"
-      target_snapshot:
-        target_snapshot_archive: false
-      accelerated_failback: true
-      restrict_target_network: false
-      state: "present"
+- name: Modify SyncIQ policy
+  dellemc.powerscale.synciqpolicy:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    policy_name: "New_policy"
+    action: "sync"
+    description: "Creating a policy"
+    enabled: false
+    run_job: "when-snapshot-taken"
+    snapshot_sync_patten: "^snapshot\\-$latest"
+    source_cluster:
+      source_root_path: "<path_to_source>"
+      source_exclude_directories: "<path_to_exclude>"
+      source_include_directories: "<path_to_include>"
+      source_network:
+        pool: "pool1"
+        subnet: "subnet1"
+    target_cluster:
+      target_host: "198.10.xxx.xxx"
+      target_path: "<path_to_target>"
+      target_certificate_id: "7sdgvejkiau7629903048hdjdkljsbwgsuasj716iuhywthsjk"
+    target_snapshot:
+      target_snapshot_archive: false
+    accelerated_failback: true
+    restrict_target_network: false
+    target_compare_initial_sync: false
+    state: "present"
 
-  - name: Rename a SyncIQ policy
-    dellemc.powerscale.synciqpolicy:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      policy_id: "d63b079d34adf2d2ec3ce92f15bfc730"
-      new_policy_name: "Policy_Rename"
-      state: "present"
+- name: Rename a SyncIQ policy
+  dellemc.powerscale.synciqpolicy:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    policy_id: "d63b079d34adf2d2ec3ce92f15bfc730"
+    new_policy_name: "Policy_Rename"
+    state: "present"
 
-  - name: Get SyncIQ policy details
-    dellemc.powerscale.synciqpolicy:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      policy_name: "Policy_rename"
-      state: "present"
+- name: Get SyncIQ policy details
+  dellemc.powerscale.synciqpolicy:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    policy_name: "Policy_rename"
+    state: "present"
 
-  - name: Create a job on SyncIQ policy
-    dellemc.powerscale.synciqpolicy:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      policy_name: "Test_SSL"
-      job_params:
-        action: "run"
-        source_snapshot: "TestSIQ-snapshot"
-        wait_for_completion: false
-      state: "present"
+- name: Create a job on SyncIQ policy
+  dellemc.powerscale.synciqpolicy:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    policy_name: "Test_SSL"
+    job_params:
+      action: "run"
+      source_snapshot: "TestSIQ-snapshot"
+      wait_for_completion: false
+    state: "present"
 
-  - name: Create a resync_prep job on SyncIQ policy
-    dellemc.powerscale.synciqpolicy:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      policy_name: "Test_SSL"
-      job_params:
-        action: "resync_prep"
-        source_snapshot: "TestSIQ-snapshot"
-        wait_for_completion: false
-      state: "present"
+- name: Create a resync_prep job on SyncIQ policy
+  dellemc.powerscale.synciqpolicy:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    policy_name: "Test_SSL"
+    job_params:
+      action: "resync_prep"
+      source_snapshot: "TestSIQ-snapshot"
+      wait_for_completion: false
+    state: "present"
 
-  - name: Allow writes on target of SyncIQ policy
-    dellemc.powerscale.synciqpolicy:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      policy_name: "Test_SSL"
-      job_params:
-        action: "allow_write"
-        source_snapshot: "TestSIQ-snapshot"
-        workers_per_node: 3
-        wait_for_completion: false
-      state: "present"
+- name: Allow writes on target of SyncIQ policy
+  dellemc.powerscale.synciqpolicy:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    policy_name: "Test_SSL"
+    job_params:
+      action: "allow_write"
+      source_snapshot: "TestSIQ-snapshot"
+      workers_per_node: 3
+      wait_for_completion: false
+    state: "present"
 
-  - name: Disallow writes on target of SyncIQ policy
-    dellemc.powerscale.synciqpolicy:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      policy_name: "Test_SSL"
-      job_params:
-        action: "allow_write_revert"
-        source_snapshot: "TestSIQ-snapshot"
-        workers_per_node: 3
-        wait_for_completion: false
-      state: "present"
+- name: Disallow writes on target of SyncIQ policy
+  dellemc.powerscale.synciqpolicy:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    policy_name: "Test_SSL"
+    job_params:
+      action: "allow_write_revert"
+      source_snapshot: "TestSIQ-snapshot"
+      workers_per_node: 3
+      wait_for_completion: false
+    state: "present"
 
-  - name: Delete SyncIQ policy by policy name
-    dellemc.powerscale.synciqpolicy:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      policy_name: "Policy_rename"
-      state: "absent"
+- name: Delete SyncIQ policy by policy name
+  dellemc.powerscale.synciqpolicy:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    policy_name: "Policy_rename"
+    state: "absent"
 
-  - name: Delete SyncIQ policy by policy ID
-    dellemc.powerscale.synciqpolicy:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      policy_id: "d63b079d34adf2d2ec3ce92f15bfc730"
-      state: "absent"
+- name: Create SyncIQ policy with target password
+  dellemc.powerscale.synciqpolicy:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    action: "copy"
+    description: "Policy with target password"
+    enabled: true
+    policy_name: "Policy_with_password"
+    run_job: "on-schedule"
+    schedule: "every 1 days at 12:00 PM"
+    source_cluster:
+      source_root_path: "/ifs/source"
+    target_cluster:
+      target_host: "198.10.xxx.xxx"
+      target_path: "/ifs/target"
+      password: "{{target_cluster_password}}"
+    state: "present"
+
+- name: Modify SyncIQ policy target password
+  dellemc.powerscale.synciqpolicy:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    policy_name: "Policy_with_password"
+    target_cluster:
+      password: "{{new_target_cluster_password}}"
+    state: "present"
+
+- name: Delete SyncIQ policy by policy ID
+  dellemc.powerscale.synciqpolicy:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    policy_id: "d63b079d34adf2d2ec3ce92f15bfc730"
+    state: "absent"
 '''
 
 RETURN = r'''
@@ -403,10 +461,11 @@ changed:
     description: Whether or not the resource has changed.
     returned: always
     type: bool
+    sample: "true"
 synciq_policy_details:
     description: Details of the SyncIQ policy.
     returned: When SyncIQ policy exists
-    type: complex
+    type: dict
     contains:
         name:
             description: The name of the policy.
@@ -432,13 +491,38 @@ synciq_policy_details:
         target_path:
             description: The target directory where source is replicated
             type: str
+        password_set:
+            description: Indicates if a password is set for accessing the target cluster.
+            type: bool
         jobs:
             description: List of jobs running on the policy
             type: list
+    sample: {
+        "action": "copy",
+        "bandwidth": 100,
+        "description": "SyncIQ policy Description",
+        "enabled": true,
+        "encryption": false,
+        "file_matching_pattern": {
+            "or_criteria": None
+        },
+        "id": "d63b079d34adf2d2ec3ce92f15bfc730",
+        "job_delay": "1.0 days",
+        "job": [],
+        "name": "SyncIQ_Policy",
+        "next_run_time": "1700479390",
+        "schedule": "when-source-modified",
+        "source_root_path": "/ifs",
+        "target_certificate_id": "7sdgvejkiau7629903048hdjdkljsbwgsuasj7169823kkckll",
+        "target_certificate_name": "test",
+        "target_host": "192.10.xxx.xxx",
+        "target_path": "/ifs/synciq",
+        "target_snapshot_archive": false
+    }
 target_synciq_policy_details:
     description: Details of the target SyncIQ policy.
     returned: When failover/failback is performed on target cluster
-    type: complex
+    type: dict
     contains:
         name:
             description: The name of the policy.
@@ -450,11 +534,17 @@ target_synciq_policy_details:
             description: The state of the policy with respect to sync
                          failover/failback.
             type: str
+    sample: {
+        "name": "SyncIQ_Policy",
+        "id": "d63b079d34adf2d2ec3ce92f15bfc730",
+        "failover_failback_state": "enabled"
+    }
 '''
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
+import copy
 
 LOG = utils.get_logger('synciqpolicy')
 
@@ -464,6 +554,16 @@ class SynciqPolicy(object):
 
     def __init__(self):
         """ Define all parameters required by this module"""
+        self.result = {
+            "changed": False,
+            "synciq_policy_details": {},
+            "target_synciq_policy_details": {},
+            "create_synciq_policy": False,
+            "modify_synciq_policy": False,
+            "create_job_synciq_policy": False,
+            "delete_synciq_policy": False,
+            "diff": {}
+        }
         self.module_params = utils.get_powerscale_management_host_parameters()
         self.module_params.update(get_synciqpolicy_parameters())
         mutually_exclusive = [['policy_name', 'policy_id']]
@@ -471,7 +571,7 @@ class SynciqPolicy(object):
         # initialize the Ansible module
         self.module = AnsibleModule(
             argument_spec=self.module_params,
-            supports_check_mode=False,
+            supports_check_mode=True,
             mutually_exclusive=mutually_exclusive
         )
         PREREQS_VALIDATE = utils.validate_module_pre_reqs(self.module.params)
@@ -497,23 +597,24 @@ class SynciqPolicy(object):
         """
         name_or_id = policy_name if policy_name else policy_id
         try:
-            policy = self.api_instance.get_sync_policy(name_or_id).policies
-            if policy:
-                return policy[0], False
-
+            policy_details = self.api_instance.get_sync_policy(name_or_id)
+            if policy_details:
+                policy = policy_details.policies
+                if policy:
+                    return policy[0], False
             return None, False
-        except utils.ApiException as e:
-            if str(e.status) == "404":
+        except (utils.ApiException, Exception) as e:
+            if isinstance(e, utils.ApiException) and str(e.status) == "404":
                 LOG.info("SyncIQ policy %s is not found", name_or_id)
-                return self.get_target_policy(name_or_id, job_params)
-        except Exception as e:
-            error_msg = utils.determine_error(error_obj=e)
-            error_message = 'Get details of SyncIQ policy %s failed with ' \
-                            'error : %s' % (name_or_id, str(error_msg))
-            LOG.error(error_message)
-            self.module.fail_json(msg=error_message)
+                return self.get_synciq_target_policy(name_or_id, job_params)
+            else:
+                error_msg = utils.determine_error(error_obj=e)
+                error_message = 'Get details of SyncIQ policy %s failed with ' \
+                                'error : %s' % (name_or_id, str(error_msg))
+                LOG.error(error_message)
+                self.module.fail_json(msg=error_message)
 
-    def get_target_policy(self, policy_id, job_params):
+    def get_synciq_target_policy(self, policy_id, job_params):
         """ Returns details of target syncIQ policy"""
         if job_params and job_params['action'] in \
                 ('allow_write', 'allow_write_revert'):
@@ -544,20 +645,22 @@ class SynciqPolicy(object):
         :return: dict with SyncIQ policy details
         """
         try:
-            policy_details = policy_obj.to_dict()
+            policy_details = policy_obj
+            if not isinstance(policy_obj, dict):
+                policy_details = policy_obj.to_dict()
 
             if 'target_certificate_id' in policy_details and policy_details['target_certificate_id']:
                 policy_details['target_certificate_name'] = \
                     self.get_target_cert_id_name(cert_id=policy_details['target_certificate_id'])
 
-            if policy_details['job_delay'] is not None:
+            if policy_details.get('job_delay') is not None:
                 policy_details['job_delay'] = utils.get_time_with_unit(policy_details['job_delay'])
 
-            if policy_details['target_snapshot_expiration'] is not None:
+            if policy_details.get('target_snapshot_expiration') is not None:
                 policy_details['target_snapshot_expiration'] = \
                     utils.get_time_with_unit(policy_details['target_snapshot_expiration'])
 
-            if policy_details['rpo_alert'] is not None:
+            if policy_details.get('rpo_alert') is not None:
                 policy_details['rpo_alert'] = \
                     utils.get_time_with_unit(policy_details['rpo_alert'])
 
@@ -566,7 +669,7 @@ class SynciqPolicy(object):
         except Exception as e:
             error_msg = utils.determine_error(error_obj=e)
             errormsg = "Display details of SyncIQ policy %s failed with " \
-                       "error %s" % (policy_obj.name, str(error_msg))
+                       "error %s" % (policy_details["name"], str(error_msg))
             LOG.error(errormsg)
             self.module.fail_json(msg=errormsg)
 
@@ -578,8 +681,10 @@ class SynciqPolicy(object):
         """
         try:
             LOG.debug("Parameters to set when creating a SyncIQ policy %s", policy_param)
-            policy_id = self.api_instance.create_sync_policy(sync_policy=policy_param)
-            return policy_id
+            if not self.module.check_mode:
+                policy_id = self.api_instance.create_sync_policy(sync_policy=policy_param)
+                return policy_id
+            return True
         except Exception as e:
             error_msg = utils.determine_error(error_obj=e)
             error_message = 'Creating SyncIQ policy %s failed with ' \
@@ -587,18 +692,21 @@ class SynciqPolicy(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
-    def modify_synciq_policy(self, policy_params_dict, policy_id):
+    def modify_synciq_policy(self, policy_params_dict, policy_id, policy_details):
         """
         Modify SyncIQ policy.
         :policy_params_dict: Dictionary of parameters to be modified of a policy
         :policy_id: ID of the policy to be modified
         :return: True if modify is successful
         """
-
+        modified_details = copy.deepcopy(policy_details.to_dict())
+        filtered_dict = {key: value for key, value in policy_params_dict.items() if value is not None}
+        modified_details.update(filtered_dict)
         try:
             if policy_params_dict is not None:
                 LOG.debug("Policy parameters being modified : %s", policy_params_dict)
-                self.api_instance.update_sync_policy(sync_policy=policy_params_dict, sync_policy_id=policy_id)
+                if not self.module.check_mode:
+                    self.api_instance.update_sync_policy(sync_policy=policy_params_dict, sync_policy_id=policy_id)
             return True
         except Exception as e:
             error_msg = utils.determine_error(error_obj=e)
@@ -638,9 +746,8 @@ class SynciqPolicy(object):
         :job_params: Dictionary of parameters for creating a job
         :return: True if job creation is successful
         """
-
         try:
-            if job_params:
+            if job_params and not self.module.check_mode:
                 sync_job_params = {}
                 sync_job_keys = ['action', 'source_snapshot', 'workers_per_node']
                 sync_job_params['id'] = policy_id
@@ -654,7 +761,6 @@ class SynciqPolicy(object):
                     self.api_instance.create_sync_job(sync_job)
                 else:
                     self.api_instance.create_sync_job(sync_job, async_req=True)
-
             return True
         except Exception as e:
             error_msg = utils.determine_error(error_obj=e)
@@ -669,9 +775,9 @@ class SynciqPolicy(object):
         :param policy_id: ID of SyncIQ policy
         :return: True if deletion is successful
         """
-
         try:
-            self.api_instance.delete_sync_policy(sync_policy_id=policy_id)
+            if not self.module.check_mode:
+                self.api_instance.delete_sync_policy(sync_policy_id=policy_id)
             return True
         except Exception as e:
             error_msg = utils.determine_error(error_obj=e)
@@ -720,7 +826,8 @@ class SynciqPolicy(object):
                              'source_include_directories', 'source_exclude_directories',
                              'target_host', 'target_path', 'target_certificate_id', 'target_snapshot_archive',
                              'target_snapshot_expiration', 'snapshot_sync_pattern', 'accelerated_failback',
-                             'restrict_target_network'
+                             'restrict_target_network', 'target_compare_initial_sync',
+                             'password'
                              ]
 
         for param in input_param:
@@ -779,14 +886,14 @@ class SynciqPolicy(object):
                                       'as policy is in disabled state.')
 
     def validate_job_params(self, job_params):
-        if job_params['workers_per_node'] is not None:
+        if job_params.get('workers_per_node') is not None:
             if job_params['action'] not in \
                     ('allow_write', 'allow_write_revert'):
                 self.module.fail_json(msg='workers_per_node is valid '
                                       'only for allow_write and '
                                       'allow_write_revert operation.')
 
-            if job_params['workers_per_node'] <= 0:
+            if job_params.get('workers_per_node') is not None and job_params.get('workers_per_node') <= 0:
                 self.module.fail_json(msg='Please enter a value greater than '
                                       '0 for workers_per_node.')
 
@@ -809,139 +916,90 @@ class SynciqPolicy(object):
         if not policy_id_or_name or utils.is_input_empty(policy_id_or_name):
             self.module.fail_json(msg='Please specify policy_name or policy_id')
 
-    def perform_module_operation(self):
-        """
-        Perform different actions on SyncIQ policy module based on
-        parameters chosen in playbook
-        """
-
-        policy_name = self.module.params['policy_name']
-        policy_id = self.module.params['policy_id']
-        new_policy_name = self.module.params['new_policy_name']
-        schedule = self.module.params['schedule']
-        run_job = self.module.params['run_job']
-        rpo_alert = self.module.params['rpo_alert']
-        rpo_alert_unit = self.module.params['rpo_alert_unit']
-        target_snapshot = self.module.params['target_snapshot']
-        job_delay = self.module.params['job_delay']
-        job_delay_unit = self.module.params['job_delay_unit']
-        job_params = self.module.params['job_params']
-        target_cluster = self.module.params['target_cluster']
-        state = self.module.params['state']
-
-        # Dictionary of inputs from playbook
-        input_param = {}
-        for param in self.module.params:
-            input_param[param] = self.module.params[param]
-
-        # result is a dictionary that contains changed status and SyncIQ
-        # policy details
-        result = dict(
-            changed=False,
-            synciq_policy_details='',
-            target_synciq_policy_details='',
-            create_synciq_policy=False,
-            modify_synciq_policy=False,
-            create_job_synciq_policy=False,
-            delete_synciq_policy=False
-        )
-        policy_modifiable_dict = {}
-        self.validate_input(policy_name or policy_id)
-        if job_params:
-            self.validate_job_params(job_params)
-
-        # Check if policy exists
-        policy_obj, is_target_policy = \
-            self.get_synciq_policy_details(policy_name, policy_id, job_params)
-        if not is_target_policy:
-            if rpo_alert:
-                rpo_alert = utils.get_time_in_seconds(rpo_alert,
-                                                      rpo_alert_unit)
-
-            if job_delay:
-                job_delay = utils.get_time_in_seconds(job_delay,
-                                                      job_delay_unit)
-
-            if target_snapshot and \
-                    target_snapshot['target_snapshot_expiration'] is not None:
-                target_snapshot['target_snapshot_expiration'] = \
-                    utils.get_time_in_seconds(
-                        target_snapshot['target_snapshot_expiration'],
-                        target_snapshot['exp_time_unit'])
-
-            if run_job == 'when-source-modified' or \
-                    run_job == 'when-snapshot-taken':
-                schedule = run_job
-
-            # Construct dictionary of policy parameters to be passed while creating policy
-            policy_param = self.construct_policy_params(input_param, schedule,
-                                                        rpo_alert, job_delay)
-
-            # Form dictionary of modifiable parameters of policy
-            if policy_obj is not None and policy_param:
-                policy_modifiable_dict = \
-                    is_policy_modify(policy_obj, policy_param)
-
-            # Rename policy
-            if new_policy_name is not None and utils.is_input_empty(new_policy_name):
-                self.module.fail_json(msg='new_policy_name cannot be empty. Please provide a valid '
-                                          'new_policy_name to rename policy.')
-            elif new_policy_name and policy_obj and new_policy_name != policy_obj.name:
-                policy_modifiable_dict['name'] = policy_name = new_policy_name
-
-            # Create a policy
-            if policy_obj is None and state == 'present':
-                # Check if all mandatory params are provided
-                self.validate_create_params(policy_param)
-                policy_param['accelerated_failback'] = True if input_param['accelerated_failback'] is None else input_param['accelerated_failback']
-                policy_id = self.create_synciq_policy(policy_param)
-                result['create_synciq_policy'] = True
-                result['changed'] = True
-
-            # Modify SyncIQ policy
-            if policy_modifiable_dict and state == "present":
-                result['modify_synciq_policy'] = \
-                    self.modify_synciq_policy(policy_modifiable_dict,
-                                              policy_obj.id)
-                result['changed'] = True
-
-            # Delete SyncIQ policy
-            if policy_obj and state == "absent":
-                result['delete_synciq_policy'] = \
-                    self.delete_synciq_policy(policy_obj.id)
-                result['changed'] = True
-
-            policy_obj, is_target_policy = \
-                self.get_synciq_policy_details(policy_name, policy_id)
-
-        # Create a job on SyncIQ policy
-        if job_params:
-            if job_params['action'] in ('allow_write', 'allow_write_revert'):
-                if not policy_obj:
-                    name_or_id = policy_name if policy_name else policy_id
-                    self.module.fail_json("Target policy %s is not found to "
-                                          "run failover/failover revert "
-                                          "job." % (name_or_id))
-
-            self.validate_create_job(policy_obj, is_target_policy)
-            if not self.is_job_running(policy_obj, is_target_policy,
-                                       job_params['action']):
-                result['create_job_synciq_policy'] = \
-                    self.create_synciq_job(policy_obj.id, job_params)
-                result['changed'] = True
-
-        # Display policy details
-        if policy_obj:
-            if is_target_policy:
-                result['target_synciq_policy_details'] = policy_obj.to_dict()
+    def get_diff_after(self, state, params_dict, policy_details, modify_dict):
+        if state == "absent":
+            return {}
+        else:
+            diff_dict = {}
+            if policy_details is None:
+                diff_dict = {
+                    "accelerated_failback": params_dict.get("accelerated_failback", True),
+                    "action": params_dict.get("action"),
+                    "allow_copy_fb": False,
+                    "bandwidth_reservation": None,
+                    "changelist": False,
+                    "check_integrity": True,
+                    "cloud_deep_copy": "deny",
+                    "conflicted": False,
+                    "database_mirrored": False,
+                    "delete_quotas": True,
+                    "description": params_dict.get("description", ""),
+                    "disable_file_split": False,
+                    "disable_fofb": False,
+                    "disable_quota_tmp_dir": False,
+                    "disable_stf": False,
+                    "enable_hash_tmpdir": False,
+                    "enabled": params_dict.get("enabled", True),
+                    "encrypted": False,
+                    "encryption_cipher_list": "",
+                    "expected_dataloss": False,
+                    "file_matching_pattern": {
+                        "or_criteria": None
+                    },
+                    "force_interface": False,
+                    "has_sync_state": False,
+                    "ignore_recursive_quota": False,
+                    "job_delay": params_dict.get("job_delay"),
+                    "jobs": [],
+                    "last_job_state": "unknown",
+                    "last_started": None,
+                    "last_success": None,
+                    "linked_service_policies": [],
+                    "log_level": "notice",
+                    "log_removed_files": False,
+                    "name": params_dict.get("name"),
+                    "next_run": None,
+                    "ocsp_address": "",
+                    "ocsp_issuer_certificate_id": "",
+                    "password_set": False,
+                    "priority": 0,
+                    "report_max_age": 31536000,
+                    "report_max_count": 2000,
+                    "restrict_target_network": params_dict.get("restrict_target_network", False),
+                    "rpo_alert": params_dict.get("rpo_alert"),
+                    "schedule": params_dict.get("schedule", ""),
+                    "service_policy": False,
+                    "skip_lookup": None,
+                    "skip_when_source_unmodified": params_dict.get("skip_when_source_unmodified", False),
+                    "snapshot_sync_existing": False,
+                    "snapshot_sync_pattern": params_dict.get("snapshot_sync_pattern", "*"),
+                    "source_certificate_id": "",
+                    "source_domain_marked": False,
+                    "source_exclude_directories": params_dict.get("source_exclude_directories", []),
+                    "source_include_directories": params_dict.get("source_include_directories", []),
+                    "source_network": params_dict.get("source_network"),
+                    "source_root_path": params_dict.get("source_root_path", ""),
+                    "source_snapshot_archive": False,
+                    "source_snapshot_expiration": 0,
+                    "source_snapshot_pattern": "",
+                    "sync_existing_snapshot_expiration": False,
+                    "sync_existing_target_snapshot_pattern": "%{SnapName}-%{SnapCreateTime}",
+                    "target_certificate_id": params_dict.get("target_certificate_id", ""),
+                    "target_compare_initial_sync": params_dict.get("target_compare_initial_sync", False),
+                    "target_detect_modifications": True,
+                    "target_host": params_dict.get("target_host", ""),
+                    "target_path": params_dict.get("target_path", ""),
+                    "target_snapshot_alias": "SIQ-%{SrcCluster}-%{PolicyName}-latest",
+                    "target_snapshot_archive": params_dict.get("target_snapshot_archive", False),
+                    "target_snapshot_expiration": params_dict.get("target_snapshot_expiration"),
+                    "target_snapshot_pattern": "SIQ-%{SrcCluster}-%{PolicyName}-%Y-%m-%d_%H-%M-%S",
+                    "workers_per_node": params_dict.get("workers_per_node", 3)
+                }
             else:
-                result['synciq_policy_details'] = \
-                    self.get_synciq_policy_display_attributes(
-                        policy_obj)
-                policy_jobs = self.get_policy_jobs(policy_obj.name)
-                result['synciq_policy_details'].update(jobs=policy_jobs)
-
-        self.module.exit_json(**result)
+                diff_dict = copy.deepcopy(policy_details.to_dict())
+                for key in modify_dict.keys():
+                    diff_dict[key] = modify_dict[key]
+        return self.get_synciq_policy_display_attributes(diff_dict)
 
 
 def is_policy_modify(policy_obj, policy_param):
@@ -954,7 +1012,7 @@ def is_policy_modify(policy_obj, policy_param):
     """
     modify_policy_dict = {}
 
-    exclude_key = ['source_include_directories', 'source_exclude_directories', 'source_network']
+    exclude_key = ['source_include_directories', 'source_exclude_directories', 'source_network', 'password']
 
     if 'source_include_directories' in policy_param and \
             set(policy_obj.source_include_directories) != set(policy_param['source_include_directories']):
@@ -970,11 +1028,24 @@ def is_policy_modify(policy_obj, policy_param):
         if modified_source_network:
             modify_policy_dict['source_network'] = modified_source_network
 
-    policy_obj = policy_obj.to_dict()
+    policy_obj_dict = policy_obj.to_dict()
 
     for param in policy_param:
-        if policy_obj[param] != policy_param[param] and param not in exclude_key:
+        if param in exclude_key:
+            continue
+        if param in policy_obj_dict and policy_obj_dict[param] != policy_param[param]:
             modify_policy_dict[param] = policy_param[param]
+
+    # Special handling for write-only password field.
+    # The API never returns the password value (only password_set boolean),
+    # so standard comparison is impossible.
+    if 'password' in policy_param:
+        if not policy_obj_dict.get('password_set', False):
+            # Password not yet set on the policy — needs to be set
+            modify_policy_dict['password'] = policy_param['password']
+        elif modify_policy_dict:
+            # Other changes detected — include password in the update
+            modify_policy_dict['password'] = policy_param['password']
 
     return modify_policy_dict
 
@@ -1016,7 +1087,8 @@ def get_synciqpolicy_parameters():
         action=dict(type='str', choices=['copy', 'sync']),
         schedule=dict(type='str'),
         run_job=dict(type='str', choices=['on-schedule',
-                                          'when-source-modified', 'when-snapshot-taken']),
+                                          'when-source-modified', 'when-snapshot-taken',
+                                          'manual']),
         skip_when_source_unmodified=dict(type='bool'),
         rpo_alert=dict(type='int'),
         rpo_alert_unit=dict(type='str', choices=['minutes', 'hours',
@@ -1037,7 +1109,8 @@ def get_synciqpolicy_parameters():
         target_cluster=dict(type='dict', options=dict(target_host=dict(type='str', no_log=True),
                                                       target_path=dict(type='str', no_log=True),
                                                       target_certificate_id=dict(type='str'),
-                                                      target_certificate_name=dict(type='str')),
+                                                      target_certificate_name=dict(type='str'),
+                                                      password=dict(type='str', no_log=True)),
                             mutually_exclusive=[['target_certificate_id', 'target_certificate_name']]),
         target_snapshot=dict(type='dict', options=dict(target_snapshot_archive=dict(type='bool'),
                                                        target_snapshot_expiration=dict(type='int'),
@@ -1055,15 +1128,193 @@ def get_synciqpolicy_parameters():
                                      wait_for_completion=dict(type='bool', default=False))),
         accelerated_failback=dict(type='bool'),
         restrict_target_network=dict(type='bool'),
-        state=dict(required=True, type='str', choices=['present', 'absent'])
+        target_compare_initial_sync=dict(type='bool'),
+        state=dict(required=True, choices=['present', 'absent'])
     )
+
+
+class SynciqPolicyExitHandler:
+    def handle(self, synciq_obj):
+        calculated_params = ["next_run",
+                             "last_job_state",
+                             "last_started",
+                             "last_success"]
+        if synciq_obj.module._diff:
+            if synciq_obj.result["diff"]["after"]:
+                for param in calculated_params:
+                    synciq_obj.result["diff"]["after"].pop(param, None)
+            if synciq_obj.result["diff"]["before"]:
+                for param in calculated_params:
+                    synciq_obj.result["diff"]["before"].pop(param, None)
+        synciq_obj.module.exit_json(**synciq_obj.result)
+
+
+class SynciqPolicyGetDetailsHandler:
+    def handle(self, synciq_obj, policy_obj, is_target_policy):
+        if policy_obj:
+            if is_target_policy:
+                synciq_obj.result['target_synciq_policy_details'] = policy_obj.to_dict()
+            else:
+                synciq_obj.result['synciq_policy_details'] = \
+                    synciq_obj.get_synciq_policy_display_attributes(
+                        policy_obj)
+                policy_jobs = synciq_obj.get_policy_jobs(policy_obj.name)
+                synciq_obj.result['synciq_policy_details'].update(jobs=policy_jobs)
+        SynciqPolicyExitHandler().handle(synciq_obj)
+
+
+class SynciqPolicyJobCreateHandler:
+    def handle(self, synciq_obj, synciq_params, policy_name):
+        job_params = synciq_params.get('job_params')
+        policy_obj, is_target_policy = \
+            synciq_obj.get_synciq_policy_details(policy_name, "", job_params)
+        if job_params:
+            if job_params['action'] in ('allow_write', 'allow_write_revert'):
+                if not policy_obj:
+                    synciq_obj.module.fail_json("Target policy %s is not found to "
+                                                "run failover/failover revert "
+                                                "job." % (policy_name))
+            synciq_obj.validate_create_job(policy_obj, is_target_policy)
+            if not synciq_obj.is_job_running(policy_obj, is_target_policy,
+                                             job_params['action']):
+                synciq_obj.result['create_job_synciq_policy'] = \
+                    synciq_obj.create_synciq_job(policy_obj.id, job_params)
+                synciq_obj.result['changed'] = True
+        SynciqPolicyGetDetailsHandler().handle(synciq_obj, policy_obj, is_target_policy)
+
+
+class SynciqPolicyDeleteHandler:
+    def handle(self, synciq_obj, synciq_params, policy_obj, is_target_policy, policy_name):
+        if not is_target_policy and policy_obj:
+            if synciq_params.get("state") == "absent":
+                synciq_obj.result['delete_synciq_policy'] = \
+                    synciq_obj.delete_synciq_policy(policy_obj.id)
+                synciq_obj.result['changed'] = True
+        SynciqPolicyJobCreateHandler().handle(synciq_obj, synciq_params, policy_name)
+
+
+class SynciqPolicyModifyHandler:
+    def handle_diff_after(self, synciq_obj, policy_name):
+        if not synciq_obj.module.check_mode and synciq_obj.module._diff:
+            if synciq_obj.result['diff']['after']:
+                policy_obj, _is_target_policy = \
+                    synciq_obj.get_synciq_policy_details(policy_name, "")
+                policy_details = synciq_obj.get_synciq_policy_display_attributes(policy_obj)
+                synciq_obj.result['diff']['after'] = policy_details
+
+    def handle(self, synciq_obj, synciq_params, policy_modifiable_dict, policy_obj, is_target_policy, policy_name):
+        if not is_target_policy:
+            if policy_modifiable_dict and synciq_params.get("state") == "present":
+                synciq_obj.result['modify_synciq_policy'] = \
+                    synciq_obj.modify_synciq_policy(policy_modifiable_dict,
+                                                    policy_obj.id, policy_obj)
+                synciq_obj.result['changed'] = True
+        self.handle_diff_after(synciq_obj, policy_name)
+        SynciqPolicyDeleteHandler().handle(synciq_obj, synciq_params, policy_obj, is_target_policy, policy_name)
+
+
+class SynciqPolicyCreateHandler:
+    def rename_policy(self, synciq_obj, policy_obj, synciq_params, policy_modifiable_dict):
+        policy_name = synciq_params.get('policy_name')
+        new_policy_name = synciq_params.get('new_policy_name')
+        if new_policy_name is not None and utils.is_input_empty(new_policy_name):
+            synciq_obj.module.fail_json(msg='new_policy_name cannot be empty. Please provide a valid '
+                                        'new_policy_name to rename policy.')
+        elif new_policy_name and policy_obj and new_policy_name != policy_obj.name:
+            policy_modifiable_dict['name'] = policy_name = new_policy_name
+        return policy_name
+
+    def create_policy(self, synciq_obj, synciq_params, policy_obj, policy_param):
+        state = synciq_params.get('state')
+        if policy_obj is None and state == 'present':
+            # Check if all mandatory params are provided
+            synciq_obj.validate_create_params(policy_param)
+            policy_param['accelerated_failback'] = True if synciq_params.get('accelerated_failback') is None else synciq_params.get('accelerated_failback')
+            synciq_obj.create_synciq_policy(policy_param)
+            synciq_obj.result['create_synciq_policy'] = True
+            synciq_obj.result['changed'] = True
+
+    def handle(self, synciq_obj, synciq_params, policy_param, policy_modifiable_dict, policy_obj, is_target_policy):
+        policy_name = synciq_params.get('policy_name')
+        if not is_target_policy:
+            policy_name = self.rename_policy(synciq_obj, policy_obj, synciq_params, policy_modifiable_dict)
+            self.create_policy(synciq_obj, synciq_params, policy_obj, policy_param)
+            if synciq_obj.module._diff and synciq_obj.result["diff"]["after"] and policy_name:
+                synciq_obj.result["diff"]["after"]["name"] = policy_name
+        SynciqPolicyModifyHandler().handle(synciq_obj, synciq_params, policy_modifiable_dict, policy_obj, is_target_policy, policy_name)
+
+
+class SynciqPolicyHandler:
+    """SyncIQ Policy Handler"""
+    def determine_schedule(self, run_job, schedule):
+        """
+        Determine the schedule based on the run_job value.
+        :param run_job: The type of job scheduling
+        :return: The schedule string
+        """
+        if run_job == 'when-source-modified' or run_job == 'when-snapshot-taken':
+            return run_job
+        elif run_job == 'manual':
+            return ''
+        return schedule
+
+    def handling_diff(self, synciq_obj, state, policy_param, policy_obj, policy_modifiable_dict):
+        before_dict = {}
+        diff_dict = {}
+        diff_dict = synciq_obj.get_diff_after(state, policy_param, policy_obj, policy_modifiable_dict)
+        if policy_obj is None:
+            before_dict = {}
+        else:
+            before_dict = synciq_obj.get_synciq_policy_display_attributes(policy_obj)
+        if synciq_obj.module._diff:
+            synciq_obj.result['diff'] = dict(before=before_dict, after=diff_dict)
+
+    def handle(self, synciq_obj, synciq_params):
+        policy_name = synciq_params.get('policy_name')
+        policy_id = synciq_params.get('policy_id')
+        job_params = synciq_params.get('job_params')
+        run_job = synciq_params.get('run_job')
+        target_snapshot = synciq_params.get('target_snapshot')
+        rpo_alert = synciq_params.get('rpo_alert')
+        rpo_alert_unit = synciq_params.get('rpo_alert_unit')
+        job_delay = synciq_params.get('job_delay')
+        job_delay_unit = synciq_params.get('job_delay_unit')
+        schedule = synciq_params.get('schedule') or ""
+        state = synciq_params.get('state')
+        synciq_obj.validate_input(policy_name or policy_id)
+        if job_params:
+            synciq_obj.validate_job_params(job_params)
+
+        policy_obj, is_target_policy = \
+            synciq_obj.get_synciq_policy_details(policy_name, policy_id, job_params)
+        policy_param = {}
+        policy_modifiable_dict = {}
+        if not is_target_policy:
+            rpo_alert = utils.get_time_in_seconds(rpo_alert, rpo_alert_unit) if rpo_alert else None
+            job_delay = utils.get_time_in_seconds(job_delay, job_delay_unit) if job_delay else None
+
+            if target_snapshot and target_snapshot.get('target_snapshot_expiration') is not None:
+                target_snapshot['target_snapshot_expiration'] = utils.get_time_in_seconds(
+                    target_snapshot['target_snapshot_expiration'],
+                    target_snapshot['exp_time_unit']
+                )
+            schedule = self.determine_schedule(run_job, schedule)
+            # Construct dictionary of policy parameters to be passed while creating policy
+            policy_param = synciq_obj.construct_policy_params(synciq_params, schedule,
+                                                              rpo_alert, job_delay)
+            # Form dictionary of modifiable parameters of policy
+            if policy_obj is not None and policy_param:
+                policy_modifiable_dict = \
+                    is_policy_modify(policy_obj, policy_param)
+        self.handling_diff(synciq_obj, state, policy_param, policy_obj, policy_modifiable_dict)
+        SynciqPolicyCreateHandler().handle(synciq_obj, synciq_params, policy_param, policy_modifiable_dict, policy_obj, is_target_policy)
 
 
 def main():
     """ Create PowerScale SyncIQ policy object and perform action on it
         based on user input from playbook"""
     obj = SynciqPolicy()
-    obj.perform_module_operation()
+    SynciqPolicyHandler().handle(obj, obj.module.params)
 
 
 if __name__ == '__main__':

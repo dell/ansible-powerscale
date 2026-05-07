@@ -1,13 +1,3 @@
-<!--
-Copyright (c) 2022 Dell Inc., or its subsidiaries. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
--->
-
 # Triage issues
 
 The main goal of issue triage is to categorize all incoming issues and make sure each issue has all basic information needed for anyone else to understand and be able to start working on it.
@@ -41,10 +31,10 @@ This section describes the various issue templates and the expected content.
 
 Should explain what happened, what was expected and how to reproduce it together with any additional information that may help giving a complete picture of what happened such as screenshots, output and any environment related information that's applicable and/or maybe related to the reported problem:
 
- - Ansible Version: [e.g. 2.15]
- - Python Version [e.g. 3.11]
- - Ansible modules for Dell PowerScale Version: [e.g. 2.2.0]
- - PowerScale SDK version: [e.g. isilon-sdk]
+ - Ansible Version: [e.g. 2.19]
+ - Python Version [e.g. 3.13]
+ - Ansible modules for Dell PowerScale Version: [e.g. 3.9.0]
+ - PowerScale SDK version: [e.g. 0.6.0]
  - Any other additional information...
 
 #### Feature requests

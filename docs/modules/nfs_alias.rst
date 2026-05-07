@@ -21,8 +21,8 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.13 or later.
-- Python 3.9, 3.10 or 3.11.
+- Ansible-core 2.17 or later.
+- Python 3.11, 3.12 or 3.13.
 
 
 
@@ -50,9 +50,9 @@ Parameters
 
 
   scope (optional, str, effective)
-    When specified as ``effective``, or not specified, all fields are returned.
+    When specified as :literal:`effective`\ , or not specified, all fields are returned.
 
-    When specified as ``user``, only fields with non-default values are shown.
+    When specified as :literal:`user`\ , only fields with non-default values are shown.
 
 
   check (optional, bool, False)
@@ -66,9 +66,9 @@ Parameters
   state (optional, str, present)
     Defines whether the NFS alias should exist or not.
 
-    ``present`` indicates that the NFS alias should exist in system.
+    :literal:`present` indicates that the NFS alias should exist in system.
 
-    ``absent`` indicates that the NFS alias should not exist in system.
+    :literal:`absent` indicates that the NFS alias should not exist in system.
 
 
   onefs_host (True, str, None)
@@ -82,9 +82,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    ``true`` - indicates that the SSL certificate should be verified.
+    :literal:`true` - indicates that the SSL certificate should be verified.
 
-    ``false`` - indicates that the SSL certificate should not be verified.
+    :literal:`false` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -102,7 +102,7 @@ Notes
 -----
 
 .. note::
-   - The *check_mode* is supported.
+   - The :emphasis:`check\_mode` is supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -114,80 +114,80 @@ Examples
 .. code-block:: yaml+jinja
 
     
-      - name: Create NFS alias - check mode
-        dellemc.powerscale.nfs_alias:
-          onefs_host: "{{onefs_host}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          nfs_alias_name: "/sample_alias_2"
-          path: "/ifs"
-          access_zone: 'System'
-          state: "present"
-        check_mode: true
+    - name: Create NFS alias - check mode
+      dellemc.powerscale.nfs_alias:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        nfs_alias_name: "/sample_alias_2"
+        path: "/ifs"
+        access_zone: 'System'
+        state: "present"
+      check_mode: true
 
-      - name: Create NFS alias
-        dellemc.powerscale.nfs_alias:
-          onefs_host: "{{onefs_host}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          nfs_alias_name: "/sample_alias_2"
-          path: "/ifs"
-          access_zone: 'System'
-          state: "present"
+    - name: Create NFS alias
+      dellemc.powerscale.nfs_alias:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        nfs_alias_name: "/sample_alias_2"
+        path: "/ifs"
+        access_zone: 'System'
+        state: "present"
 
-      - name: Get NFS alias by name
-        dellemc.powerscale.nfs_alias:
-          onefs_host: "{{onefs_host}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          nfs_alias_name: "/sample_alias_2"
-          scope: "effective"
-          check: true
+    - name: Get NFS alias by name
+      dellemc.powerscale.nfs_alias:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        nfs_alias_name: "/sample_alias_2"
+        scope: "effective"
+        check: true
 
-      - name: Modify NFS alias - check mode
-        dellemc.powerscale.nfs_alias:
-          onefs_host: "{{onefs_host}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          nfs_alias_name: "/sample_alias_2"
-          new_alias_name: "/Renamed_alias_2"
-          path: "/ifs/Test"
-          state: "present"
-        check_mode: true
+    - name: Modify NFS alias - check mode
+      dellemc.powerscale.nfs_alias:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        nfs_alias_name: "/sample_alias_2"
+        new_alias_name: "/Renamed_alias_2"
+        path: "/ifs/Test"
+        state: "present"
+      check_mode: true
 
-      - name: Modify NFS alias
-        dellemc.powerscale.nfs_alias:
-          onefs_host: "{{onefs_host}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          nfs_alias_name: "/sample_alias_2"
-          new_alias_name: "/Renamed_alias_2"
-          path: "/ifs/Test"
-          state: "present"
+    - name: Modify NFS alias
+      dellemc.powerscale.nfs_alias:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        nfs_alias_name: "/sample_alias_2"
+        new_alias_name: "/Renamed_alias_2"
+        path: "/ifs/Test"
+        state: "present"
 
-      - name: Delete NFS alias - check mode
-        dellemc.powerscale.nfs_alias:
-          onefs_host: "{{onefs_host}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          nfs_alias_name: "/Renamed_alias_2"
-          state: "absent"
-        check_mode: true
+    - name: Delete NFS alias - check mode
+      dellemc.powerscale.nfs_alias:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        nfs_alias_name: "/Renamed_alias_2"
+        state: "absent"
+      check_mode: true
 
-      - name: Delete NFS alias
-        dellemc.powerscale.nfs_alias:
-          onefs_host: "{{onefs_host}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          nfs_alias_name: "/Renamed_alias_2"
-          state: "absent"
+    - name: Delete NFS alias
+      dellemc.powerscale.nfs_alias:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        nfs_alias_name: "/Renamed_alias_2"
+        state: "absent"
 
 
 

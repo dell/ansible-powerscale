@@ -1,0 +1,117 @@
+---
+- name: Manage Server Certificate Module Operations on PowerScale Storage
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: "10.**.**.**"
+    port_no: "1234"
+    api_user: "user"
+    api_password: "password"
+    verify_ssl: false
+
+  tasks:
+
+    - name: To import the new server certificate
+      dellemc.powerscale.server_certificate:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        state: present
+        alias_name: certificate_name
+        description: The certificate description
+        certificate_path: "/ifs/certificates/server.crt"
+        certificate_key_path: "/ifs/certificates/server.key"
+        certificate_key_password: "Secret@123"
+
+    - name: Import and set the new server certificate as default
+      dellemc.powerscale.server_certificate:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        state: present
+        alias_name: default_certificate
+        description: The default certificate description
+        certificate_path: "/ifs/certificates/server.crt"
+        certificate_key_path: "/ifs/certificates/server.key"
+        certificate_key_password: "Secret@123"
+        is_default_certificate: true
+        certificate_monitor_enabled: true
+        certificate_pre_expiration_threshold: 300
+
+    - name: To update the server certificate
+      dellemc.powerscale.server_certificate:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        state: present
+        alias_name: certificate_new_name
+        description: The updated certificate description
+
+    - name: To update the server certificate and set the certificate as default
+      dellemc.powerscale.server_certificate:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        state: present
+        certificate_id: "a851d9f3d7b16985be6fcb0402"
+        description: The updated certificate description
+        is_default_certificate: true
+        certificate_monitor_enabled: true
+        certificate_pre_expiration_threshold: 42949
+
+    - name: To delete the server certificate
+      dellemc.powerscale.server_certificate:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        state: absent
+        alias_name: certificate_new_name
+
+    - name: To delete the server certificate using certificate ID
+      dellemc.powerscale.server_certificate:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        state: absent
+        certificate_id: "a851d9f3d7b16985be6fcb0402"
+
+    - name: To remove the description of the certificate
+      dellemc.powerscale.server_certificate:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        state: present
+        alias_name: certificate_new_name
+        description: " "
+
+    - name: To replace the existing server certificate
+      block:
+
+        - name: To delete the server certificate
+          dellemc.powerscale.server_certificate:
+            onefs_host: "{{ onefs_host }}"
+            api_user: "{{ api_user }}"
+            api_password: "{{ api_password }}"
+            verify_ssl: "{{ verify_ssl }}"
+            state: absent
+            alias_name: certificate_name
+
+        - name: To import the new server certificate
+          dellemc.powerscale.server_certificate:
+            onefs_host: "{{ onefs_host }}"
+            api_user: "{{ api_user }}"
+            api_password: "{{ api_password }}"
+            verify_ssl: "{{ verify_ssl }}"
+            state: present
+            alias_name: certificate_name
+            description: The replaced server certificate description
+            certificate_path: "/ifs/certificates/server.pem"
+            certificate_key_path: "/ifs/certificates/server.key"
+            certificate_key_password: "Secret@123"

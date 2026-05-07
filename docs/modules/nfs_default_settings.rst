@@ -21,8 +21,8 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.13 or later.
-- Python 3.9, 3.10 or 3.11.
+- Ansible-core 2.17 or later.
+- Python 3.11, 3.12 or 3.13.
 
 
 
@@ -375,9 +375,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    ``true`` - indicates that the SSL certificate should be verified.
+    :literal:`true` - indicates that the SSL certificate should be verified.
 
-    ``false`` - indicates that the SSL certificate should not be verified.
+    :literal:`false` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -395,7 +395,7 @@ Notes
 -----
 
 .. note::
-   - The *check_mode* is supported.
+   - The :emphasis:`check\_mode` is supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -407,50 +407,50 @@ Examples
 .. code-block:: yaml+jinja
 
     
-        - name: Get NFS default settings
-          dellemc.powerscale.nfs_default_settings:
-            onefs_host: "{{onefs_host}}"
-            verify_ssl: "{{verify_ssl}}"
-            api_user: "{{api_user}}"
-            api_password: "{{api_password}}"
-            access_zone: "sample-zone"
+    - name: Get NFS default settings
+      dellemc.powerscale.nfs_default_settings:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        access_zone: "sample-zone"
 
-        - name: Update the NFS default settings
-          dellemc.powerscale.nfs_default_settings:
-            onefs_host: "{{ onefs_host }}"
-            api_user: "{{ api_user }}"
-            api_password: "{{ api_password }}"
-            verify_ssl: "{{ verify_ssl }}"
-            access_zone: "sample-zone"
-            block_size:
-              size_value: 5
-              size_unit: 'KB'
-            commit_asynchronous: False
-            encoding: 'UTF8'
-            map_root:
-              enabled: true
-              primary_group: 'test_group_1'
-              secondary_groups:
-                - name: 'test_group_2'
-                - name: 'test_group_3'
-                  state: 'absent'
-              user: 'test_user'
-            map_non_root:
-              enabled: true
-              primary_group: 'test_non_root_group'
-              secondary_groups:
-                - name: 'test_non_root_group_2'
-                - name: 'test_non_root_group_3'
-                  state: 'absent'
-              user: 'test_non_root_user'
-            readdirplus: true
-            time_delta:
-              time_value: 5
-              time_unit: 'seconds'
-            write_filesync_action: 'DATASYNC'
-            security_flavors:
-              - unix
-              - kerberos
+    - name: Update the NFS default settings
+      dellemc.powerscale.nfs_default_settings:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        access_zone: "sample-zone"
+        block_size:
+          size_value: 5
+          size_unit: 'KB'
+        commit_asynchronous: false
+        encoding: 'UTF8'
+        map_root:
+          enabled: true
+          primary_group: 'test_group_1'
+          secondary_groups:
+            - name: 'test_group_2'
+            - name: 'test_group_3'
+              state: 'absent'
+          user: 'test_user'
+        map_non_root:
+          enabled: true
+          primary_group: 'test_non_root_group'
+          secondary_groups:
+            - name: 'test_non_root_group_2'
+            - name: 'test_non_root_group_3'
+              state: 'absent'
+          user: 'test_non_root_user'
+        readdirplus: true
+        time_delta:
+          time_value: 5
+          time_unit: 'seconds'
+        write_filesync_action: 'DATASYNC'
+        security_flavors:
+          - unix
+          - kerberos
 
 
 

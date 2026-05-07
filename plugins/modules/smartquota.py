@@ -1,7 +1,7 @@
 #!/usr/bin/python
-# Copyright: (c) 2020, Dell Technologies
+# Copyright: (c) 2020-2026, Dell Technologies
 
-# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """ Ansible module for managing Smart Quota on PowerScale"""
 from __future__ import (absolute_import, division, print_function)
@@ -17,14 +17,15 @@ version_added: '1.2.0'
 short_description: Manage Smart Quotas on PowerScale
 
 description:
-- Manages Smart Quotas on a PowerScale storage system. This includes getting details,
-  modifying, creating and deleting Smart Quotas.
+- Manages Smart Quotas on a PowerScale storage system. This includes
+  getting details, modifying, creating and deleting Smart Quotas.
 
 extends_documentation_fragment:
   - dellemc.powerscale.powerscale
 
 author:
 - P Srinivas Rao (@srinivas-rao5) <ansible.team@dell.com>
+- Kritika Bhateja(@Kritika-Bhateja-03) <ansible.team.dell.com>)
 
 options:
   path:
@@ -39,7 +40,7 @@ options:
     - The type of quota which will be imposed on the path.
     type: str
     required: true
-    choices: ['user', 'group', 'directory', 'default-user', 'default-group']
+    choices: ['user', 'group', 'directory', 'default-user', 'default-group', 'default-directory']
   user_name:
     description:
     - The name of the user account for which
@@ -52,8 +53,8 @@ options:
   access_zone:
     description:
     - This option mentions the zone in which the user/group exists.
-    - For a non-system access zone, the path relative to the non-system Access Zone's
-      base directory has to be given.
+    - For a non-system access zone, the path relative to the non-system
+      Access Zone's base directory has to be given.
     - For a system access zone, the absolute path has to be given.
     type: str
     default: 'system'
@@ -69,6 +70,20 @@ options:
     type: str
     default: 'local'
     choices: [ 'local', 'file', 'ldap', 'ads', 'nis']
+  description:
+    description:
+    - A description of the quota.
+    - Maximum length is 1024 characters.
+    type: str
+  labels:
+    description:
+    - A string of labels for the quota, comma-separated.
+    - Maximum length is 1024 characters.
+    type: str
+  force:
+    description:
+    - Whether to force creation of a quota on the root of /ifs.
+    type: bool
   quota:
     description:
     - Specifies Smart Quota parameters.
@@ -103,16 +118,16 @@ options:
         - Threshold value after which the soft limit exceeded notification
           will be sent and the I(soft_grace) period will start.
         - Write access will be restricted after the grace period expires.
-        - Both I(soft_grace_period) and I(soft_limit_size) are required to modify
-          soft threshold for the quota.
+        - Both I(soft_grace_period) and either I(soft_limit_size) or
+          I(percent_soft) are required to modify soft threshold for the quota.
+        - Mutually exclusive with I(percent_soft).
         type: float
       soft_grace_period:
         description:
         - Grace Period after the soft limit for quota is exceeded.
         - After the grace period, the write access to the quota will be
           restricted.
-        - Both I(soft_grace_period) and I(soft_limit_size) are required to modify
-          soft threshold for the quota.
+        - Required when I(soft_limit_size) or I(percent_soft) is set.
         type: int
       period_unit:
         description:
@@ -135,15 +150,34 @@ options:
           limits is specified.
         type: str
         choices: ['GB', 'TB']
+      percent_soft:
+        description:
+        - The soft threshold as a percentage of the hard limit.
+        - Must be between 0.01 and 99.99.
+        - Mutually exclusive with I(soft_limit_size).
+        - Requires I(hard_limit_size) to be set.
+        - Both I(soft_grace_period) and either I(soft_limit_size) or
+          I(percent_soft) are required to modify soft threshold for the quota.
+        type: float
+      percent_advisory:
+        description:
+        - The advisory threshold as a percentage of the hard limit.
+        - Must be between 0.01 and 99.99.
+        - Mutually exclusive with I(advisory_limit_size).
+        - Requires I(hard_limit_size) to be set.
+        type: float
       container:
-         description: If C(true), SMB shares using the quota directory see the quota thresholds as share size.
+         description:
+         - If C(true), SMB shares using the quota directory see
+           the quota thresholds as share size.
          type: bool
          default: false
   state:
     description:
     - Define whether the Smart Quota should exist or not.
     - C(present) - indicates that the Smart Quota should exist on the system.
-    - C(absent) - indicates that the Smart Quota should not exist on the system.
+    - C(absent) - indicates that the Smart Quota should not exist on the
+      system.
     choices: ['absent', 'present']
     type: str
     required: true
@@ -153,140 +187,192 @@ notes:
   mandatory parameters.
 - There can be two quotas for each type per directory, one with snapshots
   included and one without snapshots included.
+- The I(check_mode) is supported.
 - Once the limits are assigned, then the quota cannot be converted to
   accounting. Only modification to the threshold limits is permitted.
-- The I(check_mode) is not supported.
 '''
 EXAMPLES = r'''
-  - name: Create a Quota for a User excluding snapshot
-    dellemc.powerscale.smartquota:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      path: "<path>"
-      quota_type: "user"
-      user_name: "{{user_name}}"
-      access_zone: "sample-zone"
-      provider_type: "local"
-      quota:
-        include_overheads: false
-        advisory_limit_size: "{{advisory_limit_size}}"
-        soft_limit_size: "{{soft_limit_size}}"
-        soft_grace_period: "{{soft_grace_period}}"
-        period_unit: "{{period_unit}}"
-        hard_limit_size: "{{hard_limit_size}}"
-        cap_unit: "{{cap_unit}}"
-      state: "present"
+- name: Create a Quota for a User excluding snapshot
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "user"
+    user_name: "{{user_name}}"
+    access_zone: "sample-zone"
+    provider_type: "local"
+    quota:
+      include_overheads: false
+      advisory_limit_size: "{{advisory_limit_size}}"
+      soft_limit_size: "{{soft_limit_size}}"
+      soft_grace_period: "{{soft_grace_period}}"
+      period_unit: "{{period_unit}}"
+      hard_limit_size: "{{hard_limit_size}}"
+      cap_unit: "{{cap_unit}}"
+    state: "present"
 
-  - name: Create a Quota for a Directory for accounting includes snapshots and data protection overheads
-    dellemc.powerscale.smartquota:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      path: "<path>"
-      quota_type: "directory"
-      quota:
-        include_snapshots: true
-        include_overheads: true
-      state: "present"
+- name: Create a Quota for a Directory for accounting includes snapshots
+    and data protection overheads
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "directory"
+    quota:
+      include_snapshots: true
+      include_overheads: true
+    state: "present"
 
-  - name: Create default-user Quota for a Directory with snaps and overheads
-    dellemc.powerscale.smartquota:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      path: "<path>"
-      quota_type: "default-user"
-      quota:
-        include_snapshots: true
-        include_overheads: true
-      state: "present"
+- name: Create default-user Quota for a Directory with snaps and overheads
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "default-user"
+    quota:
+      include_snapshots: true
+      include_overheads: true
+    state: "present"
 
-  - name: Get a Quota Details for a Group
-    dellemc.powerscale.smartquota:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      path: "<path>"
-      quota_type: "group"
-      group_name: "{{user_name}}"
-      access_zone: "sample-zone"
-      provider_type: "local"
-      quota:
-        include_snapshots: true
-      state: "present"
+- name: Get a Quota Details for a Group
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "group"
+    group_name: "{{user_name}}"
+    access_zone: "sample-zone"
+    provider_type: "local"
+    quota:
+      include_snapshots: true
+    state: "present"
 
-  - name: Update Quota for a User
-    dellemc.powerscale.smartquota:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      path: "<path>"
-      quota_type: "user"
-      user_name: "{{user_name}}"
-      access_zone: "sample-zone"
-      provider_type: "local"
-      quota:
-        include_snapshots: true
-        include_overheads: true
-        advisory_limit_size: "{{new_advisory_limit_size}}"
-        hard_limit_size: "{{new_hard_limit_size}}"
-        cap_unit: "{{cap_unit}}"
-      state: "present"
+- name: Update Quota for a User
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "user"
+    user_name: "{{user_name}}"
+    access_zone: "sample-zone"
+    provider_type: "local"
+    quota:
+      include_snapshots: true
+      include_overheads: true
+      advisory_limit_size: "{{new_advisory_limit_size}}"
+      hard_limit_size: "{{new_hard_limit_size}}"
+      cap_unit: "{{cap_unit}}"
+    state: "present"
 
-  - name: Modify Soft Limit and Grace period of default-user Quota
-    dellemc.powerscale.smartquota:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      path: "<path>"
-      quota_type: "default-user"
-      access_zone: "sample-zone"
-      quota:
-        include_snapshots: true
-        include_overheads: true
-        soft_limit_size: "{{soft_limit_size}}"
-        cap_unit: "{{cap_unit}}"
-        soft_grace_period: "{{soft_grace_period}}"
-        period_unit: "{{period_unit}}"
-      state: "present"
+- name: Modify Soft Limit and Grace period of default-user Quota
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "default-user"
+    access_zone: "sample-zone"
+    quota:
+      include_snapshots: true
+      include_overheads: true
+      soft_limit_size: "{{soft_limit_size}}"
+      cap_unit: "{{cap_unit}}"
+      soft_grace_period: "{{soft_grace_period}}"
+      period_unit: "{{period_unit}}"
+    state: "present"
 
-  - name: Delete a Quota for a Directory
-    dellemc.powerscale.smartquota:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      path: "<path>"
-      quota_type: "directory"
-      quota:
-        include_snapshots: true
-      state: "absent"
+- name: Delete a Quota for a Directory
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "directory"
+    quota:
+      include_snapshots: true
+    state: "absent"
 
-  - name: Delete Quota for a default-group
-    dellemc.powerscale.smartquota:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      path: "<path>"
-      quota_type: "default-group"
-      quota:
-        include_snapshots: true
-      state: "absent"
+- name: Delete Quota for a default-group
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "default-group"
+    quota:
+      include_snapshots: true
+    state: "absent"
+
+- name: Create a default-directory Quota with description and labels
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "default-directory"
+    description: "Production data quota"
+    labels: "prod,tier1"
+    quota:
+      thresholds_on: "fs_logical_size"
+      hard_limit_size: 10
+      cap_unit: "TB"
+      include_snapshots: false
+    state: "present"
+
+- name: Create a Quota with percent-based thresholds and force
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "directory"
+    force: true
+    quota:
+      thresholds_on: "fs_logical_size"
+      hard_limit_size: 10
+      cap_unit: "TB"
+      percent_soft: 80.0
+      percent_advisory: 50.0
+      soft_grace_period: 14
+      period_unit: "days"
+      include_snapshots: false
+    state: "present"
+
+- name: Update description and labels on an existing Quota
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "directory"
+    description: "Updated quota description"
+    labels: "updated,labels"
+    quota:
+      include_snapshots: false
+    state: "present"
 '''
 RETURN = r'''
 changed:
     description: Whether or not the resource has changed.
     returned: always
     type: bool
-    sample: true
+    sample: "true"
 
 quota_details:
     description: The quota details.
@@ -417,7 +503,7 @@ class SmartQuota(object):
 
         # initialize the ansible module
         self.module = AnsibleModule(argument_spec=self.module_params,
-                                    supports_check_mode=False,
+                                    supports_check_mode=True,
                                     mutually_exclusive=mut_ex_args,
                                     required_if=req_if_args)
 
@@ -469,22 +555,28 @@ class SmartQuota(object):
         :param persona: User/Group object.
         :return: Quota Id.
         """
+        threshold_kwargs = {}
         if quota_dict:
-            threshold_obj = utils.isi_sdk.QuotaQuotaThresholds(
-                quota_dict['advisory'], hard=quota_dict['hard'],
-                soft=quota_dict['soft'],
-                soft_grace=quota_dict['soft_grace'])
-        else:
-            threshold_obj = utils.isi_sdk.QuotaQuotaThresholds()
+            threshold_kwargs = {
+                'advisory': quota_dict.get('advisory'),
+                'hard': quota_dict.get('hard'),
+                'soft': quota_dict.get('soft'),
+                'soft_grace': quota_dict.get('soft_grace')
+            }
+            if quota_dict.get('percent_soft') is not None:
+                threshold_kwargs['percent_soft'] = quota_dict['percent_soft']
+            if quota_dict.get('percent_advisory') is not None:
+                threshold_kwargs['percent_advisory'] = quota_dict['percent_advisory']
+        threshold_obj = utils.isi_sdk.QuotaQuotaThresholds(**threshold_kwargs)
 
         enforced = False
-        if quota_dict and (quota_dict['hard'] or quota_dict['soft']
-                           or quota_dict['advisory']):
+        if quota_dict and (quota_dict.get('hard') or quota_dict.get('soft')
+                           or quota_dict.get('advisory')):
             enforced = True
 
         # if not passed during creation of Quota
         # Set include_snapshots as False
-        if quota_dict is None or quota_dict['include_snapshots'] is None:
+        if quota_dict is None or quota_dict.get('include_snapshots') is None:
             include_snapshots = False
         else:
             include_snapshots = quota_dict['include_snapshots']
@@ -501,15 +593,28 @@ class SmartQuota(object):
             'thresholds': threshold_obj,
             'container': container, 'type': quota_type
         }
-        if quota_dict is not None and quota_dict["thresholds_on"] is not None:
+        if quota_dict is not None and quota_dict.get("thresholds_on") is not None:
             quota_create_params["thresholds_on"] = quota_dict["thresholds_on"]
+
+        description = self.module.params.get('description')
+        if description is not None:
+            quota_create_params['description'] = description
+        labels = self.module.params.get('labels')
+        if labels is not None:
+            quota_create_params['labels'] = labels
+        force = self.module.params.get('force')
+        if force is not None:
+            quota_create_params['force'] = force
+
         quota_params_obj = utils.isi_sdk.QuotaQuotaCreateParams(**quota_create_params)
         try:
-            api_response = self.quota_api_instance.create_quota_quota(
-                quota_quota=quota_params_obj, zone=zone)
-            message = "Quota created, %s" % api_response
-            LOG.info(message)
-            return api_response
+            if not self.module.check_mode:
+                api_response = self.quota_api_instance.create_quota_quota(
+                    quota_quota=quota_params_obj, zone=zone)
+                message = "Quota created, %s" % api_response
+                LOG.info(message)
+                return api_response
+            return True
         except utils.ApiException as e:
             error_message = "Create quota for %s failed with %s" \
                             % (path, determine_error(e))
@@ -526,19 +631,39 @@ class SmartQuota(object):
         :return: True if the operation is successful.
         """
 
-        threshold_obj = utils.isi_sdk.QuotaQuotaThresholds(
-            advisory=quota_dict['advisory'], hard=quota_dict['hard'],
-            soft=quota_dict['soft'], soft_grace=quota_dict['soft_grace'])
+        threshold_kwargs = {
+            'advisory': quota_dict.get('advisory'),
+            'hard': quota_dict.get('hard'),
+            'soft': quota_dict.get('soft'),
+            'soft_grace': quota_dict.get('soft_grace')
+        }
+        if quota_dict.get('percent_soft') is not None:
+            threshold_kwargs['percent_soft'] = quota_dict['percent_soft']
+        if quota_dict.get('percent_advisory') is not None:
+            threshold_kwargs['percent_advisory'] = quota_dict['percent_advisory']
+        threshold_obj = utils.isi_sdk.QuotaQuotaThresholds(**threshold_kwargs)
 
         get_quota_params = {'enforced': enforced,
-                            'thresholds_on': quota_dict["thresholds_on"],
+                            'thresholds_on': quota_dict.get("thresholds_on"),
                             'thresholds': threshold_obj}
+
+        description = self.module.params.get('description')
+        if description is not None:
+            get_quota_params['description'] = description
+        labels = self.module.params.get('labels')
+        if labels is not None:
+            get_quota_params['labels'] = labels
+        force = self.module.params.get('force')
+        if force is not None:
+            get_quota_params['force'] = force
+
         quota_params_obj = utils.isi_sdk.QuotaQuota(**get_quota_params)
         try:
-            self.quota_api_instance.update_quota_quota(
-                quota_quota=quota_params_obj, quota_quota_id=quota_id)
-            msg = "Quota Updated successfully for path %s" % path
-            LOG.debug(msg)
+            if not self.module.check_mode:
+                self.quota_api_instance.update_quota_quota(
+                    quota_quota=quota_params_obj, quota_quota_id=quota_id)
+                msg = "Quota Updated successfully for path %s" % path
+                LOG.debug(msg)
             return True
         except utils.ApiException as e:
             error_message = "Update quota for path %s failed with %s" \
@@ -624,9 +749,10 @@ class SmartQuota(object):
         :return: True, if the delete operation is successful.
         """
         try:
-            self.quota_api_instance.delete_quota_quota(quota_id)
-            msg = "Quota Deleted Successfully for Path %s" % path
-            LOG.debug(msg)
+            if not self.module.check_mode:
+                self.quota_api_instance.delete_quota_quota(quota_id)
+                msg = "Quota Deleted Successfully for Path %s" % path
+                LOG.debug(msg)
             return True
         except Exception as e:
             error_message = "Delete quota for %s failed with %s" \
@@ -643,7 +769,7 @@ class SmartQuota(object):
         available_quota_args = quota.keys()
 
         # convert soft_grace_period
-        if 'soft_grace_period' in available_quota_args and quota['soft_grace_period'] is not None:
+        if 'soft_grace_period' in available_quota_args and quota.get('soft_grace_period') is not None:
             if quota['soft_grace_period'] <= 0:
                 self.module.fail_json(msg="soft_grace_period should be greater than 0")
             quota['soft_grace_period'] = period_to_seconds(quota['soft_grace_period'], quota['period_unit'])
@@ -652,17 +778,17 @@ class SmartQuota(object):
         limit_params = ['advisory_limit_size', 'soft_limit_size',
                         'hard_limit_size']
         for limit in available_quota_args:
-            if limit in limit_params and quota[limit] is not None:
+            if limit in limit_params and quota.get(limit) is not None:
                 limit_size = round(utils.get_size_bytes(
                     quota[limit], quota['cap_unit']))
                 if limit_size < 1073741824:
                     self.module.fail_json(msg="%s should be greater than or equal to 1GB" % limit)
                 quota[limit] = limit_size
 
-        quota['advisory'] = quota.pop('advisory_limit_size')
-        quota['soft'] = quota.pop('soft_limit_size')
-        quota['hard'] = quota.pop('hard_limit_size')
-        quota['soft_grace'] = quota.pop('soft_grace_period')
+        quota['advisory'] = quota.pop('advisory_limit_size', None)
+        quota['soft'] = quota.pop('soft_limit_size', None)
+        quota['hard'] = quota.pop('hard_limit_size', None)
+        quota['soft_grace'] = quota.pop('soft_grace_period', None)
         return quota
 
     def get_user_group_sid(self):
@@ -699,6 +825,47 @@ class SmartQuota(object):
             path = self.get_zone_base_path(access_zone) + path
         return path
 
+    def _validate_string_length(self, param_name, max_len):
+        """Check a string param does not exceed max_len."""
+        try:
+            value = self.module.params.get(param_name)
+            if value is not None and len(value) > max_len:
+                self.module.fail_json(
+                    msg="%s exceeds maximum length of %d characters"
+                    % (param_name, max_len))
+        except (TypeError, AttributeError) as e:
+            LOG.error("Validation error for %s: %s", param_name, str(e))
+            self.module.fail_json(msg="Invalid %s parameter" % param_name)
+
+    def _validate_percent_field(self, quota, field_name):
+        """Check a percent threshold is in range and has hard_limit_size."""
+        try:
+            value = quota.get(field_name)
+            if value is not None:
+                if value < 0.01 or value > 99.99:
+                    self.module.fail_json(
+                        msg="%s must be between 0.01 and 99.99" % field_name)
+                if not quota.get('hard_limit_size'):
+                    self.module.fail_json(
+                        msg="%s requires hard_limit_size to be set" % field_name)
+        except (TypeError, AttributeError) as e:
+            LOG.error("Validation error for %s: %s", field_name, str(e))
+            self.module.fail_json(msg="Invalid %s parameter" % field_name)
+
+    def validate_new_params(self):
+        """Validate description, labels, and percent thresholds."""
+        self._validate_string_length('description', 1024)
+        self._validate_string_length('labels', 1024)
+        quota = self.module.params.get('quota')
+        if quota:
+            self._validate_percent_field(quota, 'percent_soft')
+            self._validate_percent_field(quota, 'percent_advisory')
+            has_soft = quota.get('soft_limit_size') or quota.get('percent_soft')
+            if has_soft and not quota.get('soft_grace_period'):
+                self.module.fail_json(
+                    msg="soft_grace_period is required when "
+                        "soft_limit_size or percent_soft is set")
+
     def validate_zone_path_params(self):
         """Validate path and access zone parameters"""
         param_list = ['access_zone', 'path']
@@ -734,6 +901,7 @@ class SmartQuota(object):
         path = self.module.params['path']
 
         self.validate_zone_path_params()
+        self.validate_new_params()
 
         quota = copy.deepcopy(self.module.params['quota'])
         if quota:
@@ -744,8 +912,7 @@ class SmartQuota(object):
         message = "Quota Dictionary after conversion:  %s" % str(quota)
         LOG.debug(message)
 
-        VALIDATE_THRESHOLD = utils.validate_threshold_overhead_parameter(
-            quota, "include_overheads")
+        VALIDATE_THRESHOLD = utils.validate_threshold_overhead_parameter(quota)
         if VALIDATE_THRESHOLD and not VALIDATE_THRESHOLD["param_is_valid"]:
             self.module.fail_json(msg=VALIDATE_THRESHOLD["error_message"])
         # If Access_Zone is System then absolute path is required
@@ -756,7 +923,7 @@ class SmartQuota(object):
         # Get the sid(security identifier) for User/Group
         sid = self.get_user_group_sid()
 
-        # Throw error if quota_type is directory/default-user/default-group
+        # Throw error if quota_type is directory/default-user/default-group/default-directory
         # and parameters for user and group are provided
         if quota_type != 'user' and quota_type != 'group':
             provider_type = None
@@ -785,18 +952,33 @@ class SmartQuota(object):
             changed = True
 
         # Update a Quota
-        if state == "present" and quota_details and quota:
+        if state == "present" and quota_details:
             modify_flag = False
             if quota:
                 modify_flag = to_modify_quota(
                     quota, quota_details["thresholds"],
                     quota_details["thresholds_on"])
+
+            # Check if description or labels need updating
+            description = self.module.params.get('description')
+            if description is not None and \
+                    description != quota_details.get("description"):
+                modify_flag = True
+            labels = self.module.params.get('labels')
+            if labels is not None and \
+                    labels != quota_details.get("labels"):
+                modify_flag = True
+
             enforce_limit = False
-            if quota_details["enforced"] or quota['advisory'] or \
-                    quota['hard'] or quota['soft']:
+            if quota_details["enforced"] or \
+                    (quota and (quota.get('advisory') or
+                                quota.get('hard') or quota.get('soft'))):
                 enforce_limit = True
             if modify_flag:
                 LOG.info("Updating the Quota")
+                if quota is None:
+                    quota = {'advisory': None, 'hard': None, 'soft': None,
+                             'soft_grace': None, 'thresholds_on': None}
                 changed = self.update(quota, quota_id, enforce_limit, path)
 
         # Delete Quota
@@ -890,7 +1072,11 @@ def get_smartquota_parameters():
                            choices=['local', 'file', 'ldap', 'ads', 'nis']),
         quota_type=dict(required=True, type='str',
                         choices=['user', 'group', 'directory',
-                                 'default-user', 'default-group']),
+                                 'default-user', 'default-group',
+                                 'default-directory']),
+        description=dict(type='str'),
+        labels=dict(type='str'),
+        force=dict(type='bool'),
         quota=dict(type='dict',
                    options=dict(include_snapshots=dict(type='bool', default=False),
                                 container=dict(type='bool', default=False),
@@ -905,9 +1091,12 @@ def get_smartquota_parameters():
                                 soft_grace_period=dict(type='int'),
                                 period_unit=dict(type='str',
                                                  choices=['days', 'weeks', 'months']),
-                                cap_unit=dict(type='str', choices=['GB', 'TB'])),
-                   required_together=[['soft_grace_period', 'period_unit'],
-                                      ['soft_grace_period', 'soft_limit_size']]),
+                                cap_unit=dict(type='str', choices=['GB', 'TB']),
+                                percent_soft=dict(type='float'),
+                                percent_advisory=dict(type='float')),
+                   required_together=[['soft_grace_period', 'period_unit']],
+                   mutually_exclusive=[['soft_limit_size', 'percent_soft'],
+                                       ['advisory_limit_size', 'percent_advisory']]),
         state=dict(required=True, type='str', choices=['present', 'absent'])
     )
 

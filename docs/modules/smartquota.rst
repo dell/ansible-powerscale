@@ -21,8 +21,8 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.13 or later.
-- Python 3.9, 3.10 or 3.11.
+- Ansible\-core 2.17 or later.
+- Python 3.11, 3.12 or 3.13.
 
 
 
@@ -50,7 +50,7 @@ Parameters
   access_zone (optional, str, system)
     This option mentions the zone in which the user/group exists.
 
-    For a non-system access zone, the path relative to the non-system Access Zone's base directory has to be given.
+    For a non\-system access zone, the path relative to the non\-system Access Zone's base directory has to be given.
 
     For a system access zone, the absolute path has to be given.
 
@@ -58,9 +58,25 @@ Parameters
   provider_type (optional, str, local)
     This option defines the type which is used to authenticate the user/group.
 
-    If the *provider_type* is 'ads' then the domain name of the Active Directory Server has to be mentioned in the *user_name*. The format for the *user_name* should be 'DOMAIN_NAME\user_name' or "DOMAIN_NAME\\user_name".
+    If the :emphasis:`provider\_type` is 'ads' then the domain name of the Active Directory Server has to be mentioned in the :emphasis:`user\_name`. The format for the :emphasis:`user\_name` should be 'DOMAIN\_NAME\\user\_name' or "DOMAIN\_NAME\\\\user\_name".
 
     This option acts as a filter for all operations except creation.
+
+
+  description (optional, str, None)
+    A description of the quota.
+
+    Maximum length is 1024 characters.
+
+
+  labels (optional, str, None)
+    A string of labels for the quota, comma\-separated.
+
+    Maximum length is 1024 characters.
+
+
+  force (optional, bool, None)
+    Whether to force creation of a quota on the root of /ifs.
 
 
   quota (optional, dict, None)
@@ -80,7 +96,7 @@ Parameters
 
 
     thresholds_on (optional, str, None)
-      For SDK 9.0.0 the parameter *include_overheads* is deprecated and *thresholds_on* is used.
+      For SDK 9.0.0 the parameter :emphasis:`include\_overheads` is deprecated and :emphasis:`thresholds\_on` is used.
 
 
     advisory_limit_size (optional, float, None)
@@ -88,11 +104,13 @@ Parameters
 
 
     soft_limit_size (optional, float, None)
-      Threshold value after which the soft limit exceeded notification will be sent and the *soft_grace* period will start.
+      Threshold value after which the soft limit exceeded notification will be sent and the :emphasis:`soft\_grace` period will start.
 
       Write access will be restricted after the grace period expires.
 
-      Both *soft_grace_period* and *soft_limit_size* are required to modify soft threshold for the quota.
+      Both :emphasis:`soft\_grace\_period` and either :emphasis:`soft\_limit\_size` or :emphasis:`percent\_soft` are required to modify soft threshold for the quota.
+
+      Mutually exclusive with :emphasis:`percent\_soft`.
 
 
     soft_grace_period (optional, int, None)
@@ -100,15 +118,15 @@ Parameters
 
       After the grace period, the write access to the quota will be restricted.
 
-      Both *soft_grace_period* and *soft_limit_size* are required to modify soft threshold for the quota.
+      Required when :emphasis:`soft\_limit\_size` or :emphasis:`percent\_soft` is set.
 
 
     period_unit (optional, str, None)
-      Unit of the time period for *soft_grace_period*.
+      Unit of the time period for :emphasis:`soft\_grace\_period`.
 
       For months the number of days is assumed to be 30 days.
 
-      This parameter is required only if the *soft_grace_period*, is specified.
+      This parameter is required only if the :emphasis:`soft\_grace\_period`\ , is specified.
 
 
     hard_limit_size (optional, float, None)
@@ -123,17 +141,39 @@ Parameters
       This parameter is required if any of the hard, soft or advisory limits is specified.
 
 
+    percent_soft (optional, float, None)
+      The soft threshold as a percentage of the hard limit.
+
+      Must be between 0.01 and 99.99.
+
+      Mutually exclusive with :emphasis:`soft\_limit\_size`.
+
+      Requires :emphasis:`hard\_limit\_size` to be set.
+
+      Both :emphasis:`soft\_grace\_period` and either :emphasis:`soft\_limit\_size` or :emphasis:`percent\_soft` are required to modify soft threshold for the quota.
+
+
+    percent_advisory (optional, float, None)
+      The advisory threshold as a percentage of the hard limit.
+
+      Must be between 0.01 and 99.99.
+
+      Mutually exclusive with :emphasis:`advisory\_limit\_size`.
+
+      Requires :emphasis:`hard\_limit\_size` to be set.
+
+
     container (optional, bool, False)
-      If ``true``, SMB shares using the quota directory see the quota thresholds as share size.
+      If :literal:`true`\ , SMB shares using the quota directory see the quota thresholds as share size.
 
 
 
   state (True, str, None)
     Define whether the Smart Quota should exist or not.
 
-    ``present`` - indicates that the Smart Quota should exist on the system.
+    :literal:`present` \- indicates that the Smart Quota should exist on the system.
 
-    ``absent`` - indicates that the Smart Quota should not exist on the system.
+    :literal:`absent` \- indicates that the Smart Quota should not exist on the system.
 
 
   onefs_host (True, str, None)
@@ -147,9 +187,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    ``true`` - indicates that the SSL certificate should be verified.
+    :literal:`true` \- indicates that the SSL certificate should be verified.
 
-    ``false`` - indicates that the SSL certificate should not be verified.
+    :literal:`false` \- indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -167,10 +207,10 @@ Notes
 -----
 
 .. note::
-   - To perform any operation, path, quota_type and state are mandatory parameters.
+   - To perform any operation, path, quota\_type and state are mandatory parameters.
    - There can be two quotas for each type per directory, one with snapshots included and one without snapshots included.
+   - The :emphasis:`check\_mode` is supported.
    - Once the limits are assigned, then the quota cannot be converted to accounting. Only modification to the threshold limits is permitted.
-   - The *check_mode* is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -182,135 +222,187 @@ Examples
 .. code-block:: yaml+jinja
 
     
-      - name: Create a Quota for a User excluding snapshot
-        dellemc.powerscale.smartquota:
-          onefs_host: "{{onefs_host}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          path: "<path>"
-          quota_type: "user"
-          user_name: "{{user_name}}"
-          access_zone: "sample-zone"
-          provider_type: "local"
-          quota:
-            include_overheads: false
-            advisory_limit_size: "{{advisory_limit_size}}"
-            soft_limit_size: "{{soft_limit_size}}"
-            soft_grace_period: "{{soft_grace_period}}"
-            period_unit: "{{period_unit}}"
-            hard_limit_size: "{{hard_limit_size}}"
-            cap_unit: "{{cap_unit}}"
-          state: "present"
+    - name: Create a Quota for a User excluding snapshot
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "<path>"
+        quota_type: "user"
+        user_name: "{{user_name}}"
+        access_zone: "sample-zone"
+        provider_type: "local"
+        quota:
+          include_overheads: false
+          advisory_limit_size: "{{advisory_limit_size}}"
+          soft_limit_size: "{{soft_limit_size}}"
+          soft_grace_period: "{{soft_grace_period}}"
+          period_unit: "{{period_unit}}"
+          hard_limit_size: "{{hard_limit_size}}"
+          cap_unit: "{{cap_unit}}"
+        state: "present"
 
-      - name: Create a Quota for a Directory for accounting includes snapshots and data protection overheads
-        dellemc.powerscale.smartquota:
-          onefs_host: "{{onefs_host}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          path: "<path>"
-          quota_type: "directory"
-          quota:
-            include_snapshots: true
-            include_overheads: true
-          state: "present"
+    - name: Create a Quota for a Directory for accounting includes snapshots
+        and data protection overheads
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "<path>"
+        quota_type: "directory"
+        quota:
+          include_snapshots: true
+          include_overheads: true
+        state: "present"
 
-      - name: Create default-user Quota for a Directory with snaps and overheads
-        dellemc.powerscale.smartquota:
-          onefs_host: "{{onefs_host}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          path: "<path>"
-          quota_type: "default-user"
-          quota:
-            include_snapshots: true
-            include_overheads: true
-          state: "present"
+    - name: Create default-user Quota for a Directory with snaps and overheads
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "<path>"
+        quota_type: "default-user"
+        quota:
+          include_snapshots: true
+          include_overheads: true
+        state: "present"
 
-      - name: Get a Quota Details for a Group
-        dellemc.powerscale.smartquota:
-          onefs_host: "{{onefs_host}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          path: "<path>"
-          quota_type: "group"
-          group_name: "{{user_name}}"
-          access_zone: "sample-zone"
-          provider_type: "local"
-          quota:
-            include_snapshots: true
-          state: "present"
+    - name: Get a Quota Details for a Group
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "<path>"
+        quota_type: "group"
+        group_name: "{{user_name}}"
+        access_zone: "sample-zone"
+        provider_type: "local"
+        quota:
+          include_snapshots: true
+        state: "present"
 
-      - name: Update Quota for a User
-        dellemc.powerscale.smartquota:
-          onefs_host: "{{onefs_host}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          path: "<path>"
-          quota_type: "user"
-          user_name: "{{user_name}}"
-          access_zone: "sample-zone"
-          provider_type: "local"
-          quota:
-            include_snapshots: true
-            include_overheads: true
-            advisory_limit_size: "{{new_advisory_limit_size}}"
-            hard_limit_size: "{{new_hard_limit_size}}"
-            cap_unit: "{{cap_unit}}"
-          state: "present"
+    - name: Update Quota for a User
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "<path>"
+        quota_type: "user"
+        user_name: "{{user_name}}"
+        access_zone: "sample-zone"
+        provider_type: "local"
+        quota:
+          include_snapshots: true
+          include_overheads: true
+          advisory_limit_size: "{{new_advisory_limit_size}}"
+          hard_limit_size: "{{new_hard_limit_size}}"
+          cap_unit: "{{cap_unit}}"
+        state: "present"
 
-      - name: Modify Soft Limit and Grace period of default-user Quota
-        dellemc.powerscale.smartquota:
-          onefs_host: "{{onefs_host}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          path: "<path>"
-          quota_type: "default-user"
-          access_zone: "sample-zone"
-          quota:
-            include_snapshots: true
-            include_overheads: true
-            soft_limit_size: "{{soft_limit_size}}"
-            cap_unit: "{{cap_unit}}"
-            soft_grace_period: "{{soft_grace_period}}"
-            period_unit: "{{period_unit}}"
-          state: "present"
+    - name: Modify Soft Limit and Grace period of default-user Quota
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "<path>"
+        quota_type: "default-user"
+        access_zone: "sample-zone"
+        quota:
+          include_snapshots: true
+          include_overheads: true
+          soft_limit_size: "{{soft_limit_size}}"
+          cap_unit: "{{cap_unit}}"
+          soft_grace_period: "{{soft_grace_period}}"
+          period_unit: "{{period_unit}}"
+        state: "present"
 
-      - name: Delete a Quota for a Directory
-        dellemc.powerscale.smartquota:
-          onefs_host: "{{onefs_host}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          path: "<path>"
-          quota_type: "directory"
-          quota:
-            include_snapshots: true
-          state: "absent"
+    - name: Delete a Quota for a Directory
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "<path>"
+        quota_type: "directory"
+        quota:
+          include_snapshots: true
+        state: "absent"
 
-      - name: Delete Quota for a default-group
-        dellemc.powerscale.smartquota:
-          onefs_host: "{{onefs_host}}"
-          verify_ssl: "{{verify_ssl}}"
-          api_user: "{{api_user}}"
-          api_password: "{{api_password}}"
-          path: "<path>"
-          quota_type: "default-group"
-          quota:
-            include_snapshots: true
-          state: "absent"
+    - name: Delete Quota for a default-group
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "<path>"
+        quota_type: "default-group"
+        quota:
+          include_snapshots: true
+        state: "absent"
+
+    - name: Create a default-directory Quota with description and labels
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "<path>"
+        quota_type: "default-directory"
+        description: "Production data quota"
+        labels: "prod,tier1"
+        quota:
+          thresholds_on: "fs_logical_size"
+          hard_limit_size: 10
+          cap_unit: "TB"
+          include_snapshots: false
+        state: "present"
+
+    - name: Create a Quota with percent-based thresholds and force
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "<path>"
+        quota_type: "directory"
+        force: true
+        quota:
+          thresholds_on: "fs_logical_size"
+          hard_limit_size: 10
+          cap_unit: "TB"
+          percent_soft: 80.0
+          percent_advisory: 50.0
+          soft_grace_period: 14
+          period_unit: "days"
+          include_snapshots: false
+        state: "present"
+
+    - name: Update description and labels on an existing Quota
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "<path>"
+        quota_type: "directory"
+        description: "Updated quota description"
+        labels: "updated,labels"
+        quota:
+          include_snapshots: false
+        state: "present"
 
 
 
 Return Values
 -------------
 
-changed (always, bool, True)
+changed (always, bool, true)
   Whether or not the resource has changed.
 
 
@@ -327,11 +419,11 @@ quota_details (When Quota exists., complex, {'container': True, 'description': '
 
 
   container (, bool, True)
-    If ``true``, SMB shares using the quota directory see the quota thresholds as share size.
+    If :literal:`true`\ , SMB shares using the quota directory see the quota thresholds as share size.
 
 
   thresholds (, dict, {'advisory': 3221225472, 'advisory(GB)': '3.0', 'advisory_exceeded': False, 'advisory_last_exceeded': 0, 'hard': 6442450944, 'hard(GB)': '6.0', 'hard_exceeded': False, 'hard_last_exceeded': 0, 'soft': 5368709120, 'soft(GB)': '5.0', 'soft_exceeded': False, 'soft_grace': 3024000, 'soft_last_exceeded': 0})
-    Includes information about all the limits imposed on quota. The limits are mentioned in bytes and *soft_grace* is in seconds.
+    Includes information about all the limits imposed on quota. The limits are mentioned in bytes and :emphasis:`soft\_grace` is in seconds.
 
 
   type (, str, directory)
@@ -357,4 +449,5 @@ Authors
 ~~~~~~~
 
 - P Srinivas Rao (@srinivas-rao5) <ansible.team@dell.com>
+- Kritika Bhateja(@Kritika-Bhateja-03) <ansible.team.dell.com>)
 

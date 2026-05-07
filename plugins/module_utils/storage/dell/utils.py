@@ -7,25 +7,13 @@ HAS_POWERSCALE_SDK = False
 isi_sdk = None
 IMPORT_PKGS_FAIL = []
 
-try:
-    import urllib3
-
-    urllib3.disable_warnings()
-except ImportError:
-    IMPORT_PKGS_FAIL.append("urllib3")
 
 try:
-    import dateutil.relativedelta  # noqa   # pylint: disable=unused-import
-except ImportError:
-    IMPORT_PKGS_FAIL.append("python-dateutil")
-
-try:
-    from pkg_resources import parse_version
-    import pkg_resources
+    from packaging.version import parse as parse_version
     HAS_PKG_RESOURCES = True
 except ImportError:
     HAS_PKG_RESOURCES = False
-    IMPORT_PKGS_FAIL.append("pkg_resources")
+    IMPORT_PKGS_FAIL.append("packaging")
 
 try:
     import importlib
@@ -37,11 +25,14 @@ except ImportError:
 import logging
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.logging_handler \
     import CustomRotatingFileHandler
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.nwpool_utils \
+    import NetworkPoolAPI
 import math
 from decimal import Decimal
 import datetime
 import re
 import sys
+
 
 ''' Check and Get required libraries '''
 
@@ -122,7 +113,7 @@ returns configuration object
 def get_powerscale_connection(module_params):
     if HAS_POWERSCALE_SDK:
         if isi_sdk.__name__ == "isilon_sdk":
-            conn = isi_sdk.v9_5_0.Configuration()
+            conn = isi_sdk.v9_10_0.Configuration()
         else:
             conn = isi_sdk.Configuration()
         if module_params['port_no'] is not None:
@@ -134,7 +125,7 @@ def get_powerscale_connection(module_params):
         conn.username = module_params['api_user']
         conn.password = module_params['api_password']
         if isi_sdk.__name__ == "isilon_sdk":
-            api_client = isi_sdk.v9_5_0.ApiClient(conn)
+            api_client = isi_sdk.v9_10_0.ApiClient(conn)
         else:
             api_client = isi_sdk.ApiClient(conn)
         return api_client
@@ -227,7 +218,7 @@ Validates the package pre-requisites of invoking module
 '''
 
 
-def validate_module_pre_reqs(module_params, module=None):
+def validate_module_pre_reqs(module_params):
     error_message = ""
     cur_py_ver = "{0}.{1}.{2}".format(str(sys.version_info[0]),
                                       str(sys.version_info[1]),
@@ -248,7 +239,7 @@ def validate_module_pre_reqs(module_params, module=None):
         )
         return prereqs_check
 
-    POWERSCALE_SDK_IMPORT = find_compatible_powerscale_sdk(module_params, module)
+    POWERSCALE_SDK_IMPORT = find_compatible_powerscale_sdk(module_params)
     if POWERSCALE_SDK_IMPORT and \
             not POWERSCALE_SDK_IMPORT["powerscale_package_imported"]:
         if POWERSCALE_SDK_IMPORT['error_message']:
@@ -274,12 +265,14 @@ def validate_module_pre_reqs(module_params, module=None):
 ''' Import compatible powerscale sdk based on onefs version '''
 
 
-def import_powerscale_sdk(sdk):
+def import_powerscale_sdk(sdk, major, minor):
     try:
         global isi_sdk
         global ApiException
         global HAS_POWERSCALE_SDK
         isi_sdk = importlib.import_module(sdk)
+        isi_sdk.major = major
+        isi_sdk.minor = minor
         ApiException = getattr(importlib.import_module(sdk + ".rest"),
                                'ApiException')
         HAS_POWERSCALE_SDK = True
@@ -291,15 +284,23 @@ def import_powerscale_sdk(sdk):
 ''' Find compatible powerscale sdk based on onefs version '''
 
 
-def find_compatible_powerscale_sdk(module_params, module=None):
+def find_compatible_powerscale_sdk(module_params):
     global HAS_POWERSCALE_SDK
     error_message = ""
 
-    powerscale_packages = [pkg for pkg in pkg_resources.working_set
-                           if pkg.key.startswith("isilon-sdk")]
+    # Try to find isilon-sdk packages using importlib.metadata
+    powerscale_packages = []
+    try:
+        from importlib import metadata
+        for dist in metadata.distributions():
+            if dist.metadata["name"] and dist.metadata["name"].startswith("isilon-sdk"):
+                powerscale_packages.append(dist.metadata["name"])
+    except (ImportError, AttributeError):
+        powerscale_packages = []
+
     if powerscale_packages:
-        powerscale_sdk = powerscale_packages[0].key.replace('-', '_')
-        import_powerscale_sdk(powerscale_sdk + ".v9_5_0")
+        powerscale_sdk = powerscale_packages[0].replace('-', '_')
+        import_powerscale_sdk(powerscale_sdk + ".v9_10_0", 9, 10)
         try:
             HAS_POWERSCALE_SDK = True
             api_client = get_powerscale_connection(module_params)
@@ -307,12 +308,15 @@ def find_compatible_powerscale_sdk(module_params, module=None):
             major = str(parse_version(cluster_api.get_cluster_config().to_dict()['onefs_version']['release'].split('.')[0]))
             minor = str(parse_version(cluster_api.get_cluster_config().to_dict()['onefs_version']['release'].split('.')[1]))
             array_version = major + "_" + minor + "_0"
-            if module == "ads":
-                # Adding a workaround for home_directory_template failure in later versions of SDK.
-                compatible_powerscale_sdk = "isilon_sdk.v9_1_0"
+
+            compatible_powerscale_sdk = "isilon_sdk.v" + array_version
+            # Pin to 9.10 if version is greater than 9.10
+            if int(major) > 9 or (int(major) == 9 and int(minor) > 10):
+                compatible_powerscale_sdk = "isilon_sdk.v9_10_0"
+                import_powerscale_sdk(compatible_powerscale_sdk, 9, 10)
             else:
-                compatible_powerscale_sdk = "isilon_sdk.v" + array_version
-            import_powerscale_sdk(compatible_powerscale_sdk)
+                import_powerscale_sdk(compatible_powerscale_sdk, int(major), int(minor))
+
         except Exception as e:
             HAS_POWERSCALE_SDK = False
             error_message = 'Unable to fetch version of array {0}, ' \
@@ -346,7 +350,7 @@ def validate_python_version(cur_py_ver):
 ''' Validates threshold overhead parameter based on imported sdk version '''
 
 
-def validate_threshold_overhead_parameter(quota, threshold_overhead_param):
+def validate_threshold_overhead_parameter(quota):
     error_msg = None
     key = 'thresholds_on'
     if quota and key in quota \
@@ -518,9 +522,8 @@ Returns sdk AclObject
 
 def get_acl_object():
     try:
-        return getattr(importlib.import_module(isi_sdk.__name__ + ".models.acl_object"),
-                       'AclObject')
-
+        import_obj = importlib.import_module(isi_sdk.__name__ + ".models")
+        return import_obj.AclObject()
     except ImportError:
         return None
 
@@ -541,3 +544,58 @@ def get_nfs_map_object():
         return import_obj.NfsExportMapAll()
     except ImportError:
         return None
+
+
+def is_email_address_valid(address):
+    if address is not None and re.search(r'^\w+(?:[\.-]\w+)*@\w+(?:[\.-]\w+)*(?:\.\w{2,3})+$', address) is None:
+        return True
+
+
+def is_param_length_valid(item):
+    return len(item) <= 225
+
+
+def get_network_pool_details(user, password, hostname, port, groupnet, subnet, pool_id, validate_certs=False):
+    params = {
+        "username": user,
+        "password": password,
+        "onefs_host": hostname,
+        "port_no": port,
+        "verify_ssl": validate_certs
+    }
+    nwpool = NetworkPoolAPI(params)
+    session_url = "/platform/16/network/groupnets/" + groupnet + "/subnets/" + subnet + "/pools/" + pool_id + "?select=*"
+    session_status_response = nwpool.invoke_request(headers={"Content-Type": "application/json"}, uri=session_url, method="GET")
+
+    return session_status_response.json_data
+
+
+def get_ads_provider_details(user, password, hostname, port, ads_provider_name, validate_certs=False):
+    """
+    Fetches details of all the ADS providers in the cluster.
+
+    :param user: Username to authenticate.
+    :param password: Password to authenticate.
+    :param hostname: Cluster name or IP address.
+    :param port: Port number.
+    :param ads_provider_name: Name of the ADS provider to fetch details.
+    :param validate_certs: Validate SSL certificates.
+    :return: A dictionary of ADS providers.
+
+    :raises HTTPError: If unable to connect to the cluster.
+    :raises URLError: If unable to connect to the cluster.
+    :raises SSLValidationError: If SSL certificate validation fails.
+    :raises ConnectionError: If unable to connect to the cluster.
+    """
+    params = {
+        "username": user,
+        "password": password,
+        "onefs_host": hostname,
+        "port_no": port,
+        "verify_ssl": validate_certs
+    }
+    nwpool = NetworkPoolAPI(params)
+    session_url = "/platform/14/auth/providers/ads/" + ads_provider_name + "?select=*"
+    session_status_response = nwpool.invoke_request(headers={"Content-Type": "application/json"}, uri=session_url, method="GET")
+
+    return session_status_response.json_data

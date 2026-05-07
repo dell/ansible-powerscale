@@ -1,7 +1,7 @@
 #!/usr/bin/python
-# Copyright: (c) 2019, Dell Technologies
+# Copyright: (c) 2019-2024, Dell Technologies
 
-# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """Ansible module for managing filesystems on PowerScale"""
 
@@ -30,6 +30,7 @@ extends_documentation_fragment:
 author:
 - Prashant Rakheja (@prashant-dell) <ansible.team@dell.com>
 - Trisha Datta (@trisha-dell) <ansible.team@dell.com>
+- Kritika Bhateja(@Kritika-Bhateja-03) <ansible.team.dell.com>)
 
 options:
   path:
@@ -223,198 +224,200 @@ options:
     default: false
 
 notes:
-- While deleting a filesystem when recursive_force_delete is set as C(true) it deletes all sub files and folders
-  recursively. This is C(true) even if the filesystem is not empty.
-- Modification of I(inherit_flags) of filesystem ACL is successful only if I(access_rights) is also specified in
+- While deleting a filesystem when recursive_force_delete is set as C(true) it
+  deletes all sub files and folders recursively. This is C(true)
+  even if the filesystem is not empty.
+- Modification of I(inherit_flags) of filesystem ACL is
+  successful only if I(access_rights) is also specified in
   the I(access_control_rights) dictionary.
-- I(Check_mode) is not supported.
+- I(Check_mode) is supported.
 '''
 
 EXAMPLES = r'''
-  - name: Create Filesystem with Quota in given access zone
-    dellemc.powerscale.filesystem:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      path: "<path>"
-      access_zone: "{{access_zone}}"
-      owner:
-        name: 'ansible_user'
-        provider_type: 'ldap'
-      group:
-        name: 'ansible_group'
-        provider_type: 'ldap'
+- name: Create Filesystem with Quota in given access zone
+  dellemc.powerscale.filesystem:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    access_zone: "{{access_zone}}"
+    owner:
+      name: 'ansible_user'
+      provider_type: 'ldap'
+    group:
+      name: 'ansible_group'
+      provider_type: 'ldap'
       access_control: "{{access_control}}"
-      quota:
-        include_snap_data: false
-        include_data_protection_overhead: false
-        advisory_limit_size: 2
-        soft_limit_size: 5
-        hard_limit_size: 10
-        cap_unit: "GB"
-        quota_state: "present"
-        container: true
+    quota:
+      include_snap_data: false
+      include_data_protection_overhead: false
+      advisory_limit_size: 2
+      soft_limit_size: 5
+      hard_limit_size: 10
+      cap_unit: "GB"
+      quota_state: "present"
+      container: true
       recursive: "{{recursive}}"
-      state: "{{state_present}}"
+    state: "{{state_present}}"
 
-  - name: Create Filesystem in default (system) access zone, without Quota
-    dellemc.powerscale.filesystem:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      path: "<path>"
-      owner:
-        name: 'ansible_user'
-        provider_type: 'ldap'
-      state: "{{state_present}}"
+- name: Create Filesystem in default (system) access zone, without Quota
+  dellemc.powerscale.filesystem:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    owner:
+    name: 'ansible_user'
+    provider_type: 'ldap'
+    state: "{{state_present}}"
 
-  - name: Get filesystem details
-    dellemc.powerscale.filesystem:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      access_zone: "{{access_zone}}"
-      path: "<path>"
-      state: "{{state_present}}"
+- name: Get filesystem details
+  dellemc.powerscale.filesystem:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    access_zone: "{{access_zone}}"
+    path: "<path>"
+    state: "{{state_present}}"
 
-  - name: Get filesystem details with snapshots
-    dellemc.powerscale.filesystem:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      access_zone: "{{access_zone}}"
-      path: "<path>"
-      list_snapshots: "{{list_snapshots_true}}"
-      state: "{{state_present}}"
+- name: Get filesystem details with snapshots
+  dellemc.powerscale.filesystem:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    access_zone: "{{access_zone}}"
+    path: "<path>"
+    list_snapshots: "{{list_snapshots_true}}"
+    state: "{{state_present}}"
 
-  - name: Modify Filesystem Hard Quota
-    dellemc.powerscale.filesystem:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      path: "<path>"
-      access_zone: "{{access_zone}}"
-      quota:
-        hard_limit_size: 15
-        cap_unit: "GB"
-        quota_state: "present"
-        container: true
-      state: "{{state_present}}"
+- name: Modify Filesystem Hard Quota
+  dellemc.powerscale.filesystem:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    access_zone: "{{access_zone}}"
+    quota:
+    hard_limit_size: 15
+    cap_unit: "GB"
+    quota_state: "present"
+    container: true
+    state: "{{state_present}}"
 
-  - name: Modify Filesystem Owner, Group and ACL
-    dellemc.powerscale.filesystem:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      path: "<path>"
-      access_zone: "{{access_zone}}"
-      owner:
-        name: 'ansible_user'
-        provider_type: 'ldap'
-      group:
-        name: 'ansible_group'
-        provider_type: 'ldap'
+- name: Modify Filesystem Owner, Group and ACL
+  dellemc.powerscale.filesystem:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    access_zone: "{{access_zone}}"
+    owner:
+      name: 'ansible_user'
+      provider_type: 'ldap'
+    group:
+      name: 'ansible_group'
+      provider_type: 'ldap'
       access_control: "{{new_access_control}}"
-      state: "{{state_present}}"
+    state: "{{state_present}}"
 
-  - name: Modify Filesystem to add access control rights
-    dellemc.powerscale.filesystem:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      path: "/ifs/test"
-      access_zone: "{{access_zone}}"
-      access_control_rights:
-        access_type: "allow"
-        access_rights:
-          - dir_gen_all
-        inherit_flags:
-          - container_inherit
-        trustee:
-          name: test_user
-          provider_type: "ldap"
-      access_control_rights_state: "add"
-      state: "present"
+- name: Modify Filesystem to add access control rights
+  dellemc.powerscale.filesystem:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "/ifs/test"
+    access_zone: "{{access_zone}}"
+    access_control_rights:
+    access_type: "allow"
+    access_rights:
+      - dir_gen_all
+    inherit_flags:
+      - container_inherit
+    trustee:
+      name: test_user
+      provider_type: "ldap"
+    access_control_rights_state: "add"
+    state: "present"
 
-  - name: Modify Filesystem to remove access control rights
-    dellemc.powerscale.filesystem:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      path: "/ifs/test"
-      access_zone: "{{access_zone}}"
-      access_control_rights:
-        access_type: "allow"
-        access_rights:
-          - dir_gen_all
-        inherit_flags:
-          - container_inherit
-        trustee:
-          name: test_user
-          provider_type: "ldap"
-      access_control_rights_state: "remove"
-      state: "present"
+- name: Modify Filesystem to remove access control rights
+  dellemc.powerscale.filesystem:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "/ifs/test"
+    access_zone: "{{access_zone}}"
+    access_control_rights:
+    access_type: "allow"
+    access_rights:
+      - dir_gen_all
+    inherit_flags:
+      - container_inherit
+    trustee:
+      name: test_user
+      provider_type: "ldap"
+    access_control_rights_state: "remove"
+    state: "present"
 
-  - name: Remove Quota from FS
-    dellemc.powerscale.filesystem:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      path: "<path>"
-      access_zone: "{{access_zone}}"
-      quota:
-        quota_state: "absent"
-      state: "{{state_present}}"
+- name: Remove Quota from FS
+  dellemc.powerscale.filesystem:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    access_zone: "{{access_zone}}"
+    quota:
+      quota_state: "absent"
+    state: "{{state_present}}"
 
-  - name: Create Filesystem with access control rights for everyone
-    dellemc.powerscale.filesystem:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      path: "/ifs/test"
-      access_zone: "{{access_zone}}"
-      access_control_rights:
-        access_type: "allow"
-        access_rights:
-          - dir_gen_all
-        inherit_flags:
-          - container_inherit
-        trustee:
-          name: "everyone"
-          type: "wellknown"
-      access_control_rights_state: "add"
-      state: "present"
+- name: Create Filesystem with access control rights for everyone
+  dellemc.powerscale.filesystem:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "/ifs/test"
+    access_zone: "{{access_zone}}"
+    access_control_rights:
+    access_type: "allow"
+    access_rights:
+      - dir_gen_all
+    inherit_flags:
+      - container_inherit
+    trustee:
+      name: "everyone"
+      type: "wellknown"
+    access_control_rights_state: "add"
+    state: "present"
 
-  - name: Delete filesystem
-    dellemc.powerscale.filesystem:
-      onefs_host: "{{onefs_host}}"
-      port_no: "{{powerscaleport}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{user}}"
-      api_password: "{{api_password}}"
-      access_zone: "{{access_zone}}"
-      path: "<path>"
-      recursive_force_delete: "{{recursive_force_delete}}"
-      state: "{{state_absent}}"
+- name: Delete filesystem
+  dellemc.powerscale.filesystem:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{user}}"
+    api_password: "{{api_password}}"
+    access_zone: "{{access_zone}}"
+    path: "<path>"
+    recursive_force_delete: "{{recursive_force_delete}}"
+    state: "{{state_absent}}"
 '''
 
 RETURN = r'''
@@ -422,7 +425,7 @@ changed:
     description: Whether or not the resource has changed.
     returned: always
     type: bool
-    sample: true
+    sample: "true"
 
 filesystem_details:
     description: The filesystem details.
@@ -563,6 +566,8 @@ import copy
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.quota \
+    import Quota
 
 LOG = utils.get_logger('filesystem')
 
@@ -581,11 +586,24 @@ class FileSystem(object):
         required_together = [['access_control_rights', 'access_control_rights_state']]
         # initialize the Ansible module
         self.module = AnsibleModule(argument_spec=self.module_params,
-                                    supports_check_mode=False,
+                                    supports_check_mode=True,
                                     mutually_exclusive=mutually_exclusive,
                                     required_together=required_together
                                     )
-
+        self.result = dict(
+            changed=False,
+            create_filesystem='',
+            delete_filesystem='',
+            modify_filesystem='',
+            add_quota='',
+            delete_quota='',
+            modify_quota='',
+            modify_owner='',
+            modify_group='',
+            quota_details='',
+            filesystem_snapshots='',
+            filesystem_details=''
+        )
         PREREQS_VALIDATE = utils.validate_module_pre_reqs(self.module.params)
         if PREREQS_VALIDATE \
                 and not PREREQS_VALIDATE["all_packages_found"]:
@@ -603,13 +621,70 @@ class FileSystem(object):
         self.snapshot_api = self.isi_sdk.SnapshotApi(self.api_client)
         self.auth_api = self.isi_sdk.AuthApi(self.api_client)
 
+    def get_filesystem(self, path):
+        """Gets a FileSystem on PowerScale."""
+        try:
+            resp = self.namespace_api.get_directory_metadata(
+                directory_metadata_path=path,
+                zone=self.module.params['access_zone'],
+                metadata=True).to_dict()
+            return resp
+        except utils.ApiException as e:
+            if str(e.status) == "404":
+                log_msg = "Filesystem {0} status is " \
+                          "{1}".format(path, e.status)
+                LOG.info(log_msg)
+                return None
+            else:
+                error_msg = self.determine_error(error_obj=e)
+                error_message = "Failed to get details of Filesystem " \
+                                "{0} with error {1} ".format(
+                                    path,
+                                    str(error_msg))
+                LOG.error(error_message)
+                self.module.fail_json(msg=error_message)
+
+    def get_acl(self, effective_path):
+        """Retrieves ACL rights of filesystem"""
+        try:
+            if not self.module.check_mode:
+                filesystem_acl = \
+                    (self.namespace_api.get_acl(
+                        namespace_path=effective_path,
+                        zone=self.module.params['access_zone'],
+                        acl=True)).to_dict()
+                return filesystem_acl
+            return True
+        except Exception as e:
+            error_message = 'Error %s while retrieving the access control list for ' \
+                            'namespace object.' % utils.determine_error(error_obj=e)
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    def get_filesystem_snapshots(self, effective_path):
+        """Get snapshots for a given filesystem"""
+        try:
+            snapshot_list = \
+                self.snapshot_api.list_snapshot_snapshots().to_dict()
+            snapshots = []
+
+            for snap in snapshot_list['snapshots']:
+                if snap['path'] == '/' + effective_path:
+                    snapshots.append(snap)
+            return snapshots
+        except Exception as e:
+            error_msg = utils.determine_error(error_obj=e)
+            error_message = 'Failed to get filesystem snapshots ' \
+                            'due to error {0}'.format((str(error_msg)))
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
     def determine_path(self):
         path = None
         if self.module.params['path']:
             path = self.module.params['path']
         access_zone = self.module.params['access_zone']
-
-        if access_zone.lower() != 'system' and path:
+        if access_zone and access_zone.lower() != 'system' and path:
             path = self.get_zone_base_path(access_zone) + path
 
         # For Filesystem related APIs, the leading '/' is not expected.
@@ -634,124 +709,101 @@ class FileSystem(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
-    def get_filesystem(self, path):
-        """Gets a FileSystem on PowerScale."""
-        try:
-            resp = self.namespace_api.get_directory_metadata(
-                path,
-                metadata=True)
-            return resp.to_dict()
-        except utils.ApiException as e:
-            if str(e.status) == "404":
-                log_msg = "Filesystem {0} status is " \
-                          "{1}".format(path, e.status)
-                LOG.info(log_msg)
-                return None
-            else:
-                error_msg = self.determine_error(error_obj=e)
-                error_message = "Failed to get details of Filesystem " \
-                                "{0} with error {1} ".format(
-                                    path,
-                                    str(error_msg))
-                LOG.error(error_message)
-                self.module.fail_json(msg=error_message)
-
-        except Exception as e:
-            error_message = "Failed to get details of Filesystem {0} with" \
-                            " error {1} ".format(path, str(e))
+    def validate_create(self, owner, group):
+        if not owner:
+            error_message = 'owner is required while creating Filesystem'
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
-    def get_quota(self, effective_path):
-        """Gets Quota details"""
-        # On a single path , you can create multiple Quotas of
-        # different types (directory, user etc)
-        # We are filtering Quotas on the path and the type (directory).
-        # On a given path, there can be only One Quota of a given type.
-        try:
-            filesystem_quota = self.quota_api.list_quota_quotas(
-                path='/' + effective_path,
-                type='directory')
-            return filesystem_quota.to_dict()
-        except Exception:
-            error_message = 'Unable to get Quota details on ' \
-                            'path {0}'.format(effective_path)
-            LOG.info(error_message)
-            return None
+        if 'name' not in owner:
+            error_message = 'Please specify a name for the owner.'
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+        if group and 'name' not in group:
+            error_message = 'Please specify a name for the group.'
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    def get_owner_info(self, owner):
+        if 'provider_type' in owner:
+            owner_provider = owner['provider_type']
+        else:
+            owner_provider = 'local'
+        owner_id = self.get_owner_id(
+            name=owner['name'],
+            zone=self.module.params['access_zone'],
+            provider=owner_provider)['users'][0]['on_disk_user_identity']['id']
+
+        create_owner = {'type': 'user', 'id': owner_id,
+                        'name': owner['name']}
+        return create_owner
+
+    def get_group_info(self, group):
+        if 'provider_type' in group:
+            group_provider = group['provider_type']
+        else:
+            group_provider = 'local'
+
+        group_sid = \
+            self.get_group_id(
+                name=group['name'],
+                zone=self.module.params['access_zone'],
+                provider=group_provider)['groups'][0]['sid']['id']
+        on_disk_id = self.get_identity_on_disk_id(sid=group_sid,
+                                                  zone=self.module.params['access_zone'])
+        group_id = on_disk_id if on_disk_id else group_sid
+
+        create_group = {'type': 'group', 'id': group_id,
+                        'name': group['name']}
+        return create_group
+
+    def _get_authoritative(self, owner_id):
+        """Returns 'acl' if owner_id starts with 'SID', else 'mode'."""
+        if owner_id and owner_id.upper().startswith('SID'):
+            return 'acl'
+        return 'mode'
 
     def create_filesystem(self, path, recursive, acl, acl_rights, quota, owner, group):
         """Creates a FileSystem on PowerScale."""
         try:
-            if not owner:
-                error_message = 'owner is required while creating Filesystem'
-                LOG.error(error_message)
-                self.module.fail_json(msg=error_message)
-
-            if 'name' not in owner:
-                error_message = 'Please specify a name for the owner.'
-                LOG.error(error_message)
-                self.module.fail_json(msg=error_message)
-            if 'provider_type' in owner:
-                owner_provider = owner['provider_type']
-            else:
-                owner_provider = 'local'
-
-            owner_id = self.get_owner_id(
-                name=owner['name'],
-                zone=self.module.params['access_zone'],
-                provider=owner_provider)['users'][0]['uid']['id']
-
-            owner = {'type': 'user', 'id': owner_id,
-                     'name': owner['name']}
-
+            self.validate_create(owner=owner,
+                                 group=group)
+            create_owner = self.get_owner_info(owner=owner)
+            create_group = None
             if group:
-                if 'name' not in group:
-                    error_message = 'Please specify a name for the group.'
-                    LOG.error(error_message)
-                    self.module.fail_json(msg=error_message)
-                if 'provider_type' in group:
-                    group_provider = group['provider_type']
-                else:
-                    group_provider = 'local'
-
-                group_id = \
-                    self.get_group_id(
-                        name=group['name'],
-                        zone=self.module.params['access_zone'],
-                        provider=group_provider)['groups'][0]['gid']['id']
-
-                group = {'type': 'group', 'id': group_id,
-                         'name': group['name']}
-
+                create_group = self.get_group_info(group=group)
             info_message = "Attempting to create new FS {0}".format(path)
             LOG.info(info_message)
-            if acl is not None:
-                self.namespace_api.create_directory(
-                    path,
-                    x_isi_ifs_target_type='container',
-                    recursive=recursive,
-                    x_isi_ifs_access_control=acl,
-                    overwrite=False)
-            else:
-                self.namespace_api.create_directory(
-                    path,
-                    x_isi_ifs_target_type='container',
-                    recursive=recursive,
-                    overwrite=False)
-            if quota is not None and quota['quota_state'] == 'present':
-                self.create_quota(quota, path)
-            permissions = \
-                self.isi_sdk.NamespaceAcl(
-                    authoritative='mode',
-                    owner=owner,
-                    group=group)
-            self.namespace_api.set_acl(namespace_path=path,
-                                       acl=True,
-                                       namespace_acl=permissions)
+            if not self.module.check_mode:
+                if acl is not None:
+                    self.namespace_api.create_directory(
+                        path,
+                        x_isi_ifs_target_type='container',
+                        recursive=recursive,
+                        x_isi_ifs_access_control=acl,
+                        overwrite=False)
+                else:
+                    self.namespace_api.create_directory(
+                        path,
+                        x_isi_ifs_target_type='container',
+                        recursive=recursive,
+                        overwrite=False)
+                if quota is not None and quota['quota_state'] == 'present':
+                    self.create_quota(quota, path)
+                authoritative = self._get_authoritative(create_owner['id'])
+                permissions = \
+                    self.isi_sdk.NamespaceAcl(
+                        authoritative=authoritative,
+                        owner=create_owner,
+                        group=create_group)
+                self.namespace_api.set_acl(namespace_path=path,
+                                           zone=self.module.params['access_zone'],
+                                           acl=True,
+                                           namespace_acl=permissions)
 
-            if acl_rights:
-                self.set_access_control_rights(acl_rights, path)
-
+                if acl_rights:
+                    self.set_access_control_rights(acl_rights, path)
             return True
         except Exception as e:
             error_msg = self.determine_error(error_obj=e)
@@ -764,13 +816,16 @@ class FileSystem(object):
         """Sets the ACL permissions on specified filesystem."""
         try:
             acl = self.get_acl_permissions(acl_rights)
-            permissions = self.isi_sdk.NamespaceAcl(
-                authoritative='acl',
-                action="update",
-                acl=acl)
-            self.namespace_api.set_acl(namespace_path=path,
-                                       acl=True,
-                                       namespace_acl=permissions)
+            if not self.module.check_mode:
+                permissions = self.isi_sdk.NamespaceAcl(
+                    authoritative='acl',
+                    action="update",
+                    acl=acl)
+                self.namespace_api.set_acl(namespace_path=path,
+                                           zone=self.module.params['access_zone'],
+                                           acl=True,
+                                           namespace_acl=permissions)
+            return True
         except Exception as e:
             error_message = 'Setting ACL rights of Filesystem %s failed ' \
                             'with error: %s' % (path, utils.determine_error(error_obj=e))
@@ -784,24 +839,24 @@ class FileSystem(object):
         try:
             # Check for NFS exports
             nfs_exports = self.protocol_api.list_nfs_exports(
-                path='/' + path, zone=access_zone)
-
-            if nfs_exports.to_dict()['exports']:
+                path='/' + path, zone=access_zone).to_dict()
+            if nfs_exports['exports']:
                 error_message = 'The Filesystem path {0} has NFS ' \
                                 'exports. Hence, deleting this directory ' \
                                 'is not safe'.format(path)
                 LOG.error(error_message)
                 self.module.fail_json(msg=error_message)
             # Check for SMB shares
-            smb_shares = self.protocol_api.list_smb_shares(zone=access_zone)
-            for share in smb_shares.to_dict()['shares']:
+            smb_shares = self.protocol_api.list_smb_shares(zone=access_zone).to_dict()
+            for share in smb_shares['shares']:
                 if share['path'] == '/' + path:
                     error_message = 'The Filesystem path {0} has SMB ' \
                                     'Shares. Hence, deleting this directory ' \
                                     'is not safe'.format(path)
                     LOG.error(error_message)
                     self.module.fail_json(msg=error_message)
-            self.namespace_api.delete_directory(directory_path=path, recursive=recursive_force_delete)
+            if not self.module.check_mode:
+                self.namespace_api.delete_directory(directory_path=path, recursive=recursive_force_delete)
             return True
         except Exception as e:
             error_msg = self.determine_error(error_obj=e)
@@ -813,18 +868,20 @@ class FileSystem(object):
     def modify_acl(self, path, mode):
         """Modifies Filesystem ACL on PowerScale."""
         try:
-            if mode == 'posix':
-                acl = self.module.params['access_control']
-                new_mode = self.isi_sdk.NamespaceAcl(
-                    authoritative='mode',
-                    mode=acl)
-                self.namespace_api.set_acl(namespace_path=path,
-                                           acl=True,
-                                           namespace_acl=new_mode)
-            else:
-                acl_rights = self.module.params['access_control_rights']
-                if acl_rights:
-                    self.set_access_control_rights(acl_rights, path)
+            if not self.module.check_mode:
+                if mode == 'posix':
+                    acl = self.module.params['access_control']
+                    new_mode = self.isi_sdk.NamespaceAcl(
+                        authoritative='mode',
+                        mode=acl)
+                    self.namespace_api.set_acl(namespace_path=path,
+                                               zone=self.module.params['access_zone'],
+                                               acl=True,
+                                               namespace_acl=new_mode)
+                else:
+                    acl_rights = self.module.params['access_control_rights']
+                    if acl_rights:
+                        self.set_access_control_rights(acl_rights, path)
 
             return True
         except Exception as e:
@@ -841,40 +898,46 @@ class FileSystem(object):
             container = False
         return container
 
+    def check_quota_params(self, quota):
+        if 'cap_unit' in quota and quota['cap_unit'] is not None:
+            cap_unit = quota['cap_unit']
+        else:
+            cap_unit = 'GB'
+
+        enforced = False
+        if 'advisory_limit_size' in quota and \
+                quota['advisory_limit_size'] is not None:
+            advisory_limit = utils.get_size_bytes(
+                quota['advisory_limit_size'], cap_unit)
+        else:
+            advisory_limit = None
+
+        if 'hard_limit_size' in quota and \
+                quota['hard_limit_size'] is not None:
+            hard_limit = utils.get_size_bytes(quota['hard_limit_size'],
+                                              cap_unit)
+            enforced = True
+        else:
+            hard_limit = None
+
+        if 'soft_limit_size' in quota and \
+                quota['soft_limit_size'] is not None:
+            soft_limit = utils.get_size_bytes(quota['soft_limit_size'],
+                                              cap_unit)
+            enforced = True
+            soft_grace = 604800
+        else:
+            soft_limit = None
+            soft_grace = None
+
+        return advisory_limit, hard_limit, enforced, soft_limit, soft_grace
+
     def get_quota_update_param(self, quota):
         """Returns the update params for Quota"""
         try:
             if quota is not None and quota['quota_state'] == 'present':
-                if 'cap_unit' in quota and quota['cap_unit'] is not None:
-                    cap_unit = quota['cap_unit']
-                else:
-                    cap_unit = 'GB'
-
-                enforced = False
-                if 'advisory_limit_size' in quota and \
-                        quota['advisory_limit_size'] is not None:
-                    advisory_limit = utils.get_size_bytes(
-                        quota['advisory_limit_size'], cap_unit)
-                else:
-                    advisory_limit = None
-
-                if 'hard_limit_size' in quota and \
-                        quota['hard_limit_size'] is not None:
-                    hard_limit = utils.get_size_bytes(quota['hard_limit_size'],
-                                                      cap_unit)
-                    enforced = True
-                else:
-                    hard_limit = None
-
-                if 'soft_limit_size' in quota and \
-                        quota['soft_limit_size'] is not None:
-                    soft_limit = utils.get_size_bytes(quota['soft_limit_size'],
-                                                      cap_unit)
-                    enforced = True
-                    soft_grace = 604800
-                else:
-                    soft_limit = None
-                    soft_grace = None
+                advisory_limit, hard_limit, enforced, soft_limit, soft_grace = \
+                    self.check_quota_params(quota=quota)
 
                 container = self.get_container_param(quota)
 
@@ -895,7 +958,7 @@ class FileSystem(object):
                 quota_params = {'enforced': enforced,
                                 'container': container,
                                 'thresholds_on':
-                                include_dp_overhead,
+                                    include_dp_overhead,
                                 'thresholds': threshold}
                 quota_update_param = self.isi_sdk.QuotaQuota(**quota_params)
 
@@ -913,11 +976,12 @@ class FileSystem(object):
             LOG.info('Modifying Quota..')
             get_quotas = self.quota_api.list_quota_quotas(path='/' + path,
                                                           type='directory')
-            quota_id = get_quotas.quotas[0].id
-            updated_quota = self.get_quota_update_param(quota)
-            self.quota_api.update_quota_quota(
-                quota_quota=updated_quota,
-                quota_quota_id=quota_id)
+            if not self.module.check_mode:
+                quota_id = get_quotas.quotas[0].id
+                updated_quota = self.get_quota_update_param(quota)
+                self.quota_api.update_quota_quota(
+                    quota_quota=updated_quota,
+                    quota_quota_id=quota_id)
             return True
         except Exception as e:
             error_msg = self.determine_error(error_obj=e)
@@ -929,9 +993,10 @@ class FileSystem(object):
     def delete_quota(self, path):
         """Deletes Filesystem Quota on PowerScale"""
         try:
-            self.quota_api.delete_quota_quotas(
-                path='/' + path,
-                type='directory')
+            if not self.module.check_mode:
+                self.quota_api.delete_quota_quotas(
+                    path='/' + path,
+                    type='directory')
             return True
         except Exception as e:
             error_msg = self.determine_error(error_obj=e)
@@ -944,36 +1009,8 @@ class FileSystem(object):
         """Returns the object needed to create Quota"""
         try:
             if quota is not None and quota['quota_state'] == 'present':
-                if 'cap_unit' in quota and quota['cap_unit'] is not None:
-                    cap_unit = quota['cap_unit']
-                else:
-                    cap_unit = 'GB'
-
-                enforced = False
-                if 'advisory_limit_size' in quota and \
-                        quota['advisory_limit_size'] is not None:
-                    advisory_limit = utils.get_size_bytes(
-                        quota['advisory_limit_size'], cap_unit)
-                else:
-                    advisory_limit = None
-
-                if 'hard_limit_size' in quota and \
-                        quota['hard_limit_size'] is not None:
-                    hard_limit = utils.get_size_bytes(quota['hard_limit_size'],
-                                                      cap_unit)
-                    enforced = True
-                else:
-                    hard_limit = None
-
-                if 'soft_limit_size' in quota and \
-                        quota['soft_limit_size'] is not None:
-                    soft_limit = utils.get_size_bytes(quota['soft_limit_size'],
-                                                      cap_unit)
-                    enforced = True
-                    soft_grace = 604800
-                else:
-                    soft_limit = None
-                    soft_grace = None
+                advisory_limit, hard_limit, enforced, soft_limit, soft_grace = \
+                    self.check_quota_params(quota=quota)
 
                 if 'include_snap_data' in quota and \
                         quota['include_snap_data'] is not None:
@@ -982,7 +1019,6 @@ class FileSystem(object):
                     include_snap_data = False
 
                 container = self.get_container_param(quota)
-
                 threshold = self.isi_sdk.QuotaQuotaThresholds(
                     advisory=advisory_limit,
                     hard=hard_limit,
@@ -1018,9 +1054,10 @@ class FileSystem(object):
     def create_quota(self, quota, path):
         """Creates a Quota"""
         try:
-            quota_param = self.get_quota_param(quota, '/' + path)
-            self.quota_api.create_quota_quota(
-                quota_quota=quota_param)
+            if not self.module.check_mode:
+                quota_param = self.get_quota_param(quota, '/' + path)
+                self.quota_api.create_quota_quota(
+                    quota_quota=quota_param)
             return True
         except Exception as e:
             error_msg = self.determine_error(error_obj=e)
@@ -1029,31 +1066,41 @@ class FileSystem(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
+    def get_acl_posix(self, access_control):
+        if access_control == 'private_read':
+            acl_posix = '0550'
+            new_authoritative = 'acl'
+        elif access_control == 'private':
+            acl_posix = '0770'
+            new_authoritative = 'acl'
+        elif access_control == 'public_read':
+            acl_posix = '0775'
+            new_authoritative = 'acl'
+        elif access_control == \
+                'public_read_write' or self.module.params['access_control'] == 'public':
+            acl_posix = '0777'
+            new_authoritative = 'acl'
+        else:
+            acl_posix = access_control
+            new_authoritative = 'mode'
+
+        return acl_posix, new_authoritative
+
     def is_acl_modified(self, effective_path):
         """Determines if ACLs are modified."""
         try:
             LOG.info('Determining if the ACLs are modified..')
             filesystem_acl = self.get_acl(effective_path)
+            if not isinstance(filesystem_acl, dict):
+                return True, None
+
             info_message = 'ACL of the filesystem on ' \
                            'the array is %s' % filesystem_acl['acl']
             LOG.info(info_message)
             if self.module.params['access_control']:
-                if self.module.params['access_control'] == 'private_read':
-                    acl_posix = '0550'
-                    new_authoritative = 'acl'
-                elif self.module.params['access_control'] == 'private':
-                    acl_posix = '0770'
-                    new_authoritative = 'acl'
-                elif self.module.params['access_control'] == 'public_read':
-                    acl_posix = '0775'
-                    new_authoritative = 'acl'
-                elif self.module.params['access_control'] == \
-                        'public_read_write' or self.module.params['access_control'] == 'public':
-                    acl_posix = '0777'
-                    new_authoritative = 'acl'
-                else:
-                    acl_posix = self.module.params['access_control']
-                    new_authoritative = 'mode'
+                acl_posix, new_authoritative = \
+                    self.get_acl_posix(
+                        access_control=self.module.params['access_control'])
 
                 info_message = 'ACL provided in the ' \
                                'playbook is {0}'.format(acl_posix)
@@ -1064,11 +1111,11 @@ class FileSystem(object):
                                                'POSIX to POSIX mode bits.'
 
                 if (filesystem_acl['authoritative'] == 'acl'
-                        and new_authoritative == 'mode') or \
-                   (filesystem_acl['authoritative'] == 'mode'
-                        and new_authoritative == 'acl') or \
-                   (filesystem_acl['authoritative'] == 'acl'
-                        and new_authoritative == 'acl' and filesystem_acl['mode'] != acl_posix):
+                    and new_authoritative == 'mode') or \
+                        (filesystem_acl['authoritative'] == 'mode'
+                         and new_authoritative == 'acl') or \
+                        (filesystem_acl['authoritative'] == 'acl'
+                         and new_authoritative == 'acl' and filesystem_acl['mode'] != acl_posix):
                     LOG.error(filesystem_acl_error_message)
                     self.module.fail_json(msg=filesystem_acl_error_message)
 
@@ -1079,6 +1126,7 @@ class FileSystem(object):
                     return True, "acl"
 
             return False, None
+
         except Exception as e:
             error_msg = self.determine_error(error_obj=e)
             error_message = 'Error {0} while determining if ' \
@@ -1102,7 +1150,6 @@ class FileSystem(object):
                     (self.module.params['access_control_rights_state'] == 'add' and
                      self.is_access_or_inherit_modified(acl_rights, acl)):
                 return True
-
         if trustee_id + ":" + acl_rights['access_type'] not in acl_trustee:
             if self.module.params['access_control_rights_state'] == 'add':
                 return True
@@ -1112,92 +1159,74 @@ class FileSystem(object):
 
     def is_access_or_inherit_modified(self, acl_rights, acl):
         """Determines if access rights or inherit flags of ACL are modified"""
-        return acl_rights['access_rights'] and \
-            (list(set(acl_rights['access_rights']) - set(acl['accessrights'])) or
-             acl_rights['inherit_flags'] and list(set(acl_rights['inherit_flags']) - set(acl['inherit_flags'])) or
-             acl_rights['access_type'] != acl['accesstype'])
+        return (acl_rights['access_rights'] and
+                (list(set(acl_rights['access_rights']) - set(acl['accessrights']))) or
+                (acl_rights['inherit_flags'] and (set(acl_rights['inherit_flags']) - set(acl['inherit_flags']))) or
+                acl_rights['access_type'] != acl['accesstype'])
 
-    def get_acl(self, effective_path):
-        """Retrieves ACL rights of filesystem"""
-        try:
-            filesystem_acl = \
-                (self.namespace_api.get_acl(effective_path,
-                                            acl=True)).to_dict()
-            return filesystem_acl
-        except Exception as e:
-            error_message = 'Error %s while retrieving the access control list for ' \
-                            'namespace object.' % utils.determine_error(error_obj=e)
-            LOG.error(error_message)
-            self.module.fail_json(msg=error_message)
+    def check_quota_param_modification(self, quota, filesystem_quota):
+        if 'cap_unit' in quota and quota['cap_unit'] is not None:
+            cap_unit = quota['cap_unit']
+        else:
+            cap_unit = 'GB'
+        if 'advisory_limit_size' in quota and \
+                quota['advisory_limit_size'] is not None:
+            advisory_limit_size = utils.get_size_bytes(
+                quota['advisory_limit_size'], cap_unit)
+            if advisory_limit_size != \
+                    filesystem_quota['quotas'][0]['thresholds'][
+                        'advisory']:
+                return True
+        if 'soft_limit_size' in quota and \
+                quota['soft_limit_size'] is not None:
+            soft_limit_size = utils.get_size_bytes(
+                quota['soft_limit_size'], cap_unit)
+            if soft_limit_size != \
+                    filesystem_quota['quotas'][0]['thresholds'][
+                        'soft']:
+                return True
+        if 'hard_limit_size' in quota and \
+                quota['hard_limit_size'] is not None:
+            hard_limit_size = utils.get_size_bytes(
+                quota['hard_limit_size'], cap_unit)
+            if hard_limit_size != filesystem_quota['quotas'][0]['thresholds']['hard']:
+                return True
 
     def is_quota_modified(self, filesystem_quota):
         """Determines if Quota is modified"""
-        try:
-            LOG.info('Determining if Quota is modified...')
-            if self.module.params['quota'] is not None \
-                    and filesystem_quota is not None and filesystem_quota[
-                'quotas'] and \
-                    self.module.params['quota']['quota_state'] == 'present':
-                quota = self.module.params['quota']
-                if 'include_snap_data' in quota and \
-                        quota['include_snap_data'] is not None:
-                    include_snap_data = quota['include_snap_data']
-                    if include_snap_data != \
-                            filesystem_quota['quotas'][0]['include_snapshots']:
-                        error_message = 'The value of include_snap_data does '\
-                                        'not match the state on the array. ' \
-                                        'Modifying include_snap_data is ' \
-                                        'not supported.'
-                        LOG.error(error_message)
-                        self.module.fail_json(msg=error_message)
-                if THRESHOLD_PARAM in quota and \
-                        quota[THRESHOLD_PARAM] is not None:
-                    include_data_protection_overhead = \
-                        quota[THRESHOLD_PARAM]
-                    if include_data_protection_overhead != \
-                            filesystem_quota['quotas'][0][
-                                'thresholds_on']:
-                        return True
-                if 'cap_unit' in quota and quota['cap_unit'] is not None:
-                    cap_unit = quota['cap_unit']
-                else:
-                    cap_unit = 'GB'
-                if 'advisory_limit_size' in quota and \
-                        quota['advisory_limit_size'] is not None:
-                    advisory_limit_size = utils.get_size_bytes(
-                        quota['advisory_limit_size'], cap_unit)
-                    if advisory_limit_size != \
-                            filesystem_quota['quotas'][0]['thresholds'][
-                                'advisory']:
-                        return True
-                if 'soft_limit_size' in quota and \
-                        quota['soft_limit_size'] is not None:
-                    soft_limit_size = utils.get_size_bytes(
-                        quota['soft_limit_size'], cap_unit)
-                    if soft_limit_size != \
-                            filesystem_quota['quotas'][0]['thresholds'][
-                                'soft']:
-                        return True
-                if 'hard_limit_size' in quota and \
-                        quota['hard_limit_size'] is not None:
-                    hard_limit_size = utils.get_size_bytes(
-                        quota['hard_limit_size'], cap_unit)
-                    if hard_limit_size != filesystem_quota[
-                            'quotas'][0]['thresholds']['hard']:
-                        return True
-        except Exception as e:
-            error_msg = self.determine_error(error_obj=e)
-            error_message = 'Error {0} while determining ' \
-                            'if Quotas are modified '.format((str(error_msg)))
-            LOG.error(error_message)
-            self.module.fail_json(msg=error_message)
+        LOG.info('Determining if Quota is modified...')
+        if self.module.params['quota'] is not None \
+                and filesystem_quota is not None and filesystem_quota[
+            'quotas'] and \
+                self.module.params['quota']['quota_state'] == 'present':
+            quota = self.module.params['quota']
+            if 'include_snap_data' in quota and \
+                    quota['include_snap_data'] is not None:
+                include_snap_data = quota['include_snap_data']
+                if include_snap_data != \
+                        filesystem_quota['quotas'][0]['include_snapshots']:
+                    error_message = 'The value of include_snap_data does ' \
+                                    'not match the state on the array. ' \
+                                    'Modifying include_snap_data is ' \
+                                    'not supported.'
+                    LOG.error(error_message)
+                    self.module.fail_json(msg=error_message)
+            if THRESHOLD_PARAM in quota and \
+                    quota[THRESHOLD_PARAM] is not None:
+                include_data_protection_overhead = \
+                    quota[THRESHOLD_PARAM]
+                if include_data_protection_overhead != \
+                        filesystem_quota['quotas'][0][
+                            'thresholds_on']:
+                    return True
+            return self.check_quota_param_modification(quota=quota, filesystem_quota=filesystem_quota)
 
     def validate_input(self, quota):
         """Valid input parameters"""
         global THRESHOLD_PARAM
         if 'quota' in self.module.params \
                 and self.module.params['quota'] is not None:
-            if 'quota_state' not in self.module.params['quota']:
+            if self.module.params['quota']['quota_state'] is None:
                 self.module.fail_json(msg='quota_state is required while '
                                           'creating, deleting or modifying '
                                           'a quota')
@@ -1208,8 +1237,7 @@ class FileSystem(object):
                                           'only MB, GB and TB are '
                                           'supported.')
 
-            VALIDATE_THRESHOLD = utils.validate_threshold_overhead_parameter(
-                quota, "include_data_protection_overhead")
+            VALIDATE_THRESHOLD = utils.validate_threshold_overhead_parameter(quota)
             if VALIDATE_THRESHOLD and not \
                     VALIDATE_THRESHOLD["param_is_valid"]:
                 self.module.fail_json(msg=VALIDATE_THRESHOLD["error_message"])
@@ -1229,19 +1257,34 @@ class FileSystem(object):
                 (acl_rights['access_rights'] is None and
                  acl_rights['inherit_flags'] is None):
             self.module.fail_json(msg='Please specify access_rights or '
-                                  'inherit_flags to set ACL')
+                                      'inherit_flags to set ACL')
 
     def get_trustee_id(self, trustee_name, type, access_zone, provider):
         if type == 'user':
             return self.get_owner_id(name=trustee_name,
                                      zone=access_zone,
-                                     provider=provider)['users'][0]['uid']['id']
+                                     provider=provider)['users'][0]['on_disk_user_identity']['id']
         elif type == 'group':
-            return self.get_group_id(name=trustee_name,
-                                     zone=access_zone,
-                                     provider=provider)['groups'][0]['gid']['id']
+            group_sid = self.get_group_id(name=trustee_name,
+                                          zone=access_zone,
+                                          provider=provider)['groups'][0]['sid']['id']
+            on_disk_id = self.get_identity_on_disk_id(sid=group_sid, zone=access_zone)
+            return on_disk_id if on_disk_id else group_sid
         else:
             return self.get_wellknown_id(name=trustee_name)['wellknowns'][0]['id']
+
+    def get_duplicated_trustee_id(self, trustee, access_zone, provider):
+        """Returns duplicated trustee id for user or group"""
+        if trustee['type'] == 'user':
+            user = self.get_owner_id(name=trustee['name'],
+                                     zone=access_zone,
+                                     provider=provider)['users'][0]
+            return user['uid']['id'] if user['uid']['id'] != trustee['id'] else user['sid']['id']
+        else:
+            group = self.get_group_id(name=trustee['name'],
+                                      zone=access_zone,
+                                      provider=provider)['groups'][0]
+            return group['gid']['id'] if group['gid']['id'] != trustee['id'] else group['sid']['id']
 
     def get_acl_permissions(self, acl_rights):
         """Returns ACL permissions"""
@@ -1252,22 +1295,40 @@ class FileSystem(object):
             acl_obj.op = "add"
             if acl_state and acl_state == 'remove':
                 acl_obj.op = "delete"
+            trustee_type = acl_rights['trustee']['type']
             trustee_id = \
                 self.get_trustee_id(acl_rights['trustee']['name'],
-                                    acl_rights['trustee']['type'],
+                                    trustee_type,
                                     self.module.params['access_zone'],
                                     acl_rights['trustee']['provider_type'])
-            trustee = {"name": acl_rights['trustee']['name'], "id": trustee_id, "type": "user"}
+            trustee_type = trustee_type if trustee_type else "user"
+            trustee = {"name": acl_rights['trustee']['name'], "id": trustee_id, "type": trustee_type}
             acl_obj.trustee = trustee
             acl_obj.accesstype = acl_rights['access_type']
             acl_obj.accessrights = acl_rights['access_rights']
             acl_obj.inherit_flags = acl_rights['inherit_flags']
             permissions.append(acl_obj)
+
+            # allow customer to remove duplicated trustee
+            if acl_obj.op == "delete" and trustee_type in ['user', 'group']:
+                trustee_id_duplicated = \
+                    self.get_duplicated_trustee_id(trustee,
+                                                   self.module.params['access_zone'],
+                                                   acl_rights['trustee']['provider_type'])
+                acl_obj_duplicated = utils.get_acl_object()
+                acl_obj_duplicated.op = "delete"
+                trustee_duplicated = {"name": acl_rights['trustee']['name'],
+                                      "id": trustee_id_duplicated, "type": trustee_type}
+                acl_obj_duplicated.trustee = trustee_duplicated
+                acl_obj_duplicated.accesstype = acl_rights['access_type']
+                acl_obj_duplicated.accessrights = acl_rights['access_rights']
+                acl_obj_duplicated.inherit_flags = acl_rights['inherit_flags']
+                permissions.append(acl_obj_duplicated)
+
             return permissions
         except Exception as e:
             error_message = 'Error %s while retrieving ACL object instance ' % \
-                utils.determine_error(error_obj=e)
-            LOG.error(error_message)
+                            utils.determine_error(error_obj=e)
             self.module.fail_json(msg=error_message)
 
     def determine_error(self, error_obj):
@@ -1278,21 +1339,20 @@ class FileSystem(object):
             error = str(error_obj)
         return error
 
-    def get_filesystem_snapshots(self, effective_path):
-        """Get snapshots for a given filesystem"""
+    def get_identity_on_disk_id(self, sid, zone):
+        """Get the Identity Details in PowerScale"""
         try:
-            snapshot_list = \
-                self.snapshot_api.list_snapshot_snapshots().to_dict()
-            snapshots = []
-
-            for snap in snapshot_list['snapshots']:
-                if snap['path'] == '/' + effective_path:
-                    snapshots.append(snap)
-            return snapshots
+            resp = self.auth_api.get_mapping_identity(
+                mapping_identity_id=sid,
+                zone=zone).to_dict()
+            for identity in resp['identities'][0]['targets']:
+                if identity['on_disk']:
+                    return identity['target']['id']
+            return None
         except Exception as e:
             error_msg = self.determine_error(error_obj=e)
-            error_message = 'Failed to get filesystem snapshots ' \
-                            'due to error {0}'.format((str(error_msg)))
+            error_message = f'Failed to get the identity id for {sid} '\
+                            f'in zone {zone} due to error {error_msg}'
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
@@ -1319,6 +1379,7 @@ class FileSystem(object):
             resp = self.auth_api.get_auth_group(
                 auth_group_id='GROUP:' + name,
                 zone=zone, provider=provider).to_dict()
+
             return resp
         except Exception as e:
             error_msg = self.determine_error(error_obj=e)
@@ -1353,49 +1414,40 @@ class FileSystem(object):
     def is_owner_modified(self, effective_path, owner):
         """Determines if the Owner for the FS is modified"""
         try:
-            if owner:
-                LOG.info('Determining if owner is modified..')
-                if 'name' not in owner:
-                    error_message = 'Please specify a name for the owner.'
-                    LOG.error(error_message)
-                    self.module.fail_json(msg=error_message)
-                if 'provider_type' in owner:
-                    owner_provider = owner['provider_type']
-                else:
-                    owner_provider = 'local'
+            if not owner:
+                return False
+            LOG.info('Determining if owner is modified..')
+            if 'name' not in owner:
+                error_message = 'Please specify a name for the owner.'
+                LOG.error(error_message)
+                self.module.fail_json(msg=error_message)
+            if 'provider_type' in owner:
+                owner_provider = owner['provider_type']
+            else:
+                owner_provider = 'local'
 
-                owner_details = self.get_owner_id(
-                    name=owner['name'],
-                    zone=self.module.params['access_zone'],
-                    provider=owner_provider)
+            owner_id = self.get_owner_id(
+                name=owner['name'],
+                zone=self.module.params['access_zone'],
+                provider=owner_provider)['users'][0]['on_disk_user_identity']['id']
 
-                owner_uid = owner_details['users'][0]['uid']['id']
-                owner_sid = owner_details['users'][0]['sid']['id']
+            owner = {'type': 'user', 'id': owner_id,
+                     'name': owner['name']}
 
-                owner = {'type': 'user', 'id': owner_uid,
-                         'name': owner['name']}
-
-                acl = self.get_acl(effective_path)
+            acl = self.get_acl(effective_path)
+            modified = False
+            if isinstance(acl, dict):
                 file_uid = acl['owner']['id']
                 info_message = 'The user ID fetched from playbook is ' \
                                '{0} and the user ID on ' \
-                               'the file is {1}'.format(owner_uid, file_uid)
+                               'the file is {1}'.format(owner_id, file_uid)
                 LOG.info(info_message)
+                modified = (owner_id != file_uid)
 
-                modified = False
-                if owner_provider.lower() != 'ads' and \
-                        owner_uid != file_uid:
-                    modified = True
-                # For ADS providers, the SID of the owner gets set in the ACL
-                if owner_provider.lower() == 'ads' and owner_sid != file_uid:
-                    modified = True
-
-                if modified:
-                    LOG.info('Modifying owner..')
-                    self.modify_owner(owner, effective_path)
-                    return True
-            else:
-                return False
+            if modified:
+                LOG.info('Modifying owner..')
+                self.modify_owner(owner, effective_path)
+                return True
 
         except Exception as e:
             error_msg = self.determine_error(error_obj=e)
@@ -1408,49 +1460,44 @@ class FileSystem(object):
     def is_group_modified(self, effective_path, group):
         """Determines if the Group for the FS is modified"""
         try:
-            if group:
-                LOG.info('Determining if group is modified..')
-                if 'name' not in group:
-                    error_message = 'Please specify a name for the group.'
-                    LOG.error(error_message)
-                    self.module.fail_json(msg=error_message)
-                if 'provider_type' in group:
-                    group_provider = group['provider_type']
-                else:
-                    group_provider = 'local'
+            if not group:
+                return False
+            LOG.info('Determining if group is modified..')
+            if 'name' not in group:
+                error_message = 'Please specify a name for the group.'
+                LOG.error(error_message)
+                self.module.fail_json(msg=error_message)
+            if 'provider_type' in group:
+                group_provider = group['provider_type']
+            else:
+                group_provider = 'local'
 
-                group_details = self.get_group_id(
-                    name=group['name'],
-                    zone=self.module.params['access_zone'],
-                    provider=group_provider)
+            group_sid = self.get_group_id(
+                name=group['name'],
+                zone=self.module.params['access_zone'],
+                provider=group_provider)['groups'][0]['sid']['id']
+            on_disk_id = self.get_identity_on_disk_id(
+                sid=group_sid,
+                zone=self.module.params['access_zone'])
+            group_id = on_disk_id if on_disk_id else group_sid
 
-                group_uid = group_details['groups'][0]['gid']['id']
-                group_sid = group_details['groups'][0]['sid']['id']
+            group = {'type': 'group', 'id': group_id,
+                     'name': group['name']}
 
-                group = {'type': 'group', 'id': group_uid,
-                         'name': group['name']}
-
-                acl = self.get_acl(effective_path)
+            acl = self.get_acl(effective_path)
+            modified = False
+            if isinstance(acl, dict):
                 file_gid = acl['group']['id']
                 info_message = 'The group ID fetched from playbook is ' \
                                '{0} and the group ID on ' \
-                               'the file is {1}'.format(group_uid, file_gid)
+                               'the file is {1}'.format(group_id, file_gid)
                 LOG.info(info_message)
+                modified = (group_id != file_gid)
 
-                modified = False
-                if group_provider.lower() != 'ads' and \
-                        group_uid != file_gid:
-                    modified = True
-                # For ADS providers, the SID of the group gets set in the ACL
-                if group_provider.lower() == 'ads' and group_sid != file_gid:
-                    modified = True
-
-                if modified:
-                    LOG.info('Modifying group..')
-                    self.modify_group(group, effective_path)
-                    return True
-            else:
-                return False
+            if modified:
+                LOG.info('Modifying group..')
+                self.modify_group(group, effective_path)
+                return True
         except Exception as e:
             error_msg = self.determine_error(error_obj=e)
             error_message = 'Failed to determine if group ' \
@@ -1462,12 +1509,16 @@ class FileSystem(object):
     def modify_owner(self, owner, effective_path):
         """Modifies the FS owner"""
         try:
-            permissions = self.isi_sdk.NamespaceAcl(
-                authoritative='mode',
-                owner=owner)
-            self.namespace_api.set_acl(namespace_path=effective_path,
-                                       acl=True,
-                                       namespace_acl=permissions)
+            if not self.module.check_mode:
+                authoritative = self._get_authoritative(owner['id'])
+                permissions = self.isi_sdk.NamespaceAcl(
+                    authoritative=authoritative,
+                    owner=owner)
+                self.namespace_api.set_acl(namespace_path=effective_path,
+                                           zone=self.module.params['access_zone'],
+                                           acl=True,
+                                           namespace_acl=permissions)
+            return True
         except Exception as e:
             error_msg = self.determine_error(error_obj=e)
             error_message = 'Failed to modify owner ' \
@@ -1478,12 +1529,18 @@ class FileSystem(object):
     def modify_group(self, group, effective_path):
         """Modifies the FS group"""
         try:
-            permissions = self.isi_sdk.NamespaceAcl(
-                authoritative='mode',
-                group=group)
-            self.namespace_api.set_acl(namespace_path=effective_path,
-                                       acl=True,
-                                       namespace_acl=permissions)
+            if not self.module.check_mode:
+                acl = self.get_acl(effective_path)
+                owner_id = acl['owner']['id'] if isinstance(acl, dict) else None
+                authoritative = self._get_authoritative(owner_id)
+                permissions = self.isi_sdk.NamespaceAcl(
+                    authoritative=authoritative,
+                    group=group)
+                self.namespace_api.set_acl(namespace_path=effective_path,
+                                           zone=self.module.params['access_zone'],
+                                           acl=True,
+                                           namespace_acl=permissions)
+            return True
         except Exception as e:
             error_msg = self.determine_error(error_obj=e)
             error_message = 'Failed to modify group ' \
@@ -1491,112 +1548,18 @@ class FileSystem(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
-    def perform_module_operation(self):
-        """Perform different actions on Snapshot based on user parameter
-        chosen in playbook
-        """
-        access_zone = self.module.params['access_zone']
-        owner = self.module.params['owner']
-        group = self.module.params['group']
-        access_control = self.module.params['access_control']
-        access_control_rights = self.module.params['access_control_rights']
-        recursive = self.module.params['recursive']
-        recursive_force_delete = self.module.params['recursive_force_delete']
-        quota = copy.deepcopy(self.module.params['quota'])
-        state = self.module.params['state']
-
-        result = dict(
-            changed=False,
-            create_filesystem='',
-            delete_filesystem='',
-            modify_filesystem='',
-            add_quota='',
-            delete_quota='',
-            modify_quota='',
-            modify_owner='',
-            modify_group='',
-            quota_details='',
-            filesystem_snapshots='',
-            filesystem_details=''
-        )
-
-        self.validate_input(quota)
-
-        effective_path = self.determine_path()
-
-        filesystem = self.get_filesystem(effective_path)
-        filesystem_quota = self.get_quota(effective_path)
-
-        is_acl_modified = False
-        is_quota_modified = False
-
-        if filesystem:
-            is_acl_modified, mode = self.is_acl_modified(effective_path)
-            is_quota_modified = self.is_quota_modified(filesystem_quota)
-            result['modify_owner'] = \
-                self.is_owner_modified(effective_path, owner)
-            result['modify_group'] = \
-                self.is_group_modified(effective_path, group)
-
-        if state == 'present' and not filesystem:
-            LOG.info('Creating Filesystem...')
-            result['create_filesystem'] = self.create_filesystem(
-                effective_path,
-                recursive,
-                access_control,
-                access_control_rights,
-                quota,
-                owner,
-                group)
-
-        if state == 'present' and is_acl_modified:
-            LOG.info('Modifying ACL..')
-            result['modify_filesystem'] = self.modify_acl(effective_path, mode)
-
-        if is_quota_modified:
-            LOG.info('Modifying Quota..')
-            result['modify_quota'] = self.modify_quota(quota,
-                                                       effective_path)
-
-        # There is no Quota on the filesystem.
-        # The user specified a Quota in the playbook to be created.
-        if filesystem_quota is not None and 'quotas' in filesystem_quota \
-                and not filesystem_quota['quotas'] and filesystem is not \
-                None and quota is not None and \
-                self.module.params['quota']['quota_state'] == 'present':
-            result['add_quota'] = self.create_quota(quota, effective_path)
-
-        # There is a Quota on the filesystem.
-        # The user specified a Quota in the playbook to be removed.
-        if filesystem_quota is not None and 'quotas' in filesystem_quota and \
-                filesystem_quota['quotas'] and quota is not None and \
-                self.module.params['quota']['quota_state'] == 'absent':
-            result['delete_quota'] = self.delete_quota(effective_path)
-
-        if state == 'absent' and filesystem:
-            LOG.info('Deleting Filesystem...')
-            result['delete_filesystem'] = self.delete_filesystem(
-                effective_path,
-                access_zone,
-                recursive_force_delete)
-
-        if state == 'present':
-            LOG.info('Getting filesystem details..')
-            result['filesystem_details'] = self.get_filesystem(effective_path)
-            result['filesystem_details'].update(namespace_acl=self.get_acl(effective_path))
-            result['quota_details'] = self.get_quota(effective_path)
-            if self.module.params['list_snapshots']:
-                result['filesystem_snapshots'] = \
-                    self.get_filesystem_snapshots(effective_path)
-
-        if result['create_filesystem'] or result['delete_filesystem'] or \
-                result['modify_filesystem'] or result['add_quota'] \
-                or result['delete_quota'] or result['modify_quota'] or \
-                result['modify_owner'] or result['modify_group']:
-            result['changed'] = True
-
-        # Finally update the module result!
-        self.module.exit_json(**result)
+    def get_quota(self, effective_path):
+        """Returns the quota object"""
+        try:
+            quota = Quota(self.quota_api,
+                          self.module).get_quota(effective_path)
+            return quota
+        except Exception as e:
+            error_msg = self.determine_error(error_obj=e)
+            error_message = 'Failed to get quota ' \
+                            'due to error {0}'.format(str(error_msg))
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
 
 
 def get_filesystem_parameters():
@@ -1645,11 +1608,150 @@ def get_filesystem_parameters():
     )
 
 
+class FilesystemExitHandler():
+    def handle(self, filesystem_obj):
+        if filesystem_obj.result['create_filesystem'] or filesystem_obj.result['delete_filesystem'] or \
+                filesystem_obj.result['modify_filesystem'] or filesystem_obj.result['add_quota'] \
+                or filesystem_obj.result['delete_quota'] or filesystem_obj.result['modify_quota'] or \
+                filesystem_obj.result['modify_owner'] or filesystem_obj.result['modify_group']:
+            filesystem_obj.result['changed'] = True
+
+        # Finally update the module result!
+        filesystem_obj.module.exit_json(**filesystem_obj.result)
+
+
+class FilesystemDetailsHandler():
+    def handle(self, filesystem_obj, filesystem_params, effective_path):
+        if filesystem_params['state'] == 'present':
+            filesystem_obj.result['filesystem_details'] = filesystem_obj.get_filesystem(path=effective_path)
+            if filesystem_obj.result.get('filesystem_details') is None:
+                filesystem_obj.result['filesystem_details'] = {}
+            filesystem_obj.result['filesystem_details'].update(
+                namespace_acl=filesystem_obj.get_acl(effective_path))
+            filesystem_obj.result['quota_details'] = Quota(filesystem_obj.quota_api,
+                                                           filesystem_obj.module).get_quota(effective_path)
+            if filesystem_obj.module.params['list_snapshots']:
+                filesystem_obj.result['filesystem_snapshots'] = \
+                    filesystem_obj.get_filesystem_snapshots(effective_path)
+
+        FilesystemExitHandler().handle(filesystem_obj)
+
+
+class FilesystemDeleteHandler():
+    def handle(self, filesystem_obj, filesystem_params, filesystem_details, effective_path):
+        if filesystem_params['state'] == 'absent' and filesystem_details:
+            filesystem_obj.result['delete_filesystem'] = filesystem_obj.delete_filesystem(
+                effective_path,
+                filesystem_params['access_zone'],
+                filesystem_params['recursive_force_delete'])
+        FilesystemDetailsHandler().handle(filesystem_obj, filesystem_params, effective_path)
+
+
+class FilesystemDeleteQuotaHandler():
+    def handle(self, filesystem_obj, filesystem_params, filesystem_details, effective_path,
+               filesystem_quota, quota):
+        # There is a Quota on the filesystem.
+        # The user specified a Quota in the playbook to be removed.
+        if filesystem_quota is not None and 'quotas' in filesystem_quota and \
+                filesystem_quota['quotas'] and quota is not None and \
+                filesystem_params['quota']['quota_state'] == 'absent':
+            filesystem_obj.result['delete_quota'] = filesystem_obj.delete_quota(effective_path)
+        FilesystemDeleteHandler().handle(
+            filesystem_obj=filesystem_obj, filesystem_params=filesystem_params,
+            filesystem_details=filesystem_details, effective_path=effective_path)
+
+
+class FilesystemCreateQuotaHandler():
+    def handle(self, filesystem_obj, filesystem_params, filesystem_details, effective_path,
+               filesystem_quota, quota):
+        # There is no Quota on the filesystem.
+        # The user specified a Quota in the playbook to be created.
+        if filesystem_quota is not None and 'quotas' in filesystem_quota \
+                and not filesystem_quota['quotas'] and filesystem_details is not \
+                None and quota is not None and \
+                filesystem_params['quota']['quota_state'] == 'present':
+            filesystem_obj.result['add_quota'] = filesystem_obj.create_quota(quota, effective_path)
+        FilesystemDeleteQuotaHandler().handle(
+            filesystem_obj=filesystem_obj, filesystem_params=filesystem_params,
+            filesystem_details=filesystem_details, effective_path=effective_path,
+            filesystem_quota=filesystem_quota, quota=quota)
+
+
+class FilesystemModifyQuotaHandler():
+    def handle(self, filesystem_obj, filesystem_params, filesystem_details, effective_path,
+               filesystem_quota, is_quota_modified, quota):
+        if filesystem_params["state"] == "present" and is_quota_modified:
+            filesystem_obj.result['modify_quota'] = filesystem_obj.modify_quota(quota,
+                                                                                effective_path)
+        FilesystemCreateQuotaHandler().handle(
+            filesystem_obj=filesystem_obj, filesystem_params=filesystem_params,
+            filesystem_details=filesystem_details, effective_path=effective_path,
+            filesystem_quota=filesystem_quota, quota=quota)
+
+
+class FilesystemModifyACLHandler():
+    def handle(self, filesystem_obj, filesystem_params, filesystem_details, effective_path,
+               filesystem_quota, is_acl_modified, is_quota_modified, mode, quota):
+        if filesystem_params["state"] == "present" and is_acl_modified:
+            LOG.info('Modifying ACL..')
+            filesystem_obj.result['modify_filesystem'] = filesystem_obj.modify_acl(effective_path, mode)
+        FilesystemModifyQuotaHandler().handle(
+            filesystem_obj=filesystem_obj, filesystem_params=filesystem_params,
+            filesystem_details=filesystem_details, effective_path=effective_path,
+            filesystem_quota=filesystem_quota,
+            is_quota_modified=is_quota_modified, quota=quota)
+
+
+class FilesystemCreateHandler():
+    def handle(self, filesystem_obj, filesystem_params, filesystem_details, effective_path,
+               filesystem_quota, is_acl_modified, is_quota_modified, mode, quota):
+        if filesystem_params["state"] == "present" and not filesystem_details:
+            LOG.info('Creating Filesystem...')
+            filesystem_obj.result['create_filesystem'] = filesystem_obj.create_filesystem(
+                path=effective_path,
+                recursive=filesystem_params['recursive'],
+                acl=filesystem_params['access_control'],
+                acl_rights=filesystem_params['access_control_rights'],
+                quota=quota,
+                owner=filesystem_params['owner'],
+                group=filesystem_params['group'])
+        FilesystemModifyACLHandler().handle(
+            filesystem_obj=filesystem_obj, filesystem_params=filesystem_params,
+            filesystem_details=filesystem_details, effective_path=effective_path,
+            filesystem_quota=filesystem_quota, is_acl_modified=is_acl_modified,
+            is_quota_modified=is_quota_modified, mode=mode, quota=quota)
+
+
+class FilesystemHandler():
+    def handle(self, filesystem_obj, filesystem_params):
+        quota = copy.deepcopy(filesystem_params['quota'])
+        filesystem_obj.validate_input(quota)
+        effective_path = filesystem_obj.determine_path()
+        filesystem_details = filesystem_obj.get_filesystem(path=effective_path)
+        filesystem_quota = filesystem_obj.get_quota(effective_path)
+
+        is_acl_modified = False
+        is_quota_modified = False
+        mode = None
+        if filesystem_details:
+            is_acl_modified, mode = filesystem_obj.is_acl_modified(effective_path)
+            is_quota_modified = filesystem_obj.is_quota_modified(filesystem_quota)
+            filesystem_obj.result['modify_owner'] = \
+                filesystem_obj.is_owner_modified(effective_path, filesystem_params['owner'])
+            filesystem_obj.result['modify_group'] = \
+                filesystem_obj.is_group_modified(effective_path, filesystem_params['group'])
+        FilesystemCreateHandler().handle(
+            filesystem_obj=filesystem_obj, filesystem_params=filesystem_params,
+            filesystem_details=filesystem_details, effective_path=effective_path,
+            filesystem_quota=filesystem_quota, is_acl_modified=is_acl_modified,
+            is_quota_modified=is_quota_modified, mode=mode, quota=quota)
+
+
 def main():
-    """Create PowerScale Filesystem object and perform action on it
-        based on user input from playbook"""
+    """ Create PowerScale Filesystem object and perform action on it
+        based on user input from playbook."""
     obj = FileSystem()
-    obj.perform_module_operation()
+    FilesystemHandler().handle(obj, obj.module.params)
 
 
 if __name__ == '__main__':

@@ -1,7 +1,7 @@
 #!/usr/bin/python
-# Copyright: (c) 2022, Dell Technologies
+# Copyright: (c) 2022-2024, Dell Technologies
 
-# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """ Ansible module for managing smartpool settings on PowerScale"""
 from __future__ import (absolute_import, division, print_function)
@@ -45,23 +45,23 @@ notes:
 '''
 
 EXAMPLES = r'''
-  - name: Get SmartPool settings
-    dellemc.powerscale.smartpoolsettings:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      state: "{{state_present}}"
+- name: Get SmartPool settings
+  dellemc.powerscale.smartpoolsettings:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    state: "{{state_present}}"
 
-  - name: Modify SmartPool setting
-    dellemc.powerscale.smartpoolsettings:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      virtual_hot_spare_limit_percent: 10
-      virtual_hot_spare_hide_spare: true
-      state: "present"
+- name: Modify SmartPool setting
+  dellemc.powerscale.smartpoolsettings:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    virtual_hot_spare_limit_percent: 10
+    virtual_hot_spare_hide_spare: true
+    state: "present"
 '''
 
 RETURN = r'''

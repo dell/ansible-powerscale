@@ -1,7 +1,7 @@
 #!/usr/bin/python
-# Copyright: (c) 2021, Dell Technologies
+# Copyright: (c) 2021-2024, Dell Technologies
 
-# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """ Ansible module for managing SyncIQ target reports on PowerScale"""
 from __future__ import (absolute_import, division, print_function)
@@ -48,53 +48,53 @@ notes:
 '''
 
 EXAMPLES = r'''
-  - name: Get a single SyncIQ target report with id
-    dellemc.powerscale.synciqtargetreports:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      id: "2-sample_policy"
-      state: "present"
+- name: Get a single SyncIQ target report with id
+  dellemc.powerscale.synciqtargetreports:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    id: "2-sample_policy"
+    state: "present"
 
-  - name: Get a single SyncIQ target report with name
-    dellemc.powerscale.synciqtargetreports:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      name: "sample_policy"
-      state: "present"
+- name: Get a single SyncIQ target report with name
+  dellemc.powerscale.synciqtargetreports:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    name: "sample_policy"
+    state: "present"
 
-  - name: Get all SyncIQ target sub-reports with report id
-    dellemc.powerscale.synciqtargetreports:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      id: "2-sample_policy"
-      include_sub_reports: true
-      state: "present"
+- name: Get all SyncIQ target sub-reports with report id
+  dellemc.powerscale.synciqtargetreports:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    id: "2-sample_policy"
+    include_sub_reports: true
+    state: "present"
 
-  - name: Get all SyncIQ target sub-reports with report name
-    dellemc.powerscale.synciqtargetreports:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      name: "sample_policy"
-      include_sub_reports: true
-      state: "present"
+- name: Get all SyncIQ target sub-reports with report name
+  dellemc.powerscale.synciqtargetreports:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    name: "sample_policy"
+    include_sub_reports: true
+    state: "present"
 
-  - name: Get a single SyncIQ target sub-report with sub-report id
-    dellemc.powerscale.synciqtargetreports:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      id: "2-sample_policy"
-      sub_report_id: "1"
-      state: "present"
+- name: Get a single SyncIQ target sub-report with sub-report id
+  dellemc.powerscale.synciqtargetreports:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    id: "2-sample_policy"
+    sub_report_id: "1"
+    state: "present"
 '''
 
 RETURN = r'''
@@ -557,6 +557,7 @@ class SyncIQTargetReports(object):
         include_sub_reports = self.module.params['include_sub_reports']
         synciq_target_report = None
         synciq_target_sub_report_details = None
+        synciq_target_sub_report_detail = None
 
         if not id and not name:
             error_message = 'Please provide a valid report id or valid report name'

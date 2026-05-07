@@ -1,6 +1,6 @@
-# Copyright: (c) 2022, Dell Technologies
+# Copyright: (c) 2022-2026, Dell Technologies
 
-# Apache License version 2.0 (see MODULE-LICENSE or http: //www.apache.org/licenses/LICENSE-2.0.txt)
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """Mock Api response for Unit tests of smartquota module on PowerScale"""
 
@@ -27,7 +27,62 @@ class MockSmartQuotaApi:
         "provider_type": None,
         "quota": None,
         "list_snapshots": None,
-        "state": None
+        "state": None,
+        "description": None,
+        "labels": None,
+        "force": None
+    }
+
+    GET_QUOTA_WITH_NEW_PARAMS = {
+        "id": "2nQKAAEAAAAAAAAAAAAAQIMCAAAAAAAA",
+        "path": "/ifs/Test/Test1",
+        "type": "directory",
+        "enforced": True,
+        "container": False,
+        "include_snapshots": False,
+        "description": "Test quota description",
+        "labels": "test,prod",
+        "thresholds": {
+            "advisory": 3221225472,
+            "hard": 10737418240,
+            "soft": 5368709120,
+            "soft_grace": 86400,
+            "percent_soft": 80.0,
+            "percent_advisory": 50.0,
+            "advisory_exceeded": False,
+            "advisory_last_exceeded": 0,
+            "hard_exceeded": False,
+            "hard_last_exceeded": 0,
+            "soft_exceeded": False,
+            "soft_last_exceeded": 0
+        },
+        "thresholds_on": "fs_logical_size"
+    }
+
+    GET_DEFAULT_DIRECTORY_QUOTA = {
+        "id": "3nQKAAEAAAAAAAAAAAAAQIMCAAAAAAAA",
+        "path": "/ifs/Test/Test1",
+        "type": "default-directory",
+        "enforced": True,
+        "container": False,
+        "include_snapshots": False,
+        "description": "",
+        "labels": "",
+        "thresholds": {
+            "advisory": None,
+            "hard": 10737418240,
+            "soft": None,
+            "soft_grace": None,
+            "percent_soft": None,
+            "percent_advisory": None,
+            "advisory_exceeded": False,
+            "advisory_last_exceeded": None,
+            "hard_exceeded": False,
+            "hard_last_exceeded": None,
+            "soft_exceeded": False,
+            "soft_last_exceeded": None
+        },
+        "thresholds_on": "fs_logical_size"
     }
 
     @staticmethod
@@ -65,17 +120,17 @@ class MockSmartQuotaApi:
 
     @staticmethod
     def smartquota_create_quota_response(path):
-        return "Create quota for" + path + "failed with"
+        return "Create quota for " + path + " failed with"
 
     @staticmethod
     def smartquota_delete_quota_response(path):
-        return "Delete quota for" + path + "failed with"
+        return "Delete quota for " + path + " failed with"
 
     @staticmethod
     def smartquota_get_sid_exception(name, az, provider):
         return "Failed to get " + name + \
-               "details for AccessZone:" + az + "and Provider:" + provider + \
-               "with error"
+               " details for AccessZone:" + az + " and Provider:" + provider + \
+               " with error"
 
     @staticmethod
     def get_smartquota_dependent_response(response_type):

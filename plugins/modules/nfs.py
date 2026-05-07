@@ -1,7 +1,7 @@
 #!/usr/bin/python
-# Copyright: (c) 2020, Dell Technologies
+# Copyright: (c) 2020-2025, Dell Technologies
 
-# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """Ansible module for managing NFS Exports on PowerScale"""
 
@@ -26,8 +26,114 @@ author:
 - Manisha Agrawal(@agrawm3) <ansible.team@dell.com>
 - Bhavneet Sharma(@Bhavneet-Sharma) <ansible.team@dell.com>
 - Trisha Datta(@trisha-dell) <ansible.team@dell.com>
+- Kritika Bhateja(@Kritika-Bhateja-03) <ansible.team.dell.com>)
+- Saksham Nautiyal (@Saksham-Nautiyal) <ansible.team@dell.com>
 
 options:
+  access_zone:
+    description:
+    - Specifies the zone in which the export is valid.
+    - Access zone once set cannot be changed.
+    type: str
+    default: System
+  clients:
+    description:
+    - Specifies the clients to the export. The type of access to clients in
+      this list is determined by the I(read_only) parameter.
+    - This list can be changed anytime during the lifetime of the NFS export.
+    - I(client_state) is not provided, then the host machine will replicate the values provided in the I(clients).
+    type: list
+    elements: str
+  client_state:
+    description:
+    - Defines whether the clients can access the NFS export.
+    - Value C(present-in-export) indicates that the clients can access the NFS export.
+    - Value C(absent-in-export) indicates that the client cannot access the NFS export.
+    - Required when adding or removing access of clients from the export.
+    - While removing clients, only the specified clients will be removed from
+      the export, others will remain as is.
+    type: str
+    choices: [present-in-export, absent-in-export]
+  description:
+    description:
+    - Optional description field for the NFS export.
+    - Can be modified by passing a new value.
+    type: str
+  ignore_unresolvable_hosts:
+    description:
+    - Does not present an error condition on unresolvable hosts when creating
+     or modifying an export.
+    type: bool
+  map_root:
+    description:
+    - Specifies the users and groups to which non-root and root clients are mapped.
+    type: dict
+    suboptions:
+      enabled:
+        description:
+        - True if the user mapping is applied.
+        type: bool
+        default: true
+      primary_group:
+        description:
+        - Specifies the primary group name.
+        type: str
+      secondary_groups:
+        description:
+        - Specifies the secondary groups.
+        type: list
+        elements: dict
+        suboptions:
+          name:
+            description:
+            - Specifies the group name.
+            type: str
+            required: true
+          state:
+            description:
+            - Specifies the group state.
+            type: str
+            choices: [absent, present]
+            default: present
+      user:
+        description:
+        - Specifies the persona name.
+        type: str
+  map_non_root:
+    description:
+    - Specifies the users and groups to which non-root and root clients are mapped.
+    type: dict
+    suboptions:
+      enabled:
+        description:
+        - True if the user mapping is applied.
+        type: bool
+        default: true
+      primary_group:
+        description:
+        - Specifies the primary group name.
+        type: str
+      secondary_groups:
+        description:
+        - Specifies the secondary groups.
+        type: list
+        elements: dict
+        suboptions:
+          name:
+            description:
+            - Specifies the group name.
+            type: str
+            required: true
+          state:
+            description:
+            - Specifies the group state.
+            type: str
+            choices: [absent, present]
+            default: present
+      user:
+        description:
+        - Specifies the persona name.
+        type: str
   path:
     description:
     - Specifies the filesystem path. It is the absolute path for System access zone
@@ -44,39 +150,6 @@ options:
       creation, modification or deletion of such exports will fail.
     required: true
     type: str
-  access_zone:
-    description:
-    - Specifies the zone in which the export is valid.
-    - Access zone once set cannot be changed.
-    type: str
-    default: System
-  clients:
-    description:
-    - Specifies the clients to the export. The type of access to clients in
-      this list is determined by the I(read_only) parameter.
-    - This list can be changed anytime during the lifetime of the NFS export.
-    type: list
-    elements: str
-  root_clients:
-    description:
-    - Specifies the clients with root access to the export.
-    - This list can be changed anytime during the lifetime of the NFS export.
-    type: list
-    elements: str
-  read_only_clients:
-    description:
-    - Specifies the clients with read-only access to the export, even when the
-      export is read/write.
-    - This list can be changed anytime during the lifetime of the NFS export.
-    type: list
-    elements: str
-  read_write_clients:
-    description:
-    - Specifies the clients with both read and write access to the export,
-      even when the export is set to read-only.
-    - This list can be changed anytime during the lifetime of the NFS export.
-    type: list
-    elements: str
   read_only:
     description:
     - Specifies whether the export is read-only or read-write. This parameter
@@ -85,17 +158,35 @@ options:
     - This setting can be modified any time. If it is not set at the time of
       creation, the export will be of type read/write.
     type: bool
-  sub_directories_mountable:
+  read_only_clients:
     description:
-    - C(true) if all directories under the specified paths are mountable. If not
-      set, sub-directories will not be mountable.
-    - This setting can be modified any time.
-    type: bool
-  description:
+    - Specifies the clients with read-only access to the export, even when the
+      export is read/write.
+    - This list can be changed anytime during the lifetime of the NFS export.
+    - I(client_state) is not provided, then the host machine will replicate the values provided in the I(read_only_clients).
+    type: list
+    elements: str
+  read_write_clients:
     description:
-    - Optional description field for the NFS export.
-    - Can be modified by passing a new value.
-    type: str
+    - Specifies the clients with both read and write access to the export,
+      even when the export is set to read-only.
+    - This list can be changed anytime during the lifetime of the NFS export.
+    - I(client_state) is not provided, then the host machine will replicate the values provided in the I(read_write_clients).
+    type: list
+    elements: str
+  root_clients:
+    description:
+    - Specifies the clients with root access to the export.
+    - This list can be changed anytime during the lifetime of the NFS export.
+    - I(client_state) is not provided, then the host machine will replicate the values provided in the I(root_clients).
+    type: list
+    elements: str
+  security_flavors:
+    description:
+    - Specifies the authentication types that are supported for this export.
+    type: list
+    elements: str
+    choices: ['unix', 'kerberos', 'kerberos_integrity', 'kerberos_privacy']
   state:
     description:
     - Defines whether the NFS export should exist or not.
@@ -104,30 +195,15 @@ options:
     required: true
     type: str
     choices: [absent, present]
-  client_state:
+  sub_directories_mountable:
     description:
-    - Defines whether the clients can access the NFS export.
-    - Value C(present-in-export) indicates that the clients can access the NFS export.
-    - Value C(absent-in-export) indicates that the client cannot access the NFS export.
-    - Required when adding or removing access of clients from the export.
-    - While removing clients, only the specified clients will be removed from
-      the export, others will remain as is.
-    type: str
-    choices: [present-in-export, absent-in-export]
-  security_flavors:
-    description:
-    - Specifies the authentication types that are supported for this export.
-    type: list
-    elements: str
-    choices: ['unix', 'kerberos', 'kerberos_integrity', 'kerberos_privacy']
-  ignore_unresolvable_hosts:
-    description:
-    - Does not present an error condition on unresolvable hosts when creating
-     or modifying an export.
+    - C(true) if all directories under the specified paths are mountable. If not
+      set, sub-directories will not be mountable.
+    - This setting can be modified any time.
     type: bool
-  map_root:
+  map_failure:
     description:
-    - Specifies the users and groups to which non-root and root clients are mapped.
+    - Specifies the user/group mapping to apply after a failed auth attempt for this export.
     type: dict
     suboptions:
       enabled:
@@ -135,10 +211,6 @@ options:
         - True if the user mapping is applied.
         type: bool
         default: true
-      user:
-        description:
-        - Specifies the persona name.
-        type: str
       primary_group:
         description:
         - Specifies the primary group name.
@@ -160,178 +232,426 @@ options:
             type: str
             choices: [absent, present]
             default: present
-  map_non_root:
-    description:
-    - Specifies the users and groups to which non-root and root clients are mapped.
-    type: dict
-    suboptions:
-      enabled:
-        description:
-        - True if the user mapping is applied.
-        type: bool
-        default: true
       user:
         description:
         - Specifies the persona name.
         type: str
-      primary_group:
+  file_name_max_size:
+    description:
+    - Specifies the reported maximum length of a file name (size dict).
+    type: dict
+    suboptions:
+      size_value:
         description:
-        - Specifies the primary group name.
+        - Size value.
+        type: int
+        required: true
+      size_unit:
+        description:
+        - Unit for the size value.
         type: str
-      secondary_groups:
+        required: true
+        choices: ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+  block_size:
+    description:
+    - Specifies the block size returned by the NFS statfs procedure (size dict).
+    type: dict
+    suboptions:
+      size_value:
         description:
-        - Specifies the secondary groups.
-        type: list
-        elements: dict
-        suboptions:
-          name:
-            description:
-            - Specifies the group name.
-            type: str
-            required: true
-          state:
-            description:
-            - Specifies the group state.
-            type: str
-            choices: [absent, present]
-            default: present
-
+        - Size value.
+        type: int
+        required: true
+      size_unit:
+        description:
+        - Unit for the size value.
+        type: str
+        required: true
+        choices: ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+  directory_transfer_size:
+    description:
+    - Specifies the preferred size for directory read operations (size dict).
+    type: dict
+    suboptions:
+      size_value:
+        description:
+        - Size value.
+        type: int
+        required: true
+      size_unit:
+        description:
+        - Unit for the size value.
+        type: str
+        required: true
+        choices: ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+  read_transfer_max_size:
+    description:
+    - Specifies the maximum buffer size that clients should use on NFS read requests (size dict).
+    type: dict
+    suboptions:
+      size_value:
+        description:
+        - Size value.
+        type: int
+        required: true
+      size_unit:
+        description:
+        - Unit for the size value.
+        type: str
+        required: true
+        choices: ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+  read_transfer_multiple:
+    description:
+    - Specifies the preferred multiple size for NFS read requests (size dict).
+    type: dict
+    suboptions:
+      size_value:
+        description:
+        - Size value.
+        type: int
+        required: true
+      size_unit:
+        description:
+        - Unit for the size value.
+        type: str
+        required: true
+        choices: ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+  read_transfer_size:
+    description:
+    - Specifies the preferred size for NFS read requests (size dict).
+    type: dict
+    suboptions:
+      size_value:
+        description:
+        - Size value.
+        type: int
+        required: true
+      size_unit:
+        description:
+        - Unit for the size value.
+        type: str
+        required: true
+        choices: ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+  write_transfer_max_size:
+    description:
+    - Specifies the maximum buffer size that clients should use on NFS write requests (size dict).
+    type: dict
+    suboptions:
+      size_value:
+        description:
+        - Size value.
+        type: int
+        required: true
+      size_unit:
+        description:
+        - Unit for the size value.
+        type: str
+        required: true
+        choices: ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+  write_transfer_multiple:
+    description:
+    - Specifies the preferred multiple size for NFS write requests (size dict).
+    type: dict
+    suboptions:
+      size_value:
+        description:
+        - Size value.
+        type: int
+        required: true
+      size_unit:
+        description:
+        - Unit for the size value.
+        type: str
+        required: true
+        choices: ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+  write_transfer_size:
+    description:
+    - Specifies the preferred multiple size for NFS write requests (size dict).
+    type: dict
+    suboptions:
+      size_value:
+        description:
+        - Size value.
+        type: int
+        required: true
+      size_unit:
+        description:
+        - Unit for the size value.
+        type: str
+        required: true
+        choices: ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+  max_file_size:
+    description:
+    - Specifies the maximum file size for any file accessed from the export (size dict).
+    type: dict
+    suboptions:
+      size_value:
+        description:
+        - Size value.
+        type: int
+        required: true
+      size_unit:
+        description:
+        - Unit for the size value.
+        type: str
+        required: true
+        choices: ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+  commit_asynchronous:
+    description:
+    - True if NFS commit requests execute asynchronously.
+    type: bool
+  setattr_asynchronous:
+    description:
+    - True if set attribute operations execute asynchronously.
+    type: bool
+  readdirplus:
+    description:
+    - True if 'readdirplus' requests are enabled. Enabling this property might improve network performance and is only available for NFSv3.
+    type: bool
+  return_32bit_file_ids:
+    description:
+    - Limits the size of file identifiers returned by NFSv3+ to 32-bit values (may require remount).
+    type: bool
+  can_set_time:
+    description:
+    - True if the client can set file times through the NFS set attribute request.
+    type: bool
+  map_lookup_uid:
+    description:
+    - True if incoming user IDs (UIDs) are mapped to users in the OneFS user database.
+    - When set to False, incoming UIDs are applied directly to file operations.
+    type: bool
+  symlinks:
+    description:
+    - True if symlinks are supported.
+    type: bool
+  write_datasync_action:
+    description:
+    - Specifies the synchronization type for datasync action.
+    type: str
+    choices: ['DATASYNC', 'FILESYNC', 'UNSTABLE']
+  write_datasync_reply:
+    description:
+    - Specifies the synchronization type for datasync reply.
+    type: str
+    choices: ['DATASYNC', 'FILESYNC', 'UNSTABLE']
+  write_filesync_action:
+    description:
+    - Specifies the synchronization type for filesync action.
+    type: str
+    choices: ['DATASYNC', 'FILESYNC', 'UNSTABLE']
+  write_filesync_reply:
+    description:
+    - Specifies the synchronization type for filesync reply.
+    type: str
+    choices: ['DATASYNC', 'FILESYNC', 'UNSTABLE']
+  write_unstable_action:
+    description:
+    - Specifies the synchronization type for unstable action.
+    type: str
+    choices: ['DATASYNC', 'FILESYNC', 'UNSTABLE']
+  write_unstable_reply:
+    description:
+    - Specifies the synchronization type for unstable reply.
+    type: str
+    choices: ['DATASYNC', 'FILESYNC', 'UNSTABLE']
+  encoding:
+    description:
+    - Encoding type for filenames returned to clients.
+    type: str
+  time_delta:
+    description:
+    - Time delta object expressing time skew; expects a dict with time_value and time_unit.
+    type: dict
+    suboptions:
+      time_value:
+        description:
+        - Numeric time value.
+        type: float
+        required: true
+      time_unit:
+        description:
+        - Unit for time_value.
+        type: str
+        required: true
+        choices: ['seconds', 'nanoseconds', 'milliseconds', 'microseconds']
+attributes:
+  check_mode:
+    description:
+    - Runs task to validate without performing action on the target machine.
+    support: full
+  diff_mode:
+    description:
+    - Runs the task to report the changes made or to be made.
+    support: full
 notes:
-- The I(check_mode) is not supported.
-
+  - As I(ignore_unresolvable_hosts) is input only parameter, therefore idempotency is not supported for it.
 '''
 
 EXAMPLES = r'''
-  - name: Create NFS Export
-    dellemc.powerscale.nfs:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      path: "<path>"
-      access_zone: "{{access_zone}}"
-      read_only_clients:
+- name: Create NFS Export
+  dellemc.powerscale.nfs:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    path: "<path>"
+    access_zone: "{{access_zone}}"
+    read_only_clients:
       - "{{client1}}"
       - "{{client2}}"
-      read_only: true
-      clients: ["{{client3}}"]
-      client_state: 'present-in-export'
-      state: 'present'
+    read_only: true
+    clients: ["{{client3}}"]
+    client_state: 'present-in-export'
+    state: 'present'
 
-  - name: Get NFS Export
-    dellemc.powerscale.nfs:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      path: "<path>"
-      access_zone: "{{access_zone}}"
-      state: 'present'
+- name: Get NFS Export
+  dellemc.powerscale.nfs:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    path: "<path>"
+    access_zone: "{{access_zone}}"
+    state: 'present'
 
-  - name: Add a root client
-    dellemc.powerscale.nfs:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      path: "<path>"
-      access_zone: "{{access_zone}}"
-      root_clients:
+- name: Add a root client
+  dellemc.powerscale.nfs:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    path: "<path>"
+    access_zone: "{{access_zone}}"
+    root_clients:
       - "{{client4}}"
-      client_state: 'present-in-export'
-      state: 'present'
+    client_state: 'present-in-export'
+    state: 'present'
 
-  - name: Set sub_directories_mountable flag to true
-    dellemc.powerscale.nfs:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      path: "<path>"
-      access_zone: "{{access_zone}}"
-      sub_directories_mountable: true
-      state: 'present'
-
-  - name: Remove a root client
-    dellemc.powerscale.nfs:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      path: "<path>"
-      access_zone: "{{access_zone}}"
-      root_clients:
+- name: Replace existing list of root clients
+  dellemc.powerscale.nfs:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    path: "<path>"
+    access_zone: "{{access_zone}}"
+    root_clients:
       - "{{client4}}"
-      client_state: 'absent-in-export'
-      state: 'present'
+    state: 'present'
 
-  - name: Modify NFS Export
-    dellemc.powerscale.nfs:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      path: "<path>"
-      access_zone: "{{access_zone}}"
-      description: "new description"
-      security_flavors:
+- name: Set sub_directories_mountable flag to true
+  dellemc.powerscale.nfs:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    path: "<path>"
+    access_zone: "{{access_zone}}"
+    sub_directories_mountable: true
+    state: 'present'
+
+- name: Remove a root client
+  dellemc.powerscale.nfs:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    path: "<path>"
+    access_zone: "{{access_zone}}"
+    root_clients:
+      - "{{client4}}"
+    client_state: 'absent-in-export'
+    state: 'present'
+
+- name: Modify NFS Export
+  dellemc.powerscale.nfs:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    path: "<path>"
+    access_zone: "{{access_zone}}"
+    description: "new description"
+    security_flavors:
       - "kerberos_integrity"
       - "kerberos"
+    state: 'present'
+
+- name: Set read_only flag to false
+  dellemc.powerscale.nfs:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    path: "<path>"
+    access_zone: "{{access_zone}}"
+    read_only: false
+    state: 'present'
+
+- name: Modify map_root and map_non_root
+  dellemc.powerscale.nfs:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    path: "<path>"
+    access_zone: "{{access_zone}}"
+    map_root:
+      user: "root"
+      primary_group: "root"
+    map_non_root:
+      user: "root"
+      primary_group: "root"
+    secondary_groups:
+      - name: "group_test"
+        state: "absent"
+    state: 'present'
+
+- name: Disable map_root
+  dellemc.powerscale.nfs:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    path: "<path>"
+    access_zone: "{{access_zone}}"
+    map_root:
+      enabled: false
       state: 'present'
 
-  - name: Set read_only flag to false
-    dellemc.powerscale.nfs:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      path: "<path>"
-      access_zone: "{{access_zone}}"
-      read_only: false
-      state: 'present'
+- name: Delete NFS Export
+  dellemc.powerscale.nfs:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    path: "<path>"
+    access_zone: "{{access_zone}}"
+    state: 'absent'
 
-  - name: Modify map_root and map_non_root
-    dellemc.powerscale.nfs:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      path: "<path>"
-      access_zone: "{{access_zone}}"
-      map_root:
-        user: "root"
-        primary_group: "root"
-        secondary_groups:
-          - name: "group_test"
-      map_non_root:
-        user: "root"
-        primary_group: "root"
-        secondary_groups:
-          - name: "group_test"
-            state: "absent"
-      state: 'present'
-
-  - name: Disable map_root
-    dellemc.powerscale.nfs:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      path: "<path>"
-      access_zone: "{{access_zone}}"
-      map_root:
-        enabled: false
-      state: 'present'
-
-  - name: Delete NFS Export
-    dellemc.powerscale.nfs:
-      onefs_host: "{{onefs_host}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      verify_ssl: "{{verify_ssl}}"
-      path: "<path>"
-      access_zone: "{{access_zone}}"
-      state: 'absent'
+- name: Create NFS Export with advanced settings
+  dellemc.powerscale.nfs:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    path: "<path>"
+    access_zone: "{{access_zone}}"
+    read_only: false
+    clients:
+      - "10.0.0.10"
+    map_lookup_uid: true
+    block_size:
+      size_value: 8192
+      size_unit: 'B'
+    map_failure:
+      enabled: false
+    write_filesync_action: 'FILESYNC'
+    time_delta:
+      time_value: 1.0
+      time_unit: 'seconds'
+    state: 'present'
 '''
 
 RETURN = r'''
@@ -430,7 +750,113 @@ NFS_export_details:
                 secondary_groups:
                     description: Specifies the secondary groups details.
                     type: list
-
+        map_failure:
+            description: Mapping of users to a specific user and/or group ID after a failed auth attempt.
+            type: dict
+        name_max_size:
+            description: Specifies the reported maximum length of a file name. This parameter does
+                not affect server behavior, but is included to accommodate legacy client
+                requirements.
+            type: dict
+        block_size:
+            description: Specifies the block size returned by the NFS statfs procedure.
+            type: dict
+        directory_transfer_size:
+            description: Specifies the preferred size for directory read operations. This value is
+                used to advise the client of optimal settings for the server, but is not
+                enforced.
+            type: dict
+        read_transfer_max_size:
+            description: Specifies the maximum buffer size that clients should use on NFS read
+                requests. This value is used to advise the client of optimal settings for
+                the server, but is not enforced.
+            type: dict
+        read_transfer_multiple:
+            description: Specifies the preferred multiple size for NFS read requests. This value is
+                used to advise the client of optimal settings for the server, but is not
+                enforced.
+            type: dict
+        read_transfer_size:
+            description: Specifies the preferred size for NFS read requests. This value is used to
+                advise the client of optimal settings for the server, but is not enforced.
+            type: dict
+        write_transfer_max_size:
+            description: Specifies the maximum buffer size that clients should use on NFS write
+                requests. This value is used to advise the client of optimal settings for
+                the server, but is not enforced.
+            type: dict
+        write_transfer_multiple:
+            description: Specifies the preferred multiple size for NFS write requests. This value is
+                used to advise the client of optimal settings for the server, but is not
+                enforced.
+            type: dict
+        write_transfer_size:
+            description: Specifies the preferred multiple size for NFS write requests. This value is
+                used to advise the client of optimal settings for the server, but is not
+                enforced.
+            type: dict
+        max_file_size:
+            description: Specifies the maximum file size for any file accessed from the export. This
+                parameter does not affect server behavior, but is included to accommodate
+                legacy client requirements.
+            type: dict
+        security_flavors:
+            description: Specifies the authentication types that are supported for this export.
+            type: list
+        commit_asynchronous:
+            description: True if NFS commit requests execute asynchronously.
+            type: bool
+        setattr_asynchronous:
+            description: True if set attribute operations execute asynchronously.
+            type: bool
+        readdirplus:
+            description: True if 'readdirplus' requests are enabled. Enabling this property might
+                improve network performance and is only available for NFSv3.
+            type: bool
+        return_32bit_file_ids:
+            description: Limits the size of file identifiers returned by NFSv3+ to 32-bit values (may
+                require remount).
+            type: bool
+        can_set_time:
+            description: True if the client can set file times through the NFS set attribute
+                request. This parameter does not affect server behavior, but is included to
+                accommodate legacy client requirements.
+            type: bool
+        map_lookup_uid:
+            description: True if incoming user IDs (UIDs) are mapped to users in the OneFS user
+                database. When set to False, incoming UIDs are applied directly to file
+                operations.
+            type: bool
+        symlinks:
+            description: True if symlinks are supported. This value is used to advise the client of
+                optimal settings for the server, but is not enforced.
+            type: bool
+        write_datasync_action:
+            description: Specifies the synchronization type for data sync action.
+            type: str
+        write_datasync_reply:
+            description: Specifies the synchronization type for data sync reply.
+            type: str
+        write_filesync_action:
+            description: Specifies the synchronization type for file sync action.
+            type: str
+        write_filesync_reply:
+            description: Specifies the synchronization type for file sync reply.
+            type: str
+        write_unstable_action:
+            description: Specifies the synchronization type for unstable action.
+            type: str
+        write_unstable_reply:
+            description: Specifies the synchronization type for unstable reply.
+            type: str
+        encoding:
+            description: Specifies the default character set encoding of the clients connecting to
+                the export, unless otherwise specified.
+            type: str
+        time_delta:
+            description: Specifies the resolution of all time values that are returned to the
+                clients.
+            type: dict
     sample: {
         "all_dir": "false",
         "block_size": 8192,
@@ -466,53 +892,82 @@ NFS_export_details:
                 "name": null,
                 "type": null
             }
-        }
+        },
+        'map_failure': {
+            'enabled': False,
+            'primary_group': {
+                'id': None,
+                'name': None,
+                'type': None
+            },
+            'secondary_groups': [],
+            'user': {
+                'id': 'USER:nobody',
+                'name': None,
+                'type': None
+            }
+        },
+        'name_max_size': 255,
+        'commit_asynchronous': False,
+        'directory_transfer_size': 131072,
+        'read_transfer_max_size': 1048576,
+        'read_transfer_multiple': 512,
+        'read_transfer_size': 131072,
+        'setattr_asynchronous': False,
+        'write_datasync_action': 'DATASYNC',
+        'write_datasync_reply': 'DATASYNC',
+        'write_filesync_action': 'FILESYNC',
+        'write_filesync_reply': 'FILESYNC',
+        'write_transfer_max_size': 1048576,
+        'write_transfer_multiple': 512,
+        'write_transfer_size': 524288,
+        'write_unstable_action': 'UNSTABLE',
+        'write_unstable_reply': 'UNSTABLE',
+        'max_file_size': 9223372036854775807,
+        'readdirplus': True,
+        'return_32bit_file_ids': False,
+        'can_set_time': True,
+        'encoding': 'DEFAULT',
+        'map_lookup_uid': False,
+        'symlinks': True,
+        'time_delta': 1e-09,
     }
 '''
 
 from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.powerscale_base \
+    import PowerScaleBase
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
+import copy
 
 LOG = utils.get_logger('nfs')
 
 
-class NfsExport(object):
+class NfsExport(PowerScaleBase):
 
     '''Class with NFS export operations'''
 
     def __init__(self):
         ''' Define all parameters required by this module'''
-        self.module_params = utils.get_powerscale_management_host_parameters()
-        self.module_params.update(self.get_nfs_parameters())
-        # Initialize the ansible module
-        self.module = AnsibleModule(
-            argument_spec=self.module_params,
-            supports_check_mode=False
-        )
+
+        ansible_module_params = {
+            'argument_spec': self.get_nfs_parameters(),
+            'supports_check_mode': True
+        }
+        super().__init__(AnsibleModule, ansible_module_params)
         # Result is a dictionary that contains changed status, NFS export
         # details
         self.result = {
             "changed": False,
-            "NFS_export_details": {}
+            "NFS_export_details": {},
+            "diff": {}
         }
-        PREREQS_VALIDATE = utils.validate_module_pre_reqs(self.module.params)
-        if PREREQS_VALIDATE \
-                and not PREREQS_VALIDATE["all_packages_found"]:
-            self.module.fail_json(
-                msg=PREREQS_VALIDATE["error_message"])
-
-        self.api_client = utils.get_powerscale_connection(self.module.params)
-        self.isi_sdk = utils.get_powerscale_sdk()
-        LOG.info('Got python SDK instance for provisioning on PowerScale ')
-
-        self.protocol_api = self.isi_sdk.ProtocolsApi(self.api_client)
-        self.zone_summary_api = self.isi_sdk.ZonesSummaryApi(self.api_client)
 
     def get_zone_base_path(self, access_zone):
         """Returns the base path of the Access Zone."""
         try:
-            zone_path = (self.zone_summary_api.
+            zone_path = (self.zones_summary_api.
                          get_zones_summary_zone(access_zone)).to_dict()
             return zone_path["summary"]["path"]
         except Exception as e:
@@ -534,6 +989,7 @@ class NfsExport(object):
                 path = path[0:len(path) - 1]
             nfs_exports_extended_obj = self.protocol_api.list_nfs_exports(
                 path=path, zone=access_zone)
+
             if nfs_exports_extended_obj.total > 1:
                 error_msg = 'Multiple NFS Exports found'
                 LOG.error(error_msg)
@@ -602,6 +1058,51 @@ class NfsExport(object):
                 security_flavors=get_security_keys(
                     self.module.params['security_flavors']),
                 zone=self.module.params['access_zone'])
+            # Apply advanced per-export settings if provided
+            nfs_map_root = set_nfs_map(self.module.params.get('map_root'), 'map_root')
+            if nfs_map_root:
+                nfs_export.map_root = nfs_map_root
+            nfs_map_non_root = set_nfs_map(self.module.params.get('map_non_root'), 'map_non_root')
+            if nfs_map_non_root:
+                nfs_export.map_non_root = nfs_map_non_root
+            nfs_map_failure = set_nfs_map(self.module.params.get('map_failure'), 'map_failure')
+            if nfs_map_failure:
+                nfs_export.map_failure = nfs_map_failure
+
+            # Size fields (convert to integer bytes using utils.get_size_bytes)
+            for size_field in ['file_name_max_size', 'block_size', 'directory_transfer_size',
+                               'read_transfer_max_size', 'read_transfer_multiple', 'read_transfer_size',
+                               'write_transfer_max_size', 'write_transfer_multiple', 'write_transfer_size',
+                               'max_file_size']:
+                size_param = self.module.params.get(size_field)
+                if size_param is not None:
+                    try:
+                        size_val = utils.get_size_bytes(size_param['size_value'], size_param['size_unit'])
+                    except Exception:
+                        size_val = None
+                    if size_val is not None:
+                        setattr(
+                            nfs_export,
+                            # keys in NFS export details sometimes differ (file_name_max_size -> name_max_size)
+                            size_field if size_field != 'file_name_max_size' else 'name_max_size',
+                            size_val,
+                        )
+
+            # Simple booleans / strings
+            for simple_field in ['commit_asynchronous', 'setattr_asynchronous', 'readdirplus',
+                                 'return_32bit_file_ids', 'can_set_time', 'map_lookup_uid', 'symlinks',
+                                 'encoding', 'write_datasync_action', 'write_datasync_reply',
+                                 'write_filesync_action', 'write_filesync_reply', 'write_unstable_action',
+                                 'write_unstable_reply']:
+                if self.module.params.get(simple_field) is not None:
+                    setattr(nfs_export, simple_field, self.module.params.get(simple_field))
+
+            # time_delta expects a numeric seconds value in the SDK; convert if provided
+            if self.module.params.get('time_delta') is not None:
+                td = self.module.params.get('time_delta')
+                td_seconds = utils.convert_to_seconds(td.get('time_value'), td.get('time_unit'))
+                setattr(nfs_export, 'time_delta', td_seconds)
+
             return nfs_export
         except Exception as e:
             error_msg = 'Create NfsExportCreateParams object for path {0}' \
@@ -621,16 +1122,19 @@ class NfsExport(object):
         nfs_map_non_root = set_nfs_map(self.module.params.get('map_non_root'), 'map_non_root')
         if nfs_map_non_root:
             nfs_export.map_non_root = nfs_map_non_root
+        if self.module._diff:
+            self.result.update({"diff": {"before": {}, "after": nfs_export.to_dict()}})
         try:
-            msg = ("Creating NFS export with parameters:nfs_export=%s",
-                   nfs_export)
-            LOG.info(msg)
-            if ignore_unresolvable_hosts is not True:
-                response = self.protocol_api.create_nfs_export(nfs_export, zone=access_zone)
-            else:
-                response = self.protocol_api.create_nfs_export(nfs_export, zone=access_zone,
-                                                               ignore_unresolvable_hosts=ignore_unresolvable_hosts)
-            self.result['NFS_export_details'] = self._get_nfs_export_from_id(response.id, access_zone=access_zone)
+            if not self.module.check_mode:
+                msg = ("Creating NFS export with parameters:nfs_export=%s",
+                       nfs_export)
+                LOG.info(msg)
+                if ignore_unresolvable_hosts is not True:
+                    response = self.protocol_api.create_nfs_export(nfs_export, zone=access_zone)
+                else:
+                    response = self.protocol_api.create_nfs_export(nfs_export, zone=access_zone,
+                                                                   ignore_unresolvable_hosts=ignore_unresolvable_hosts)
+                self.result['NFS_export_details'] = self._get_nfs_export_from_id(response.id, access_zone=access_zone)
             return True
 
         except Exception as e:
@@ -663,19 +1167,25 @@ class NfsExport(object):
         Check if read-write clients are to be added/removed to/from NFS export
         '''
 
-        if playbook_client_dict['read_write_clients']:
-            for client in playbook_client_dict['read_write_clients']:
-                if client not in current_client_dict['read_write_clients'] and \
-                        self.module.params['client_state'] == 'present-in-export':
-                    current_client_dict['read_write_clients'].append(client)
-                    mod_flag = True
-                elif client in current_client_dict['read_write_clients'] and \
-                        self.module.params['client_state'] == 'absent-in-export':
-                    current_client_dict['read_write_clients'].remove(client)
-                    mod_flag = True
+        client_state = self.module.params['client_state']
+        if playbook_client_dict['read_write_clients'] is None:
+            return mod_flag, nfs_export
 
-            if mod_flag:
-                nfs_export.read_write_clients = current_client_dict['read_write_clients']
+        if client_state is None:
+            if set(playbook_client_dict['read_write_clients']) != set(current_client_dict['read_write_clients']):
+                current_client_dict['read_write_clients'] = playbook_client_dict['read_write_clients']
+                mod_flag = True
+        for client in playbook_client_dict['read_write_clients']:
+            if client_state == 'present-in-export' and client not in current_client_dict['read_write_clients']:
+                current_client_dict['read_write_clients'].append(client)
+                mod_flag = True
+
+            elif client_state == 'absent-in-export' and client in current_client_dict['read_write_clients']:
+                current_client_dict['read_write_clients'].remove(client)
+                mod_flag = True
+
+        if mod_flag:
+            nfs_export.read_write_clients = current_client_dict['read_write_clients']
 
         return mod_flag, nfs_export
 
@@ -684,19 +1194,25 @@ class NfsExport(object):
         Check if clients are to be added/removed to/from NFS export
         '''
 
-        if playbook_client_dict['clients']:
-            for client in playbook_client_dict['clients']:
-                if client not in current_client_dict['clients'] and \
-                        self.module.params['client_state'] == 'present-in-export':
-                    current_client_dict['clients'].append(client)
-                    mod_flag = True
-                elif client in current_client_dict['clients'] and \
-                        self.module.params['client_state'] == 'absent-in-export':
-                    current_client_dict['clients'].remove(client)
-                    mod_flag = True
+        client_state = self.module.params['client_state']
+        if playbook_client_dict['clients'] is None:
+            return mod_flag, nfs_export
 
-            if mod_flag:
-                nfs_export.clients = current_client_dict['clients']
+        if client_state is None:
+            if playbook_client_dict['clients'] != current_client_dict['clients']:
+                current_client_dict['clients'] = playbook_client_dict['clients']
+                mod_flag = True
+        for client in playbook_client_dict['clients']:
+            if client_state == 'present-in-export' and client not in current_client_dict['clients']:
+                current_client_dict['clients'].append(client)
+                mod_flag = True
+
+            elif client_state == 'absent-in-export' and client in current_client_dict['clients']:
+                current_client_dict['clients'].remove(client)
+                mod_flag = True
+
+        if mod_flag:
+            nfs_export.clients = current_client_dict['clients']
 
         return mod_flag, nfs_export
 
@@ -705,19 +1221,25 @@ class NfsExport(object):
         Check if read-only clients are to be added/removed to/from NFS export
         '''
 
-        if playbook_client_dict['read_only_clients']:
-            for client in playbook_client_dict['read_only_clients']:
-                if client not in current_client_dict['read_only_clients'] and \
-                        self.module.params['client_state'] == 'present-in-export':
-                    current_client_dict['read_only_clients'].append(client)
-                    mod_flag = True
-                elif client in current_client_dict['read_only_clients'] and \
-                        self.module.params['client_state'] == 'absent-in-export':
-                    current_client_dict['read_only_clients'].remove(client)
-                    mod_flag = True
+        client_state = self.module.params['client_state']
+        if playbook_client_dict['read_only_clients'] is None:
+            return mod_flag, nfs_export
 
-            if mod_flag:
-                nfs_export.read_only_clients = current_client_dict['read_only_clients']
+        if client_state is None:
+            if sorted(playbook_client_dict['read_only_clients']) != sorted(current_client_dict['read_only_clients']):
+                current_client_dict['read_only_clients'] = playbook_client_dict['read_only_clients']
+                mod_flag = True
+        for client in playbook_client_dict['read_only_clients']:
+            if client_state == 'present-in-export' and client not in current_client_dict['read_only_clients']:
+                current_client_dict['read_only_clients'].append(client)
+                mod_flag = True
+
+            elif client_state == 'absent-in-export' and client in current_client_dict['read_only_clients']:
+                current_client_dict['read_only_clients'].remove(client)
+                mod_flag = True
+
+        if mod_flag:
+            nfs_export.read_only_clients = current_client_dict['read_only_clients']
 
         return mod_flag, nfs_export
 
@@ -726,19 +1248,25 @@ class NfsExport(object):
         Check if root clients are to be added/removed to/from NFS export
         '''
 
-        if playbook_client_dict['root_clients']:
-            for client in playbook_client_dict['root_clients']:
-                if client not in current_client_dict['root_clients'] and \
-                        self.module.params['client_state'] == 'present-in-export':
-                    current_client_dict['root_clients'].append(client)
-                    mod_flag = True
-                elif client in current_client_dict['root_clients'] and \
-                        self.module.params['client_state'] == 'absent-in-export':
-                    current_client_dict['root_clients'].remove(client)
-                    mod_flag = True
+        client_state = self.module.params['client_state']
+        if playbook_client_dict['root_clients'] is None:
+            return mod_flag, nfs_export
 
-            if mod_flag:
-                nfs_export.root_clients = current_client_dict['root_clients']
+        if client_state is None:
+            if sorted(playbook_client_dict['root_clients']) != sorted(current_client_dict['root_clients']):
+                current_client_dict['root_clients'] = playbook_client_dict['root_clients']
+                mod_flag = True
+        for client in playbook_client_dict['root_clients']:
+            if client_state == 'present-in-export' and client not in current_client_dict['root_clients']:
+                current_client_dict['root_clients'].append(client)
+                mod_flag = True
+
+            elif client_state == 'absent-in-export' and client in current_client_dict['root_clients']:
+                current_client_dict['root_clients'].remove(client)
+                mod_flag = True
+
+        if mod_flag:
+            nfs_export.root_clients = current_client_dict['root_clients']
 
         return mod_flag, nfs_export
 
@@ -754,19 +1282,29 @@ class NfsExport(object):
         mod_flag, nfs_export = self._check_clients(nfs_export, playbook_client_dict, current_client_dict, mod_flag)
         mod_flag, nfs_export = self._check_read_only_clients(nfs_export, playbook_client_dict, current_client_dict, mod_flag)
         mod_flag, nfs_export = self._check_root_clients(nfs_export, playbook_client_dict, current_client_dict, mod_flag)
-
-        # mod_flag = mod_flag1 or mod_flag2 or mod_flag3 or mod_flag4
         return mod_flag, nfs_export
 
     def _check_mod_field(self, field_name_playbook, field_name_powerscale):
         _field_mod = False
-        if self.module.params[field_name_playbook] is None:
-            field_value = self.result['NFS_export_details'][field_name_powerscale]
-        elif self.module.params[field_name_playbook] == \
-                self.result['NFS_export_details'][field_name_powerscale]:
-            field_value = self.result['NFS_export_details'][field_name_powerscale]
+        # Use .get to avoid KeyError when optional playbook fields are not present
+        play_val = self.module.params.get(field_name_playbook, None)
+        # Safe read from result in case the powerscale field is absent
+        res_details = self.result.get('NFS_export_details', {}) or {}
+        res_val = res_details.get(field_name_powerscale, None)
+        # Special handling for time_delta: convert playbook dict to seconds before compare
+        if field_name_playbook == 'time_delta' and play_val is not None:
+            try:
+                play_val_converted = utils.convert_to_seconds(play_val.get('time_value'), play_val.get('time_unit'))
+            except Exception:
+                play_val_converted = play_val
+            play_val = play_val_converted
+
+        if play_val is None:
+            field_value = res_val
+        elif play_val == res_val:
+            field_value = res_val
         else:
-            field_value = self.module.params[field_name_playbook]
+            field_value = play_val
             _field_mod = True
         return _field_mod, field_value
 
@@ -784,9 +1322,12 @@ class NfsExport(object):
         '''
         Modify NFS export in system
         '''
+        nfs_details = copy.deepcopy(self.result.get('NFS_export_details'))
+
         nfs_export = self.isi_sdk.NfsExport()
         client_flag = map_root_flag = map_non_root_flag = False
         client_flag, nfs_export = self._check_client_status(nfs_export)
+
         map_root = set_nfs_map(self.module.params.get('map_root'), 'map_root', self.result.get('NFS_export_details'))
         if map_root:
             nfs_export.map_root = map_root
@@ -795,45 +1336,147 @@ class NfsExport(object):
         if map_non_root:
             nfs_export.map_non_root = map_non_root
             map_non_root_flag = True
+        map_failure = set_nfs_map(self.module.params.get('map_failure'), 'map_failure', self.result.get('NFS_export_details'))
+        if map_failure:
+            nfs_export.map_failure = map_failure
+            map_failure_flag = True
+        else:
+            map_failure_flag = False
+
+        # size fields: if provided in playbook, convert to bytes and compare to existing
+        size_fields = ['file_name_max_size', 'block_size', 'directory_transfer_size',
+                       'read_transfer_max_size', 'read_transfer_multiple', 'read_transfer_size',
+                       'write_transfer_max_size', 'write_transfer_multiple', 'write_transfer_size',
+                       'max_file_size']
+        size_flags = []
+        for sz in size_fields:
+            param = self.module.params.get(sz)
+            if param is not None:
+                try:
+                    new_val = utils.get_size_bytes(param['size_value'], param['size_unit'])
+                except Exception:
+                    new_val = None
+                # keys in NFS export details sometimes differ (file_name_max_size -> name_max_size)
+                export_key = 'name_max_size' if sz == 'file_name_max_size' else sz
+                export_value = None
+                if self.result.get('NFS_export_details'):
+                    export_value = self.result['NFS_export_details'].get(export_key)
+                # consider modified only if the converted value differs from existing
+                if new_val is None or export_value is None or new_val != export_value:
+                    nfs_export.__setattr__(export_key, new_val)
+                    size_flags.append(True)
+                else:
+                    size_flags.append(False)
+            else:
+                size_flags.append(False)
+
+        # simple fields that can be compared using _check_mod_field
         read_only_flag, read_only_value = self._check_mod_field(
             'read_only', 'read_only')
         all_dirs_flag, all_dirs_value = self._check_mod_field(
             'sub_directories_mountable', 'all_dirs')
         description_flag, description_value = self._check_mod_field(
             'description', 'description')
+        map_lookup_uid_flag, map_lookup_uid_value = self._check_mod_field(
+            'map_lookup_uid', 'map_lookup_uid')
+        commit_flag, commit_value = self._check_mod_field('commit_asynchronous', 'commit_asynchronous')
+        setattr_flag, setattr_value = self._check_mod_field('setattr_asynchronous', 'setattr_asynchronous')
+        readdir_flag, readdir_value = self._check_mod_field('readdirplus', 'readdirplus')
+        return32_flag, return32_value = self._check_mod_field('return_32bit_file_ids', 'return_32bit_file_ids')
+        can_set_time_flag, can_set_time_value = self._check_mod_field('can_set_time', 'can_set_time')
+        symlinks_flag, symlinks_value = self._check_mod_field('symlinks', 'symlinks')
+        encoding_flag, encoding_value = self._check_mod_field('encoding', 'encoding')
+        write_datasync_action_flag, write_datasync_action_value = self._check_mod_field('write_datasync_action', 'write_datasync_action')
+        write_datasync_reply_flag, write_datasync_reply_value = self._check_mod_field('write_datasync_reply', 'write_datasync_reply')
+        write_filesync_action_flag, write_filesync_action_value = self._check_mod_field('write_filesync_action', 'write_filesync_action')
+        write_filesync_reply_flag, write_filesync_reply_value = self._check_mod_field('write_filesync_reply', 'write_filesync_reply')
+        write_unstable_action_flag, write_unstable_action_value = self._check_mod_field('write_unstable_action', 'write_unstable_action')
+        write_unstable_reply_flag, write_unstable_reply_value = self._check_mod_field('write_unstable_reply', 'write_unstable_reply')
+        time_delta_flag, time_delta_value = self._check_mod_field('time_delta', 'time_delta')
         security_flag, nfs_export = self._is_security_flavour_mod(
             self.module.params['security_flavors'], nfs_export)
 
-        if all(
-            field_mod_flag is False for field_mod_flag in [
-                client_flag, read_only_flag, all_dirs_flag, description_flag, map_root_flag,
-                map_non_root_flag, security_flag]) and self.module.params['ignore_unresolvable_hosts'] is not True:
+        # consider changed if any of our flags are True
+        all_flags = [client_flag, read_only_flag, all_dirs_flag, description_flag, map_root_flag,
+                     map_non_root_flag, map_failure_flag, security_flag, map_lookup_uid_flag,
+                     commit_flag, setattr_flag, readdir_flag, return32_flag, can_set_time_flag,
+                     symlinks_flag, encoding_flag, write_datasync_action_flag, write_datasync_reply_flag,
+                     write_filesync_action_flag, write_filesync_reply_flag, write_unstable_action_flag,
+                     write_unstable_reply_flag, time_delta_flag] + size_flags
+
+        if all(field_mod_flag is False for field_mod_flag in all_flags):
             LOG.info(
                 'No change detected for the NFS Export, returning changed = False')
+            if self.module._diff:
+                self.result.update({"diff": {"before": nfs_details, "after": nfs_details}})
             return False
         else:
             nfs_export.read_only = read_only_value if read_only_flag else None
             nfs_export.all_dirs = all_dirs_value if all_dirs_flag else None
             nfs_export.description = description_value if description_flag else None
-            LOG.debug('Modifying NFS Export with  %s details', nfs_export)
-            return self.perform_modify_nfs_export(nfs_export, path, access_zone, ignore_unresolvable_hosts)
+            # apply simple fields
+            if map_lookup_uid_flag:
+                nfs_export.map_lookup_uid = map_lookup_uid_value
+            if commit_flag:
+                nfs_export.commit_asynchronous = commit_value
+            if setattr_flag:
+                nfs_export.setattr_asynchronous = setattr_value
+            if readdir_flag:
+                nfs_export.readdirplus = readdir_value
+            if return32_flag:
+                nfs_export.return_32bit_file_ids = return32_value
+            if can_set_time_flag:
+                nfs_export.can_set_time = can_set_time_value
+            if symlinks_flag:
+                nfs_export.symlinks = symlinks_value
+            if encoding_flag:
+                nfs_export.encoding = encoding_value
+            if write_datasync_action_flag:
+                nfs_export.write_datasync_action = write_datasync_action_value
+            if write_datasync_reply_flag:
+                nfs_export.write_datasync_reply = write_datasync_reply_value
+            if write_filesync_action_flag:
+                nfs_export.write_filesync_action = write_filesync_action_value
+            if write_filesync_reply_flag:
+                nfs_export.write_filesync_reply = write_filesync_reply_value
+            if write_unstable_action_flag:
+                nfs_export.write_unstable_action = write_unstable_action_value
+            if write_unstable_reply_flag:
+                nfs_export.write_unstable_reply = write_unstable_reply_value
+            if time_delta_flag:
+                nfs_export.time_delta = time_delta_value
+            # sizes already set above when present
 
-    def perform_modify_nfs_export(self, nfs_export, path, access_zone, ignore_unresolvable_hosts):
+            return self.perform_modify_nfs_export(nfs_export, path, access_zone, ignore_unresolvable_hosts, nfs_details)
+
+    def perform_modify_nfs_export(self, nfs_export, path, access_zone, ignore_unresolvable_hosts, nfs_details):
+        '''
+        Modify NFS export in PowerScale system
+        '''
+        modified_details = copy.deepcopy(nfs_details)
+        filtered_dict = {key: value for key, value in nfs_export.to_dict().items() if value is not None}
+        modified_details.update(filtered_dict)
+
+        if self.module._diff:
+            self.result.update({"diff": {"before": nfs_details, "after": modified_details}})
+
+        self.result['NFS_export_details'] = nfs_details
         try:
-            if ignore_unresolvable_hosts is not True:
-                self.protocol_api.update_nfs_export(
-                    nfs_export,
-                    self.result['NFS_export_details']['id'],
-                    zone=self.result['NFS_export_details']['zone'])
-            else:
-                self.protocol_api.update_nfs_export(
-                    nfs_export,
-                    self.result['NFS_export_details']['id'],
-                    zone=self.result['NFS_export_details']['zone'],
-                    ignore_unresolvable_hosts=ignore_unresolvable_hosts)
-            # update result with updated details
-            self.result['NFS_export_details'] = self.get_nfs_export(
-                path, access_zone)
+            if not self.module.check_mode:
+                if ignore_unresolvable_hosts is not True:
+                    self.protocol_api.update_nfs_export(
+                        nfs_export,
+                        self.result['NFS_export_details']['id'],
+                        zone=self.result['NFS_export_details']['zone'])
+                else:
+                    self.protocol_api.update_nfs_export(
+                        nfs_export,
+                        self.result['NFS_export_details']['id'],
+                        zone=self.result['NFS_export_details']['zone'],
+                        ignore_unresolvable_hosts=ignore_unresolvable_hosts)
+                # update result with updated details
+                self.result['NFS_export_details'] = self.get_nfs_export(
+                    path, access_zone)
             return True
 
         except Exception as e:
@@ -848,14 +1491,17 @@ class NfsExport(object):
         Delete NFS export from system
         '''
         nfs_export = self.result['NFS_export_details']
+        if self.module._diff:
+            self.result.update({"diff": {"before": nfs_export, "after": {}}})
         try:
-            msg = ('Deleting NFS export with path: {0}, zone: {1} and ID: {2}'.format(
-                nfs_export['paths'][0], nfs_export['zone'], nfs_export['id']))
-            LOG.info(msg)
-            self.protocol_api.delete_nfs_export(
-                nfs_export['id'], zone=nfs_export['zone'])
+            if not self.module.check_mode:
+                msg = ('Deleting NFS export with path: {0}, zone: {1} and ID: {2}'.format(
+                    nfs_export['paths'][0], nfs_export['zone'], nfs_export['id']))
+                LOG.info(msg)
+                self.protocol_api.delete_nfs_export(
+                    nfs_export['id'], zone=nfs_export['zone'])
 
-            self.result['NFS_export_details'] = {}
+                self.result['NFS_export_details'] = {}
             return True
         except Exception as e:
             error_msg = (
@@ -889,47 +1535,30 @@ class NfsExport(object):
             error_msg = 'Invalid input: Client state is given, clients not specified'
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
-        if self.module.params['client_state'] is None and any(
-                client_list is not None for client_list in all_client_list):
-            error_msg = 'Invalid input: Clients are given, client state not specified'
-            LOG.error(error_msg)
-            self.module.fail_json(msg=error_msg)
 
-    def perform_module_operation(self):
-        '''
-        Perform different actions on NFS exports based on user parameter
-        chosen in playbook
-        '''
-        state = self.module.params['state']
-        access_zone = self.module.params['access_zone']
-        ignore_unresolvable_hosts = self.module.params['ignore_unresolvable_hosts']
-        path = self.effective_path(access_zone=access_zone, path=self.module.params['path'])
-        changed = False
+    def get_size_paramters(self):
+        """Return the Ansible argument spec for size parameters (value + unit)."""
+        return dict(type='dict', options=dict(
+                    size_value=dict(type='int', required=True),
+                    size_unit=dict(type='str', required=True, choices=['B', 'KB', 'MB', 'GB', 'TB', 'PB'])))
 
-        self.result['NFS_export_details'] = self.get_nfs_export(
-            path=path, access_zone=access_zone)
+    def get_nfs_map_parameters(self):
+        """Return the Ansible argument spec for NFS map parameters."""
+        return dict(type='dict', options=dict(
+            enabled=dict(type='bool', default=True),
+            primary_group=dict(),
+            secondary_groups=dict(type='list', elements='dict', options=dict(
+                                  name=dict(required=True),
+                                  state=dict(choices=['present', 'absent'], default='present'))),
+            user=dict()))
 
-        self._validate_input()
-        if state == 'present' and self.result['NFS_export_details']:
-            # check for modification
-            changed = self.modify_nfs_export(path, access_zone, ignore_unresolvable_hosts) or changed
-
-        if state == 'present' and not self.result['NFS_export_details']:
-            # create NFS export
-            changed = self.create_nfs_export(path=path, access_zone=access_zone, ignore_unresolvable_hosts=ignore_unresolvable_hosts)
-
-        if state == 'absent' and self.result['NFS_export_details']:
-            # delete nfs export
-            changed = self.delete_nfs_export() or changed
-
-        # Update the module's final state
-        LOG.info('changed %s', changed)
-        self.result['changed'] = changed
-        self.module.exit_json(**self.result)
+    def get_sync_parameters(self):
+        """Return the Ansible argument spec for write sync choice parameters."""
+        return dict(type='str', choices=['DATASYNC', 'FILESYNC', 'UNSTABLE'])
 
     def get_nfs_parameters(self):
         return dict(
-            path=dict(required=True, type='str', no_log=True),
+            path=dict(required=True, type='str'),
             access_zone=dict(type='str', default='System'),
             clients=dict(type='list', elements='str'),
             root_clients=dict(type='list', elements='str'),
@@ -946,22 +1575,37 @@ class NfsExport(object):
                 type='list', elements='str',
                 choices=['unix', 'kerberos', 'kerberos_integrity',
                          'kerberos_privacy']),
-            map_root=dict(type='dict', options=dict(
-                enabled=dict(type='bool', default=True),
-                primary_group=dict(),
-                secondary_groups=dict(type='list', elements='dict', options=dict(
-                                      name=dict(required=True),
-                                      state=dict(choices=['present', 'absent'], default='present'))),
-                user=dict())
-            ),
-            map_non_root=dict(type='dict', options=dict(
-                enabled=dict(type='bool', default=True),
-                primary_group=dict(),
-                secondary_groups=dict(type='list', elements='dict', options=dict(
-                                      name=dict(required=True),
-                                      state=dict(choices=['present', 'absent'], default='present'))),
-                user=dict())
-            ),
+            # Advanced per-export NFS settings (mirror of nfs_default_settings)
+            map_failure=self.get_nfs_map_parameters(),
+            file_name_max_size=self.get_size_paramters(),
+            block_size=self.get_size_paramters(),
+            directory_transfer_size=self.get_size_paramters(),
+            read_transfer_max_size=self.get_size_paramters(),
+            read_transfer_multiple=self.get_size_paramters(),
+            read_transfer_size=self.get_size_paramters(),
+            write_transfer_max_size=self.get_size_paramters(),
+            write_transfer_multiple=self.get_size_paramters(),
+            write_transfer_size=self.get_size_paramters(),
+            max_file_size=self.get_size_paramters(),
+            commit_asynchronous=dict(type='bool'),
+            setattr_asynchronous=dict(type='bool'),
+            readdirplus=dict(type='bool'),
+            return_32bit_file_ids=dict(type='bool'),
+            can_set_time=dict(type='bool'),
+            map_lookup_uid=dict(type='bool'),
+            symlinks=dict(type='bool'),
+            write_datasync_action=self.get_sync_parameters(),
+            write_datasync_reply=self.get_sync_parameters(),
+            write_filesync_action=self.get_sync_parameters(),
+            write_filesync_reply=self.get_sync_parameters(),
+            write_unstable_action=self.get_sync_parameters(),
+            write_unstable_reply=self.get_sync_parameters(),
+            encoding=dict(type='str'),
+            time_delta=dict(type='dict', options=dict(
+                time_value=dict(type='float', required=True),
+                time_unit=dict(type='str', required=True, choices=['seconds', 'nanoseconds', 'milliseconds', 'microseconds']))),
+            map_root=self.get_nfs_map_parameters(),
+            map_non_root=self.get_nfs_map_parameters(),
             state=dict(required=True, type='str', choices=['present',
                                                            'absent'])
         )
@@ -1097,11 +1741,53 @@ def is_map_secondary_groups_modified(nfs_map_params, nfs_export_details, nfs_exp
         return True
 
 
+class NFSExitHandler:
+    def handle(self, nfs_obj, changed):
+        LOG.info('changed %s', changed)
+        nfs_obj.result['changed'] = changed
+        nfs_obj.module.exit_json(**nfs_obj.result)
+
+
+class NFSDeleteHandler:
+    def handle(self, nfs_obj, nfs_params, changed):
+        if nfs_params['state'] == 'absent' and nfs_obj.result['NFS_export_details']:
+            # delete nfs export
+            changed = nfs_obj.delete_nfs_export() or changed
+        NFSExitHandler().handle(nfs_obj=nfs_obj, changed=changed)
+
+
+class NFSCreateHandler:
+    def handle(self, nfs_obj, nfs_params, path, changed):
+        if nfs_params['state'] == 'present' and not nfs_obj.result['NFS_export_details']:
+            changed = nfs_obj.create_nfs_export(
+                path=path, access_zone=nfs_params['access_zone'],
+                ignore_unresolvable_hosts=nfs_params['ignore_unresolvable_hosts'])
+        NFSDeleteHandler().handle(nfs_obj=nfs_obj, nfs_params=nfs_params, changed=changed)
+
+
+class NFSModifyHandler:
+    def handle(self, nfs_obj, nfs_params, path, changed):
+        if nfs_params['state'] == 'present' and nfs_obj.result['NFS_export_details']:
+            # check for modification
+            changed = nfs_obj.modify_nfs_export(path, nfs_params['access_zone'], nfs_params['ignore_unresolvable_hosts']) or changed
+        NFSCreateHandler().handle(nfs_obj=nfs_obj, nfs_params=nfs_params, path=path, changed=changed)
+
+
+class NFSHandler:
+    def handle(self, nfs_obj, nfs_params):
+        changed = False
+        path = nfs_obj.effective_path(access_zone=nfs_params['access_zone'], path=nfs_params['path'])
+        nfs_obj.result['NFS_export_details'] = nfs_obj.get_nfs_export(
+            path=path, access_zone=nfs_params['access_zone'])
+        nfs_obj._validate_input()
+        NFSModifyHandler().handle(nfs_obj=nfs_obj, nfs_params=nfs_params, path=path, changed=changed)
+
+
 def main():
-    ''' Create PowerScale_NFS export object and perform action on it
-        based on user input from playbook'''
+    """ Perform action on PowerScale nfs_export object and perform action on it
+        based on user input from playbook."""
     obj = NfsExport()
-    obj.perform_module_operation()
+    NFSHandler().handle(obj, obj.module.params)
 
 
 if __name__ == '__main__':

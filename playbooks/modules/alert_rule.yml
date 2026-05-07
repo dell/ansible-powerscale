@@ -1,0 +1,103 @@
+---
+- name: Alert Rule operations on PowerScale Array
+  hosts: localhost
+  connection: local
+
+  tasks:
+
+    - name: Get the alert channel and alert group details
+      dellemc.powerscale.info:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        port: "{{ port }}"
+        gather_subset:
+          - alert_channels
+          - event_group
+      register: result_info
+
+    - name: Create alert rule with basic options
+      dellemc.powerscale.alert_rule:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        port: "{{ port }}"
+        state: present
+        name: test_alert_rule
+        categories: []
+        channels:
+          - "{{ result_info.alert_channels[0]['channels'][0].name }}"
+        condition: "NEW"
+        eventgroup_ids:
+          - "{{ result_info.event_groups[0]['eventgroup_definitions'][0].id }}"
+        exclude_eventgroup_ids: []
+        interval: 0
+        limit: 0
+        severities: []
+        transient: 0
+
+    - name: Create alert rule with all options
+      dellemc.powerscale.alert_rule:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        port: "{{ port }}"
+        state: present
+        name: test_rule_new
+        condition: "NEW"
+        categories:
+          - all
+        channels:
+          - "{{ result_info.alert_channels[0]['channels'][0].name }}"
+        eventgroup_ids:
+          - "{{ result_info.event_groups[0]['eventgroup_definitions'][0].id }}"
+          - "{{ result_info.event_groups[0]['eventgroup_definitions'][1].id }}"
+          - "{{ result_info.event_groups[0]['eventgroup_definitions'][2].id }}"
+        exclude_eventgroup_ids:
+          - "{{ result_info.event_groups[0]['eventgroup_definitions'][3].id }}"
+        interval: 11
+        transient: 10
+        limit: 10
+        severities:
+          - emergency
+          - critical
+
+    - name: Update alert rule
+      dellemc.powerscale.alert_rule:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        port: "{{ port }}"
+        state: present
+        name: test_rule_new
+        condition: "NEW"
+        categories:
+          - SYS_DISK_EVENTS
+          - NODE_STATUS_EVENTS
+        channels:
+          - "{{ result_info.alert_channels[0]['channels'][0].name }}"
+        eventgroup_ids:
+          - "{{ result_info.event_groups[0]['eventgroup_definitions'][0].id }}"
+          - "{{ result_info.event_groups[0]['eventgroup_definitions'][1].id }}"
+        exclude_eventgroup_ids:
+          - "{{ result_info.event_groups[0]['eventgroup_definitions'][3].id }}"
+        interval: 11
+        transient: 10
+        limit: 10
+        severities:
+          - emergency
+          - critical
+
+    - name: Delete alert rule
+      dellemc.powerscale.alert_rule:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        port: "{{ port }}"
+        state: absent
+        name: test_rule_new

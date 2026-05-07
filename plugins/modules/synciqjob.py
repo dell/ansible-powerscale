@@ -1,7 +1,7 @@
 #!/usr/bin/python
-# Copyright: (c) 2021, Dell Technologies
+# Copyright: (c) 2024, Dell Technologies
 
-# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """Ansible module for managing SyncIQ jobs on PowerScale"""
 
@@ -51,6 +51,7 @@ options:
 notes:
 - There is delay in the actual state change of the SyncIQ job. The state
   change of jobs in 'scheduled' state is not supported.
+- To start the SyncIQ job use the M(dellemc.powerscale.synciqpolicy) module.
 - The I(check_mode) is not supported.
 '''
 
@@ -308,12 +309,6 @@ class SyncIQJob(object):
                                            (error_obj=e))
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
-        except Exception as e:
-            error_message = 'Get details of SyncIQ job %s failed with ' \
-                            'error: %s' % (job_id, utils.determine_error
-                                           (error_obj=e))
-            LOG.error(error_message)
-            self.module.fail_json(msg=error_message)
 
     def modify_job_state(self, job_id, job_state):
         """
@@ -328,12 +323,6 @@ class SyncIQJob(object):
                                                    job_id)
             return True
         except utils.ApiException as e:
-            error_message = 'Modify state of SyncIQ job %s failed with ' \
-                            'error: %s' % (job_id, utils.determine_error
-                                           (error_obj=e))
-            LOG.error(error_message)
-            self.module.fail_json(msg=error_message)
-        except Exception as e:
             error_message = 'Modify state of SyncIQ job %s failed with ' \
                             'error: %s' % (job_id, utils.determine_error
                                            (error_obj=e))

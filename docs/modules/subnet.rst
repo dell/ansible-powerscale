@@ -21,8 +21,8 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.13 or later.
-- Python 3.9, 3.10 or 3.11.
+- Ansible-core 2.17 or later.
+- Python 3.11, 3.12 or 3.13.
 
 
 
@@ -66,16 +66,16 @@ Parameters
 
 
       start_range (True, str, None)
-        Specifies the start range for *sc_service_addrs*.
+        Specifies the start range for :emphasis:`sc\_service\_addrs`.
 
 
       end_range (True, str, None)
-        Specifies the end range for *sc_service_addrs*.
+        Specifies the end range for :emphasis:`sc\_service\_addrs`.
 
 
 
     sc_service_addrs_state (optional, str, None)
-      Specifies if the *sc_service_addrs* range need to be added or removed from the subnet.
+      Specifies if the :emphasis:`sc\_service\_addrs` range need to be added or removed from the subnet.
 
 
     mtu (optional, int, None)
@@ -94,9 +94,9 @@ Parameters
   state (True, str, None)
     The state of the subnet after the task is performed.
 
-    ``present`` - indicates that the subnet should exist on the system.
+    :literal:`present` - indicates that the subnet should exist on the system.
 
-    ``absent`` - indicates that the subnet should not exist on the system.
+    :literal:`absent` - indicates that the subnet should not exist on the system.
 
 
   onefs_host (True, str, None)
@@ -110,9 +110,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    ``true`` - indicates that the SSL certificate should be verified.
+    :literal:`true` - indicates that the SSL certificate should be verified.
 
-    ``false`` - indicates that the SSL certificate should not be verified.
+    :literal:`false` - indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -130,7 +130,7 @@ Notes
 -----
 
 .. note::
-   - The *check_mode* is not supported.
+   - The :emphasis:`check\_mode` is not supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -157,7 +157,7 @@ Examples
         subnet_params:
           gateway: '198.10.**.***'
           sc_service_addrs:
-            - start_range : '198.10.**.***'
+            - start_range: '198.10.**.***'
               end_range: '198.10.**.***'
           sc_service_addrs_state: "add"
           mtu: 1500
@@ -206,7 +206,7 @@ Examples
         subnet_name: "subnet_test"
         subnet_params:
           sc_service_addrs:
-            - start_range : '198.10.**.***'
+            - start_range: '198.10.**.***'
               end_range: '198.10.**.***'
           sc_service_addrs_state: "add"
         state: 'present'
@@ -222,7 +222,7 @@ Examples
         subnet_name: "subnet_test"
         subnet_params:
           sc_service_addrs:
-            - start_range : '198.10.**.***'
+            - start_range: '198.10.**.***'
               end_range: '198.10.**.***'
           sc_service_addrs_state: "remove"
         state: 'present'

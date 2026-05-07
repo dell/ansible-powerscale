@@ -1,0 +1,29 @@
+---
+- name: SyncIQ Global Settings Module Operations on PowerScale Storage
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: "10.**.**.**"
+    port_no: "1234"
+    api_user: "user"
+    api_password: "password"
+    verify_ssl: false
+
+  tasks:
+    - name: Get SyncIQ global settings
+      dellemc.powerscale.synciq_global_settings:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+
+    - name: Update service of SyncIQ global settings
+      dellemc.powerscale.synciq_global_settings:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        service: "on"
+        encryption_required: true

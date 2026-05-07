@@ -1,0 +1,34 @@
+---
+- name: Alert Settings Module Operations on PowerScale Storage
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: "x.x.x.x"
+    api_user: "user"
+    api_password: "xxxx"
+    verify_ssl: false
+    timestamp: 1720091148
+    timestamp_converted: "{{ '%Y-%m-%d %H:%M:%S'|strftime(timestamp) }}"
+
+  tasks:
+    - name: Enable celog maintenance mode
+      dellemc.powerscale.alert_settings:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        enable_celog_maintenance_mode: true
+
+    - name: Disable and prune all history of maintenance mode
+      dellemc.powerscale.alert_settings:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        enable_celog_maintenance_mode: false
+        prune: 0
+
+    # Use this task to convert start or end timestamp to date
+    - name: Convert Unix timestamp to date
+      ansible.builtin.debug:
+        msg: "{{ timestamp_converted }}"

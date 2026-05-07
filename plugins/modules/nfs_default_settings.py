@@ -1,7 +1,7 @@
 #!/usr/bin/python
-# Copyright: (c) 2023, Dell Technologies
+# Copyright: (c) 2023-2024, Dell Technologies
 
-# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """Ansible module for managing NFS Default Settings on PowerScale"""
 
@@ -436,50 +436,50 @@ notes:
 '''
 
 EXAMPLES = r'''
-    - name: Get NFS default settings
-      dellemc.powerscale.nfs_default_settings:
-        onefs_host: "{{onefs_host}}"
-        verify_ssl: "{{verify_ssl}}"
-        api_user: "{{api_user}}"
-        api_password: "{{api_password}}"
-        access_zone: "sample-zone"
+- name: Get NFS default settings
+  dellemc.powerscale.nfs_default_settings:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    access_zone: "sample-zone"
 
-    - name: Update the NFS default settings
-      dellemc.powerscale.nfs_default_settings:
-        onefs_host: "{{ onefs_host }}"
-        api_user: "{{ api_user }}"
-        api_password: "{{ api_password }}"
-        verify_ssl: "{{ verify_ssl }}"
-        access_zone: "sample-zone"
-        block_size:
-          size_value: 5
-          size_unit: 'KB'
-        commit_asynchronous: False
-        encoding: 'UTF8'
-        map_root:
-          enabled: true
-          primary_group: 'test_group_1'
-          secondary_groups:
-            - name: 'test_group_2'
-            - name: 'test_group_3'
-              state: 'absent'
-          user: 'test_user'
-        map_non_root:
-          enabled: true
-          primary_group: 'test_non_root_group'
-          secondary_groups:
-            - name: 'test_non_root_group_2'
-            - name: 'test_non_root_group_3'
-              state: 'absent'
-          user: 'test_non_root_user'
-        readdirplus: true
-        time_delta:
-          time_value: 5
-          time_unit: 'seconds'
-        write_filesync_action: 'DATASYNC'
-        security_flavors:
-          - unix
-          - kerberos
+- name: Update the NFS default settings
+  dellemc.powerscale.nfs_default_settings:
+    onefs_host: "{{ onefs_host }}"
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    verify_ssl: "{{ verify_ssl }}"
+    access_zone: "sample-zone"
+    block_size:
+      size_value: 5
+      size_unit: 'KB'
+    commit_asynchronous: false
+    encoding: 'UTF8'
+    map_root:
+      enabled: true
+      primary_group: 'test_group_1'
+      secondary_groups:
+        - name: 'test_group_2'
+        - name: 'test_group_3'
+          state: 'absent'
+      user: 'test_user'
+    map_non_root:
+      enabled: true
+      primary_group: 'test_non_root_group'
+      secondary_groups:
+        - name: 'test_non_root_group_2'
+        - name: 'test_non_root_group_3'
+          state: 'absent'
+      user: 'test_non_root_user'
+    readdirplus: true
+    time_delta:
+      time_value: 5
+      time_unit: 'seconds'
+    write_filesync_action: 'DATASYNC'
+    security_flavors:
+      - unix
+      - kerberos
 '''
 
 RETURN = r'''

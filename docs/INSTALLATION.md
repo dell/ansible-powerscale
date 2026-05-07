@@ -1,13 +1,3 @@
-<!--
-Copyright (c) 2022 Dell Inc., or its subsidiaries. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
--->
-
 # Installation and execution of Ansible modules for Dell PowerScale
 
 ## Installation of sdk
@@ -32,7 +22,7 @@ Use this procedure to install SDK:
   #### Offline installation of collections
   1. Download the latest tar build from either of the available distribution channels [Ansible Galaxy](https://galaxy.ansible.com/dellemc/powerscale) /[Automation Hub](https://console.redhat.com/ansible/automation-hub/repo/published/dellemc/powerscale) and use this command to install the collection anywhere in your system:
 
-	      ansible-galaxy collection install dellemc-powerscale-2.2.0.tar.gz -p <install_path>
+	      ansible-galaxy collection install dellemc-powerscale-3.9.0.tar.gz -p <install_path>
 
   2. Set the environment variable:
 
@@ -59,7 +49,7 @@ Use this procedure to install SDK:
 
 ## Ansible modules execution
 
-The Ansible server must be configured with Python library for OneFS to run the Ansible playbooks. The [Documents](https://github.com/dell/ansible-powerscale/blob/2.2.0/docs) provide information on different Ansible modules along with their functions and syntax. The parameters table in the Product Guide provides information on various parameters which need to be configured before running the modules.
+The Ansible server must be configured with Python library for OneFS to run the Ansible playbooks. The [Documents](https://github.com/dell/ansible-powerscale/blob/main/docs) provide information on different Ansible modules along with their functions and syntax. The parameters table in the Product Guide provides information on various parameters which need to be configured before running the modules.
 
 ## SSL certificate validation
 

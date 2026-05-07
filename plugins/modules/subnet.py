@@ -1,7 +1,7 @@
 #!/usr/bin/python
-# Copyright: (c) 2021, Dell Technologies
+# Copyright: (c) 2021-2024, Dell Technologies
 
-# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """Ansible module for managing subnets on PowerScale"""
 
@@ -121,7 +121,7 @@ EXAMPLES = r'''
     subnet_params:
       gateway: '198.10.**.***'
       sc_service_addrs:
-        - start_range : '198.10.**.***'
+        - start_range: '198.10.**.***'
           end_range: '198.10.**.***'
       sc_service_addrs_state: "add"
       mtu: 1500
@@ -170,7 +170,7 @@ EXAMPLES = r'''
     subnet_name: "subnet_test"
     subnet_params:
       sc_service_addrs:
-        - start_range : '198.10.**.***'
+        - start_range: '198.10.**.***'
           end_range: '198.10.**.***'
       sc_service_addrs_state: "add"
     state: 'present'
@@ -186,7 +186,7 @@ EXAMPLES = r'''
     subnet_name: "subnet_test"
     subnet_params:
       sc_service_addrs:
-        - start_range : '198.10.**.***'
+        - start_range: '198.10.**.***'
           end_range: '198.10.**.***'
       sc_service_addrs_state: "remove"
     state: 'present'
@@ -635,7 +635,7 @@ def get_subnet_create_params(subnet_params):
             if sc_service_addrs:
                 sc_service_addrs_list = []
                 for i in range(len(sc_service_addrs)):
-                    network_range = utils.isi_sdk.ConfigNetworkRange()
+                    network_range = utils.isi_sdk.ConfigNetworkNetworkRange()
                     network_range.low = sc_service_addrs[i]['start_range']
                     network_range.high = sc_service_addrs[i]['end_range']
                     sc_service_addrs_list.append(network_range)

@@ -1,6 +1,6 @@
-# Copyright: (c) 2021, Dell Technologies
+# Copyright: (c) 2021-2024, Dell Technologies
 
-# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """Mock API responses for PowerScale Network Pool module"""
 
@@ -9,6 +9,9 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 MODULE_UTILS_PATH = 'ansible_collections.dellemc.powerscale.plugins.modules.networkpool.utils'
+
+RANGE1 = "1.1.1.1"
+RANGE2 = "2.2.2.2"
 
 GET_NETWORK_POOLS = {"pools": [{"access_zone": "ansible-neo",
                                 "groupnet": "groupnet0",
@@ -24,14 +27,14 @@ CREATE_NETWORK_POOL = {"pools": [{"access_zone": "ansible-neo",
                                   "name": "Test_pool1",
                                   "subnet": "subnet0",
                                   "description": "Test_pool1",
-                                  "ranges": [{"low": "1.*.*.*",
-                                              "high": "1.*.*.*"}],
+                                  "ranges": [{"low": RANGE1,
+                                              "high": RANGE1}],
                                   "ifaces": [{"iface": "ext-1",
                                               "lnn": 4}],
-                                  "static_routes": [{"gateway": "1.*.*.*",
+                                  "static_routes": [{"gateway": RANGE1,
                                                      "prefixlen": 4,
-                                                     "subnetdict": "1.*.*.*"}],
-                                  "sc_dns_zone": "1.*.*.*",
+                                                     "subnet": RANGE1}],
+                                  "sc_dns_zone": RANGE1,
                                   "sc_connect_policy": "throughput",
                                   "sc_failover_policy": "throughput",
                                   "rebalance_policy": "auto",
@@ -59,5 +62,14 @@ def delete_networkpool_failed_msg(pool_name):
     return 'Failed to delete network pool: ' + pool_name + ' with error'
 
 
-def get_networkpool_invalid_id_msg(pool_name):
-    return "Invalid value for 'id', must not be 'None'"
+def network_pool_failed_msg(response_type):
+    if response_type == 'invalid_pool_name':
+        return 'The value for pool_name is invalid'
+    elif response_type == 'invalid_pool_description':
+        return 'The maximum length for description is 128'
+    elif response_type == 'invalid_ip_range':
+        return 'The value for IP range is invalid'
+    elif response_type == 'invalid_iface':
+        return 'Please enter valid value for iface'
+    elif response_type == 'invalid_route':
+        return 'Invalid static route value'

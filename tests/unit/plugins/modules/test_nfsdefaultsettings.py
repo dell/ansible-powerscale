@@ -1,6 +1,6 @@
-# Copyright: (c) 2023, Dell Technologies
+# Copyright: (c) 2023-2024, Dell Technologies
 
-# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """Unit Tests for user mapping rules module on PowerScale"""
 
@@ -10,17 +10,9 @@ __metaclass__ = type
 
 import pytest
 from mock.mock import MagicMock
-from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
+# pylint: disable=unused-import
+from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.initial_mock \
     import utils
-
-utils.get_logger = MagicMock()
-utils.isi_sdk = MagicMock()
-PREREQS_VALIDATE = {
-    "all_packages_found": True
-}
-utils.validate_module_pre_reqs = MagicMock(return_value=PREREQS_VALIDATE)
-from ansible.module_utils import basic
-basic.AnsibleModule = MagicMock()
 
 from ansible_collections.dellemc.powerscale.plugins.modules.nfs_default_settings import NFSDefaultSettings
 from ansible_collections.dellemc.powerscale.plugins.modules.nfs_default_settings import NFSDefaultSettingsHandler
@@ -30,35 +22,32 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock
     import MockNfsDefaultSettingsApi
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_api_exception \
     import MockApiException
-from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_fail_json \
-    import FailJsonException, fail_json
+from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.powerscale_unit_base import \
+    PowerScaleUnitBase
 
 
-class TestNfsDefaultSettings():
+class TestNfsDefaultSettings(PowerScaleUnitBase):
     nfsdefaultsettings_args = MockNfsDefaultSettingsApi.NFS_DEFAULT_SETTINGS_COMMON_ARGS
 
     @pytest.fixture
-    def nfsdefaultsettings_module_mock(self, mocker):
-        mocker.patch(MockNfsDefaultSettingsApi.MODULE_UTILS_PATH + '.ApiException', new=MockApiException)
-        nfsdefaultsettings_module_mock = NFSDefaultSettings()
-        nfsdefaultsettings_module_mock.module.check_mode = False
-        nfsdefaultsettings_module_mock.module.fail_json = fail_json
-        return nfsdefaultsettings_module_mock
-
-    def test_get_nfsdefaultsettings(self, nfsdefaultsettings_module_mock):
-        nfsdefaultsettings_details = MockNfsDefaultSettingsApi.GET_NFSDEFAULTSETTINGS_RESPONSE
-        nfsdefaultsettings_module_mock.module.params = self.nfsdefaultsettings_args
-        Protocol.get_nfs_default_settings = MagicMock(return_value=nfsdefaultsettings_details)
-        NFSDefaultSettingsHandler().handle(nfsdefaultsettings_module_mock)
-        assert nfsdefaultsettings_module_mock.module.exit_json.call_args[1]['changed'] is False
+    def module_object(self):
+        return NFSDefaultSettings
 
     def capture_fail_json_call(self, error_msg, nfsdefaultsettings_module_mock):
-        try:
+        with pytest.raises(SystemExit):
             NFSDefaultSettingsHandler().handle(nfsdefaultsettings_module_mock)
-        except FailJsonException as fj_object:
-            assert error_msg == fj_object.message
+        self.powerscale_module_mock.module.fail_json.assert_called()
+        call_args = self.powerscale_module_mock.module.fail_json.call_args.kwargs
+        assert error_msg in call_args['msg']
 
-    def test_update_nfsdefaultsettings_for_map_dict(self, nfsdefaultsettings_module_mock):
+    def test_get_nfsdefaultsettings(self, powerscale_module_mock):
+        nfsdefaultsettings_details = MockNfsDefaultSettingsApi.GET_NFSDEFAULTSETTINGS_RESPONSE
+        powerscale_module_mock.module.params = self.nfsdefaultsettings_args
+        Protocol.get_nfs_default_settings = MagicMock(return_value=nfsdefaultsettings_details)
+        NFSDefaultSettingsHandler().handle(powerscale_module_mock)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
+
+    def test_update_nfsdefaultsettings_for_map_dict(self, powerscale_module_mock):
         nfsdefaultsettings_details = MockNfsDefaultSettingsApi.GET_NFSDEFAULTSETTINGS_RESPONSE
         self.nfsdefaultsettings_args.update({
             'map_root': {
@@ -73,12 +62,12 @@ class TestNfsDefaultSettings():
                 "user": "test_user_2"
             }
         })
-        nfsdefaultsettings_module_mock.module.params = self.nfsdefaultsettings_args
+        powerscale_module_mock.module.params = self.nfsdefaultsettings_args
         Protocol.get_nfs_default_settings = MagicMock(return_value=nfsdefaultsettings_details)
-        NFSDefaultSettingsHandler().handle(nfsdefaultsettings_module_mock)
-        assert nfsdefaultsettings_module_mock.module.exit_json.call_args[1]['changed'] is True
+        NFSDefaultSettingsHandler().handle(powerscale_module_mock)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
-    def test_update_nfsdefaultsettings_for_map_dict_two(self, nfsdefaultsettings_module_mock):
+    def test_update_nfsdefaultsettings_for_map_dict_two(self, powerscale_module_mock):
         nfsdefaultsettings_details = MockNfsDefaultSettingsApi.GET_NFSDEFAULTSETTINGS_RESPONSE
         nfsdefaultsettings_details['map_root']['enabled'] = True
         self.nfsdefaultsettings_args.update({
@@ -96,12 +85,12 @@ class TestNfsDefaultSettings():
                 "size_unit": "KB"
             }
         })
-        nfsdefaultsettings_module_mock.module.params = self.nfsdefaultsettings_args
+        powerscale_module_mock.module.params = self.nfsdefaultsettings_args
         Protocol.get_nfs_default_settings = MagicMock(return_value=nfsdefaultsettings_details)
-        NFSDefaultSettingsHandler().handle(nfsdefaultsettings_module_mock)
-        assert nfsdefaultsettings_module_mock.module.exit_json.call_args[1]['changed'] is True
+        NFSDefaultSettingsHandler().handle(powerscale_module_mock)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
-    def test_update_nfsdefaultsettings_for_size_dict(self, nfsdefaultsettings_module_mock):
+    def test_update_nfsdefaultsettings_for_size_dict(self, powerscale_module_mock):
         nfsdefaultsettings_details = MockNfsDefaultSettingsApi.GET_NFSDEFAULTSETTINGS_RESPONSE
         self.nfsdefaultsettings_args.update({
             "max_file_size": {
@@ -109,12 +98,12 @@ class TestNfsDefaultSettings():
                 "size_unit": "KB"
             }
         })
-        nfsdefaultsettings_module_mock.module.params = self.nfsdefaultsettings_args
+        powerscale_module_mock.module.params = self.nfsdefaultsettings_args
         Protocol.get_nfs_default_settings = MagicMock(return_value=nfsdefaultsettings_details)
-        NFSDefaultSettingsHandler().handle(nfsdefaultsettings_module_mock)
-        assert nfsdefaultsettings_module_mock.module.exit_json.call_args[1]['changed'] is True
+        NFSDefaultSettingsHandler().handle(powerscale_module_mock)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
-    def test_update_nfsdefaultsettings_for_time_dict(self, nfsdefaultsettings_module_mock):
+    def test_update_nfsdefaultsettings_for_time_dict(self, powerscale_module_mock):
         nfsdefaultsettings_details = MockNfsDefaultSettingsApi.GET_NFSDEFAULTSETTINGS_RESPONSE
         self.nfsdefaultsettings_args.update({
             "time_delta": {
@@ -122,48 +111,48 @@ class TestNfsDefaultSettings():
                 "time_unit": "seconds"
             }
         })
-        nfsdefaultsettings_module_mock.module.params = self.nfsdefaultsettings_args
+        powerscale_module_mock.module.params = self.nfsdefaultsettings_args
         Protocol.get_nfs_default_settings = MagicMock(return_value=nfsdefaultsettings_details)
-        NFSDefaultSettingsHandler().handle(nfsdefaultsettings_module_mock)
-        assert nfsdefaultsettings_module_mock.module.exit_json.call_args[1]['changed'] is True
+        NFSDefaultSettingsHandler().handle(powerscale_module_mock)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
-    def test_update_nfsdefaultsettings_for_security_dict(self, nfsdefaultsettings_module_mock):
+    def test_update_nfsdefaultsettings_for_security_dict(self, powerscale_module_mock):
         nfsdefaultsettings_details = MockNfsDefaultSettingsApi.GET_NFSDEFAULTSETTINGS_RESPONSE
         self.nfsdefaultsettings_args.update({
             "security_flavors": [
                 'kerberos_integrity'
             ]
         })
-        nfsdefaultsettings_module_mock.module.params = self.nfsdefaultsettings_args
+        powerscale_module_mock.module.params = self.nfsdefaultsettings_args
         Protocol.get_nfs_default_settings = MagicMock(return_value=nfsdefaultsettings_details)
-        NFSDefaultSettingsHandler().handle(nfsdefaultsettings_module_mock)
-        assert nfsdefaultsettings_module_mock.module.exit_json.call_args[1]['changed'] is True
+        NFSDefaultSettingsHandler().handle(powerscale_module_mock)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
-    def test_update_nfsdefaultsettings_for_bool_dict(self, nfsdefaultsettings_module_mock):
+    def test_update_nfsdefaultsettings_for_bool_dict(self, powerscale_module_mock):
         nfsdefaultsettings_details = MockNfsDefaultSettingsApi.GET_NFSDEFAULTSETTINGS_RESPONSE
         self.nfsdefaultsettings_args.update({
             'commit_asynchronous': True
         })
-        nfsdefaultsettings_module_mock.module.params = self.nfsdefaultsettings_args
+        powerscale_module_mock.module.params = self.nfsdefaultsettings_args
         Protocol.get_nfs_default_settings = MagicMock(return_value=nfsdefaultsettings_details)
-        NFSDefaultSettingsHandler().handle(nfsdefaultsettings_module_mock)
-        assert nfsdefaultsettings_module_mock.module.exit_json.call_args[1]['changed'] is True
+        NFSDefaultSettingsHandler().handle(powerscale_module_mock)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
-    def test_update_nfsdefaultsettings_for_bool_dict_exception(self, nfsdefaultsettings_module_mock):
+    def test_update_nfsdefaultsettings_for_bool_dict_exception(self, powerscale_module_mock):
         nfsdefaultsettings_details = MockNfsDefaultSettingsApi.GET_NFSDEFAULTSETTINGS_RESPONSE
         self.nfsdefaultsettings_args.update({
             'commit_asynchronous': True
         })
-        nfsdefaultsettings_module_mock.module.params = self.nfsdefaultsettings_args
+        powerscale_module_mock.module.params = self.nfsdefaultsettings_args
         Protocol.get_nfs_default_settings = MagicMock(return_value=nfsdefaultsettings_details)
-        nfsdefaultsettings_module_mock.protocol_api.update_nfs_settings_export = MagicMock(side_effect=MockApiException)
+        powerscale_module_mock.protocol_api.update_nfs_settings_export = MagicMock(side_effect=MockApiException)
         self.capture_fail_json_call(MockNfsDefaultSettingsApi.get_nfsdefaultsettings_exception_response('update_exception'),
-                                    nfsdefaultsettings_module_mock)
+                                    powerscale_module_mock)
 
-    def test_update_nfsdefaultsettings_form_modify_exception(self, nfsdefaultsettings_module_mock):
+    def test_update_nfsdefaultsettings_form_modify_exception(self, powerscale_module_mock):
         nfsdefaultsettings_details = MockNfsDefaultSettingsApi.GET_NFSDEFAULTSETTINGS_RESPONSE
-        nfsdefaultsettings_module_mock.module.params = self.nfsdefaultsettings_args
+        powerscale_module_mock.module.params = self.nfsdefaultsettings_args
         Protocol.get_nfs_default_settings = MagicMock(return_value=nfsdefaultsettings_details)
-        nfsdefaultsettings_module_mock.form_map_dict = MagicMock(side_effect=MockApiException)
+        powerscale_module_mock.form_map_dict = MagicMock(side_effect=MockApiException)
         self.capture_fail_json_call(MockNfsDefaultSettingsApi.get_nfsdefaultsettings_exception_response('form_dict_exception'),
-                                    nfsdefaultsettings_module_mock)
+                                    powerscale_module_mock)

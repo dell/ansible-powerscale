@@ -1,7 +1,7 @@
 #!/usr/bin/python
-# Copyright: (c) 2023, Dell Technologies
+# Copyright: (c) 2023-2024, Dell Technologies
 
-# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """Ansible module for managing SMB files on PowerScale"""
 
@@ -50,33 +50,31 @@ notes:
 '''
 
 EXAMPLES = r'''
+- name: Get list of SMB files of the PowerScale cluster
+  dellemc.powerscale.smb_file:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    state: "present"
 
-  - name: Get list of SMB files of the PowerScale cluster
-    dellemc.powerscale.smb_file:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      state: "present"
+- name: Close SMB file of the PowerScale cluster
+  dellemc.powerscale.smb_file:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    file_id: xxx
+    state: "absent"
 
-  - name: Close SMB file of the PowerScale cluster
-    dellemc.powerscale.smb_file:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      file_id: xxx
-      state: "absent"
-
-  - name: Close smb file of the PowerScale cluster
-    dellemc.powerscale.smb_file:
-      onefs_host: "{{onefs_host}}"
-      verify_ssl: "{{verify_ssl}}"
-      api_user: "{{api_user}}"
-      api_password: "{{api_password}}"
-      file_path: "/ifs/ATest"
-      state: "absent"
-
+- name: Close smb file of the PowerScale cluster
+  dellemc.powerscale.smb_file:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    file_path: "/ifs/ATest"
+    state: "absent"
 '''
 
 RETURN = r'''

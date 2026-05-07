@@ -1,0 +1,740 @@
+# Copyright: (c) 2024, Dell Technologies
+
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+"""Unit Tests for support assist settings module on PowerScale"""
+
+from __future__ import (absolute_import, division, print_function)
+
+__metaclass__ = type
+
+import pytest
+from mock.mock import MagicMock
+# pylint: disable=unused-import
+from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.initial_mock \
+    import utils
+from ansible_collections.dellemc.powerscale.plugins.modules.support_assist import SupportAssist
+from ansible_collections.dellemc.powerscale.plugins.modules.support_assist import SupportAssistHandler
+from ansible_collections.dellemc.powerscale.plugins.modules.support_assist import main
+from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_support_assist_api \
+    import MockSupportAssistApi
+from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_api_exception \
+    import MockApiException
+from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.powerscale_unit_base \
+    import PowerScaleUnitBase
+
+
+class TestSupportAssist(PowerScaleUnitBase):
+    support_assist_args = MockSupportAssistApi.SUPPORT_ASSIST_COMMON_ARGS
+
+    @pytest.fixture
+    def module_object(self):
+        return SupportAssist
+
+    def test_get_support_assist_details(self, powerscale_module_mock):
+        self.set_module_params(self.support_assist_args, {})
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        powerscale_module_mock.support_assist_api.get_supportassist_settings.assert_called()
+
+    def test_get_support_assist_details_exception(self, powerscale_module_mock):
+        self.set_module_params(self.support_assist_args, {})
+        powerscale_module_mock.support_assist_api.get_supportassist_settings = MagicMock(
+            side_effect=MockApiException)
+        self.capture_fail_json_call(
+            MockSupportAssistApi.get_support_assist_settings_exception_response('get_details_exception'),
+            SupportAssistHandler)
+
+    def test_modify_support_assist_network_pool_response(self, powerscale_module_mock):
+        self.set_module_params(self.support_assist_args,
+                               {
+                                   "connection": {
+                                       "network_pools": [
+                                           {
+                                               "pool_name": "subnet0:pool1",
+                                               "state": "absent"
+                                           },
+                                           {
+                                               "pool_name": "subnet0:pool5",
+                                               "state": "present"
+                                           }
+                                       ]
+                                   }
+                               })
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
+        powerscale_module_mock.module.check_mode = False
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        powerscale_module_mock.support_assist_api.update_supportassist_settings.assert_called()
+
+    def test_modify_support_assist_gateway_endpoints_response(self, powerscale_module_mock):
+        self.set_module_params(self.support_assist_args,
+                               {
+                                   "connection": {
+                                       "gateway_endpoints": [
+                                           {
+                                               "enabled": True,
+                                               "gateway_host": "XX.XX.XX.XX",
+                                               "gateway_port": 9443,
+                                               "priority": 2,
+                                               "use_proxy": False,
+                                               "validate_ssl": False,
+                                               "state": "present"
+                                           },
+                                           {
+                                               "enabled": True,
+                                               "gateway_host": "XX.XX.XX.XZ",
+                                               "gateway_port": 9443,
+                                               "priority": 1,
+                                               "use_proxy": False,
+                                               "validate_ssl": False,
+                                               "state": "present"
+                                           },
+                                           {
+                                               "enabled": True,
+                                               "gateway_host": "XX.XX.XX.XY",
+                                               "gateway_port": 9443,
+                                               "priority": 2,
+                                               "use_proxy": False,
+                                               "validate_ssl": False,
+                                               "state": "absent"
+                                           }
+                                       ],
+                                       "mode": "gateway"
+                                   }
+                               })
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
+        powerscale_module_mock.module.check_mode = False
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        powerscale_module_mock.support_assist_api.update_supportassist_settings.assert_called()
+
+    def test_modify_support_assist_contact_response(self, powerscale_module_mock):
+        self.set_module_params(self.support_assist_args,
+                               {
+                                   "contact": {
+                                       "primary": {
+                                           "email": "primary@example.com",
+                                           "first_name": "Jane",
+                                           "last_name": "Doe",
+                                           "phone": "1234567890"
+                                       },
+                                       "secondary": {
+                                           "email": "secondary@example.com",
+                                           "first_name": "John",
+                                           "last_name": "Doe",
+                                           "phone": "1234567891"
+                                       }
+                                   }
+                               })
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
+        powerscale_module_mock.module.check_mode = False
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        powerscale_module_mock.support_assist_api.update_supportassist_settings.assert_called()
+
+    def test_modify_support_assist_contact_without_phone(self, powerscale_module_mock):
+        self.set_module_params(self.support_assist_args,
+                               {
+                                   "contact": {
+                                       "primary": {
+                                           "email": "primary@example.com",
+                                           "first_name": "Jane",
+                                           "last_name": "Doe"
+                                       },
+                                       "secondary": {
+                                           "email": "secondary@example.com",
+                                           "first_name": "John",
+                                           "last_name": "Doe"
+                                       }
+                                   }
+                               })
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
+        powerscale_module_mock.module.check_mode = False
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        powerscale_module_mock.support_assist_api.update_supportassist_settings.assert_called()
+        call_args = powerscale_module_mock.support_assist_api.update_supportassist_settings.call_args
+        modify_dict = call_args.kwargs.get('supportassist_settings') or call_args[1].get('supportassist_settings')
+        assert 'phone' not in modify_dict['contact']['primary']
+        assert 'phone' not in modify_dict['contact']['secondary']
+
+    def test_modify_support_assist_telemetry_response(self, powerscale_module_mock):
+        self.set_module_params(self.support_assist_args,
+                               {
+                                   "telemetry": {
+                                       "offline_collection_period": 61,
+                                       "telemetry_enabled": True,
+                                       "telemetry_persist": False,
+                                       "telemetry_threads": 11
+                                   }
+                               })
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
+        powerscale_module_mock.module.check_mode = False
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        powerscale_module_mock.support_assist_api.update_supportassist_settings.assert_called()
+
+    def test_disable_support_assist_telemetry_response(self, powerscale_module_mock):
+        self.set_module_params(self.support_assist_args,
+                               {
+                                   "telemetry": {
+                                       "telemetry_enabled": False
+                                   }
+                               })
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
+        powerscale_module_mock.module.check_mode = False
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        powerscale_module_mock.support_assist_api.update_supportassist_settings.assert_called()
+
+    def test_modify_support_assist_params_response(self, powerscale_module_mock):
+        self.set_module_params(self.support_assist_args,
+                               {
+                                   "enable_download": True,
+                                   "enable_remote_support": True,
+                                   "automatic_case_creation": True,
+                                   "enable_service": False
+                               })
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
+        powerscale_module_mock.module.check_mode = False
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        powerscale_module_mock.support_assist_api.update_supportassist_settings.assert_called()
+
+    def test_accept_support_assist_terms_response(self, powerscale_module_mock):
+        self.set_module_params(self.support_assist_args,
+                               {
+                                   "accepted_terms": True
+                               })
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
+        powerscale_module_mock.get_support_assist_terms = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_TERMS_RESPONSE)
+        powerscale_module_mock.module.check_mode = False
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        powerscale_module_mock.support_assist_api.update_supportassist_terms.assert_called()
+
+    def test_accept_support_assist_terms_idempotency(self, powerscale_module_mock):
+        self.set_module_params(self.support_assist_args,
+                               {
+                                   "accepted_terms": True,
+                                   "contact": {"primary": None, "secondary": None},
+                                   "telemetry": {
+                                       "offline_collection_period": None,
+                                       "telemetry_enabled": None,
+                                       "telemetry_persist": None,
+                                       "telemetry_threads": None
+                                   }
+                               })
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
+        powerscale_module_mock.get_support_assist_terms = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_TERMS_ACCEPTED_RESPONSE)
+        powerscale_module_mock.module.check_mode = False
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
+        powerscale_module_mock.support_assist_api.update_supportassist_terms.assert_not_called()
+
+    def test_reject_support_assist_terms_idempotency(self, powerscale_module_mock):
+        self.set_module_params(self.support_assist_args,
+                               {
+                                   "accepted_terms": False,
+                                   "contact": {"primary": None, "secondary": None},
+                                   "telemetry": {
+                                       "offline_collection_period": None,
+                                       "telemetry_enabled": None,
+                                       "telemetry_persist": None,
+                                       "telemetry_threads": None
+                                   }
+                               })
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
+        powerscale_module_mock.get_support_assist_terms = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_TERMS_RESPONSE)
+        powerscale_module_mock.module.check_mode = False
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
+        powerscale_module_mock.support_assist_api.update_supportassist_terms.assert_not_called()
+
+    def test_modify_support_assist_response_check_mode(self, powerscale_module_mock):
+        powerscale_module_mock.module.check_mode = True
+        self.set_module_params(self.support_assist_args,
+                               {"enable_download": True})
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+
+    def test_accept_support_assist_terms_response_check_mode(self, powerscale_module_mock):
+        powerscale_module_mock.module.check_mode = True
+        self.set_module_params(self.support_assist_args,
+                               {"accepted_terms": True})
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
+        powerscale_module_mock.get_support_assist_terms = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_TERMS_RESPONSE)
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+
+    def test_modify_support_assist_exception(self, powerscale_module_mock):
+        self.set_module_params(self.support_assist_args,
+                               {"enable_download": True})
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
+        powerscale_module_mock.support_assist_api.update_supportassist_settings = MagicMock(
+            side_effect=MockApiException)
+        self.capture_fail_json_call(
+            MockSupportAssistApi.get_support_assist_settings_exception_response('update_exception'),
+            SupportAssistHandler)
+
+    def test_modify_mode_from_gateway_to_direct(self, powerscale_module_mock):
+        self.set_module_params(self.support_assist_args,
+                               {
+                                   "connection": {
+                                       "mode": "direct"
+                                   }
+                               })
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+
+    def test_modify_mode_from_direct_to_direct(self, powerscale_module_mock):
+        self.set_module_params(self.support_assist_args,
+                               {
+                                   "connection": {
+                                       "mode": "direct"
+                                   }
+                               })
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE_DIRECT_MODE)
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+
+    def test_add_gateway_endpoints_from_gateway_to_direct(self, powerscale_module_mock):
+        self.set_module_params(self.support_assist_args,
+                               {
+                                   "connection": {
+                                       "gateway_endpoints": [
+                                           {
+                                               "enabled": True,
+                                               "gateway_host": "XX.XX.XX.XX",
+                                               "gateway_port": 9443,
+                                               "priority": 2,
+                                               "use_proxy": False,
+                                               "validate_ssl": False,
+                                               "state": "present"
+                                           },
+                                           {
+                                               "enabled": True,
+                                               "gateway_host": "XX.XX.XX.XY",
+                                               "gateway_port": 9443,
+                                               "priority": 2,
+                                               "use_proxy": False,
+                                               "validate_ssl": False,
+                                               "state": "present"
+                                           }
+                                       ],
+                                       "mode": "gateway"
+                                   }
+                               })
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE_DIRECT_MODE)
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+
+    def test_empty_gateway_endpoints_exception_1(self, powerscale_module_mock):
+        self.set_module_params(self.support_assist_args,
+                               {
+                                   "connection": {
+                                       "gateway_endpoints": [
+                                           {
+                                               "gateway_host": "XX.XX.XX.XX",
+                                               "state": "absent"
+                                           },
+                                           {
+                                               "gateway_host": "XX.XX.XX.XY",
+                                               "state": "absent"
+                                           }
+                                       ],
+                                       "mode": "gateway"
+                                   }
+                               })
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
+        self.capture_fail_json_call(
+            MockSupportAssistApi.get_support_assist_settings_exception_response('empty_gateway_exception'),
+            SupportAssistHandler)
+
+    def test_empty_gateway_endpoints_exception_2(self, powerscale_module_mock):
+        self.set_module_params(self.support_assist_args,
+                               {
+                                   "connection": {
+                                       "mode": "gateway"
+                                   }
+                               })
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE_DIRECT_MODE)
+        self.capture_fail_json_call(
+            MockSupportAssistApi.get_support_assist_settings_exception_response('empty_gateway_exception'),
+            SupportAssistHandler)
+
+    def test_empty_network_pools_exception(self, powerscale_module_mock):
+        self.set_module_params(self.support_assist_args,
+                               {
+                                   "connection": {
+                                       "network_pools": [
+                                           {
+                                               "pool_name": "subnet0:pool1",
+                                               "state": "absent"
+                                           }
+                                       ],
+                                       "mode": "gateway"
+                                   }
+                               })
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
+        self.capture_fail_json_call(
+            MockSupportAssistApi.get_support_assist_settings_exception_response('empty_network_pools_exception'),
+            SupportAssistHandler)
+
+    def test_accept_support_assist_terms_exception(self, powerscale_module_mock):
+        self.set_module_params(self.support_assist_args,
+                               {
+                                   "accepted_terms": True,
+                                   "contact": {"primary": None, "secondary": None},
+                                   "telemetry": {
+                                       "offline_collection_period": None,
+                                       "telemetry_enabled": None,
+                                       "telemetry_persist": None,
+                                       "telemetry_threads": None
+                                   }
+                               })
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
+        powerscale_module_mock.get_support_assist_terms = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_TERMS_RESPONSE)
+        powerscale_module_mock.support_assist_api.update_supportassist_terms = MagicMock(
+            side_effect=MockApiException)
+        self.capture_fail_json_call(
+            MockSupportAssistApi.get_support_assist_settings_exception_response('accept_terms_exception'),
+            SupportAssistHandler)
+
+    def test_get_support_assist_terms_exception(self, powerscale_module_mock):
+        self.set_module_params(self.support_assist_args,
+                               {
+                                   "accepted_terms": True,
+                                   "contact": {"primary": None, "secondary": None},
+                                   "telemetry": {
+                                       "offline_collection_period": None,
+                                       "telemetry_enabled": None,
+                                       "telemetry_persist": None,
+                                       "telemetry_threads": None
+                                   }
+                               })
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
+        powerscale_module_mock.support_assist_api.get_supportassist_terms = MagicMock(
+            side_effect=MockApiException)
+        self.capture_fail_json_call(
+            MockSupportAssistApi.get_support_assist_settings_exception_response('get_terms_exception'),
+            SupportAssistHandler)
+
+    def test_main(self, powerscale_module_mock):
+        self.set_module_params(self.support_assist_args, {})
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
+        main()
+        powerscale_module_mock.support_assist_api.get_supportassist_settings.assert_called()
+
+    # ========================================================================
+    # Declarative Network Pools Tests (Test IDs: U-018 through U-030)
+    # ========================================================================
+
+    # Null overrides for non-pool params to prevent spurious changes
+    # from contact/telemetry comparison against response data.
+    _POOL_ONLY = {
+        "contact": None, "telemetry": None,
+        "automatic_case_creation": None, "connection_state": None,
+        "enable_download": None, "enable_remote_support": None,
+        "enable_service": None, "accepted_terms": None,
+    }
+
+    def test_network_pools_declarative_convergence(self, powerscale_module_mock):
+        """U-018: Declarative convergence — set pools to exact desired list."""
+        self.set_module_params(self.support_assist_args,
+                               {**self._POOL_ONLY,
+                                "connection": {
+                                    "network_pools": [
+                                        {"pool_name": "subnet0:pool0"},
+                                        {"pool_name": "subnet0:pool1"}
+                                    ]
+                                }})
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE_TWO_POOLS)
+        powerscale_module_mock.module.check_mode = False
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert result['changed'] is True
+        assert powerscale_module_mock.module.exit_json.called is True
+        powerscale_module_mock.support_assist_api.update_supportassist_settings.assert_called()
+        assert powerscale_module_mock.support_assist_api.update_supportassist_settings.call_count >= 1
+
+    def test_network_pools_declarative_idempotent(self, powerscale_module_mock):
+        """U-019: Idempotency — no changes when desired matches current."""
+        self.set_module_params(self.support_assist_args,
+                               {**self._POOL_ONLY,
+                                "connection": {
+                                    "network_pools": [
+                                        {"pool_name": "subnet0:pool0"},
+                                        {"pool_name": "subnet0:pool1"}
+                                    ]
+                                }})
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE_MATCHING_POOLS)
+        powerscale_module_mock.module.check_mode = False
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert result['changed'] is False
+        assert powerscale_module_mock.module.exit_json.called is True
+        assert powerscale_module_mock.support_assist_api.update_supportassist_settings.call_count == 0
+        powerscale_module_mock.support_assist_api.update_supportassist_settings.assert_not_called()
+
+    def test_network_pools_declarative_check_mode(self, powerscale_module_mock):
+        """U-020: Check mode — detect changes but don't apply."""
+        powerscale_module_mock.module.check_mode = True
+        self.set_module_params(self.support_assist_args,
+                               {**self._POOL_ONLY,
+                                "connection": {
+                                    "network_pools": [
+                                        {"pool_name": "subnet0:pool0"}
+                                    ]
+                                }})
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE_TWO_POOLS)
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert result['changed'] is True
+        assert powerscale_module_mock.module.exit_json.called is True
+        assert powerscale_module_mock.module.check_mode is True
+        assert powerscale_module_mock.support_assist_api.update_supportassist_settings.call_count == 0
+        powerscale_module_mock.support_assist_api.update_supportassist_settings.assert_not_called()
+
+    def test_network_pools_declarative_diff_mode(self, powerscale_module_mock):
+        """U-021: Diff mode — before/after network pool output."""
+        powerscale_module_mock.module._diff = True
+        self.set_module_params(self.support_assist_args,
+                               {**self._POOL_ONLY,
+                                "connection": {
+                                    "network_pools": [
+                                        {"pool_name": "subnet0:pool0"},
+                                        {"pool_name": "subnet0:pool1"}
+                                    ]
+                                }})
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE_TWO_POOLS)
+        powerscale_module_mock.module.check_mode = False
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert result['changed'] is True
+        assert powerscale_module_mock.module.exit_json.called is True
+        assert 'diff' in result
+        assert isinstance(result['diff'], dict)
+        assert 'before' in result['diff']
+        assert 'after' in result['diff']
+        assert 'network_pools' in result['diff']['before']
+        assert 'network_pools' in result['diff']['after']
+        assert isinstance(result['diff']['before']['network_pools'], list)
+        assert isinstance(result['diff']['after']['network_pools'], list)
+        assert 'subnet0:pool2' in result['diff']['before']['network_pools']
+        assert 'subnet0:pool1' in result['diff']['after']['network_pools']
+
+    def test_network_pools_declarative_empty_list_fails(self, powerscale_module_mock):
+        """U-022: Boundary — empty declarative pool list fails validation."""
+        self.set_module_params(self.support_assist_args,
+                               {**self._POOL_ONLY,
+                                "connection": {
+                                    "network_pools": []
+                                }})
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
+        self.capture_fail_json_call(
+            MockSupportAssistApi.get_support_assist_settings_exception_response('empty_network_pools_exception'),
+            SupportAssistHandler)
+
+    def test_network_pools_legacy_mode_add_remove(self, powerscale_module_mock):
+        """U-023: Legacy — pools with state=present/absent use existing behavior."""
+        self.set_module_params(self.support_assist_args,
+                               {**self._POOL_ONLY,
+                                "connection": {
+                                    "network_pools": [
+                                        {
+                                            "pool_name": "subnet0:pool5",
+                                            "state": "present"
+                                        },
+                                        {
+                                            "pool_name": "subnet0:pool1",
+                                            "state": "absent"
+                                        }
+                                    ]
+                                }})
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
+        powerscale_module_mock.module.check_mode = False
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert result['changed'] is True
+        assert powerscale_module_mock.module.exit_json.called is True
+        powerscale_module_mock.support_assist_api.update_supportassist_settings.assert_called()
+        assert powerscale_module_mock.support_assist_api.update_supportassist_settings.call_count >= 1
+
+    def test_network_pools_state_none_triggers_declarative(self, powerscale_module_mock):
+        """U-024: Mode detection — all state=None triggers declarative mode."""
+        pools = [{"pool_name": "subnet0:pool0", "state": None}]
+        is_declarative = all(pool.get('state') is None for pool in pools)
+        assert is_declarative is True
+        assert len(pools) == 1
+        assert pools[0]['state'] is None
+
+    def test_network_pools_any_state_triggers_legacy(self, powerscale_module_mock):
+        """U-025: Mode detection — any explicit state triggers legacy mode."""
+        pools = [
+            {"pool_name": "subnet0:pool0", "state": "present"},
+            {"pool_name": "subnet0:pool1", "state": None}
+        ]
+        is_declarative = all(pool.get('state') is None for pool in pools)
+        assert is_declarative is False
+        assert len(pools) == 2
+        assert pools[0]['state'] == 'present'
+        assert pools[1]['state'] is None
+
+    def test_network_pools_mixed_state_legacy_mode(self, powerscale_module_mock):
+        """U-026: Negative — mixed state/no-state in pools triggers legacy mode."""
+        self.set_module_params(self.support_assist_args,
+                               {**self._POOL_ONLY,
+                                "connection": {
+                                    "network_pools": [
+                                        {
+                                            "pool_name": "subnet0:pool5",
+                                            "state": "present"
+                                        },
+                                        {
+                                            "pool_name": "subnet0:pool0"
+                                        }
+                                    ]
+                                }})
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE)
+        powerscale_module_mock.module.check_mode = False
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        # Legacy mode: pool5 added, pool0 has no state so no change for it
+        assert result['changed'] is True
+        assert powerscale_module_mock.module.exit_json.called is True
+        powerscale_module_mock.support_assist_api.update_supportassist_settings.assert_called()
+
+    def test_network_pools_declarative_add_new_pool(self, powerscale_module_mock):
+        """U-029: Declarative — add a new pool that doesn't exist."""
+        self.set_module_params(self.support_assist_args,
+                               {**self._POOL_ONLY,
+                                "connection": {
+                                    "network_pools": [
+                                        {"pool_name": "subnet0:pool0"},
+                                        {"pool_name": "subnet0:pool1"},
+                                        {"pool_name": "subnet0:pool2"}
+                                    ]
+                                }})
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE_MATCHING_POOLS)
+        powerscale_module_mock.module.check_mode = False
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert result['changed'] is True
+        assert powerscale_module_mock.module.exit_json.called is True
+        powerscale_module_mock.support_assist_api.update_supportassist_settings.assert_called()
+        assert powerscale_module_mock.support_assist_api.update_supportassist_settings.call_count >= 1
+
+    def test_network_pools_declarative_remove_extra_pool(self, powerscale_module_mock):
+        """U-030: Declarative — remove pool not in desired list."""
+        self.set_module_params(self.support_assist_args,
+                               {**self._POOL_ONLY,
+                                "connection": {
+                                    "network_pools": [
+                                        {"pool_name": "subnet0:pool0"}
+                                    ]
+                                }})
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE_TWO_POOLS)
+        powerscale_module_mock.module.check_mode = False
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert result['changed'] is True
+        assert powerscale_module_mock.module.exit_json.called is True
+        powerscale_module_mock.support_assist_api.update_supportassist_settings.assert_called()
+        assert powerscale_module_mock.support_assist_api.update_supportassist_settings.call_count >= 1
+
+    def test_network_pools_declarative_full_workflow(self, powerscale_module_mock):
+        """I-002: Integration — set pools declaratively, then re-run for idempotency."""
+        # First run: converge from [pool0, pool2] to [pool0, pool1]
+        self.set_module_params(self.support_assist_args,
+                               {**self._POOL_ONLY,
+                                "connection": {
+                                    "network_pools": [
+                                        {"pool_name": "subnet0:pool0"},
+                                        {"pool_name": "subnet0:pool1"}
+                                    ]
+                                }})
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE_TWO_POOLS)
+        powerscale_module_mock.module.check_mode = False
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        first_result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert first_result['changed'] is True
+        assert powerscale_module_mock.module.exit_json.called is True
+        assert powerscale_module_mock.support_assist_api.update_supportassist_settings.call_count >= 1
+
+        # Second run: now current matches desired — should be idempotent
+        powerscale_module_mock.module.exit_json.reset_mock()
+        powerscale_module_mock.support_assist_api.update_supportassist_settings.reset_mock()
+        powerscale_module_mock.result = {"changed": False, "support_assist_details": {}}
+        powerscale_module_mock.get_support_assist_details = MagicMock(
+            return_value=MockSupportAssistApi.GET_SUPPORT_ASSIST_RESPONSE_MATCHING_POOLS)
+        SupportAssistHandler().handle(powerscale_module_mock,
+                                      powerscale_module_mock.module.params)
+        second_result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert second_result['changed'] is False
+        assert powerscale_module_mock.module.exit_json.called is True
+        assert powerscale_module_mock.support_assist_api.update_supportassist_settings.call_count == 0

@@ -1,6 +1,6 @@
-# Copyright: (c) 2021, Dell Technologies
+# Copyright: (c) 2021-2024, Dell Technologies
 
-# Apache License version 2.0 (see MODULE-LICENSE or http://www.apache.org/licenses/LICENSE-2.0.txt)
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 """Mock ApiException for PowerScale Test modules"""
 
@@ -10,5 +10,6 @@ __metaclass__ = type
 
 
 class MockApiException(Exception):
-    body = "SDK Error message"
-    status = "500"
+    def __init__(self, status=500, body="SDK Error message"):
+        self.status = status
+        self.body = body
