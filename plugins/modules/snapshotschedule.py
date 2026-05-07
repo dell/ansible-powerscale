@@ -387,23 +387,24 @@ class SnapshotSchedule(object):
             modified = True
 
         if desired_retention is not None:
-            retention_in_sec = 0
-            if retention_unit == 'days':
-                retention_in_sec = desired_retention * 24 * 60 * 60
-            else:
-                retention_in_sec = desired_retention * 60 * 60
-
-            if retention_in_sec != snapshot_schedule_details['schedules'][
-                    0]['duration']:
-                if retention_in_sec < 7200:
-                    self.module.fail_json(msg="The snapshot desired retention"
-                                              " must be at least 2 hours")
-                LOG.info("Retention Modification: new value=%s, old value=%s",
-                         retention_in_sec, snapshot_schedule_details
-                         ['schedules'][0]['duration'])
-                snapshot_schedule_modify['duration'] = retention_in_sec
-                modified = True
+            retention_in_sec = desired_retention * 24 * 60 * 60 if retention_unit == 'days' \
+                else desired_retention * 60 * 60
+            modified = self._check_retention_modified(
+                retention_in_sec, snapshot_schedule_details, snapshot_schedule_modify) or modified
         return modified, snapshot_schedule_modify
+
+    def _check_retention_modified(self, retention_in_sec, snapshot_schedule_details, snapshot_schedule_modify):
+        """Check if retention needs modification. Returns True if modified."""
+        current_duration = snapshot_schedule_details['schedules'][0]['duration']
+        if retention_in_sec == current_duration:
+            return False
+        if retention_in_sec < 7200:
+            self.module.fail_json(msg="The snapshot desired retention"
+                                      " must be at least 2 hours")
+        LOG.info("Retention Modification: new value=%s, old value=%s",
+                 retention_in_sec, current_duration)
+        snapshot_schedule_modify['duration'] = retention_in_sec
+        return True
 
     def create_snapshot_schedule(self, name, alias, effective_path,
                                  desired_retention, retention_unit,
@@ -530,6 +531,49 @@ class SnapshotSchedule(object):
             error = error_obj
         return error
 
+    def _get_effective_path(self, path, access_zone):
+        """Calculate effective path based on access zone."""
+        if not path:
+            return None
+        if access_zone.lower() == 'system':
+            return path.rstrip("/")
+        return self.get_zone_base_path(access_zone) + path.rstrip("/")
+
+    def _handle_creation(self, name, alias, effective_path, desired_retention, retention_unit, pattern, schedule, result):
+        """Handle snapshot schedule creation when state is present and schedule doesn't exist."""
+        LOG.debug("Creating new snapshot schedule: %s for path: %s", name, effective_path)
+        result['changed'] = self.create_snapshot_schedule(
+            name, alias, effective_path, desired_retention,
+            retention_unit, pattern, schedule) or result['changed']
+
+    def _handle_rename(self, name, new_name, snapshot_schedule_details, result):
+        """Handle snapshot schedule renaming when new_name is provided."""
+        if len(new_name) == 0:
+            self.module.fail_json(msg="Please provide valid string for new_name")
+
+        if snapshot_schedule_details is None:
+            self.module.fail_json(msg="Snapshot schedule not found.")
+
+        if snapshot_schedule_details is not None and len(snapshot_schedule_details['schedules']) != 0:
+            if new_name != snapshot_schedule_details['schedules'][0]['name']:
+                self.validate_new_name(new_name)
+                LOG.info("Renaming snapshot schedule %s to new name %s", name, new_name)
+                result['changed'] = self.rename_snapshot_schedule(
+                    snapshot_schedule_details, new_name) or result['changed']
+                return new_name
+        return name
+
+    def _handle_modification(self, name, snapshot_schedule_modification_details, result):
+        """Handle snapshot schedule modification when schedule is modified."""
+        LOG.info("Modifying snapshot schedule %s", name)
+        result['changed'] = self.modify_snapshot_schedule(
+            name, snapshot_schedule_modification_details) or result['changed']
+
+    def _handle_deletion(self, name, result):
+        """Handle snapshot schedule deletion when state is absent and schedule exists."""
+        LOG.info("Deleting snapshot schedule %s", name)
+        result['changed'] = self.delete_snapshot_schedule(name) or result['changed']
+
     def perform_module_operation(self):
         """
         Perform different actions on snapshot schedule module based on
@@ -546,19 +590,13 @@ class SnapshotSchedule(object):
         retention_unit = self.module.params['retention_unit']
         alias = self.module.params['alias']
 
-        # result is a dictionary that contains changed status and snapshot
-        # schedule details
         result = dict(
             changed=False,
             snapshot_schedule_details=''
         )
-        effective_path = None
-        if path:
-            if access_zone.lower() == 'system':
-                effective_path = path.rstrip("/")
-            else:
-                effective_path = self.get_zone_base_path(access_zone) + \
-                    path.rstrip("/")
+
+        effective_path = self._get_effective_path(path, access_zone)
+
         if desired_retention:
             self.validate_desired_retention(desired_retention)
 
@@ -574,40 +612,17 @@ class SnapshotSchedule(object):
                     retention_unit, effective_path, pattern, schedule)
 
         if state == 'present' and not snapshot_schedule_details:
-            LOG.debug("Creating new snapshot schedule: %s for path: %s",
-                      name, effective_path)
-            result['changed'] = self.create_snapshot_schedule(
-                name, alias, effective_path, desired_retention,
-                retention_unit, pattern, schedule) or result['changed']
+            self._handle_creation(name, alias, effective_path, desired_retention,
+                                  retention_unit, pattern, schedule, result)
 
         if state == 'present' and new_name is not None:
-            if len(new_name) == 0:
-                self.module.fail_json(msg="Please provide valid string for "
-                                          "new_name")
-
-            if snapshot_schedule_details is None:
-                self.module.fail_json(msg="Snapshot schedule not found.")
-
-            if snapshot_schedule_details is not None and \
-                    len(snapshot_schedule_details['schedules']) != 0:
-                if new_name != snapshot_schedule_details['schedules'][0]['name']:
-                    self.validate_new_name(new_name)
-                    LOG.info("Renaming snapshot schedule %s to new name %s",
-                             name, new_name)
-                    result['changed'] = self.rename_snapshot_schedule(
-                        snapshot_schedule_details, new_name) or result['changed']
-                    name = new_name
+            name = self._handle_rename(name, new_name, snapshot_schedule_details, result)
 
         if state == 'present' and is_schedule_modified:
-            LOG.info("Modifying snapshot schedule %s", name)
-            result['changed'] = self.modify_snapshot_schedule(
-                name, snapshot_schedule_modification_details) or \
-                result['changed']
+            self._handle_modification(name, snapshot_schedule_modification_details, result)
 
         if state == 'absent' and snapshot_schedule_details:
-            LOG.info("Deleting snapshot schedule %s", name)
-            result['changed'] = self.delete_snapshot_schedule(name) or \
-                result['changed']
+            self._handle_deletion(name, result)
 
         snapshot_schedule_details = self.get_details(name)
         result['snapshot_schedule_details'] = snapshot_schedule_details

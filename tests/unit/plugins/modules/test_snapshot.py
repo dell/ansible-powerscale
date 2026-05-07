@@ -427,3 +427,123 @@ class TestSnapshot(PowerScaleUnitBase):
             side_effect=utils.ApiException)
         self.capture_fail_json_call(
             MockSnapshotApi.delete_snapshot_exception_failed_msg(), invoke_perform_module=True)
+
+    def test_compute_expiration_hours(self, powerscale_module_mock):
+        """Test _compute_expiration with hours unit."""
+        from datetime import datetime, timedelta
+        import time
+
+        snap_creation_timestamp = time.time()
+        desired_retention = "2"
+        retention_unit = "hours"
+
+        result = Snapshot._compute_expiration(
+            desired_retention, retention_unit, snap_creation_timestamp)
+        expected = snap_creation_timestamp + (2 * 3600)
+        assert abs(result - expected) < 1  # Allow 1 second tolerance
+
+    def test_compute_expiration_days(self, powerscale_module_mock):
+        """Test _compute_expiration with days unit."""
+        from datetime import datetime, timedelta
+        import time
+
+        snap_creation_timestamp = time.time()
+        desired_retention = "1"
+        retention_unit = "days"
+
+        result = Snapshot._compute_expiration(
+            desired_retention, retention_unit, snap_creation_timestamp)
+        expected = snap_creation_timestamp + (1 * 24 * 3600)
+        assert abs(result - expected) < 1  # Allow 1 second tolerance
+
+    def test_compute_expiration_none_retention(self, powerscale_module_mock):
+        """Test _compute_expiration with 'none' retention."""
+        import time
+
+        snap_creation_timestamp = time.time()
+        desired_retention = "none"
+        retention_unit = "hours"
+
+        result = Snapshot._compute_expiration(
+            desired_retention, retention_unit, snap_creation_timestamp)
+        assert result is None
+
+    def test_compute_expiration_none_value(self, powerscale_module_mock):
+        """Test _compute_expiration with None retention."""
+        import time
+
+        snap_creation_timestamp = time.time()
+        desired_retention = None
+        retention_unit = "hours"
+
+        result = Snapshot._compute_expiration(
+            desired_retention, retention_unit, snap_creation_timestamp)
+        assert result is None
+
+    def test_compute_expiration_invalid_unit(self, powerscale_module_mock):
+        """Test _compute_expiration with invalid retention unit."""
+        import time
+
+        snap_creation_timestamp = time.time()
+        desired_retention = "2"
+        retention_unit = "invalid"
+
+        result = Snapshot._compute_expiration(
+            desired_retention, retention_unit, snap_creation_timestamp)
+        assert result is None
+
+    def test_check_timestamp_modified_diff(self, powerscale_module_mock):
+        """Test _check_timestamp_modified when timestamps differ by more than 2 minutes."""
+        import time
+        from datetime import datetime, timedelta
+
+        snap_data = {'expires': time.time()}
+        expiration_timestamp = time.time() + 300  # 5 minutes difference
+        desired_retention = "2"
+        mod_details = {}
+
+        result = powerscale_module_mock._check_timestamp_modified(
+            snap_data, expiration_timestamp, desired_retention, mod_details)
+        assert result is True
+        assert mod_details['is_timestamp_modified'] is True
+
+    def test_check_timestamp_modified_same(self, powerscale_module_mock):
+        """Test _check_timestamp_modified when timestamps are the same."""
+        import time
+
+        snap_data = {'expires': time.time()}
+        expiration_timestamp = snap_data['expires']
+        desired_retention = "2"
+        mod_details = {}
+
+        result = powerscale_module_mock._check_timestamp_modified(
+            snap_data, expiration_timestamp, desired_retention, mod_details)
+        assert result is False
+
+    def test_check_timestamp_modified_new_expiration(self, powerscale_module_mock):
+        """Test _check_timestamp_modified when existing expires is None."""
+        import time
+
+        snap_data = {'expires': None}
+        expiration_timestamp = time.time()
+        desired_retention = "2"
+        mod_details = {}
+
+        result = powerscale_module_mock._check_timestamp_modified(
+            snap_data, expiration_timestamp, desired_retention, mod_details)
+        assert result is True
+        assert mod_details['is_timestamp_modified'] is True
+
+    def test_check_timestamp_modified_set_to_none(self, powerscale_module_mock):
+        """Test _check_timestamp_modified when setting expiration to None."""
+        import time
+
+        snap_data = {'expires': time.time()}
+        expiration_timestamp = None
+        desired_retention = "none"
+        mod_details = {}
+
+        result = powerscale_module_mock._check_timestamp_modified(
+            snap_data, expiration_timestamp, desired_retention, mod_details)
+        assert result is True
+        assert mod_details['is_timestamp_modified'] is True

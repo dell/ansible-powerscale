@@ -218,6 +218,53 @@ class SynciqRules(object):
         self.api_instance = utils.isi_sdk.SyncApi(self.api_client)
         LOG.info('Got python SDK instance for provisioning on PowerScale')
 
+    def _get_sync_rule_by_id(self, sync_rule_id):
+        """Get sync rule by ID."""
+        sync_rule_obj = self.api_instance.get_sync_rule(sync_rule_id=sync_rule_id).rules[0]
+        return sync_rule_obj.to_dict()
+
+    def _find_matching_sync_rule(self, sync_rule_dict):
+        """Find matching sync rule from list based on dictionary criteria."""
+        duplicate_rule = []
+        sync_rule_list = self.api_instance.list_sync_rules().rules
+
+        for rule in sync_rule_list:
+            rule = rule.to_dict()
+            if all(rule.get(key, None) == val for key, val in sync_rule_dict.items()) \
+                    and rule['schedule'] == sync_rule_dict['schedule']:
+                duplicate_rule.append(rule)
+
+        return duplicate_rule
+
+    def _validate_single_match(self, duplicate_rule):
+        """Validate that only one matching rule exists."""
+        if len(duplicate_rule) > 1:
+            self.module.fail_json("Operation is not successful as "
+                                  "more than one instance of "
+                                  "SyncIQ performance rule is present with same configuration")
+        elif len(duplicate_rule) == 1:
+            return duplicate_rule[0]
+        return None
+
+    def _handle_api_exception(self, e, sync_rule_id):
+        """Handle API exceptions when getting sync rule."""
+        if str(e.status) == '404':
+            error_message = " Sync rule: %s not found." % sync_rule_id
+            LOG.info(error_message)
+            return None
+        else:
+            error_msg = utils.determine_error(error_obj=e)
+            error_message = 'Failed to get SyncIQ rule with error : %s' % str(error_msg)
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    def _handle_general_exception(self, e):
+        """Handle general exceptions when getting sync rule."""
+        error_msg = utils.determine_error(error_obj=e)
+        error_message = 'Failed to get SyncIQ rule with error : %s' % str(error_msg)
+        LOG.error(error_message)
+        self.module.fail_json(msg=error_message)
+
     def get_sync_rule(self, sync_rule_id=None, sync_rule_dict=None):
         """
         Get SyncIQ performance rule details. If multiple instances are found for same
@@ -226,45 +273,19 @@ class SynciqRules(object):
         :param sync_rule_dict: Dictionary of details of a performance rule
         :return: Dictionary of performance rule details if exists else none
         """
-        duplicate_rule = []
         sync_rule_obj = None
 
         try:
             if sync_rule_id:
-                sync_rule_obj = self.api_instance.get_sync_rule(sync_rule_id=sync_rule_id).rules[0]
-                sync_rule_obj = sync_rule_obj.to_dict()
+                sync_rule_obj = self._get_sync_rule_by_id(sync_rule_id)
             else:
-                sync_rule_list = self.api_instance.list_sync_rules().rules
-                for rule in sync_rule_list:
-                    rule = rule.to_dict()
-                    if all(rule.get(key, None) == val for key, val in sync_rule_dict.items()) \
-                            and rule['schedule'] == sync_rule_dict['schedule']:
-                        duplicate_rule.append(rule)
-                if len(duplicate_rule) > 1:
-                    self.module.fail_json("Operation is not successful as "
-                                          "more than one instance of "
-                                          "SyncIQ performance rule is present with same configuration")
-                elif len(duplicate_rule) == 1:
-                    sync_rule_obj = duplicate_rule[0]
+                duplicate_rule = self._find_matching_sync_rule(sync_rule_dict)
+                sync_rule_obj = self._validate_single_match(duplicate_rule)
             return sync_rule_obj
         except utils.ApiException as e:
-            if str(e.status) == '404':
-                error_message = " Sync rule: %s not found." % sync_rule_id
-                LOG.info(error_message)
-                return None
-            else:
-                error_msg = utils.determine_error(error_obj=e)
-                error_message = 'Failed to get SyncIQ rule with ' \
-                                'error : %s' % str(error_msg)
-                LOG.error(error_message)
-                self.module.fail_json(msg=error_message)
-
+            return self._handle_api_exception(e, sync_rule_id)
         except Exception as e:
-            error_msg = utils.determine_error(error_obj=e)
-            error_message = 'Failed to get SyncIQ rule with ' \
-                            'error : %s' % str(error_msg)
-            LOG.error(error_message)
-            self.module.fail_json(msg=error_message)
+            self._handle_general_exception(e)
 
     def create_sync_rule(self, sync_rule_param):
         """
@@ -318,6 +339,37 @@ class SynciqRules(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
+    def _check_field_modification(self, existing_rule_dict, input_rule_dict, field_name):
+        """Check if a field has been modified and add to modify parameters."""
+        if field_name in input_rule_dict and input_rule_dict[field_name] != existing_rule_dict[field_name]:
+            return input_rule_dict[field_name]
+        return None
+
+    def _merge_schedule_keys(self, input_rule_dict, existing_rule_dict):
+        """Merge missing schedule keys from existing rule into input rule."""
+        has_schedule_key = ['monday', 'tuesday', 'wednesday', 'thursday',
+                            'friday', 'saturday', 'sunday', 'begin', 'end']
+
+        for key in has_schedule_key:
+            if key not in input_rule_dict['schedule']:
+                input_rule_dict['schedule'].update({key: existing_rule_dict['schedule'][key]})
+
+    def _check_schedule_modification(self, existing_rule_dict, input_rule_dict):
+        """Check if schedule has been modified and return modified schedule."""
+        if 'schedule' not in input_rule_dict:
+            return None
+
+        self._merge_schedule_keys(input_rule_dict, existing_rule_dict)
+
+        if input_rule_dict['schedule'] != existing_rule_dict['schedule']:
+            return input_rule_dict['schedule']
+        return None
+
+    def _validate_type_not_modified(self, existing_rule_dict, input_rule_dict):
+        """Validate that type field is not being modified (not allowed)."""
+        if 'type' in input_rule_dict and input_rule_dict['type'] != existing_rule_dict['type']:
+            self.module.fail_json(msg="rule_type is not modifiable. Please create new SyncIQ rule for the rule_type.")
+
     def is_sync_rule_modifiable(self, existing_rule_dict, input_rule_dict):
         """
         Form dictionary of parameters for performance rule that is modifiable
@@ -325,48 +377,62 @@ class SynciqRules(object):
         :param input_rule_dict: Performance rule details dictionary provided by user
         :return: Dictionary of performance rule parameters that are modifiable
         """
-
         modify_rule_param = {}
 
-        has_schedule_key = ['monday', 'tuesday', 'wednesday', 'thursday',
-                            'friday', 'saturday', 'sunday', 'begin', 'end']
+        # Check simple field modifications
+        description = self._check_field_modification(existing_rule_dict, input_rule_dict, 'description')
+        if description:
+            modify_rule_param['description'] = description
 
-        if 'description' in input_rule_dict and input_rule_dict['description'] != existing_rule_dict['description']:
-            modify_rule_param['description'] = input_rule_dict['description']
+        limit = self._check_field_modification(existing_rule_dict, input_rule_dict, 'limit')
+        if limit:
+            modify_rule_param['limit'] = limit
 
-        if 'limit' in input_rule_dict and input_rule_dict['limit'] != existing_rule_dict['limit']:
-            modify_rule_param['limit'] = input_rule_dict['limit']
+        enabled = self._check_field_modification(existing_rule_dict, input_rule_dict, 'enabled')
+        if enabled:
+            modify_rule_param['enabled'] = enabled
 
-        if 'enabled' in input_rule_dict and input_rule_dict['enabled'] != existing_rule_dict['enabled']:
-            modify_rule_param['enabled'] = input_rule_dict['enabled']
+        # Check schedule modification
+        schedule = self._check_schedule_modification(existing_rule_dict, input_rule_dict)
+        if schedule:
+            modify_rule_param['schedule'] = schedule
 
-        if 'schedule' in input_rule_dict:
-            for key in has_schedule_key:
-                if key not in input_rule_dict['schedule']:
-                    input_rule_dict['schedule'].update({key: existing_rule_dict['schedule'][key]})
-
-            if input_rule_dict['schedule'] != existing_rule_dict['schedule']:
-                modify_rule_param['schedule'] = input_rule_dict['schedule']
-
-        if 'type' in input_rule_dict and input_rule_dict['type'] != existing_rule_dict['type']:
-            self.module.fail_json(msg="rule_type is not modifiable. Please create new SyncIQ rule for the rule_type.")
+        # Validate type is not being modified
+        self._validate_type_not_modified(existing_rule_dict, input_rule_dict)
 
         return modify_rule_param
 
-    def perform_module_operation(self):
-        """
-        Perform different actions on SyncIQ performance rule module based on
-        parameters chosen in playbook
-        """
-        sync_rule_id = self.module.params['sync_rule_id']
-        description = self.module.params['description']
-        rule_type = self.module.params['rule_type']
-        schedule = self.module.params['schedule']
-        limit = self.module.params['limit']
-        enabled = self.module.params['enabled']
-        state = self.module.params['state']
+    def _validate_sync_rule_params(self, sync_rule_id, rule_type, limit, schedule, enabled, state):
+        """Validate mandatory parameters for creating/deleting a performance rule."""
+        if sync_rule_id is not None and state != 'absent':
+            return
+        if rule_type is None or utils.is_input_empty(rule_type):
+            self.module.fail_json(msg="Please provide rule_type to "
+                                      "create/delete a SyncIQ performance rule.")
+        if limit is None:
+            self.module.fail_json(msg="Please provide limit to "
+                                      "create/delete a SyncIQ performance rule.")
+        if schedule is None:
+            self.module.fail_json(msg="Please provide schedule to "
+                                      "create/delete a SyncIQ performance rule.")
+        if schedule is not None and schedule['days_of_week'] is None:
+            self.module.fail_json(msg="Please provide days of a week, when an enabled rule is active,"
+                                      " to create/delete a SyncIQ performance rule.")
+        if schedule is not None and schedule['begin'] is None:
+            self.module.fail_json(msg="Please provide scheduled begin time to "
+                                      "create/delete a SyncIQ performance rule.")
+        if schedule is not None and schedule['end'] is None:
+            self.module.fail_json(msg="Please provide scheduled end time to "
+                                      "create/delete a SyncIQ performance rule.")
+        if enabled is None:
+            self.module.fail_json(msg="Please provide whether performance rule is "
+                                      "enabled to create/delete a SyncIQ rule.")
+        if sync_rule_id is None and state == 'absent':
+            self.module.fail_json(msg="Please provide sync_rule_id to delete a SyncIQ performance rule.")
 
-        result = dict(
+    def _initialize_result_dict(self):
+        """Initialize the result dictionary with default values."""
+        return dict(
             changed=False,
             synciq_rule_details='',
             create_synciq_rule=False,
@@ -374,68 +440,92 @@ class SynciqRules(object):
             delete_synciq_rule=False
         )
 
-        # Check mandatory parameters for creating/ deleting a performance rule
-        if sync_rule_id is None or state == 'absent':
-            if rule_type is None or utils.is_input_empty(rule_type):
-                self.module.fail_json(msg="Please provide rule_type to "
-                                          "create/delete a SyncIQ performance rule.")
-            if limit is None:
-                self.module.fail_json(msg="Please provide limit to "
-                                          "create/delete a SyncIQ performance rule.")
-            if schedule is None:
-                self.module.fail_json(msg="Please provide schedule to "
-                                          "create/delete a SyncIQ performance rule.")
-            if schedule is not None:
-                if schedule['days_of_week'] is None:
-                    self.module.fail_json(msg="Please provide days of a week, when an enabled rule is active,"
-                                              " to create/delete a SyncIQ performance rule.")
+    def _get_module_params(self):
+        """Get all module parameters."""
+        return {
+            'sync_rule_id': self.module.params['sync_rule_id'],
+            'description': self.module.params['description'],
+            'rule_type': self.module.params['rule_type'],
+            'schedule': self.module.params['schedule'],
+            'limit': self.module.params['limit'],
+            'enabled': self.module.params['enabled'],
+            'state': self.module.params['state']
+        }
 
-                if schedule['begin'] is None:
-                    self.module.fail_json(msg="Please provide scheduled begin time to "
-                                              "create/delete a SyncIQ performance rule.")
-
-                if schedule['end'] is None:
-                    self.module.fail_json(msg="Please provide scheduled end time to "
-                                              "create/delete a SyncIQ performance rule.")
-
-            if enabled is None:
-                self.module.fail_json(msg="Please provide whether performance rule is "
-                                          "enabled to create/delete a SyncIQ rule.")
-
-        if sync_rule_id is None and state == 'absent':
-            self.module.fail_json(msg="Please provide sync_rule_id to delete a SyncIQ performance rule.")
-
-        # Construct a dictionary for the parameters entered from playbook
-        sync_rule_dict = construct_sync_rule_dict(description, rule_type, schedule, limit, enabled)
-
-        rule_details = self.get_sync_rule(sync_rule_id, sync_rule_dict)
-
+    def _resolve_sync_rule_id(self, sync_rule_id, rule_details):
+        """Resolve the sync rule ID based on rule details."""
         if rule_details:
-            sync_rule_id = rule_details['id']
+            return rule_details['id']
         elif rule_details is None and sync_rule_id:
-            sync_rule_id = None
+            return None
+        return sync_rule_id
 
-        # Create a Rule
-        if rule_details is None and state == 'present':
-            sync_rule_id = self.create_sync_rule(sync_rule_dict)
-            result['create_synciq_rule'] = True
-        # Modify a rule
-        elif sync_rule_id and state == 'present':
-            modify_rule_dict = self.is_sync_rule_modifiable(rule_details, sync_rule_dict)
-            if modify_rule_dict:
-                result['modify_synciq_rule'] = self.modify_sync_rule(sync_rule_id, modify_rule_dict)
-        # Delete a rule
-        elif sync_rule_id and state == 'absent':
-            if not self.is_sync_rule_modifiable(rule_details, sync_rule_dict):
-                result['delete_synciq_rule'] = self.delete_sync_rule(sync_rule_id)
+    def _handle_rule_creation(self, sync_rule_dict, result):
+        """Handle sync rule creation when state is present and rule doesn't exist."""
+        sync_rule_id = self.create_sync_rule(sync_rule_dict)
+        result['create_synciq_rule'] = True
+        return sync_rule_id
 
-        # Display rule details
-        if sync_rule_id and state == 'present':
+    def _handle_rule_modification(self, sync_rule_id, rule_details, sync_rule_dict, result):
+        """Handle sync rule modification when state is present and rule exists."""
+        modify_rule_dict = self.is_sync_rule_modifiable(rule_details, sync_rule_dict)
+        if modify_rule_dict:
+            result['modify_synciq_rule'] = self.modify_sync_rule(sync_rule_id, modify_rule_dict)
+
+    def _handle_rule_deletion(self, sync_rule_id, rule_details, sync_rule_dict, result):
+        """Handle sync rule deletion when state is absent and rule exists."""
+        if not self.is_sync_rule_modifiable(rule_details, sync_rule_dict):
+            result['delete_synciq_rule'] = self.delete_sync_rule(sync_rule_id)
+
+    def _update_rule_details_display(self, sync_rule_id, result):
+        """Update result with rule details for display when state is present."""
+        if sync_rule_id:
             rule_details = self.get_sync_rule(sync_rule_id=sync_rule_id)
             result['synciq_rule_details'] = display_rule_details(rule_details)
+
+    def _update_changed_status(self, result):
+        """Update changed status based on operations performed."""
         if result['create_synciq_rule'] or result['modify_synciq_rule'] or result['delete_synciq_rule']:
             result['changed'] = True
 
+    def perform_module_operation(self):
+        """
+        Perform different actions on SyncIQ performance rule module based on
+        parameters chosen in playbook
+        """
+        params = self._get_module_params()
+        result = self._initialize_result_dict()
+
+        self._validate_sync_rule_params(params['sync_rule_id'], params['rule_type'],
+                                        params['limit'], params['schedule'],
+                                        params['enabled'], params['state'])
+
+        # Construct a dictionary for the parameters entered from playbook
+        sync_rule_dict = construct_sync_rule_dict(
+            params['description'], params['rule_type'],
+            params['schedule'], params['limit'],
+            params['enabled'])
+
+        rule_details = self.get_sync_rule(params['sync_rule_id'], sync_rule_dict)
+        sync_rule_id = self._resolve_sync_rule_id(params['sync_rule_id'], rule_details)
+
+        # Create a Rule
+        if rule_details is None and params['state'] == 'present':
+            sync_rule_id = self._handle_rule_creation(sync_rule_dict, result)
+
+        # Modify a rule
+        elif sync_rule_id and params['state'] == 'present':
+            self._handle_rule_modification(sync_rule_id, rule_details, sync_rule_dict, result)
+
+        # Delete a rule
+        elif sync_rule_id and params['state'] == 'absent':
+            self._handle_rule_deletion(sync_rule_id, rule_details, sync_rule_dict, result)
+
+        # Display rule details
+        if params['state'] == 'present':
+            self._update_rule_details_display(sync_rule_id, result)
+
+        self._update_changed_status(result)
         self.module.exit_json(**result)
 
 

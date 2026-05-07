@@ -53,11 +53,11 @@ class TestSNMPSettings(PowerScaleUnitBase):
                                 "snmp_v3": {
                                     "access": False,
                                     "auth_protocol": "MD5",
-                                    "privacy_password": "password",
+                                    "privacy_password": "test_privacy_password_placeholder",
                                     "privacy_protocol": "DES",
                                     "security_level": "noAuthNoPriv",
                                     "read_only_user": "user",
-                                    "password": "password_set"
+                                    "password": "test_password_set_placeholder"
                                 },
                                 "read_only_community": "community_set"})
         powerscale_module_mock.protocol_api.get_snmp_settings.to_dict = MagicMock(

@@ -150,3 +150,69 @@ class TestNetworkRule(PowerScaleUnitBase):
         powerscale_module_mock.network_api_instance.update_pools_pool_rule = \
             MagicMock(side_effect=utils.ApiException)
         self.capture_fail_json_call(MockNetworkRuleApi.modify_rule_failed_msg(rule_name), invoke_perform_module=True)
+
+    def test_handle_present_state_create(self, powerscale_module_mock):
+        """Test _handle_present_state when creating a new rule."""
+        groupnet = "groupnet0"
+        subnet = "subnet1"
+        pool = "pool1"
+        rule = "rule1"
+        iface = "ext-4"
+        new_name = None
+        current_rule_details = []
+        result = {}
+
+        powerscale_module_mock.get_settings_to_modify = MagicMock(
+            return_value={"iface": iface})
+        powerscale_module_mock.create_network_rule = MagicMock()
+
+        powerscale_module_mock._handle_present_state(
+            groupnet, subnet, pool, rule, iface, new_name,
+            current_rule_details, result)
+
+        powerscale_module_mock.create_network_rule.assert_called_once()
+        assert result['create_network_rule'] is True
+
+    def test_handle_present_state_modify(self, powerscale_module_mock):
+        """Test _handle_present_state when modifying an existing rule."""
+        groupnet = "groupnet0"
+        subnet = "subnet1"
+        pool = "pool1"
+        rule = "rule1"
+        iface = None
+        new_name = None
+        current_rule_details = [{"name": "rule1"}]
+        result = {}
+
+        powerscale_module_mock.get_settings_to_modify = MagicMock(
+            return_value={"description": "new desc"})
+        powerscale_module_mock.modify_network_rule = MagicMock()
+
+        powerscale_module_mock._handle_present_state(
+            groupnet, subnet, pool, rule, iface, new_name,
+            current_rule_details, result)
+
+        powerscale_module_mock.modify_network_rule.assert_called_once()
+        assert result['modify_network_rule'] is True
+
+    def test_handle_present_state_no_modification(self, powerscale_module_mock):
+        """Test _handle_present_state when no modification needed."""
+        groupnet = "groupnet0"
+        subnet = "subnet1"
+        pool = "pool1"
+        rule = "rule1"
+        iface = None
+        new_name = None
+        current_rule_details = [{"name": "rule1"}]
+        result = {}
+
+        powerscale_module_mock.get_settings_to_modify = MagicMock(
+            return_value={})
+        powerscale_module_mock.modify_network_rule = MagicMock()
+
+        powerscale_module_mock._handle_present_state(
+            groupnet, subnet, pool, rule, iface, new_name,
+            current_rule_details, result)
+
+        powerscale_module_mock.modify_network_rule.assert_not_called()
+        assert 'modify_network_rule' not in result

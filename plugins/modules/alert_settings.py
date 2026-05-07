@@ -156,6 +156,32 @@ class AlertSettings(PowerScaleBase):
         else:
             return Events(self.event_api, self.module).get_event_maintenance()
 
+    def _is_new_api_version(self):
+        """Check if cluster uses the newer API (>9.9)."""
+        return self.major > 9 or (self.major == 9 and self.minor > 9)
+
+    def _modify_new_api(self, modify_dict):
+        """Apply alert settings changes using the new API."""
+        if modify_dict.get('prune') is not None:
+            event_settings = self.isi_sdk.EventSettingsSettings(retention_days=modify_dict.get('prune'))
+            if not self.module.check_mode:
+                self.event_api.update_event_settings(event_settings=event_settings)
+            LOG.info("Successfully modified the event settings retention_days.")
+        if modify_dict.get('enable_celog_maintenance_mode') is not None:
+            cluster_maintenance = self.isi_sdk.MaintenanceSettingsExtended(active=modify_dict.get('enable_celog_maintenance_mode'))
+            if not self.module.check_mode:
+                self.cluster_api.update_maintenance_settings(maintenance_settings=cluster_maintenance)
+            LOG.info("Successfully modified the cluster maintenance mode.")
+
+    def _modify_legacy_api(self, modify_dict):
+        """Apply alert settings changes using the legacy API."""
+        event_maintenance = self.isi_sdk.EventMaintenanceExtended(
+            maintenance=modify_dict.get('enable_celog_maintenance_mode'),
+            prune=modify_dict.get('prune'))
+        if not self.module.check_mode:
+            self.event_api.update_event_maintenance(event_maintenance=event_maintenance)
+        LOG.info("Successfully modified the event maintenance.")
+
     def modify_alert_settings(self, modify_dict):
         """
         Modify the alert settings based on modify dict
@@ -164,24 +190,10 @@ class AlertSettings(PowerScaleBase):
         try:
             msg = "Modifing maintenance mode with parameters"
             LOG.info(msg)
-            if self.major > 9 or (self.major == 9 and self.minor > 9):
-                if modify_dict.get('prune') is not None:
-                    event_settings = self.isi_sdk.EventSettingsSettings(retention_days=modify_dict.get('prune'))
-                    if not self.module.check_mode:
-                        self.event_api.update_event_settings(event_settings=event_settings)
-                    LOG.info("Successfully modified the event settings retention_days.")
-                if modify_dict.get('enable_celog_maintenance_mode') is not None:
-                    cluster_maintenance = self.isi_sdk.MaintenanceSettingsExtended(active=modify_dict.get('enable_celog_maintenance_mode'))
-                    if not self.module.check_mode:
-                        self.cluster_api.update_maintenance_settings(maintenance_settings=cluster_maintenance)
-                    LOG.info("Successfully modified the cluster maintenance mode.")
+            if self._is_new_api_version():
+                self._modify_new_api(modify_dict)
             else:
-                event_maintenance = self.isi_sdk.EventMaintenanceExtended(
-                    maintenance=modify_dict.get('enable_celog_maintenance_mode'),
-                    prune=modify_dict.get('prune'))
-                if not self.module.check_mode:
-                    self.event_api.update_event_maintenance(event_maintenance=event_maintenance)
-                LOG.info("Successfully modified the event maintenance.")
+                self._modify_legacy_api(modify_dict)
             return True
 
         except Exception as e:

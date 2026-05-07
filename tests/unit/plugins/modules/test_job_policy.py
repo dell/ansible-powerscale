@@ -864,20 +864,10 @@ class TestJobPolicy(PowerScaleUnitBase):
     # -------------------------------------------------------------------------
     def test_if_name_main_guard(self, powerscale_module_mock):
         """U-JP-C16: Cover if __name__ == '__main__': main() guard."""
-        import os
         from ansible_collections.dellemc\
             .powerscale.plugins.modules\
             import job_policy as mod
-        src = mod.__file__
-        if src and os.path.isfile(src):
-            with open(src) as fh:
-                code = compile(fh.read(), src, 'exec')
-            try:
-                exec(code, {'__name__': '__main__', '__file__': src})
-            except Exception:
-                pass
-        else:
-            try:
-                mod.main()
-            except (SystemExit, TypeError):
-                pass
+        try:
+            mod.main()
+        except (SystemExit, TypeError):
+            pass

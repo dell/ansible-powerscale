@@ -18,6 +18,8 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
 LOG = utils.get_logger('ipmi_helper')
 
 IPMI_BASE_URI = "/platform/10/ipmi/config"
+CONTENT_TYPE_JSON = 'application/json'
+NOT_CONFIGURED_MSG = 'not configured'
 
 
 class IpmiApi(object):
@@ -47,8 +49,8 @@ class IpmiApi(object):
             'services': ['platform', 'namespace']
         })
         headers = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            'Content-Type': CONTENT_TYPE_JSON,
+            'Accept': CONTENT_TYPE_JSON
         }
         resp = open_url(
             url, data=body, headers=headers, method='POST',
@@ -90,8 +92,8 @@ class IpmiApi(object):
             headers = {
                 'Cookie': self._session_id,
                 'X-CSRF-Token': self._csrf_token or '',
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
+                'Content-Type': CONTENT_TYPE_JSON,
+                'Accept': CONTENT_TYPE_JSON,
                 'Referer': self.base_url
             }
             body = json.dumps(data) if data else None
@@ -156,7 +158,7 @@ class IpmiApi(object):
             return network
         except Exception as e:
             error_str = str(e).lower()
-            if 'not configured' in error_str or \
+            if NOT_CONFIGURED_MSG in error_str or \
                'not set to' in error_str or \
                'allocation type' in error_str or \
                'disabled' in error_str:
@@ -190,7 +192,7 @@ class IpmiApi(object):
             return result.get('user', {})
         except Exception as e:
             error_str = str(e).lower()
-            if 'not configured' in error_str or \
+            if NOT_CONFIGURED_MSG in error_str or \
                'disabled' in error_str:
                 return {}
             error_msg = f"Failed to get IPMI user config: {str(e)}"
@@ -218,7 +220,7 @@ class IpmiApi(object):
             return result.get('features', [])
         except Exception as e:
             error_str = str(e).lower()
-            if 'not configured' in error_str or \
+            if NOT_CONFIGURED_MSG in error_str or \
                'disabled' in error_str:
                 return []
             error_msg = f"Failed to get IPMI features: {str(e)}"
@@ -247,7 +249,7 @@ class IpmiApi(object):
             return result.get('nodes', [])
         except Exception as e:
             error_str = str(e).lower()
-            if 'not configured' in error_str or \
+            if NOT_CONFIGURED_MSG in error_str or \
                'not found' in error_str or \
                '404' in error_str:
                 return []

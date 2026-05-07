@@ -32,7 +32,7 @@ class TestLdap(PowerScaleUnitBase):
         "ldap_parameters": {
             'groupnet': "groupnet_ansildap",
             'bind_dn': "cn=admin,dc=example,dc=com",
-            'bind_password': "bind_password"
+            'bind_password': "test_bind_password_placeholder"
         },
         'state': 'present'
     }
@@ -46,7 +46,7 @@ class TestLdap(PowerScaleUnitBase):
             'ldap_name': 'ldap1',
             "ldap_parameters": {
                 'bind_dn': "cn=admin,dc=test,dc=com",
-                'bind_password': "bind_password"
+                'bind_password': "test_bind_password_placeholder"
             },
         })
         ldap_details = self.get_ldap_args
@@ -65,7 +65,7 @@ class TestLdap(PowerScaleUnitBase):
             'server_uris': ['uri1', 'uri2'],
             "ldap_parameters": {
                 'bind_dn': "cn=admin,dc=test,dc=com",
-                'bind_password': "bind_password"
+                'bind_password': "test_bind_password_placeholder"
             },
         })
         ldap_details = self.get_ldap_args
@@ -81,7 +81,7 @@ class TestLdap(PowerScaleUnitBase):
             "ldap_parameters": {
                 'groupnet': "groupnet_ansildap",
                 'bind_dn': "cn=admin,dc=example,dc=com",
-                'bind_password': "bind_password"
+                'bind_password': "test_bind_password_placeholder"
             },
         })
         powerscale_module_mock.module.params = self.get_ldap_args
@@ -94,7 +94,7 @@ class TestLdap(PowerScaleUnitBase):
             'base_dn': 'DC=ansildap,DC=com',
             "ldap_parameters": {
                 'bind_dn': "cn=admin,dc=test,dc=com",
-                'bind_password': "bind_password"
+                'bind_password': "test_bind_password_placeholder"
             },
         })
         powerscale_module_mock.module.params = self.get_ldap_args
@@ -107,7 +107,7 @@ class TestLdap(PowerScaleUnitBase):
             'server_uris': '',
             "ldap_parameters": {
                 'bind_dn': "cn=admin,dc=test,dc=com",
-                'bind_password': "bind_password"
+                'bind_password': "test_bind_password_placeholder"
             },
         })
         powerscale_module_mock.module.params = self.get_ldap_args
@@ -120,7 +120,7 @@ class TestLdap(PowerScaleUnitBase):
             "ldap_parameters": {
                 'groupnet': "groupnet_ansildap",
                 'bind_dn': "cn=admin,dc=example,dc=com",
-                'bind_password': "bind_password"
+                'bind_password': "test_bind_password_placeholder"
             },
         })
         powerscale_module_mock.module.params = self.get_ldap_args
@@ -136,7 +136,7 @@ class TestLdap(PowerScaleUnitBase):
             "ldap_name": "ldap1",
             "ldap_parameters": {
                 'bind_dn': "cn=admin,dc=test,dc=com",
-                'bind_password': "bind_password"
+                'bind_password': "test_bind_password_placeholder"
             },
         })
         powerscale_module_mock.module.params = self.get_ldap_args
@@ -151,7 +151,7 @@ class TestLdap(PowerScaleUnitBase):
             "ldap_name": "ldap1",
             "ldap_parameters": {
                 'bind_dn': "cn=admin,dc=test,dc=com",
-                'bind_password': "bind_password"
+                'bind_password': "test_bind_password_placeholder"
             },
         })
         powerscale_module_mock.module.params = self.get_ldap_args
@@ -215,7 +215,7 @@ class TestLdap(PowerScaleUnitBase):
             'server_uri_state': 'absent-in-ldap',
             "ldap_parameters": {
                 'bind_dn': "cn=admin,dc=test,dc=com",
-                'bind_password': "bind_password"
+                'bind_password': "test_bind_password_placeholder"
             },
         })
         powerscale_module_mock.get_ldap_details = MagicMock(return_value=MockLdapApi.LDAP['ldap'][0])

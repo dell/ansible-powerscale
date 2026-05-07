@@ -371,23 +371,13 @@ class JobEventInfo(object):
             parsed_end_time = self.parse_time_input(end_time)
 
         # Build API parameters, excluding None values
-        api_params = {}
-        if state is not None:
-            api_params['state'] = state
-        if parsed_begin_time is not None:
-            api_params['begin'] = parsed_begin_time
-        if parsed_end_time is not None:
-            api_params['end'] = parsed_end_time
-        if job_id is not None:
-            api_params['job_id'] = job_id
-        if job_type is not None:
-            api_params['job_type'] = job_type
-        if event_key is not None:
-            api_params['key'] = event_key
-        if ended_jobs_only is not None:
-            api_params['ended_jobs_only'] = ended_jobs_only
-        if limit is not None:
-            api_params['limit'] = limit
+        param_map = {
+            'state': state, 'begin': parsed_begin_time,
+            'end': parsed_end_time, 'job_id': job_id,
+            'job_type': job_type, 'key': event_key,
+            'ended_jobs_only': ended_jobs_only, 'limit': limit
+        }
+        api_params = {k: v for k, v in param_map.items() if v is not None}
 
         # Fetch events with pagination
         all_events = []
