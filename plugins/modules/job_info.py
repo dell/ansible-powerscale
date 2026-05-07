@@ -287,6 +287,42 @@ class JobInfo(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
+    def _list_filtered_jobs(self, state_filter, job_type_filter, sort, dir_param, limit):
+        """List jobs with filters applied. Returns list of job dicts."""
+        params = {}
+        if sort:
+            params['sort'] = sort
+        if dir_param:
+            params['dir'] = dir_param
+        if limit is not None:
+            params['limit'] = limit
+
+        if state_filter and len(state_filter) > 1:
+            job_details = self._list_jobs_multi_state(params, state_filter)
+        else:
+            if state_filter:
+                params['state'] = state_filter[0]
+            jobs_response = self.list_jobs(**params)
+            job_details = jobs_response.get('jobs', []) if jobs_response else []
+
+        if job_type_filter and job_details:
+            job_details = [j for j in job_details if j.get('type') in job_type_filter]
+        return job_details
+
+    def _list_jobs_multi_state(self, params, state_filter):
+        """List jobs across multiple state filters, deduplicating by ID."""
+        job_details = []
+        seen_ids = set()
+        for s in state_filter:
+            state_params = dict(params, state=s)
+            jobs_response = self.list_jobs(**state_params)
+            for job in (jobs_response.get('jobs', []) if jobs_response else []):
+                jid = job.get('id')
+                if jid not in seen_ids:
+                    seen_ids.add(jid)
+                    job_details.append(job)
+        return job_details
+
     def perform_module_operation(self):
         """
         Perform different actions on job info module based on parameters
@@ -318,43 +354,8 @@ class JobInfo(object):
                     list) else job_details
                 result['total_jobs'] = len(result['job_details'])
         else:
-            # Build filter parameters for list_job_jobs
-            params = {}
-            if sort:
-                params['sort'] = sort
-            if dir_param:
-                params['dir'] = dir_param
-            if limit is not None:
-                params['limit'] = limit
-
-            # Handle multiple state filters by making separate calls
-            if state_filter and len(state_filter) > 1:
-                job_details = []
-                seen_ids = set()
-                for s in state_filter:
-                    state_params = dict(params, state=s)
-                    jobs_response = self.list_jobs(**state_params)
-                    for job in (jobs_response.get('jobs', [])
-                                if jobs_response else []):
-                        jid = job.get('id')
-                        if jid not in seen_ids:
-                            seen_ids.add(jid)
-                            job_details.append(job)
-            elif state_filter:
-                params['state'] = state_filter[0]
-                jobs_response = self.list_jobs(**params)
-                job_details = jobs_response.get('jobs', []) \
-                    if jobs_response else []
-            else:
-                jobs_response = self.list_jobs(**params)
-                job_details = jobs_response.get('jobs', []) \
-                    if jobs_response else []
-
-            # Apply client-side job_type filter
-            if job_type_filter and job_details:
-                job_details = [job for job in job_details
-                               if job.get('type') in job_type_filter]
-
+            job_details = self._list_filtered_jobs(
+                state_filter, job_type_filter, sort, dir_param, limit)
             result['job_details'] = job_details
             result['total_jobs'] = len(job_details)
 

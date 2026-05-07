@@ -545,62 +545,38 @@ class SyncIQTargetReports(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
+    def _resolve_target_report_id(self):
+        """Resolve target report id from id or name parameter."""
+        report_id = self.module.params['id']
+        name = self.module.params['name']
+        if not report_id and not name:
+            self.module.fail_json(msg='Please provide a valid report id or valid report name')
+        if not report_id and name:
+            report_id = self.get_target_report_id(name)
+        return report_id
+
     def perform_module_operation(self):
         """
         Perform different actions on syncIQ report module based on parameters
         chosen in playbook
         """
-        id = self.module.params['id']
         state = self.module.params['state']
-        name = self.module.params['name']
         sub_report_id = self.module.params['sub_report_id']
         include_sub_reports = self.module.params['include_sub_reports']
-        synciq_target_report = None
-        synciq_target_sub_report_details = None
-        synciq_target_sub_report_detail = None
-
-        if not id and not name:
-            error_message = 'Please provide a valid report id or valid report name'
-            self.module.fail_json(msg=error_message)
 
         if state != 'present':
-            error_message = 'Please provide a valid value for state'
-            self.module.fail_json(msg=error_message)
+            self.module.fail_json(msg='Please provide a valid value for state')
 
-        if not include_sub_reports and not sub_report_id:
-            if id:
-                synciq_target_report = self.get_synciq_target_report(id)
+        report_id = self._resolve_target_report_id()
 
-            if name:
-                id = self.get_target_report_id(name)
-                synciq_target_report = self.get_synciq_target_report(id)
+        if sub_report_id:
+            self.result["synciq_subreport_detail"] = self.get_synciq_taget_sub_report(sub_report_id, report_id)
+        elif include_sub_reports:
+            self.result["synciq_target_subreport_details"] = self.get_synciq_target_sub_reports(report_id)
+        else:
+            self.result["synciq_target_report_details"] = self.get_synciq_target_report(report_id)
 
-        if include_sub_reports:
-            if id:
-                synciq_target_sub_report_details = self.get_synciq_target_sub_reports(id)
-
-            if name:
-                id = self.get_target_report_id(name)
-                synciq_target_sub_report_details = self.get_synciq_target_sub_reports(id)
-
-        if sub_report_id and (id or name):
-            if id:
-                synciq_target_sub_report_detail = self.get_synciq_taget_sub_report(sub_report_id, id)
-            elif name:
-                id = self.get_target_report_id(name)
-                synciq_target_sub_report_detail = self.get_synciq_taget_sub_report(sub_report_id, id)
-
-        if synciq_target_report:
-            self.result["synciq_target_report_details"] = synciq_target_report
-            self.module.exit_json(**self.result)
-
-        if synciq_target_sub_report_details:
-            self.result["synciq_target_subreport_details"] = synciq_target_sub_report_details
-            self.module.exit_json(**self.result)
-
-        if synciq_target_sub_report_detail:
-            self.result["synciq_subreport_detail"] = synciq_target_sub_report_detail
-            self.module.exit_json(**self.result)
+        self.module.exit_json(**self.result)
 
 
 def get_synciq_target_reports_parameters():
