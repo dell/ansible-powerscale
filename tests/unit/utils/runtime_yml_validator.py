@@ -56,11 +56,8 @@ def validate_action_group_structure(runtime_yml_dict: Dict) -> Tuple[bool, str]:
         return False, "Missing dellemc.powerscale.all action group"
     
     action_group = action_groups['dellemc.powerscale.all']
-    if 'modules' not in action_group:
-        return False, "Missing modules key in action group"
-    
-    if not isinstance(action_group['modules'], list):
-        return False, "modules must be a list"
+    if not isinstance(action_group, list):
+        return False, "action group must be a direct list of module names (not a dict with 'modules' key)"
     
     return True, ""
 
@@ -80,9 +77,9 @@ def validate_module_list_completeness(
         Tuple of (is_valid, error_message, missing_modules)
     """
     try:
-        # Get modules from action group
+        # Get modules from action group (direct list format)
         action_group = runtime_yml_dict['plugin_routing']['action_groups']['dellemc.powerscale.all']
-        action_group_modules = set(action_group['modules'])
+        action_group_modules = set(action_group)
         
         # Get actual module files
         modules_path = Path(modules_dir)

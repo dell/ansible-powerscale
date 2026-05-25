@@ -51,29 +51,21 @@ class TestRuntimeYmlHasActionGroups:
             "Add it under plugin_routing.action_groups."
         )
 
-    def test_action_group_has_modules_key(self, runtime_yml):
-        """dellemc.powerscale.all must have a modules list."""
+    def test_action_group_is_list(self, runtime_yml):
+        """dellemc.powerscale.all must be a direct list (Ansible action_groups schema)."""
         action_groups = runtime_yml.get("plugin_routing", {}).get("action_groups", {})
-        group = action_groups.get(EXPECTED_GROUP, {})
-        assert "modules" in group, (
-            f"'{EXPECTED_GROUP}' action group is missing the 'modules' key."
+        group = action_groups.get(EXPECTED_GROUP)
+        assert isinstance(group, list), (
+            f"'{EXPECTED_GROUP}' must be a direct list of module names, got {type(group)}. "
+            "Ansible iterates action_group entries directly — a dict-with-modules-key is not supported."
         )
 
-    def test_action_group_modules_is_list(self, runtime_yml):
-        """The modules value must be a list."""
+    def test_action_group_not_empty(self, runtime_yml):
+        """The action group list must not be empty."""
         action_groups = runtime_yml.get("plugin_routing", {}).get("action_groups", {})
-        group = action_groups.get(EXPECTED_GROUP, {})
-        modules = group.get("modules", None)
-        assert isinstance(modules, list), (
-            f"'{EXPECTED_GROUP}.modules' must be a list, got {type(modules)}."
-        )
-
-    def test_action_group_modules_not_empty(self, runtime_yml):
-        """The modules list must not be empty."""
-        action_groups = runtime_yml.get("plugin_routing", {}).get("action_groups", {})
-        modules = action_groups.get(EXPECTED_GROUP, {}).get("modules", [])
+        modules = action_groups.get(EXPECTED_GROUP, [])
         assert len(modules) > 0, (
-            f"'{EXPECTED_GROUP}.modules' is empty. All PowerScale modules must be listed."
+            f"'{EXPECTED_GROUP}' is empty. All PowerScale modules must be listed."
         )
 
 
@@ -83,7 +75,7 @@ class TestAllModulesInActionGroup:
     def test_all_actual_modules_in_action_group(self, runtime_yml, actual_module_names):
         """Every .py file in plugins/modules/ must appear in the action group."""
         action_groups = runtime_yml.get("plugin_routing", {}).get("action_groups", {})
-        listed_modules = set(action_groups.get(EXPECTED_GROUP, {}).get("modules", []))
+        listed_modules = set(action_groups.get(EXPECTED_GROUP, []))
         missing = [m for m in actual_module_names if m not in listed_modules]
         assert not missing, (
             f"The following modules are in plugins/modules/ but missing from the action group:\n"
@@ -93,7 +85,7 @@ class TestAllModulesInActionGroup:
     def test_no_extra_modules_in_action_group(self, runtime_yml, actual_module_names):
         """Action group must not list modules that don't exist in plugins/modules/."""
         action_groups = runtime_yml.get("plugin_routing", {}).get("action_groups", {})
-        listed_modules = set(action_groups.get(EXPECTED_GROUP, {}).get("modules", []))
+        listed_modules = set(action_groups.get(EXPECTED_GROUP, []))
         actual_set = set(actual_module_names)
         extra = listed_modules - actual_set
         assert not extra, (
@@ -104,7 +96,7 @@ class TestAllModulesInActionGroup:
     def test_no_duplicate_modules(self, runtime_yml):
         """No module should appear twice in the action group."""
         action_groups = runtime_yml.get("plugin_routing", {}).get("action_groups", {})
-        modules = action_groups.get(EXPECTED_GROUP, {}).get("modules", [])
+        modules = action_groups.get(EXPECTED_GROUP, [])
         duplicates = [m for m in modules if modules.count(m) > 1]
         assert not duplicates, (
             f"Duplicate modules found in action group: {set(duplicates)}"
@@ -113,7 +105,7 @@ class TestAllModulesInActionGroup:
     def test_module_count_matches_plugins_dir(self, runtime_yml, actual_module_names):
         """Number of modules in action group must match number of .py files in plugins/modules/."""
         action_groups = runtime_yml.get("plugin_routing", {}).get("action_groups", {})
-        listed_modules = action_groups.get(EXPECTED_GROUP, {}).get("modules", [])
+        listed_modules = action_groups.get(EXPECTED_GROUP, [])
         assert len(listed_modules) == len(actual_module_names), (
             f"Module count mismatch: {len(listed_modules)} in action group, "
             f"{len(actual_module_names)} in plugins/modules/."
@@ -126,7 +118,7 @@ class TestModuleNameFormat:
     def test_all_module_names_have_correct_prefix(self, runtime_yml):
         """All entries in action group must start with 'dellemc.powerscale.'"""
         action_groups = runtime_yml.get("plugin_routing", {}).get("action_groups", {})
-        modules = action_groups.get(EXPECTED_GROUP, {}).get("modules", [])
+        modules = action_groups.get(EXPECTED_GROUP, [])
         invalid = [m for m in modules if not m.startswith(f"{EXPECTED_NAMESPACE}.")]
         assert not invalid, (
             f"Module names with incorrect format (must start with '{EXPECTED_NAMESPACE}.'):\n"

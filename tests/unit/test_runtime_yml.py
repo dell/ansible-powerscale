@@ -22,10 +22,9 @@ requires_ansible: ">=2.15.0"
 plugin_routing:
     action_groups:
         dellemc.powerscale.all:
-            modules:
-                - dellemc.powerscale.accesszone
-                - dellemc.powerscale.filesystem
-                - dellemc.powerscale.settings
+            - dellemc.powerscale.accesszone
+            - dellemc.powerscale.filesystem
+            - dellemc.powerscale.settings
 """
 
 INVALID_YAML = """
@@ -38,12 +37,12 @@ plugin_routing:
                   bad_indent: broken yaml: [unclosed
 """
 
-MISSING_MODULES_KEY_YML = """
+INVALID_ACTION_GROUP_YML = """
 requires_ansible: ">=2.15.0"
 plugin_routing:
     action_groups:
         dellemc.powerscale.all:
-            not_modules:
+            modules:
                 - dellemc.powerscale.accesszone
 """
 
@@ -100,10 +99,10 @@ class TestValidateActionGroupStructure:
         assert error == ""
 
     def test_validate_action_group_structure_invalid(self):
-        bad_dict = yaml.safe_load(MISSING_MODULES_KEY_YML)
+        bad_dict = yaml.safe_load(INVALID_ACTION_GROUP_YML)
         is_valid, error = validate_action_group_structure(bad_dict)
         assert is_valid is False
-        assert len(error) > 0
+        assert "direct list" in error or len(error) > 0
 
     def test_validate_action_group_structure_missing_plugin_routing(self):
         is_valid, error = validate_action_group_structure({})
@@ -136,8 +135,7 @@ class TestValidateModuleListCompleteness:
 plugin_routing:
     action_groups:
         dellemc.powerscale.all:
-            modules:
-                - dellemc.powerscale.accesszone
+            - dellemc.powerscale.accesszone
 """)
         (tmp_path / "plugins" / "modules" / "newmodule.py").write_text("# new")
         modules_dir = str(tmp_path / "plugins" / "modules")
@@ -191,7 +189,7 @@ class TestActionGroupNamingConvention:
     def test_modules_have_correct_namespace(self, valid_runtime_dict):
         modules = valid_runtime_dict["plugin_routing"]["action_groups"][
             "dellemc.powerscale.all"
-        ]["modules"]
+        ]
         assert all(m.startswith("dellemc.powerscale.") for m in modules)
 
 
