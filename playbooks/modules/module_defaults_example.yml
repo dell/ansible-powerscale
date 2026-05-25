@@ -1,0 +1,46 @@
+---
+- name: PowerScale Module Defaults Example
+  hosts: localhost
+  gather_facts: false
+  vars:
+    onefs_host: "{{ onefs_host }}"
+    onefs_port: 8080
+    onefs_ssl: true
+    onefs_user: "{{ onefs_user }}"
+    onefs_password: "{{ onefs_password }}"
+
+  module_defaults:
+    group/dellemc.powerscale.all:
+      onefs_host: "{{ onefs_host }}"
+      port_no: "{{ onefs_port }}"
+      verify_ssl: "{{ onefs_ssl }}"
+      api_user: "{{ onefs_user }}"
+      api_password: "{{ onefs_password }}"
+
+  tasks:
+    - name: Get cluster information
+      dellemc.powerscale.info:
+        gather_subset:
+          - cluster
+      register: cluster_info
+
+    - name: Display cluster info
+      ansible.builtin.debug:
+        var: cluster_info
+
+    - name: Configure NTP settings
+      dellemc.powerscale.settings:
+        ntp_servers:
+          - time1.example.com
+          - time2.example.com
+
+    - name: Create filesystem
+      dellemc.powerscale.filesystem:
+        path: /ifs/data/example_fs
+        state: present
+
+    - name: Override onefs_host for a specific task
+      dellemc.powerscale.info:
+        onefs_host: "alternate.example.com"
+        gather_subset:
+          - cluster
