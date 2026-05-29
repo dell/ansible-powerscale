@@ -6,7 +6,6 @@ global action groups feature for module_defaults support.
 """
 
 import os
-import tempfile
 import pytest
 import yaml
 
@@ -20,11 +19,16 @@ from tests.unit.utils.runtime_yml_validator import (
 VALID_RUNTIME_YML = """
 requires_ansible: ">=2.15.0"
 plugin_routing:
-    action_groups:
-        dellemc.powerscale.all:
-            - dellemc.powerscale.accesszone
-            - dellemc.powerscale.filesystem
-            - dellemc.powerscale.settings
+    modules:
+        dellemc_powerscale_accesszone:
+            tombstone:
+                removal_date: "2024-03-25"
+                warning_text: Use accesszone instead.
+action_groups:
+    dellemc.powerscale.all:
+        - dellemc.powerscale.accesszone
+        - dellemc.powerscale.filesystem
+        - dellemc.powerscale.settings
 """
 
 INVALID_YAML = """
@@ -40,10 +44,15 @@ plugin_routing:
 INVALID_ACTION_GROUP_YML = """
 requires_ansible: ">=2.15.0"
 plugin_routing:
-    action_groups:
-        dellemc.powerscale.all:
-            modules:
-                - dellemc.powerscale.accesszone
+    modules:
+        dellemc_powerscale_accesszone:
+            tombstone:
+                removal_date: "2024-03-25"
+                warning_text: Use accesszone instead.
+action_groups:
+    dellemc.powerscale.all:
+        modules:
+            - dellemc.powerscale.accesszone
 """
 
 
@@ -104,19 +113,13 @@ class TestValidateActionGroupStructure:
         assert is_valid is False
         assert "direct list" in error or len(error) > 0
 
-    def test_validate_action_group_structure_missing_plugin_routing(self):
-        is_valid, error = validate_action_group_structure({})
-        assert is_valid is False
-        assert "plugin_routing" in error
-
     def test_validate_action_group_structure_missing_action_groups(self):
-        d = {"plugin_routing": {"modules": {}}}
-        is_valid, error = validate_action_group_structure(d)
+        is_valid, error = validate_action_group_structure({})
         assert is_valid is False
         assert "action_groups" in error
 
     def test_validate_action_group_structure_missing_group_name(self):
-        d = {"plugin_routing": {"action_groups": {"other.group": {"modules": []}}}}
+        d = {"action_groups": {"other.group": {"modules": []}}}
         is_valid, error = validate_action_group_structure(d)
         assert is_valid is False
         assert "dellemc.powerscale.all" in error
@@ -132,10 +135,9 @@ class TestValidateModuleListCompleteness:
 
     def test_validate_module_list_incomplete(self, mock_modules_dir, tmp_path):
         runtime_dict = yaml.safe_load("""
-plugin_routing:
-    action_groups:
-        dellemc.powerscale.all:
-            - dellemc.powerscale.accesszone
+action_groups:
+    dellemc.powerscale.all:
+        - dellemc.powerscale.accesszone
 """)
         (tmp_path / "plugins" / "modules" / "newmodule.py").write_text("# new")
         modules_dir = str(tmp_path / "plugins" / "modules")
@@ -183,11 +185,11 @@ class TestValidateModuleNameFormat:
 
 class TestActionGroupNamingConvention:
     def test_action_group_naming_convention(self, valid_runtime_dict):
-        action_groups = valid_runtime_dict["plugin_routing"]["action_groups"]
+        action_groups = valid_runtime_dict["action_groups"]
         assert "dellemc.powerscale.all" in action_groups
 
     def test_modules_have_correct_namespace(self, valid_runtime_dict):
-        modules = valid_runtime_dict["plugin_routing"]["action_groups"][
+        modules = valid_runtime_dict["action_groups"][
             "dellemc.powerscale.all"
         ]
         assert all(m.startswith("dellemc.powerscale.") for m in modules)
