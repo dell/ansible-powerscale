@@ -89,6 +89,7 @@ The Ansible Modules for Dell PowerScale release 3.9.1 provides the following enh
 - Added support for PowerScale 9.13.
 - Added support for target_compare_initial_sync parameter in SyncIQ policy module to enable data comparison during initial sync.
 - Fixed typo in SDK call in subnet module.
+- Added global action group `dellemc.powerscale.all` in `meta/runtime.yml` to support Ansible `module_defaults`. Users can now define shared connection parameters (onefs_host, api_user, api_password, verify_ssl, port_no) once using `module_defaults` and have all PowerScale modules inherit them automatically, eliminating per-task repetition.
 
 Known issues
 ------------
