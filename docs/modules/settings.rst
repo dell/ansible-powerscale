@@ -53,6 +53,10 @@ Parameters
     The subject line for notification messages from this cluster.
 
 
+  smtp_port (optional, int, None)
+    The port on the SMTP server to be used for relaying notification messages.
+
+
   email_settings (optional, bool, None)
     (deprecated) This is an addition flag to view the email settings.
 
@@ -202,6 +206,7 @@ Examples
         mail_relay: "mailrelay.itp.dell.com"
         mail_sender: "lab-a2@dell.com"
         mail_subject: "lab-a2-alerts"
+        smtp_port: 25
 
     - name: Add NTP server
       dellemc.powerscale.settings:
@@ -244,6 +249,7 @@ Examples
         mail_relay: "mailrelay.itp.dell.com"
         mail_sender: "lab-a2@dell.com"
         mail_subject: "lab-a2-alerts"
+        smtp_port: 25
         ntp_servers:
           - "10.106.**.***"
           - "10.106.**.***"
@@ -308,6 +314,7 @@ Examples
         mail_relay: "mailrelay.itp.dell.com"
         mail_sender: "lab-a2@dell.com"
         mail_subject: "lab-a2-alerts"
+        smtp_port: 25
         ntp_servers:
           - "10.106.**.***"
           - "10.106.**.***"

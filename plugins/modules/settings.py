@@ -43,6 +43,10 @@ options:
     description:
     - The subject line for notification messages from this cluster.
     type: str
+  smtp_port:
+    description:
+    - The port on the SMTP server to be used for relaying notification messages.
+    type: int
   email_settings:
     description:
     - (deprecated) This is an addition flag to view the email settings.
@@ -156,6 +160,7 @@ EXAMPLES = r'''
     mail_relay: "mailrelay.itp.dell.com"
     mail_sender: "lab-a2@dell.com"
     mail_subject: "lab-a2-alerts"
+    smtp_port: 25
 
 - name: Add NTP server
   dellemc.powerscale.settings:
@@ -198,6 +203,7 @@ EXAMPLES = r'''
     mail_relay: "mailrelay.itp.dell.com"
     mail_sender: "lab-a2@dell.com"
     mail_subject: "lab-a2-alerts"
+    smtp_port: 25
     ntp_servers:
       - "10.106.**.***"
       - "10.106.**.***"
@@ -262,6 +268,7 @@ EXAMPLES = r'''
     mail_relay: "mailrelay.itp.dell.com"
     mail_sender: "lab-a2@dell.com"
     mail_subject: "lab-a2-alerts"
+    smtp_port: 25
     ntp_servers:
       - "10.106.**.***"
       - "10.106.**.***"
@@ -578,6 +585,7 @@ class Settings(PowerScaleBase):
             mail_relay=dict(type='str'),
             mail_sender=dict(type='str'),
             mail_subject=dict(type='str'),
+            smtp_port=dict(type='int'),
             email_settings=dict(type='bool'),
             ntp_servers=dict(type='list', elements='str'),
             ntp_server_id=dict(type='str'),
@@ -670,11 +678,13 @@ class Settings(PowerScaleBase):
         return source and source != target
 
     def form_modify_email_dict(self, settings_params, email_settings):
-        email_setting_keys = ['mail_relay', 'mail_sender', 'mail_subject']
+        email_setting_keys = ['mail_relay', 'mail_sender', 'mail_subject',
+                              'smtp_port']
         email_params = {}
         for setting in email_setting_keys:
             if setting in email_setting_keys and \
-                    self.do_update(settings_params[setting], email_settings['settings'][setting]):
+                    self.do_update(settings_params[setting],
+                                   email_settings['settings'].get(setting)):
                 email_params[setting] = settings_params[setting]
         return email_params
 
