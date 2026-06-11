@@ -1,12 +1,8 @@
-# KNOWLEDGE.md — providers/
-
-<!-- Filename: Use KNOWLEDGE.md for single-component directories.
-     Use KNOWLEDGE-<component>.md when a directory covers multiple components.
-     See governance/constitutions/appendices/knowledge-loading.md Section 0. -->
+# KNOWLEDGE.md — ansible-powerscale
 
 <!-- yaml-metadata-start -->
 scope_paths: ["./"]
-capture_git_sha: "cc89f26c07cab11f84a28168f816a36fa1a3c431"
+capture_git_sha: "c117cc5c803f9b58d19cc9f081cb616f15396acf"
 status: "current"
 auto_update: false
 preview_before_apply: true
@@ -17,170 +13,131 @@ scaffold_version: "1.0"
 <!-- quick-reference-start -->
 ## Agent Quick Reference
 
-> Machine-readable navigation aid for agents performing section-level selective loading.
-> Section locators are heading strings only — no line numbers.
-> never_again_count: N means N production-incident-derived constraints exist in Failure Modes.
-
 | Section | Heading | Summary | never_again_count |
 |---------|---------|---------|-------------------|
-| Component Overview | `## Component Overview` | High-level purpose and boundaries | — |
-| Architectural Rationale | `## Architectural Rationale` | Why built this way; key tradeoffs | — |
-| Failure Modes & Gotchas | `## Failure Modes & Gotchas` | Production incidents; Never Again constraints | 0 |
-| Performance Characteristics | `## Performance Characteristics` | Throughput; latency; resource limits | — |
-| Implicit Contracts | `## Implicit Contracts` | Undocumented assumptions; caller invariants | — |
-| Threading & Synchronization | `## Threading & Synchronization` | Thread safety; lock ordering; async patterns | — |
+| Component Overview | `## Component Overview` | dellemc.powerscale collection for PowerScale | — |
+| Architectural Rationale | `## Architectural Rationale` | isilon-sdk SDK; Ansible collection pattern | — |
+| Failure Modes & Gotchas | `## Failure Modes & Gotchas` | SDK coupling, idempotency, verify_ssl | 0 |
+| Implicit Contracts | `## Implicit Contracts` | Connection params, ordering, action groups | — |
 <!-- quick-reference-end -->
 
 ## Five Questions Quick Reference
 
 ### What does it do?
-`providers/` is a workspace containing 6 Ansible Galaxy collections published under the `dellemc` namespace. Each delivers declarative, idempotent resource management for a specific Dell hardware platform. Five collections target storage arrays (PowerScale 56 modules, PowerStore 45, PowerFlex 22, PowerMax 17, Unity 18) and share a canonical internal layout. OpenManage (105 modules + 16 roles) targets PowerEdge server lifecycle management with a structurally distinct layout developed by a different team.
+Ansible Galaxy collection `dellemc.powerscale` (v3.9.1). Provides 56 modules for declarative, idempotent management of Dell PowerScale (Isilon) scale-out NAS storage. Uses `isilon-sdk` (==0.6.0) Python SDK.
 
 ### How do you modify it?
-To add a new module to a storage collection: create the module file in `plugins/modules/`, add corresponding example playbook in `playbooks/modules/`, add unit test in `tests/unit/plugins/modules/`, and append the module FQCN to `meta/runtime.yml` under the `dellemc.<platform>.all` action group. For OpenManage, the module_utils layout is flat (no `storage/dell/` path) and includes roles in addition to modules.
+Create module file in `plugins/modules/`, add example playbook in `playbooks/modules/`, add unit test in `tests/unit/plugins/modules/`, append module FQCN to `meta/runtime.yml` action group.
 
 ### What breaks?
-No known production incidents. Possible silent-failure constraints: partial parameter acceptance (ignored fields), idempotency mismatch, async operations treated as completed, duplicate resource scenarios, capacity/pool constraints not surfaced clearly, initiator/host configuration inconsistencies, and version drift between collection and array firmware.
+SDK version mismatch is a blocking defect. Missing action group entry causes `module_defaults` to silently skip the module. `verify_ssl: false` in production violates security constitution.
 
 ### What depends on it?
-Ordering requirements: filesystem must exist before snapshot; volume group must exist before creating volumes in it; protection/performance policies must exist before assignment. All modules require connection parameters (host, user, password, verify_ssl) — not optional. `verify_ssl: false` is lab-only; production requires `true`.
+`isilon-sdk` ==0.6.0, Ansible >= 2.15.0. Ordering: dependent resources must exist before referencing them.
 
 ### What's undocumented?
-- **isilon-sdk dynamic import:** `dellemc.powerscale` imports `isilon_sdk` at runtime via `importlib.import_module()` to handle version-specific package names. Static analysis tools will not detect this dependency. [source: code-analysis, file: ansible-powerscale/plugins/module_utils/storage/dell/utils.py:273]
-- **PowerMax TODO markers:** `ansible-powermax/plugins/modules/volume.py` contains 3 TODO comments about PyU4V implementation gaps (lines 466, 523, 567). [source: code-analysis]
-- **PowerFlex version gating:** `@powerflex_compatibility` decorator provides runtime version checking for module compatibility with PowerFlex API versions. [source: code-analysis, file: ansible-powerflex/plugins/module_utils/storage/dell/libraries/powerflex_base.py:121]
-- **Logging deviation:** PowerScale, PowerFlex, PowerMax, Unity write `ansible_<platform>.log` to working directory by default. PowerStore defaults to NullHandler (no file logging) — enable via env toggle (`1`/`true`/`yes`). [source: code-analysis, file: ansible-powerstore/plugins/module_utils/storage/dell/utils.py:177-183]
+`powerscale_base.py` (base class) + 12 per-API-domain helpers: `auth.py`, `certificate.py`, `cluster.py`, `events.py`, `ipmi.py`, `namespace.py`, `protocol.py`, `quota.py`, `snapshot.py`, `support_assist.py`, `synciq.py`, `zones_summary.py`. Uses `logging.basicConfig` with `CustomRotatingFileHandler`. Writes `ansible_powerscale.log` by default (5 MB rotate, 5 backups).
 
 ---
 
 ## Component Overview
 
-`providers/` is a workspace containing 6 independent Git repos, each an Ansible Galaxy collection published under the `dellemc` namespace. The workspace structure is:
-
-- `ansible-powerscale/` — 56 modules for PowerScale storage arrays, SDK `isilon-sdk==0.6.0` (dynamically imported)
-- `ansible-powerstore/` — 45 modules for PowerStore storage arrays, SDK `PyPowerStore==3.4.2`
-- `ansible-powerflex/` — 22 modules for PowerFlex storage arrays, SDK `PyPowerFlex==2.0.0`
-- `ansible-powermax/` — 17 modules for PowerMax storage arrays, SDK `PyU4V >=10.2.0.3,==10.2.0.*`
-- `ansible-unity/` — 18 modules for Unity storage arrays, SDK `storops>=1.2.12`
-- `dellemc-openmanage-ansible-modules/` — 105 modules + 16 roles for PowerEdge server lifecycle management, SDKs `omsdk` and `netaddr>=0.7.19`
-
-All five storage collections share a canonical layout: `plugins/modules/` (one file per resource), `plugins/module_utils/storage/dell/` (utils.py + optional libraries/), `playbooks/modules/` (example playbooks), `tests/unit/` (unit tests), `meta/runtime.yml` (action groups and tombstones), and `galaxy.yml` (collection metadata). OpenManage deviates with a flat `module_utils/` layout, per-API-surface clients, and roles.
+Ansible Galaxy collection `dellemc.powerscale` (v3.9.1) for Dell PowerScale (Isilon) scale-out NAS storage. 56 modules covering access zones, ACLs, quotas, SMB shares, NFS exports, snapshot schedules, user groups, file systems, network settings, cluster configuration, S3 buckets, SyncIQ policies, NDMP, support assist, LDAP, ADS, certificates, and more.
 
 ---
 
 ## Architectural Rationale
 
-All Dell providers are architected mostly the same way. The five storage collections share a canonical layout to maintain consistency across the storage product line. OpenManage has a structurally distinct layout because it was developed by a different team and architect. SDK versioning differs by team — PowerMax uses a range-pinned version while others are single-version pinned. The `providers/` workspace exists as a local grouping so that the same knowledge can be built for all collections as generic information.
+Standard Ansible Galaxy collection layout. Each module is a self-contained Python file under `plugins/modules/` that communicates with the PowerScale REST API through the `isilon-sdk` SDK.
 
-The reason for PowerScale's dynamic import of `isilon-sdk` is uncertain — SME input required.
-
-### Evolution
-
-Phase 0 scan could not determine evolution from code analysis. SME input required for how and why the architecture changed over time.
+**SDK strategy:** **Dynamic** — `importlib.import_module('isilon_sdk.<version>')` at runtime. Static analysis cannot detect this dependency.. Version pinned at `==0.6.0` in `requirements.txt`.
 
 ---
 
 ## Failure Modes & Gotchas
 
-No known production failure modes or edge cases identified by the SME. Common mistakes fall into categories: authentication, idempotency assumptions, API behavior, module usage, and environment setup.
+### 1. SDK version coupling
 
-Possible constraints that may cause silent failures if violated:
-- **Partial Parameter Acceptance (Ignored Fields):** Some parameters may be accepted by the module but ignored by the underlying API
-- **Idempotency Mismatch:** Modules may not be truly idempotent in all scenarios despite the framework's idempotency design
-- **Async Operations Treated as Completed:** Long-running operations may be reported as completed before they actually finish
-- **Duplicate Resource Scenarios:** Behavior when creating resources that already exist may be inconsistent
-- **Capacity / Pool Constraints Not Surfaced Clearly:** Storage capacity or pool limitations may not be surfaced as clear error messages
-- **Initiator / Host Configuration Inconsistencies:** Host or initiator configuration may have platform-specific inconsistencies
-- **Version Drift Between Collection and Array Firmware:** Collection and array firmware version mismatches may cause unexpected behavior
+Each collection release is tested against exactly one SDK version (or tight range for PyU4V). A mismatch between collection and SDK version is a blocking defect. Never update `requirements.txt` SDK versions without verifying against the corresponding collection release notes.
+
+### 2. Idempotency assumptions
+
+Modules are designed to be idempotent but some parameters may be accepted by the module yet ignored by the underlying API. Always verify with a second run.
+
+### 3. Verify SSL setting
+
+`verify_ssl: false` is used in example playbooks but is a lab-only setting. Production requires `true`. Modules must not default to skipping verification.
+
+### 4. Acceptance test cleanup
+
+If tests fail mid-run, resources may be left on the array. Clean up manually before re-running.
+
+### Dynamic SDK Import
+
+The `isilon-sdk` package uses version-specific module names (e.g. `isilon_sdk.v9_5_0`). The collection imports it at runtime via `importlib.import_module()`. Static analysis tools (linters, dependency scanners) will **not** detect this dependency. It is declared only in `requirements.txt`. Agents adding imports must not assume static import is feasible.
+
+### Port Configuration
+
+The provider defaults to port 8080 for the Platform API. This is configurable via the `port_no` parameter (unique to PowerScale among storage collections).
 
 ### Never Again
 
-No incident-derived constraints recorded. If you know of past incidents affecting this component, please record them during the next Knowledge Extraction session.
-
-### Evolution
-
-Phase 0 scan could not determine evolution from code analysis. SME input required for how failure modes have changed.
+No incident-derived constraints recorded.
 
 ---
 
 ## Performance Characteristics
 
-Phase 0 scan could not determine performance characteristics from code analysis. SME input required for bottlenecks, scaling limits, tuning parameters, benchmarks, and known performance cliffs.
-
-### Evolution
-
-Phase 0 scan could not determine evolution from code analysis. SME input required for how performance characteristics changed.
+TBD — requires SME input.
 
 ---
 
 ## Implicit Contracts
 
-**Ordering requirements:**
-- Filesystem must be created before snapshot (PowerScale example playbook creates filesystem at line 40-56, then snapshot at line 58-70)
-- Volume group must exist before creating volumes in it (PowerStore example playbook references `vg_name` at line 39)
-- Protection policies and performance policies referenced by name must exist before being assigned to volumes
+**Connection parameters required:** All modules require `onefs_host`, `api_user`, `api_password`, `verify_ssl` — these are not optional.
 
-**Connection parameters:**
-- All modules require connection parameters (`onefs_host`/`array_ip`/`hostname`, `api_user`/`username`, `api_password`/`password`, `verify_ssl`/`validate_certs`) — these are not optional
-- `verify_ssl: false` is used in example playbooks but is a lab-only setting; production requires `true`
+**Resource ordering:** Dependent resources must exist before being referenced (e.g., filesystem before snapshot, volume group before volumes, policies before assignment).
 
-**Environment configuration:**
-- PowerStore supports an environment variable toggle for file logging (via `os.getenv` in utils.py) — truthy values ("1", "true", "yes") enable file logging
-
-### Evolution
-
-Phase 0 scan could not determine evolution from code analysis. SME input required for how implicit contracts changed.
+**Action group registration:** Every new module must be appended to the `dellemc.powerscale.all` action group in `meta/runtime.yml`.
 
 ---
 
 ## Threading & Synchronization
 
-Phase 0 scan could not determine threading and synchronization patterns from code analysis. SME input required for concurrency model, lock ordering, callback threading, and thread safety guarantees.
-
-### Evolution
-
-Phase 0 scan could not determine evolution from code analysis. SME input required for how the concurrency model changed.
+Ansible handles concurrency via forks at the play level. Individual module executions are single-threaded.
 
 ---
 
 ## Build System & Configuration
 
-Phase 0 scan could not determine build system and configuration from code analysis. SME input required for non-obvious build dependencies, conditional compilation flags, platform-specific build paths, and configuration that affects runtime behavior.
-
-### Evolution
-
-Phase 0 scan could not determine evolution from code analysis. SME input required for how build and configuration changed.
+| Command | Description |
+|---------|-------------|
+| `ansible-galaxy collection build` | Build collection tarball |
+| `ansible-galaxy collection install <tarball>` | Install locally |
+| `pytest tests/unit/` | Run unit tests |
+| `ansible-playbook --syntax-check` | Validate playbook syntax |
 
 ---
 
 ## Operational Knowledge
 
-**Logging behavior — deviation between collections (code-verified):**
-- **PowerScale, PowerFlex, PowerMax, Unity:** `get_logger()` uses `logging.basicConfig(filename=...)` plus a `CustomRotatingFileHandler` and writes a log file **by default** to the working directory: `ansible_powerscale.log`, `ansible_powerflex.log`, `ansible_powermax.log`, `ansible_unity.log` respectively. Rotation: 5 MB max, 5 backups.
-- **PowerStore (outlier):** `get_logger()` defaults to a `NullHandler` — **no file is written by default**. File logging is enabled only via an explicit flag or the environment-variable toggle (truthy values `1`/`true`/`yes`). Failures to initialize the file handler are caught and the module continues without logging (fail-safe). [file: ansible-powerstore/plugins/module_utils/storage/dell/utils.py:133-203]
-
-For debugging connection or operation failures: on the four collections with default file logging, inspect the `ansible_<platform>.log` file in the playbook's working directory. On PowerStore, enable logging first via the env toggle before reproducing.
-
-Phase 0 scan could not determine deployment runbooks, monitoring integrations, or common support scenarios from code analysis. SME input required.
-
-### Evolution
-
-Phase 0 scan could not determine evolution from code analysis. SME input required for how operational knowledge changed.
+Uses `logging.basicConfig` with `CustomRotatingFileHandler`. Writes `ansible_powerscale.log` by default (5 MB rotate, 5 backups).
 
 ---
 
 ## General Context
 
-No additional team context, ownership, historical background, cross-cutting concerns, or other important information beyond what has been captured.
+No additional context beyond what has been captured.
 
 ---
 
 ## References
 
-No external references captured.
+- [Ansible Galaxy — dellemc.powerscale](https://galaxy.ansible.com/dellemc/powerscale)
+- [Ansible Collection Developer Guide](https://docs.ansible.com/ansible/latest/dev_guide/developing_collections.html)
 
 ---
 
 ## Governance Spec Discrepancies
 
-No discrepancies detected between code/SME knowledge and loaded governance specs.
+No discrepancies detected.
