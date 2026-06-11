@@ -4,7 +4,7 @@
 
 <!-- yaml-metadata-start -->
 scope_paths: ["./"]
-capture_git_sha: "c117cc5c803f9b58d19cc9f081cb616f15396acf"
+capture_git_sha: "e8f4dbb257939c894bf04d794639f43269140e15"
 status: "current"
 auto_update: false
 preview_before_apply: true
@@ -30,7 +30,7 @@ Published to Ansible Galaxy under the `dellemc` namespace. Uses the `isilon-sdk`
 | Module utilities | `plugins/module_utils/storage/dell/` | SDK init, connection factory, logger, error helpers |
 | Domain helpers | `plugins/module_utils/storage/dell/shared_library/` | `powerscale_base.py` (base class) + 12 per-API-domain helpers: `auth.py`, `certificate.py`, `cluster.py`, `events.py`, `ipmi.py`, `namespace.py`, `protocol.py`, `quota.py`, `snapshot.py`, `support_assist.py`, `synciq.py`, `zones_summary.py` |
 | Doc fragments | `plugins/doc_fragments/powerscale.py` | Shared DOCUMENTATION fragment for connection params |
-| Runtime metadata | `meta/runtime.yml` | `requires_ansible`, action groups, tombstones |
+| Runtime metadata | `meta/runtime.yml` | `meta/runtime.yml` defines the `dellemc.powerscale.all` action group (56 modules) and contains 24 tombstone entries for deprecated module names. |
 | Execution env | `meta/execution-environment.yml` | EE definition |
 | Example playbooks | `playbooks/modules/` | One example playbook per module |
 | Unit tests | `tests/unit/plugins/modules/` | One test file per module |
