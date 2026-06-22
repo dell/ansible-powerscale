@@ -121,6 +121,9 @@ This table provides information about the software prerequisites for the Ansible
 * [SMB File Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/smb_file.rst)
 * [SMB Global Settings Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/smb_global_settings.rst)
 * [S3 Bucket Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/s3_bucket.rst)
+* [S3 Global Settings Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/s3_global_settings.rst)
+* [S3 Key Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/s3_key.rst)
+* [S3 Zone Settings Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/s3_zone_settings.rst)
 
 ### Network Configuration
 
@@ -134,6 +137,7 @@ This table provides information about the software prerequisites for the Ansible
 
 * [Access Zone Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/accesszone.rst)
 * [Settings Module](https://github.com/dell/ansible-powerscale/tree/main/docs/modules/settings.rst)
+* [Cluster Services Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/cluster_services.rst)
 
 ### SyncIQ (Replication)
 
@@ -156,6 +160,15 @@ This table provides information about the software prerequisites for the Ansible
 * [Support Assist](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/support_assist.rst)
 * [IPMI Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/ipmi.rst)
 * [Info Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/info.rst)
+
+### Job Management
+
+* [Job Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/job.rst)
+* [Job Event Info Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/job_event_info.rst)
+* [Job Info Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/job_info.rst)
+* [Job Policy Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/job_policy.rst)
+* [Job Report Info Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/job_report_info.rst)
+* [Job Type Info Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/job_type_info.rst)
 
 ## Installation and execution of Ansible modules for Dell PowerScale
 The installation and execution steps of Ansible modules for Dell PowerScale can be found [here](https://github.com/dell/ansible-powerscale/blob/main/docs/INSTALLATION.md).

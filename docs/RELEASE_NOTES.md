@@ -1,6 +1,6 @@
-**Ansible Modules for Dell Technologies PowerScale** 
+**Ansible Modules for Dell Technologies PowerScale**
 =========================================
-### Release notes 3.9.1
+### Release notes 3.10.0
 
 >   © 2026 Dell Inc. or its subsidiaries. All rights reserved. Dell
 >   and other trademarks are trademarks of Dell Inc. or its
@@ -27,6 +27,7 @@ Table 1. Revision history
 
 | Revision | Date            | Description                                               |
 |----------|-----------------|-----------------------------------------------------------|
+| 06       | June 2026       | Ansible Modules for Dell PowerScale 3.10.0                |
 | 05       | March 2026      | Ansible Modules for Dell PowerScale 3.9.1                 |
 | 04       | June 2025       | Ansible Modules for Dell PowerScale 3.9.0                 |
 | 03       | May 2025        | Ansible Modules for Dell PowerScale 3.8.1                 |
@@ -77,6 +78,9 @@ The Ansible Modules for Dell PowerScale support the following features:
 - Get details, create, modify, and delete Alert Channel.
 - Get details, create, modify, and delete Alert Rule.
 - Get details, create, and delete Writable Snapshots.
+- Manage jobs on PowerScale with comprehensive job management and monitoring capabilities.
+- Manage S3 global and zone-specific settings for enhanced S3 capabilities.
+- Manage cluster services for PowerScale service management.
   
 The Ansible modules use playbooks, written in yaml syntax, to list, show, create, delete, and modify each of these entities.
 
@@ -84,11 +88,15 @@ New Features and Enhancements
 ---------------------------
 This section describes the features or enhancements of the Ansible Modules for Dell PowerScale for this release.
 
-The Ansible Modules for Dell PowerScale release 3.9.1 provides the following enhancements:
+The Ansible Modules for Dell PowerScale release 3.10.0 provides the following enhancements:
 
-- Added support for PowerScale 9.13.
-- Added support for target_compare_initial_sync parameter in SyncIQ policy module to enable data comparison during initial sync.
-- Fixed typo in SDK call in subnet module.
+- Added Job Management modules for comprehensive PowerScale job operations and monitoring
+- Added S3 Global Settings module for managing S3 global configurations
+- Added S3 Key module for managing S3 keys
+- Added S3 Zone Settings module for managing S3 zone-specific configurations
+- Added Cluster Services module for PowerScale service management
+- Enhanced S3 capabilities with granular zone and global settings
+- Added comprehensive job management and monitoring features
 
 Known issues
 ------------
