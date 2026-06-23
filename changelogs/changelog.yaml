@@ -329,11 +329,6 @@ releases:
         name: support_assist
         namespace: ''
     release_date: '2024-06-28'
-  3.10.0:
-    changes:
-      minor_changes:
-        - Added support for target_compare_initial_sync parameter in SyncIQ policy module
-          to enable data comparison during initial sync.
   3.2.0:
     changes:
       minor_changes:
