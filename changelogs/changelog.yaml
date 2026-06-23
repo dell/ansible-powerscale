@@ -1,47 +1,5 @@
 ancestor: null
 releases:
-  3.10.0:
-    changes:
-      minor_changes:
-        - Added Job Management modules for PowerScale job operations
-        - Added S3 Global Settings module for managing S3 global configurations
-        - Added S3 Key module for managing S3 keys
-        - Added S3 Zone Settings module for managing S3 zone-specific configurations
-        - Added Cluster Services module for PowerScale service management
-        - Enhanced S3 capabilities with granular zone and global settings
-        - Added comprehensive job management and monitoring features
-    modules:
-      - description: Manage jobs on PowerScale
-        name: job
-        namespace: ''
-      - description: Get job event information on PowerScale
-        name: job_event_info
-        namespace: ''
-      - description: Get job information on PowerScale
-        name: job_info
-        namespace: ''
-      - description: Manage job policies on PowerScale
-        name: job_policy
-        namespace: ''
-      - description: Get job report information on PowerScale
-        name: job_report_info
-        namespace: ''
-      - description: Get job type information on PowerScale
-        name: job_type_info
-        namespace: ''
-      - description: Manage S3 global settings on PowerScale
-        name: s3_global_settings
-        namespace: ''
-      - description: Manage S3 keys on PowerScale
-        name: s3_key
-        namespace: ''
-      - description: Manage S3 zone settings on PowerScale
-        name: s3_zone_settings
-        namespace: ''
-      - description: Manage cluster services on PowerScale
-        name: cluster_services
-        namespace: ''
-    release_date: '2026-06-22'
   1.0.0:
     modules:
       - description: Manages access zones on PowerScale
@@ -431,3 +389,45 @@ releases:
         | >- This release brings several bug fixes and minor changes to the PowerScale
         | Ansible Modules.
     release_date: '2026-03-17'
+  3.10.0:
+    changes:
+      minor_changes:
+        - Added Job Management modules for PowerScale job operations
+        - Added S3 Global Settings module for managing S3 global configurations
+        - Added S3 Key module for managing S3 keys
+        - Added S3 Zone Settings module for managing S3 zone-specific configurations
+        - Added Cluster Services module for PowerScale service management
+        - Enhanced S3 capabilities with granular zone and global settings
+        - Added comprehensive job management and monitoring features
+    modules:
+      - description: Manage jobs on PowerScale
+        name: job
+        namespace: ''
+      - description: Get job event information on PowerScale
+        name: job_event_info
+        namespace: ''
+      - description: Get job information on PowerScale
+        name: job_info
+        namespace: ''
+      - description: Manage job policies on PowerScale
+        name: job_policy
+        namespace: ''
+      - description: Get job report information on PowerScale
+        name: job_report_info
+        namespace: ''
+      - description: Get job type information on PowerScale
+        name: job_type_info
+        namespace: ''
+      - description: Manage S3 global settings on PowerScale
+        name: s3_global_settings
+        namespace: ''
+      - description: Manage S3 keys on PowerScale
+        name: s3_key
+        namespace: ''
+      - description: Manage S3 zone settings on PowerScale
+        name: s3_zone_settings
+        namespace: ''
+      - description: Manage cluster services on PowerScale
+        name: cluster_services
+        namespace: ''
+    release_date: '2026-06-22'
