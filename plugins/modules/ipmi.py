@@ -465,10 +465,10 @@ class IpmiExitHandler:
 class IpmiModifyHandler:
     """Handle modification of IPMI configuration"""
 
-    def handle(self, ipmi_object, ipmi_params, ipmi_details):
-        """Handle modification of IPMI configuration"""
-        changed = False
-        before_state = {
+    @staticmethod
+    def _build_state_snapshot(ipmi_details):
+        """Build a state snapshot for diff output."""
+        return {
             'settings': dict(ipmi_details.get('settings', {})),
             'network': dict(ipmi_details.get('network', {})),
             'user': {k: v for k, v in ipmi_details.get('user', {}).items()
@@ -476,63 +476,50 @@ class IpmiModifyHandler:
             'features': list(ipmi_details.get('features', [])),
         }
 
+    @staticmethod
+    def _apply_modifications(ipmi_object, settings_modify, network_modify, user_modify, features_modify):
+        """Apply all pending IPMI modifications."""
+        if settings_modify:
+            LOG.info("Updating IPMI settings: %s", settings_modify)
+            ipmi_object.ipmi_api.update_ipmi_settings(settings_modify)
+        if network_modify:
+            LOG.info("Updating IPMI network: %s", network_modify)
+            ipmi_object.ipmi_api.update_ipmi_network(network_modify)
+        if user_modify:
+            LOG.info("Updating IPMI user configuration")
+            ipmi_object.ipmi_api.update_ipmi_user(user_modify)
+        for feat in (features_modify or []):
+            LOG.info("Updating IPMI feature: %s", feat['id'])
+            ipmi_object.ipmi_api.update_ipmi_feature(
+                feat['id'], {'enabled': feat['enabled']})
+
+    def handle(self, ipmi_object, ipmi_params, ipmi_details):
+        """Handle modification of IPMI configuration"""
+        before_state = self._build_state_snapshot(ipmi_details)
+
         settings_modify = ipmi_object.is_settings_modify_required(
-            ipmi_params.get('settings'), ipmi_details.get('settings', {})
-        )
+            ipmi_params.get('settings'), ipmi_details.get('settings', {}))
         network_modify = ipmi_object.is_network_modify_required(
-            ipmi_params.get('network'), ipmi_details.get('network', {})
-        )
+            ipmi_params.get('network'), ipmi_details.get('network', {}))
         user_modify = ipmi_object.is_user_modify_required(
-            ipmi_params.get('user'), ipmi_details.get('user', {})
-        )
+            ipmi_params.get('user'), ipmi_details.get('user', {}))
         features_modify = ipmi_object.is_features_modify_required(
-            ipmi_params.get('features'), ipmi_details.get('features', [])
-        )
+            ipmi_params.get('features'), ipmi_details.get('features', []))
 
         if settings_modify or network_modify or user_modify or features_modify:
-            changed = True
             if not ipmi_object.module.check_mode:
-                if settings_modify:
-                    msg = f"Updating IPMI settings: {settings_modify}"
-                    LOG.info(msg)
-                    ipmi_object.ipmi_api.update_ipmi_settings(settings_modify)
-
-                if network_modify:
-                    msg = f"Updating IPMI network: {network_modify}"
-                    LOG.info(msg)
-                    ipmi_object.ipmi_api.update_ipmi_network(network_modify)
-
-                if user_modify:
-                    LOG.info("Updating IPMI user configuration")
-                    ipmi_object.ipmi_api.update_ipmi_user(user_modify)
-
-                if features_modify:
-                    for feat in features_modify:
-                        msg = f"Updating IPMI feature: {feat['id']}"
-                        LOG.info(msg)
-                        ipmi_object.ipmi_api.update_ipmi_feature(
-                            feat['id'], {'enabled': feat['enabled']}
-                        )
-
+                self._apply_modifications(
+                    ipmi_object, settings_modify, network_modify,
+                    user_modify, features_modify)
                 ipmi_details = ipmi_object.get_ipmi_config()
                 LOG.info("Successfully updated IPMI configuration.")
 
-            ipmi_object.result["changed"] = changed
+            ipmi_object.result["changed"] = True
 
             if ipmi_object.module._diff:
-                after_state = {
-                    'settings': dict(ipmi_details.get('settings', {})),
-                    'network': dict(ipmi_details.get('network', {})),
-                    'user': {
-                        k: v for k, v
-                        in ipmi_details.get('user', {}).items()
-                        if k != 'password'
-                    },
-                    'features': list(ipmi_details.get('features', [])),
-                }
                 ipmi_object.result['diff'] = {
                     'before': before_state,
-                    'after': after_state,
+                    'after': self._build_state_snapshot(ipmi_details),
                 }
 
         IpmiExitHandler().handle(ipmi_object, ipmi_details)

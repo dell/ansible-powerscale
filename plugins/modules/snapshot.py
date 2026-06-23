@@ -489,6 +489,50 @@ class Snapshot(object):
             td = dt2 - dt1
         return int(round(td.total_seconds() / 60))
 
+    @staticmethod
+    def _compute_expiration(desired_retention, retention_unit, snap_creation_timestamp):
+        """Compute expiration timestamp from desired retention and creation time."""
+        if desired_retention and desired_retention.lower() != 'none':
+            if retention_unit is None or retention_unit == 'hours':
+                exp = datetime.fromtimestamp(snap_creation_timestamp) + \
+                    timedelta(hours=int(desired_retention))
+            elif retention_unit == 'days':
+                exp = datetime.fromtimestamp(snap_creation_timestamp) + \
+                    timedelta(days=int(desired_retention))
+            else:
+                return None
+            return time.mktime(exp.timetuple())
+        if desired_retention and desired_retention.lower() == 'none':
+            return None
+        return None
+
+    def _check_timestamp_modified(self, snap_data, expiration_timestamp, desired_retention, mod_details):
+        """Check if timestamp is modified. Returns True if modified."""
+        existing_expires = snap_data.get('expires')
+
+        if existing_expires is not None and expiration_timestamp is not None:
+            if existing_expires != expiration_timestamp:
+                LOG.info('The existing timestamp is: %s and the new timestamp is: %s',
+                         existing_expires, expiration_timestamp)
+                td_min = self.get_datetime_diff_in_minutes(
+                    datetime.fromtimestamp(existing_expires),
+                    datetime.fromtimestamp(expiration_timestamp))
+                LOG.info('The time difference is %s minutes', td_min)
+                if td_min > 2:
+                    mod_details['is_timestamp_modified'] = True
+                    mod_details['new_expiration_timestamp_value'] = expiration_timestamp
+                    return True
+        elif existing_expires is None and expiration_timestamp is not None:
+            mod_details['is_timestamp_modified'] = True
+            mod_details['new_expiration_timestamp_value'] = expiration_timestamp
+            return True
+        elif existing_expires is not None and desired_retention \
+                and desired_retention.lower() == 'none' and expiration_timestamp is None:
+            mod_details['is_timestamp_modified'] = True
+            mod_details['new_expiration_timestamp_value'] = expiration_timestamp
+            return True
+        return False
+
     def check_snapshot_modified(self, snapshot, alias,
                                 desired_retention,
                                 retention_unit,
@@ -497,134 +541,46 @@ class Snapshot(object):
                                 effective_path):
         """Determines whether the snapshot has been modified"""
         LOG.info("Determining if the snap has been modified...")
-        snapshot_modification_details = dict()
-        snapshot_modification_details['is_alias_modified'] = False
-        snapshot_modification_details['new_alias_value'] = None
-        snapshot_modification_details['is_timestamp_modified'] = False
-        snapshot_modification_details['new_expiration_timestamp_value'] = None
+        snapshot_modification_details = dict(
+            is_alias_modified=False, new_alias_value=None,
+            is_timestamp_modified=False, new_expiration_timestamp_value=None)
 
-        snap_details = snapshot
+        snap_data = snapshot['snapshots'][0]
 
         if effective_path is not None:
-            if self.module.params['path'] and \
-                    snap_details['snapshots'][0]['path'] != effective_path:
+            if self.module.params['path'] and snap_data['path'] != effective_path:
                 error_message = 'The path {0} specified in the playbook does '\
                                 'not match the path of the snapshot {1} '\
-                                'on the array'.format(effective_path,
-                                                      snapshot_name)
+                                'on the array'.format(effective_path, snapshot_name)
                 LOG.error(error_message)
                 self.module.fail_json(msg=error_message)
 
-        if desired_retention is None and expiration_timestamp is None \
-                and alias is None:
+        if desired_retention is None and expiration_timestamp is None and alias is None:
             LOG.info("desired_retention and expiration_time and alias are "
                      "not provided, we do not check for snapshot modification "
                      "in this case. The snapshot details would be returned, "
                      "if available.")
             return False, snapshot_modification_details
-        info_message = "The snap details are: {0}".format(snap_details)
-        LOG.info(info_message)
-        snap_creation_timestamp = None
-        if 'created' in snap_details['snapshots'][0]:
-            snap_creation_timestamp = \
-                snap_details['snapshots'][0]['created']
 
-        # Here we are calculating the desired retention.
-        # If the retention unit is not specified, default is hours.
-        # Expiration timestamp is calculated by adding the
-        # creation timestamp of the snapshot to the desired retention
-        # specified in the Playbook.
-        if desired_retention and desired_retention.lower() != 'none':
-            if retention_unit is None or retention_unit == 'hours':
-                expiration_timestamp = \
-                    datetime.fromtimestamp(snap_creation_timestamp) + \
-                    timedelta(hours=int(desired_retention))
-                expiration_timestamp = \
-                    time.mktime(expiration_timestamp.timetuple())
+        LOG.info("The snap details are: %s", snapshot)
+        snap_creation_timestamp = snap_data.get('created')
 
-            elif retention_unit == 'days':
-                expiration_timestamp = \
-                    datetime.fromtimestamp(snap_creation_timestamp) + \
-                    timedelta(days=int(desired_retention))
-                expiration_timestamp = \
-                    time.mktime(expiration_timestamp.timetuple())
-        elif desired_retention and desired_retention.lower() == 'none':
-            expiration_timestamp = None
-        info_message = "The new expiration " \
-                       "timestamp is {0}".format(expiration_timestamp)
-        LOG.info(info_message)
+        if desired_retention:
+            expiration_timestamp = self._compute_expiration(
+                desired_retention, retention_unit, snap_creation_timestamp)
+        LOG.info("The new expiration timestamp is %s", expiration_timestamp)
 
-        modified = False
-        if 'expires' in snap_details['snapshots'][0] and \
-                snap_details['snapshots'][0]['expires'] is not None \
-                and expiration_timestamp is not None:
-            if snap_details['snapshots'][0]['expires'] \
-                    != expiration_timestamp:
-                # We can tolerate a delta of two minutes.
-                existing_timestamp = \
-                    snap_details['snapshots'][0]['expires']
-                new_timestamp = expiration_timestamp
-                info_message = 'The existing timestamp is: ' \
-                               '{0} and the new timestamp ' \
-                               'is: {1}'.format(existing_timestamp,
-                                                new_timestamp)
-                LOG.info(info_message)
-
-                existing_time_obj = datetime.fromtimestamp(
-                    existing_timestamp)
-                new_time_obj = datetime.fromtimestamp(
-                    new_timestamp)
-                # Get datetime diff in minutes
-                td_min = self.get_datetime_diff_in_minutes(existing_time_obj, new_time_obj)
-                info_message = 'The time difference is ' \
-                               '{0} minutes'.format(td_min)
-                LOG.info(info_message)
-                # A delta of two minutes is treated as idempotent
-                if td_min > 2:
-                    snapshot_modification_details[
-                        'is_timestamp_modified'] = True
-                    snapshot_modification_details[
-                        'new_expiration_timestamp_value'] = \
-                        expiration_timestamp
-                    modified = True
-        # This is the case when expiration timestamp may not be present
-        # in the snapshot details.
-        # Expiration timestamp specified in the playbook is not None.
-        elif ('expires' not in snap_details['snapshots'][0]
-                and expiration_timestamp is not None) or \
-                ('expires' in snap_details['snapshots'][0] and
-                 snap_details['snapshots'][0]['expires'] is
-                 None and expiration_timestamp is not None):
-            snapshot_modification_details['is_timestamp_modified'] = True
-            snapshot_modification_details[
-                'new_expiration_timestamp_value'] = expiration_timestamp
-            modified = True
-        elif 'expires' in snap_details['snapshots'][0] \
-                and desired_retention and desired_retention.lower() == 'none' \
-                and expiration_timestamp is None:
-            # Ensure only when desired retention is explicitly set to 'None'
-            # we try to modify.
-            if snap_details['snapshots'][
-                    0]['expires'] is not None:
-                snapshot_modification_details['is_timestamp_modified'] = True
-                snapshot_modification_details[
-                    'new_expiration_timestamp_value'] = expiration_timestamp
-                modified = True
+        modified = self._check_timestamp_modified(
+            snap_data, expiration_timestamp, desired_retention, snapshot_modification_details)
 
         snapshot_alias = self.get_snapshot_alias(snapshot_name)
-
         if snapshot_alias != alias:
             snapshot_modification_details['is_alias_modified'] = True
             snapshot_modification_details['new_alias_value'] = alias
             modified = True
-        info_message = "Snapshot " \
-                       "modified {0}, " \
-                       "modification " \
-                       "details: {1}".format(
-                           modified,
-                           snapshot_modification_details)
-        LOG.info(info_message)
 
+        LOG.info("Snapshot modified %s, modification details: %s",
+                 modified, snapshot_modification_details)
         return modified, snapshot_modification_details
 
     def modify_filesystem_snapshot(self, snapshot_name,

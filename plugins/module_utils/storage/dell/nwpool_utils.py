@@ -33,6 +33,9 @@ from ansible.module_utils.six.moves.urllib.error import URLError, HTTPError
 from ansible.module_utils.six.moves.urllib.parse import urlencode
 
 
+CONTENT_TYPE_JSON = 'application/json'
+
+
 class OpenURLResponse(object):
     """Handles HTTPResponse"""
 
@@ -82,7 +85,7 @@ class NetworkPoolAPI(object):
         self.req_session = req_session
         self.session_id = None
         self.protocol = 'https'
-        self._headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+        self._headers = {'Content-Type': CONTENT_TYPE_JSON, 'Accept': CONTENT_TYPE_JSON}
 
     def _get_url(self, uri):
         return "{0}://{1}:{2}{3}".format(self.protocol, self.ipaddress, self.port, uri)
@@ -160,7 +163,7 @@ class NetworkPoolAPI(object):
             csrf_token = self._create_session()
             session_header = {'Cookie': self.session_id,
                               'X-CSRF-Token': csrf_token,
-                              'Content-Type': 'application/json',
+                              'Content-Type': CONTENT_TYPE_JSON,
                               'Referer': self._get_url('')
                               }
             if headers:

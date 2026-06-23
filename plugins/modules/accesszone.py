@@ -575,6 +575,8 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
 import copy
 LOG = utils.get_logger('accesszone')
+OCTAL_FORMAT = "{0:o}"
+FIRST_KEY_MOD_MSG = "First Key Modification %s"
 
 
 class AccessZone(object):
@@ -628,17 +630,17 @@ class AccessZone(object):
             smb_settings = self.api_protocol.get_smb_settings_share(
                 zone=name).to_dict()
             smb_settings['settings']['directory_create_mask_octal'] = \
-                "{0:o}".format(smb_settings['settings']
-                               ['directory_create_mask'])
+                OCTAL_FORMAT.format(smb_settings['settings']
+                                    ['directory_create_mask'])
             smb_settings['settings']['directory_create_mode_octal'] = \
-                "{0:o}".format(smb_settings['settings']
-                               ['directory_create_mode'])
+                OCTAL_FORMAT.format(smb_settings['settings']
+                                    ['directory_create_mode'])
             smb_settings['settings']['file_create_mask_octal'] = \
-                "{0:o}".format(smb_settings['settings']
-                               ['file_create_mask'])
+                OCTAL_FORMAT.format(smb_settings['settings']
+                                    ['file_create_mask'])
             smb_settings['settings']['file_create_mode_octal'] = \
-                "{0:o}".format(smb_settings['settings']
-                               ['file_create_mode'])
+                OCTAL_FORMAT.format(smb_settings['settings']
+                                    ['file_create_mode'])
             smb_settings['smb_settings'] = smb_settings['settings']
             del smb_settings['settings']
             api_response.update(smb_settings)
@@ -691,7 +693,7 @@ class AccessZone(object):
 
         for key in smb_playbook.keys():
             if smb_playbook[key] != access_zone_details['smb_settings'][key]:
-                LOG.info("First Key Modification %s", key)
+                LOG.info(FIRST_KEY_MOD_MSG, key)
                 return True
         return False
 
@@ -719,7 +721,7 @@ class AccessZone(object):
                     keys():
                 if nfs_playbook[key] != access_zone_details['nfs_settings'][
                         'export_settings'][key]:
-                    LOG.info("First Key Modification %s", key)
+                    LOG.info(FIRST_KEY_MOD_MSG, key)
                     nfs_export_flag = True
 
         for key in nfs_playbook.keys():
@@ -727,34 +729,33 @@ class AccessZone(object):
                     keys():
                 if nfs_playbook[key] != access_zone_details['nfs_settings'][
                         'zone_settings'][key]:
-                    LOG.info("First Key Modification %s", key)
+                    LOG.info(FIRST_KEY_MOD_MSG, key)
                     nfs_zone_flag = True
 
         return nfs_export_flag, nfs_zone_flag
+
+    def _build_nfs_zone_dict(self, nfs):
+        """Build NFS zone settings dict from playbook params."""
+        nfs_zone_dict = {}
+        zone_keys = ['nfsv4_domain', 'nfsv4_allow_numeric_ids',
+                     'nfsv4_no_domain', 'nfsv4_no_domain_uids',
+                     'nfsv4_no_names']
+        for key in zone_keys:
+            if key in nfs:
+                nfs_zone_dict[key] = nfs[key]
+        return nfs_zone_dict
 
     def nfs_modify(self, name, nfs, nfs_export_flag, nfs_zone_flag):
         """ Modify nfs settings of access zone """
         nfs_export_dict = {}
         nfs_zone_dict = {}
 
-        if nfs_export_flag:
-            if 'commit_asynchronous' in nfs:
-                nfs_export_dict['commit_asynchronous'] = nfs[
-                    'commit_asynchronous']
+        if nfs_export_flag and 'commit_asynchronous' in nfs:
+            nfs_export_dict['commit_asynchronous'] = nfs[
+                'commit_asynchronous']
 
         if nfs_zone_flag:
-            if 'nfsv4_domain' in nfs:
-                nfs_zone_dict['nfsv4_domain'] = nfs['nfsv4_domain']
-            if 'nfsv4_allow_numeric_ids' in nfs:
-                nfs_zone_dict['nfsv4_allow_numeric_ids'] = nfs[
-                    'nfsv4_allow_numeric_ids']
-            if 'nfsv4_no_domain' in nfs:
-                nfs_zone_dict['nfsv4_no_domain'] = nfs['nfsv4_no_domain']
-            if 'nfsv4_no_domain_uids' in nfs:
-                nfs_zone_dict['nfsv4_no_domain_uids'] = nfs[
-                    'nfsv4_no_domain_uids']
-            if 'nfsv4_no_names' in nfs:
-                nfs_zone_dict['nfsv4_no_names'] = nfs['nfsv4_no_names']
+            nfs_zone_dict = self._build_nfs_zone_dict(nfs)
 
         try:
             if nfs_export_flag:
@@ -922,6 +923,31 @@ class AccessZone(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
+    def _handle_provider_state(self, name, provider_state, auth_providers, access_zone_details):
+        """Handle add/remove of auth providers and return modify flag."""
+        existing_auth_providers = access_zone_details['zones'][0]['auth_providers']
+        if provider_state == 'add':
+            flag = self.add_auth_providers_to_access_zone(name, auth_providers, existing_auth_providers)
+            LOG.info("added auth providers to access zone")
+            return flag
+        flag = self.remove_auth_providers_to_access_zone(name, auth_providers, existing_auth_providers)
+        LOG.info("removed auth providers from access zone")
+        return flag
+
+    def _handle_smb_nfs(self, name, smb, nfs, access_zone_details, result):
+        """Handle SMB and NFS modification checks and updates."""
+        if smb is not None:
+            smb_modify_flag = self.is_smb_modification_required(smb, access_zone_details)
+            LOG.info("SMB modification flag %s", smb_modify_flag)
+            if smb_modify_flag:
+                result['smb_modify_flag'] = self.smb_modify(name, smb)
+
+        if nfs is not None:
+            nfs_export_flag, nfs_zone_flag = self.is_nfs_modification_required(nfs, access_zone_details)
+            LOG.info("NFS modification flag %s %s", nfs_export_flag, nfs_zone_flag)
+            if nfs_export_flag or nfs_zone_flag:
+                result['nfs_modify_flag'] = self.nfs_modify(name, nfs, nfs_export_flag, nfs_zone_flag)
+
     def perform_module_operation(self):
         """
         Perform different actions on access zone module based on parameters
@@ -933,13 +959,8 @@ class AccessZone(object):
         nfs = self.module.params['nfs']
         provider_state = self.module.params['provider_state']
         auth_providers = self.module.params['auth_providers']
-        path = self.module.params['path']
-        groupnet = self.module.params['groupnet']
-        create_path = self.module.params['create_path']
         az_params = self.module.params
 
-        # result is a dictionary that contains changed status and access zone
-        # details
         result = dict(
             changed=False,
             smb_modify_flag=False,
@@ -956,40 +977,17 @@ class AccessZone(object):
             result['changed'] = self.create_access_zone(access_zone_params)
             access_zone_details = self.get_details(name)
 
-        if state == 'present' and provider_state == 'add' and access_zone_details:
-            existing_auth_providers = access_zone_details['zones'][0]['auth_providers']
-            access_zone_modify_flag = self.add_auth_providers_to_access_zone(name, auth_providers, existing_auth_providers)
+        if state == 'present' and provider_state in ('add', 'remove') and access_zone_details:
+            result['access_zone_modify_flag'] = self._handle_provider_state(
+                name, provider_state, auth_providers, access_zone_details)
             access_zone_details = self.get_details(name)
-            LOG.info("added auth providers to access zone")
-            result['access_zone_modify_flag'] = access_zone_modify_flag
-
-        if state == 'present' and provider_state == 'remove' and access_zone_details:
-            existing_auth_providers = access_zone_details['zones'][0]['auth_providers']
-            access_zone_modify_flag = self.remove_auth_providers_to_access_zone(name, auth_providers, existing_auth_providers)
-            access_zone_details = self.get_details(name)
-            LOG.info("removed auth providers from access zone")
-            result['access_zone_modify_flag'] = access_zone_modify_flag
 
         if state == 'absent' and access_zone_details:
             result['changed'] = self.delete_access_zone(name)
 
-        if state == 'present' and smb is not None:
-            smb_modify_flag = self.is_smb_modification_required(
-                smb, access_zone_details)
-            LOG.info("SMB modification flag %s", smb_modify_flag)
+        if state == 'present':
+            self._handle_smb_nfs(name, smb, nfs, access_zone_details, result)
 
-            if smb_modify_flag:
-                result['smb_modify_flag'] = self.smb_modify(name, smb)
-
-        if state == 'present' and nfs is not None:
-            nfs_export_flag, nfs_zone_flag = self.\
-                is_nfs_modification_required(nfs, access_zone_details)
-            LOG.info("NFS modification flag %s %s", nfs_export_flag,
-                     nfs_zone_flag)
-
-            if nfs_export_flag or nfs_zone_flag:
-                result['nfs_modify_flag'] = self.nfs_modify(
-                    name, nfs, nfs_export_flag, nfs_zone_flag)
         result['access_zone_details'] = access_zone_details
         if result['smb_modify_flag'] or result['nfs_modify_flag'] or \
                 result['access_zone_modify_flag'] or result['changed']:

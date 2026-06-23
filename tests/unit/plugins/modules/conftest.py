@@ -23,7 +23,7 @@ def _patch_ansible_for_unit_tests(monkeypatch, mocker):
         "ANSIBLE_MODULE_ARGS": {
             "onefs_host": "test.example.com",
             "api_user": "admin",
-            "api_password": "test_password",
+            "api_password": "test_api_password_placeholder",
             "verify_ssl": "False"
         }
     }

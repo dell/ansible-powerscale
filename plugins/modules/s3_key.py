@@ -176,6 +176,7 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell im
 
 
 LOG = utils.get_logger("s3_key")
+LOG_ERR_FMT = "%s with error: %s"
 
 
 class S3Key(object):
@@ -232,7 +233,7 @@ class S3Key(object):
                     f"Failed to get details of S3 Key"
                     f" for user {user} in access zone {access_zone}"
                 )
-                LOG.error("%s with error: %s", error_message, error_msg)
+                LOG.error(LOG_ERR_FMT, error_message, error_msg)
                 self.module.fail_json(msg=error_message)
         except Exception as e:
             error_message = (
@@ -277,7 +278,7 @@ class S3Key(object):
                 f"Create S3 Key for user {user} in access zone"
                 f" {access_zone} failed"
             )
-            LOG.error("%s with error: %s", error_message, utils.determine_error(e))
+            LOG.error(LOG_ERR_FMT, error_message, utils.determine_error(e))
             self.module.fail_json(msg=error_message)
 
     def delete_key(self):
@@ -298,7 +299,7 @@ class S3Key(object):
                 f"Delete S3 Key for user {user} in access zone"
                 f" {access_zone} failed"
             )
-            LOG.error("%s with error: %s", error_message, utils.determine_error(e))
+            LOG.error(LOG_ERR_FMT, error_message, utils.determine_error(e))
             self.module.fail_json(msg=error_message)
 
     def get_s3_key_parameters(self):

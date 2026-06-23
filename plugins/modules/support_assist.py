@@ -407,6 +407,7 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.sh
 import copy
 
 LOG = utils.get_logger('support_assist')
+NW_POOL_EMPTY_MSG = "Network pool list cannot be empty."
 
 
 class SupportAssist(PowerScaleBase):
@@ -563,7 +564,7 @@ class SupportAssist(PowerScaleBase):
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
         if not desired_pools:
-            error_msg = "Network pool list cannot be empty."
+            error_msg = NW_POOL_EMPTY_MSG
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
         if set(existing_pools) != set(desired_pools):
@@ -595,7 +596,7 @@ class SupportAssist(PowerScaleBase):
                 pool_list.remove(connection.get('network_pools')[pool]['pool_name'])
         if set(existing_network_pools) != set(pool_list):
             if pool_list == []:
-                error_msg = "Network pool list cannot be empty."
+                error_msg = NW_POOL_EMPTY_MSG
                 LOG.error(error_msg)
                 self.module.fail_json(msg=error_msg)
             connection_dict['network_pools'] = pool_list
@@ -670,7 +671,7 @@ class SupportAssist(PowerScaleBase):
                 connection_dict['mode'] = settings_params['connection']['mode']
             if connection.get('network_pools') is not None:
                 if len(connection['network_pools']) == 0:
-                    error_msg = "Network pool list cannot be empty."
+                    error_msg = NW_POOL_EMPTY_MSG
                     LOG.error(error_msg)
                     self.module.fail_json(msg=error_msg)
                 connection_dict = self.add_or_remove_network_pools(settings_params=settings_params,
@@ -681,26 +682,33 @@ class SupportAssist(PowerScaleBase):
                 modify_dict['connection'] = connection_dict
         return modify_dict
 
+    @staticmethod
+    def _is_telemetry_enabled(telemetry, current_telemetry):
+        """Check if telemetry is or should be enabled."""
+        return (telemetry['telemetry_enabled'] is True or
+                (telemetry['telemetry_enabled'] is None and current_telemetry.get('telemetry_enabled') is True))
+
     def is_support_assist_telemetry_modify_required(self, settings_params, settings_details, modify_dict):
         """
         Check whether modification is required in support assist telemetry settings
         """
+        telemetry = settings_params.get('telemetry')
+        if telemetry is None:
+            return modify_dict
+
         telemetry_keys = ["offline_collection_period", "telemetry_enabled",
                           "telemetry_persist", "telemetry_threads"]
-        telemetry = settings_params.get('telemetry')
+        current_telemetry = settings_details.get('telemetry', {})
         telemetry_dict = {}
 
-        if telemetry is not None:
-            if telemetry['telemetry_enabled'] is True or \
-                    (telemetry['telemetry_enabled'] is None and settings_details['telemetry']['telemetry_enabled'] is True):
-                for key in telemetry_keys:
-                    if telemetry.get(key) is not None and \
-                            settings_details['telemetry'].get(key) != telemetry[key]:
-                        telemetry_dict[key] = telemetry[key]
-            if telemetry['telemetry_enabled'] is False and \
-                    settings_details['telemetry']['telemetry_enabled'] is not False:
-                telemetry_dict['telemetry_enabled'] = telemetry['telemetry_enabled']
-        if telemetry_dict != {}:
+        if self._is_telemetry_enabled(telemetry, current_telemetry):
+            for key in telemetry_keys:
+                if telemetry.get(key) is not None and current_telemetry.get(key) != telemetry[key]:
+                    telemetry_dict[key] = telemetry[key]
+        elif telemetry['telemetry_enabled'] is False and current_telemetry.get('telemetry_enabled') is not False:
+            telemetry_dict['telemetry_enabled'] = telemetry['telemetry_enabled']
+
+        if telemetry_dict:
             modify_dict["telemetry"] = telemetry_dict
         return modify_dict
 

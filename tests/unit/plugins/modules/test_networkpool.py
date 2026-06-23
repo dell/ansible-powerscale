@@ -30,7 +30,7 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shar
 class TestNetworkPool(PowerScaleUnitBase):
     get_network_pool_args = {
         "api_user": "user",
-        "api_password": "password",
+        "api_password": "test_api_password_placeholder",
         "onefs_host": "10.10.10.10",
         "port_no": 8080,
         "verify_ssl": False,

@@ -1002,6 +1002,24 @@ class SynciqPolicy(object):
         return self.get_synciq_policy_display_attributes(diff_dict)
 
 
+def _check_list_fields(policy_obj, policy_param, modify_dict):
+    """Check source include/exclude directories for changes."""
+    for field in ('source_include_directories', 'source_exclude_directories'):
+        if field in policy_param and \
+                set(getattr(policy_obj, field)) != set(policy_param[field]):
+            modify_dict[field] = policy_param[field]
+
+
+def _check_password_field(policy_obj_dict, policy_param, modify_dict):
+    """Handle write-only password field comparison."""
+    if 'password' not in policy_param:
+        return
+    if not policy_obj_dict.get('password_set', False):
+        modify_dict['password'] = policy_param['password']
+    elif modify_dict:
+        modify_dict['password'] = policy_param['password']
+
+
 def is_policy_modify(policy_obj, policy_param):
     """
     Check whether policy is modifiable
@@ -1011,16 +1029,9 @@ def is_policy_modify(policy_obj, policy_param):
      if no parameters are to be modified dict is empty
     """
     modify_policy_dict = {}
+    exclude_key = {'source_include_directories', 'source_exclude_directories', 'source_network', 'password'}
 
-    exclude_key = ['source_include_directories', 'source_exclude_directories', 'source_network', 'password']
-
-    if 'source_include_directories' in policy_param and \
-            set(policy_obj.source_include_directories) != set(policy_param['source_include_directories']):
-        modify_policy_dict['source_include_directories'] = policy_param['source_include_directories']
-
-    if 'source_exclude_directories' in policy_param and \
-            set(policy_obj.source_exclude_directories) != set(policy_param['source_exclude_directories']):
-        modify_policy_dict['source_exclude_directories'] = policy_param['source_exclude_directories']
+    _check_list_fields(policy_obj, policy_param, modify_policy_dict)
 
     if 'source_network' in policy_param:
         modified_source_network = get_modified_source_network(policy_obj.source_network,
@@ -1036,16 +1047,7 @@ def is_policy_modify(policy_obj, policy_param):
         if param in policy_obj_dict and policy_obj_dict[param] != policy_param[param]:
             modify_policy_dict[param] = policy_param[param]
 
-    # Special handling for write-only password field.
-    # The API never returns the password value (only password_set boolean),
-    # so standard comparison is impossible.
-    if 'password' in policy_param:
-        if not policy_obj_dict.get('password_set', False):
-            # Password not yet set on the policy — needs to be set
-            modify_policy_dict['password'] = policy_param['password']
-        elif modify_policy_dict:
-            # Other changes detected — include password in the update
-            modify_policy_dict['password'] = policy_param['password']
+    _check_password_field(policy_obj_dict, policy_param, modify_policy_dict)
 
     return modify_policy_dict
 

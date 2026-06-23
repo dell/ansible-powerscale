@@ -232,23 +232,12 @@ class JobReportInfo(object):
         limit = self.module.params['limit']
 
         # Build filter dict, excluding None values
-        params = {}
-        if job_type is not None:
-            params['job_type'] = job_type
-        if job_id is not None:
-            params['job_id'] = job_id
-        if event_key is not None:
-            params['key'] = event_key
-        if begin is not None:
-            params['begin'] = begin
-        if end is not None:
-            params['end'] = end
-        if last_phase_only is not None:
-            params['last_phase_only'] = last_phase_only
-        if verbose is not None:
-            params['verbose'] = verbose
-        if limit is not None:
-            params['limit'] = limit
+        param_map = {
+            'job_type': job_type, 'job_id': job_id, 'key': event_key,
+            'begin': begin, 'end': end, 'last_phase_only': last_phase_only,
+            'verbose': verbose, 'limit': limit
+        }
+        params = {k: v for k, v in param_map.items() if v is not None}
 
         # Fetch reports with pagination
         all_reports = []

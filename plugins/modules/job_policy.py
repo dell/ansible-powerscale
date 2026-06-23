@@ -471,6 +471,86 @@ class JobPolicy(object):
                         "Must be one of: %s."
                         % (impact, ', '.join(VALID_IMPACT_VALUES)))
 
+    def _handle_modify_existing(self, existing, policy_name, description, intervals, diff_dict):
+        """Handle modification of an existing policy. Returns changed."""
+        desired = {}
+        if description is not None:
+            desired['description'] = description
+        if intervals is not None:
+            desired['intervals'] = intervals
+
+        modified, changes = self.is_policy_modified(existing, desired)
+        if not modified:
+            LOG.info("Job policy %s is already in the desired state.", policy_name)
+            return False
+
+        if existing.get('system', False):
+            self.module.fail_json(
+                msg="Cannot modify system policy '%s'. System policies are read-only." % policy_name)
+
+        if not self.module.check_mode:
+            self.modify_policy(existing['id'], **changes)
+            updated = self.get_policy_by_name(policy_name)
+            if updated and self._policy_equal(existing, updated):
+                LOG.info("Job policy %s: API normalized values match existing state. No real change.", policy_name)
+                return False
+            if self.module._diff:
+                diff_dict.update({'before': existing, 'after': updated or dict(existing, **changes)})
+            return True
+
+        if self.module._diff:
+            diff_dict.update({'before': existing, 'after': dict(existing, **changes)})
+        return True
+
+    def _handle_create_policy(self, policy_name, description, intervals, diff_dict):
+        """Handle creation of a new policy. Returns changed=True."""
+        if self.module._diff:
+            diff_dict.update({
+                'before': {},
+                'after': {'name': policy_name, 'description': description, 'intervals': intervals}
+            })
+        if not self.module.check_mode:
+            self.create_policy(policy_name, description, intervals)
+            if self.module._diff:
+                created = self.get_policy_by_name(policy_name)
+                if created:
+                    diff_dict['after'] = created
+        return True
+
+    def _handle_absent_state(self, existing, policy_id, diff_dict):
+        """Handle absent state. Returns changed."""
+        if not existing:
+            LOG.info("Job policy does not exist. No action needed.")
+            return False
+        if existing.get('system', False):
+            self.module.fail_json(
+                msg="Cannot delete system policy '%s'. System policies cannot be removed."
+                    % existing.get('name', policy_id))
+        if self.module._diff:
+            diff_dict.update({'before': existing, 'after': {}})
+        if not self.module.check_mode:
+            self.delete_policy(existing['id'])
+        return True
+
+    def _get_final_details(self, state, policy_name, policy_id, existing, changed, description, intervals):
+        """Get final policy details for output."""
+        if state != 'present':
+            return None
+        if not self.module.check_mode:
+            if policy_name:
+                return self.get_policy_by_name(policy_name)
+            return self.get_policy_details(policy_id) if policy_id else None
+        if existing and not changed:
+            return existing
+        if existing and changed:
+            details = dict(existing)
+            if description is not None:
+                details['description'] = description
+            if intervals is not None:
+                details['intervals'] = intervals
+            return details
+        return {'name': policy_name, 'description': description, 'intervals': intervals}
+
     def perform_module_operation(self):
         """
         Perform different actions on job policy module based on parameters
@@ -482,148 +562,33 @@ class JobPolicy(object):
         intervals = self.module.params.get('intervals')
         state = self.module.params.get('state')
 
-        changed = False
-        job_policy_details = None
-        diff_dict = {}
-
-        # Validate intervals format
         self.validate_intervals(intervals)
 
-        # Get existing policy
         existing = None
         if policy_name:
             existing = self.get_policy_by_name(policy_name)
         elif policy_id:
             existing = self.get_policy_details(policy_id)
 
+        diff_dict = {}
+        changed = False
+
         if state == 'present':
             if not policy_name:
-                self.module.fail_json(
-                    msg="policy_name is required when state is present.")
-
+                self.module.fail_json(msg="policy_name is required when state is present.")
             if existing:
-                # Check if modification is needed
-                desired = {}
-                if description is not None:
-                    desired['description'] = description
-                if intervals is not None:
-                    desired['intervals'] = intervals
-
-                modified, changes = self.is_policy_modified(existing, desired)
-
-                if modified:
-                    # Check if it is a system policy
-                    if existing.get('system', False):
-                        self.module.fail_json(
-                            msg="Cannot modify system policy '%s'. "
-                                "System policies are read-only."
-                                % policy_name)
-
-                    if not self.module.check_mode:
-                        self.modify_policy(existing['id'], **changes)
-
-                        # Re-fetch to check if API actually changed
-                        updated = self.get_policy_by_name(policy_name)
-                        if updated and self._policy_equal(existing, updated):
-                            changed = False
-                            LOG.info(
-                                "Job policy %s: API normalized values "
-                                "match existing state. No real change.",
-                                policy_name)
-                        else:
-                            changed = True
-                            if self.module._diff:
-                                diff_dict = {
-                                    'before': existing,
-                                    'after': updated if updated else
-                                    dict(existing, **changes)
-                                }
-                    else:
-                        changed = True
-                        if self.module._diff:
-                            diff_dict = {
-                                'before': existing,
-                                'after': dict(existing, **changes)
-                            }
-                else:
-                    LOG.info("Job policy %s is already in the desired state.",
-                             policy_name)
+                changed = self._handle_modify_existing(existing, policy_name, description, intervals, diff_dict)
             else:
-                # Create new policy
-                if self.module._diff:
-                    diff_dict = {
-                        'before': {},
-                        'after': {
-                            'name': policy_name,
-                            'description': description,
-                            'intervals': intervals
-                        }
-                    }
-
-                if not self.module.check_mode:
-                    self.create_policy(policy_name, description, intervals)
-
-                    if self.module._diff:
-                        created = self.get_policy_by_name(policy_name)
-                        if created:
-                            diff_dict['after'] = created
-
-                changed = True
-
+                changed = self._handle_create_policy(policy_name, description, intervals, diff_dict)
         elif state == 'absent':
-            if existing:
-                # Check if it is a system policy
-                if existing.get('system', False):
-                    self.module.fail_json(
-                        msg="Cannot delete system policy '%s'. "
-                            "System policies cannot be removed."
-                            % existing.get('name', policy_id))
+            changed = self._handle_absent_state(existing, policy_id, diff_dict)
 
-                if self.module._diff:
-                    diff_dict = {
-                        'before': existing,
-                        'after': {}
-                    }
+        job_policy_details = self._get_final_details(
+            state, policy_name, policy_id, existing, changed, description, intervals)
 
-                if not self.module.check_mode:
-                    self.delete_policy(existing['id'])
-
-                changed = True
-            else:
-                LOG.info("Job policy does not exist. No action needed.")
-
-        # Get final policy details for output
-        if state == 'present' and not self.module.check_mode:
-            if policy_name:
-                job_policy_details = self.get_policy_by_name(policy_name)
-            elif policy_id:
-                job_policy_details = self.get_policy_details(policy_id)
-        elif state == 'present' and self.module.check_mode:
-            # In check mode return existing or projected details
-            if existing and not changed:
-                job_policy_details = existing
-            elif existing and changed:
-                # Return projected details
-                job_policy_details = dict(existing)
-                if description is not None:
-                    job_policy_details['description'] = description
-                if intervals is not None:
-                    job_policy_details['intervals'] = intervals
-            else:
-                job_policy_details = {
-                    'name': policy_name,
-                    'description': description,
-                    'intervals': intervals
-                }
-
-        result = dict(
-            changed=changed,
-            job_policy_details=job_policy_details
-        )
-
+        result = dict(changed=changed, job_policy_details=job_policy_details)
         if self.module._diff and diff_dict:
             result['diff'] = diff_dict
-
         self.module.exit_json(**result)
 
 

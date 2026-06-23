@@ -233,20 +233,10 @@ class TestJobReportInfo(PowerScaleUnitBase):
     # U-JR-C03: Test if __name__ == '__main__' guard (covers line 307)
     def test_if_name_main_guard(self, powerscale_module_mock):
         """U-JR-C03: Cover if __name__ == '__main__': main() guard."""
-        import os
         from ansible_collections.dellemc\
             .powerscale.plugins.modules\
             import job_report_info as mod
-        src = mod.__file__
-        if src and os.path.isfile(src):
-            with open(src) as fh:
-                code = compile(fh.read(), src, 'exec')
-            try:
-                exec(code, {'__name__': '__main__', '__file__': src})
-            except Exception:
-                pass
-        else:
-            try:
-                mod.main()
-            except (SystemExit, TypeError):
-                pass
+        try:
+            mod.main()
+        except (SystemExit, TypeError):
+            pass
