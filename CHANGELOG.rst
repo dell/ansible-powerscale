@@ -4,6 +4,30 @@ Dellemc.Powerscale Release Notes
 
 .. contents:: Topics
 
+v3.10.0
+======
+
+Release Summary
+---------------
+
+| Release Date: 2026-06-22
+| >- This release adds new modules for Job Management, S3 settings, and Cluster Services.
+
+New Modules
+-----------
+
+- Added Job Management modules for PowerScale job operations
+- Added S3 Global Settings module for managing S3 global configurations
+- Added S3 Key module for managing S3 keys
+- Added S3 Zone Settings module for managing S3 zone-specific configurations
+- Added Cluster Services module for PowerScale service management
+
+Minor Changes
+-------------
+
+- Enhanced S3 capabilities with granular zone and global settings
+- Added comprehensive job management and monitoring features
+
 v3.9.1
 ======
 
