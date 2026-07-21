@@ -731,8 +731,12 @@ class SmartQuota(object):
             LOG.info("Get Quota Details Failed. Quota does not exist.")
             return None, None
         except Exception as e:
+            error_str = determine_error(e)
+            if 'AEC_NOT_FOUND' in error_str:
+                LOG.info("Path %s not found, quota does not exist", path)
+                return None, None
             error_message = "Get Quota Details for %s failed with %s" \
-                            % (path, determine_error(e))
+                            % (path, error_str)
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
