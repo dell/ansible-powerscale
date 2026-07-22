@@ -48,6 +48,115 @@ body:
     validations:
       required: true
 
+  - type: markdown
+    attributes:
+      value: |
+        ## Customer Details
+
+  - type: input
+    id: organization-name
+    attributes:
+      label: Organization Name
+      placeholder: Example Corp
+    validations:
+      required: true
+
+  - type: input
+    id: industry
+    attributes:
+      label: Industry
+      placeholder: Financial Services, Healthcare, Telecom, etc.
+    validations:
+      required: true
+
+  - type: input
+    id: customer-size
+    attributes:
+      label: Size
+      placeholder: Number of users, clusters, storage capacity, etc.
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Your Context
+
+  - type: input
+    id: role
+    attributes:
+      label: Role
+      placeholder: Storage Administrator, DevOps Engineer, Architect, etc.
+    validations:
+      required: true
+
+  - type: input
+    id: scale
+    attributes:
+      label: Scale (# of devices/operations affected)
+      placeholder: e.g. 500 nodes, 1000 daily operations
+    validations:
+      required: true
+
+  - type: dropdown
+    id: frequency
+    attributes:
+      label: How often do you encounter this?
+      options:
+        - Daily
+        - Weekly
+        - Monthly
+        - Quarterly
+        - Occasionally
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Business Impact
+
+  - type: textarea
+    id: time-savings
+    attributes:
+      label: Time savings per operation
+      description: Estimate the amount of time saved if this feature exists.
+    validations:
+      required: true
+
+  - type: textarea
+    id: error-reduction
+    attributes:
+      label: Expected error reduction
+      description: Describe how this enhancement would reduce operational errors.
+    validations:
+      required: true
+
+  - type: textarea
+    id: compliance-security
+    attributes:
+      label: Compliance / Security Requirements
+      description: Describe any regulatory, audit, or security requirements driving this request.
+    validations:
+      required: true
+
+  - type: textarea
+    id: other-business-impact
+    attributes:
+      label: Other Business Impacts
+      description: Cost savings, faster deployment, customer satisfaction, operational efficiency, etc.
+    validations:
+      required: false
+
+  - type: textarea
+    id: current-workaround
+    attributes:
+      label: Current Workaround
+      description: How are you handling this today?
+    validations:
+      required: true
+
+
   - type: textarea
     id: problem-statement
     attributes:
