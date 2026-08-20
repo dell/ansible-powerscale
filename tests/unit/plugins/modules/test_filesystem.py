@@ -1660,3 +1660,172 @@ class TestFileSystem(PowerScaleUnitBase):
         powerscale_module_mock.get_trustee_id = MagicMock(return_value="UID:2000")
         result = powerscale_module_mock._is_replace_acl_modified(filesystem_acl, acl_rights_list)
         assert result is False
+
+    # --- Check mode and diff output tests ---
+
+    def test_check_mode_multi_ace_replace_no_api_call(self, powerscale_module_mock):
+        """Check mode with replace state returns changed=true without API mutation."""
+        acl_list = [
+            {
+                "access_rights": ["dir_gen_all"],
+                "inherit_flags": ["container_inherit"],
+                "access_type": "allow",
+                "trustee": {"name": "test_user", "type": "user", "provider_type": "local"}
+            },
+            {
+                "access_rights": ["dir_gen_read"],
+                "inherit_flags": ["object_inherit", "inherit_only"],
+                "access_type": "allow",
+                "trustee": {"name": "test_user", "type": "user", "provider_type": "local"}
+            }
+        ]
+        self.set_module_params(self.get_filesystem_args,
+                               {"path": self.path1,
+                                "owner": {"name": "test"},
+                                "group": {"name": "group_test"},
+                                "access_control_rights": acl_list,
+                                "access_control_rights_state": "replace",
+                                "access_zone": "System", "state": "present"})
+        powerscale_module_mock.module.check_mode = True
+        powerscale_module_mock.get_acl = MagicMock(return_value=MockFileSystemApi.get_acl_response())
+        powerscale_module_mock.get_acl_object = MagicMock()
+        utils.get_acl_object = MagicMock()
+        FilesystemHandler().handle(
+            powerscale_module_mock, powerscale_module_mock.module.params)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed']
+        # Verify set_acl was NOT called (check mode)
+        powerscale_module_mock.namespace_api.set_acl.assert_not_called()
+
+    def test_diff_output_replace_mode(self, powerscale_module_mock):
+        """Diff output contains before and after ACL arrays for replace mode."""
+        acl_list = [
+            {
+                "access_rights": ["dir_gen_all"],
+                "inherit_flags": ["container_inherit"],
+                "access_type": "allow",
+                "trustee": {"name": "test_user", "type": "user", "provider_type": "local"}
+            }
+        ]
+        self.set_module_params(self.get_filesystem_args,
+                               {"path": self.path1,
+                                "owner": {"name": "test"},
+                                "group": {"name": "group_test"},
+                                "access_control_rights": acl_list,
+                                "access_control_rights_state": "replace",
+                                "access_zone": "System", "state": "present"})
+        powerscale_module_mock.module.check_mode = True
+        powerscale_module_mock.get_acl = MagicMock(return_value=MockFileSystemApi.get_acl_response())
+        powerscale_module_mock.get_acl_object = MagicMock()
+        utils.get_acl_object = MagicMock()
+        FilesystemHandler().handle(
+            powerscale_module_mock, powerscale_module_mock.module.params)
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert 'diff' in result
+        assert 'before' in result['diff']
+        assert 'after' in result['diff']
+        assert 'acl' in result['diff']['before']
+        assert 'acl' in result['diff']['after']
+        # Before should have the mock ACL, after should have our desired ACL
+        assert len(result['diff']['before']['acl']) > 0
+        assert len(result['diff']['after']['acl']) == 1
+
+    def test_diff_output_add_mode(self, powerscale_module_mock):
+        """Diff output for add mode shows new ACE appended."""
+        acl_list = [
+            {
+                "access_rights": ["dir_gen_all"],
+                "inherit_flags": ["container_inherit"],
+                "access_type": "allow",
+                "trustee": {"name": "new_user", "type": "user", "provider_type": "local"}
+            }
+        ]
+        self.set_module_params(self.get_filesystem_args,
+                               {"path": self.path1,
+                                "owner": {"name": "test"},
+                                "group": {"name": "group_test"},
+                                "access_control_rights": acl_list,
+                                "access_control_rights_state": "add",
+                                "access_zone": "System", "state": "present"})
+        powerscale_module_mock.module.check_mode = True
+        powerscale_module_mock.get_acl = MagicMock(return_value=MockFileSystemApi.get_acl_response())
+        powerscale_module_mock.get_acl_object = MagicMock()
+        utils.get_acl_object = MagicMock()
+        FilesystemHandler().handle(
+            powerscale_module_mock, powerscale_module_mock.module.params)
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert 'diff' in result
+        before_count = len(result['diff']['before']['acl'])
+        after_count = len(result['diff']['after']['acl'])
+        # After should have one more ACE than before
+        assert after_count == before_count + 1
+
+    def test_compute_acl_diff_replace(self, powerscale_module_mock):
+        """_compute_acl_diff builds correct before/after for replace."""
+        filesystem_acl = {
+            'acl': [
+                {
+                    'accessrights': ['dir_gen_read'],
+                    'accesstype': 'allow',
+                    'inherit_flags': [],
+                    'trustee': {'id': 'UID:1000', 'name': 'old_user', 'type': 'user'}
+                }
+            ]
+        }
+        acl_rights_list = [
+            {
+                'access_rights': ['dir_gen_all'],
+                'inherit_flags': ['container_inherit'],
+                'access_type': 'allow',
+                'trustee': {'name': 'new_user', 'type': 'user', 'provider_type': 'local'}
+            }
+        ]
+        self.set_module_params(self.get_filesystem_args,
+                               {"path": self.path1,
+                                "access_control_rights": acl_rights_list,
+                                "access_control_rights_state": "replace",
+                                "access_zone": "System", "state": "present"})
+        powerscale_module_mock.get_trustee_id = MagicMock(return_value="UID:2000")
+        powerscale_module_mock._compute_acl_diff(filesystem_acl, acl_rights_list, 'replace')
+        diff = powerscale_module_mock.result['diff']
+        assert len(diff['before']['acl']) == 1
+        assert diff['before']['acl'][0]['trustee']['id'] == 'UID:1000'
+        assert len(diff['after']['acl']) == 1
+        assert diff['after']['acl'][0]['trustee']['id'] == 'UID:2000'
+
+    def test_compute_acl_diff_remove(self, powerscale_module_mock):
+        """_compute_acl_diff removes matching trustee+access_type for remove."""
+        filesystem_acl = {
+            'acl': [
+                {
+                    'accessrights': ['dir_gen_read'],
+                    'accesstype': 'allow',
+                    'inherit_flags': [],
+                    'trustee': {'id': 'UID:1000', 'name': 'user1', 'type': 'user'}
+                },
+                {
+                    'accessrights': ['dir_gen_all'],
+                    'accesstype': 'deny',
+                    'inherit_flags': [],
+                    'trustee': {'id': 'GID:100', 'name': 'group1', 'type': 'group'}
+                }
+            ]
+        }
+        acl_rights_list = [
+            {
+                'access_rights': ['dir_gen_read'],
+                'inherit_flags': [],
+                'access_type': 'allow',
+                'trustee': {'name': 'user1', 'type': 'user', 'provider_type': 'local'}
+            }
+        ]
+        self.set_module_params(self.get_filesystem_args,
+                               {"path": self.path1,
+                                "access_control_rights": acl_rights_list,
+                                "access_control_rights_state": "remove",
+                                "access_zone": "System", "state": "present"})
+        powerscale_module_mock.get_trustee_id = MagicMock(return_value="UID:1000")
+        powerscale_module_mock._compute_acl_diff(filesystem_acl, acl_rights_list, 'remove')
+        diff = powerscale_module_mock.result['diff']
+        assert len(diff['before']['acl']) == 2
+        assert len(diff['after']['acl']) == 1
+        assert diff['after']['acl'][0]['trustee']['id'] == 'GID:100'

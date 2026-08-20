@@ -645,7 +645,8 @@ class FileSystem(object):
             modify_group='',
             quota_details='',
             filesystem_snapshots='',
-            filesystem_details=''
+            filesystem_details='',
+            diff=dict(before={}, after={})
         )
         PREREQS_VALIDATE = utils.validate_module_pre_reqs(self.module.params)
         if PREREQS_VALIDATE \
@@ -1172,8 +1173,11 @@ class FileSystem(object):
                 if acl_posix != filesystem_acl['mode']:
                     return True, "posix"
             if self.module.params['access_control_rights']:
+                acl_rights_state = self.module.params['access_control_rights_state']
                 if self.is_acl_rights_modified(filesystem_acl, self.module.params['access_control_rights'],
-                                               self.module.params['access_control_rights_state']):
+                                               acl_rights_state):
+                    self._compute_acl_diff(filesystem_acl, self.module.params['access_control_rights'],
+                                           acl_rights_state)
                     return True, "acl"
 
             return False, None
@@ -1184,6 +1188,62 @@ class FileSystem(object):
                             'ACLs are modified'.format(str(error_msg))
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
+
+    def _compute_acl_diff(self, filesystem_acl, acl_rights_list, acl_rights_state):
+        """Computes before/after diff for ACL changes and stores in result."""
+        before_acl = []
+        for acl in filesystem_acl.get('acl', []):
+            if not acl.get('trustee', {}).get('id'):
+                continue
+            before_acl.append({
+                'trustee': acl['trustee'],
+                'access_type': acl['accesstype'],
+                'access_rights': acl.get('accessrights', []),
+                'inherit_flags': acl.get('inherit_flags', []),
+            })
+
+        after_acl = list(before_acl)
+        if acl_rights_state == 'replace':
+            after_acl = []
+            for ace in acl_rights_list:
+                trustee_id = self.get_trustee_id(ace['trustee']['name'],
+                                                 ace['trustee']['type'],
+                                                 self.module.params['access_zone'],
+                                                 ace['trustee']['provider_type'])
+                after_acl.append({
+                    'trustee': {'name': ace['trustee']['name'], 'id': trustee_id,
+                                'type': ace['trustee']['type']},
+                    'access_type': ace['access_type'],
+                    'access_rights': ace.get('access_rights', []),
+                    'inherit_flags': ace.get('inherit_flags', []),
+                })
+        elif acl_rights_state == 'add':
+            for ace in acl_rights_list:
+                trustee_id = self.get_trustee_id(ace['trustee']['name'],
+                                                 ace['trustee']['type'],
+                                                 self.module.params['access_zone'],
+                                                 ace['trustee']['provider_type'])
+                after_acl.append({
+                    'trustee': {'name': ace['trustee']['name'], 'id': trustee_id,
+                                'type': ace['trustee']['type']},
+                    'access_type': ace['access_type'],
+                    'access_rights': ace.get('access_rights', []),
+                    'inherit_flags': ace.get('inherit_flags', []),
+                })
+        elif acl_rights_state == 'remove':
+            for ace in acl_rights_list:
+                trustee_id = self.get_trustee_id(ace['trustee']['name'],
+                                                 ace['trustee']['type'],
+                                                 self.module.params['access_zone'],
+                                                 ace['trustee']['provider_type'])
+                after_acl = [a for a in after_acl
+                             if not (a['trustee'].get('id') == trustee_id and
+                                     a['access_type'] == ace['access_type'])]
+
+        self.result['diff'] = {
+            'before': {'acl': before_acl},
+            'after': {'acl': after_acl}
+        }
 
     def _get_ace_composite_key(self, trustee_id, access_type, inherit_flags):
         """Build composite key for ACE identification.
