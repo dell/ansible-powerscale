@@ -260,6 +260,25 @@ notes:
   C(remove) states may fail with an ambiguous-match error when the
   existing ACL already contains multiple ACEs for the same trustee
   and access type.
+- "Troubleshooting - Non-existent trustee: If the module fails with
+  a trustee resolution error, verify that the trustee name exists in
+  the specified provider (local, LDAP, or AD). Check the provider_type
+  setting in the trustee dict matches the actual identity source."
+- "Troubleshooting - ACL reset with empty list: Using C(replace) with
+  an empty I(access_control_rights) list removes all custom ACEs from
+  the directory. The directory retains its inherited ACEs and default
+  owner/group permissions. This is the expected OneFS behavior."
+- "Troubleshooting - Ambiguous ACE matching: When using the legacy
+  C(add) or C(remove) states on a directory that already has multiple
+  ACEs for the same trustee and access type, the module raises an error
+  because it cannot determine which ACE to modify. Switch to C(replace)
+  state with a complete list of desired ACEs to resolve this."
+- "Migration from single-ACE to multi-ACE: Existing playbooks using
+  I(access_control_rights) as a single dict continue to work unchanged.
+  To adopt multi-ACE, change the parameter value from a dict to a list
+  of dicts, and change I(access_control_rights_state) from C(add) to
+  C(replace) for declarative whole-ACL management. See the migration
+  example in the EXAMPLES section for a before/after comparison."
 - I(Check_mode) is supported.
 '''
 

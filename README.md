@@ -52,6 +52,7 @@ The Ansible Modules for Dell PowerScale support the following features:
 - Get details and modify alert settings.
 - Get details and modify IPMI configuration settings.
 - Use query parameters and filters for Info module.
+- Configure advanced ACL permissions with multiple Access Control Entries (ACEs) per trustee, supporting differentiated inheritance flags for fine-grained directory and file access control.
 
 The tasks can be executed by running simple playbooks written in yaml syntax.
 
@@ -99,7 +100,7 @@ This table provides information about the software prerequisites for the Ansible
 
 ### File System & Data Protection
 
-* [File System Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/filesystem.rst)
+* [File System Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/filesystem.rst) - Includes advanced ACL management with multi-ACE per trustee support
 * [Snapshot Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/snapshot.rst)
 * [Snapshot Schedule Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/snapshotschedule.rst)
 * [Smart Quota Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/smartquota.rst)
