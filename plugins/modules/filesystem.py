@@ -89,6 +89,14 @@ options:
       for multi-ACE operations.
     - When a single dict is provided, it is automatically wrapped into a
       single-element list internally.
+    - Multiple ACEs for the same trustee are supported. Each ACE is uniquely
+      identified by a composite key of (trustee identity, access_type,
+      sorted inherit_flags). This allows different inheritance behaviors
+      for the same user or group.
+    - When managing multiple ACEs per trustee, use C(replace) as the
+      I(access_control_rights_state) to perform a declarative whole-ACL
+      replacement. The C(add) and C(remove) states operate on individual
+      ACEs and may produce ambiguous results with multi-ACE configurations.
     type: list
     elements: dict
     suboptions:
@@ -107,6 +115,15 @@ options:
       inherit_flags:
         description:
         - Provides the inherit flags set for the directory.
+        - C(object_inherit) - permissions propagate to files within the directory.
+        - C(container_inherit) - permissions propagate to subdirectories.
+        - C(inherit_only) - permissions apply only to child objects, not to the
+          directory itself. Must be combined with C(object_inherit) or
+          C(container_inherit).
+        - C(no_prop_inherit) - permissions propagate only to immediate children,
+          not to deeper descendants.
+        - C(inherited_ace) - indicates the ACE was inherited from a parent directory
+          (read-only; set by the system).
         type: list
         elements: str
         choices: ['object_inherit', 'container_inherit', 'inherit_only',
@@ -238,6 +255,11 @@ notes:
 - Modification of I(inherit_flags) of filesystem ACL is
   successful only if I(access_rights) is also specified in
   the I(access_control_rights) dictionary.
+- When configuring multiple ACEs for the same trustee, always use
+  C(replace) as the I(access_control_rights_state). The C(add) and
+  C(remove) states may fail with an ambiguous-match error when the
+  existing ACL already contains multiple ACEs for the same trustee
+  and access type.
 - I(Check_mode) is supported.
 '''
 
@@ -530,6 +552,56 @@ EXAMPLES = r'''
           name: test_user
           provider_type: "ldap"
     access_control_rights_state: "replace"
+    state: "present"
+
+- name: Modify existing multi-ACE configuration using replace state
+  dellemc.powerscale.filesystem:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "/ifs/test"
+    access_zone: "{{access_zone}}"
+    access_control_rights:
+      - access_type: "allow"
+        access_rights:
+          - dir_gen_all
+        inherit_flags:
+          - container_inherit
+        trustee:
+          name: test_user
+          provider_type: "ldap"
+      - access_type: "allow"
+        access_rights:
+          - dir_gen_all
+        inherit_flags:
+          - object_inherit
+          - inherit_only
+        trustee:
+          name: test_user
+          provider_type: "ldap"
+    access_control_rights_state: "replace"
+    state: "present"
+
+- name: Remove one ACE from a multi-ACE trustee using remove state
+  dellemc.powerscale.filesystem:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "/ifs/test"
+    access_zone: "{{access_zone}}"
+    access_control_rights:
+      access_type: "allow"
+      inherit_flags:
+        - object_inherit
+        - inherit_only
+      trustee:
+        name: test_user
+        provider_type: "ldap"
+    access_control_rights_state: "remove"
     state: "present"
 
 - name: Migration example - single dict to list format
