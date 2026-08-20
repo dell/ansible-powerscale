@@ -1829,3 +1829,75 @@ class TestFileSystem(PowerScaleUnitBase):
         assert len(diff['before']['acl']) == 2
         assert len(diff['after']['acl']) == 1
         assert diff['after']['acl'][0]['trustee']['id'] == 'GID:100'
+
+    def test_merge_aces_by_key_combines_access_rights(self, powerscale_module_mock):
+        """Two desired ACEs with same key merge access_rights into one."""
+        filesystem_acl = {
+            'acl': [
+                {
+                    'accessrights': ['dir_gen_all', 'dir_gen_read'],
+                    'accesstype': 'allow',
+                    'inherit_flags': ['container_inherit'],
+                    'trustee': {'id': 'UID:2000', 'name': 'user1', 'type': 'user'}
+                }
+            ]
+        }
+        acl_rights_list = [
+            {
+                'access_rights': ['dir_gen_all'],
+                'inherit_flags': ['container_inherit'],
+                'access_type': 'allow',
+                'trustee': {'name': 'user1', 'type': 'user', 'provider_type': 'local'}
+            },
+            {
+                'access_rights': ['dir_gen_read'],
+                'inherit_flags': ['container_inherit'],
+                'access_type': 'allow',
+                'trustee': {'name': 'user1', 'type': 'user', 'provider_type': 'local'}
+            }
+        ]
+        self.set_module_params(self.get_filesystem_args,
+                               {"path": self.path1,
+                                "access_control_rights": acl_rights_list,
+                                "access_control_rights_state": "replace",
+                                "access_zone": "System", "state": "present"})
+        powerscale_module_mock.get_trustee_id = MagicMock(return_value="UID:2000")
+        result = powerscale_module_mock.is_acl_rights_modified(
+            filesystem_acl, acl_rights_list, 'replace')
+        assert result is False
+
+    def test_ambiguous_legacy_add_raises_error(self, powerscale_module_mock):
+        """Legacy add with multiple matching trustee+access_type ACEs fails."""
+        filesystem_acl = {
+            'acl': [
+                {
+                    'accessrights': ['dir_gen_all'],
+                    'accesstype': 'allow',
+                    'inherit_flags': ['container_inherit'],
+                    'trustee': {'id': 'UID:2000', 'name': 'user1', 'type': 'user'}
+                },
+                {
+                    'accessrights': ['dir_gen_read'],
+                    'accesstype': 'allow',
+                    'inherit_flags': ['object_inherit'],
+                    'trustee': {'id': 'UID:2000', 'name': 'user1', 'type': 'user'}
+                }
+            ]
+        }
+        acl_rights_list = [
+            {
+                'access_rights': ['dir_gen_write'],
+                'inherit_flags': ['container_inherit'],
+                'access_type': 'allow',
+                'trustee': {'name': 'user1', 'type': 'user', 'provider_type': 'local'}
+            }
+        ]
+        self.set_module_params(self.get_filesystem_args,
+                               {"path": self.path1,
+                                "access_control_rights": acl_rights_list,
+                                "access_control_rights_state": "add",
+                                "access_zone": "System", "state": "present"})
+        powerscale_module_mock.get_trustee_id = MagicMock(return_value="UID:2000")
+        powerscale_module_mock.get_acl = MagicMock(return_value=filesystem_acl)
+        self.capture_fail_json_call(
+            "Multiple existing ACEs match trustee", FilesystemHandler)

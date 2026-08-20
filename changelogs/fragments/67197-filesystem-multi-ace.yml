@@ -1,0 +1,8 @@
+---
+minor_changes:
+  - dellemc.powerscale.filesystem - Added support for multiple Access Control
+    Entries (ACEs) per trustee with different inheritance flags. The
+    ``access_control_rights`` parameter now accepts a list of ACE dicts. A new
+    ``replace`` value for ``access_control_rights_state`` enables declarative
+    whole-ACL replacement. Single-dict input remains fully backward
+    compatible.

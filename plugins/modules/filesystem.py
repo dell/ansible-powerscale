@@ -445,6 +445,126 @@ EXAMPLES = r'''
     access_control_rights_state: "replace"
     state: "present"
 
+- name: Replace ACL with object_inherit only
+  dellemc.powerscale.filesystem:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "/ifs/test"
+    access_zone: "{{access_zone}}"
+    access_control_rights:
+      - access_type: "allow"
+        access_rights:
+          - std_read_dac
+        inherit_flags:
+          - object_inherit
+        trustee:
+          name: test_user
+          provider_type: "ldap"
+    access_control_rights_state: "replace"
+    state: "present"
+
+- name: Replace ACL with object_inherit and container_inherit
+  dellemc.powerscale.filesystem:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "/ifs/test"
+    access_zone: "{{access_zone}}"
+    access_control_rights:
+      - access_type: "allow"
+        access_rights:
+          - dir_gen_all
+        inherit_flags:
+          - object_inherit
+          - container_inherit
+        trustee:
+          name: test_user
+          provider_type: "ldap"
+    access_control_rights_state: "replace"
+    state: "present"
+
+- name: Replace ACL with object_inherit and no_prop_inherit
+  dellemc.powerscale.filesystem:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "/ifs/test"
+    access_zone: "{{access_zone}}"
+    access_control_rights:
+      - access_type: "allow"
+        access_rights:
+          - dir_gen_read
+        inherit_flags:
+          - object_inherit
+          - no_prop_inherit
+        trustee:
+          name: test_user
+          provider_type: "ldap"
+    access_control_rights_state: "replace"
+    state: "present"
+
+- name: Replace ACL with container_inherit and inherit_only
+  dellemc.powerscale.filesystem:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "/ifs/test"
+    access_zone: "{{access_zone}}"
+    access_control_rights:
+      - access_type: "allow"
+        access_rights:
+          - dir_gen_all
+        inherit_flags:
+          - container_inherit
+          - inherit_only
+        trustee:
+          name: test_user
+          provider_type: "ldap"
+    access_control_rights_state: "replace"
+    state: "present"
+
+- name: Migration example - single dict to list format
+  dellemc.powerscale.filesystem:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "/ifs/test"
+    access_zone: "{{access_zone}}"
+    # Before (still supported): access_control_rights as a single dict
+    # access_control_rights:
+    #   access_type: "allow"
+    #   access_rights:
+    #     - dir_gen_all
+    #   inherit_flags:
+    #     - container_inherit
+    #   trustee:
+    #     name: test_user
+    #     provider_type: "ldap"
+    # access_control_rights_state: "add"
+    # After: access_control_rights as a list with replace for declarative ACL
+    access_control_rights:
+      - access_type: "allow"
+        access_rights:
+          - dir_gen_all
+        inherit_flags:
+          - container_inherit
+        trustee:
+          name: test_user
+          provider_type: "ldap"
+    access_control_rights_state: "replace"
+    state: "present"
+
 - name: Delete filesystem
   dellemc.powerscale.filesystem:
     onefs_host: "{{onefs_host}}"
@@ -464,6 +584,50 @@ changed:
     returned: always
     type: bool
     sample: "true"
+
+diff:
+    description: Before and after ACL state when running in diff mode.
+    returned: When I(diff=true) and ACL changes are detected.
+    type: complex
+    contains:
+        before:
+            description: The ACL before the change.
+            type: dict
+            contains:
+                acl:
+                    description: The list of ACEs before the change.
+                    type: list
+                    elements: dict
+        after:
+            description: The ACL after the change.
+            type: dict
+            contains:
+                acl:
+                    description: The list of ACEs after the change.
+                    type: list
+                    elements: dict
+    sample: {
+        "before": {
+            "acl": [
+                {
+                    "trustee": {"id": "UID:2000", "name": "user", "type": "user"},
+                    "access_type": "allow",
+                    "access_rights": ["dir_gen_read"],
+                    "inherit_flags": []
+                }
+            ]
+        },
+        "after": {
+            "acl": [
+                {
+                    "trustee": {"id": "UID:2000", "name": "user", "type": "user"},
+                    "access_type": "allow",
+                    "access_rights": ["dir_gen_all"],
+                    "inherit_flags": ["container_inherit"]
+                }
+            ]
+        }
+    }
 
 filesystem_details:
     description: The filesystem details.
@@ -1174,10 +1338,15 @@ class FileSystem(object):
                     return True, "posix"
             if self.module.params['access_control_rights']:
                 acl_rights_state = self.module.params['access_control_rights_state']
-                if self.is_acl_rights_modified(filesystem_acl, self.module.params['access_control_rights'],
-                                               acl_rights_state):
-                    self._compute_acl_diff(filesystem_acl, self.module.params['access_control_rights'],
-                                           acl_rights_state)
+                desired_aces = self._resolve_desired_acl(
+                    self.module.params['access_control_rights'])
+                modified = self.is_acl_rights_modified(
+                    filesystem_acl, self.module.params['access_control_rights'],
+                    acl_rights_state, desired_aces=desired_aces)
+                if modified:
+                    self._compute_acl_diff(
+                        filesystem_acl, self.module.params['access_control_rights'],
+                        acl_rights_state, desired_aces=desired_aces)
                     return True, "acl"
 
             return False, None
@@ -1189,8 +1358,57 @@ class FileSystem(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
-    def _compute_acl_diff(self, filesystem_acl, acl_rights_list, acl_rights_state):
+    def _resolve_desired_ace(self, ace):
+        """Resolves a desired ACE to trustee id and normalized structure."""
+        trustee_type = ace['trustee']['type'] or 'user'
+        trustee_id = self.get_trustee_id(
+            ace['trustee']['name'], trustee_type,
+            self.module.params['access_zone'],
+            ace['trustee']['provider_type'])
+        return {
+            'trustee_id': trustee_id,
+            'trustee_name': ace['trustee']['name'],
+            'trustee_type': trustee_type,
+            'access_type': ace['access_type'],
+            'access_rights': ace.get('access_rights') or [],
+            'inherit_flags': ace.get('inherit_flags') or [],
+        }
+
+    def _resolve_desired_acl(self, acl_rights_list):
+        """Resolves desired ACE list once for reuse across compare and diff."""
+        return [self._resolve_desired_ace(ace) for ace in acl_rights_list]
+
+    def _merge_aces_by_key(self, aces):
+        """Merges ACEs with the same composite key by unioning access_rights.
+
+        Composite key is (trustee_id, access_type, frozenset(inherit_flags)).
+        Preserves order of first occurrence and trustee metadata.
+        """
+        merged = {}
+        for ace in aces:
+            rights = set(ace.get('access_rights', []))
+            flags = sorted(ace.get('inherit_flags', []))
+            key = (ace['trustee_id'], ace['access_type'], frozenset(flags))
+            if key in merged:
+                merged[key]['access_rights'] = \
+                    sorted(set(merged[key]['access_rights']) | rights)
+            else:
+                merged[key] = {
+                    'trustee_id': ace['trustee_id'],
+                    'trustee_name': ace.get('trustee_name'),
+                    'trustee_type': ace.get('trustee_type'),
+                    'access_type': ace['access_type'],
+                    'access_rights': sorted(rights),
+                    'inherit_flags': flags,
+                }
+        return list(merged.values())
+
+    def _compute_acl_diff(self, filesystem_acl, acl_rights_list, acl_rights_state,
+                          desired_aces=None):
         """Computes before/after diff for ACL changes and stores in result."""
+        if desired_aces is None:
+            desired_aces = self._resolve_desired_acl(acl_rights_list)
+
         before_acl = []
         for acl in filesystem_acl.get('acl', []):
             if not acl.get('trustee', {}).get('id'):
@@ -1204,40 +1422,31 @@ class FileSystem(object):
 
         after_acl = list(before_acl)
         if acl_rights_state == 'replace':
+            merged = self._merge_aces_by_key(desired_aces)
             after_acl = []
-            for ace in acl_rights_list:
-                trustee_id = self.get_trustee_id(ace['trustee']['name'],
-                                                 ace['trustee']['type'],
-                                                 self.module.params['access_zone'],
-                                                 ace['trustee']['provider_type'])
+            for ace in merged:
                 after_acl.append({
-                    'trustee': {'name': ace['trustee']['name'], 'id': trustee_id,
-                                'type': ace['trustee']['type']},
+                    'trustee': {'name': ace['trustee_name'],
+                                'id': ace['trustee_id'],
+                                'type': ace['trustee_type']},
                     'access_type': ace['access_type'],
-                    'access_rights': ace.get('access_rights', []),
-                    'inherit_flags': ace.get('inherit_flags', []),
+                    'access_rights': ace['access_rights'],
+                    'inherit_flags': ace['inherit_flags'],
                 })
         elif acl_rights_state == 'add':
-            for ace in acl_rights_list:
-                trustee_id = self.get_trustee_id(ace['trustee']['name'],
-                                                 ace['trustee']['type'],
-                                                 self.module.params['access_zone'],
-                                                 ace['trustee']['provider_type'])
+            for ace in desired_aces:
                 after_acl.append({
-                    'trustee': {'name': ace['trustee']['name'], 'id': trustee_id,
-                                'type': ace['trustee']['type']},
+                    'trustee': {'name': ace['trustee_name'],
+                                'id': ace['trustee_id'],
+                                'type': ace['trustee_type']},
                     'access_type': ace['access_type'],
-                    'access_rights': ace.get('access_rights', []),
-                    'inherit_flags': ace.get('inherit_flags', []),
+                    'access_rights': ace['access_rights'],
+                    'inherit_flags': ace['inherit_flags'],
                 })
         elif acl_rights_state == 'remove':
-            for ace in acl_rights_list:
-                trustee_id = self.get_trustee_id(ace['trustee']['name'],
-                                                 ace['trustee']['type'],
-                                                 self.module.params['access_zone'],
-                                                 ace['trustee']['provider_type'])
+            for ace in desired_aces:
                 after_acl = [a for a in after_acl
-                             if not (a['trustee'].get('id') == trustee_id and
+                             if not (a['trustee'].get('id') == ace['trustee_id'] and
                                      a['access_type'] == ace['access_type'])]
 
         self.result['diff'] = {
@@ -1270,7 +1479,8 @@ class FileSystem(object):
             })
         return normalized
 
-    def is_acl_rights_modified(self, filesystem_acl, acl_rights_list, acl_rights_state=None):
+    def is_acl_rights_modified(self, filesystem_acl, acl_rights_list,
+                               acl_rights_state=None, desired_aces=None):
         """Determines if acl rights of filesystem are modified.
 
         Accepts acl_rights_list as a list of ACE dicts.
@@ -1280,57 +1490,67 @@ class FileSystem(object):
         compatible behavior).
         """
         if acl_rights_state is None:
-            acl_rights_state = self.module.params.get('access_control_rights_state', 'add')
+            acl_rights_state = self.module.params.get(
+                'access_control_rights_state', 'add')
+
+        if desired_aces is None:
+            desired_aces = self._resolve_desired_acl(acl_rights_list)
 
         if acl_rights_state == 'replace':
-            return self._is_replace_acl_modified(filesystem_acl, acl_rights_list)
+            return self._is_replace_acl_modified(filesystem_acl,
+                                                 desired_aces=desired_aces)
 
         # Legacy add/remove behavior — iterate over each ACE
-        for acl_rights in acl_rights_list:
-            trustee_id = self.get_trustee_id(acl_rights['trustee']['name'],
-                                             acl_rights['trustee']['type'],
-                                             self.module.params['access_zone'],
-                                             acl_rights['trustee']['provider_type'])
-            acl_trustee = []
-            for acl in filesystem_acl['acl']:
-                if not acl['trustee']['id']:
-                    continue
-                acl_trustee.append(acl['trustee']['id'] + ":" + acl['accesstype'])
-                if acl['trustee']['id'] + ":" + acl['accesstype'] == \
-                        trustee_id + ":" + acl_rights['access_type'] and \
-                        (acl_rights_state == 'add' and
-                         self.is_access_or_inherit_modified(acl_rights, acl)):
+        for idx, acl_rights in enumerate(acl_rights_list):
+            trustee_id = desired_aces[idx]['trustee_id']
+            matched_acls = [
+                acl for acl in filesystem_acl['acl']
+                if acl.get('trustee', {}).get('id')
+                and acl['trustee']['id'] + ":" + acl['accesstype']
+                == trustee_id + ":" + acl_rights['access_type']]
+            if len(matched_acls) > 1:
+                error_message = (
+                    "Multiple existing ACEs match trustee '{0}' with "
+                    "access_type '{1}'. Use access_control_rights as a list "
+                    "with access_control_rights_state='replace' to "
+                    "declaratively manage the full ACL.").format(
+                        acl_rights['trustee']['name'], acl_rights['access_type'])
+                LOG.error(error_message)
+                self.module.fail_json(msg=error_message)
+            if matched_acls:
+                if acl_rights_state == 'add' and \
+                        self.is_access_or_inherit_modified(
+                            acl_rights, matched_acls[0]):
                     return True
-            if trustee_id + ":" + acl_rights['access_type'] not in acl_trustee:
-                if acl_rights_state == 'add':
-                    return True
-            else:
                 if acl_rights_state == 'remove':
                     return True
+            elif acl_rights_state == 'add':
+                return True
         return False
 
-    def _is_replace_acl_modified(self, filesystem_acl, acl_rights_list):
+    def _is_replace_acl_modified(self, filesystem_acl, acl_rights_list=None,
+                                 desired_aces=None):
         """Compares desired ACL list against current ACL for replace mode.
 
         Uses ordered comparison — if the desired ACL exactly matches the
         current ACL (same order, same entries), returns False (no change).
+        ACEs with the same composite key are merged by unioning access_rights.
         """
-        current_normalized = self._normalize_acl_for_compare(filesystem_acl.get('acl', []))
+        if desired_aces is None:
+            desired_aces = self._resolve_desired_acl(acl_rights_list)
 
-        desired_normalized = []
-        for ace in acl_rights_list:
-            trustee_id = self.get_trustee_id(ace['trustee']['name'],
-                                             ace['trustee']['type'],
-                                             self.module.params['access_zone'],
-                                             ace['trustee']['provider_type'])
-            desired_normalized.append({
-                'trustee_id': trustee_id,
-                'access_type': ace['access_type'],
-                'access_rights': sorted(ace.get('access_rights') or []),
-                'inherit_flags': sorted(ace.get('inherit_flags') or []),
-            })
+        current_merged = self._merge_aces_by_key(
+            self._normalize_acl_for_compare(filesystem_acl.get('acl', [])))
+        desired_merged = self._merge_aces_by_key(desired_aces)
 
-        return current_normalized != desired_normalized
+        # Compare identity and permissions only; trustee display metadata
+        # (name/type) may differ between API and playbook input.
+        compare_keys = ('trustee_id', 'access_type', 'access_rights',
+                        'inherit_flags')
+        current_cmp = [{k: a[k] for k in compare_keys} for a in current_merged]
+        desired_cmp = [{k: a[k] for k in compare_keys} for a in desired_merged]
+
+        return current_cmp != desired_cmp
 
     def is_access_or_inherit_modified(self, acl_rights, acl):
         """Determines if access rights or inherit flags of ACL are modified"""
