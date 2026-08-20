@@ -85,7 +85,12 @@ options:
   access_control_rights:
     description:
     - Manage user rights and set ACL permissions for files and directories.
-    type: dict
+    - Accepts a single ACE dict (backward compatible) or a list of ACE dicts
+      for multi-ACE operations.
+    - When a single dict is provided, it is automatically wrapped into a
+      single-element list internally.
+    type: list
+    elements: dict
     suboptions:
       access_rights:
         description:
@@ -131,10 +136,13 @@ options:
             default: local
   access_control_rights_state:
     description:
-    - Specifies if the access rights are to be added or deleted for the trustee.
+    - Specifies if the access rights are to be added, deleted, or replaced for the trustee.
     - It is required together with I(access_control_rights).
+    - When set to C(replace), the module performs a whole-ACL replacement using the
+      complete list of ACEs provided. This is required for multi-ACE operations
+      where the same trustee has multiple ACEs with different inheritance flags.
     type: str
-    choices: ['add', 'remove']
+    choices: ['add', 'remove', 'replace']
   recursive:
     description:
     - Creates intermediate folders recursively when set to C(true).
@@ -407,6 +415,36 @@ EXAMPLES = r'''
     access_control_rights_state: "add"
     state: "present"
 
+- name: Set multiple ACEs for the same trustee with different inheritance flags
+  dellemc.powerscale.filesystem:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "/ifs/test"
+    access_zone: "{{access_zone}}"
+    access_control_rights:
+      - access_type: "allow"
+        access_rights:
+          - dir_gen_all
+        inherit_flags:
+          - container_inherit
+        trustee:
+          name: test_user
+          provider_type: "ldap"
+      - access_type: "allow"
+        access_rights:
+          - dir_gen_read
+        inherit_flags:
+          - object_inherit
+          - inherit_only
+        trustee:
+          name: test_user
+          provider_type: "ldap"
+    access_control_rights_state: "replace"
+    state: "present"
+
 - name: Delete filesystem
   dellemc.powerscale.filesystem:
     onefs_host: "{{onefs_host}}"
@@ -590,6 +628,11 @@ class FileSystem(object):
                                     mutually_exclusive=mutually_exclusive,
                                     required_together=required_together
                                     )
+        # Backward compatibility: wrap single dict into single-element list
+        acl_rights = self.module.params.get('access_control_rights')
+        if isinstance(acl_rights, dict):
+            self.module.params['access_control_rights'] = [acl_rights]
+
         self.result = dict(
             changed=False,
             create_filesystem='',
@@ -813,13 +856,20 @@ class FileSystem(object):
             self.module.fail_json(msg=error_message)
 
     def set_access_control_rights(self, acl_rights, path):
-        """Sets the ACL permissions on specified filesystem."""
+        """Sets the ACL permissions on specified filesystem.
+
+        acl_rights is a list of ACE dicts.
+        For 'replace' state, uses action='replace' for whole-ACL replacement.
+        For 'add'/'remove' states, uses action='update' (legacy behavior).
+        """
         try:
+            acl_state = self.module.params['access_control_rights_state']
             acl = self.get_acl_permissions(acl_rights)
             if not self.module.check_mode:
+                action = "replace" if acl_state == 'replace' else "update"
                 permissions = self.isi_sdk.NamespaceAcl(
                     authoritative='acl',
-                    action="update",
+                    action=action,
                     acl=acl)
                 self.namespace_api.set_acl(namespace_path=path,
                                            zone=self.module.params['access_zone'],
@@ -1122,7 +1172,8 @@ class FileSystem(object):
                 if acl_posix != filesystem_acl['mode']:
                     return True, "posix"
             if self.module.params['access_control_rights']:
-                if self.is_acl_rights_modified(filesystem_acl, self.module.params['access_control_rights']):
+                if self.is_acl_rights_modified(filesystem_acl, self.module.params['access_control_rights'],
+                                               self.module.params['access_control_rights_state']):
                     return True, "acl"
 
             return False, None
@@ -1134,28 +1185,92 @@ class FileSystem(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
-    def is_acl_rights_modified(self, filesystem_acl, acl_rights):
-        """Determines if acl rights of filesystem are modified"""
-        acl_trustee = []
-        trustee_id = self.get_trustee_id(acl_rights['trustee']['name'],
-                                         acl_rights['trustee']['type'],
-                                         self.module.params['access_zone'],
-                                         acl_rights['trustee']['provider_type'])
-        for acl in filesystem_acl['acl']:
-            if not acl['trustee']['id']:
+    def _get_ace_composite_key(self, trustee_id, access_type, inherit_flags):
+        """Build composite key for ACE identification.
+
+        Returns (trustee_id, access_type, frozenset(sorted(inherit_flags or []))).
+        """
+        return (trustee_id, access_type, frozenset(sorted(inherit_flags or [])))
+
+    def _normalize_acl_for_compare(self, acl_list):
+        """Normalize a current ACL list into a list of comparable dicts.
+
+        Each dict contains: trustee_id, access_type, access_rights (sorted),
+        inherit_flags (sorted).
+        """
+        normalized = []
+        for acl in acl_list:
+            if not acl.get('trustee', {}).get('id'):
                 continue
-            acl_trustee.append(acl['trustee']['id'] + ":" + acl['accesstype'])
-            if acl['trustee']['id'] + ":" + acl['accesstype'] == \
-                    trustee_id + ":" + acl_rights['access_type'] and \
-                    (self.module.params['access_control_rights_state'] == 'add' and
-                     self.is_access_or_inherit_modified(acl_rights, acl)):
-                return True
-        if trustee_id + ":" + acl_rights['access_type'] not in acl_trustee:
-            if self.module.params['access_control_rights_state'] == 'add':
-                return True
-        else:
-            if self.module.params['access_control_rights_state'] == 'remove':
-                return True
+            normalized.append({
+                'trustee_id': acl['trustee']['id'],
+                'access_type': acl['accesstype'],
+                'access_rights': sorted(acl.get('accessrights') or []),
+                'inherit_flags': sorted(acl.get('inherit_flags') or []),
+            })
+        return normalized
+
+    def is_acl_rights_modified(self, filesystem_acl, acl_rights_list, acl_rights_state=None):
+        """Determines if acl rights of filesystem are modified.
+
+        Accepts acl_rights_list as a list of ACE dicts.
+        For 'replace' state, compares the entire desired ACL list against
+        current ACL using ordered comparison.
+        For 'add'/'remove' states, checks each ACE individually (backward
+        compatible behavior).
+        """
+        if acl_rights_state is None:
+            acl_rights_state = self.module.params.get('access_control_rights_state', 'add')
+
+        if acl_rights_state == 'replace':
+            return self._is_replace_acl_modified(filesystem_acl, acl_rights_list)
+
+        # Legacy add/remove behavior — iterate over each ACE
+        for acl_rights in acl_rights_list:
+            trustee_id = self.get_trustee_id(acl_rights['trustee']['name'],
+                                             acl_rights['trustee']['type'],
+                                             self.module.params['access_zone'],
+                                             acl_rights['trustee']['provider_type'])
+            acl_trustee = []
+            for acl in filesystem_acl['acl']:
+                if not acl['trustee']['id']:
+                    continue
+                acl_trustee.append(acl['trustee']['id'] + ":" + acl['accesstype'])
+                if acl['trustee']['id'] + ":" + acl['accesstype'] == \
+                        trustee_id + ":" + acl_rights['access_type'] and \
+                        (acl_rights_state == 'add' and
+                         self.is_access_or_inherit_modified(acl_rights, acl)):
+                    return True
+            if trustee_id + ":" + acl_rights['access_type'] not in acl_trustee:
+                if acl_rights_state == 'add':
+                    return True
+            else:
+                if acl_rights_state == 'remove':
+                    return True
+        return False
+
+    def _is_replace_acl_modified(self, filesystem_acl, acl_rights_list):
+        """Compares desired ACL list against current ACL for replace mode.
+
+        Uses ordered comparison — if the desired ACL exactly matches the
+        current ACL (same order, same entries), returns False (no change).
+        """
+        current_normalized = self._normalize_acl_for_compare(filesystem_acl.get('acl', []))
+
+        desired_normalized = []
+        for ace in acl_rights_list:
+            trustee_id = self.get_trustee_id(ace['trustee']['name'],
+                                             ace['trustee']['type'],
+                                             self.module.params['access_zone'],
+                                             ace['trustee']['provider_type'])
+            desired_normalized.append({
+                'trustee_id': trustee_id,
+                'access_type': ace['access_type'],
+                'access_rights': sorted(ace.get('access_rights') or []),
+                'inherit_flags': sorted(ace.get('inherit_flags') or []),
+            })
+
+        return current_normalized != desired_normalized
 
     def is_access_or_inherit_modified(self, acl_rights, acl):
         """Determines if access rights or inherit flags of ACL are modified"""
@@ -1224,6 +1339,12 @@ class FileSystem(object):
     def validate_input(self, quota):
         """Valid input parameters"""
         global THRESHOLD_PARAM
+
+        # Normalize access_control_rights: wrap single dict into list
+        acl_rights = self.module.params.get('access_control_rights')
+        if isinstance(acl_rights, dict):
+            self.module.params['access_control_rights'] = [acl_rights]
+
         if 'quota' in self.module.params \
                 and self.module.params['quota'] is not None:
             if self.module.params['quota']['quota_state'] is None:
@@ -1252,12 +1373,19 @@ class FileSystem(object):
                                             self.module.params['access_control_rights_state'])
 
     def validate_access_control_rights(self, acl_rights, acl_rights_state):
-        """Validates access control rights input object"""
-        if acl_rights and acl_rights_state == 'add' and \
-                (acl_rights['access_rights'] is None and
-                 acl_rights['inherit_flags'] is None):
-            self.module.fail_json(msg='Please specify access_rights or '
-                                      'inherit_flags to set ACL')
+        """Validates access control rights input object.
+
+        Accepts acl_rights as a list of ACE dicts (single-dict input is
+        already wrapped into a list by __init__).
+        """
+        if not acl_rights:
+            return
+        for ace in acl_rights:
+            if acl_rights_state in ('add', 'replace') and \
+                    (ace.get('access_rights') is None and
+                     ace.get('inherit_flags') is None):
+                self.module.fail_json(msg='Please specify access_rights or '
+                                          'inherit_flags to set ACL')
 
     def get_trustee_id(self, trustee_name, type, access_zone, provider):
         if type == 'user':
@@ -1286,44 +1414,54 @@ class FileSystem(object):
                                       provider=provider)['groups'][0]
             return group['gid']['id'] if group['gid']['id'] != trustee['id'] else group['sid']['id']
 
-    def get_acl_permissions(self, acl_rights):
-        """Returns ACL permissions"""
+    def get_acl_permissions(self, acl_rights_list):
+        """Returns ACL permissions from a list of ACE dicts.
+
+        For 'replace' state, sets op='add' on each ACE (used with
+        NamespaceAcl action='replace' for whole-ACL replacement).
+        For 'add' state, sets op='add'.
+        For 'remove' state, sets op='delete' and includes duplicated-trustee
+        cleanup entries.
+        """
         try:
             permissions = []
             acl_state = self.module.params['access_control_rights_state']
-            acl_obj = utils.get_acl_object()
-            acl_obj.op = "add"
-            if acl_state and acl_state == 'remove':
-                acl_obj.op = "delete"
-            trustee_type = acl_rights['trustee']['type']
-            trustee_id = \
-                self.get_trustee_id(acl_rights['trustee']['name'],
-                                    trustee_type,
-                                    self.module.params['access_zone'],
-                                    acl_rights['trustee']['provider_type'])
-            trustee_type = trustee_type if trustee_type else "user"
-            trustee = {"name": acl_rights['trustee']['name'], "id": trustee_id, "type": trustee_type}
-            acl_obj.trustee = trustee
-            acl_obj.accesstype = acl_rights['access_type']
-            acl_obj.accessrights = acl_rights['access_rights']
-            acl_obj.inherit_flags = acl_rights['inherit_flags']
-            permissions.append(acl_obj)
 
-            # allow customer to remove duplicated trustee
-            if acl_obj.op == "delete" and trustee_type in ['user', 'group']:
-                trustee_id_duplicated = \
-                    self.get_duplicated_trustee_id(trustee,
-                                                   self.module.params['access_zone'],
-                                                   acl_rights['trustee']['provider_type'])
-                acl_obj_duplicated = utils.get_acl_object()
-                acl_obj_duplicated.op = "delete"
-                trustee_duplicated = {"name": acl_rights['trustee']['name'],
-                                      "id": trustee_id_duplicated, "type": trustee_type}
-                acl_obj_duplicated.trustee = trustee_duplicated
-                acl_obj_duplicated.accesstype = acl_rights['access_type']
-                acl_obj_duplicated.accessrights = acl_rights['access_rights']
-                acl_obj_duplicated.inherit_flags = acl_rights['inherit_flags']
-                permissions.append(acl_obj_duplicated)
+            for acl_rights in acl_rights_list:
+                acl_obj = utils.get_acl_object()
+                if acl_state == 'remove':
+                    acl_obj.op = "delete"
+                else:
+                    acl_obj.op = "add"
+                trustee_type = acl_rights['trustee']['type']
+                trustee_id = \
+                    self.get_trustee_id(acl_rights['trustee']['name'],
+                                        trustee_type,
+                                        self.module.params['access_zone'],
+                                        acl_rights['trustee']['provider_type'])
+                trustee_type = trustee_type if trustee_type else "user"
+                trustee = {"name": acl_rights['trustee']['name'], "id": trustee_id, "type": trustee_type}
+                acl_obj.trustee = trustee
+                acl_obj.accesstype = acl_rights['access_type']
+                acl_obj.accessrights = acl_rights['access_rights']
+                acl_obj.inherit_flags = acl_rights['inherit_flags']
+                permissions.append(acl_obj)
+
+                # allow customer to remove duplicated trustee
+                if acl_obj.op == "delete" and trustee_type in ['user', 'group']:
+                    trustee_id_duplicated = \
+                        self.get_duplicated_trustee_id(trustee,
+                                                       self.module.params['access_zone'],
+                                                       acl_rights['trustee']['provider_type'])
+                    acl_obj_duplicated = utils.get_acl_object()
+                    acl_obj_duplicated.op = "delete"
+                    trustee_duplicated = {"name": acl_rights['trustee']['name'],
+                                          "id": trustee_id_duplicated, "type": trustee_type}
+                    acl_obj_duplicated.trustee = trustee_duplicated
+                    acl_obj_duplicated.accesstype = acl_rights['access_type']
+                    acl_obj_duplicated.accessrights = acl_rights['access_rights']
+                    acl_obj_duplicated.inherit_flags = acl_rights['inherit_flags']
+                    permissions.append(acl_obj_duplicated)
 
             return permissions
         except Exception as e:
@@ -1570,19 +1708,22 @@ def get_filesystem_parameters():
         owner=dict(required=False, type='dict'),
         group=dict(required=False, type='dict'),
         access_control=dict(required=False, type='str'),
-        access_control_rights=dict(type='dict', options=dict(
-            access_rights=dict(type='list', elements='str'),
-            access_type=dict(required=True, type='str', choices=['allow', 'deny']),
-            inherit_flags=dict(type='list', elements='str',
-                               choices=['object_inherit', 'container_inherit',
-                                        'inherit_only', 'no_prop_inherit',
-                                        'inherited_ace']),
-            trustee=dict(required=True, type='dict',
-                         options=dict(name=dict(type='str', required=True),
-                                      type=dict(type='str', choices=['user', 'group', 'wellknown'], default='user'),
-                                      provider_type=dict(type='str', default='local'))))),
+        access_control_rights=dict(type='list', elements='dict',
+                                   options=dict(
+                                       access_rights=dict(type='list', elements='str'),
+                                       access_type=dict(required=True, type='str', choices=['allow', 'deny']),
+                                       inherit_flags=dict(type='list', elements='str',
+                                                          choices=['object_inherit', 'container_inherit',
+                                                                   'inherit_only', 'no_prop_inherit',
+                                                                   'inherited_ace']),
+                                       trustee=dict(required=True, type='dict',
+                                                    options=dict(name=dict(type='str', required=True),
+                                                                 type=dict(type='str',
+                                                                           choices=['user', 'group', 'wellknown'],
+                                                                           default='user'),
+                                                                 provider_type=dict(type='str', default='local'))))),
         access_control_rights_state=dict(required=False, type='str',
-                                         choices=['add', 'remove']),
+                                         choices=['add', 'remove', 'replace']),
         recursive=dict(required=False, type='bool',
                        default=True),
         recursive_force_delete=dict(required=False, type='bool',
