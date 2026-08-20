@@ -1,0 +1,108 @@
+---
+# Example: Multi-ACE with object_inherit + container_inherit (full inheritance)
+#
+# This playbook demonstrates configuring two ACEs for the same trustee
+# where one ACE combines object_inherit and container_inherit (permissions
+# propagate to both files and subdirectories).
+#
+# Use case: An administrator needs the trustee to have full control on
+# the parent directory with no inheritance, plus a second ACE that grants
+# read access inherited by both files and subdirectories (full propagation).
+
+- name: Multi-ACE filesystem operations - object_inherit + container_inherit
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.**'
+    verify_ssl: false
+    api_user: 'root'
+    api_password: '**********'
+    test_path: '/ifs/multi_ace_obj_cont_inherit_test'
+    trustee_user: 'ansible_test_user1'
+    trustee_provider: 'ldap'
+
+  tasks:
+    - name: Create filesystem for object+container inherit multi-ACE test
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ test_path }}"
+        owner:
+          name: "{{ trustee_user }}"
+          provider_type: "{{ trustee_provider }}"
+        state: present
+
+    - name: Set two ACEs with object_inherit + container_inherit for the same trustee
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ test_path }}"
+        access_control_rights:
+          # ACE 1: Full control on the directory itself (no inheritance)
+          - access_type: "allow"
+            access_rights:
+              - "dir_gen_all"
+            inherit_flags: []
+            trustee:
+              name: "{{ trustee_user }}"
+              provider_type: "{{ trustee_provider }}"
+          # ACE 2: Read access inherited by both files and subdirectories
+          - access_type: "allow"
+            access_rights:
+              - "dir_gen_read"
+            inherit_flags:
+              - "object_inherit"
+              - "container_inherit"
+            trustee:
+              name: "{{ trustee_user }}"
+              provider_type: "{{ trustee_provider }}"
+        access_control_rights_state: "replace"
+        state: present
+
+    - name: Set two ACEs with full inheritance - Idempotency check
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ test_path }}"
+        access_control_rights:
+          - access_type: "allow"
+            access_rights:
+              - "dir_gen_all"
+            inherit_flags: []
+            trustee:
+              name: "{{ trustee_user }}"
+              provider_type: "{{ trustee_provider }}"
+          - access_type: "allow"
+            access_rights:
+              - "dir_gen_read"
+            inherit_flags:
+              - "object_inherit"
+              - "container_inherit"
+            trustee:
+              name: "{{ trustee_user }}"
+              provider_type: "{{ trustee_provider }}"
+        access_control_rights_state: "replace"
+        state: present
+      register: result_idempotent
+
+    - name: Verify idempotency (no changes expected)
+      ansible.builtin.assert:
+        that:
+          - not result_idempotent.changed
+        fail_msg: "Idempotency check failed - unexpected change detected"
+
+    - name: Clean up - delete test filesystem
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ test_path }}"
+        recursive_force_delete: true
+        state: absent

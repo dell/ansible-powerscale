@@ -411,6 +411,13 @@
     # --- Multi-ACE examples ---
     # The access_control_rights parameter accepts a list of ACE dicts,
     # allowing multiple ACEs per trustee with different inheritance flags.
+    #
+    # For dedicated multi-ACE examples by inheritance pattern, see:
+    #   - filesystem_mult_ace_container_inherit.yml      (container_inherit only)
+    #   - filesystem_mult_ace_object_inherit.yml         (object_inherit only)
+    #   - filesystem_mult_ace_object_container_inherit.yml (object + container inherit)
+    #   - filesystem_mult_ace_container_inherit_only.yml (container_inherit + inherit_only)
+    #   - filesystem_mult_ace_object_no_prop.yml         (object_inherit + no_prop_inherit)
 
     - name: Set multiple ACEs for the same trustee with different inheritance flags
       dellemc.powerscale.filesystem:
