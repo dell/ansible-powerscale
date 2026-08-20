@@ -1519,3 +1519,144 @@ class TestFileSystem(PowerScaleUnitBase):
         powerscale_module_mock.get_trustee_id = MagicMock(return_value="UID:2000")
         result = powerscale_module_mock.is_acl_rights_modified(filesystem_acl, acl_rights_list, 'add')
         assert result is True
+
+    def test_is_acl_rights_modified_remove_existing_trustee(self, powerscale_module_mock):
+        """Remove mode: change detected when trustee exists in current ACL."""
+        filesystem_acl = {
+            'acl': [
+                {
+                    'accessrights': ['dir_gen_all'],
+                    'accesstype': 'allow',
+                    'inherit_flags': ['container_inherit'],
+                    'trustee': {'id': 'UID:2000', 'name': 'test_user', 'type': 'user'}
+                }
+            ]
+        }
+        acl_rights_list = [
+            {
+                'access_rights': ['dir_gen_all'],
+                'inherit_flags': ['container_inherit'],
+                'access_type': 'allow',
+                'trustee': {'name': 'test_user', 'type': 'user', 'provider_type': 'local'}
+            }
+        ]
+        self.set_module_params(self.get_filesystem_args,
+                               {"path": self.path1,
+                                "access_control_rights": acl_rights_list,
+                                "access_control_rights_state": "remove",
+                                "access_zone": "System", "state": "present"})
+        powerscale_module_mock.get_trustee_id = MagicMock(return_value="UID:2000")
+        result = powerscale_module_mock.is_acl_rights_modified(filesystem_acl, acl_rights_list, 'remove')
+        assert result is True
+
+    def test_is_acl_rights_modified_add_trustee_not_present(self, powerscale_module_mock):
+        """Add mode: change detected when trustee not in current ACL."""
+        filesystem_acl = {
+            'acl': [
+                {
+                    'accessrights': ['dir_gen_read'],
+                    'accesstype': 'allow',
+                    'inherit_flags': [],
+                    'trustee': {'id': 'UID:3000', 'name': 'other_user', 'type': 'user'}
+                }
+            ]
+        }
+        acl_rights_list = [
+            {
+                'access_rights': ['dir_gen_all'],
+                'inherit_flags': ['container_inherit'],
+                'access_type': 'allow',
+                'trustee': {'name': 'test_user', 'type': 'user', 'provider_type': 'local'}
+            }
+        ]
+        self.set_module_params(self.get_filesystem_args,
+                               {"path": self.path1,
+                                "access_control_rights": acl_rights_list,
+                                "access_control_rights_state": "add",
+                                "access_zone": "System", "state": "present"})
+        powerscale_module_mock.get_trustee_id = MagicMock(return_value="UID:2000")
+        result = powerscale_module_mock.is_acl_rights_modified(filesystem_acl, acl_rights_list, 'add')
+        assert result is True
+
+    def test_normalize_acl_for_compare(self, powerscale_module_mock):
+        """Normalizes ACL list into comparable format."""
+        acl_list = [
+            {
+                'accessrights': ['dir_gen_write', 'dir_gen_read'],
+                'accesstype': 'allow',
+                'inherit_flags': ['object_inherit', 'container_inherit'],
+                'trustee': {'id': 'UID:2000', 'name': 'user1', 'type': 'user'}
+            },
+            {
+                'accessrights': ['dir_gen_all'],
+                'accesstype': 'deny',
+                'inherit_flags': [],
+                'trustee': {'id': 'GID:100', 'name': 'group1', 'type': 'group'}
+            }
+        ]
+        result = powerscale_module_mock._normalize_acl_for_compare(acl_list)
+        assert len(result) == 2
+        assert result[0]['access_rights'] == ['dir_gen_read', 'dir_gen_write']  # sorted
+        assert result[0]['inherit_flags'] == ['container_inherit', 'object_inherit']  # sorted
+        assert result[1]['trustee_id'] == 'GID:100'
+
+    def test_normalize_acl_skips_empty_trustee_id(self, powerscale_module_mock):
+        """ACL entries without trustee id are skipped."""
+        acl_list = [
+            {
+                'accessrights': ['dir_gen_read'],
+                'accesstype': 'allow',
+                'inherit_flags': [],
+                'trustee': {'id': None, 'name': 'unknown', 'type': 'user'}
+            },
+            {
+                'accessrights': ['dir_gen_all'],
+                'accesstype': 'allow',
+                'inherit_flags': [],
+                'trustee': {'id': 'UID:2000', 'name': 'user1', 'type': 'user'}
+            }
+        ]
+        result = powerscale_module_mock._normalize_acl_for_compare(acl_list)
+        assert len(result) == 1
+        assert result[0]['trustee_id'] == 'UID:2000'
+
+    def test_is_replace_acl_modified_identical(self, powerscale_module_mock):
+        """Replace: no change when desired exactly matches current."""
+        filesystem_acl = {
+            'acl': [
+                {
+                    'accessrights': ['dir_gen_all'],
+                    'accesstype': 'allow',
+                    'inherit_flags': ['container_inherit'],
+                    'trustee': {'id': 'UID:2000', 'name': 'user1', 'type': 'user'}
+                },
+                {
+                    'accessrights': ['dir_gen_read'],
+                    'accesstype': 'allow',
+                    'inherit_flags': ['object_inherit', 'inherit_only'],
+                    'trustee': {'id': 'UID:2000', 'name': 'user1', 'type': 'user'}
+                }
+            ]
+        }
+        acl_rights_list = [
+            {
+                'access_rights': ['dir_gen_all'],
+                'inherit_flags': ['container_inherit'],
+                'access_type': 'allow',
+                'trustee': {'name': 'user1', 'type': 'user', 'provider_type': 'local'}
+            },
+            {
+                'access_rights': ['dir_gen_read'],
+                'inherit_flags': ['inherit_only', 'object_inherit'],
+                'access_type': 'allow',
+                'trustee': {'name': 'user1', 'type': 'user', 'provider_type': 'local'}
+            }
+        ]
+        self.set_module_params(self.get_filesystem_args,
+                               {"path": self.path1,
+                                "access_control_rights": acl_rights_list,
+                                "access_control_rights_state": "replace",
+                                "access_zone": "System", "state": "present"})
+        powerscale_module_mock.get_trustee_id = MagicMock(return_value="UID:2000")
+        result = powerscale_module_mock._is_replace_acl_modified(filesystem_acl, acl_rights_list)
+        assert result is False
