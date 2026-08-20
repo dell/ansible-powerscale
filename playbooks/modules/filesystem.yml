@@ -407,3 +407,102 @@
         access_control_rights_state: "remove"
         recursive: "{{ recursive }}"
         state: "{{ state_present }}"
+
+    # --- Multi-ACE examples ---
+    # The access_control_rights parameter accepts a list of ACE dicts,
+    # allowing multiple ACEs per trustee with different inheritance flags.
+
+    - name: Set multiple ACEs for the same trustee with different inheritance flags
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "/ifs/test15"
+        owner:
+          name: 'ansible_test_user1'
+          provider_type: 'local'
+        group:
+          name: 'test_group_1'
+          provider_type: 'local'
+        access_control_rights:
+          - access_type: "allow"
+            access_rights:
+              - "dir_gen_all"
+            inherit_flags:
+              - "container_inherit"
+            trustee:
+              name: 'ansible_test_user1'
+              provider_type: 'ldap'
+          - access_type: "allow"
+            access_rights:
+              - "dir_gen_read"
+            inherit_flags:
+              - "object_inherit"
+              - "inherit_only"
+            trustee:
+              name: 'ansible_test_user1'
+              provider_type: 'ldap'
+        access_control_rights_state: "replace"
+        state: "{{ state_present }}"
+
+    - name: Replace entire ACL with multiple ACEs - Idempotency
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "/ifs/test15"
+        owner:
+          name: 'ansible_test_user1'
+          provider_type: 'local'
+        group:
+          name: 'test_group_1'
+          provider_type: 'local'
+        access_control_rights:
+          - access_type: "allow"
+            access_rights:
+              - "dir_gen_all"
+            inherit_flags:
+              - "container_inherit"
+            trustee:
+              name: 'ansible_test_user1'
+              provider_type: 'ldap'
+          - access_type: "allow"
+            access_rights:
+              - "dir_gen_read"
+            inherit_flags:
+              - "object_inherit"
+              - "inherit_only"
+            trustee:
+              name: 'ansible_test_user1'
+              provider_type: 'ldap'
+        access_control_rights_state: "replace"
+        state: "{{ state_present }}"
+
+    - name: Replace ACL with multi-ACE in check mode (no changes applied)
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "/ifs/test15"
+        access_control_rights:
+          - access_type: "allow"
+            access_rights:
+              - "dir_gen_all"
+            inherit_flags:
+              - "container_inherit"
+            trustee:
+              name: 'ansible_test_user1'
+          - access_type: "deny"
+            access_rights:
+              - "dir_gen_write"
+            inherit_flags:
+              - "object_inherit"
+            trustee:
+              name: 'ansible_test_user1'
+        access_control_rights_state: "replace"
+        state: "{{ state_present }}"
+      check_mode: true
+      diff: true
