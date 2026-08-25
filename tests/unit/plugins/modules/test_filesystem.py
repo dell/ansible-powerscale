@@ -1368,20 +1368,20 @@ class TestFileSystem(PowerScaleUnitBase):
         assert result is False
 
     def test_is_acl_rights_modified_replace_order_change(self, powerscale_module_mock):
-        """Replace mode: change detected when order differs."""
+        """Replace mode: change detected when order of different-trustee ACEs differs."""
         filesystem_acl = {
             'acl': [
                 {
                     'accessrights': ['dir_gen_all'],
                     'accesstype': 'allow',
                     'inherit_flags': ['container_inherit'],
-                    'trustee': {'id': 'UID:2000', 'name': 'test_user', 'type': 'user'}
+                    'trustee': {'id': 'UID:2000', 'name': 'user1', 'type': 'user'}
                 },
                 {
                     'accessrights': ['dir_gen_read'],
                     'accesstype': 'allow',
                     'inherit_flags': ['object_inherit'],
-                    'trustee': {'id': 'UID:2000', 'name': 'test_user', 'type': 'user'}
+                    'trustee': {'id': 'UID:3000', 'name': 'user2', 'type': 'user'}
                 }
             ]
         }
@@ -1391,13 +1391,13 @@ class TestFileSystem(PowerScaleUnitBase):
                 'access_rights': ['dir_gen_read'],
                 'inherit_flags': ['object_inherit'],
                 'access_type': 'allow',
-                'trustee': {'name': 'test_user', 'type': 'user', 'provider_type': 'local'}
+                'trustee': {'name': 'user2', 'type': 'user', 'provider_type': 'local'}
             },
             {
                 'access_rights': ['dir_gen_all'],
                 'inherit_flags': ['container_inherit'],
                 'access_type': 'allow',
-                'trustee': {'name': 'test_user', 'type': 'user', 'provider_type': 'local'}
+                'trustee': {'name': 'user1', 'type': 'user', 'provider_type': 'local'}
             }
         ]
         self.set_module_params(self.get_filesystem_args,
@@ -1405,23 +1405,30 @@ class TestFileSystem(PowerScaleUnitBase):
                                 "access_control_rights": acl_rights_list,
                                 "access_control_rights_state": "replace",
                                 "access_zone": "System", "state": "present"})
-        powerscale_module_mock.get_trustee_id = MagicMock(return_value="UID:2000")
+        powerscale_module_mock.get_trustee_id = MagicMock(
+            side_effect=lambda name, *a, **kw: "UID:2000" if name == "user1" else "UID:3000")
         result = powerscale_module_mock.is_acl_rights_modified(filesystem_acl, acl_rights_list, 'replace')
         assert result is True
 
-    def test_is_acl_rights_modified_replace_same_trustee_different_inherit(self, powerscale_module_mock):
-        """Replace mode: same trustee with different inherit_flags as distinct ACEs."""
+    def test_is_acl_rights_modified_replace_same_trustee_api_consolidation(self, powerscale_module_mock):
+        """Replace mode: same trustee ACEs are pre-merged by API key for comparison.
+
+        When the desired ACEs have the same trustee+accesstype but different inherit_flags,
+        the module pre-merges them (matching API behavior) before comparing.
+        If the pre-merged result matches what's currently stored, no change is reported.
+        """
+        # Current ACL: what the API stored after consolidation
         filesystem_acl = {
             'acl': [
                 {
-                    'accessrights': ['dir_gen_all'],
+                    'accessrights': ['dir_gen_all', 'dir_gen_read'],
                     'accesstype': 'allow',
-                    'inherit_flags': ['container_inherit'],
+                    'inherit_flags': ['container_inherit', 'inherit_only', 'object_inherit'],
                     'trustee': {'id': 'UID:2000', 'name': 'test_user', 'type': 'user'}
                 }
             ]
         }
-        # Desired has 2 ACEs for same trustee with different inherit_flags
+        # Desired has 2 ACEs for same trustee — will be pre-merged to match above
         acl_rights_list = [
             {
                 'access_rights': ['dir_gen_all'],
@@ -1443,6 +1450,45 @@ class TestFileSystem(PowerScaleUnitBase):
                                 "access_zone": "System", "state": "present"})
         powerscale_module_mock.get_trustee_id = MagicMock(return_value="UID:2000")
         result = powerscale_module_mock.is_acl_rights_modified(filesystem_acl, acl_rights_list, 'replace')
+        # Pre-merged desired matches current (API consolidated form)
+        assert result is False
+
+    def test_is_acl_rights_modified_replace_same_trustee_different_from_stored(self, powerscale_module_mock):
+        """Replace mode: change detected when pre-merged desired differs from stored."""
+        # Current: only has container_inherit
+        filesystem_acl = {
+            'acl': [
+                {
+                    'accessrights': ['dir_gen_all'],
+                    'accesstype': 'allow',
+                    'inherit_flags': ['container_inherit'],
+                    'trustee': {'id': 'UID:2000', 'name': 'test_user', 'type': 'user'}
+                }
+            ]
+        }
+        # Desired after pre-merge will have additional flags and rights
+        acl_rights_list = [
+            {
+                'access_rights': ['dir_gen_all'],
+                'inherit_flags': ['container_inherit'],
+                'access_type': 'allow',
+                'trustee': {'name': 'test_user', 'type': 'user', 'provider_type': 'local'}
+            },
+            {
+                'access_rights': ['dir_gen_read'],
+                'inherit_flags': ['object_inherit', 'inherit_only'],
+                'access_type': 'allow',
+                'trustee': {'name': 'test_user', 'type': 'user', 'provider_type': 'local'}
+            }
+        ]
+        self.set_module_params(self.get_filesystem_args,
+                               {"path": self.path1,
+                                "access_control_rights": acl_rights_list,
+                                "access_control_rights_state": "replace",
+                                "access_zone": "System", "state": "present"})
+        powerscale_module_mock.get_trustee_id = MagicMock(return_value="UID:2000")
+        result = powerscale_module_mock.is_acl_rights_modified(filesystem_acl, acl_rights_list, 'replace')
+        # Pre-merged desired has [dir_gen_all, dir_gen_read] + [CI, IO, OI] which differs from stored
         assert result is True
 
     def test_get_acl_permissions_multi_ace_replace(self, powerscale_module_mock):
@@ -1621,7 +1667,7 @@ class TestFileSystem(PowerScaleUnitBase):
         assert result[0]['trustee_id'] == 'UID:2000'
 
     def test_is_replace_acl_modified_identical(self, powerscale_module_mock):
-        """Replace: no change when desired exactly matches current."""
+        """Replace: no change when desired matches current (single ACE per trustee+accesstype)."""
         filesystem_acl = {
             'acl': [
                 {
@@ -1633,8 +1679,8 @@ class TestFileSystem(PowerScaleUnitBase):
                 {
                     'accessrights': ['dir_gen_read'],
                     'accesstype': 'allow',
-                    'inherit_flags': ['object_inherit', 'inherit_only'],
-                    'trustee': {'id': 'UID:2000', 'name': 'user1', 'type': 'user'}
+                    'inherit_flags': ['object_inherit'],
+                    'trustee': {'id': 'UID:3000', 'name': 'user2', 'type': 'user'}
                 }
             ]
         }
@@ -1647,7 +1693,45 @@ class TestFileSystem(PowerScaleUnitBase):
             },
             {
                 'access_rights': ['dir_gen_read'],
-                'inherit_flags': ['inherit_only', 'object_inherit'],
+                'inherit_flags': ['object_inherit'],
+                'access_type': 'allow',
+                'trustee': {'name': 'user2', 'type': 'user', 'provider_type': 'local'}
+            }
+        ]
+        self.set_module_params(self.get_filesystem_args,
+                               {"path": self.path1,
+                                "access_control_rights": acl_rights_list,
+                                "access_control_rights_state": "replace",
+                                "access_zone": "System", "state": "present"})
+        powerscale_module_mock.get_trustee_id = MagicMock(
+            side_effect=lambda name, *a, **kw: "UID:2000" if name == "user1" else "UID:3000")
+        result = powerscale_module_mock._is_replace_acl_modified(filesystem_acl, acl_rights_list)
+        assert result is False
+
+    def test_is_replace_acl_modified_same_trustee_consolidated(self, powerscale_module_mock):
+        """Replace: no change when desired has multiple same-trustee ACEs that match API's consolidated form."""
+        # API stores consolidated: union of rights and flags
+        filesystem_acl = {
+            'acl': [
+                {
+                    'accessrights': ['dir_gen_all', 'dir_gen_read'],
+                    'accesstype': 'allow',
+                    'inherit_flags': ['container_inherit', 'object_inherit'],
+                    'trustee': {'id': 'UID:2000', 'name': 'user1', 'type': 'user'}
+                }
+            ]
+        }
+        # Desired has 2 ACEs that will be merged by API into the above
+        acl_rights_list = [
+            {
+                'access_rights': ['dir_gen_all'],
+                'inherit_flags': ['container_inherit'],
+                'access_type': 'allow',
+                'trustee': {'name': 'user1', 'type': 'user', 'provider_type': 'local'}
+            },
+            {
+                'access_rights': ['dir_gen_read'],
+                'inherit_flags': ['object_inherit'],
                 'access_type': 'allow',
                 'trustee': {'name': 'user1', 'type': 'user', 'provider_type': 'local'}
             }
@@ -1901,3 +1985,124 @@ class TestFileSystem(PowerScaleUnitBase):
         powerscale_module_mock.get_acl = MagicMock(return_value=filesystem_acl)
         self.capture_fail_json_call(
             "Multiple existing ACEs match trustee", FilesystemHandler)
+
+    def test_merge_aces_by_api_key_consolidates_same_trustee(self, powerscale_module_mock):
+        """_merge_aces_by_api_key unions rights and flags for same trustee+accesstype."""
+        aces = [
+            {
+                'trustee_id': 'UID:2000',
+                'trustee_name': 'user1',
+                'trustee_type': 'user',
+                'access_type': 'allow',
+                'access_rights': ['dir_gen_all'],
+                'inherit_flags': [],
+            },
+            {
+                'trustee_id': 'UID:2000',
+                'trustee_name': 'user1',
+                'trustee_type': 'user',
+                'access_type': 'allow',
+                'access_rights': ['dir_gen_read'],
+                'inherit_flags': ['container_inherit'],
+            }
+        ]
+        result = powerscale_module_mock._merge_aces_by_api_key(aces)
+        assert len(result) == 1
+        assert sorted(result[0]['access_rights']) == ['dir_gen_all', 'dir_gen_read']
+        assert result[0]['inherit_flags'] == ['container_inherit']
+
+    def test_merge_aces_by_api_key_preserves_different_accesstype(self, powerscale_module_mock):
+        """_merge_aces_by_api_key keeps allow and deny ACEs separate for same trustee."""
+        aces = [
+            {
+                'trustee_id': 'UID:2000',
+                'trustee_name': 'user1',
+                'trustee_type': 'user',
+                'access_type': 'allow',
+                'access_rights': ['dir_gen_all'],
+                'inherit_flags': ['container_inherit'],
+            },
+            {
+                'trustee_id': 'UID:2000',
+                'trustee_name': 'user1',
+                'trustee_type': 'user',
+                'access_type': 'deny',
+                'access_rights': ['std_delete'],
+                'inherit_flags': ['container_inherit'],
+            }
+        ]
+        result = powerscale_module_mock._merge_aces_by_api_key(aces)
+        assert len(result) == 2
+        assert result[0]['access_type'] == 'allow'
+        assert result[1]['access_type'] == 'deny'
+
+    def test_merge_aces_by_api_key_preserves_different_trustees(self, powerscale_module_mock):
+        """_merge_aces_by_api_key keeps ACEs for different trustees separate."""
+        aces = [
+            {
+                'trustee_id': 'UID:2000',
+                'trustee_name': 'user1',
+                'trustee_type': 'user',
+                'access_type': 'allow',
+                'access_rights': ['dir_gen_all'],
+                'inherit_flags': ['container_inherit'],
+            },
+            {
+                'trustee_id': 'UID:3000',
+                'trustee_name': 'user2',
+                'trustee_type': 'user',
+                'access_type': 'allow',
+                'access_rights': ['dir_gen_read'],
+                'inherit_flags': ['object_inherit'],
+            }
+        ]
+        result = powerscale_module_mock._merge_aces_by_api_key(aces)
+        assert len(result) == 2
+
+    def test_acls_equivalent_matching(self, powerscale_module_mock):
+        """_acls_equivalent returns True for matching ACLs."""
+        acl1 = {
+            'acl': [
+                {
+                    'accessrights': ['dir_gen_all'],
+                    'accesstype': 'allow',
+                    'inherit_flags': ['container_inherit'],
+                    'trustee': {'id': 'UID:2000', 'name': 'user1', 'type': 'user'}
+                }
+            ]
+        }
+        acl2 = {
+            'acl': [
+                {
+                    'accessrights': ['dir_gen_all'],
+                    'accesstype': 'allow',
+                    'inherit_flags': ['container_inherit'],
+                    'trustee': {'id': 'UID:2000', 'name': 'user1', 'type': 'user'}
+                }
+            ]
+        }
+        assert powerscale_module_mock._acls_equivalent(acl1, acl2) is True
+
+    def test_acls_equivalent_different(self, powerscale_module_mock):
+        """_acls_equivalent returns False for different ACLs."""
+        acl1 = {
+            'acl': [
+                {
+                    'accessrights': ['dir_gen_all'],
+                    'accesstype': 'allow',
+                    'inherit_flags': ['container_inherit'],
+                    'trustee': {'id': 'UID:2000', 'name': 'user1', 'type': 'user'}
+                }
+            ]
+        }
+        acl2 = {
+            'acl': [
+                {
+                    'accessrights': ['dir_gen_read'],
+                    'accesstype': 'allow',
+                    'inherit_flags': ['container_inherit'],
+                    'trustee': {'id': 'UID:2000', 'name': 'user1', 'type': 'user'}
+                }
+            ]
+        }
+        assert powerscale_module_mock._acls_equivalent(acl1, acl2) is False

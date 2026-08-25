@@ -89,11 +89,17 @@ options:
       for multi-ACE operations.
     - When a single dict is provided, it is automatically wrapped into a
       single-element list internally.
-    - Multiple ACEs for the same trustee are supported. Each ACE is uniquely
-      identified by a composite key of (trustee identity, access_type,
-      sorted inherit_flags). This allows different inheritance behaviors
-      for the same user or group.
-    - When managing multiple ACEs per trustee, use C(replace) as the
+    - "B(API Limitation): The OneFS REST API consolidates multiple ACEs for
+      the same trustee with the same C(access_type) into a single ACE by
+      unioning C(access_rights) and C(inherit_flags). This means you cannot
+      maintain separate ACEs for the same trustee with the same access_type
+      but different inheritance flags. To maintain separate ACEs, use
+      different C(access_type) values (one C(allow) and one C(deny)) or
+      different trustees."
+    - Multiple ACEs across B(different) trustees are fully supported. A
+      single C(allow) ACE and a single C(deny) ACE for the B(same) trustee
+      are also supported as separate entries.
+    - When managing multiple ACEs, use C(replace) as the
       I(access_control_rights_state) to perform a declarative whole-ACL
       replacement. The C(add) and C(remove) states operate on individual
       ACEs and may produce ambiguous results with multi-ACE configurations.
@@ -156,8 +162,11 @@ options:
     - Specifies if the access rights are to be added, deleted, or replaced for the trustee.
     - It is required together with I(access_control_rights).
     - When set to C(replace), the module performs a whole-ACL replacement using the
-      complete list of ACEs provided. This is required for multi-ACE operations
-      where the same trustee has multiple ACEs with different inheritance flags.
+      complete list of ACEs provided. This is the recommended mode for managing
+      ACLs with multiple trustees or allow+deny ACEs for the same trustee.
+    - The module performs post-write verification to confirm the API stored the
+      desired state, ensuring accurate C(changed) reporting even when the API
+      consolidates ACEs.
     type: str
     choices: ['add', 'remove', 'replace']
   recursive:
@@ -456,7 +465,92 @@ EXAMPLES = r'''
     access_control_rights_state: "add"
     state: "present"
 
-- name: Set multiple ACEs for the same trustee with different inheritance flags
+- name: Set multiple ACEs for different trustees with inheritance flags
+  dellemc.powerscale.filesystem:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "/ifs/test"
+    access_zone: "{{access_zone}}"
+    access_control_rights:
+      - access_type: "allow"
+        access_rights:
+          - dir_gen_all
+        inherit_flags:
+          - object_inherit
+          - container_inherit
+        trustee:
+          name: admin_user
+          provider_type: "ldap"
+      - access_type: "allow"
+        access_rights:
+          - dir_gen_read
+        inherit_flags:
+          - container_inherit
+        trustee:
+          name: read_user
+          provider_type: "ldap"
+    access_control_rights_state: "replace"
+    state: "present"
+
+- name: Set allow and deny ACEs for the same trustee (supported pattern)
+  dellemc.powerscale.filesystem:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "/ifs/test"
+    access_zone: "{{access_zone}}"
+    access_control_rights:
+      # Deny delete rights (evaluated first in canonical order)
+      - access_type: "deny"
+        access_rights:
+          - std_delete
+        inherit_flags:
+          - object_inherit
+          - container_inherit
+        trustee:
+          name: test_user
+          provider_type: "ldap"
+      # Allow read/traverse rights
+      - access_type: "allow"
+        access_rights:
+          - dir_gen_read
+        inherit_flags:
+          - object_inherit
+          - container_inherit
+        trustee:
+          name: test_user
+          provider_type: "ldap"
+    access_control_rights_state: "replace"
+    state: "present"
+
+- name: Replace ACL with single trustee and full inheritance
+  dellemc.powerscale.filesystem:
+    onefs_host: "{{onefs_host}}"
+    port_no: "{{powerscaleport}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "/ifs/test"
+    access_zone: "{{access_zone}}"
+    access_control_rights:
+      - access_type: "allow"
+        access_rights:
+          - dir_gen_all
+        inherit_flags:
+          - object_inherit
+          - container_inherit
+        trustee:
+          name: test_user
+          provider_type: "ldap"
+    access_control_rights_state: "replace"
+    state: "present"
+
+- name: Replace ACL with container_inherit and inherit_only (subfolders only)
   dellemc.powerscale.filesystem:
     onefs_host: "{{onefs_host}}"
     port_no: "{{powerscaleport}}"
@@ -471,14 +565,6 @@ EXAMPLES = r'''
           - dir_gen_all
         inherit_flags:
           - container_inherit
-        trustee:
-          name: test_user
-          provider_type: "ldap"
-      - access_type: "allow"
-        access_rights:
-          - dir_gen_read
-        inherit_flags:
-          - object_inherit
           - inherit_only
         trustee:
           name: test_user
@@ -486,28 +572,7 @@ EXAMPLES = r'''
     access_control_rights_state: "replace"
     state: "present"
 
-- name: Replace ACL with object_inherit only
-  dellemc.powerscale.filesystem:
-    onefs_host: "{{onefs_host}}"
-    port_no: "{{powerscaleport}}"
-    verify_ssl: "{{verify_ssl}}"
-    api_user: "{{api_user}}"
-    api_password: "{{api_password}}"
-    path: "/ifs/test"
-    access_zone: "{{access_zone}}"
-    access_control_rights:
-      - access_type: "allow"
-        access_rights:
-          - std_read_dac
-        inherit_flags:
-          - object_inherit
-        trustee:
-          name: test_user
-          provider_type: "ldap"
-    access_control_rights_state: "replace"
-    state: "present"
-
-- name: Replace ACL with object_inherit and container_inherit
+- name: Multi-trustee ACL with mixed inheritance patterns
   dellemc.powerscale.filesystem:
     onefs_host: "{{onefs_host}}"
     port_no: "{{powerscaleport}}"
@@ -524,21 +589,17 @@ EXAMPLES = r'''
           - object_inherit
           - container_inherit
         trustee:
-          name: test_user
+          name: admin_user
           provider_type: "ldap"
-    access_control_rights_state: "replace"
-    state: "present"
-
-- name: Replace ACL with object_inherit and no_prop_inherit
-  dellemc.powerscale.filesystem:
-    onefs_host: "{{onefs_host}}"
-    port_no: "{{powerscaleport}}"
-    verify_ssl: "{{verify_ssl}}"
-    api_user: "{{api_user}}"
-    api_password: "{{api_password}}"
-    path: "/ifs/test"
-    access_zone: "{{access_zone}}"
-    access_control_rights:
+      - access_type: "allow"
+        access_rights:
+          - dir_gen_read
+        inherit_flags:
+          - container_inherit
+          - inherit_only
+        trustee:
+          name: read_user
+          provider_type: "ldap"
       - access_type: "allow"
         access_rights:
           - dir_gen_read
@@ -546,64 +607,12 @@ EXAMPLES = r'''
           - object_inherit
           - no_prop_inherit
         trustee:
-          name: test_user
+          name: file_reader
           provider_type: "ldap"
     access_control_rights_state: "replace"
     state: "present"
 
-- name: Replace ACL with container_inherit and inherit_only
-  dellemc.powerscale.filesystem:
-    onefs_host: "{{onefs_host}}"
-    port_no: "{{powerscaleport}}"
-    verify_ssl: "{{verify_ssl}}"
-    api_user: "{{api_user}}"
-    api_password: "{{api_password}}"
-    path: "/ifs/test"
-    access_zone: "{{access_zone}}"
-    access_control_rights:
-      - access_type: "allow"
-        access_rights:
-          - dir_gen_all
-        inherit_flags:
-          - container_inherit
-          - inherit_only
-        trustee:
-          name: test_user
-          provider_type: "ldap"
-    access_control_rights_state: "replace"
-    state: "present"
-
-- name: Modify existing multi-ACE configuration using replace state
-  dellemc.powerscale.filesystem:
-    onefs_host: "{{onefs_host}}"
-    port_no: "{{powerscaleport}}"
-    verify_ssl: "{{verify_ssl}}"
-    api_user: "{{api_user}}"
-    api_password: "{{api_password}}"
-    path: "/ifs/test"
-    access_zone: "{{access_zone}}"
-    access_control_rights:
-      - access_type: "allow"
-        access_rights:
-          - dir_gen_all
-        inherit_flags:
-          - container_inherit
-        trustee:
-          name: test_user
-          provider_type: "ldap"
-      - access_type: "allow"
-        access_rights:
-          - dir_gen_all
-        inherit_flags:
-          - object_inherit
-          - inherit_only
-        trustee:
-          name: test_user
-          provider_type: "ldap"
-    access_control_rights_state: "replace"
-    state: "present"
-
-- name: Remove one ACE from a multi-ACE trustee using remove state
+- name: Remove a trustee ACE using remove state
   dellemc.powerscale.filesystem:
     onefs_host: "{{onefs_host}}"
     port_no: "{{powerscaleport}}"
@@ -614,11 +623,8 @@ EXAMPLES = r'''
     access_zone: "{{access_zone}}"
     access_control_rights:
       access_type: "allow"
-      inherit_flags:
-        - object_inherit
-        - inherit_only
       trustee:
-        name: test_user
+        name: read_user
         provider_type: "ldap"
     access_control_rights_state: "remove"
     state: "present"
@@ -1117,12 +1123,21 @@ class FileSystem(object):
         acl_rights is a list of ACE dicts.
         For 'replace' state, uses action='replace' for whole-ACL replacement.
         For 'add'/'remove' states, uses action='update' (legacy behavior).
+
+        Returns True if a real state change occurred, False if the write
+        was a no-op (post-write verification shows same state as before).
         """
         try:
             acl_state = self.module.params['access_control_rights_state']
             acl = self.get_acl_permissions(acl_rights)
             if not self.module.check_mode:
                 action = "replace" if acl_state == 'replace' else "update"
+
+                # Capture pre-write state for post-write verification
+                pre_write_acl = None
+                if acl_state == 'replace':
+                    pre_write_acl = self.get_acl(path)
+
                 permissions = self.isi_sdk.NamespaceAcl(
                     authoritative='acl',
                     action=action,
@@ -1131,12 +1146,55 @@ class FileSystem(object):
                                            zone=self.module.params['access_zone'],
                                            acl=True,
                                            namespace_acl=permissions)
+
+                # Post-write verification for replace mode
+                if acl_state == 'replace' and pre_write_acl \
+                        and isinstance(pre_write_acl, dict):
+                    post_write_acl = self.get_acl(path)
+                    if post_write_acl and isinstance(post_write_acl, dict):
+                        # Update diff.after to reflect actual stored state
+                        self._update_diff_after_from_acl(post_write_acl)
+                        # If stored state is unchanged, the write was a no-op
+                        if self._acls_equivalent(pre_write_acl, post_write_acl):
+                            return False
             return True
         except Exception as e:
             error_message = 'Setting ACL rights of Filesystem %s failed ' \
                             'with error: %s' % (path, utils.determine_error(error_obj=e))
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
+
+    def _update_diff_after_from_acl(self, stored_acl):
+        """Updates diff.after to reflect what the API actually stored."""
+        after_acl = []
+        for acl in stored_acl.get('acl', []):
+            if not acl.get('trustee', {}).get('id'):
+                continue
+            after_acl.append({
+                'trustee': acl['trustee'],
+                'access_type': acl['accesstype'],
+                'access_rights': acl.get('accessrights', []),
+                'inherit_flags': acl.get('inherit_flags', []),
+            })
+        self.result['diff']['after'] = {'acl': after_acl}
+
+    def _acls_equivalent(self, acl1, acl2):
+        """Compares two raw ACL responses for equivalence.
+
+        Normalizes both ACLs and compares by trustee_id, access_type,
+        sorted access_rights, and sorted inherit_flags.
+        """
+        norm1 = self._normalize_acl_for_compare(acl1.get('acl', []))
+        norm2 = self._normalize_acl_for_compare(acl2.get('acl', []))
+        if len(norm1) != len(norm2):
+            return False
+        for a, b in zip(norm1, norm2):
+            if (a['trustee_id'] != b['trustee_id'] or
+                    a['access_type'] != b['access_type'] or
+                    a['access_rights'] != b['access_rights'] or
+                    a['inherit_flags'] != b['inherit_flags']):
+                return False
+        return True
 
     def delete_filesystem(self, path, access_zone=None, recursive_force_delete=False):
         """Deletes a FileSystem on PowerScale.
@@ -1172,7 +1230,11 @@ class FileSystem(object):
             self.module.fail_json(msg=error_message)
 
     def modify_acl(self, path, mode):
-        """Modifies Filesystem ACL on PowerScale."""
+        """Modifies Filesystem ACL on PowerScale.
+
+        Returns True if a real change occurred, False if the API stored the
+        same state as before (post-write verification determined no-op).
+        """
         try:
             if not self.module.check_mode:
                 if mode == 'posix':
@@ -1187,7 +1249,7 @@ class FileSystem(object):
                 else:
                     acl_rights = self.module.params['access_control_rights']
                     if acl_rights:
-                        self.set_access_control_rights(acl_rights, path)
+                        return self.set_access_control_rights(acl_rights, path)
 
             return True
         except Exception as e:
@@ -1431,6 +1493,9 @@ class FileSystem(object):
                 acl_rights_state = self.module.params['access_control_rights_state']
                 desired_aces = self._resolve_desired_acl(
                     self.module.params['access_control_rights'])
+                # Warn if API will consolidate same-trustee same-accesstype ACEs
+                if acl_rights_state == 'replace':
+                    self._warn_if_api_consolidation(desired_aces)
                 modified = self.is_acl_rights_modified(
                     filesystem_acl, self.module.params['access_control_rights'],
                     acl_rights_state, desired_aces=desired_aces)
@@ -1469,6 +1534,35 @@ class FileSystem(object):
         """Resolves desired ACE list once for reuse across compare and diff."""
         return [self._resolve_desired_ace(ace) for ace in acl_rights_list]
 
+    def _warn_if_api_consolidation(self, desired_aces):
+        """Emits a warning if the OneFS API will consolidate desired ACEs.
+
+        The OneFS REST API merges multiple ACEs sharing the same
+        (trustee_id, accesstype) into a single ACE. If the playbook
+        specifies multiple such ACEs, warn the user that the API will
+        consolidate them.
+        """
+        seen = {}
+        consolidated_names = []
+        for ace in desired_aces:
+            key = (ace['trustee_id'], ace['access_type'])
+            if key in seen:
+                name = ace.get('trustee_name') or str(ace.get('trustee_id', ''))
+                if key not in [c[0] for c in consolidated_names]:
+                    consolidated_names.append((key, name))
+            else:
+                seen[key] = True
+        if consolidated_names:
+            names = [str(c[1]) for c in consolidated_names]
+            self.module.warn(
+                "The OneFS REST API consolidates multiple ACEs for the same "
+                "trustee with the same access_type into a single ACE by "
+                "unioning access_rights and inherit_flags. The following "
+                "trustee(s) have multiple ACEs with the same access_type that "
+                "will be consolidated: {0}. Use different access_type values "
+                "(allow + deny) or different trustees to maintain separate "
+                "ACEs.".format(', '.join(names)))
+
     def _merge_aces_by_key(self, aces):
         """Merges ACEs with the same composite key by unioning access_rights.
 
@@ -1494,9 +1588,48 @@ class FileSystem(object):
                 }
         return list(merged.values())
 
+    def _merge_aces_by_api_key(self, aces):
+        """Merges ACEs using the OneFS API's consolidation key (trustee_id, accesstype).
+
+        The OneFS REST API silently consolidates multiple ACEs for the same
+        trustee with the same accesstype into a single ACE by unioning
+        access_rights and inherit_flags. This method replicates that behavior
+        client-side for accurate idempotency comparison and diff output.
+
+        Preserves order of first occurrence.
+        """
+        merged = {}
+        order = []
+        for ace in aces:
+            rights = set(ace.get('access_rights') or [])
+            flags = set(ace.get('inherit_flags') or [])
+            key = (ace['trustee_id'], ace['access_type'])
+            if key in merged:
+                merged[key]['access_rights'] = sorted(
+                    set(merged[key]['access_rights']) | rights)
+                merged[key]['inherit_flags'] = sorted(
+                    set(merged[key]['inherit_flags']) | flags)
+            else:
+                entry = {
+                    'trustee_id': ace['trustee_id'],
+                    'trustee_name': ace.get('trustee_name'),
+                    'trustee_type': ace.get('trustee_type'),
+                    'access_type': ace['access_type'],
+                    'access_rights': sorted(rights),
+                    'inherit_flags': sorted(flags),
+                }
+                merged[key] = entry
+                order.append(key)
+        return [merged[k] for k in order]
+
     def _compute_acl_diff(self, filesystem_acl, acl_rights_list, acl_rights_state,
                           desired_aces=None):
-        """Computes before/after diff for ACL changes and stores in result."""
+        """Computes before/after diff for ACL changes and stores in result.
+
+        For replace mode, the 'after' state reflects what the API will
+        actually store (ACEs merged by trustee_id + accesstype) rather than
+        the raw playbook desired state.
+        """
         if desired_aces is None:
             desired_aces = self._resolve_desired_acl(acl_rights_list)
 
@@ -1513,7 +1646,8 @@ class FileSystem(object):
 
         after_acl = list(before_acl)
         if acl_rights_state == 'replace':
-            merged = self._merge_aces_by_key(desired_aces)
+            # Use API-key merge to show what the API will actually store
+            merged = self._merge_aces_by_api_key(desired_aces)
             after_acl = []
             for ace in merged:
                 after_acl.append({
@@ -1623,16 +1757,17 @@ class FileSystem(object):
                                  desired_aces=None):
         """Compares desired ACL list against current ACL for replace mode.
 
-        Uses ordered comparison — if the desired ACL exactly matches the
-        current ACL (same order, same entries), returns False (no change).
-        ACEs with the same composite key are merged by unioning access_rights.
+        Uses ordered comparison with API-level merging. The OneFS REST API
+        consolidates ACEs sharing the same (trustee_id, accesstype) into a
+        single ACE. This method pre-merges the desired ACEs using that same
+        key to compare against what the API actually stores.
         """
         if desired_aces is None:
             desired_aces = self._resolve_desired_acl(acl_rights_list)
 
-        current_merged = self._merge_aces_by_key(
+        current_merged = self._merge_aces_by_api_key(
             self._normalize_acl_for_compare(filesystem_acl.get('acl', [])))
-        desired_merged = self._merge_aces_by_key(desired_aces)
+        desired_merged = self._merge_aces_by_api_key(desired_aces)
 
         # Compare identity and permissions only; trustee display metadata
         # (name/type) may differ between API and playbook input.
