@@ -24,7 +24,7 @@
     test_path: '/ifs/multi_ace_container_inherit_test'
     admin_user: 'ansible_test_user1'
     read_user: 'ansible_test_user2'
-    trustee_provider: 'ldap'
+    trustee_provider: 'local'
 
   tasks:
     - name: Create filesystem for container_inherit multi-trustee test

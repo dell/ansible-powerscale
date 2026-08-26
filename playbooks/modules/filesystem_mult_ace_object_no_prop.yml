@@ -24,7 +24,7 @@
     test_path: '/ifs/multi_ace_object_no_prop_test'
     admin_user: 'ansible_test_user1'
     read_user: 'ansible_test_user2'
-    trustee_provider: 'ldap'
+    trustee_provider: 'local'
 
   tasks:
     - name: Create filesystem for object_inherit + no_prop_inherit test

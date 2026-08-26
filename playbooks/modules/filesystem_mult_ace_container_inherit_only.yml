@@ -24,7 +24,7 @@
     api_password: '**********'
     test_path: '/ifs/multi_ace_allow_deny_test'
     trustee_user: 'ansible_test_user1'
-    trustee_provider: 'ldap'
+    trustee_provider: 'local'
 
   tasks:
     - name: Create filesystem for allow+deny multi-ACE test
