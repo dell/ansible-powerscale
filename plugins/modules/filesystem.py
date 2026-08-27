@@ -103,8 +103,7 @@ options:
       I(access_control_rights_state) to perform a declarative whole-ACL
       replacement. The C(add) and C(remove) states operate on individual
       ACEs and may produce ambiguous results with multi-ACE configurations.
-    type: list
-    elements: dict
+    type: raw
     suboptions:
       access_rights:
         description:
