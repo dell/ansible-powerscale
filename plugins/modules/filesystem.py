@@ -1916,6 +1916,9 @@ class FileSystem(object):
                                               access_type,
                                               ', '.join(allowed_access_types)))
             inherit_flags = ace.get('inherit_flags')
+            if isinstance(inherit_flags, str):
+                inherit_flags = [inherit_flags]
+                ace['inherit_flags'] = inherit_flags
             if inherit_flags is not None and not isinstance(inherit_flags, list):
                 self.module.fail_json(msg='inherit_flags must be a list')
             if inherit_flags:
@@ -1945,7 +1948,13 @@ class FileSystem(object):
                                               trustee_type,
                                               ', '.join(allowed_trustee_types)))
             access_rights = ace.get('access_rights')
+            if isinstance(access_rights, str):
+                access_rights = [access_rights]
+                ace['access_rights'] = access_rights
             inherit_flags = ace.get('inherit_flags')
+            if isinstance(inherit_flags, str):
+                inherit_flags = [inherit_flags]
+                ace['inherit_flags'] = inherit_flags
             # For add/replace, access_rights or inherit_flags must be specified
             if acl_rights_state in ('add', 'replace') and \
                     (access_rights is None and inherit_flags is None):

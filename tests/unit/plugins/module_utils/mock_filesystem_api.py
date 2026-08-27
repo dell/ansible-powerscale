@@ -358,7 +358,7 @@ class MockFileSystemApi:
             "create_file_system_wo_owner_exception": "owner is required while creating Filesystem",
             "create_file_system_wo_owner_name_exception": "Please specify a name for the owner.",
             "create_file_system_wo_group_name_exception": "Please specify a name for the group.",
-            "create_file_system_with_access_control_rights_exception": "Failed to get the wellknown id for wellknown",
+            "create_file_system_with_access_control_rights_exception": "Invalid trustee type",
             "set_acl_exception": "Setting ACL rights of Filesystem",
             "modify_acl_exception": "Setting ACL rights of Filesystem",
             "modify_acl_posix_exception": "Modification of ACL",

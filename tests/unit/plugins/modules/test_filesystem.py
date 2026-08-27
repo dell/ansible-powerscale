@@ -51,6 +51,24 @@ class TestFileSystem(PowerScaleUnitBase):
         return FileSystem
 
     @pytest.fixture(autouse=True)
+    def reset_filesystem_args(self):
+        """Reset the shared get_filesystem_args dict before each test to prevent state leakage."""
+        TestFileSystem.get_filesystem_args = {
+            'path': None,
+            'access_zone': None,
+            'owner': None,
+            'group': None,
+            'access_control': None,
+            'access_control_rights': None,
+            'access_control_rights_state': None,
+            'recursive': None,
+            'recursive_force_delete': None,
+            'quota': None,
+            'list_snapshots': None,
+            'state': None
+        }
+
+    @pytest.fixture(autouse=True)
     def inject_attributes(self, powerscale_module_mock):
         powerscale_module_mock.namespace_api = MagicMock()
         powerscale_module_mock.quota_api = MagicMock()
@@ -957,7 +975,7 @@ class TestFileSystem(PowerScaleUnitBase):
                                          "access_control_rights":
                                              {"access_rights": ["dir_gen_all"], "inherit_flags": "container_inherit",
                                               "access_type": "allow",
-                                              "trustee": {"name": "test_group", "type": "everyone",
+                                              "trustee": {"name": "test_group", "type": "wellknown",
                                                           "provider_type": "local"}},
                                          "access_zone": "System", "state": "present", "access_control_rights_state": "add"})
         powerscale_module_mock.module.params = self.get_filesystem_args
