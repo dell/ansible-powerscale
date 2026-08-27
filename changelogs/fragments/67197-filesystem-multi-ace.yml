@@ -5,4 +5,7 @@ minor_changes:
     ``access_control_rights`` parameter now accepts a list of ACE dicts. A new
     ``replace`` value for ``access_control_rights_state`` enables declarative
     whole-ACL replacement. Single-dict input remains fully backward
-    compatible.
+    compatible. The module now performs client-side pre-merge and post-write
+    verification to account for OneFS REST API ACE consolidation behavior
+    (same trustee + same accesstype merged). Documentation updated with API
+    limitation notes, migration guide, and troubleshooting section.
