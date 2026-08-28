@@ -6,7 +6,7 @@
     onefs_host: '10.**.**.**'
     verify_ssl: false
     api_user: 'root'
-    api_password: 'pancake'
+    api_password: '**********'
     path_ansible: '/ifs/ATest'
     new_path_ansible: '/ansible110'
     new_path_ansible_1: '/ansible111'
@@ -341,6 +341,12 @@
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         path: "/ifs/test15"
+        owner:
+          name: 'ansible_test_user1'
+          provider_type: 'local'
+        group:
+          name: 'test_group_1'
+          provider_type: 'local'
         access_control_rights:
           access_type: "allow"
           access_rights:
@@ -360,12 +366,6 @@
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         path: "/ifs/test15"
-        owner:
-          name: 'ansible_test_user1'
-          provider_type: 'local'
-        group:
-          name: 'test_group_1'
-          provider_type: 'local'
         access_control_rights:
           access_type: "allow"
           access_rights:
@@ -407,3 +407,101 @@
         access_control_rights_state: "remove"
         recursive: "{{ recursive }}"
         state: "{{ state_present }}"
+
+    # --- Multi-ACE examples ---
+    # The access_control_rights parameter accepts a list of ACE dicts.
+    #
+    # IMPORTANT: The OneFS REST API silently merges multiple ACEs for the same
+    # trustee with the same accesstype (allow or deny) into a single ACE by
+    # unioning access_rights and inherit_flags. This is an API limitation.
+    #
+    # Multiple ACEs are preserved only when:
+    # - Different trustees
+    # - Same trustee but different accesstype (one allow + one deny)
+    #
+    # The following example playbooks demonstrate multi-ACE scenarios, but note
+    # that same-trustee same-accesstype ACEs will be consolidated by the API:
+    #   - filesystem_mult_ace_container_inherit.yml      (container_inherit only)
+    #   - filesystem_mult_ace_object_inherit.yml         (object_inherit only)
+    #   - filesystem_mult_ace_object_container_inherit.yml (object + container inherit)
+    #   - filesystem_mult_ace_container_inherit_only.yml (container_inherit + inherit_only)
+    #   - filesystem_mult_ace_object_no_prop.yml         (object_inherit + no_prop_inherit)
+
+    - name: Set multiple ACEs for the same trustee with different inheritance flags
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "/ifs/test15"
+        access_control_rights:
+          - access_type: "allow"
+            access_rights:
+              - "dir_gen_all"
+            inherit_flags:
+              - "container_inherit"
+            trustee:
+              name: 'ansible_test_user1'
+          - access_type: "allow"
+            access_rights:
+              - "dir_gen_read"
+            inherit_flags:
+              - "object_inherit"
+              - "inherit_only"
+            trustee:
+              name: 'ansible_test_user1'
+        access_control_rights_state: "replace"
+        state: "{{ state_present }}"
+
+    - name: Replace entire ACL with multiple ACEs - Idempotency
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "/ifs/test15"
+        access_control_rights:
+          - access_type: "allow"
+            access_rights:
+              - "dir_gen_all"
+            inherit_flags:
+              - "container_inherit"
+            trustee:
+              name: 'ansible_test_user1'
+          - access_type: "allow"
+            access_rights:
+              - "dir_gen_read"
+            inherit_flags:
+              - "object_inherit"
+              - "inherit_only"
+            trustee:
+              name: 'ansible_test_user1'
+        access_control_rights_state: "replace"
+        state: "{{ state_present }}"
+
+    - name: Replace ACL with multi-ACE in check mode (no changes applied)
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "/ifs/test15"
+        access_control_rights:
+          - access_type: "allow"
+            access_rights:
+              - "dir_gen_all"
+            inherit_flags:
+              - "container_inherit"
+            trustee:
+              name: 'ansible_test_user1'
+          - access_type: "deny"
+            access_rights:
+              - "dir_gen_write"
+            inherit_flags:
+              - "object_inherit"
+            trustee:
+              name: 'ansible_test_user1'
+        access_control_rights_state: "replace"
+        state: "{{ state_present }}"
+      check_mode: true
+      diff: true

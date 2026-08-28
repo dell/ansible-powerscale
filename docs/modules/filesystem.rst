@@ -21,7 +21,7 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.17 or later.
+- Ansible\-core 2.17 or later.
 - Python 3.11, 3.12 or 3.13.
 
 
@@ -30,7 +30,7 @@ Parameters
 ----------
 
   path (True, str, None)
-    This is the directory path. It is the absolute path for System access zone and is relative if using a non-System access zone. For example, if your access zone is 'Ansible' and it has a base path '/ifs/ansible' and the path specified is '/user1', then the effective path would be '/ifs/ansible/user1'. If your access zone is System, and you have 'directory1' in the access zone, the path provided should be '/ifs/directory1'.
+    This is the directory path. It is the absolute path for System access zone and is relative if using a non\-System access zone. For example, if your access zone is 'Ansible' and it has a base path '/ifs/ansible' and the path specified is '/user1', then the effective path would be '/ifs/ansible/user1'. If your access zone is System, and you have 'directory1' in the access zone, the path provided should be '/ifs/directory1'.
 
 
   access_zone (optional, str, System)
@@ -42,7 +42,7 @@ Parameters
 
     This parameter is required when creating a Filesystem.
 
-    The following sub-options are supported for Owner. - :emphasis:`name(str`\ ), - :emphasis:`provider\_type(str`\ ).
+    The following sub\-options are supported for Owner. \- :emphasis:`name(str`\ ), \- :emphasis:`provider\_type(str`\ ).
 
     If you specify owner, then the corresponding name is mandatory.
 
@@ -54,7 +54,7 @@ Parameters
   group (optional, dict, None)
     The group of the Filesystem.
 
-    The following sub-options are supported for Group. - :emphasis:`name(str`\ ), - :emphasis:`provider\_type(str`\ ).
+    The following sub\-options are supported for Group. \- :emphasis:`name(str`\ ), \- :emphasis:`provider\_type(str`\ ).
 
     If you specify  a group, then the corresponding name is mandatory.
 
@@ -73,8 +73,18 @@ Parameters
     This field is mutually exclusive with :emphasis:`access\_control\_rights`.
 
 
-  access_control_rights (optional, dict, None)
+  access_control_rights (optional, raw, None)
     Manage user rights and set ACL permissions for files and directories.
+
+    Accepts a single ACE dict (backward compatible) or a list of ACE dicts for multi\-ACE operations.
+
+    When a single dict is provided, it is automatically wrapped into a single\-element list internally.
+
+    :strong:`API Limitation`\ : The OneFS REST API consolidates multiple ACEs for the same trustee with the same :literal:`access\_type` into a single ACE by unioning :literal:`access\_rights` and :literal:`inherit\_flags`. This means you cannot maintain separate ACEs for the same trustee with the same access\_type but different inheritance flags. To maintain separate ACEs, use different :literal:`access\_type` values (one :literal:`allow` and one :literal:`deny`\ ) or different trustees.
+
+    Multiple ACEs across :strong:`different` trustees are fully supported. A single :literal:`allow` ACE and a single :literal:`deny` ACE for the :strong:`same` trustee are also supported as separate entries.
+
+    When managing multiple ACEs, use :literal:`replace` as the :emphasis:`access\_control\_rights\_state` to perform a declarative whole\-ACL replacement. The :literal:`add` and :literal:`remove` states operate on individual ACEs and may produce ambiguous results with multi\-ACE configurations.
 
 
     access_rights (optional, list, None)
@@ -87,6 +97,16 @@ Parameters
 
     inherit_flags (optional, list, None)
       Provides the inherit flags set for the directory.
+
+      :literal:`object\_inherit` \- permissions propagate to files within the directory.
+
+      :literal:`container\_inherit` \- permissions propagate to subdirectories.
+
+      :literal:`inherit\_only` \- permissions apply only to child objects, not to the directory itself. Must be combined with :literal:`object\_inherit` or :literal:`container\_inherit`.
+
+      :literal:`no\_prop\_inherit` \- permissions propagate only to immediate children, not to deeper descendants.
+
+      :literal:`inherited\_ace` \- indicates the ACE was inherited from a parent directory (read\-only; set by the system).
 
 
     trustee (True, dict, None)
@@ -110,9 +130,13 @@ Parameters
 
 
   access_control_rights_state (optional, str, None)
-    Specifies if the access rights are to be added or deleted for the trustee.
+    Specifies if the access rights are to be added, deleted, or replaced for the trustee.
 
     It is required together with :emphasis:`access\_control\_rights`.
+
+    When set to :literal:`replace`\ , the module performs a whole\-ACL replacement using the complete list of ACEs provided. This is the recommended mode for managing ACLs with multiple trustees or allow+deny ACEs for the same trustee.
+
+    The module performs post\-write verification to confirm the API stored the desired state, ensuring accurate :literal:`changed` reporting even when the API consolidates ACEs.
 
 
   recursive (optional, bool, True)
@@ -126,7 +150,7 @@ Parameters
   quota (optional, dict, None)
     The Smart Quota for the filesystem. Only directory Quotas are supported.
 
-    The following sub-options are supported for Quota.
+    The following sub\-options are supported for Quota.
 
 
     include_snap_data (optional, bool, False)
@@ -201,9 +225,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    :literal:`true` - indicates that the SSL certificate should be verified.
+    :literal:`true` \- indicates that the SSL certificate should be verified.
 
-    :literal:`false` - indicates that the SSL certificate should not be verified.
+    :literal:`false` \- indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -223,6 +247,11 @@ Notes
 .. note::
    - While deleting a filesystem when recursive\_force\_delete is set as :literal:`true` it deletes all sub files and folders recursively. This is :literal:`true` even if the filesystem is not empty.
    - Modification of :emphasis:`inherit\_flags` of filesystem ACL is successful only if :emphasis:`access\_rights` is also specified in the :emphasis:`access\_control\_rights` dictionary.
+   - When configuring multiple ACEs for the same trustee, always use :literal:`replace` as the :emphasis:`access\_control\_rights\_state`. The :literal:`add` and :literal:`remove` states may fail with an ambiguous\-match error when the existing ACL already contains multiple ACEs for the same trustee and access type.
+   - Troubleshooting \- Non\-existent trustee: If the module fails with a trustee resolution error, verify that the trustee name exists in the specified provider (local, LDAP, or AD). Check the provider\_type setting in the trustee dict matches the actual identity source.
+   - Troubleshooting \- ACL reset with empty list: Using :literal:`replace` with an empty :emphasis:`access\_control\_rights` list removes all custom ACEs from the directory. The directory retains its inherited ACEs and default owner/group permissions. This is the expected OneFS behavior.
+   - Troubleshooting \- Ambiguous ACE matching: When using the legacy :literal:`add` or :literal:`remove` states on a directory that already has multiple ACEs for the same trustee and access type, the module raises an error because it cannot determine which ACE to modify. Switch to :literal:`replace` state with a complete list of desired ACEs to resolve this.
+   - Migration from single\-ACE to multi\-ACE: Existing playbooks using :emphasis:`access\_control\_rights` as a single dict continue to work unchanged. To adopt multi\-ACE, change the parameter value from a dict to a list of dicts, and change :emphasis:`access\_control\_rights\_state` from :literal:`add` to :literal:`replace` for declarative whole\-ACL management. See the migration example in the EXAMPLES section for a before/after comparison.
    - :emphasis:`Check\_mode` is supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
@@ -408,6 +437,203 @@ Examples
         access_control_rights_state: "add"
         state: "present"
 
+    - name: Set multiple ACEs for different trustees with inheritance flags
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{powerscaleport}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "/ifs/test"
+        access_zone: "{{access_zone}}"
+        access_control_rights:
+          - access_type: "allow"
+            access_rights:
+              - dir_gen_all
+            inherit_flags:
+              - object_inherit
+              - container_inherit
+            trustee:
+              name: admin_user
+              provider_type: "ldap"
+          - access_type: "allow"
+            access_rights:
+              - dir_gen_read
+            inherit_flags:
+              - container_inherit
+            trustee:
+              name: read_user
+              provider_type: "ldap"
+        access_control_rights_state: "replace"
+        state: "present"
+
+    - name: Set allow and deny ACEs for the same trustee (supported pattern)
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{powerscaleport}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "/ifs/test"
+        access_zone: "{{access_zone}}"
+        access_control_rights:
+          # Deny delete rights (evaluated first in canonical order)
+          - access_type: "deny"
+            access_rights:
+              - std_delete
+            inherit_flags:
+              - object_inherit
+              - container_inherit
+            trustee:
+              name: test_user
+              provider_type: "ldap"
+          # Allow read/traverse rights
+          - access_type: "allow"
+            access_rights:
+              - dir_gen_read
+            inherit_flags:
+              - object_inherit
+              - container_inherit
+            trustee:
+              name: test_user
+              provider_type: "ldap"
+        access_control_rights_state: "replace"
+        state: "present"
+
+    - name: Replace ACL with single trustee and full inheritance
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{powerscaleport}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "/ifs/test"
+        access_zone: "{{access_zone}}"
+        access_control_rights:
+          - access_type: "allow"
+            access_rights:
+              - dir_gen_all
+            inherit_flags:
+              - object_inherit
+              - container_inherit
+            trustee:
+              name: test_user
+              provider_type: "ldap"
+        access_control_rights_state: "replace"
+        state: "present"
+
+    - name: Replace ACL with container_inherit and inherit_only (subfolders only)
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{powerscaleport}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "/ifs/test"
+        access_zone: "{{access_zone}}"
+        access_control_rights:
+          - access_type: "allow"
+            access_rights:
+              - dir_gen_all
+            inherit_flags:
+              - container_inherit
+              - inherit_only
+            trustee:
+              name: test_user
+              provider_type: "ldap"
+        access_control_rights_state: "replace"
+        state: "present"
+
+    - name: Multi-trustee ACL with mixed inheritance patterns
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{powerscaleport}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "/ifs/test"
+        access_zone: "{{access_zone}}"
+        access_control_rights:
+          - access_type: "allow"
+            access_rights:
+              - dir_gen_all
+            inherit_flags:
+              - object_inherit
+              - container_inherit
+            trustee:
+              name: admin_user
+              provider_type: "ldap"
+          - access_type: "allow"
+            access_rights:
+              - dir_gen_read
+            inherit_flags:
+              - container_inherit
+              - inherit_only
+            trustee:
+              name: read_user
+              provider_type: "ldap"
+          - access_type: "allow"
+            access_rights:
+              - dir_gen_read
+            inherit_flags:
+              - object_inherit
+              - no_prop_inherit
+            trustee:
+              name: file_reader
+              provider_type: "ldap"
+        access_control_rights_state: "replace"
+        state: "present"
+
+    - name: Remove a trustee ACE using remove state
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{powerscaleport}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "/ifs/test"
+        access_zone: "{{access_zone}}"
+        access_control_rights:
+          access_type: "allow"
+          trustee:
+            name: read_user
+            provider_type: "ldap"
+        access_control_rights_state: "remove"
+        state: "present"
+
+    - name: Migration example - single dict to list format
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{onefs_host}}"
+        port_no: "{{powerscaleport}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "/ifs/test"
+        access_zone: "{{access_zone}}"
+        # Before (still supported): access_control_rights as a single dict
+        # access_control_rights:
+        #   access_type: "allow"
+        #   access_rights:
+        #     - dir_gen_all
+        #   inherit_flags:
+        #     - container_inherit
+        #   trustee:
+        #     name: test_user
+        #     provider_type: "ldap"
+        # access_control_rights_state: "add"
+        # After: access_control_rights as a list with replace for declarative ACL
+        access_control_rights:
+          - access_type: "allow"
+            access_rights:
+              - dir_gen_all
+            inherit_flags:
+              - container_inherit
+            trustee:
+              name: test_user
+              provider_type: "ldap"
+        access_control_rights_state: "replace"
+        state: "present"
+
     - name: Delete filesystem
       dellemc.powerscale.filesystem:
         onefs_host: "{{onefs_host}}"
@@ -427,6 +653,29 @@ Return Values
 
 changed (always, bool, true)
   Whether or not the resource has changed.
+
+
+diff (When I(diff=true) and ACL changes are detected., complex, {'before': {'acl': [{'trustee': {'id': 'UID:2000', 'name': 'user', 'type': 'user'}, 'access_type': 'allow', 'access_rights': ['dir_gen_read'], 'inherit_flags': []}]}, 'after': {'acl': [{'trustee': {'id': 'UID:2000', 'name': 'user', 'type': 'user'}, 'access_type': 'allow', 'access_rights': ['dir_gen_all'], 'inherit_flags': ['container_inherit']}]}})
+  Before and after ACL state when running in diff mode.
+
+
+  before (, dict, )
+    The ACL before the change.
+
+
+    acl (, list, )
+      The list of ACEs before the change.
+
+
+
+  after (, dict, )
+    The ACL after the change.
+
+
+    acl (, list, )
+      The list of ACEs after the change.
+
+
 
 
 filesystem_details (When Filesystem exists., complex, {'attrs': [{'name': 'owner', 'namespace': None, 'value': 'user'}, {'name': 'group', 'namespace': None, 'value': 'group'}, {'name': 'mode', 'namespace': None, 'value': '0750'}], 'namespace_acl': {'acl': [{'accessrights': ['dir_gen_all'], 'accesstype': 'allow', 'inherit_flags': ['container_inherit'], 'op': 'add', 'trustee': {'id': 'id:2001', 'name': 'user', 'type': 'user'}}], 'action': 'replace', 'authoritative': 'acl', 'group': {'id': '123', 'name': 'group', 'type': 'group'}, 'mode': '0750', 'owner': {'id': '123', 'name': 'user', 'type': 'user'}}})

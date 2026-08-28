@@ -1,0 +1,119 @@
+---
+# Example: Same trustee with allow + deny ACEs (supported multi-ACE pattern)
+#
+# This playbook demonstrates the supported pattern of having multiple ACEs
+# for the same trustee using DIFFERENT access_type values (allow + deny).
+# The OneFS API preserves these as separate ACEs because they have different
+# access_type values.
+#
+# Use case: An administrator needs to grant a user read/traverse access but
+# explicitly deny delete permissions. Using deny + allow for the same trustee
+# ensures the deny rule takes precedence in ACL evaluation order.
+#
+# NOTE: The OneFS REST API consolidates multiple ACEs for the same trustee
+# with the same access_type into a single ACE. Using different access_type
+# values (allow + deny) avoids this consolidation.
+
+- name: Same trustee with allow and deny ACEs
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: '10.**.**.**'
+    verify_ssl: false
+    api_user: 'root'
+    api_password: '**********'
+    test_path: '/ifs/multi_ace_allow_deny_test'
+    trustee_user: 'ansible_test_user1'
+    trustee_provider: 'local'
+
+  tasks:
+    - name: Create filesystem for allow+deny multi-ACE test
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ test_path }}"
+        owner:
+          name: "{{ trustee_user }}"
+          provider_type: "{{ trustee_provider }}"
+        state: present
+
+    - name: Set allow + deny ACEs for the same trustee
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ test_path }}"
+        access_control_rights:
+          # Deny: prevent deletion (evaluated before allow in canonical order)
+          - access_type: "deny"
+            access_rights:
+              - "std_delete"
+              - "delete_child"
+            inherit_flags:
+              - "container_inherit"
+              - "inherit_only"
+            trustee:
+              name: "{{ trustee_user }}"
+              provider_type: "{{ trustee_provider }}"
+          # Allow: grant read and traverse
+          - access_type: "allow"
+            access_rights:
+              - "dir_gen_read"
+            inherit_flags:
+              - "container_inherit"
+              - "inherit_only"
+            trustee:
+              name: "{{ trustee_user }}"
+              provider_type: "{{ trustee_provider }}"
+        access_control_rights_state: "replace"
+        state: present
+
+    - name: Set allow + deny ACEs - Idempotency check
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ test_path }}"
+        access_control_rights:
+          - access_type: "deny"
+            access_rights:
+              - "std_delete"
+              - "delete_child"
+            inherit_flags:
+              - "container_inherit"
+              - "inherit_only"
+            trustee:
+              name: "{{ trustee_user }}"
+              provider_type: "{{ trustee_provider }}"
+          - access_type: "allow"
+            access_rights:
+              - "dir_gen_read"
+            inherit_flags:
+              - "container_inherit"
+              - "inherit_only"
+            trustee:
+              name: "{{ trustee_user }}"
+              provider_type: "{{ trustee_provider }}"
+        access_control_rights_state: "replace"
+        state: present
+      register: result_idempotent
+
+    - name: Verify idempotency (no changes expected)
+      ansible.builtin.assert:
+        that:
+          - not result_idempotent.changed
+        fail_msg: "Idempotency check failed - unexpected change detected"
+
+    - name: Clean up - delete test filesystem
+      dellemc.powerscale.filesystem:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ test_path }}"
+        recursive_force_delete: true
+        state: absent

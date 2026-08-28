@@ -247,6 +247,64 @@ class MockFileSystemApi:
     }
 
     @staticmethod
+    def get_multi_ace_acl_response():
+        """ACL response with multiple ACEs for the same trustee (different inherit_flags)."""
+        return {'acl': [
+            {
+                "accessrights": [
+                    "dir_gen_all"
+                ],
+                "accesstype": "allow",
+                "inherit_flags": [
+                    "container_inherit"
+                ],
+                "trustee": {
+                    "id": "UID:2000",
+                    "name": "test_user",
+                    "type": "user"
+                }
+            },
+            {
+                "accessrights": [
+                    "dir_gen_read"
+                ],
+                "accesstype": "allow",
+                "inherit_flags": [
+                    "object_inherit",
+                    "inherit_only"
+                ],
+                "trustee": {
+                    "id": "UID:2000",
+                    "name": "test_user",
+                    "type": "user"
+                }
+            },
+            {
+                "accessrights": [
+                    "std_read_dac",
+                    "std_synchronize"
+                ],
+                "accesstype": "allow",
+                "inherit_flags": [],
+                "trustee": {
+                    "id": "GID:100",
+                    "name": "test_group",
+                    "type": "group"
+                }
+            }],
+            "authoritative": "acl",
+            "group": {
+                "id": "GID:100",
+                "name": "test_group",
+                "type": "group"},
+            "mode": "0000",
+            "owner": {
+                "id": "UID:2000",
+                "name": "test_user",
+                "type": "user"}
+        }
+
+    @staticmethod
     def get_acl_response():
         return {'acl': [
             {
@@ -300,7 +358,7 @@ class MockFileSystemApi:
             "create_file_system_wo_owner_exception": "owner is required while creating Filesystem",
             "create_file_system_wo_owner_name_exception": "Please specify a name for the owner.",
             "create_file_system_wo_group_name_exception": "Please specify a name for the group.",
-            "create_file_system_with_access_control_rights_exception": "Failed to get the wellknown id for wellknown",
+            "create_file_system_with_access_control_rights_exception": "Invalid trustee type",
             "set_acl_exception": "Setting ACL rights of Filesystem",
             "modify_acl_exception": "Setting ACL rights of Filesystem",
             "modify_acl_posix_exception": "Modification of ACL",
@@ -315,6 +373,7 @@ class MockFileSystemApi:
             "set_access_control_rights_exception": "Setting ACL rights of Filesystem",
             "is_owner_modified_exception": "Failed to determine if owner is modified",
             "is_group_modified_exception": "Failed to determine if group is modified",
-            "get_identity_exception": "Failed to get the identity id"
+            "get_identity_exception": "Failed to get the identity id",
+            "multi_ace_validation_exception": "Please specify access_rights or inherit_flags to set ACL"
         }
         return err_msg_dict.get(response_type)
