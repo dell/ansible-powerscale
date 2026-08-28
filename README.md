@@ -52,6 +52,7 @@ The Ansible Modules for Dell PowerScale support the following features:
 - Get details and modify alert settings.
 - Get details and modify IPMI configuration settings.
 - Use query parameters and filters for Info module.
+- Configure advanced ACL permissions with multiple Access Control Entries (ACEs) per trustee, supporting differentiated inheritance flags for fine-grained directory and file access control.
 
 The tasks can be executed by running simple playbooks written in yaml syntax.
 
