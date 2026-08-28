@@ -100,7 +100,7 @@ This table provides information about the software prerequisites for the Ansible
 
 ### File System & Data Protection
 
-* [File System Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/filesystem.rst) - Includes advanced ACL management with multi-ACE per trustee support
+* [File System Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/filesystem.rst)
 * [Snapshot Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/snapshot.rst)
 * [Snapshot Schedule Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/snapshotschedule.rst)
 * [Smart Quota Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/smartquota.rst)
