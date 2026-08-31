@@ -483,6 +483,65 @@ class TestGroup(PowerScaleUnitBase):
             "_validate_onefs_version",
         )
 
+    # ------------------------------------------------------------------
+    # Lazy preflight wiring (Story-29823, NFR-1 / NFR-2)
+    # ------------------------------------------------------------------
+
+    def mock_preflight_apis(self, powerscale_module_mock, provider_types=None,
+                            release="9.13.0.0", zone="System"):
+        self.mock_providers_summary(powerscale_module_mock,
+                                    provider_types=provider_types, zone=zone)
+        self.mock_cluster_config(powerscale_module_mock, release=release)
+
+    def test_preflight_cross_provider_skipped_when_no_member_provider(self, powerscale_module_mock):
+        """NFR-1/NFR-2: a legacy payload triggers zero validation API calls."""
+        self.set_module_params(self.group_args, MockGroupApi.get_update_group_payload())
+        self.mock_preflight_apis(powerscale_module_mock)
+        powerscale_module_mock._preflight_cross_provider("System", None)
+        powerscale_module_mock.api_instance.get_providers_summary.assert_not_called()
+        powerscale_module_mock.cluster_api_instance.get_cluster_config.assert_not_called()
+        powerscale_module_mock.module.fail_json.assert_not_called()
+
+    def test_preflight_cross_provider_runs_both_validators(self, powerscale_module_mock):
+        """FR-7 + FR-8 both run when a per-member provider_type is supplied."""
+        self.set_module_params(self.group_args, MockGroupApi.get_update_group_payload())
+        self.mock_preflight_apis(powerscale_module_mock, provider_types=["local", "ldap"])
+        powerscale_module_mock._preflight_cross_provider("System", "ldap")
+        powerscale_module_mock.cluster_api_instance.get_cluster_config.assert_called_once()
+        powerscale_module_mock.api_instance.get_providers_summary.assert_called_once()
+        powerscale_module_mock.module.fail_json.assert_not_called()
+
+    def test_preflight_cross_provider_runs_validators_once_for_many_members(self, powerscale_module_mock):
+        """NFR-1: five cross-provider members still cost one call per validator."""
+        self.set_module_params(self.group_args, MockGroupApi.get_update_group_payload())
+        self.mock_preflight_apis(powerscale_module_mock, provider_types=["local", "ldap"])
+        for _ in range(5):
+            powerscale_module_mock._preflight_cross_provider("System", "ldap")
+        assert powerscale_module_mock.cluster_api_instance.get_cluster_config.call_count == 1
+        assert powerscale_module_mock.api_instance.get_providers_summary.call_count == 1
+
+    def test_preflight_cross_provider_version_checked_before_provider(self, powerscale_module_mock):
+        """FR-8 precedes FR-7: an old cluster fails on version, not provider."""
+        self.set_module_params(self.group_args, MockGroupApi.get_update_group_payload())
+        self.mock_preflight_apis(powerscale_module_mock,
+                                 provider_types=["local"], release="9.5.0.0")
+        with pytest.raises(SystemExit):
+            powerscale_module_mock._preflight_cross_provider("System", "ldap")
+        call_args = powerscale_module_mock.module.fail_json.call_args.kwargs
+        assert "OneFS version 9.5.0.0 is below the required minimum" in call_args['msg']
+        powerscale_module_mock.api_instance.get_providers_summary.assert_not_called()
+
+    def test_preflight_cross_provider_rejects_unconfigured_provider(self, powerscale_module_mock):
+        """FR-7 via the preflight entry point on a supported cluster."""
+        self.set_module_params(self.group_args, MockGroupApi.get_update_group_payload())
+        self.mock_preflight_apis(powerscale_module_mock, provider_types=["local"])
+        self.capture_fail_json_method(
+            "Provider 'ldap' is not configured in access zone 'System'",
+            powerscale_module_mock,
+            "_preflight_cross_provider",
+            "System", "ldap",
+        )
+
     def test_delete_group(self, powerscale_module_mock):
         self.set_module_params(self.group_args, MockGroupApi.get_delete_group_payload())
         self.delete_group(powerscale_module_mock)

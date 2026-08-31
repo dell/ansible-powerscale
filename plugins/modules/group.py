@@ -388,6 +388,28 @@ class Group(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
+    def _preflight_cross_provider(self, access_zone, member_provider):
+        """Run the cross-provider preflight checks, if they are needed at all.
+
+        This is the single gate for cross-provider behaviour. When a user dict
+        omits ``provider_type`` the module resolves members exactly as it
+        always has, so no validation call is made and existing playbooks incur
+        no extra API traffic (NFR-1, NFR-2).
+
+        The OneFS version is checked before provider existence: on a cluster
+        that cannot support cross-provider membership at all, the version is
+        the actionable error, and reporting a missing provider first would
+        send the operator chasing the wrong problem.
+
+        :param access_zone: the access zone the group lives in.
+        :param member_provider: per-member provider type, or None when the
+            member did not specify one.
+        """
+        if not member_provider:
+            return
+        self._validate_onefs_version()
+        self._validate_provider_exists(member_provider, access_zone)
+
     def check_provider_type(self, provider, message):
         """ Check the provider and return the updated provider"""
         if provider.lower() != "local":
