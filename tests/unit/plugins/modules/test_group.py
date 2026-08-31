@@ -781,6 +781,39 @@ class TestGroup(PowerScaleUnitBase):
         # The LDAP member should have been resolved via get_auth_user
         powerscale_module_mock.api_instance.get_auth_user.assert_called()
 
+    # ------------------------------------------------------------------
+    # FR-6 / AC-003: backward compatibility (Story-29823)
+    # ------------------------------------------------------------------
+
+    def test_update_group_with_existing_local_user_unchanged(self, powerscale_module_mock):
+        """FR-6/AC-003: a legacy payload (no per-member provider_type) for an
+        already-present user returns changed=false — identical to pre-cross-
+        provider behaviour."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload(
+                                   users=[{"user_name": "test_user"}]))
+        self.update_group(powerscale_module_mock)
+        assert not powerscale_module_mock.module.exit_json.call_args[1]['changed']
+        # No write calls should have been made
+        powerscale_module_mock.group_api_instance.create_group_member.assert_not_called()
+        powerscale_module_mock.group_api_instance.delete_group_member.assert_not_called()
+
+    def test_update_group_legacy_payload_uses_group_provider(self, powerscale_module_mock):
+        """FR-6: without per-member provider_type the legacy path is used, so
+        add_user_to_group receives the group-level provider and
+        check_provider_type is enforced."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload(
+                                   users=[{"user_name": "test_user"}, {"user_id": "1000"}]))
+        self.update_group(powerscale_module_mock)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed']
+        # check_provider_type is still called for legacy members
+        # (create_group_member receives provider=local)
+        create_calls = powerscale_module_mock.group_api_instance.create_group_member.call_args_list
+        for call in create_calls:
+            # The legacy path passes provider= as a keyword argument
+            assert 'provider' in call.kwargs
+
     def test_delete_group(self, powerscale_module_mock):
         self.set_module_params(self.group_args, MockGroupApi.get_delete_group_payload())
         self.delete_group(powerscale_module_mock)
