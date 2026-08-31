@@ -5,6 +5,7 @@
 """Mock Api response for Unit tests of Group module on PowerScale"""
 
 from __future__ import (absolute_import, division, print_function)
+import copy
 from mock.mock import MagicMock
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_sdk_response \
     import MockSDKResponse
@@ -69,6 +70,48 @@ class MockGroupApi:
             }
         ]
     }
+    # Mirrors ProvidersSummary -> provider_instances[] from the PowerScale SDK.
+    # Each instance carries the bare provider ``type`` (local, file, ldap, ads,
+    # nis) alongside the zone it is configured in, which is what FR-7 validates.
+    GET_PROVIDERS_SUMMARY = {
+        "provider_instances": [
+            {
+                "groupnet": "groupnet0",
+                "id": "lsa-local-provider:System",
+                "name": "System",
+                "status": "active",
+                "type": "local",
+                "zone_name": "System"
+            },
+            {
+                "groupnet": "groupnet0",
+                "id": "lsa-file-provider:System",
+                "name": "System",
+                "status": "active",
+                "type": "file",
+                "zone_name": "System"
+            },
+            {
+                "groupnet": "groupnet0",
+                "id": "lsa-ldap-provider:example.org",
+                "name": "example.org",
+                "status": "online",
+                "type": "ldap",
+                "zone_name": "System"
+            }
+        ]
+    }
+    # Mirrors ClusterConfig -> onefs_version. ``release`` is a dotted string such
+    # as "9.13.0.0"; FR-8 compares it against the 9.11.0 minimum.
+    GET_CLUSTER_CONFIG = {
+        "onefs_version": {
+            "build": "B_MAIN_0000(RELEASE)",
+            "release": "9.13.0.0",
+            "revision": "1234567890",
+            "type": "Isilon OneFS",
+            "version": "Isilon OneFS v9.13.0.0"
+        }
+    }
 
     @staticmethod
     def get_create_group_payload(id=None, name=None, users=None, user_state=None, provider_type=None):
@@ -84,7 +127,8 @@ class MockGroupApi:
         return group_payload
 
     @staticmethod
-    def get_update_group_payload(users=None, user_state=None):
+    def get_update_group_payload(users=None, user_state=None, provider_type=None,
+                                 access_zone=None):
         group_payload = MockGroupApi.CREATE_GROUP_PAYLOAD.copy()
         group_payload['users'] = [{"user_name": "test_user"}, {"user_id": "1000"}]
         group_payload['user_state'] = "present-in-group"
@@ -92,6 +136,10 @@ class MockGroupApi:
             group_payload['user_state'] = user_state
         if users is not None:
             group_payload['users'] = users
+        if provider_type:
+            group_payload['provider_type'] = provider_type
+        if access_zone:
+            group_payload['access_zone'] = access_zone
         return group_payload
 
     @staticmethod
@@ -123,3 +171,27 @@ class MockGroupApi:
     @staticmethod
     def get_group_members_list():
         return MockSDKResponse(MockGroupApi.GET_GROUP_MEMBERS)
+
+    @staticmethod
+    def get_providers_summary(provider_types=None, zone="System"):
+        """Build a ProvidersSummary response.
+
+        :param provider_types: bare provider types to expose (e.g.
+            ``['local', 'ldap']``). Defaults to the full fixture set
+            (local, file, ldap).
+        :param zone: access zone reported on every provider instance.
+        """
+        instances = copy.deepcopy(
+            MockGroupApi.GET_PROVIDERS_SUMMARY['provider_instances'])
+        if provider_types is not None:
+            instances = [i for i in instances if i['type'] in provider_types]
+        for instance in instances:
+            instance['zone_name'] = zone
+        return MockSDKResponse({"provider_instances": instances})
+
+    @staticmethod
+    def get_cluster_config(release="9.13.0.0"):
+        """Build a ClusterConfig response carrying the given OneFS release."""
+        config = copy.deepcopy(MockGroupApi.GET_CLUSTER_CONFIG)
+        config['onefs_version']['release'] = release
+        return MockSDKResponse(config)
