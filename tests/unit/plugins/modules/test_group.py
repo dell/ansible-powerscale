@@ -401,6 +401,88 @@ class TestGroup(PowerScaleUnitBase):
             "ldap", "System",
         )
 
+    # ------------------------------------------------------------------
+    # FR-8: OneFS version validation (Story-29823)
+    # ------------------------------------------------------------------
+
+    def mock_cluster_config(self, powerscale_module_mock, release="9.13.0.0",
+                            call_exception=False):
+        if call_exception:
+            powerscale_module_mock.cluster_api_instance.get_cluster_config = \
+                MagicMock(side_effect=Exception)
+        else:
+            powerscale_module_mock.cluster_api_instance.get_cluster_config = \
+                MagicMock(return_value=MockGroupApi.get_cluster_config(release=release))
+
+    @pytest.mark.parametrize("release", ["9.5.0.0", "9.10.9.0", "9.10.0.0", "8.2.2.0"])
+    def test_validate_onefs_version_below_minimum_exception(self, powerscale_module_mock, release):
+        """FR-8/AC-008: a cluster below 9.11.0 fails with the exact message."""
+        self.set_module_params(self.group_args, MockGroupApi.get_update_group_payload())
+        self.mock_cluster_config(powerscale_module_mock, release=release)
+        self.capture_fail_json_method(
+            "OneFS version %s is below the required minimum 9.11.0"
+            " for cross-provider group membership" % release,
+            powerscale_module_mock,
+            "_validate_onefs_version",
+        )
+
+    @pytest.mark.parametrize("release", ["9.11.0.0", "9.11.0", "9.12.0.0", "9.13.0.0", "10.0.0.0"])
+    def test_validate_onefs_version_at_or_above_minimum_accepted(self, powerscale_module_mock, release):
+        """FR-8: 9.11.0 is inclusive; anything above it passes."""
+        self.set_module_params(self.group_args, MockGroupApi.get_update_group_payload())
+        self.mock_cluster_config(powerscale_module_mock, release=release)
+        powerscale_module_mock._validate_onefs_version()
+        powerscale_module_mock.module.fail_json.assert_not_called()
+
+    def test_validate_onefs_version_makes_no_member_api_calls_on_failure(self, powerscale_module_mock):
+        """FR-8/AC-008: validation fails before any membership API call is issued."""
+        self.set_module_params(self.group_args, MockGroupApi.get_update_group_payload())
+        self.mock_cluster_config(powerscale_module_mock, release="9.5.0.0")
+        powerscale_module_mock.group_api_instance.list_group_members = MagicMock()
+        powerscale_module_mock.group_api_instance.create_group_member = MagicMock()
+        powerscale_module_mock.group_api_instance.delete_group_member = MagicMock()
+        with pytest.raises(SystemExit):
+            powerscale_module_mock._validate_onefs_version()
+        powerscale_module_mock.group_api_instance.list_group_members.assert_not_called()
+        powerscale_module_mock.group_api_instance.create_group_member.assert_not_called()
+        powerscale_module_mock.group_api_instance.delete_group_member.assert_not_called()
+
+    def test_validate_onefs_version_is_cached_across_calls(self, powerscale_module_mock):
+        """NFR-1: the cluster version is fetched once per module invocation."""
+        self.set_module_params(self.group_args, MockGroupApi.get_update_group_payload())
+        self.mock_cluster_config(powerscale_module_mock, release="9.13.0.0")
+        powerscale_module_mock._validate_onefs_version()
+        powerscale_module_mock._validate_onefs_version()
+        powerscale_module_mock._validate_onefs_version()
+        assert powerscale_module_mock.cluster_api_instance.get_cluster_config.call_count == 1
+
+    def test_validate_onefs_version_tolerates_v_prefix(self, powerscale_module_mock):
+        """FR-8: a 'v'-prefixed release string is parsed, not rejected outright."""
+        self.set_module_params(self.group_args, MockGroupApi.get_update_group_payload())
+        self.mock_cluster_config(powerscale_module_mock, release="v9.13.0.0")
+        powerscale_module_mock._validate_onefs_version()
+        powerscale_module_mock.module.fail_json.assert_not_called()
+
+    def test_validate_onefs_version_api_exception(self, powerscale_module_mock):
+        """NFR-4: SDK failures surface a sanitised message, not a stack trace."""
+        self.set_module_params(self.group_args, MockGroupApi.get_update_group_payload())
+        self.mock_cluster_config(powerscale_module_mock, call_exception=True)
+        self.capture_fail_json_method(
+            "Failed to determine the OneFS version of the cluster",
+            powerscale_module_mock,
+            "_validate_onefs_version",
+        )
+
+    def test_validate_onefs_version_unparseable_release(self, powerscale_module_mock):
+        """FR-8: an unusable release string fails clearly rather than crashing."""
+        self.set_module_params(self.group_args, MockGroupApi.get_update_group_payload())
+        self.mock_cluster_config(powerscale_module_mock, release="not-a-version")
+        self.capture_fail_json_method(
+            "Failed to determine the OneFS version of the cluster",
+            powerscale_module_mock,
+            "_validate_onefs_version",
+        )
+
     def test_delete_group(self, powerscale_module_mock):
         self.set_module_params(self.group_args, MockGroupApi.get_delete_group_payload())
         self.delete_group(powerscale_module_mock)
