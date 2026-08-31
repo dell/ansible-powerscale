@@ -585,6 +585,70 @@ class TestGroup(PowerScaleUnitBase):
             "perform_module_operation",
         )
 
+    # ------------------------------------------------------------------
+    # FR-1 / FR-10: user-to-id resolution (Story-29823)
+    # ------------------------------------------------------------------
+
+    def mock_get_auth_user(self, powerscale_module_mock, provider="local",
+                           call_exception=False):
+        """Mock AuthApi.get_auth_user for user resolution tests."""
+        if call_exception:
+            powerscale_module_mock.api_instance.get_auth_user = \
+                MagicMock(side_effect=Exception("SDK boom"))
+        else:
+            powerscale_module_mock.api_instance.get_auth_user = \
+                MagicMock(return_value=MockGroupApi.get_auth_user_response(provider))
+
+    def test_resolve_member_id_ldap_user_by_name(self, powerscale_module_mock):
+        """FR-1: an LDAP user_name resolves to the fixture's unique SID."""
+        self.set_module_params(self.group_args, MockGroupApi.get_update_group_payload())
+        self.mock_get_auth_user(powerscale_module_mock, provider="ldap")
+        resolved = powerscale_module_mock._resolve_member_id(
+            "ldap_user", None, "ldap", "System")
+        assert resolved == "SID:S-1-5-21-9999999999-8888888888-7777777777-50001"
+        powerscale_module_mock.api_instance.get_auth_user.assert_called_once()
+
+    def test_resolve_member_id_local_user_by_name(self, powerscale_module_mock):
+        """FR-1: a local user_name resolves to its SID."""
+        self.set_module_params(self.group_args, MockGroupApi.get_update_group_payload())
+        self.mock_get_auth_user(powerscale_module_mock, provider="local")
+        resolved = powerscale_module_mock._resolve_member_id(
+            "test_user", None, "local", "System")
+        assert resolved == "SID:S-1-5-21-1426242897-2739835565-3634425493-501"
+
+    def test_resolve_member_id_by_uid(self, powerscale_module_mock):
+        """FR-1: resolution by user_id uses UID: prefix."""
+        self.set_module_params(self.group_args, MockGroupApi.get_update_group_payload())
+        self.mock_get_auth_user(powerscale_module_mock, provider="ldap")
+        resolved = powerscale_module_mock._resolve_member_id(
+            None, "50001", "ldap", "System")
+        assert resolved == "SID:S-1-5-21-9999999999-8888888888-7777777777-50001"
+        # Verify the lookup used UID: prefix
+        call_kwargs = powerscale_module_mock.api_instance.get_auth_user.call_args
+        assert "UID:50001" in str(call_kwargs)
+
+    def test_resolve_member_id_unresolvable_user_exception(self, powerscale_module_mock):
+        """FR-10: an empty result fails with the exact message."""
+        self.set_module_params(self.group_args, MockGroupApi.get_update_group_payload())
+        self.mock_get_auth_user(powerscale_module_mock, provider=None)  # empty result
+        self.capture_fail_json_method(
+            "User 'alice' could not be resolved in access zone 'System'",
+            powerscale_module_mock,
+            "_resolve_member_id",
+            "alice", None, "ldap", "System",
+        )
+
+    def test_resolve_member_id_api_exception(self, powerscale_module_mock):
+        """NFR-4: SDK failures surface a sanitised message."""
+        self.set_module_params(self.group_args, MockGroupApi.get_update_group_payload())
+        self.mock_get_auth_user(powerscale_module_mock, call_exception=True)
+        self.capture_fail_json_method(
+            "Failed to resolve user 'bob' in provider 'ldap'",
+            powerscale_module_mock,
+            "_resolve_member_id",
+            "bob", None, "ldap", "System",
+        )
+
     def test_group_user_dict_valid_with_provider_type_accepted(self, powerscale_module_mock):
         """FR-2: a user dict with user_name + provider_type passes validation."""
         self.set_module_params(self.group_args,

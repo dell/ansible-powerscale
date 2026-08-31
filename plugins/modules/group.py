@@ -410,6 +410,44 @@ class Group(object):
         self._validate_onefs_version()
         self._validate_provider_exists(member_provider, access_zone)
 
+    def _resolve_member_id(self, user_name, user_id, provider_type, access_zone):
+        """Resolve a user to its unique identity in a specific provider.
+
+        Uses ``AuthApi.get_auth_user`` with the given provider so the cluster
+        looks up the user in the correct authentication backend. Returns the
+        SID string (e.g. ``SID:S-1-5-…``) that can be passed directly to the
+        group-membership API.
+
+        :param user_name: the human-readable user name, or ``None``.
+        :param user_id:   the numeric UID as a string, or ``None``.
+        :param provider_type: bare provider type (local, ldap, …).
+        :param access_zone: the access zone the group lives in.
+        :return: the user's ``SID:…`` identifier string.
+        """
+        auth_user_id = ("USER:" + user_name) if user_name else ("UID:" + user_id)
+        display_name = user_name or user_id
+        try:
+            api_response = self.api_instance.get_auth_user(
+                auth_user_id=auth_user_id,
+                zone=access_zone, provider=provider_type)
+            users = api_response.to_dict().get('users') or []
+            if not users:
+                error_message = "User '%s' could not be resolved in" \
+                                " access zone '%s'" % (display_name, access_zone)
+                LOG.error(error_message)
+                self.module.fail_json(msg=error_message)
+            resolved_id = users[0]['sid']['id']
+            LOG.info("Resolved user '%s' in provider '%s' zone '%s' to %s",
+                     display_name, provider_type, access_zone, resolved_id)
+            return resolved_id
+        except Exception as e:
+            error = self.determine_error(error_obj=e)
+            error_message = "Failed to resolve user '%s' in provider" \
+                            " '%s', access zone '%s': %s" \
+                            % (display_name, provider_type, access_zone, error)
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
     def check_provider_type(self, provider, message):
         """ Check the provider and return the updated provider"""
         if provider.lower() != "local":
