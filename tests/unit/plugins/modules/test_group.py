@@ -324,6 +324,83 @@ class TestGroup(PowerScaleUnitBase):
             "perform_module_operation",
         )
 
+    # ------------------------------------------------------------------
+    # FR-7: provider existence validation (Story-29823)
+    # ------------------------------------------------------------------
+
+    def mock_providers_summary(self, powerscale_module_mock, provider_types=None,
+                               zone="System", call_exception=False):
+        if call_exception:
+            powerscale_module_mock.api_instance.get_providers_summary = \
+                MagicMock(side_effect=Exception)
+        else:
+            powerscale_module_mock.api_instance.get_providers_summary = \
+                MagicMock(return_value=MockGroupApi.get_providers_summary(
+                    provider_types=provider_types, zone=zone))
+
+    def test_validate_provider_exists_unconfigured_provider_exception(self, powerscale_module_mock):
+        """FR-7/AC-007: a provider absent from the zone fails with the exact message."""
+        self.set_module_params(self.group_args, MockGroupApi.get_update_group_payload())
+        self.mock_providers_summary(powerscale_module_mock, provider_types=["local", "file", "ldap"])
+        self.capture_fail_json_method(
+            "Provider 'nis' is not configured in access zone 'System'",
+            powerscale_module_mock,
+            "_validate_provider_exists",
+            "nis", "System",
+        )
+
+    def test_validate_provider_exists_makes_no_member_api_calls_on_failure(self, powerscale_module_mock):
+        """FR-7/AC-007: validation fails before any membership API call is issued."""
+        self.set_module_params(self.group_args, MockGroupApi.get_update_group_payload())
+        self.mock_providers_summary(powerscale_module_mock, provider_types=["local"])
+        powerscale_module_mock.group_api_instance.list_group_members = MagicMock()
+        powerscale_module_mock.group_api_instance.create_group_member = MagicMock()
+        powerscale_module_mock.group_api_instance.delete_group_member = MagicMock()
+        with pytest.raises(SystemExit):
+            powerscale_module_mock._validate_provider_exists("ldap", "System")
+        powerscale_module_mock.group_api_instance.list_group_members.assert_not_called()
+        powerscale_module_mock.group_api_instance.create_group_member.assert_not_called()
+        powerscale_module_mock.group_api_instance.delete_group_member.assert_not_called()
+
+    def test_validate_provider_exists_configured_provider_accepted(self, powerscale_module_mock):
+        """FR-7: a configured provider passes validation without failing."""
+        self.set_module_params(self.group_args, MockGroupApi.get_update_group_payload())
+        self.mock_providers_summary(powerscale_module_mock, provider_types=["local", "ldap"])
+        powerscale_module_mock._validate_provider_exists("ldap", "System")
+        powerscale_module_mock.module.fail_json.assert_not_called()
+
+    def test_validate_provider_exists_is_cached_across_calls(self, powerscale_module_mock):
+        """NFR-1: the per-zone summary is fetched once, not once per member."""
+        self.set_module_params(self.group_args, MockGroupApi.get_update_group_payload())
+        self.mock_providers_summary(powerscale_module_mock, provider_types=["local", "ldap"])
+        powerscale_module_mock._validate_provider_exists("ldap", "System")
+        powerscale_module_mock._validate_provider_exists("local", "System")
+        powerscale_module_mock._validate_provider_exists("ldap", "System")
+        assert powerscale_module_mock.api_instance.get_providers_summary.call_count == 1
+
+    def test_validate_provider_exists_respects_access_zone(self, powerscale_module_mock):
+        """FR-7: a provider configured in another zone is not accepted for this zone."""
+        self.set_module_params(self.group_args, MockGroupApi.get_update_group_payload())
+        self.mock_providers_summary(powerscale_module_mock,
+                                    provider_types=["local", "ldap"], zone="sampleZone")
+        self.capture_fail_json_method(
+            "Provider 'ldap' is not configured in access zone 'System'",
+            powerscale_module_mock,
+            "_validate_provider_exists",
+            "ldap", "System",
+        )
+
+    def test_validate_provider_exists_api_exception(self, powerscale_module_mock):
+        """NFR-4: SDK failures surface a sanitised message, not a stack trace."""
+        self.set_module_params(self.group_args, MockGroupApi.get_update_group_payload())
+        self.mock_providers_summary(powerscale_module_mock, call_exception=True)
+        self.capture_fail_json_method(
+            "Failed to fetch authentication providers for access zone 'System'",
+            powerscale_module_mock,
+            "_validate_provider_exists",
+            "ldap", "System",
+        )
+
     def test_delete_group(self, powerscale_module_mock):
         self.set_module_params(self.group_args, MockGroupApi.get_delete_group_payload())
         self.delete_group(powerscale_module_mock)
