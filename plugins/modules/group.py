@@ -43,8 +43,8 @@ options:
     default: 'system'
   provider_type:
     description:
-    - This option defines the type which will be used to
-      authenticate the group members.
+    - This option defines the type of the authentication provider for
+      the group itself.
     - Creation, Deletion and Modification is allowed only for local group.
     - Details of groups of all provider types can be fetched.
     - If the I(provider_type) is C(ads) then the domain name of the Active
@@ -52,6 +52,8 @@ options:
       The format for the group_name should be 'DOMAIN_NAME\group_name'
       or "DOMAIN_NAME\\group_name".
     - This option acts as a filter for all operations except creation.
+    - When a member in I(users) omits its own C(provider_type), this
+      group-level provider is used as the default for member resolution.
     type: str
     default: 'local'
     choices: [ 'local', 'file', 'ldap', 'ads', 'nis']
@@ -67,8 +69,31 @@ options:
     - Either I(user_name) or I(user_id) is needed to add or remove the user
       from the group.
     - Users can be part of multiple groups.
+    - Each element may optionally include a C(provider_type) key to add or
+      remove a member from a different authentication provider (cross-provider
+      membership). This requires OneFS 9.11.0 or later.
     type: list
     elements: dict
+    suboptions:
+      user_name:
+        description:
+        - The name of the user to add or remove.
+        - Mutually exclusive with I(user_id).
+        type: str
+      user_id:
+        description:
+        - The numeric UID of the user to add or remove.
+        - Mutually exclusive with I(user_name).
+        type: str
+      provider_type:
+        description:
+        - The authentication provider in which to resolve the user.
+        - When omitted the group-level I(provider_type) is used.
+        - When specified the module validates that the provider is
+          configured in the target I(access_zone) and that the cluster
+          runs OneFS 9.11.0 or later.
+        type: str
+        choices: [ 'local', 'file', 'ldap', 'ads', 'nis']
   user_state:
     description:
     - The I(user_state) option is used to  determine whether the users
@@ -76,8 +101,15 @@ options:
     - It is required when users are added or removed from a group.
     type: str
     choices: ['present-in-group', 'absent-in-group']
+attributes:
+  check_mode:
+    description: Runs task to validate without performing action on the target machine.
+    support: full
+  diff_mode:
+    description: Runs the task to report the changes made or to be made.
+    support: full
 notes:
-- The I(check_mode) is not supported.
+- Cross-provider group membership requires OneFS 9.11.0 or later.
 '''
 
 EXAMPLES = r'''
@@ -172,6 +204,85 @@ EXAMPLES = r'''
       - user_id: "{{user_id}}"
       - user_name: "{{user_name_2}}"
     user_state: "absent-in-group"
+    state: "present"
+
+- name: Add an LDAP user to a local group (cross-provider, requires OneFS 9.11+)
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "local"
+    access_zone: "{{access_zone}}"
+    group_name: "{{group_name}}"
+    users:
+      - user_name: "{{ldap_user_name}}"
+        provider_type: "ldap"
+    user_state: "present-in-group"
+    state: "present"
+
+- name: Add mixed-provider members in a single task
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "local"
+    access_zone: "{{access_zone}}"
+    group_name: "{{group_name}}"
+    users:
+      - user_name: "{{user_name}}"
+      - user_name: "{{ldap_user_name}}"
+        provider_type: "ldap"
+    user_state: "present-in-group"
+    state: "present"
+
+- name: Remove an LDAP user from a local group
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "local"
+    access_zone: "{{access_zone}}"
+    group_name: "{{group_name}}"
+    users:
+      - user_name: "{{ldap_user_name}}"
+        provider_type: "ldap"
+    user_state: "absent-in-group"
+    state: "present"
+
+- name: Check mode with diff - preview cross-provider membership changes
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "local"
+    access_zone: "{{access_zone}}"
+    group_name: "{{group_name}}"
+    users:
+      - user_name: "{{ldap_user_name}}"
+        provider_type: "ldap"
+    user_state: "present-in-group"
+    state: "present"
+  check_mode: true
+  diff: true
+  register: result
+
+- name: Backward-compatible legacy usage (no per-member provider_type)
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "{{provider_type}}"
+    access_zone: "{{access_zone}}"
+    group_name: "{{group_name}}"
+    users:
+      - user_name: "{{user_name}}"
+      - user_id: "{{user_id}}"
+    user_state: "present-in-group"
     state: "present"
 '''
 
