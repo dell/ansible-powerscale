@@ -290,7 +290,61 @@ class Group(object):
         self.api_instance = utils.isi_sdk.AuthApi(self.api_client)
         self.group_api_instance = utils.isi_sdk.AuthGroupsApi(
             self.api_client)
+        self.cluster_api_instance = utils.isi_sdk.ClusterApi(self.api_client)
+        # Caches for the cross-provider preflight checks. Both are populated
+        # lazily -- a playbook that never specifies a per-member provider_type
+        # makes no additional API calls at all.
+        self._providers_cache = {}
+        self._onefs_version_validated = False
         LOG.info('Got the isi_sdk instance for authorization on to PowerScale')
+
+    def _get_providers_summary(self, access_zone):
+        """Fetch the authentication providers configured in an access zone.
+
+        The summary is cached per access zone so that a task adding several
+        cross-provider members issues a single API call rather than one per
+        member.
+
+        :param access_zone: the access zone to inspect.
+        :return: list of provider type names (e.g. ``['local', 'ldap']``).
+        """
+        if access_zone in self._providers_cache:
+            return self._providers_cache[access_zone]
+        try:
+            api_response = self.api_instance.get_providers_summary(
+                zone=access_zone)
+            instances = api_response.to_dict().get('provider_instances') or []
+            provider_types = [
+                instance.get('type') for instance in instances
+                if instance.get('zone_name') == access_zone
+                and instance.get('type')
+            ]
+            LOG.info("Providers configured in access zone %s: %s",
+                     access_zone, provider_types)
+            self._providers_cache[access_zone] = provider_types
+            return provider_types
+        except Exception as e:
+            error = self.determine_error(error_obj=e)
+            error_message = "Failed to fetch authentication providers for" \
+                            " access zone '%s': %s" % (access_zone, error)
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    def _validate_provider_exists(self, provider_type, access_zone):
+        """Validate that a provider type is configured in the access zone.
+
+        Fails the module before any membership API call is issued when the
+        requested provider is not present in the target zone.
+
+        :param provider_type: bare provider type (local, file, ldap, ads, nis).
+        :param access_zone: the access zone the group lives in.
+        """
+        provider_types = self._get_providers_summary(access_zone)
+        if provider_type not in provider_types:
+            error_message = "Provider '%s' is not configured in access" \
+                            " zone '%s'" % (provider_type, access_zone)
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
 
     def check_provider_type(self, provider, message):
         """ Check the provider and return the updated provider"""
