@@ -782,6 +782,80 @@ class TestGroup(PowerScaleUnitBase):
         powerscale_module_mock.api_instance.get_auth_user.assert_called()
 
     # ------------------------------------------------------------------
+    # FR-4 / FR-5 / AC-004: check mode and diff (Story-29823)
+    # ------------------------------------------------------------------
+
+    def test_update_group_check_mode_diff_add(self, powerscale_module_mock):
+        """FR-4/FR-5/AC-004: check mode + diff for adding an LDAP member.
+
+        changed=true, diff emitted, create_group_member never called.
+        """
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload(
+                                   users=[{"user_name": "ldap_user", "provider_type": "ldap"}]))
+        powerscale_module_mock.module.check_mode = True
+        powerscale_module_mock.module._diff = True
+        self.setup_cross_provider_update(powerscale_module_mock)
+        powerscale_module_mock.perform_module_operation()
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert result['changed']
+        # No write API calls in check mode
+        powerscale_module_mock.group_api_instance.create_group_member.assert_not_called()
+        powerscale_module_mock.group_api_instance.delete_group_member.assert_not_called()
+        # Diff should be present
+        assert 'diff' in result
+        assert 'before' in result['diff']
+        assert 'after' in result['diff']
+
+    def test_update_group_check_mode_diff_remove(self, powerscale_module_mock):
+        """FR-4/FR-5: check mode + diff for removing an LDAP member."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload(
+                                   users=[{"user_name": "ldap_user", "provider_type": "ldap"}],
+                                   user_state="absent-in-group"))
+        powerscale_module_mock.module.check_mode = True
+        powerscale_module_mock.module._diff = True
+        self.setup_cross_provider_update(
+            powerscale_module_mock,
+            members=MockGroupApi.get_group_members_mixed())
+        powerscale_module_mock.perform_module_operation()
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert result['changed']
+        powerscale_module_mock.group_api_instance.delete_group_member.assert_not_called()
+        assert 'diff' in result
+
+    def test_update_group_check_mode_no_change(self, powerscale_module_mock):
+        """FR-4: already-correct membership returns changed=false in check mode."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload(
+                                   users=[{"user_name": "ldap_user", "provider_type": "ldap"}]))
+        powerscale_module_mock.module.check_mode = True
+        powerscale_module_mock.module._diff = True
+        # LDAP user is already a member
+        self.setup_cross_provider_update(
+            powerscale_module_mock,
+            members=MockGroupApi.get_group_members_mixed())
+        powerscale_module_mock.perform_module_operation()
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert not result['changed']
+
+    def test_update_group_diff_without_check_mode(self, powerscale_module_mock):
+        """FR-5: a real apply with diff=true still emits diff alongside writes."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload(
+                                   users=[{"user_name": "ldap_user", "provider_type": "ldap"}]))
+        powerscale_module_mock.module.check_mode = False
+        powerscale_module_mock.module._diff = True
+        self.setup_cross_provider_update(powerscale_module_mock)
+        powerscale_module_mock.perform_module_operation()
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert result['changed']
+        # Write call IS made (not check mode)
+        powerscale_module_mock.group_api_instance.create_group_member.assert_called_once()
+        # Diff should still be emitted
+        assert 'diff' in result
+
+    # ------------------------------------------------------------------
     # FR-6 / AC-003: backward compatibility (Story-29823)
     # ------------------------------------------------------------------
 

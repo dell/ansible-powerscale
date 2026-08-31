@@ -279,7 +279,7 @@ class Group(object):
         required_one_of = [['group_name', 'group_id']]
         # initialize the ansible module
         self.module = AnsibleModule(argument_spec=self.module_params,
-                                    supports_check_mode=False,
+                                    supports_check_mode=True,
                                     required_one_of=required_one_of)
 
         # result is a dictionary that contains changed status and
@@ -582,6 +582,9 @@ class Group(object):
         try:
             message = "Adding user %s to group %s" % (user, group)
             LOG.info(message)
+            if self.module.check_mode:
+                LOG.info("Check mode: skipping create_group_member for %s", user)
+                return True
             group_member = utils.isi_sdk.AuthAccessAccessItemFileGroup(user)
             if cross_provider:
                 api_response = self.group_api_instance.create_group_member(
@@ -605,6 +608,9 @@ class Group(object):
         try:
             message = "Removing user %s from group %s" % (user, group)
             LOG.info(message)
+            if self.module.check_mode:
+                LOG.info("Check mode: skipping delete_group_member for %s", user)
+                return True
             if cross_provider:
                 self.group_api_instance.delete_group_member(
                     user, group, zone=zone)
@@ -715,6 +721,37 @@ class Group(object):
             return False
         return True
 
+    def _build_member_diff(self, group, access_zone, provider_type,
+                           users, user_state):
+        """Build the membership diff for the result when diff mode is active.
+
+        Computes the *before* member list from the current group membership,
+        and the *after* list by projecting the additions/removals described
+        by ``users`` and ``user_state``.
+
+        :return: dict with ``before`` and ``after`` keys, each containing a
+            ``members`` list. Returns ``None`` when diff mode is not active.
+        """
+        if not getattr(self.module, '_diff', False):
+            return None
+        current_members = self.get_group_members(group, access_zone, provider_type)
+        before_names = [m.get('name', '') for m in (current_members or [])]
+        after_names = list(before_names)
+        for user in (users or []):
+            if not isinstance(user, dict):
+                continue
+            name = user.get('user_name') or user.get('user_id', '')
+            if user_state == 'present-in-group':
+                if name.lower() not in [n.lower() for n in after_names]:
+                    after_names.append(name)
+            elif user_state == 'absent-in-group':
+                after_names = [n for n in after_names
+                               if n.lower() != name.lower()]
+        return {
+            'before': {'members': sorted(before_names)},
+            'after': {'members': sorted(after_names)},
+        }
+
     def _validate_group_params(self, group, users, user_state):
         """Validate group module input parameters."""
         if group is None:
@@ -791,6 +828,12 @@ class Group(object):
                 self.module.fail_json(msg=error_message)
 
         if user_state and users:
+            # Compute the membership diff before processing, so the diff
+            # reflects the intended changes even in check mode.
+            diff = self._build_member_diff(
+                group, access_zone, provider_type, users, user_state)
+            if diff is not None:
+                self.result['diff'] = diff
             changed = False
             for idx, user in enumerate(users):
                 if self._process_user_entry(group, user, user_state, access_zone, provider_type, index=idx):
