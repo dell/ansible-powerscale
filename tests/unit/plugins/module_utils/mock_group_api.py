@@ -113,6 +113,70 @@ class MockGroupApi:
         }
     }
 
+    # Mirrors AuthUser response from ``AuthApi.get_auth_user()``. Each entry
+    # has the fields consumed by ``_resolve_member_id()``: ``uid``, ``sid``,
+    # and ``name``.
+    GET_AUTH_USER_LOCAL = {
+        "users": [
+            {
+                "dn": "CN=test_user,CN=Users,DC=VXX267-XX",
+                "dns_domain": None,
+                "domain": "VXX267-XX",
+                "name": "test_user",
+                "provider": "lsa-local-provider:System",
+                "uid": {
+                    "id": "UID:1000",
+                    "name": "test_user",
+                    "type": "user"
+                },
+                "sid": {
+                    "id": "SID:S-1-5-21-1426242897-2739835565-3634425493-501",
+                    "name": "test_user",
+                    "type": "user"
+                },
+                "type": "user"
+            }
+        ]
+    }
+    GET_AUTH_USER_LDAP = {
+        "users": [
+            {
+                "dn": "uid=ldap_user,ou=People,dc=example,dc=org",
+                "dns_domain": None,
+                "domain": "LDAP_DOMAIN",
+                "name": "ldap_user",
+                "provider": "lsa-ldap-provider:example.org",
+                "uid": {
+                    "id": "UID:50001",
+                    "name": "ldap_user",
+                    "type": "user"
+                },
+                "sid": {
+                    "id": "SID:S-1-5-21-9999999999-8888888888-7777777777-50001",
+                    "name": "ldap_user",
+                    "type": "user"
+                },
+                "type": "user"
+            }
+        ]
+    }
+    # Mixed group members: one local and one LDAP member, as returned by
+    # ``list_group_members``. Used to test cross-provider membership.
+    GET_GROUP_MEMBERS_MIXED = {
+        "members": [
+            {
+                "id": "SID:S-1-5-21-1426242897-2739835565-3634425493-501",
+                "name": "test_user",
+                "type": "user"
+            },
+            {
+                "id": "SID:S-1-5-21-9999999999-8888888888-7777777777-50001",
+                "name": "ldap_user",
+                "type": "user"
+            }
+        ]
+    }
+
     @staticmethod
     def get_create_group_payload(id=None, name=None, users=None, user_state=None, provider_type=None):
         group_payload = MockGroupApi.CREATE_GROUP_PAYLOAD.copy()
@@ -195,3 +259,21 @@ class MockGroupApi:
         config = copy.deepcopy(MockGroupApi.GET_CLUSTER_CONFIG)
         config['onefs_version']['release'] = release
         return MockSDKResponse(config)
+
+    @staticmethod
+    def get_auth_user_response(provider="local"):
+        """Build a single-user auth response.
+
+        :param provider: ``'local'`` or ``'ldap'`` — selects the fixture.
+            Pass ``None`` to return an empty user list (unresolvable user).
+        """
+        if provider is None:
+            return MockSDKResponse({"users": []})
+        fixture = (MockGroupApi.GET_AUTH_USER_LOCAL if provider == "local"
+                   else MockGroupApi.GET_AUTH_USER_LDAP)
+        return MockSDKResponse(copy.deepcopy(fixture))
+
+    @staticmethod
+    def get_group_members_mixed():
+        """Return a member list containing both local and LDAP members."""
+        return MockSDKResponse(copy.deepcopy(MockGroupApi.GET_GROUP_MEMBERS_MIXED))
