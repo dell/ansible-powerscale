@@ -362,6 +362,32 @@ group_details:
             },
             "type": "group"
         }
+diff:
+    description: The membership diff computed when diff mode is enabled.
+    returned: When diff mode is active and membership changes are requested.
+    type: dict
+    contains:
+        before:
+            description: The group membership state before the operation.
+            type: dict
+            contains:
+                members:
+                    description: Sorted list of member names before the operation.
+                    type: list
+                    elements: str
+        after:
+            description: The group membership state after the operation.
+            type: dict
+            contains:
+                members:
+                    description: Sorted list of member names after the operation.
+                    type: list
+                    elements: str
+    sample:
+        {
+            "before": {"members": ["Guest", "ldap_user"]},
+            "after": {"members": ["Guest"]}
+        }
 
 '''
 
