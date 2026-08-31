@@ -261,6 +261,10 @@ import re
 
 LOG = utils.get_logger('group')
 GET_GROUP_ERR_MSG = "Get Group Details %s failed with %s"
+# Cross-provider group membership requires OneFS to resolve a member by its
+# unique id across authentication providers, supported from OneFS 9.11.0.
+MIN_ONEFS_VERSION_CROSS_PROVIDER = '9.11.0'
+VALID_PROVIDER_TYPES = ['local', 'file', 'ldap', 'ads', 'nis']
 
 
 class Group(object):
@@ -329,6 +333,44 @@ class Group(object):
                             " access zone '%s': %s" % (access_zone, error)
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
+
+    def _validate_onefs_version(self):
+        """Validate that the cluster meets the minimum OneFS version.
+
+        Cross-provider group membership relies on OneFS resolving a member by
+        its unique id across providers, which is only supported from
+        OneFS 9.11.0. The check runs once per module invocation.
+        """
+        if self._onefs_version_validated:
+            return
+        # fail_json raises SystemExit, which derives from BaseException and so
+        # passes straight through `except Exception`. That lets the version
+        # comparison live inside the try without the below-minimum failure
+        # being mistaken for an unparseable release.
+        try:
+            api_response = self.cluster_api_instance.get_cluster_config()
+            release = api_response.to_dict()['onefs_version']['release']
+            # OneFS reports a dotted release such as "9.13.0.0"; some builds
+            # prefix it with "v". The original string is kept for the error
+            # message so it matches what the cluster and UI report.
+            detected_version = utils.parse_version(str(release).lstrip('vV'))
+            minimum_version = utils.parse_version(
+                MIN_ONEFS_VERSION_CROSS_PROVIDER)
+            LOG.info("Detected OneFS version %s", release)
+            if detected_version < minimum_version:
+                error_message = "OneFS version %s is below the required" \
+                                " minimum %s for cross-provider group" \
+                                " membership" \
+                                % (release, MIN_ONEFS_VERSION_CROSS_PROVIDER)
+                LOG.error(error_message)
+                self.module.fail_json(msg=error_message)
+        except Exception as e:
+            error = self.determine_error(error_obj=e)
+            error_message = "Failed to determine the OneFS version of the" \
+                            " cluster: %s" % error
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+        self._onefs_version_validated = True
 
     def _validate_provider_exists(self, provider_type, access_zone):
         """Validate that a provider type is configured in the access zone.
