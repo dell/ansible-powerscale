@@ -577,15 +577,19 @@ class Group(object):
             self.module.fail_json(msg=error_message)
 
     def add_user_to_group(self, group, user,
-                          zone, provider):
+                          zone, provider, cross_provider=False):
         """ Add a User to a Group in PowerScale """
         try:
             message = "Adding user %s to group %s" % (user, group)
             LOG.info(message)
             group_member = utils.isi_sdk.AuthAccessAccessItemFileGroup(user)
-            provider = self.check_provider_type(provider, 'Add User to')
-            api_response = self.group_api_instance.create_group_member(
-                group_member, group, zone=zone, provider=provider)
+            if cross_provider:
+                api_response = self.group_api_instance.create_group_member(
+                    group_member, group, zone=zone)
+            else:
+                provider = self.check_provider_type(provider, 'Add User to')
+                api_response = self.group_api_instance.create_group_member(
+                    group_member, group, zone=zone, provider=provider)
             LOG.info(api_response)
             return True
         except Exception as e:
@@ -595,14 +599,19 @@ class Group(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
-    def remove_user_from_group(self, group, user, zone, provider):
+    def remove_user_from_group(self, group, user, zone, provider,
+                               cross_provider=False):
         """ Remove a user from a Group in PowerScale"""
         try:
             message = "Removing user %s from group %s" % (user, group)
             LOG.info(message)
-            provider = self.check_provider_type(provider, 'Remove User from')
-            self.group_api_instance.delete_group_member(
-                user, group, zone=zone, provider=provider)
+            if cross_provider:
+                self.group_api_instance.delete_group_member(
+                    user, group, zone=zone)
+            else:
+                provider = self.check_provider_type(provider, 'Remove User from')
+                self.group_api_instance.delete_group_member(
+                    user, group, zone=zone, provider=provider)
             return True
 
         except Exception as e:
@@ -643,20 +652,46 @@ class Group(object):
         return False
 
     def update_group(self, group, user_name, user_id,
-                     user_state, access_zone, provider_type):
-        """Update the group members in PowerScale"""
+                     user_state, access_zone, provider_type,
+                     member_provider=None):
+        """Update the group members in PowerScale.
+
+        :param member_provider: when set, the member is resolved via the
+            cross-provider path (preflight + resolve to SID + add/remove
+            without the ``provider`` query parameter). When ``None``, the
+            legacy local-provider path is used (FR-6 backward compat).
+        """
         changed = False
-        user_flag = self.is_user_part_of_group(group, user_name, user_id,
-                                               access_zone, provider_type)
-
-        user = "USER:" + user_name if user_name else "UID:" + user_id
-        if user_state == 'present-in-group' and not user_flag:
-            changed = self.add_user_to_group(group, user, access_zone,
-                                             provider_type)
-
-        if user_state == 'absent-in-group' and user_flag:
-            changed = self.remove_user_from_group(group, user, access_zone,
-                                                  provider_type)
+        if member_provider:
+            # Cross-provider path: resolve the member in the requested
+            # provider and use the unique SID for add/remove.
+            self._preflight_cross_provider(access_zone, member_provider)
+            resolved_id = self._resolve_member_id(
+                user_name, user_id, member_provider, access_zone)
+            # Check membership by matching the resolved name against the
+            # current member list (fetched with the group's own provider).
+            user_flag = self.is_user_part_of_group(
+                group, user_name, user_id, access_zone, provider_type)
+            if user_state == 'present-in-group' and not user_flag:
+                changed = self.add_user_to_group(
+                    group, resolved_id, access_zone, provider_type,
+                    cross_provider=True)
+            if user_state == 'absent-in-group' and user_flag:
+                changed = self.remove_user_from_group(
+                    group, resolved_id, access_zone, provider_type,
+                    cross_provider=True)
+        else:
+            # Legacy path: resolve as USER:<name> or UID:<id>, scoped to
+            # the group's own provider.
+            user_flag = self.is_user_part_of_group(
+                group, user_name, user_id, access_zone, provider_type)
+            user = "USER:" + user_name if user_name else "UID:" + user_id
+            if user_state == 'present-in-group' and not user_flag:
+                changed = self.add_user_to_group(group, user, access_zone,
+                                                 provider_type)
+            if user_state == 'absent-in-group' and user_flag:
+                changed = self.remove_user_from_group(group, user, access_zone,
+                                                      provider_type)
         return changed
 
     def determine_error(self, error_obj):
@@ -730,9 +765,11 @@ class Group(object):
                        ', '.join(VALID_PROVIDER_TYPES)))
         if 'user_name' in user:
             return self.update_group(
-                group, user['user_name'], None, user_state, access_zone, provider_type)
+                group, user['user_name'], None, user_state, access_zone,
+                provider_type, member_provider=member_provider)
         return self.update_group(
-            group, None, user['user_id'], user_state, access_zone, provider_type)
+            group, None, user['user_id'], user_state, access_zone,
+            provider_type, member_provider=member_provider)
 
     def _handle_present_state(self, group, group_name, group_id, access_zone, provider_type, users, user_state):
         """Handle present state logic. Returns (changed, group_details)."""

@@ -661,13 +661,125 @@ class TestGroup(PowerScaleUnitBase):
         self.mock_get_mapping_identity(powerscale_module_mock, call_exception=False)
         self.mock_create_group_member(powerscale_module_mock, call_exception=False)
         self.mock_delete_group_member(powerscale_module_mock, call_exception=False)
-        # The user_name+provider_type dict should NOT be rejected by validation
-        # (it will fail later because _resolve_member_id is not yet implemented,
-        # but it should pass the key-validation step)
+        self.mock_get_auth_user(powerscale_module_mock, provider="ldap")
         powerscale_module_mock.perform_module_operation()
-        # If we reach here without "unsupported keys" or "exactly one of" error,
-        # key validation passed
         powerscale_module_mock.module.fail_json.assert_not_called()
+
+    # ------------------------------------------------------------------
+    # FR-1 / FR-3 / AC-001 / AC-002 / AC-006: cross-provider add/remove
+    # ------------------------------------------------------------------
+
+    def setup_cross_provider_update(self, powerscale_module_mock, members=None,
+                                     provider_types=None):
+        """Wire up all mocks needed for a cross-provider update flow."""
+        if provider_types is None:
+            provider_types = ["local", "ldap"]
+        self.mock_preflight_apis(powerscale_module_mock, provider_types=provider_types)
+        self.mock_get_group_detail(powerscale_module_mock, operation='update', call_exception=False)
+        if members is None:
+            self.mock_get_group_members(powerscale_module_mock, call_exception=False)
+        else:
+            powerscale_module_mock.group_api_instance.list_group_members = \
+                MagicMock(return_value=members)
+        self.mock_get_mapping_identity(powerscale_module_mock, call_exception=False)
+        self.mock_create_group_member(powerscale_module_mock, call_exception=False)
+        self.mock_delete_group_member(powerscale_module_mock, call_exception=False)
+        self.mock_get_auth_user(powerscale_module_mock, provider="ldap")
+
+    def test_update_group_with_add_ldap_user(self, powerscale_module_mock):
+        """FR-1/AC-001: adding an LDAP user to a local group returns changed=true.
+
+        The cross-provider path must:
+        - resolve the user via _resolve_member_id (get_auth_user called)
+        - pass the resolved SID to create_group_member (not USER:ldap_user)
+        - not pass provider= to create_group_member (cross-provider call)
+        """
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload(
+                                   users=[{"user_name": "ldap_user", "provider_type": "ldap"}]))
+        self.setup_cross_provider_update(powerscale_module_mock)
+        powerscale_module_mock.perform_module_operation()
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed']
+        # The user was resolved via get_auth_user
+        powerscale_module_mock.api_instance.get_auth_user.assert_called()
+        # create_group_member called with the resolved SID, not USER:ldap_user
+        create_call = powerscale_module_mock.group_api_instance.create_group_member
+        create_call.assert_called_once()
+        call_args = create_call.call_args
+        # The first positional arg should be a GroupMember constructed with
+        # the SID, not with USER:ldap_user
+        member_arg = str(call_args)
+        assert "SID:S-1-5-21-9999999999" in member_arg or "ldap_user" not in member_arg.split("USER:")[-1]
+
+    def test_update_group_with_remove_ldap_user(self, powerscale_module_mock):
+        """FR-3: cross-provider removal returns changed=true.
+
+        The removal must use the resolved SID to call delete_group_member.
+        """
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload(
+                                   users=[{"user_name": "ldap_user", "provider_type": "ldap"}],
+                                   user_state="absent-in-group"))
+        # Use mixed members so the LDAP user IS a member
+        self.setup_cross_provider_update(
+            powerscale_module_mock,
+            members=MockGroupApi.get_group_members_mixed())
+        powerscale_module_mock.perform_module_operation()
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed']
+        # The user was resolved via get_auth_user
+        powerscale_module_mock.api_instance.get_auth_user.assert_called()
+        powerscale_module_mock.group_api_instance.delete_group_member.assert_called_once()
+
+    def test_update_group_remove_non_member_ldap_idempotent(self, powerscale_module_mock):
+        """AC-002: removing an absent cross-provider member returns changed=false."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload(
+                                   users=[{"user_name": "ldap_user", "provider_type": "ldap"}],
+                                   user_state="absent-in-group"))
+        # Use default members (no LDAP user present)
+        self.setup_cross_provider_update(powerscale_module_mock)
+        powerscale_module_mock.perform_module_operation()
+        assert not powerscale_module_mock.module.exit_json.call_args[1]['changed']
+        powerscale_module_mock.group_api_instance.delete_group_member.assert_not_called()
+
+    def test_update_group_add_existing_ldap_member_idempotent(self, powerscale_module_mock):
+        """AC-002: re-adding an existing cross-provider member returns changed=false."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload(
+                                   users=[{"user_name": "ldap_user", "provider_type": "ldap"}]))
+        # Use mixed members so the LDAP user IS already a member
+        self.setup_cross_provider_update(
+            powerscale_module_mock,
+            members=MockGroupApi.get_group_members_mixed())
+        powerscale_module_mock.perform_module_operation()
+        assert not powerscale_module_mock.module.exit_json.call_args[1]['changed']
+        powerscale_module_mock.group_api_instance.create_group_member.assert_not_called()
+
+    def test_update_group_with_mixed_provider_members(self, powerscale_module_mock):
+        """AC-006: a task with both a local and an LDAP member in one call.
+
+        The local member flows through the legacy path (USER:new_local_user).
+        The LDAP member flows through the cross-provider path (resolved SID).
+        We use an empty member list so both members need adding.
+        """
+        from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_sdk_response \
+            import MockSDKResponse
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload(
+                                   users=[
+                                       {"user_name": "new_local_user"},
+                                       {"user_name": "ldap_user", "provider_type": "ldap"},
+                                   ]))
+        # Empty member list so both users will be added
+        self.setup_cross_provider_update(
+            powerscale_module_mock,
+            members=MockSDKResponse({"members": []}))
+        powerscale_module_mock.perform_module_operation()
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed']
+        # Both members should trigger create_group_member
+        assert powerscale_module_mock.group_api_instance.create_group_member.call_count == 2
+        # The LDAP member should have been resolved via get_auth_user
+        powerscale_module_mock.api_instance.get_auth_user.assert_called()
 
     def test_delete_group(self, powerscale_module_mock):
         self.set_module_params(self.group_args, MockGroupApi.get_delete_group_payload())
