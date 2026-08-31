@@ -653,24 +653,48 @@ class Group(object):
             self.module.fail_json(msg="'user_state' is not specified,"
                                       " 'users' are given")
 
-    def _process_user_entry(self, group, user, user_state, access_zone, provider_type):
-        """Validate and process a single user entry, return True if modified."""
+    def _process_user_entry(self, group, user, user_state, access_zone,
+                            provider_type, index=0):
+        """Validate and process a single user entry, return True if modified.
+
+        :param index: zero-based position in the ``users`` list, used in
+            error messages so the operator can pinpoint the problematic entry.
+        """
         if not isinstance(user, dict):
             self.module.fail_json(
                 msg="Key Value pair is allowed, Provided %s." % user)
-        if len(user.keys()) != 1:
+        # Allow-list: user_name, user_id, and (new) provider_type.
+        allowed_keys = {'user_name', 'user_id', 'provider_type'}
+        unsupported = set(user.keys()) - allowed_keys
+        if unsupported:
             self.module.fail_json(
-                msg="One Key per dictionary is allowed, %s"
-                    " given" % list(user.keys()))
+                msg="User dict at index %d contains unsupported keys."
+                    " Supported keys are: user_name, user_id, provider_type."
+                    % index)
+        # Exactly one identifier is required.
+        has_name = 'user_name' in user
+        has_id = 'user_id' in user
+        if has_name and has_id:
+            self.module.fail_json(
+                msg="User dict at index %d must contain exactly one of"
+                    " 'user_name' or 'user_id', not both." % index)
+        if not has_name and not has_id:
+            error = 'user_id or user_name  is expected,' \
+                    ' "%s" given.' % list(user.keys())[0]
+            self.module.fail_json(msg=error)
+        # Validate per-member provider_type when supplied.
+        member_provider = user.get('provider_type')
+        if member_provider and member_provider not in VALID_PROVIDER_TYPES:
+            self.module.fail_json(
+                msg="User dict at index %d has invalid provider_type"
+                    " '%s'. Valid values are: %s."
+                    % (index, member_provider,
+                       ', '.join(VALID_PROVIDER_TYPES)))
         if 'user_name' in user:
             return self.update_group(
                 group, user['user_name'], None, user_state, access_zone, provider_type)
-        if 'user_id' in user:
-            return self.update_group(
-                group, None, user['user_id'], user_state, access_zone, provider_type)
-        error = 'user_id or user_name  is expected,' \
-                ' "%s" given.' % list(user.keys())[0]
-        self.module.fail_json(msg=error)
+        return self.update_group(
+            group, None, user['user_id'], user_state, access_zone, provider_type)
 
     def _handle_present_state(self, group, group_name, group_id, access_zone, provider_type, users, user_state):
         """Handle present state logic. Returns (changed, group_details)."""
@@ -693,8 +717,8 @@ class Group(object):
 
         if user_state and users:
             changed = False
-            for user in users:
-                if self._process_user_entry(group, user, user_state, access_zone, provider_type):
+            for idx, user in enumerate(users):
+                if self._process_user_entry(group, user, user_state, access_zone, provider_type, index=idx):
                     changed = True
             return changed
         return False

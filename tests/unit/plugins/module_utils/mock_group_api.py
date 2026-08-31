@@ -214,7 +214,7 @@ class MockGroupApi:
 
     @staticmethod
     def get_group_detail(provider_type=None, gid_name=None):
-        group_detail = MockGroupApi.GET_GROUP_DETAILS.copy()
+        group_detail = copy.deepcopy(MockGroupApi.GET_GROUP_DETAILS)
         if provider_type == 'nis':
             group_detail['provider'] = "lsa-nis-provider:CorpNIS"
         if gid_name:

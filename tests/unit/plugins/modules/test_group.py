@@ -300,7 +300,7 @@ class TestGroup(PowerScaleUnitBase):
                                    users=[{"user_name": "test_user", "user_id": "1000"}]))
         self.update_group(powerscale_module_mock, run_operation=False)
         self.capture_fail_json_method(
-            "One Key per dictionary is allowed, ['user_name', 'user_id'] given",
+            "User dict at index 0 must contain exactly one of 'user_name' or 'user_id', not both.",
             powerscale_module_mock,
             "perform_module_operation",
         )
@@ -310,7 +310,8 @@ class TestGroup(PowerScaleUnitBase):
                                MockGroupApi.get_update_group_payload(users=[{"invalid_key": "test_user"}]))
         self.update_group(powerscale_module_mock, run_operation=False)
         self.capture_fail_json_method(
-            "user_id or user_name  is expected, \"invalid_key\" given.",
+            "User dict at index 0 contains unsupported keys."
+            " Supported keys are: user_name, user_id, provider_type.",
             powerscale_module_mock,
             "perform_module_operation",
         )
@@ -541,6 +542,68 @@ class TestGroup(PowerScaleUnitBase):
             "_preflight_cross_provider",
             "System", "ldap",
         )
+
+    # ------------------------------------------------------------------
+    # FR-2 / FR-11: user-dict key validation (Story-29823)
+    # ------------------------------------------------------------------
+
+    def test_group_user_dict_unsupported_key_exception(self, powerscale_module_mock):
+        """FR-11: a dict with an unsupported key (not user_name/user_id/provider_type) is rejected."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload(
+                                   users=[{"user_name": "a", "bogus": "b"}]))
+        self.update_group(powerscale_module_mock, run_operation=False)
+        self.capture_fail_json_method(
+            "User dict at index 0 contains unsupported keys."
+            " Supported keys are: user_name, user_id, provider_type.",
+            powerscale_module_mock,
+            "perform_module_operation",
+        )
+
+    def test_group_user_dict_invalid_provider_type_exception(self, powerscale_module_mock):
+        """FR-2/FR-11: an invalid provider_type is rejected before any API call."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload(
+                                   users=[{"user_name": "a", "provider_type": "invalid_provider"}]))
+        self.update_group(powerscale_module_mock, run_operation=False)
+        self.capture_fail_json_method(
+            "User dict at index 0 has invalid provider_type 'invalid_provider'."
+            " Valid values are: local, file, ldap, ads, nis.",
+            powerscale_module_mock,
+            "perform_module_operation",
+        )
+
+    def test_group_user_dict_name_and_id_mutually_exclusive_exception(self, powerscale_module_mock):
+        """FR-11: user_name and user_id are mutually exclusive within one dict."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload(
+                                   users=[{"user_name": "a", "user_id": "1000"}]))
+        self.update_group(powerscale_module_mock, run_operation=False)
+        self.capture_fail_json_method(
+            "User dict at index 0 must contain exactly one of 'user_name' or 'user_id', not both.",
+            powerscale_module_mock,
+            "perform_module_operation",
+        )
+
+    def test_group_user_dict_valid_with_provider_type_accepted(self, powerscale_module_mock):
+        """FR-2: a user dict with user_name + provider_type passes validation."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload(
+                                   users=[{"user_name": "ldap_user", "provider_type": "ldap"}]))
+        # Wire up the preflight and resolution mocks so it can proceed past validation
+        self.mock_preflight_apis(powerscale_module_mock, provider_types=["local", "ldap"])
+        self.mock_get_group_detail(powerscale_module_mock, operation='update', call_exception=False)
+        self.mock_get_group_members(powerscale_module_mock, call_exception=False)
+        self.mock_get_mapping_identity(powerscale_module_mock, call_exception=False)
+        self.mock_create_group_member(powerscale_module_mock, call_exception=False)
+        self.mock_delete_group_member(powerscale_module_mock, call_exception=False)
+        # The user_name+provider_type dict should NOT be rejected by validation
+        # (it will fail later because _resolve_member_id is not yet implemented,
+        # but it should pass the key-validation step)
+        powerscale_module_mock.perform_module_operation()
+        # If we reach here without "unsupported keys" or "exactly one of" error,
+        # key validation passed
+        powerscale_module_mock.module.fail_json.assert_not_called()
 
     def test_delete_group(self, powerscale_module_mock):
         self.set_module_params(self.group_args, MockGroupApi.get_delete_group_payload())
