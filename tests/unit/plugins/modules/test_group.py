@@ -670,7 +670,7 @@ class TestGroup(PowerScaleUnitBase):
     # ------------------------------------------------------------------
 
     def setup_cross_provider_update(self, powerscale_module_mock,
-                                     members=None, provider_types=None):
+                                    members=None, provider_types=None):
         """Wire up all mocks needed for a cross-provider update flow."""
         if provider_types is None:
             provider_types = ["local", "ldap"]
