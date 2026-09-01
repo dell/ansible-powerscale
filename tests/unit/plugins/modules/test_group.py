@@ -516,7 +516,7 @@ class TestGroup(PowerScaleUnitBase):
         """NFR-1: five cross-provider members still cost one call per validator."""
         self.set_module_params(self.group_args, MockGroupApi.get_update_group_payload())
         self.mock_preflight_apis(powerscale_module_mock, provider_types=["local", "ldap"])
-        for _ in range(5):
+        for _idx in range(5):
             powerscale_module_mock._preflight_cross_provider("System", "ldap")
         assert powerscale_module_mock.cluster_api_instance.get_cluster_config.call_count == 1
         assert powerscale_module_mock.api_instance.get_providers_summary.call_count == 1
@@ -669,8 +669,8 @@ class TestGroup(PowerScaleUnitBase):
     # FR-1 / FR-3 / AC-001 / AC-002 / AC-006: cross-provider add/remove
     # ------------------------------------------------------------------
 
-    def setup_cross_provider_update(self, powerscale_module_mock, members=None,
-                                     provider_types=None):
+    def setup_cross_provider_update(self, powerscale_module_mock,
+                                     members=None, provider_types=None):
         """Wire up all mocks needed for a cross-provider update flow."""
         if provider_types is None:
             provider_types = ["local", "ldap"]
@@ -709,7 +709,7 @@ class TestGroup(PowerScaleUnitBase):
         # The first positional arg should be a GroupMember constructed with
         # the SID, not with USER:ldap_user
         member_arg = str(call_args)
-        assert "SID:S-1-5-21-9999999999" in member_arg or "ldap_user" not in member_arg.split("USER:")[-1]
+        assert "SID:S-1-5-21-9999999999" in member_arg or "ldap_user" not in member_arg.rsplit("USER:", maxsplit=1)[-1]
 
     def test_update_group_with_remove_ldap_user(self, powerscale_module_mock):
         """FR-3: cross-provider removal returns changed=true.
