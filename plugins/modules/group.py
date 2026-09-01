@@ -457,7 +457,8 @@ class Group(object):
             instances = api_response.to_dict().get('provider_instances') or []
             provider_types = [
                 instance.get('type') for instance in instances
-                if instance.get('zone_name') == access_zone
+                if (instance.get('zone_name') or '').lower()
+                == access_zone.lower()
                 and instance.get('type')
             ]
             LOG.info("Providers configured in access zone %s: %s",
