@@ -7,13 +7,15 @@
     port_no: '8080'
     verify_ssl: false
     api_user: 'user'
-    api_password: 'Password'
+    api_password: '**********'
     group_name: 'test_group_1'
     access_zone: "System"
     provider_type: "local"
     user_name_1: "test_user_1"
     user_name_2: "test_user_2"
     empty_group_name: "sample_empty_group"
+    ldap_user_name: "ldap_user"
+    ldap_group_name: "ldap_group"
 
   tasks:
     - name: Create Empty Group
@@ -34,7 +36,7 @@
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         verify_ssl: "{{ verify_ssl }}"
-        provider_type: ""
+        provider_type: "{{ provider_type }}"
         access_zone: "{{ access_zone }}"
         group_name: "{{ empty_group_name }}"
         group_id: 1000
@@ -270,7 +272,120 @@
         group_name: "{{ empty_group_name }}"
         state: "absent"
 
-    - name: Get LDAP Group Details using group name in Sample Access Zone
+    # ----------------------------------------------------------------
+    # Cross-provider group membership tasks
+    # ----------------------------------------------------------------
+
+    - name: Re-create Group for cross-provider tests
+      dellemc.powerscale.group:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "{{ provider_type }}"
+        access_zone: "{{ access_zone }}"
+        group_name: "{{ group_name }}"
+        state: "present"
+
+    - name: Add an LDAP user to a local group (cross-provider)
+      dellemc.powerscale.group:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "local"
+        access_zone: "{{ access_zone }}"
+        group_name: "{{ group_name }}"
+        users:
+          - user_name: "{{ ldap_user_name }}"
+            provider_type: "ldap"
+        user_state: "present-in-group"
+        state: "present"
+
+    - name: Add an LDAP user to a local group - Idempotency check
+      dellemc.powerscale.group:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "local"
+        access_zone: "{{ access_zone }}"
+        group_name: "{{ group_name }}"
+        users:
+          - user_name: "{{ ldap_user_name }}"
+            provider_type: "ldap"
+        user_state: "present-in-group"
+        state: "present"
+
+    - name: Add mixed-provider members in a single task
+      dellemc.powerscale.group:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "local"
+        access_zone: "{{ access_zone }}"
+        group_name: "{{ group_name }}"
+        users:
+          - user_name: "{{ user_name_1 }}"
+          - user_name: "{{ ldap_user_name }}"
+            provider_type: "ldap"
+        user_state: "present-in-group"
+        state: "present"
+
+    - name: Remove an LDAP user from a local group
+      dellemc.powerscale.group:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "local"
+        access_zone: "{{ access_zone }}"
+        group_name: "{{ group_name }}"
+        users:
+          - user_name: "{{ ldap_user_name }}"
+            provider_type: "ldap"
+        user_state: "absent-in-group"
+        state: "present"
+
+    - name: Check mode with diff - preview cross-provider changes
+      dellemc.powerscale.group:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "local"
+        access_zone: "{{ access_zone }}"
+        group_name: "{{ group_name }}"
+        users:
+          - user_name: "{{ ldap_user_name }}"
+            provider_type: "ldap"
+        user_state: "present-in-group"
+        state: "present"
+      check_mode: true
+      diff: true
+      register: result
+
+    - name: Display diff output
+      ansible.builtin.debug:
+        var: result.diff
+
+    - name: Cleanup cross-provider test group
+      dellemc.powerscale.group:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "{{ provider_type }}"
+        access_zone: "{{ access_zone }}"
+        group_name: "{{ group_name }}"
+        state: "absent"
+
+    # ----------------------------------------------------------------
+    # End cross-provider tasks
+    # ----------------------------------------------------------------
+
+    - name: Get LDAP Group Details using group name in System Access Zone
       dellemc.powerscale.group:
         onefs_host: "{{ onefs_host }}"
         port_no: "{{ port_no }}"
@@ -279,10 +394,10 @@
         verify_ssl: "{{ verify_ssl }}"
         provider_type: "ldap"
         access_zone: "{{ access_zone }}"
-        group_name: "sample_ldap_group_2"
+        group_name: "{{ ldap_group_name }}"
         state: "present"
 
-    - name: Get AD group Details using group name in Sample Access Zone
+    - name: Get AD group Details using group name in System Access Zone
       dellemc.powerscale.group:
         onefs_host: "{{ onefs_host }}"
         port_no: "{{ port_no }}"
@@ -291,5 +406,6 @@
         verify_ssl: "{{ verify_ssl }}"
         provider_type: "ads"
         access_zone: "{{ access_zone }}"
-        group_name: "devconad\\ad_group_odd_users"
+        group_name: "{{ ads_group_name | default('DOMAIN\\\\ad_group') }}"
         state: "present"
+      when: ads_group_name is defined

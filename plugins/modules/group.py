@@ -43,8 +43,8 @@ options:
     default: 'system'
   provider_type:
     description:
-    - This option defines the type which will be used to
-      authenticate the group members.
+    - This option defines the type of the authentication provider for
+      the group itself.
     - Creation, Deletion and Modification is allowed only for local group.
     - Details of groups of all provider types can be fetched.
     - If the I(provider_type) is C(ads) then the domain name of the Active
@@ -52,6 +52,8 @@ options:
       The format for the group_name should be 'DOMAIN_NAME\group_name'
       or "DOMAIN_NAME\\group_name".
     - This option acts as a filter for all operations except creation.
+    - When a member in I(users) omits its own C(provider_type), this
+      group-level provider is used as the default for member resolution.
     type: str
     default: 'local'
     choices: [ 'local', 'file', 'ldap', 'ads', 'nis']
@@ -67,8 +69,31 @@ options:
     - Either I(user_name) or I(user_id) is needed to add or remove the user
       from the group.
     - Users can be part of multiple groups.
+    - Each element may optionally include a C(provider_type) key to add or
+      remove a member from a different authentication provider (cross-provider
+      membership). This requires OneFS 9.11.0 or later.
     type: list
     elements: dict
+    suboptions:
+      user_name:
+        description:
+        - The name of the user to add or remove.
+        - Mutually exclusive with I(user_id).
+        type: str
+      user_id:
+        description:
+        - The numeric UID of the user to add or remove.
+        - Mutually exclusive with I(user_name).
+        type: str
+      provider_type:
+        description:
+        - The authentication provider in which to resolve the user.
+        - When omitted the group-level I(provider_type) is used.
+        - When specified the module validates that the provider is
+          configured in the target I(access_zone) and that the cluster
+          runs OneFS 9.11.0 or later.
+        type: str
+        choices: [ 'local', 'file', 'ldap', 'ads', 'nis']
   user_state:
     description:
     - The I(user_state) option is used to  determine whether the users
@@ -76,8 +101,15 @@ options:
     - It is required when users are added or removed from a group.
     type: str
     choices: ['present-in-group', 'absent-in-group']
+attributes:
+  check_mode:
+    description: Runs task to validate without performing action on the target machine.
+    support: full
+  diff_mode:
+    description: Runs the task to report the changes made or to be made.
+    support: full
 notes:
-- The I(check_mode) is not supported.
+- Cross-provider group membership requires OneFS 9.11.0 or later.
 '''
 
 EXAMPLES = r'''
@@ -173,6 +205,85 @@ EXAMPLES = r'''
       - user_name: "{{user_name_2}}"
     user_state: "absent-in-group"
     state: "present"
+
+- name: Add an LDAP user to a local group (cross-provider, requires OneFS 9.11+)
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "local"
+    access_zone: "{{access_zone}}"
+    group_name: "{{group_name}}"
+    users:
+      - user_name: "{{ldap_user_name}}"
+        provider_type: "ldap"
+    user_state: "present-in-group"
+    state: "present"
+
+- name: Add mixed-provider members in a single task
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "local"
+    access_zone: "{{access_zone}}"
+    group_name: "{{group_name}}"
+    users:
+      - user_name: "{{user_name}}"
+      - user_name: "{{ldap_user_name}}"
+        provider_type: "ldap"
+    user_state: "present-in-group"
+    state: "present"
+
+- name: Remove an LDAP user from a local group
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "local"
+    access_zone: "{{access_zone}}"
+    group_name: "{{group_name}}"
+    users:
+      - user_name: "{{ldap_user_name}}"
+        provider_type: "ldap"
+    user_state: "absent-in-group"
+    state: "present"
+
+- name: Check mode with diff - preview cross-provider membership changes
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "local"
+    access_zone: "{{access_zone}}"
+    group_name: "{{group_name}}"
+    users:
+      - user_name: "{{ldap_user_name}}"
+        provider_type: "ldap"
+    user_state: "present-in-group"
+    state: "present"
+  check_mode: true
+  diff: true
+  register: result
+
+- name: Backward-compatible legacy usage (no per-member provider_type)
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "{{provider_type}}"
+    access_zone: "{{access_zone}}"
+    group_name: "{{group_name}}"
+    users:
+      - user_name: "{{user_name}}"
+      - user_id: "{{user_id}}"
+    user_state: "present-in-group"
+    state: "present"
 '''
 
 RETURN = r'''
@@ -251,6 +362,32 @@ group_details:
             },
             "type": "group"
         }
+diff:
+    description: The membership diff computed when diff mode is enabled.
+    returned: When diff mode is active and membership changes are requested.
+    type: dict
+    contains:
+        before:
+            description: The group membership state before the operation.
+            type: dict
+            contains:
+                members:
+                    description: Sorted list of member names before the operation.
+                    type: list
+                    elements: str
+        after:
+            description: The group membership state after the operation.
+            type: dict
+            contains:
+                members:
+                    description: Sorted list of member names after the operation.
+                    type: list
+                    elements: str
+    sample:
+        {
+            "before": {"members": ["Guest", "ldap_user"]},
+            "after": {"members": ["Guest"]}
+        }
 
 '''
 
@@ -261,6 +398,10 @@ import re
 
 LOG = utils.get_logger('group')
 GET_GROUP_ERR_MSG = "Get Group Details %s failed with %s"
+# Cross-provider group membership requires OneFS to resolve a member by its
+# unique id across authentication providers, supported from OneFS 9.11.0.
+MIN_ONEFS_VERSION_CROSS_PROVIDER = '9.11.0'
+VALID_PROVIDER_TYPES = ['local', 'file', 'ldap', 'ads', 'nis']
 
 
 class Group(object):
@@ -275,7 +416,7 @@ class Group(object):
         required_one_of = [['group_name', 'group_id']]
         # initialize the ansible module
         self.module = AnsibleModule(argument_spec=self.module_params,
-                                    supports_check_mode=False,
+                                    supports_check_mode=True,
                                     required_one_of=required_one_of)
 
         # result is a dictionary that contains changed status and
@@ -290,7 +431,160 @@ class Group(object):
         self.api_instance = utils.isi_sdk.AuthApi(self.api_client)
         self.group_api_instance = utils.isi_sdk.AuthGroupsApi(
             self.api_client)
+        self.cluster_api_instance = utils.isi_sdk.ClusterApi(self.api_client)
+        # Caches for the cross-provider preflight checks. Both are populated
+        # lazily -- a playbook that never specifies a per-member provider_type
+        # makes no additional API calls at all.
+        self._providers_cache = {}
+        self._onefs_version_validated = False
         LOG.info('Got the isi_sdk instance for authorization on to PowerScale')
+
+    def _get_providers_summary(self, access_zone):
+        """Fetch the authentication providers configured in an access zone.
+
+        The summary is cached per access zone so that a task adding several
+        cross-provider members issues a single API call rather than one per
+        member.
+
+        :param access_zone: the access zone to inspect.
+        :return: list of provider type names (e.g. ``['local', 'ldap']``).
+        """
+        if access_zone in self._providers_cache:
+            return self._providers_cache[access_zone]
+        try:
+            api_response = self.api_instance.get_providers_summary(
+                zone=access_zone)
+            instances = api_response.to_dict().get('provider_instances') or []
+            provider_types = [
+                instance.get('type') for instance in instances
+                if (instance.get('zone_name') or '').lower()
+                == access_zone.lower()
+                and instance.get('type')
+            ]
+            LOG.info("Providers configured in access zone %s: %s",
+                     access_zone, provider_types)
+            self._providers_cache[access_zone] = provider_types
+            return provider_types
+        except Exception as e:
+            error = self.determine_error(error_obj=e)
+            error_message = "Failed to fetch authentication providers for" \
+                            " access zone '%s': %s" % (access_zone, error)
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    def _validate_onefs_version(self):
+        """Validate that the cluster meets the minimum OneFS version.
+
+        Cross-provider group membership relies on OneFS resolving a member by
+        its unique id across providers, which is only supported from
+        OneFS 9.11.0. The check runs once per module invocation.
+        """
+        if self._onefs_version_validated:
+            return
+        # fail_json raises SystemExit, which derives from BaseException and so
+        # passes straight through `except Exception`. That lets the version
+        # comparison live inside the try without the below-minimum failure
+        # being mistaken for an unparseable release.
+        try:
+            api_response = self.cluster_api_instance.get_cluster_config()
+            release = api_response.to_dict()['onefs_version']['release']
+            # OneFS reports a dotted release such as "9.13.0.0"; some builds
+            # prefix it with "v". The original string is kept for the error
+            # message so it matches what the cluster and UI report.
+            detected_version = utils.parse_version(str(release).lstrip('vV'))
+            minimum_version = utils.parse_version(
+                MIN_ONEFS_VERSION_CROSS_PROVIDER)
+            LOG.info("Detected OneFS version %s", release)
+            if detected_version < minimum_version:
+                error_message = "OneFS version %s is below the required" \
+                                " minimum %s for cross-provider group" \
+                                " membership" \
+                                % (release, MIN_ONEFS_VERSION_CROSS_PROVIDER)
+                LOG.error(error_message)
+                self.module.fail_json(msg=error_message)
+        except Exception as e:
+            error = self.determine_error(error_obj=e)
+            error_message = "Failed to determine the OneFS version of the" \
+                            " cluster: %s" % error
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+        self._onefs_version_validated = True
+
+    def _validate_provider_exists(self, provider_type, access_zone):
+        """Validate that a provider type is configured in the access zone.
+
+        Fails the module before any membership API call is issued when the
+        requested provider is not present in the target zone.
+
+        :param provider_type: bare provider type (local, file, ldap, ads, nis).
+        :param access_zone: the access zone the group lives in.
+        """
+        provider_types = self._get_providers_summary(access_zone)
+        if provider_type not in provider_types:
+            error_message = "Provider '%s' is not configured in access" \
+                            " zone '%s'" % (provider_type, access_zone)
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    def _preflight_cross_provider(self, access_zone, member_provider):
+        """Run the cross-provider preflight checks, if they are needed at all.
+
+        This is the single gate for cross-provider behaviour. When a user dict
+        omits ``provider_type`` the module resolves members exactly as it
+        always has, so no validation call is made and existing playbooks incur
+        no extra API traffic (NFR-1, NFR-2).
+
+        The OneFS version is checked before provider existence: on a cluster
+        that cannot support cross-provider membership at all, the version is
+        the actionable error, and reporting a missing provider first would
+        send the operator chasing the wrong problem.
+
+        :param access_zone: the access zone the group lives in.
+        :param member_provider: per-member provider type, or None when the
+            member did not specify one.
+        """
+        if not member_provider:
+            return
+        self._validate_onefs_version()
+        self._validate_provider_exists(member_provider, access_zone)
+
+    def _resolve_member_id(self, user_name, user_id, provider_type, access_zone):
+        """Resolve a user to its unique identity in a specific provider.
+
+        Uses ``AuthApi.get_auth_user`` with the given provider so the cluster
+        looks up the user in the correct authentication backend. Returns the
+        SID string (e.g. ``SID:S-1-5-…``) that can be passed directly to the
+        group-membership API.
+
+        :param user_name: the human-readable user name, or ``None``.
+        :param user_id:   the numeric UID as a string, or ``None``.
+        :param provider_type: bare provider type (local, ldap, …).
+        :param access_zone: the access zone the group lives in.
+        :return: the user's ``SID:…`` identifier string.
+        """
+        auth_user_id = ("USER:" + user_name) if user_name else ("UID:" + user_id)
+        display_name = user_name or user_id
+        try:
+            api_response = self.api_instance.get_auth_user(
+                auth_user_id=auth_user_id,
+                zone=access_zone, provider=provider_type)
+            users = api_response.to_dict().get('users') or []
+            if not users:
+                error_message = "User '%s' could not be resolved in" \
+                                " access zone '%s'" % (display_name, access_zone)
+                LOG.error(error_message)
+                self.module.fail_json(msg=error_message)
+            resolved_id = users[0]['sid']['id']
+            LOG.info("Resolved user '%s' in provider '%s' zone '%s' to %s",
+                     display_name, provider_type, access_zone, resolved_id)
+            return resolved_id
+        except Exception as e:
+            error = self.determine_error(error_obj=e)
+            error_message = "Failed to resolve user '%s' in provider" \
+                            " '%s', access zone '%s': %s" \
+                            % (display_name, provider_type, access_zone, error)
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
 
     def check_provider_type(self, provider, message):
         """ Check the provider and return the updated provider"""
@@ -421,15 +715,22 @@ class Group(object):
             self.module.fail_json(msg=error_message)
 
     def add_user_to_group(self, group, user,
-                          zone, provider):
+                          zone, provider, cross_provider=False):
         """ Add a User to a Group in PowerScale """
         try:
             message = "Adding user %s to group %s" % (user, group)
             LOG.info(message)
+            if self.module.check_mode:
+                LOG.info("Check mode: skipping create_group_member for %s", user)
+                return True
             group_member = utils.isi_sdk.AuthAccessAccessItemFileGroup(user)
-            provider = self.check_provider_type(provider, 'Add User to')
-            api_response = self.group_api_instance.create_group_member(
-                group_member, group, zone=zone, provider=provider)
+            if cross_provider:
+                api_response = self.group_api_instance.create_group_member(
+                    group_member, group, zone=zone)
+            else:
+                provider = self.check_provider_type(provider, 'Add User to')
+                api_response = self.group_api_instance.create_group_member(
+                    group_member, group, zone=zone, provider=provider)
             LOG.info(api_response)
             return True
         except Exception as e:
@@ -439,14 +740,22 @@ class Group(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
-    def remove_user_from_group(self, group, user, zone, provider):
+    def remove_user_from_group(self, group, user, zone, provider,
+                               cross_provider=False):
         """ Remove a user from a Group in PowerScale"""
         try:
             message = "Removing user %s from group %s" % (user, group)
             LOG.info(message)
-            provider = self.check_provider_type(provider, 'Remove User from')
-            self.group_api_instance.delete_group_member(
-                user, group, zone=zone, provider=provider)
+            if self.module.check_mode:
+                LOG.info("Check mode: skipping delete_group_member for %s", user)
+                return True
+            if cross_provider:
+                self.group_api_instance.delete_group_member(
+                    user, group, zone=zone)
+            else:
+                provider = self.check_provider_type(provider, 'Remove User from')
+                self.group_api_instance.delete_group_member(
+                    user, group, zone=zone, provider=provider)
             return True
 
         except Exception as e:
@@ -487,20 +796,46 @@ class Group(object):
         return False
 
     def update_group(self, group, user_name, user_id,
-                     user_state, access_zone, provider_type):
-        """Update the group members in PowerScale"""
+                     user_state, access_zone, provider_type,
+                     member_provider=None):
+        """Update the group members in PowerScale.
+
+        :param member_provider: when set, the member is resolved via the
+            cross-provider path (preflight + resolve to SID + add/remove
+            without the ``provider`` query parameter). When ``None``, the
+            legacy local-provider path is used (FR-6 backward compat).
+        """
         changed = False
-        user_flag = self.is_user_part_of_group(group, user_name, user_id,
-                                               access_zone, provider_type)
-
-        user = "USER:" + user_name if user_name else "UID:" + user_id
-        if user_state == 'present-in-group' and not user_flag:
-            changed = self.add_user_to_group(group, user, access_zone,
-                                             provider_type)
-
-        if user_state == 'absent-in-group' and user_flag:
-            changed = self.remove_user_from_group(group, user, access_zone,
-                                                  provider_type)
+        if member_provider:
+            # Cross-provider path: resolve the member in the requested
+            # provider and use the unique SID for add/remove.
+            self._preflight_cross_provider(access_zone, member_provider)
+            resolved_id = self._resolve_member_id(
+                user_name, user_id, member_provider, access_zone)
+            # Check membership by matching the resolved name against the
+            # current member list (fetched with the group's own provider).
+            user_flag = self.is_user_part_of_group(
+                group, user_name, user_id, access_zone, provider_type)
+            if user_state == 'present-in-group' and not user_flag:
+                changed = self.add_user_to_group(
+                    group, resolved_id, access_zone, provider_type,
+                    cross_provider=True)
+            if user_state == 'absent-in-group' and user_flag:
+                changed = self.remove_user_from_group(
+                    group, resolved_id, access_zone, provider_type,
+                    cross_provider=True)
+        else:
+            # Legacy path: resolve as USER:<name> or UID:<id>, scoped to
+            # the group's own provider.
+            user_flag = self.is_user_part_of_group(
+                group, user_name, user_id, access_zone, provider_type)
+            user = "USER:" + user_name if user_name else "UID:" + user_id
+            if user_state == 'present-in-group' and not user_flag:
+                changed = self.add_user_to_group(group, user, access_zone,
+                                                 provider_type)
+            if user_state == 'absent-in-group' and user_flag:
+                changed = self.remove_user_from_group(group, user, access_zone,
+                                                      provider_type)
         return changed
 
     def determine_error(self, error_obj):
@@ -524,6 +859,37 @@ class Group(object):
             return False
         return True
 
+    def _build_member_diff(self, group, access_zone, provider_type,
+                           users, user_state):
+        """Build the membership diff for the result when diff mode is active.
+
+        Computes the *before* member list from the current group membership,
+        and the *after* list by projecting the additions/removals described
+        by ``users`` and ``user_state``.
+
+        :return: dict with ``before`` and ``after`` keys, each containing a
+            ``members`` list. Returns ``None`` when diff mode is not active.
+        """
+        if not getattr(self.module, '_diff', False):
+            return None
+        current_members = self.get_group_members(group, access_zone, provider_type)
+        before_names = [m.get('name', '') for m in (current_members or [])]
+        after_names = list(before_names)
+        for user in (users or []):
+            if not isinstance(user, dict):
+                continue
+            name = user.get('user_name') or user.get('user_id', '')
+            if user_state == 'present-in-group':
+                if name.lower() not in [n.lower() for n in after_names]:
+                    after_names.append(name)
+            elif user_state == 'absent-in-group':
+                after_names = [n for n in after_names
+                               if n.lower() != name.lower()]
+        return {
+            'before': {'members': sorted(before_names)},
+            'after': {'members': sorted(after_names)},
+        }
+
     def _validate_group_params(self, group, users, user_state):
         """Validate group module input parameters."""
         if group is None:
@@ -535,24 +901,50 @@ class Group(object):
             self.module.fail_json(msg="'user_state' is not specified,"
                                       " 'users' are given")
 
-    def _process_user_entry(self, group, user, user_state, access_zone, provider_type):
-        """Validate and process a single user entry, return True if modified."""
+    def _process_user_entry(self, group, user, user_state, access_zone,
+                            provider_type, index=0):
+        """Validate and process a single user entry, return True if modified.
+
+        :param index: zero-based position in the ``users`` list, used in
+            error messages so the operator can pinpoint the problematic entry.
+        """
         if not isinstance(user, dict):
             self.module.fail_json(
                 msg="Key Value pair is allowed, Provided %s." % user)
-        if len(user.keys()) != 1:
+        # Allow-list: user_name, user_id, and (new) provider_type.
+        allowed_keys = {'user_name', 'user_id', 'provider_type'}
+        unsupported = set(user.keys()) - allowed_keys
+        if unsupported:
             self.module.fail_json(
-                msg="One Key per dictionary is allowed, %s"
-                    " given" % list(user.keys()))
+                msg="User dict at index %d contains unsupported keys."
+                    " Supported keys are: user_name, user_id, provider_type."
+                    % index)
+        # Exactly one identifier is required.
+        has_name = 'user_name' in user
+        has_id = 'user_id' in user
+        if has_name and has_id:
+            self.module.fail_json(
+                msg="User dict at index %d must contain exactly one of"
+                    " 'user_name' or 'user_id', not both." % index)
+        if not has_name and not has_id:
+            error = 'user_id or user_name  is expected,' \
+                    ' "%s" given.' % list(user.keys())[0]
+            self.module.fail_json(msg=error)
+        # Validate per-member provider_type when supplied.
+        member_provider = user.get('provider_type')
+        if member_provider and member_provider not in VALID_PROVIDER_TYPES:
+            self.module.fail_json(
+                msg="User dict at index %d has invalid provider_type"
+                    " '%s'. Valid values are: %s."
+                    % (index, member_provider,
+                       ', '.join(VALID_PROVIDER_TYPES)))
         if 'user_name' in user:
             return self.update_group(
-                group, user['user_name'], None, user_state, access_zone, provider_type)
-        if 'user_id' in user:
-            return self.update_group(
-                group, None, user['user_id'], user_state, access_zone, provider_type)
-        error = 'user_id or user_name  is expected,' \
-                ' "%s" given.' % list(user.keys())[0]
-        self.module.fail_json(msg=error)
+                group, user['user_name'], None, user_state, access_zone,
+                provider_type, member_provider=member_provider)
+        return self.update_group(
+            group, None, user['user_id'], user_state, access_zone,
+            provider_type, member_provider=member_provider)
 
     def _handle_present_state(self, group, group_name, group_id, access_zone, provider_type, users, user_state):
         """Handle present state logic. Returns (changed, group_details)."""
@@ -574,9 +966,15 @@ class Group(object):
                 self.module.fail_json(msg=error_message)
 
         if user_state and users:
+            # Compute the membership diff before processing, so the diff
+            # reflects the intended changes even in check mode.
+            diff = self._build_member_diff(
+                group, access_zone, provider_type, users, user_state)
+            if diff is not None:
+                self.result['diff'] = diff
             changed = False
-            for user in users:
-                if self._process_user_entry(group, user, user_state, access_zone, provider_type):
+            for idx, user in enumerate(users):
+                if self._process_user_entry(group, user, user_state, access_zone, provider_type, index=idx):
                     changed = True
             return changed
         return False
