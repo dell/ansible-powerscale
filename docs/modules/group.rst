@@ -21,7 +21,7 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.17 or later.
+- Ansible\-core 2.17 or later.
 - Python 3.11, 3.12 or 3.13.
 
 
@@ -48,7 +48,7 @@ Parameters
 
 
   provider_type (optional, str, local)
-    This option defines the type which will be used to authenticate the group members.
+    This option defines the type of the authentication provider for the group itself.
 
     Creation, Deletion and Modification is allowed only for local group.
 
@@ -57,6 +57,8 @@ Parameters
     If the :emphasis:`provider\_type` is :literal:`ads` then the domain name of the Active Directory Server has to be mentioned in the group\_name. The format for the group\_name should be 'DOMAIN\_NAME\\group\_name' or "DOMAIN\_NAME\\\\group\_name".
 
     This option acts as a filter for all operations except creation.
+
+    When a member in :emphasis:`users` omits its own :literal:`provider\_type`\ , this group\-level provider is used as the default for member resolution.
 
 
   state (True, str, None)
@@ -67,6 +69,29 @@ Parameters
     Either :emphasis:`user\_name` or :emphasis:`user\_id` is needed to add or remove the user from the group.
 
     Users can be part of multiple groups.
+
+    Each element may optionally include a :literal:`provider\_type` key to add or remove a member from a different authentication provider (cross\-provider membership). This requires OneFS 9.11.0 or later.
+
+
+    user_name (optional, str, None)
+      The name of the user to add or remove.
+
+      Mutually exclusive with :emphasis:`user\_id`.
+
+
+    user_id (optional, str, None)
+      The numeric UID of the user to add or remove.
+
+      Mutually exclusive with :emphasis:`user\_name`.
+
+
+    provider_type (optional, str, None)
+      The authentication provider in which to resolve the user.
+
+      When omitted the group\-level :emphasis:`provider\_type` is used.
+
+      When specified the module validates that the provider is configured in the target :emphasis:`access\_zone` and that the cluster runs OneFS 9.11.0 or later.
+
 
 
   user_state (optional, str, None)
@@ -86,9 +111,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    :literal:`true` - indicates that the SSL certificate should be verified.
+    :literal:`true` \- indicates that the SSL certificate should be verified.
 
-    :literal:`false` - indicates that the SSL certificate should not be verified.
+    :literal:`false` \- indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -106,7 +131,7 @@ Notes
 -----
 
 .. note::
-   - The :emphasis:`check\_mode` is not supported.
+   - Cross\-provider group membership requires OneFS 9.11.0 or later.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -211,6 +236,85 @@ Examples
         user_state: "absent-in-group"
         state: "present"
 
+    - name: Add an LDAP user to a local group (cross-provider, requires OneFS 9.11+)
+      dellemc.powerscale.group:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        provider_type: "local"
+        access_zone: "{{access_zone}}"
+        group_name: "{{group_name}}"
+        users:
+          - user_name: "{{ldap_user_name}}"
+            provider_type: "ldap"
+        user_state: "present-in-group"
+        state: "present"
+
+    - name: Add mixed-provider members in a single task
+      dellemc.powerscale.group:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        provider_type: "local"
+        access_zone: "{{access_zone}}"
+        group_name: "{{group_name}}"
+        users:
+          - user_name: "{{user_name}}"
+          - user_name: "{{ldap_user_name}}"
+            provider_type: "ldap"
+        user_state: "present-in-group"
+        state: "present"
+
+    - name: Remove an LDAP user from a local group
+      dellemc.powerscale.group:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        provider_type: "local"
+        access_zone: "{{access_zone}}"
+        group_name: "{{group_name}}"
+        users:
+          - user_name: "{{ldap_user_name}}"
+            provider_type: "ldap"
+        user_state: "absent-in-group"
+        state: "present"
+
+    - name: Check mode with diff - preview cross-provider membership changes
+      dellemc.powerscale.group:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        provider_type: "local"
+        access_zone: "{{access_zone}}"
+        group_name: "{{group_name}}"
+        users:
+          - user_name: "{{ldap_user_name}}"
+            provider_type: "ldap"
+        user_state: "present-in-group"
+        state: "present"
+      check_mode: true
+      diff: true
+      register: result
+
+    - name: Backward-compatible legacy usage (no per-member provider_type)
+      dellemc.powerscale.group:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        provider_type: "{{provider_type}}"
+        access_zone: "{{access_zone}}"
+        group_name: "{{group_name}}"
+        users:
+          - user_name: "{{user_name}}"
+          - user_id: "{{user_id}}"
+        user_state: "present-in-group"
+        state: "present"
+
 
 
 Return Values
@@ -268,6 +372,29 @@ group_details (When group exists, complex, {'dn': 'CN=group_11,CN=Groups,DC=VXXX
       type_of_resource (, str, user)
         The resource's type is mentioned.
 
+
+
+
+
+diff (When diff mode is active and membership changes are requested., dict, {'before': {'members': ['Guest', 'ldap_user']}, 'after': {'members': ['Guest']}})
+  The membership diff computed when diff mode is enabled.
+
+
+  before (, dict, )
+    The group membership state before the operation.
+
+
+    members (, list, )
+      Sorted list of member names before the operation.
+
+
+
+  after (, dict, )
+    The group membership state after the operation.
+
+
+    members (, list, )
+      Sorted list of member names after the operation.
 
 
 
