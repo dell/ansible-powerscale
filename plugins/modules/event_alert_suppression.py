@@ -41,6 +41,14 @@ options:
     type: str
     choices: ['suppressed', 'unsuppressed', 'get']
     required: true
+attributes:
+  check_mode:
+    description: Runs task to validate without performing action on the target
+                 machine.
+    support: full
+  diff_mode:
+    description: Runs the task to report the changes made or to be made.
+    support: full
 notes:
 |- This module operates on a single event ID per task.
 |- Bulk suppression of multiple event IDs is not supported.
