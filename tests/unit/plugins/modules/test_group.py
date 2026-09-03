@@ -1217,3 +1217,124 @@ class TestGroup(PowerScaleUnitBase):
             "System", "local")
         assert result is False
         powerscale_module_mock.group_api_instance.delete_group_member.assert_not_called()
+
+    # ------------------------------------------------------------------
+    # Phase 3: Well-Known SID Membership — resolve & add/remove helpers
+    # ------------------------------------------------------------------
+
+    def mock_wellknowns(self, powerscale_module_mock, call_exception=False):
+        """Mock AuthApi.list_auth_wellknowns."""
+        if call_exception:
+            powerscale_module_mock.api_instance.list_auth_wellknowns = \
+                MagicMock(side_effect=Exception("SDK boom"))
+        else:
+            powerscale_module_mock.api_instance.list_auth_wellknowns = \
+                MagicMock(return_value=MockGroupApi.get_wellknowns_response())
+
+    def test_resolve_well_known_sid_by_display_name(self, powerscale_module_mock):
+        """FR-2.1: resolve_well_known_sid resolves display name to SID string."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload_with_wellknown_sids())
+        self.mock_wellknowns(powerscale_module_mock)
+        result = powerscale_module_mock.resolve_well_known_sid("Everyone")
+        assert result == "SID:S-1-1-0"
+
+    def test_resolve_well_known_sid_by_sid_string(self, powerscale_module_mock):
+        """FR-2.1: resolve_well_known_sid resolves SID string."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload_with_wellknown_sids())
+        self.mock_wellknowns(powerscale_module_mock)
+        result = powerscale_module_mock.resolve_well_known_sid("S-1-1-0")
+        assert result == "SID:S-1-1-0"
+
+    def test_resolve_well_known_sid_case_insensitive(self, powerscale_module_mock):
+        """FR-2.1: display name matching is case-insensitive."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload_with_wellknown_sids())
+        self.mock_wellknowns(powerscale_module_mock)
+        result = powerscale_module_mock.resolve_well_known_sid("everyone")
+        assert result == "SID:S-1-1-0"
+
+    def test_resolve_well_known_sid_unrecognised_exception(self, powerscale_module_mock):
+        """FR-2.1: unrecognised value raises error."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload_with_wellknown_sids())
+        self.mock_wellknowns(powerscale_module_mock)
+        self.capture_fail_json_method(
+            "'BogusName' is not a recognised well-known SID name or SID string",
+            powerscale_module_mock,
+            "resolve_well_known_sid",
+            "BogusName",
+        )
+
+    def test_resolve_well_known_sid_edge_case_special_chars(self, powerscale_module_mock):
+        """FR-2.1: SID with special characters in name (e.g. backslash) resolves."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload_with_wellknown_sids())
+        self.mock_wellknowns(powerscale_module_mock)
+        result = powerscale_module_mock.resolve_well_known_sid(
+            "NT AUTHORITY\\INTERACTIVE")
+        assert result == "SID:S-1-5-4"
+
+    def test_add_wellknown_to_group_calls_post(self, powerscale_module_mock):
+        """FR-2.1: add_wellknown_to_group calls POST with type=wellknown."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload_with_wellknown_sids())
+        self.mock_get_group_members(powerscale_module_mock, call_exception=False)
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        result = powerscale_module_mock.add_wellknown_to_group(
+            "GROUP:test_group", "SID:S-1-1-0", "Everyone",
+            "System", "local")
+        assert result is True
+        powerscale_module_mock.group_api_instance.create_group_member.assert_called_once()
+
+    def test_remove_wellknown_from_group_calls_delete(self, powerscale_module_mock):
+        """FR-2.2: remove_wellknown_from_group calls DELETE for the SID member."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload_with_wellknown_sids())
+        # Member must be present for removal
+        members = MockSDKResponse({"members": [
+            {"id": "SID:S-1-1-0", "name": "Everyone", "type": "wellknown"}
+        ]})
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=members)
+        powerscale_module_mock.group_api_instance.delete_group_member = \
+            MagicMock(return_value=None)
+        result = powerscale_module_mock.remove_wellknown_from_group(
+            "GROUP:test_group", "SID:S-1-1-0", "Everyone",
+            "System", "local")
+        assert result is True
+        powerscale_module_mock.group_api_instance.delete_group_member.assert_called_once()
+
+    def test_add_wellknown_idempotent_already_member(self, powerscale_module_mock):
+        """FR-2.1 idempotent: add SID already a member returns no change."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload_with_wellknown_sids())
+        members = MockSDKResponse({"members": [
+            {"id": "SID:S-1-1-0", "name": "Everyone", "type": "wellknown"}
+        ]})
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=members)
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        result = powerscale_module_mock.add_wellknown_to_group(
+            "GROUP:test_group", "SID:S-1-1-0", "Everyone",
+            "System", "local")
+        assert result is False
+        powerscale_module_mock.group_api_instance.create_group_member.assert_not_called()
+
+    def test_remove_wellknown_idempotent_not_member(self, powerscale_module_mock):
+        """FR-2.2 idempotent: remove SID not a member returns no change."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload_with_wellknown_sids())
+        members = MockSDKResponse({"members": []})
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=members)
+        powerscale_module_mock.group_api_instance.delete_group_member = \
+            MagicMock(return_value=None)
+        result = powerscale_module_mock.remove_wellknown_from_group(
+            "GROUP:test_group", "SID:S-1-1-0", "Everyone",
+            "System", "local")
+        assert result is False
+        powerscale_module_mock.group_api_instance.delete_group_member.assert_not_called()

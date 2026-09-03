@@ -693,6 +693,102 @@ class Group(object):
             resolved_id, group, zone=access_zone, provider=provider_type)
         return True
 
+    def resolve_well_known_sid(self, value):
+        """Resolve a well-known SID display name or SID string to a SID identifier.
+
+        Matches display names case-insensitively and SID strings exactly.
+        Returns the ``SID:<sid_string>`` identifier that can be passed to the
+        group-membership API.
+
+        :param value: a display name (e.g. ``"Everyone"``) or SID string
+            (e.g. ``"S-1-1-0"``).
+        :return: the ``SID:…`` identifier string.
+        """
+        wellknowns = self._get_wellknowns()
+        # Try case-insensitive display name match first
+        for wk in wellknowns:
+            if wk['name'].lower() == value.lower():
+                resolved = "SID:" + wk['sid']
+                LOG.info("Resolved well-known SID '%s' to %s",
+                         value, resolved)
+                return resolved
+        # Try exact SID string match
+        for wk in wellknowns:
+            if wk['sid'] == value:
+                resolved = "SID:" + wk['sid']
+                LOG.info("Resolved well-known SID string '%s' to %s",
+                         value, resolved)
+                return resolved
+        error_message = ("'%s' is not a recognised well-known SID name"
+                         " or SID string" % value)
+        LOG.error(error_message)
+        self.module.fail_json(msg=error_message)
+
+    def add_wellknown_to_group(self, group, resolved_id, member_name,
+                               access_zone, provider_type):
+        """Add a well-known SID to a group in PowerScale.
+
+        Checks current membership first for idempotency.
+
+        :param group: the parent group identifier (e.g. ``GROUP:parent``).
+        :param resolved_id: the resolved SID identifier (e.g. ``SID:S-1-1-0``).
+        :param member_name: display name for logging.
+        :param access_zone: the access zone.
+        :param provider_type: the parent group's provider type.
+        :return: True if the member was added, False if already present.
+        """
+        current_members = self.get_group_members(group, access_zone,
+                                                 provider_type)
+        for member in (current_members or []):
+            if member.get('name', '').lower() == member_name.lower():
+                LOG.info("Well-known SID '%s' is already in group %s",
+                         member_name, group)
+                return False
+        LOG.info("Adding well-known SID '%s' to group %s",
+                 member_name, group)
+        if self.module.check_mode:
+            LOG.info("Check mode: skipping create_group_member for %s",
+                     member_name)
+            return True
+        group_member = utils.isi_sdk.AuthAccessAccessItemFileGroup(resolved_id)
+        self.group_api_instance.create_group_member(
+            group_member, group, zone=access_zone, provider=provider_type)
+        return True
+
+    def remove_wellknown_from_group(self, group, resolved_id, member_name,
+                                    access_zone, provider_type):
+        """Remove a well-known SID from a group in PowerScale.
+
+        Checks current membership first for idempotency.
+
+        :param group: the parent group identifier (e.g. ``GROUP:parent``).
+        :param resolved_id: the resolved SID identifier.
+        :param member_name: display name for logging.
+        :param access_zone: the access zone.
+        :param provider_type: the parent group's provider type.
+        :return: True if the member was removed, False if not present.
+        """
+        current_members = self.get_group_members(group, access_zone,
+                                                 provider_type)
+        is_member = False
+        for member in (current_members or []):
+            if member.get('name', '').lower() == member_name.lower():
+                is_member = True
+                break
+        if not is_member:
+            LOG.info("Well-known SID '%s' is not in group %s,"
+                     " nothing to remove", member_name, group)
+            return False
+        LOG.info("Removing well-known SID '%s' from group %s",
+                 member_name, group)
+        if self.module.check_mode:
+            LOG.info("Check mode: skipping delete_group_member for %s",
+                     member_name)
+            return True
+        self.group_api_instance.delete_group_member(
+            resolved_id, group, zone=access_zone, provider=provider_type)
+        return True
+
     def check_provider_type(self, provider, message):
         """ Check the provider and return the updated provider"""
         if provider.lower() != "local":
