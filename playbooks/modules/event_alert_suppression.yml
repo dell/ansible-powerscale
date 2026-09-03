@@ -1,0 +1,97 @@
+---
+- name: Event Alert Suppression Module Operations on PowerScale Storage
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: "10.247.102.193"
+    api_user: "root"
+    api_password: "Password123!"
+    verify_ssl: false
+    test_event_id: "100010001"
+
+  tasks:
+    - name: Suppress an event alert (AC-001)
+      dellemc.powerscale.event_alert_suppression:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        event_id: "{{ test_event_id }}"
+        state: "suppressed"
+      # Expected: changed=true, event_alert_suppression_details shows suppressed=true
+
+    - name: Un-suppress an event alert (AC-002)
+      dellemc.powerscale.event_alert_suppression:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        event_id: "{{ test_event_id }}"
+        state: "unsuppressed"
+      # Expected: changed=true, event_alert_suppression_details shows suppressed=false
+
+    - name: Query all suppressed events (AC-003)
+      dellemc.powerscale.event_alert_suppression:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        state: "get"
+      # Expected: changed=false, event_alert_suppression_details.suppressions list with full metadata (id, name, category, description, node, suppressed)
+
+    - name: Query a specific event's suppression state (AC-003)
+      dellemc.powerscale.event_alert_suppression:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        event_id: "{{ test_event_id }}"
+        state: "get"
+      # Expected: changed=false, event_alert_suppression_details shows full metadata for the event (id, name, category, description, node, suppressed)
+
+    - name: Idempotent suppress - already suppressed (AC-004)
+      dellemc.powerscale.event_alert_suppression:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        event_id: "{{ test_event_id }}"
+        state: "suppressed"
+      # Expected: changed=false if already suppressed, event_alert_suppression_details shows current state
+
+    - name: Idempotent un-suppress - already unsuppressed (AC-004)
+      dellemc.powerscale.event_alert_suppression:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        event_id: "{{ test_event_id }}"
+        state: "unsuppressed"
+      # Expected: changed=false if already unsuppressed, event_alert_suppression_details shows current state
+
+    - name: Invalid event ID error handling (AC-005)
+      dellemc.powerscale.event_alert_suppression:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        event_id: "999999999"
+        state: "suppressed"
+      # Expected: Fails with clear error message about invalid event ID (AEC_NOT_FOUND)
+
+    - name: Missing event_id error handling (AC-005)
+      dellemc.powerscale.event_alert_suppression:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        state: "suppressed"
+      # Expected: Fails due to required_if validation (event_id is required when state is suppressed)
