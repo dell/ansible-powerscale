@@ -722,8 +722,11 @@ class Group(object):
                 LOG.info("Resolved well-known SID string '%s' to %s",
                          value, resolved)
                 return resolved, wk['name']
-        error_message = ("'%s' is not a recognised well-known SID name"
-                         " or SID string" % value)
+        supported = sorted(set(wk['name'] for wk in wellknowns))
+        error_message = (
+            "'%s' is not a recognised well-known SID name or SID string."
+            " Supported display names: %s"
+            % (value, ', '.join(supported)))
         LOG.error(error_message)
         self.module.fail_json(msg=error_message)
 
@@ -1245,9 +1248,12 @@ class Group(object):
         sid_map = {wk['sid']: wk for wk in wellknowns}
         for value in well_known_sids:
             if value.lower() not in name_map and value not in sid_map:
+                supported = sorted(set(wk['name'] for wk in wellknowns))
                 self.module.fail_json(
                     msg="'%s' is not a recognised well-known SID name"
-                        " or SID string" % value)
+                        " or SID string."
+                        " Supported display names: %s"
+                        % (value, ', '.join(supported)))
 
     def _get_wellknowns(self):
         """Fetch and cache well-known SID personas from the cluster.
