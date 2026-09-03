@@ -1089,14 +1089,20 @@ class Group(object):
 
         Computes the *before* member list from the current group membership,
         and the *after* list by projecting the additions/removals described
-        by ``users`` and ``user_state``.
+        by ``users`` / ``user_state``, ``group_members`` /
+        ``group_member_state``, and ``well_known_sids`` /
+        ``well_known_sid_state``.
 
-        :return: dict with ``before`` and ``after`` keys, each containing a
-            ``members`` list. Returns ``None`` when diff mode is not active.
+        :return: dict with ``before`` and ``after`` keys, each containing
+            ``members``, ``group_members``, and ``well_known_sids`` lists.
+            Returns ``None`` when diff mode is not active.
         """
         if not getattr(self.module, '_diff', False):
             return None
-        current_members = self.get_group_members(group, access_zone, provider_type)
+        current_members = self.get_group_members(
+            group, access_zone, provider_type)
+
+        # --- users diff (existing behaviour) ---
         before_names = [m.get('name', '') for m in (current_members or [])]
         after_names = list(before_names)
         for user in (users or []):
@@ -1109,9 +1115,56 @@ class Group(object):
             elif user_state == 'absent-in-group':
                 after_names = [n for n in after_names
                                if n.lower() != name.lower()]
+
+        # --- group_members diff ---
+        group_members = self.module.params.get('group_members') or []
+        group_member_state = self.module.params.get('group_member_state')
+        before_groups = [
+            m.get('name', '') for m in (current_members or [])
+            if m.get('type') == 'group']
+        after_groups = list(before_groups)
+        for entry in group_members:
+            if not isinstance(entry, dict):
+                continue
+            gname = entry.get('group_name', '')
+            if group_member_state == 'present-in-group':
+                if gname.lower() not in [g.lower() for g in after_groups]:
+                    after_groups.append(gname)
+            elif group_member_state == 'absent-in-group':
+                after_groups = [g for g in after_groups
+                                if g.lower() != gname.lower()]
+
+        # --- well_known_sids diff ---
+        well_known_sids = self.module.params.get('well_known_sids') or []
+        wk_sid_state = self.module.params.get('well_known_sid_state')
+        before_sids = [
+            m.get('name', '') for m in (current_members or [])
+            if m.get('type') == 'wellknown']
+        after_sids = list(before_sids)
+        for sid_value in well_known_sids:
+            try:
+                _, display_name = self.resolve_well_known_sid(sid_value)
+            except SystemExit:
+                continue
+            if wk_sid_state == 'present-in-group':
+                if display_name.lower() not in [
+                        s.lower() for s in after_sids]:
+                    after_sids.append(display_name)
+            elif wk_sid_state == 'absent-in-group':
+                after_sids = [s for s in after_sids
+                              if s.lower() != display_name.lower()]
+
         return {
-            'before': {'members': sorted(before_names)},
-            'after': {'members': sorted(after_names)},
+            'before': {
+                'members': sorted(before_names),
+                'group_members': sorted(before_groups),
+                'well_known_sids': sorted(before_sids),
+            },
+            'after': {
+                'members': sorted(after_names),
+                'group_members': sorted(after_groups),
+                'well_known_sids': sorted(after_sids),
+            },
         }
 
     def _validate_group_params(self, group, users, user_state):
@@ -1329,16 +1382,17 @@ class Group(object):
 
         changed = False
 
+        # Compute the membership diff before processing, so the diff
+        # reflects the intended changes even in check mode.
+        diff = self._build_member_diff(
+            group, access_zone, provider_type, users, user_state)
+        if diff is not None:
+            self.result['diff'] = diff
+
         # Processing order: users -> group_members -> well_known_sids (FR-3.1)
 
         # Step 1: Process users (existing behaviour)
         if user_state and users:
-            # Compute the membership diff before processing, so the diff
-            # reflects the intended changes even in check mode.
-            diff = self._build_member_diff(
-                group, access_zone, provider_type, users, user_state)
-            if diff is not None:
-                self.result['diff'] = diff
             for idx, user in enumerate(users):
                 if self._process_user_entry(group, user, user_state, access_zone, provider_type, index=idx):
                     changed = True
