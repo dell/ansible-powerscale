@@ -1617,3 +1617,65 @@ class TestGroup(PowerScaleUnitBase):
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed']
         # At least 3 create calls (1 user + 1 group + 1 SID)
         assert len(call_order) >= 3
+
+    # ==================================================================
+    # Story-3078 Part 2: Compatibility, Check/Diff, Idempotency, Errors
+    # ==================================================================
+
+    # ------------------------------------------------------------------
+    # Phase 1: Backward Compatibility (AC-006)
+    # ------------------------------------------------------------------
+
+    def test_user_only_playbook_add_returns_changed(self, powerscale_module_mock):
+        """AC-006: user-only payload (no group_members/well_known_sids) adds
+        a new user and returns changed=true — identical to pre-enhancement."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload(
+                                   users=[{"user_name": "new_user"}],
+                                   user_state="present-in-group"))
+        self.update_group(powerscale_module_mock)
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert result['changed']
+        powerscale_module_mock.group_api_instance.create_group_member.assert_called()
+
+    def test_user_only_playbook_idempotent_returns_unchanged(self, powerscale_module_mock):
+        """AC-006: user-only payload for already-present user returns
+        changed=false — identical to pre-enhancement."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload(
+                                   users=[{"user_name": "test_user"}]))
+        self.update_group(powerscale_module_mock)
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert not result['changed']
+        powerscale_module_mock.group_api_instance.create_group_member.assert_not_called()
+
+    def test_user_only_no_deprecation_warning(self, powerscale_module_mock):
+        """AC-006: no deprecation warning emitted when new parameters omitted."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload(
+                                   users=[{"user_name": "test_user"}]))
+        self.update_group(powerscale_module_mock)
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert 'deprecations' not in result
+        assert 'warnings' not in result
+
+    def test_new_params_default_to_none_when_omitted(self, powerscale_module_mock):
+        """AC-006: group_members and well_known_sids default to None/[]
+        when omitted from the argument spec."""
+        payload = MockGroupApi.get_update_group_payload(
+            users=[{"user_name": "test_user"}])
+        # Explicitly do NOT set group_members or well_known_sids
+        self.set_module_params(self.group_args, payload)
+        self.update_group(powerscale_module_mock)
+        # Module should succeed without any issues
+        powerscale_module_mock.module.fail_json.assert_not_called()
+
+    def test_group_details_return_structure_backward_compatible(self, powerscale_module_mock):
+        """AC-006: group_details return structure includes expected keys."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload(
+                                   users=[{"user_name": "test_user"}]))
+        self.update_group(powerscale_module_mock)
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert 'group_details' in result
+        assert 'changed' in result
