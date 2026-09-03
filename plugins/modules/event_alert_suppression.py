@@ -320,6 +320,17 @@ def main():
                     }
                     msg = f'Check mode: Would suppress event {event_id}'
                     changed = True
+                    # Add diff output for check mode
+                    result['diff'] = {
+                        'before': {
+                            'event_id': event_id,
+                            'suppressed': False
+                        },
+                        'after': {
+                            'event_id': event_id,
+                            'suppressed': True
+                        }
+                    }
                 else:
                     # Actual suppress operation
                     event_alert_suppression.set_event_suppressed_state(event_id, True)
@@ -334,6 +345,17 @@ def main():
                         }
                         msg = f'Successfully suppressed event {event_id}'
                         changed = True
+                        # Add diff output for actual change
+                        result['diff'] = {
+                            'before': {
+                                'event_id': event_id,
+                                'suppressed': False
+                            },
+                            'after': {
+                                'event_id': event_id,
+                                'suppressed': True
+                            }
+                        }
                     else:
                         error_msg = f'Failed to verify suppression state for event {event_id}'
                         LOG.error(error_msg)
@@ -364,6 +386,17 @@ def main():
                     }
                     msg = f'Check mode: Would un-suppress event {event_id}'
                     changed = True
+                    # Add diff output for check mode
+                    result['diff'] = {
+                        'before': {
+                            'event_id': event_id,
+                            'suppressed': True
+                        },
+                        'after': {
+                            'event_id': event_id,
+                            'suppressed': False
+                        }
+                    }
                 else:
                     # Actual un-suppress operation
                     event_alert_suppression.set_event_suppressed_state(event_id, False)
@@ -378,6 +411,17 @@ def main():
                         }
                         msg = f'Successfully un-suppressed event {event_id}'
                         changed = True
+                        # Add diff output for actual change
+                        result['diff'] = {
+                            'before': {
+                                'event_id': event_id,
+                                'suppressed': True
+                            },
+                            'after': {
+                                'event_id': event_id,
+                                'suppressed': False
+                            }
+                        }
                     else:
                         error_msg = f'Failed to verify un-suppression state for event {event_id}'
                         LOG.error(error_msg)
