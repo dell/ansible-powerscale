@@ -23,6 +23,10 @@ class MockGroupApi:
         'provider_type': None,
         'users': [],
         'user_state': None,
+        'group_members': [],
+        'group_member_state': None,
+        'well_known_sids': [],
+        'well_known_sid_state': None,
         'state': None
     }
     CREATE_GROUP_PAYLOAD = {
@@ -177,6 +181,50 @@ class MockGroupApi:
         ]
     }
 
+    # Mirrors the response from ``GET /platform/1/auth/wellknowns``.
+    # Includes the ER table SIDs plus edge cases (special characters, long
+    # names) per the spec.
+    GET_WELLKNOWNS = {
+        "wellknowns": [
+            {
+                "gid": None,
+                "name": "Everyone",
+                "sid": "S-1-1-0",
+                "uid": None
+            },
+            {
+                "gid": None,
+                "name": "Creator Owner",
+                "sid": "S-1-3-0",
+                "uid": None
+            },
+            {
+                "gid": None,
+                "name": "Authenticated Users",
+                "sid": "S-1-5-11",
+                "uid": None
+            },
+            {
+                "gid": None,
+                "name": "Batch",
+                "sid": "S-1-5-3",
+                "uid": None
+            },
+            {
+                "gid": None,
+                "name": "NT AUTHORITY\\INTERACTIVE",
+                "sid": "S-1-5-4",
+                "uid": None
+            },
+            {
+                "gid": None,
+                "name": "This Organization",
+                "sid": "S-1-5-15",
+                "uid": None
+            }
+        ]
+    }
+
     @staticmethod
     def get_create_group_payload(id=None, name=None, users=None, user_state=None, provider_type=None):
         group_payload = MockGroupApi.CREATE_GROUP_PAYLOAD.copy()
@@ -277,3 +325,36 @@ class MockGroupApi:
     def get_group_members_mixed():
         """Return a member list containing both local and LDAP members."""
         return MockSDKResponse(copy.deepcopy(MockGroupApi.GET_GROUP_MEMBERS_MIXED))
+
+    @staticmethod
+    def get_wellknowns_response():
+        """Build the well-known SIDs response from ``GET /platform/1/auth/wellknowns``."""
+        return MockSDKResponse(copy.deepcopy(MockGroupApi.GET_WELLKNOWNS))
+
+    @staticmethod
+    def get_update_group_payload_with_group_members(
+            group_members=None, group_member_state=None, **kwargs):
+        """Build a payload that exercises the ``group_members`` parameter."""
+        payload = MockGroupApi.CREATE_GROUP_PAYLOAD.copy()
+        payload['users'] = []
+        payload['user_state'] = None
+        payload['group_members'] = group_members or []
+        payload['group_member_state'] = group_member_state
+        payload['well_known_sids'] = []
+        payload['well_known_sid_state'] = None
+        payload.update(kwargs)
+        return payload
+
+    @staticmethod
+    def get_update_group_payload_with_wellknown_sids(
+            well_known_sids=None, well_known_sid_state=None, **kwargs):
+        """Build a payload that exercises the ``well_known_sids`` parameter."""
+        payload = MockGroupApi.CREATE_GROUP_PAYLOAD.copy()
+        payload['users'] = []
+        payload['user_state'] = None
+        payload['group_members'] = []
+        payload['group_member_state'] = None
+        payload['well_known_sids'] = well_known_sids or []
+        payload['well_known_sid_state'] = well_known_sid_state
+        payload.update(kwargs)
+        return payload

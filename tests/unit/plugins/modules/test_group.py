@@ -901,3 +901,166 @@ class TestGroup(PowerScaleUnitBase):
             powerscale_module_mock,
             "perform_module_operation",
         )
+
+    # ==================================================================
+    # Story-3078 Part 1: Child Group & Well-Known SID Membership
+    # ==================================================================
+
+    # ------------------------------------------------------------------
+    # Phase 1: Input validation for group_members and well_known_sids
+    # ------------------------------------------------------------------
+
+    def test_group_members_unsupported_key_rejected(self, powerscale_module_mock):
+        """FR-6.1: group_members entries with unsupported keys are rejected."""
+        self.set_module_params(
+            self.group_args,
+            MockGroupApi.get_update_group_payload_with_group_members(
+                group_members=[{"group_name": "grp1", "bogus_key": "val"}],
+                group_member_state="present-in-group"))
+        self.mock_get_group_detail(powerscale_module_mock, operation='update',
+                                   call_exception=False)
+        self.mock_get_group_members(powerscale_module_mock, call_exception=False)
+        self.capture_fail_json_method(
+            "group_members entry at index 0 contains unsupported keys",
+            powerscale_module_mock,
+            "perform_module_operation",
+        )
+
+    def test_group_members_valid_keys_accepted(self, powerscale_module_mock):
+        """FR-6.1: group_members entries with only group_name and provider_type pass."""
+        self.set_module_params(
+            self.group_args,
+            MockGroupApi.get_update_group_payload_with_group_members(
+                group_members=[{"group_name": "child_grp", "provider_type": "local"}],
+                group_member_state="present-in-group"))
+        self.mock_get_group_detail(powerscale_module_mock, operation='update',
+                                   call_exception=False)
+        self.mock_get_group_members(powerscale_module_mock, call_exception=False)
+        # Mock the resolve_group_id to return a valid group
+        powerscale_module_mock.api_instance.get_auth_group = \
+            MagicMock(side_effect=[
+                MockGroupApi.get_group_detail(),  # resolve child group
+                MockGroupApi.get_group_detail(),   # final get_group_details
+            ])
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        powerscale_module_mock.perform_module_operation()
+        powerscale_module_mock.module.fail_json.assert_not_called()
+
+    def test_group_members_missing_group_name_rejected(self, powerscale_module_mock):
+        """FR-6.1: group_members entries without group_name are rejected."""
+        self.set_module_params(
+            self.group_args,
+            MockGroupApi.get_update_group_payload_with_group_members(
+                group_members=[{"provider_type": "local"}],
+                group_member_state="present-in-group"))
+        self.mock_get_group_detail(powerscale_module_mock, operation='update',
+                                   call_exception=False)
+        self.mock_get_group_members(powerscale_module_mock, call_exception=False)
+        self.capture_fail_json_method(
+            "group_members entry at index 0 is missing required key 'group_name'",
+            powerscale_module_mock,
+            "perform_module_operation",
+        )
+
+    def test_wellknown_sids_unrecognised_value_rejected(self, powerscale_module_mock):
+        """FR-6.2: well_known_sids with unrecognised values are rejected before any API call."""
+        self.set_module_params(
+            self.group_args,
+            MockGroupApi.get_update_group_payload_with_wellknown_sids(
+                well_known_sids=["NonExistentSID"],
+                well_known_sid_state="present-in-group"))
+        self.mock_get_group_detail(powerscale_module_mock, operation='update',
+                                   call_exception=False)
+        self.mock_get_group_members(powerscale_module_mock, call_exception=False)
+        # Mock the wellknowns API
+        powerscale_module_mock.api_instance.list_auth_wellknowns = \
+            MagicMock(return_value=MockGroupApi.get_wellknowns_response())
+        self.capture_fail_json_method(
+            "'NonExistentSID' is not a recognised well-known SID name or SID string",
+            powerscale_module_mock,
+            "perform_module_operation",
+        )
+
+    def test_wellknown_sids_valid_display_name_accepted(self, powerscale_module_mock):
+        """FR-6.2: well_known_sids with valid display names pass validation."""
+        self.set_module_params(
+            self.group_args,
+            MockGroupApi.get_update_group_payload_with_wellknown_sids(
+                well_known_sids=["Everyone"],
+                well_known_sid_state="present-in-group"))
+        self.mock_get_group_detail(powerscale_module_mock, operation='update',
+                                   call_exception=False)
+        self.mock_get_group_members(powerscale_module_mock, call_exception=False)
+        powerscale_module_mock.api_instance.list_auth_wellknowns = \
+            MagicMock(return_value=MockGroupApi.get_wellknowns_response())
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        powerscale_module_mock.perform_module_operation()
+        powerscale_module_mock.module.fail_json.assert_not_called()
+
+    def test_wellknown_sids_valid_sid_string_accepted(self, powerscale_module_mock):
+        """FR-6.2: well_known_sids with valid SID strings pass validation."""
+        self.set_module_params(
+            self.group_args,
+            MockGroupApi.get_update_group_payload_with_wellknown_sids(
+                well_known_sids=["S-1-1-0"],
+                well_known_sid_state="present-in-group"))
+        self.mock_get_group_detail(powerscale_module_mock, operation='update',
+                                   call_exception=False)
+        self.mock_get_group_members(powerscale_module_mock, call_exception=False)
+        powerscale_module_mock.api_instance.list_auth_wellknowns = \
+            MagicMock(return_value=MockGroupApi.get_wellknowns_response())
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        powerscale_module_mock.perform_module_operation()
+        powerscale_module_mock.module.fail_json.assert_not_called()
+
+    def test_wellknown_sids_case_insensitive_match(self, powerscale_module_mock):
+        """FR-6.2: display name matching is case-insensitive."""
+        self.set_module_params(
+            self.group_args,
+            MockGroupApi.get_update_group_payload_with_wellknown_sids(
+                well_known_sids=["everyone"],
+                well_known_sid_state="present-in-group"))
+        self.mock_get_group_detail(powerscale_module_mock, operation='update',
+                                   call_exception=False)
+        self.mock_get_group_members(powerscale_module_mock, call_exception=False)
+        powerscale_module_mock.api_instance.list_auth_wellknowns = \
+            MagicMock(return_value=MockGroupApi.get_wellknowns_response())
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        powerscale_module_mock.perform_module_operation()
+        powerscale_module_mock.module.fail_json.assert_not_called()
+
+    def test_group_member_state_without_group_members_rejected(self, powerscale_module_mock):
+        """Validation: group_member_state given without group_members fails."""
+        self.set_module_params(
+            self.group_args,
+            MockGroupApi.get_update_group_payload_with_group_members(
+                group_members=[],
+                group_member_state="present-in-group"))
+        self.mock_get_group_detail(powerscale_module_mock, operation='update',
+                                   call_exception=False)
+        self.mock_get_group_members(powerscale_module_mock, call_exception=False)
+        self.capture_fail_json_method(
+            "'group_member_state' is given, 'group_members' are not specified",
+            powerscale_module_mock,
+            "perform_module_operation",
+        )
+
+    def test_well_known_sid_state_without_sids_rejected(self, powerscale_module_mock):
+        """Validation: well_known_sid_state given without well_known_sids fails."""
+        self.set_module_params(
+            self.group_args,
+            MockGroupApi.get_update_group_payload_with_wellknown_sids(
+                well_known_sids=[],
+                well_known_sid_state="present-in-group"))
+        self.mock_get_group_detail(powerscale_module_mock, operation='update',
+                                   call_exception=False)
+        self.mock_get_group_members(powerscale_module_mock, call_exception=False)
+        self.capture_fail_json_method(
+            "'well_known_sid_state' is given, 'well_known_sids' are not specified",
+            powerscale_module_mock,
+            "perform_module_operation",
+        )

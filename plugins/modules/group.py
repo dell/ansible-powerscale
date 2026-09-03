@@ -900,6 +900,97 @@ class Group(object):
         if not user_state and users:
             self.module.fail_json(msg="'user_state' is not specified,"
                                       " 'users' are given")
+        # Validate group_members / group_member_state pairing
+        group_members = self.module.params.get('group_members') or []
+        group_member_state = self.module.params.get('group_member_state')
+        if not group_members and group_member_state:
+            self.module.fail_json(
+                msg="'group_member_state' is given,"
+                    " 'group_members' are not specified")
+        if not group_member_state and group_members:
+            self.module.fail_json(
+                msg="'group_member_state' is not specified,"
+                    " 'group_members' are given")
+        # Validate well_known_sids / well_known_sid_state pairing
+        well_known_sids = self.module.params.get('well_known_sids') or []
+        well_known_sid_state = self.module.params.get('well_known_sid_state')
+        if not well_known_sids and well_known_sid_state:
+            self.module.fail_json(
+                msg="'well_known_sid_state' is given,"
+                    " 'well_known_sids' are not specified")
+        if not well_known_sid_state and well_known_sids:
+            self.module.fail_json(
+                msg="'well_known_sid_state' is not specified,"
+                    " 'well_known_sids' are given")
+
+    def _validate_group_members_entries(self, group_members):
+        """Validate each entry in the group_members list (FR-6.1).
+
+        Each entry must be a dict with ``group_name`` (required) and optional
+        ``provider_type``. No unsupported keys are allowed. Validation runs
+        upfront before any write API call.
+        """
+        allowed_keys = {'group_name', 'provider_type'}
+        for idx, entry in enumerate(group_members):
+            if not isinstance(entry, dict):
+                self.module.fail_json(
+                    msg="group_members entry at index %d must be a dict,"
+                        " got %s" % (idx, type(entry).__name__))
+            unsupported = set(entry.keys()) - allowed_keys
+            if unsupported:
+                self.module.fail_json(
+                    msg="group_members entry at index %d contains unsupported"
+                        " keys. Supported keys are: group_name,"
+                        " provider_type." % idx)
+            if 'group_name' not in entry:
+                self.module.fail_json(
+                    msg="group_members entry at index %d is missing required"
+                        " key 'group_name'" % idx)
+            provider = entry.get('provider_type')
+            if provider and provider not in VALID_PROVIDER_TYPES:
+                self.module.fail_json(
+                    msg="group_members entry at index %d has invalid"
+                        " provider_type '%s'. Valid values are: %s."
+                        % (idx, provider,
+                           ', '.join(VALID_PROVIDER_TYPES)))
+
+    def _validate_wellknown_sids_entries(self, well_known_sids):
+        """Validate each entry in the well_known_sids list (FR-6.2).
+
+        Each value is matched against ``GET /platform/1/auth/wellknowns``:
+        display names are matched case-insensitively; SID strings must match
+        exactly. Unrecognised values cause immediate failure before any write.
+        """
+        if not well_known_sids:
+            return
+        wellknowns = self._get_wellknowns()
+        name_map = {wk['name'].lower(): wk for wk in wellknowns}
+        sid_map = {wk['sid']: wk for wk in wellknowns}
+        for value in well_known_sids:
+            if value.lower() not in name_map and value not in sid_map:
+                self.module.fail_json(
+                    msg="'%s' is not a recognised well-known SID name"
+                        " or SID string" % value)
+
+    def _get_wellknowns(self):
+        """Fetch and cache well-known SID personas from the cluster.
+
+        :return: list of dicts with ``name`` and ``sid`` keys.
+        """
+        if hasattr(self, '_wellknowns_cache'):
+            return self._wellknowns_cache
+        try:
+            api_response = self.api_instance.list_auth_wellknowns()
+            self._wellknowns_cache = api_response.to_dict().get(
+                'wellknowns') or []
+            LOG.info("Fetched %d well-known SIDs",
+                     len(self._wellknowns_cache))
+            return self._wellknowns_cache
+        except Exception as e:
+            error = self.determine_error(error_obj=e)
+            error_message = "Failed to fetch well-known SIDs: %s" % error
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
 
     def _process_user_entry(self, group, user, user_state, access_zone,
                             provider_type, index=0):
@@ -991,6 +1082,10 @@ class Group(object):
         state = self.module.params['state']
         users = self.module.params['users']
         user_state = self.module.params['user_state']
+        group_members = self.module.params.get('group_members') or []
+        group_member_state = self.module.params.get('group_member_state')
+        well_known_sids = self.module.params.get('well_known_sids') or []
+        well_known_sid_state = self.module.params.get('well_known_sid_state')
         group = None
         if group_name:
             group = 'GROUP:' + group_name
@@ -998,6 +1093,11 @@ class Group(object):
             group = 'GID:' + str(group_id)
 
         self._validate_group_params(group, users, user_state)
+        # Upfront validation for group_members and well_known_sids (FR-6)
+        if group_members:
+            self._validate_group_members_entries(group_members)
+        if well_known_sids:
+            self._validate_wellknown_sids_entries(well_known_sids)
 
         changed = False
         if state == 'present':
@@ -1030,7 +1130,17 @@ def get_group_parameters():
         state=dict(required=True, type='str', choices=['present', 'absent']),
         users=dict(required=False, type='list', elements='dict'),
         user_state=dict(required=False, type='str',
-                        choices=['present-in-group', 'absent-in-group'])
+                        choices=['present-in-group', 'absent-in-group']),
+        group_members=dict(required=False, type='list', elements='dict',
+                           default=[]),
+        group_member_state=dict(required=False, type='str',
+                                choices=['present-in-group',
+                                         'absent-in-group']),
+        well_known_sids=dict(required=False, type='list', elements='str',
+                             default=[]),
+        well_known_sid_state=dict(required=False, type='str',
+                                  choices=['present-in-group',
+                                           'absent-in-group'])
     )
 
 
