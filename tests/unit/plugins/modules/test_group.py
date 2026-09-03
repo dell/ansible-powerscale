@@ -1236,24 +1236,27 @@ class TestGroup(PowerScaleUnitBase):
         self.set_module_params(self.group_args,
                                MockGroupApi.get_update_group_payload_with_wellknown_sids())
         self.mock_wellknowns(powerscale_module_mock)
-        result = powerscale_module_mock.resolve_well_known_sid("Everyone")
-        assert result == "SID:S-1-1-0"
+        sid_id, display_name = powerscale_module_mock.resolve_well_known_sid("Everyone")
+        assert sid_id == "SID:S-1-1-0"
+        assert display_name == "Everyone"
 
     def test_resolve_well_known_sid_by_sid_string(self, powerscale_module_mock):
         """FR-2.1: resolve_well_known_sid resolves SID string."""
         self.set_module_params(self.group_args,
                                MockGroupApi.get_update_group_payload_with_wellknown_sids())
         self.mock_wellknowns(powerscale_module_mock)
-        result = powerscale_module_mock.resolve_well_known_sid("S-1-1-0")
-        assert result == "SID:S-1-1-0"
+        sid_id, display_name = powerscale_module_mock.resolve_well_known_sid("S-1-1-0")
+        assert sid_id == "SID:S-1-1-0"
+        assert display_name == "Everyone"
 
     def test_resolve_well_known_sid_case_insensitive(self, powerscale_module_mock):
         """FR-2.1: display name matching is case-insensitive."""
         self.set_module_params(self.group_args,
                                MockGroupApi.get_update_group_payload_with_wellknown_sids())
         self.mock_wellknowns(powerscale_module_mock)
-        result = powerscale_module_mock.resolve_well_known_sid("everyone")
-        assert result == "SID:S-1-1-0"
+        sid_id, display_name = powerscale_module_mock.resolve_well_known_sid("everyone")
+        assert sid_id == "SID:S-1-1-0"
+        assert display_name == "Everyone"
 
     def test_resolve_well_known_sid_unrecognised_exception(self, powerscale_module_mock):
         """FR-2.1: unrecognised value raises error."""
@@ -1272,9 +1275,10 @@ class TestGroup(PowerScaleUnitBase):
         self.set_module_params(self.group_args,
                                MockGroupApi.get_update_group_payload_with_wellknown_sids())
         self.mock_wellknowns(powerscale_module_mock)
-        result = powerscale_module_mock.resolve_well_known_sid(
+        sid_id, display_name = powerscale_module_mock.resolve_well_known_sid(
             "NT AUTHORITY\\INTERACTIVE")
-        assert result == "SID:S-1-5-4"
+        assert sid_id == "SID:S-1-5-4"
+        assert display_name == "NT AUTHORITY\\INTERACTIVE"
 
     def test_add_wellknown_to_group_calls_post(self, powerscale_module_mock):
         """FR-2.1: add_wellknown_to_group calls POST with type=wellknown."""
