@@ -95,3 +95,49 @@
         verify_ssl: "{{ verify_ssl }}"
         state: "suppressed"
       # Expected: Fails due to required_if validation (event_id is required when state is suppressed)
+
+    - name: Check mode - suppress an event alert (AC-006)
+      dellemc.powerscale.event_alert_suppression:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        event_id: "{{ test_event_id }}"
+        state: "suppressed"
+      check_mode: true
+      # Expected: changed=true, no actual API mutation, event_alert_suppression_details includes would_change_to field, diff output shows before/after
+
+    - name: Check mode - un-suppress an event alert (AC-006)
+      dellemc.powerscale.event_alert_suppression:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        event_id: "{{ test_event_id }}"
+        state: "unsuppressed"
+      check_mode: true
+      # Expected: changed=true, no actual API mutation, event_alert_suppression_details includes would_change_to field, diff output shows before/after
+
+    - name: Diff mode - suppress an event alert (AC-006)
+      dellemc.powerscale.event_alert_suppression:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        event_id: "{{ test_event_id }}"
+        state: "suppressed"
+      # Expected: changed=true, diff output shows before: {suppressed: false}, after: {suppressed: true}
+
+    - name: Diff mode - un-suppress an event alert (AC-006)
+      dellemc.powerscale.event_alert_suppression:
+        onefs_host: "{{ onefs_host }}"
+        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        event_id: "{{ test_event_id }}"
+        state: "unsuppressed"
+      # Expected: changed=true, diff output shows before: {suppressed: true}, after: {suppressed: false}
