@@ -1240,6 +1240,60 @@ class Group(object):
             group, None, user['user_id'], user_state, access_zone,
             provider_type, member_provider=member_provider)
 
+    def _process_group_members(self, group, group_members, group_member_state,
+                               access_zone, provider_type):
+        """Process group_members entries: resolve and add/remove child groups.
+
+        :return: True if any membership changed, False otherwise.
+        """
+        changed = False
+        for entry in group_members:
+            child_name = entry['group_name']
+            child_provider = entry.get('provider_type') or 'local'
+            resolved_id = self.resolve_group_id(
+                child_name, child_provider, access_zone)
+            if group_member_state == 'present-in-group':
+                if self.add_group_member_to_group(
+                        group, resolved_id, child_name,
+                        access_zone, provider_type):
+                    changed = True
+            elif group_member_state == 'absent-in-group':
+                if self.remove_group_member_from_group(
+                        group, resolved_id, child_name,
+                        access_zone, provider_type):
+                    changed = True
+        return changed
+
+    def _process_well_known_sids(self, group, well_known_sids,
+                                  well_known_sid_state, access_zone,
+                                  provider_type):
+        """Process well_known_sids entries: resolve and add/remove SIDs.
+
+        :return: True if any membership changed, False otherwise.
+        """
+        changed = False
+        for sid_value in well_known_sids:
+            resolved_id = self.resolve_well_known_sid(sid_value)
+            # Determine display name for idempotency matching
+            wellknowns = self._get_wellknowns()
+            display_name = sid_value
+            for wk in wellknowns:
+                if (wk['name'].lower() == sid_value.lower()
+                        or wk['sid'] == sid_value):
+                    display_name = wk['name']
+                    break
+            if well_known_sid_state == 'present-in-group':
+                if self.add_wellknown_to_group(
+                        group, resolved_id, display_name,
+                        access_zone, provider_type):
+                    changed = True
+            elif well_known_sid_state == 'absent-in-group':
+                if self.remove_wellknown_from_group(
+                        group, resolved_id, display_name,
+                        access_zone, provider_type):
+                    changed = True
+        return changed
+
     def _handle_present_state(self, group, group_name, group_id, access_zone, provider_type, users, user_state):
         """Handle present state logic. Returns (changed, group_details)."""
         group_details = self.get_group_details(group, access_zone, provider_type)
@@ -1259,6 +1313,11 @@ class Group(object):
                 LOG.error(error_message)
                 self.module.fail_json(msg=error_message)
 
+        changed = False
+
+        # Processing order: users -> group_members -> well_known_sids (FR-3.1)
+
+        # Step 1: Process users (existing behaviour)
         if user_state and users:
             # Compute the membership diff before processing, so the diff
             # reflects the intended changes even in check mode.
@@ -1266,12 +1325,29 @@ class Group(object):
                 group, access_zone, provider_type, users, user_state)
             if diff is not None:
                 self.result['diff'] = diff
-            changed = False
             for idx, user in enumerate(users):
                 if self._process_user_entry(group, user, user_state, access_zone, provider_type, index=idx):
                     changed = True
-            return changed
-        return False
+
+        # Step 2: Process group_members
+        group_members = self.module.params.get('group_members') or []
+        group_member_state = self.module.params.get('group_member_state')
+        if group_member_state and group_members:
+            if self._process_group_members(
+                    group, group_members, group_member_state,
+                    access_zone, provider_type):
+                changed = True
+
+        # Step 3: Process well_known_sids
+        well_known_sids = self.module.params.get('well_known_sids') or []
+        well_known_sid_state = self.module.params.get('well_known_sid_state')
+        if well_known_sid_state and well_known_sids:
+            if self._process_well_known_sids(
+                    group, well_known_sids, well_known_sid_state,
+                    access_zone, provider_type):
+                changed = True
+
+        return changed
 
     def perform_module_operation(self):
         """

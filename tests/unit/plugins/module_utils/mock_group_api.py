@@ -412,6 +412,10 @@ class MockGroupApi:
     def get_auth_group_response(provider="local"):
         """Build a single-group auth response for resolve_group_id().
 
+        The response supports both access patterns used by the module:
+        - ``api_response.to_dict().get('groups')`` (used by resolve_group_id)
+        - ``api_response.groups[0].to_dict()`` (used by get_group_details)
+
         :param provider: one of ``'local'``, ``'ads'``, ``'ldap'``, ``'nis'``,
             ``'file'``. Pass ``None`` to return an empty group list
             (unresolvable group).
@@ -426,13 +430,22 @@ class MockGroupApi:
             "file": MockGroupApi.GET_AUTH_GROUP_FILE,
         }
         fixture = fixtures.get(provider, MockGroupApi.GET_AUTH_GROUP_LOCAL)
-        return MockSDKResponse(copy.deepcopy(fixture))
+        data = copy.deepcopy(fixture)
+        # Build a response that supports both `.to_dict()` and `.groups[]`
+        mock_group = MagicMock()
+        mock_group.name = data['groups'][0]['name']
+        mock_group.to_dict.return_value = data['groups'][0]
+        mock_api_response = MagicMock()
+        mock_api_response.groups = [mock_group]
+        mock_api_response.to_dict.return_value = data
+        return mock_api_response
 
     @staticmethod
     def get_update_group_payload_with_group_members(
             group_members=None, group_member_state=None, **kwargs):
         """Build a payload that exercises the ``group_members`` parameter."""
         payload = MockGroupApi.CREATE_GROUP_PAYLOAD.copy()
+        payload['group_id'] = None  # avoid check_if_id_exists clash
         payload['users'] = []
         payload['user_state'] = None
         payload['group_members'] = group_members or []
@@ -447,6 +460,7 @@ class MockGroupApi:
             well_known_sids=None, well_known_sid_state=None, **kwargs):
         """Build a payload that exercises the ``well_known_sids`` parameter."""
         payload = MockGroupApi.CREATE_GROUP_PAYLOAD.copy()
+        payload['group_id'] = None  # avoid check_if_id_exists clash
         payload['users'] = []
         payload['user_state'] = None
         payload['group_members'] = []
