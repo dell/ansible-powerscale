@@ -262,7 +262,7 @@ def main():
     module = AnsibleModule(
         argument_spec=module_args,
         required_if=required_if,
-        supports_check_mode=False  # Deferred to Story 2
+        supports_check_mode=True
     )
 
     event_id = module.params.get('event_id')
@@ -310,22 +310,34 @@ def main():
                 changed = False
             else:
                 # Suppress the event
-                event_alert_suppression.set_event_suppressed_state(event_id, True)
-                
-                # Post-write verification
-                new_state = event_alert_suppression.get_event_suppressed_state(event_id)
-                if new_state:
-                    LOG.info(f'Successfully suppressed event {event_id}')
+                if module.check_mode:
+                    # Check mode - skip actual mutation
+                    LOG.info(f'Check mode: Would suppress event {event_id}')
                     result['event_alert_suppression_details'] = {
                         'event_id': event_id,
-                        'suppressed': True
+                        'suppressed': False,
+                        'would_change_to': True
                     }
-                    msg = f'Successfully suppressed event {event_id}'
+                    msg = f'Check mode: Would suppress event {event_id}'
                     changed = True
                 else:
-                    error_msg = f'Failed to verify suppression state for event {event_id}'
-                    LOG.error(error_msg)
-                    module.fail_json(msg=error_msg)
+                    # Actual suppress operation
+                    event_alert_suppression.set_event_suppressed_state(event_id, True)
+                    
+                    # Post-write verification
+                    new_state = event_alert_suppression.get_event_suppressed_state(event_id)
+                    if new_state:
+                        LOG.info(f'Successfully suppressed event {event_id}')
+                        result['event_alert_suppression_details'] = {
+                            'event_id': event_id,
+                            'suppressed': True
+                        }
+                        msg = f'Successfully suppressed event {event_id}'
+                        changed = True
+                    else:
+                        error_msg = f'Failed to verify suppression state for event {event_id}'
+                        LOG.error(error_msg)
+                        module.fail_json(msg=error_msg)
 
         elif state == 'unsuppressed':
             LOG.info(f'Un-suppressing event {event_id}')
@@ -342,22 +354,34 @@ def main():
                 changed = False
             else:
                 # Un-suppress the event
-                event_alert_suppression.set_event_suppressed_state(event_id, False)
-                
-                # Post-write verification
-                new_state = event_alert_suppression.get_event_suppressed_state(event_id)
-                if not new_state:
-                    LOG.info(f'Successfully un-suppressed event {event_id}')
+                if module.check_mode:
+                    # Check mode - skip actual mutation
+                    LOG.info(f'Check mode: Would un-suppress event {event_id}')
                     result['event_alert_suppression_details'] = {
                         'event_id': event_id,
-                        'suppressed': False
+                        'suppressed': True,
+                        'would_change_to': False
                     }
-                    msg = f'Successfully un-suppressed event {event_id}'
+                    msg = f'Check mode: Would un-suppress event {event_id}'
                     changed = True
                 else:
-                    error_msg = f'Failed to verify un-suppression state for event {event_id}'
-                    LOG.error(error_msg)
-                    module.fail_json(msg=error_msg)
+                    # Actual un-suppress operation
+                    event_alert_suppression.set_event_suppressed_state(event_id, False)
+                    
+                    # Post-write verification
+                    new_state = event_alert_suppression.get_event_suppressed_state(event_id)
+                    if not new_state:
+                        LOG.info(f'Successfully un-suppressed event {event_id}')
+                        result['event_alert_suppression_details'] = {
+                            'event_id': event_id,
+                            'suppressed': False
+                        }
+                        msg = f'Successfully un-suppressed event {event_id}'
+                        changed = True
+                    else:
+                        error_msg = f'Failed to verify un-suppression state for event {event_id}'
+                        LOG.error(error_msg)
+                        module.fail_json(msg=error_msg)
 
         module.exit_json(changed=changed, msg=msg, **result)
 
