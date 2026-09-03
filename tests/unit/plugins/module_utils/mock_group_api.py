@@ -225,6 +225,83 @@ class MockGroupApi:
         ]
     }
 
+    # Auth group responses for resolve_group_id() — mirrors the response from
+    # ``GET /platform/1/auth/groups/{v1AuthGroupId}`` for child group
+    # resolution across all five provider types.
+    GET_AUTH_GROUP_LOCAL = {
+        "groups": [
+            {
+                "dn": "CN=child_local_grp,CN=Groups,DC=VXX267-XX",
+                "name": "child_local_grp",
+                "provider": "lsa-local-provider:System",
+                "gid": {"id": "GID:2001", "name": "child_local_grp", "type": "group"},
+                "sid": {
+                    "id": "SID:S-1-5-21-1111111111-2222222222-3333333333-2001",
+                    "name": "child_local_grp", "type": "group"
+                },
+                "type": "group"
+            }
+        ]
+    }
+    GET_AUTH_GROUP_ADS = {
+        "groups": [
+            {
+                "dn": "CN=ad_child_grp,CN=Groups,DC=CORP,DC=EXAMPLE,DC=COM",
+                "name": "CORP\\ad_child_grp",
+                "provider": "lsa-activedirectory-provider:CORP.EXAMPLE.COM",
+                "gid": {"id": "GID:3001", "name": "CORP\\ad_child_grp", "type": "group"},
+                "sid": {
+                    "id": "SID:S-1-5-21-4444444444-5555555555-6666666666-3001",
+                    "name": "CORP\\ad_child_grp", "type": "group"
+                },
+                "type": "group"
+            }
+        ]
+    }
+    GET_AUTH_GROUP_LDAP = {
+        "groups": [
+            {
+                "dn": "cn=ldap_child_grp,ou=Groups,dc=example,dc=org",
+                "name": "ldap_child_grp",
+                "provider": "lsa-ldap-provider:example.org",
+                "gid": {"id": "GID:4001", "name": "ldap_child_grp", "type": "group"},
+                "sid": {
+                    "id": "SID:S-1-5-21-7777777777-8888888888-9999999999-4001",
+                    "name": "ldap_child_grp", "type": "group"
+                },
+                "type": "group"
+            }
+        ]
+    }
+    GET_AUTH_GROUP_NIS = {
+        "groups": [
+            {
+                "name": "nis_child_grp",
+                "provider": "lsa-nis-provider:CorpNIS",
+                "gid": {"id": "GID:5001", "name": "nis_child_grp", "type": "group"},
+                "sid": {
+                    "id": "SID:S-1-5-21-1010101010-2020202020-3030303030-5001",
+                    "name": "nis_child_grp", "type": "group"
+                },
+                "type": "group"
+            }
+        ]
+    }
+    GET_AUTH_GROUP_FILE = {
+        "groups": [
+            {
+                "name": "file_child_grp",
+                "provider": "lsa-file-provider:System",
+                "gid": {"id": "GID:6001", "name": "file_child_grp", "type": "group"},
+                "sid": {
+                    "id": "SID:S-1-5-21-4040404040-5050505050-6060606060-6001",
+                    "name": "file_child_grp", "type": "group"
+                },
+                "type": "group"
+            }
+        ]
+    }
+
     @staticmethod
     def get_create_group_payload(id=None, name=None, users=None, user_state=None, provider_type=None):
         group_payload = MockGroupApi.CREATE_GROUP_PAYLOAD.copy()
@@ -330,6 +407,26 @@ class MockGroupApi:
     def get_wellknowns_response():
         """Build the well-known SIDs response from ``GET /platform/1/auth/wellknowns``."""
         return MockSDKResponse(copy.deepcopy(MockGroupApi.GET_WELLKNOWNS))
+
+    @staticmethod
+    def get_auth_group_response(provider="local"):
+        """Build a single-group auth response for resolve_group_id().
+
+        :param provider: one of ``'local'``, ``'ads'``, ``'ldap'``, ``'nis'``,
+            ``'file'``. Pass ``None`` to return an empty group list
+            (unresolvable group).
+        """
+        if provider is None:
+            return MockSDKResponse({"groups": []})
+        fixtures = {
+            "local": MockGroupApi.GET_AUTH_GROUP_LOCAL,
+            "ads": MockGroupApi.GET_AUTH_GROUP_ADS,
+            "ldap": MockGroupApi.GET_AUTH_GROUP_LDAP,
+            "nis": MockGroupApi.GET_AUTH_GROUP_NIS,
+            "file": MockGroupApi.GET_AUTH_GROUP_FILE,
+        }
+        fixture = fixtures.get(provider, MockGroupApi.GET_AUTH_GROUP_LOCAL)
+        return MockSDKResponse(copy.deepcopy(fixture))
 
     @staticmethod
     def get_update_group_payload_with_group_members(

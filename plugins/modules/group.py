@@ -586,6 +586,113 @@ class Group(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
+    def resolve_group_id(self, group_name, provider_type, access_zone):
+        """Resolve a child group to its unique SID identifier.
+
+        Uses ``AuthApi.get_auth_group`` with the given provider so the cluster
+        looks up the group in the correct authentication backend. Returns the
+        SID string (e.g. ``SID:S-1-5-…``) that can be passed directly to the
+        group-membership API.
+
+        :param group_name: the name of the child group to resolve.
+        :param provider_type: bare provider type (local, file, ldap, ads, nis).
+        :param access_zone: the access zone the parent group lives in.
+        :return: the group's ``SID:…`` identifier string.
+        """
+        auth_group_id = "GROUP:" + group_name
+        try:
+            api_response = self.api_instance.get_auth_group(
+                auth_group_id=auth_group_id,
+                zone=access_zone, provider=provider_type)
+            groups = api_response.to_dict().get('groups') or []
+            if not groups:
+                error_message = (
+                    "Group '%s' could not be resolved in provider '%s'"
+                    " in access zone '%s'"
+                    % (group_name, provider_type, access_zone))
+                LOG.error(error_message)
+                self.module.fail_json(msg=error_message)
+            resolved_id = groups[0]['sid']['id']
+            LOG.info("Resolved group '%s' in provider '%s' zone '%s' to %s",
+                     group_name, provider_type, access_zone, resolved_id)
+            return resolved_id
+        except Exception as e:
+            error = self.determine_error(error_obj=e)
+            error_message = (
+                "Group '%s' could not be resolved in provider '%s'"
+                " in access zone '%s': %s"
+                % (group_name, provider_type, access_zone, error))
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    def add_group_member_to_group(self, group, resolved_id, member_name,
+                                  access_zone, provider_type):
+        """Add a child group to a parent group in PowerScale.
+
+        Checks current membership first for idempotency. If the child group
+        is already a member, returns False without making any API call.
+
+        :param group: the parent group identifier (e.g. ``GROUP:parent``).
+        :param resolved_id: the resolved SID of the child group.
+        :param member_name: display name for logging.
+        :param access_zone: the access zone.
+        :param provider_type: the parent group's provider type.
+        :return: True if the member was added, False if already present.
+        """
+        # Check current membership for idempotency
+        current_members = self.get_group_members(group, access_zone,
+                                                 provider_type)
+        for member in (current_members or []):
+            if member.get('name', '').lower() == member_name.lower():
+                LOG.info("Group member '%s' is already in group %s",
+                         member_name, group)
+                return False
+        LOG.info("Adding group member '%s' to group %s", member_name, group)
+        if self.module.check_mode:
+            LOG.info("Check mode: skipping create_group_member for %s",
+                     member_name)
+            return True
+        group_member = utils.isi_sdk.AuthAccessAccessItemFileGroup(resolved_id)
+        self.group_api_instance.create_group_member(
+            group_member, group, zone=access_zone, provider=provider_type)
+        return True
+
+    def remove_group_member_from_group(self, group, resolved_id, member_name,
+                                       access_zone, provider_type):
+        """Remove a child group from a parent group in PowerScale.
+
+        Checks current membership first for idempotency. If the child group
+        is not a member, returns False without making any API call.
+
+        :param group: the parent group identifier (e.g. ``GROUP:parent``).
+        :param resolved_id: the resolved SID of the child group.
+        :param member_name: display name for logging.
+        :param access_zone: the access zone.
+        :param provider_type: the parent group's provider type.
+        :return: True if the member was removed, False if not present.
+        """
+        # Check current membership for idempotency
+        current_members = self.get_group_members(group, access_zone,
+                                                 provider_type)
+        is_member = False
+        for member in (current_members or []):
+            if member.get('name', '').lower() == member_name.lower():
+                is_member = True
+                break
+        if not is_member:
+            LOG.info("Group member '%s' is not in group %s, nothing to remove",
+                     member_name, group)
+            return False
+        LOG.info("Removing group member '%s' from group %s",
+                 member_name, group)
+        if self.module.check_mode:
+            LOG.info("Check mode: skipping delete_group_member for %s",
+                     member_name)
+            return True
+        self.group_api_instance.delete_group_member(
+            resolved_id, group, zone=access_zone, provider=provider_type)
+        return True
+
     def check_provider_type(self, provider, message):
         """ Check the provider and return the updated provider"""
         if provider.lower() != "local":
