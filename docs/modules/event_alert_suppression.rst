@@ -34,7 +34,7 @@ Parameters
 
     Required when I(state) is C(suppressed) or C(unsuppressed).
 
-    Optional when I(state) is C(get).
+    Optional when I(state) is C(query).
 
 
   state (True, str, None)
@@ -44,9 +44,9 @@ Parameters
 
     C(unsuppressed) - un-suppress alerting for the specified event ID.
 
-    C(get) - query the current suppression state.
+    C(query) - query the current suppression state.
 
-    Choices: ['suppressed', 'unsuppressed', 'get']
+    Choices: ['suppressed', 'unsuppressed', 'query']
 
 
 
@@ -93,7 +93,7 @@ Examples
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         verify_ssl: "{{ verify_ssl }}"
-        state: "get"
+        state: "query"
 
     - name: Query a specific event's suppression state
       dellemc.powerscale.event_alert_suppression:
@@ -103,7 +103,7 @@ Examples
         api_password: "{{ api_password }}"
         verify_ssl: "{{ verify_ssl }}"
         event_id: "100010001"
-        state: "get"
+        state: "query"
 
 
 
@@ -133,7 +133,7 @@ event_alert_suppression_details
         suppressions (list)
             List of suppressed events.
 
-            Returned: when I(state) is C(get) and I(event_id) is not provided
+            Returned: when I(state) is C(query) and I(event_id) is not provided
 
             Type: list
 
@@ -169,7 +169,7 @@ event_alert_suppression_details
         total (int)
             Total count of suppressed events.
 
-            Returned: when I(state) is C(get) and I(event_id) is not provided
+            Returned: when I(state) is C(query) and I(event_id) is not provided
 
             Type: int
 

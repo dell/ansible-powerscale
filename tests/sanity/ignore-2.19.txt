@@ -1,1 +1,0 @@
-plugins/modules/event_alert_suppression.py validate-modules:parameter-state-invalid-choice

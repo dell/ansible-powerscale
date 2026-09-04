@@ -30,16 +30,16 @@ options:
     description:
     - The event type ID to suppress or un-suppress.
     - Required when I(state) is C(suppressed) or C(unsuppressed).
-    - Optional when I(state) is C(get).
+    - Optional when I(state) is C(query).
     type: str
   state:
     description:
     - The desired state of the event alert suppression.
     - C(suppressed) - suppress alerting for the specified event ID.
     - C(unsuppressed) - un-suppress alerting for the specified event ID.
-    - C(get) - query the current suppression state.
+    - C(query) - query the current suppression state.
     type: str
-    choices: ['suppressed', 'unsuppressed', 'get']
+    choices: ['suppressed', 'unsuppressed', 'query']
     required: true
 attributes:
   check_mode:
@@ -86,7 +86,7 @@ EXAMPLES = r'''
     api_user: "{{ api_user }}"
     api_password: "{{ api_password }}"
     verify_ssl: "{{ verify_ssl }}"
-    state: "get"
+    state: "query"
 
 - name: Query a specific event's suppression state
   dellemc.powerscale.event_alert_suppression:
@@ -96,7 +96,7 @@ EXAMPLES = r'''
     api_password: "{{ api_password }}"
     verify_ssl: "{{ verify_ssl }}"
     event_id: "100010001"
-    state: "get"
+    state: "query"
 '''
 
 RETURN = r'''
@@ -114,7 +114,7 @@ event_alert_suppression_details:
             description: List of suppressed events.
             type: list
             elements: dict
-            returned: when I(state) is C(get) and I(event_id) is not provided
+            returned: when I(state) is C(query) and I(event_id) is not provided
             contains:
                 id:
                     description: Event ID.
@@ -137,7 +137,7 @@ event_alert_suppression_details:
         total:
             description: Total count of suppressed events.
             type: int
-            returned: when I(state) is C(get) and I(event_id) is not provided
+            returned: when I(state) is C(query) and I(event_id) is not provided
         event_id:
             description: Event ID.
             type: str
@@ -240,7 +240,7 @@ class EventAlertSuppression(PowerScaleBase):
         return dict(
             event_id=dict(type='str'),
             state=dict(type='str', required=True,
-                       choices=['suppressed', 'unsuppressed', 'get']))
+                       choices=['suppressed', 'unsuppressed', 'query']))
 
 
 class EventAlertSuppressionExitHandler:
@@ -289,7 +289,7 @@ class EventAlertSuppressionQueryHandler:
     def handle(self, suppression_obj, suppression_params):
         event_id = suppression_params['event_id']
 
-        if suppression_params['state'] == 'get':
+        if suppression_params['state'] == 'query':
             if event_id is None:
                 suppression_details = suppression_obj.get_suppressed_events()
                 suppression_obj.result['msg'] = \

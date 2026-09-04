@@ -37,7 +37,7 @@
         api_password: "{{ api_password }}"
         verify_ssl: "{{ verify_ssl }}"
         event_id: "{{ event_id }}"
-        state: "get"
+        state: "query"
       # Expected: changed=false, event_alert_suppression_details with
       # event_id and suppressed. Event metadata is only returned by the
       # query-all task below.
@@ -48,7 +48,7 @@
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         verify_ssl: "{{ verify_ssl }}"
-        state: "get"
+        state: "query"
       # Expected: changed=false, event_alert_suppression_details.suppressions
       # with full metadata (id, name, category, description, node, suppressed)
       # and event_alert_suppression_details.total

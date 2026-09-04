@@ -275,7 +275,7 @@ class TestEventAlertSuppression(PowerScaleUnitBase):
 
     def test_query_all_suppressed_events(self, powerscale_module_mock):
         """Query all suppressed events - FR-3.1 / AC-003"""
-        self.set_module_params(self.suppression_args, {"state": "get"})
+        self.set_module_params(self.suppression_args, {"state": "query"})
         self.mock_suppress_list_response(
             powerscale_module_mock,
             MockEventAlertSuppressionApi.SUPPRESSED_EVENTS_LIST)
@@ -290,7 +290,7 @@ class TestEventAlertSuppression(PowerScaleUnitBase):
 
     def test_query_all_suppressed_events_pagination(self, powerscale_module_mock):
         """Query all suppressed events across pages - FR-3.1 / NFR-1"""
-        self.set_module_params(self.suppression_args, {"state": "get"})
+        self.set_module_params(self.suppression_args, {"state": "query"})
         self.mock_suppress_list_response(
             powerscale_module_mock,
             MockEventAlertSuppressionApi.SUPPRESSED_EVENTS_LIST_PAGE_1,
@@ -306,7 +306,7 @@ class TestEventAlertSuppression(PowerScaleUnitBase):
 
     def test_query_all_suppressed_events_empty(self, powerscale_module_mock):
         """Query when no event is suppressed - FR-3.1"""
-        self.set_module_params(self.suppression_args, {"state": "get"})
+        self.set_module_params(self.suppression_args, {"state": "query"})
         self.mock_suppress_list_response(
             powerscale_module_mock,
             MockEventAlertSuppressionApi.EMPTY_SUPPRESSED_EVENTS)
@@ -318,7 +318,7 @@ class TestEventAlertSuppression(PowerScaleUnitBase):
 
     def test_query_all_suppressed_events_exception(self, powerscale_module_mock):
         """Query all suppressed events fails with an API error - NFR-2"""
-        self.set_module_params(self.suppression_args, {"state": "get"})
+        self.set_module_params(self.suppression_args, {"state": "query"})
         powerscale_module_mock.event_api.get_event_suppress = MagicMock(
             side_effect=MockApiException)
         self.capture_fail_json_call(
@@ -331,7 +331,7 @@ class TestEventAlertSuppression(PowerScaleUnitBase):
         self.set_module_params(
             self.suppression_args,
             {"event_id": MockEventAlertSuppressionApi.EVENT_ID,
-             "state": "get"})
+             "state": "query"})
         self.mock_suppress_response(
             powerscale_module_mock,
             MockEventAlertSuppressionApi.SUPPRESSED_EVENT)
@@ -350,7 +350,7 @@ class TestEventAlertSuppression(PowerScaleUnitBase):
         self.set_module_params(
             self.suppression_args,
             {"event_id": MockEventAlertSuppressionApi.EVENT_ID,
-             "state": "get"})
+             "state": "query"})
         self.mock_suppress_response(
             powerscale_module_mock,
             MockEventAlertSuppressionApi.UNSUPPRESSED_EVENT)
@@ -366,7 +366,7 @@ class TestEventAlertSuppression(PowerScaleUnitBase):
         self.set_module_params(
             self.suppression_args,
             {"event_id": MockEventAlertSuppressionApi.INVALID_EVENT_ID,
-             "state": "get"})
+             "state": "query"})
         powerscale_module_mock.event_api.get_event_suppress_by_id = MagicMock(
             side_effect=MockApiException)
         self.capture_fail_json_call(
@@ -380,7 +380,7 @@ class TestEventAlertSuppression(PowerScaleUnitBase):
         assert module_params['event_id']['type'] == 'str'
         assert module_params['state']['required'] is True
         assert module_params['state']['choices'] == ['suppressed',
-                                                     'unsuppressed', 'get']
+                                                     'unsuppressed', 'query']
 
         ansible_module_kwargs = AnsibleModule.call_args.kwargs
         assert ansible_module_kwargs['supports_check_mode'] is True
@@ -392,7 +392,7 @@ class TestEventAlertSuppression(PowerScaleUnitBase):
         self.set_module_params(
             self.suppression_args,
             {"event_id": MockEventAlertSuppressionApi.EVENT_ID,
-             "state": "get"})
+             "state": "query"})
         self.mock_suppress_response(
             powerscale_module_mock,
             MockEventAlertSuppressionApi.SUPPRESSED_EVENT)
