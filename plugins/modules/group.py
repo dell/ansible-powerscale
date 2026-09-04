@@ -1106,6 +1106,9 @@ class Group(object):
             group, access_zone, provider_type)
 
         # --- users diff (existing behaviour) ---
+        # TODO(Part3): Consider filtering before_names by type == 'user'
+        # to make the 'members' diff key consistent with 'group_members'
+        # and 'well_known_sids'. This is inherited pre-Part-2 behavior.
         before_names = [m.get('name', '') for m in (current_members or [])]
         after_names = list(before_names)
         for user in (users or []):
