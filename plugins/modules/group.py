@@ -510,7 +510,10 @@ group_details:
             type: str
             sample: "lsa-local-provider:system"
         members:
-            description: The list of sid's the members of group.
+            description: The list of all members of the group, including
+                         users, child groups, and well-known SIDs. Each
+                         entry contains a C(type) field indicating the
+                         member kind (C(user), C(group), or C(wellknown)).
             type: complex
             contains:
                 sid:
@@ -525,7 +528,8 @@ group_details:
                             description: The name of the resource.
                             type: str
                         type_of_resource:
-                            description: The resource's type is mentioned.
+                            description: The resource's type — one of C(user),
+                                         C(group), or C(wellknown).
                             type: str
                             sample: "user"
     sample:
@@ -563,7 +567,18 @@ diff:
             type: dict
             contains:
                 members:
-                    description: Sorted list of member names before the operation.
+                    description: Sorted list of all member names before the
+                                 operation.
+                    type: list
+                    elements: str
+                group_members:
+                    description: Sorted list of child group names before the
+                                 operation.
+                    type: list
+                    elements: str
+                well_known_sids:
+                    description: Sorted list of well-known SID display names
+                                 before the operation.
                     type: list
                     elements: str
         after:
@@ -571,13 +586,32 @@ diff:
             type: dict
             contains:
                 members:
-                    description: Sorted list of member names after the operation.
+                    description: Sorted list of all member names after the
+                                 operation.
+                    type: list
+                    elements: str
+                group_members:
+                    description: Sorted list of child group names after the
+                                 operation.
+                    type: list
+                    elements: str
+                well_known_sids:
+                    description: Sorted list of well-known SID display names
+                                 after the operation.
                     type: list
                     elements: str
     sample:
         {
-            "before": {"members": ["Guest", "ldap_user"]},
-            "after": {"members": ["Guest"]}
+            "before": {
+                "members": ["Guest", "ldap_user"],
+                "group_members": ["child_group"],
+                "well_known_sids": ["Everyone"]
+            },
+            "after": {
+                "members": ["Guest"],
+                "group_members": [],
+                "well_known_sids": []
+            }
         }
 
 '''
