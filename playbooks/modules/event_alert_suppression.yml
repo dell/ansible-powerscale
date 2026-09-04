@@ -1,0 +1,111 @@
+---
+- name: Event Alert Suppression Module Operations on PowerScale Storage
+  hosts: localhost
+  connection: local
+  vars:
+    onefs_host: "x.x.x.x"
+    api_user: "user"
+    api_password: "xxxx"
+    verify_ssl: false
+    event_id: "100010001"
+
+  tasks:
+    - name: Suppress an event alert
+      dellemc.powerscale.event_alert_suppression:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        event_id: "{{ event_id }}"
+        state: "suppressed"
+      # Expected: changed=true, event_alert_suppression_details.suppressed=true
+
+    - name: Suppress an event alert again - idempotent
+      dellemc.powerscale.event_alert_suppression:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        event_id: "{{ event_id }}"
+        state: "suppressed"
+      # Expected: changed=false, msg reports the event is already suppressed
+
+    - name: Query the suppression state of a specific event
+      dellemc.powerscale.event_alert_suppression:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        event_id: "{{ event_id }}"
+        state: "query"
+      # Expected: changed=false, event_alert_suppression_details with
+      # event_id and suppressed. Event metadata is only returned by the
+      # query-all task below.
+
+    - name: Query all suppressed events
+      dellemc.powerscale.event_alert_suppression:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        state: "query"
+      # Expected: changed=false, event_alert_suppression_details.suppressions
+      # with full metadata (id, name, category, description, node, suppressed)
+      # and event_alert_suppression_details.total
+
+    - name: Un-suppress an event alert in check mode
+      dellemc.powerscale.event_alert_suppression:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        event_id: "{{ event_id }}"
+        state: "unsuppressed"
+      check_mode: true
+      # Expected: changed=true, no cluster modification,
+      # event_alert_suppression_details.would_change_to=false
+
+    - name: Un-suppress an event alert and report the diff
+      dellemc.powerscale.event_alert_suppression:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        event_id: "{{ event_id }}"
+        state: "unsuppressed"
+      diff: true
+      # Expected: changed=true, diff.before.suppressed=true,
+      # diff.after.suppressed=false
+
+    - name: Un-suppress an event alert again - idempotent
+      dellemc.powerscale.event_alert_suppression:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        event_id: "{{ event_id }}"
+        state: "unsuppressed"
+      # Expected: changed=false, msg reports the event is already un-suppressed
+
+    - name: Suppress an invalid event ID - expected to fail
+      dellemc.powerscale.event_alert_suppression:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        event_id: "999999999"
+        state: "suppressed"
+      register: invalid_event_result
+      ignore_errors: true
+      # Expected: task fails with a message reporting the invalid event ID
+
+    - name: Suppress without event_id - expected to fail
+      dellemc.powerscale.event_alert_suppression:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        state: "suppressed"
+      register: missing_event_id_result
+      ignore_errors: true
+      # Expected: task fails on required_if validation before any API call

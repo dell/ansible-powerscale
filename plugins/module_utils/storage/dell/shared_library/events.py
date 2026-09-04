@@ -1,4 +1,4 @@
-# Copyright: (c) 2024, Dell Technologies
+# Copyright: (c) 2026, Dell Technologies
 
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
@@ -208,3 +208,64 @@ class Events:
                 error_message = f'Fetching alert channel failed with error: {error_msg}'
                 LOG.error(error_message)
                 self.module.fail_json(msg=error_message)
+
+    def get_event_suppressed_state(self, event_id):
+        """
+        Get the current suppression state for a specific event
+        :param event_id: Event ID
+        :return: Suppression state (boolean)
+        :rtype: bool
+        """
+        try:
+            result = (self.event_api.get_event_suppress_by_id(
+                event_suppress_id=event_id)).to_dict()
+            return result.get('suppressed', False)
+        except Exception as e:
+            error_msg = utils.determine_error(error_obj=e)
+            error_message = f'Fetching suppression state for event {event_id} failed with error: {error_msg}'
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    def get_event_suppress_list(self):
+        """
+        Get all suppressed events
+        :return: List of suppressed events
+        :rtype: list
+        """
+        try:
+            suppressions = []
+            suppress_list = (self.event_api.get_event_suppress()).to_dict()
+            suppressions.extend(suppress_list.get('suppressions') or [])
+            resume = suppress_list.get('resume')
+
+            while resume:
+                suppress_list = (self.event_api.get_event_suppress(
+                    resume=resume)).to_dict()
+                suppressions.extend(suppress_list.get('suppressions') or [])
+                resume = suppress_list.get('resume')
+            return suppressions
+
+        except Exception as e:
+            error_msg = utils.determine_error(error_obj=e)
+            error_message = f'Fetching suppressed events failed with error: {error_msg}'
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    def set_event_suppressed_state(self, event_id, event_suppress_id_params):
+        """
+        Set the suppression state for a specific event
+        :param event_id: Event ID
+        :param event_suppress_id_params: SDK EventSuppressIdParams instance
+        :return: Success status
+        :rtype: bool
+        """
+        try:
+            (self.event_api.update_event_suppress_by_id(
+                event_suppress_id=event_id,
+                event_suppress_id_params=event_suppress_id_params))
+            return True
+        except Exception as e:
+            error_msg = utils.determine_error(error_obj=e)
+            error_message = f'Updating suppression state for event {event_id} failed with error: {error_msg}'
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
