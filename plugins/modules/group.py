@@ -825,6 +825,10 @@ class Group(object):
         :param access_zone: the access zone the parent group lives in.
         :return: the group's ``SID:…`` identifier string.
         """
+        cache = getattr(self, '_group_resolution_cache', {})
+        cache_key = (group_name.lower(), provider_type, access_zone)
+        if cache_key in cache:
+            return cache[cache_key]
         auth_group_id = "GROUP:" + group_name
         try:
             api_response = self.api_instance.get_auth_group(
@@ -839,6 +843,8 @@ class Group(object):
                 LOG.error(error_message)
                 self.module.fail_json(msg=error_message)
             resolved_id = groups[0]['sid']['id']
+            cache[cache_key] = resolved_id
+            self._group_resolution_cache = cache
             LOG.info("Resolved group '%s' in provider '%s' zone '%s' to %s",
                      group_name, provider_type, access_zone, resolved_id)
             return resolved_id
@@ -869,7 +875,8 @@ class Group(object):
         current_members = self.get_group_members(group, access_zone,
                                                  provider_type)
         for member in (current_members or []):
-            if member.get('name', '').lower() == member_name.lower():
+            if (member.get('id') == resolved_id or
+                    member.get('name', '').lower() == member_name.lower()):
                 LOG.info("Group member '%s' is already in group %s",
                          member_name, group)
                 return False
@@ -903,7 +910,8 @@ class Group(object):
                                                  provider_type)
         is_member = False
         for member in (current_members or []):
-            if member.get('name', '').lower() == member_name.lower():
+            if (member.get('id') == resolved_id or
+                    member.get('name', '').lower() == member_name.lower()):
                 is_member = True
                 break
         if not is_member:
@@ -971,7 +979,8 @@ class Group(object):
         current_members = self.get_group_members(group, access_zone,
                                                  provider_type)
         for member in (current_members or []):
-            if member.get('name', '').lower() == member_name.lower():
+            if (member.get('id') == resolved_id or
+                    member.get('name', '').lower() == member_name.lower()):
                 LOG.info("Well-known SID '%s' is already in group %s",
                          member_name, group)
                 return False
@@ -1004,7 +1013,8 @@ class Group(object):
                                                  provider_type)
         is_member = False
         for member in (current_members or []):
-            if member.get('name', '').lower() == member_name.lower():
+            if (member.get('id') == resolved_id or
+                    member.get('name', '').lower() == member_name.lower()):
                 is_member = True
                 break
         if not is_member:
@@ -1331,10 +1341,9 @@ class Group(object):
             group, access_zone, provider_type)
 
         # --- users diff (existing behaviour) ---
-        # TODO(Part3): Consider filtering before_names by type == 'user'
-        # to make the 'members' diff key consistent with 'group_members'
-        # and 'well_known_sids'. This is inherited pre-Part-2 behavior.
-        before_names = [m.get('name', '') for m in (current_members or [])]
+        before_names = [
+            m.get('name', '') for m in (current_members or [])
+            if m.get('type') == 'user']
         after_names = list(before_names)
         for user in (users or []):
             if not isinstance(user, dict):
@@ -1350,40 +1359,60 @@ class Group(object):
         # --- group_members diff ---
         group_members = self.module.params.get('group_members') or []
         group_member_state = self.module.params.get('group_member_state')
-        before_groups = [
-            m.get('name', '') for m in (current_members or [])
-            if m.get('type') == 'group']
-        after_groups = list(before_groups)
+        before_group_members = [
+            m for m in (current_members or []) if m.get('type') == 'group']
+        after_group_members = list(before_group_members)
+        before_groups = [m.get('name', '') for m in before_group_members]
         for entry in group_members:
             if not isinstance(entry, dict):
                 continue
             gname = entry.get('group_name', '')
+            resolved_id = self.resolve_group_id(
+                gname, entry.get('provider_type') or 'local', access_zone)
             if group_member_state == 'present-in-group':
-                if gname.lower() not in [g.lower() for g in after_groups]:
-                    after_groups.append(gname)
+                if not any(
+                        m.get('id') == resolved_id or
+                        m.get('name', '').lower() == gname.lower()
+                        for m in after_group_members):
+                    after_group_members.append(
+                        {'id': resolved_id, 'name': gname, 'type': 'group'})
             elif group_member_state == 'absent-in-group':
-                after_groups = [g for g in after_groups
-                                if g.lower() != gname.lower()]
+                after_group_members = [
+                    m for m in after_group_members
+                    if m.get('id') != resolved_id and
+                    m.get('name', '').lower() != gname.lower()]
+        after_groups = [m.get('name', '') for m in after_group_members]
 
         # --- well_known_sids diff ---
         well_known_sids = self.module.params.get('well_known_sids') or []
         wk_sid_state = self.module.params.get('well_known_sid_state')
-        before_sids = [
-            m.get('name', '') for m in (current_members or [])
+        before_sid_members = [
+            m for m in (current_members or [])
             if m.get('type') == 'wellknown']
-        after_sids = list(before_sids)
+        after_sid_members = list(before_sid_members)
+        before_sids = [m.get('name', '') for m in before_sid_members]
         for sid_value in well_known_sids:
             try:
-                _, display_name = self.resolve_well_known_sid(sid_value)
+                resolved_id, display_name = self.resolve_well_known_sid(
+                    sid_value)
             except SystemExit:
                 continue
             if wk_sid_state == 'present-in-group':
-                if display_name.lower() not in [
-                        s.lower() for s in after_sids]:
-                    after_sids.append(display_name)
+                if not any(
+                        m.get('id') == resolved_id or
+                        m.get('name', '').lower() == display_name.lower()
+                        for m in after_sid_members):
+                    after_sid_members.append({
+                        'id': resolved_id,
+                        'name': display_name,
+                        'type': 'wellknown',
+                    })
             elif wk_sid_state == 'absent-in-group':
-                after_sids = [s for s in after_sids
-                              if s.lower() != display_name.lower()]
+                after_sid_members = [
+                    m for m in after_sid_members
+                    if m.get('id') != resolved_id and
+                    m.get('name', '').lower() != display_name.lower()]
+        after_sids = [m.get('name', '') for m in after_sid_members]
 
         return {
             'before': {
@@ -1491,9 +1520,20 @@ class Group(object):
         if hasattr(self, '_wellknowns_cache'):
             return self._wellknowns_cache
         try:
-            api_response = self.api_instance.list_auth_wellknowns()
-            self._wellknowns_cache = api_response.to_dict().get(
-                'wellknowns') or []
+            get_wellknowns = getattr(
+                self.api_instance, 'list_auth_wellknowns', None)
+            if not callable(get_wellknowns):
+                get_wellknowns = self.api_instance.get_auth_wellknowns
+            api_response = get_wellknowns()
+            wellknowns = api_response.to_dict().get('wellknowns') or []
+            self._wellknowns_cache = [
+                {
+                    'name': wk['name'],
+                    'sid': (wk.get('sid') or wk.get('id', '')).replace(
+                        'SID:', '', 1),
+                }
+                for wk in wellknowns
+            ]
             LOG.info("Fetched %d well-known SIDs",
                      len(self._wellknowns_cache))
             return self._wellknowns_cache

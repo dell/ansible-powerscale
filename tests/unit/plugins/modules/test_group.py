@@ -1090,6 +1090,19 @@ class TestGroup(PowerScaleUnitBase):
             "child_local_grp", "local", "System")
         assert result == "SID:S-1-5-21-1111111111-2222222222-3333333333-2001"
 
+    def test_resolve_group_id_caches_result(self, powerscale_module_mock):
+        self.set_module_params(
+            self.group_args,
+            MockGroupApi.get_update_group_payload_with_group_members())
+        self.mock_get_auth_group_for_resolve(
+            powerscale_module_mock, provider="local")
+        first = powerscale_module_mock.resolve_group_id(
+            "child_local_grp", "local", "System")
+        second = powerscale_module_mock.resolve_group_id(
+            "child_local_grp", "local", "System")
+        assert first == second
+        powerscale_module_mock.api_instance.get_auth_group.assert_called_once()
+
     def test_resolve_group_id_ads(self, powerscale_module_mock):
         """FR-1.1/AC-001: resolve_group_id for ads provider returns SID."""
         self.set_module_params(self.group_args,
@@ -1200,6 +1213,27 @@ class TestGroup(PowerScaleUnitBase):
         assert result is False
         powerscale_module_mock.group_api_instance.create_group_member.assert_not_called()
 
+    def test_add_group_member_idempotent_when_canonical_name_differs(
+            self, powerscale_module_mock):
+        self.set_module_params(
+            self.group_args,
+            MockGroupApi.get_update_group_payload_with_group_members())
+        members = MockSDKResponse({"members": [
+            {"id": "SID:S-1-5-21-1111111111-2222222222-3333333333-2001",
+             "name": "canonical_group_name", "type": "group"}
+        ]})
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=members)
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        result = powerscale_module_mock.add_group_member_to_group(
+            "GROUP:test_group",
+            "SID:S-1-5-21-1111111111-2222222222-3333333333-2001",
+            "requested_group_name",
+            "System", "local")
+        assert result is False
+        powerscale_module_mock.group_api_instance.create_group_member.assert_not_called()
+
     def test_remove_group_member_idempotent_not_present(self, powerscale_module_mock):
         """FR-1.2 idempotent: remove when member not present returns no change."""
         self.set_module_params(self.group_args,
@@ -1230,6 +1264,25 @@ class TestGroup(PowerScaleUnitBase):
         else:
             powerscale_module_mock.api_instance.list_auth_wellknowns = \
                 MagicMock(return_value=MockGroupApi.get_wellknowns_response())
+
+    def test_get_wellknowns_uses_sdk_get_method_when_list_is_unavailable(
+            self, powerscale_module_mock):
+        powerscale_module_mock.api_instance.list_auth_wellknowns = None
+        powerscale_module_mock.api_instance.get_auth_wellknowns = MagicMock(
+            return_value=MockGroupApi.get_wellknowns_response())
+        result = powerscale_module_mock._get_wellknowns()
+        assert result
+        powerscale_module_mock.api_instance.get_auth_wellknowns.assert_called_once()
+
+    def test_get_wellknowns_normalizes_sdk_id_field(
+            self, powerscale_module_mock):
+        powerscale_module_mock.api_instance.list_auth_wellknowns = MagicMock(
+            return_value=MockSDKResponse({"wellknowns": [
+                {"id": "SID:S-1-1-0", "name": "Everyone",
+                 "type": "wellknown"}
+            ]}))
+        result = powerscale_module_mock._get_wellknowns()
+        assert result[0]["sid"] == "S-1-1-0"
 
     def test_resolve_well_known_sid_by_display_name(self, powerscale_module_mock):
         """FR-2.1: resolve_well_known_sid resolves display name to SID string."""
@@ -1795,6 +1848,22 @@ class TestGroup(PowerScaleUnitBase):
         # GET calls are allowed (list_group_members for membership check)
         powerscale_module_mock.group_api_instance.list_group_members.assert_called()
 
+    def test_diff_members_contains_only_users(self, powerscale_module_mock):
+        self.set_module_params(
+            self.group_args, MockGroupApi.CREATE_GROUP_PAYLOAD.copy())
+        powerscale_module_mock.module._diff = True
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=MockSDKResponse({"members": [
+                {"id": "UID:1001", "name": "test_user", "type": "user"},
+                {"id": "GID:2001", "name": "child_group", "type": "group"},
+                {"id": "SID:S-1-1-0", "name": "Everyone",
+                 "type": "wellknown"},
+            ]}))
+        diff = powerscale_module_mock._build_member_diff(
+            "GROUP:test_group", "System", "local", [], None)
+        assert diff['before']['members'] == ["test_user"]
+        assert diff['after']['members'] == ["test_user"]
+
     def test_diff_group_members_before_after_keys(self, powerscale_module_mock):
         """AC-007 / FR-4.2: diff output includes group_members key
         in before and after."""
@@ -1832,6 +1901,43 @@ class TestGroup(PowerScaleUnitBase):
         diff = result['diff']
         assert diff['before']['well_known_sids'] == []
         assert len(diff['after']['well_known_sids']) > 0
+
+    def test_diff_wellknown_remove_matches_sid_when_name_differs(
+            self, powerscale_module_mock):
+        payload = MockGroupApi.CREATE_GROUP_PAYLOAD.copy()
+        payload['well_known_sids'] = ["NT AUTHORITY\\BATCH"]
+        payload['well_known_sid_state'] = "absent-in-group"
+        self.set_module_params(self.group_args, payload)
+        powerscale_module_mock.module._diff = True
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=MockSDKResponse({"members": [
+                {"id": "SID:S-1-5-3", "name": "BATCH",
+                 "type": "wellknown"}
+            ]}))
+        powerscale_module_mock.resolve_well_known_sid = MagicMock(
+            return_value=("SID:S-1-5-3", "NT AUTHORITY\\BATCH"))
+        diff = powerscale_module_mock._build_member_diff(
+            "GROUP:test_group", "System", "local", [], None)
+        assert diff['after']['well_known_sids'] == []
+
+    def test_diff_group_remove_matches_sid_when_name_differs(
+            self, powerscale_module_mock):
+        payload = MockGroupApi.CREATE_GROUP_PAYLOAD.copy()
+        payload['group_members'] = [{
+            "group_name": "requested_group", "provider_type": "ldap"}]
+        payload['group_member_state'] = "absent-in-group"
+        self.set_module_params(self.group_args, payload)
+        powerscale_module_mock.module._diff = True
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=MockSDKResponse({"members": [
+                {"id": "SID:S-1-22-2-10000", "name": "canonical_group",
+                 "type": "group"}
+            ]}))
+        powerscale_module_mock.resolve_group_id = MagicMock(
+            return_value="SID:S-1-22-2-10000")
+        diff = powerscale_module_mock._build_member_diff(
+            "GROUP:test_group", "System", "local", [], None)
+        assert diff['after']['group_members'] == []
 
     def test_diff_mixed_types_all_keys_present(self, powerscale_module_mock):
         """AC-007: diff with all three member types shows members,

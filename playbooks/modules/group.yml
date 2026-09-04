@@ -16,6 +16,7 @@
     empty_group_name: "sample_empty_group"
     ldap_user_name: "ldap_user"
     ldap_group_name: "ldap_group"
+    file_group_name: "admin"
 
   tasks:
     - name: Create Empty Group
@@ -394,6 +395,7 @@
     # ----------------------------------------------------------------
 
     - name: Re-create Group for child group membership tests
+      tags: group_member_enhancement
       dellemc.powerscale.group:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
@@ -405,6 +407,7 @@
         state: "present"
 
     - name: Add a child group to a parent group
+      tags: group_member_enhancement
       dellemc.powerscale.group:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
@@ -414,11 +417,13 @@
         access_zone: "{{ access_zone }}"
         group_name: "{{ group_name }}"
         group_members:
-          - group_name: "{{ empty_group_name }}"
+          - group_name: "{{ ldap_group_name }}"
+            provider_type: "ldap"
         group_member_state: "present-in-group"
         state: "present"
 
     - name: Add a child group - Idempotency check
+      tags: group_member_enhancement
       dellemc.powerscale.group:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
@@ -428,11 +433,13 @@
         access_zone: "{{ access_zone }}"
         group_name: "{{ group_name }}"
         group_members:
-          - group_name: "{{ empty_group_name }}"
+          - group_name: "{{ ldap_group_name }}"
+            provider_type: "ldap"
         group_member_state: "present-in-group"
         state: "present"
 
     - name: Add child groups from different providers
+      tags: group_member_enhancement
       dellemc.powerscale.group:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
@@ -442,8 +449,8 @@
         access_zone: "{{ access_zone }}"
         group_name: "{{ group_name }}"
         group_members:
-          - group_name: "{{ empty_group_name }}"
-            provider_type: "local"
+          - group_name: "{{ file_group_name }}"
+            provider_type: "file"
           - group_name: "{{ ldap_group_name }}"
             provider_type: "ldap"
         group_member_state: "present-in-group"
@@ -453,6 +460,7 @@
     # Add an AD group to a local group — requires an Active Directory
     # provider configured in the target access zone.
     - name: Add AD group to a local group
+      tags: group_member_enhancement
       dellemc.powerscale.group:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
@@ -469,6 +477,7 @@
       when: ads_group_name is defined
 
     - name: Remove a child group from a parent group
+      tags: group_member_enhancement
       dellemc.powerscale.group:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
@@ -478,11 +487,13 @@
         access_zone: "{{ access_zone }}"
         group_name: "{{ group_name }}"
         group_members:
-          - group_name: "{{ empty_group_name }}"
+          - group_name: "{{ ldap_group_name }}"
+            provider_type: "ldap"
         group_member_state: "absent-in-group"
         state: "present"
 
     - name: Remove a child group - Idempotency check
+      tags: group_member_enhancement
       dellemc.powerscale.group:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
@@ -492,7 +503,8 @@
         access_zone: "{{ access_zone }}"
         group_name: "{{ group_name }}"
         group_members:
-          - group_name: "{{ empty_group_name }}"
+          - group_name: "{{ ldap_group_name }}"
+            provider_type: "ldap"
         group_member_state: "absent-in-group"
         state: "present"
 
@@ -509,6 +521,7 @@
     # ----------------------------------------------------------------
 
     - name: Add a well-known SID to a group by display name
+      tags: group_member_enhancement
       dellemc.powerscale.group:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
@@ -523,6 +536,7 @@
         state: "present"
 
     - name: Add a well-known SID - Idempotency check
+      tags: group_member_enhancement
       dellemc.powerscale.group:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
@@ -537,6 +551,7 @@
         state: "present"
 
     - name: Add multiple well-known SIDs in one task
+      tags: group_member_enhancement
       dellemc.powerscale.group:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
@@ -547,11 +562,12 @@
         group_name: "{{ group_name }}"
         well_known_sids:
           - "Everyone"
-          - "Authenticated Users"
+          - "S-1-5-11"
         well_known_sid_state: "present-in-group"
         state: "present"
 
     - name: Add a well-known SID by SID string
+      tags: group_member_enhancement
       dellemc.powerscale.group:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
@@ -566,6 +582,7 @@
         state: "present"
 
     - name: Remove a well-known SID from a group
+      tags: group_member_enhancement
       dellemc.powerscale.group:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
@@ -580,6 +597,7 @@
         state: "present"
 
     - name: Remove a well-known SID - Idempotency check
+      tags: group_member_enhancement
       dellemc.powerscale.group:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
@@ -598,6 +616,7 @@
     # ----------------------------------------------------------------
 
     - name: Add users, child groups, and well-known SIDs in a single task
+      tags: group_member_enhancement
       dellemc.powerscale.group:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
@@ -610,7 +629,8 @@
           - user_name: "{{ user_name_1 }}"
         user_state: "present-in-group"
         group_members:
-          - group_name: "{{ empty_group_name }}"
+          - group_name: "{{ ldap_group_name }}"
+            provider_type: "ldap"
         group_member_state: "present-in-group"
         well_known_sids:
           - "Everyone"
@@ -618,6 +638,7 @@
         state: "present"
 
     - name: Check mode with diff - preview child group and SID changes
+      tags: group_member_enhancement
       dellemc.powerscale.group:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
@@ -627,7 +648,8 @@
         access_zone: "{{ access_zone }}"
         group_name: "{{ group_name }}"
         group_members:
-          - group_name: "{{ empty_group_name }}"
+          - group_name: "{{ ldap_group_name }}"
+            provider_type: "ldap"
         group_member_state: "absent-in-group"
         well_known_sids:
           - "Everyone"
@@ -638,10 +660,12 @@
       register: result
 
     - name: Display diff output for mixed removals
+      tags: group_member_enhancement
       ansible.builtin.debug:
         var: result.diff
 
     - name: Cleanup child group and SID test group
+      tags: group_member_enhancement
       dellemc.powerscale.group:
         onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
