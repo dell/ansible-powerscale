@@ -941,7 +941,7 @@ class TestGroup(PowerScaleUnitBase):
         powerscale_module_mock.api_instance.get_auth_group = \
             MagicMock(side_effect=[
                 MockGroupApi.get_group_detail(),               # get_group_details
-                MockGroupApi.get_auth_group_response("local"), # resolve child_grp
+                MockGroupApi.get_auth_group_response("local"),  # resolve child_grp
                 MockGroupApi.get_group_detail(),                # final get_group_details
             ])
         powerscale_module_mock.group_api_instance.create_group_member = \
@@ -1407,7 +1407,7 @@ class TestGroup(PowerScaleUnitBase):
                                    call_exception=False)
         if members is None:
             self.mock_get_group_members(powerscale_module_mock,
-                                       call_exception=False)
+                                        call_exception=False)
         else:
             powerscale_module_mock.group_api_instance.list_group_members = \
                 MagicMock(return_value=members)
@@ -1500,7 +1500,7 @@ class TestGroup(PowerScaleUnitBase):
                                    call_exception=False)
         if members is None:
             self.mock_get_group_members(powerscale_module_mock,
-                                       call_exception=False)
+                                        call_exception=False)
         else:
             powerscale_module_mock.group_api_instance.list_group_members = \
                 MagicMock(return_value=members)

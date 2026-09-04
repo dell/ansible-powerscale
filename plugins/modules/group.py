@@ -1613,8 +1613,8 @@ class Group(object):
         return changed
 
     def _process_well_known_sids(self, group, well_known_sids,
-                                  well_known_sid_state, access_zone,
-                                  provider_type):
+                                 well_known_sid_state, access_zone,
+                                 provider_type):
         """Process well_known_sids entries: resolve and add/remove SIDs.
 
         :return: True if any membership changed, False otherwise.
