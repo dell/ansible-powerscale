@@ -101,15 +101,92 @@ options:
     - It is required when users are added or removed from a group.
     type: str
     choices: ['present-in-group', 'absent-in-group']
+  group_members:
+    description:
+    - List of child groups to add to or remove from the group.
+    - Each entry is a dictionary with a required C(group_name) key and an
+      optional C(provider_type) key (defaults to the group-level
+      I(provider_type)).
+    - The child group must already exist in the specified authentication
+      provider and access zone.
+    - Requires I(group_member_state) to be set.
+    type: list
+    elements: dict
+    suboptions:
+      group_name:
+        description:
+        - The name of the child group to add or remove.
+        type: str
+        required: true
+      provider_type:
+        description:
+        - The authentication provider in which to resolve the child group.
+        - When omitted the group-level I(provider_type) is used.
+        type: str
+        default: 'local'
+        choices: [ 'local', 'file', 'ldap', 'ads', 'nis']
+  group_member_state:
+    description:
+    - Determines whether the child groups listed in I(group_members) will
+      be added to or removed from the group.
+    - Required when I(group_members) is specified.
+    type: str
+    choices: ['present-in-group', 'absent-in-group']
+  well_known_sids:
+    description:
+    - List of well-known security identifiers (SIDs) to add to or remove
+      from the group.
+    - Each element is a string — either a display name (case-insensitive)
+      or a SID string (exact match).
+    - "Commonly used well-known SIDs:"
+    - "  C(Everyone)           — S-1-1-0"
+    - "  C(Authenticated Users) — S-1-5-11"
+    - "  C(Batch)              — S-1-5-3"
+    - "  C(Creator Owner)      — S-1-3-0"
+    - "  C(Dialup)             — S-1-5-1"
+    - "  C(Interactive)        — S-1-5-4"
+    - "  C(Network)            — S-1-5-2"
+    - "  C(Service)            — S-1-5-6"
+    - The authoritative list of supported SIDs for a specific cluster
+      can be obtained via C(GET /platform/1/auth/wellknowns).
+    - Requires I(well_known_sid_state) to be set.
+    type: list
+    elements: str
+  well_known_sid_state:
+    description:
+    - Determines whether the well-known SIDs listed in I(well_known_sids)
+      will be added to or removed from the group.
+    - Required when I(well_known_sids) is specified.
+    type: str
+    choices: ['present-in-group', 'absent-in-group']
 attributes:
   check_mode:
-    description: Runs task to validate without performing action on the target machine.
+    description:
+    - Fully supported for all member types (users, group_members,
+      well_known_sids).
+    - Reports whether changes would be made without applying them.
     support: full
   diff_mode:
-    description: Runs the task to report the changes made or to be made.
+    description:
+    - Reports before/after membership state for users, group_members,
+      and well_known_sids.
     support: full
 notes:
 - Cross-provider group membership requires OneFS 9.11.0 or later.
+- Existing playbooks using only I(users) and I(user_state) continue to
+  work unchanged. The I(group_members) and I(well_known_sids) parameters
+  are optional and default to empty when omitted.
+- B(Troubleshooting)
+- If a child group cannot be resolved, verify that the group exists in the
+  specified authentication provider and access zone. The module will fail
+  with an error message identifying the unresolvable group.
+- If a well-known SID is not recognised, verify the display name or SID
+  string against the cluster's supported list via
+  C(GET /platform/1/auth/wellknowns). The error message includes the full
+  list of supported display names.
+- Circular membership (group A contains group B which contains group A) is
+  not detected by the module. OneFS may reject or silently ignore such
+  configurations depending on the version.
 '''
 
 EXAMPLES = r'''
