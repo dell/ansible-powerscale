@@ -289,6 +289,10 @@ class EventAlertSuppressionQueryHandler:
     def handle(self, suppression_obj, suppression_params):
         event_id = suppression_params['event_id']
 
+        if event_id is not None and not event_id.isdigit():
+            suppression_obj.module.fail_json(
+                msg='event_id must contain only numeric characters')
+
         if suppression_params['state'] == 'query':
             if event_id is None:
                 suppression_details = suppression_obj.get_suppressed_events()

@@ -374,6 +374,16 @@ class TestEventAlertSuppression(PowerScaleUnitBase):
                 'get_invalid_suppress_state'),
             EventAlertSuppressionHandler)
 
+    def test_malformed_event_id_is_rejected(self, powerscale_module_mock):
+        """Reject event IDs containing non-numeric characters - NFR-3"""
+        self.set_module_params(
+            self.suppression_args,
+            {"event_id": "../../etc/passwd", "state": "suppressed"})
+        self.capture_fail_json_call(
+            "event_id must contain only numeric characters",
+            EventAlertSuppressionHandler)
+        powerscale_module_mock.event_api.get_event_suppress_by_id.assert_not_called()
+
     def test_event_id_required_for_mutation(self, powerscale_module_mock):
         """event_id is mandatory for suppress and un-suppress - FR-5.1 / AC-005"""
         module_params = powerscale_module_mock.get_event_alert_suppression_parameters()
