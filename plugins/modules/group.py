@@ -567,7 +567,7 @@ diff:
             type: dict
             contains:
                 members:
-                    description: Sorted list of all member names before the
+                    description: Sorted list of user member names before the
                                  operation.
                     type: list
                     elements: str
@@ -586,7 +586,7 @@ diff:
             type: dict
             contains:
                 members:
-                    description: Sorted list of all member names after the
+                    description: Sorted list of user member names after the
                                  operation.
                     type: list
                     elements: str
