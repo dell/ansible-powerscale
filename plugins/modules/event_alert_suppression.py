@@ -17,14 +17,14 @@ version_added: '3.11.0'
 
 short_description: Manage event alert suppression on a PowerScale Storage System
 description:
-|- Managing event alert suppression on a PowerScale system includes suppressing,
+- Managing event alert suppression on a PowerScale system includes suppressing,
   un-suppressing, and querying per-event alert suppression.
 
 extends_documentation_fragment:
   - dellemc.powerscale.powerscale
 
 author:
-  - Dell Technologies Ansible Team <ansible.team@dell.com>
+  - Ansible Team (@dell-ansible-team) <ansible.team@dell.com>
 options:
   event_id:
     description:
@@ -50,9 +50,12 @@ attributes:
     description: Runs the task to report the changes made or to be made.
     support: full
 notes:
-|- This module operates on a single event ID per task.
-|- Bulk suppression of multiple event IDs is not supported.
-|- Time-based suppression or auto-revert is not supported by the OneFS API.
+- This module operates on a single event ID per task.
+- Bulk suppression of multiple event IDs is not supported.
+- Time-based suppression or auto-revert is not supported by the OneFS API.
+- Querying with I(event_id) returns only the suppression state. Event metadata
+  such as name, category and description is returned only when querying all
+  suppressed events.
 '''
 
 EXAMPLES = r'''
@@ -97,16 +100,21 @@ EXAMPLES = r'''
 '''
 
 RETURN = r'''
+changed:
+    description: Whether or not the resource has changed.
+    returned: always
+    type: bool
+    sample: "false"
 event_alert_suppression_details:
     description: Details of the event alert suppression.
     type: complex
     returned: always
     contains:
         suppressions:
-            description: List of suppressed events (when querying all events).
+            description: List of suppressed events.
             type: list
             elements: dict
-            returned: when state is C(get) and event_id is not provided
+            returned: when I(state) is C(get) and I(event_id) is not provided
             contains:
                 id:
                     description: Event ID.
@@ -126,322 +134,192 @@ event_alert_suppression_details:
                 suppressed:
                     description: Whether the event is suppressed.
                     type: bool
-        event_id:
-            description: Event ID (when querying a specific event).
-            type: str
-            returned: when state is C(get) and event_id is provided
-        name:
-            description: Event name (when querying a specific event).
-            type: str
-            returned: when state is C(get) and event_id is provided
-        category:
-            description: Event category (when querying a specific event).
-            type: str
-            returned: when state is C(get) and event_id is provided
-        description:
-            description: Event description (when querying a specific event).
-            type: str
-            returned: when state is C(get) and event_id is provided
-        node:
-            description: Whether the event is node-specific (when querying a specific event).
-            type: bool
-            returned: when state is C(get) and event_id is provided
-        suppressed:
-            description: Whether the event is suppressed (when querying a specific event).
-            type: bool
-            returned: when state is C(get) and event_id is provided
         total:
             description: Total count of suppressed events.
             type: int
-            returned: when state is C(get) and event_id is not provided
-changed:
-    description: Whether the module made any changes.
-    type: bool
-    returned: always
+            returned: when I(state) is C(get) and I(event_id) is not provided
+        event_id:
+            description: Event ID.
+            type: str
+            returned: when I(event_id) is provided
+        suppressed:
+            description: Whether the event is currently suppressed.
+            type: bool
+            returned: when I(event_id) is provided
+        would_change_to:
+            description: The suppression state that would be applied.
+            type: bool
+            returned: when run in check mode and a change is required
+    sample: {
+      "event_id": "100010001",
+      "suppressed": true
+    }
 msg:
-    description: Status message.
+    description: Status message describing the operation performed.
     type: str
     returned: always
+    sample: "Successfully suppressed event 100010001"
 '''
 
 from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.powerscale_base \
+    import PowerScaleBase
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
-from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.events import Events
+from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.events \
+    import Events
 
 LOG = utils.get_logger('event_alert_suppression')
 
 
-class EventAlertSuppression(Events):
-    """Class for managing event alert suppression on PowerScale"""
+class EventAlertSuppression(PowerScaleBase):
+    """Class with event alert suppression operations"""
 
-    def __init__(self, event_api, module):
-        """
-        Initialize the EventAlertSuppression class
-        :param event_api: The event sdk instance
-        :param module: Ansible module object
-        """
-        super(EventAlertSuppression, self).__init__(event_api, module)
+    def __init__(self):
+        """ Define all parameters required by the event alert suppression module"""
 
-    def query_all_suppressed_events(self):
+        required_if_args = [
+            ["state", "suppressed", ["event_id"]],
+            ["state", "unsuppressed", ["event_id"]],
+        ]
+        ansible_module_params = {
+            'argument_spec': self.get_event_alert_suppression_parameters(),
+            'required_if': required_if_args,
+            'supports_check_mode': True
+        }
+        super().__init__(AnsibleModule, ansible_module_params)
+
+        # Result is a dictionary that contains changed status, event alert
+        # suppression details and the status message
+        self.result.update({
+            "event_alert_suppression_details": {},
+            "msg": "",
+            "diff": {}
+        })
+
+    def get_suppressed_state(self, event_id):
+        """Get the current suppression state of an event
+        :param event_id: The event type ID
+        :return: True if the event is suppressed else False
+        :rtype: bool
         """
-        Query all suppressed events
-        :return: Suppressed events list and total count
+        LOG.info("Getting suppression state for event %s.", event_id)
+        return Events(self.event_api, self.module).get_event_suppressed_state(
+            event_id=event_id)
+
+    def set_suppressed_state(self, event_id, suppressed):
+        """Set the suppression state of an event
+        :param event_id: The event type ID
+        :param suppressed: Desired suppression state
+        :return: True if the operation is successful.
+        """
+        LOG.info("Setting suppression state of event %s to %s.",
+                 event_id, suppressed)
+        event_suppress_params = self.isi_sdk.EventSuppressIdParams(
+            suppressed=suppressed)
+        if not self.module.check_mode:
+            Events(self.event_api, self.module).set_event_suppressed_state(
+                event_id=event_id,
+                event_suppress_id_params=event_suppress_params)
+        return True
+
+    def get_suppressed_events(self):
+        """Get all suppressed events with their metadata
+        :return: Dictionary with the list of suppressions and the total count
         :rtype: dict
         """
-        try:
-            all_suppressed_events = []
-            result = (self.event_api.get_event_suppress()).to_dict()
-            all_suppressed_events.append(result)
-            resume = result.get('resume')
+        LOG.info("Getting all suppressed events.")
+        suppressions = Events(self.event_api,
+                              self.module).get_event_suppress_list()
+        return {
+            "suppressions": suppressions,
+            "total": len(suppressions)
+        }
 
-            while resume:
-                result_resume = (self.event_api.get_event_suppress(
-                    resume=resume)).to_dict()
-                resume = result_resume.get('resume')
-                all_suppressed_events.append(result_resume)
+    def get_event_alert_suppression_parameters(self):
+        return dict(
+            event_id=dict(type='str'),
+            state=dict(type='str', required=True,
+                       choices=['suppressed', 'unsuppressed', 'get']))
 
-            # Flatten the suppressions list
-            suppressions = []
-            for page in all_suppressed_events:
-                suppressions.extend(page.get('suppressions', []))
 
-            return {
-                'suppressions': suppressions,
-                'total': len(suppressions)
-            }
-        except Exception as e:
-            error_msg = utils.determine_error(error_obj=e)
-            error_message = f'Fetching suppressed events failed with error: {error_msg}'
-            LOG.error(error_message)
-            self.module.fail_json(msg=error_message)
+class EventAlertSuppressionExitHandler:
+    def handle(self, suppression_obj, suppression_details):
+        suppression_obj.result['event_alert_suppression_details'] = suppression_details
+        suppression_obj.module.exit_json(**suppression_obj.result)
 
-    def query_specific_event(self, event_id):
-        """
-        Query a specific event's suppression state with full metadata
-        :param event_id: Event ID
-        :return: Event details with full metadata
-        :rtype: dict
-        """
-        try:
-            # Get suppression state
-            suppression_state = (self.event_api.get_event_suppress_by_id(
-                event_suppress_id=event_id)).to_dict()
 
-            # Get full metadata from eventgroup definitions
-            event_group = (self.event_api.get_event_eventgroup_definitions(
-                filter=f'id eq {event_id}')).to_dict()
+class EventAlertSuppressionModifyHandler:
+    def handle(self, suppression_obj, suppression_params, current_state):
+        event_id = suppression_params['event_id']
+        desired_state = suppression_params['state'] == 'suppressed'
+        action = 'suppressed' if desired_state else 'un-suppressed'
 
-            # Find the matching event
-            event_details = None
-            for event in event_group.get('eventgroup-definitions', []):
-                if event.get('id') == event_id:
-                    event_details = event
-                    break
+        if current_state == desired_state:
+            suppression_obj.result['msg'] = \
+                f"Event {event_id} is already {action}"
+            suppression_details = {"event_id": event_id,
+                                   "suppressed": current_state}
+        else:
+            if suppression_obj.module._diff:
+                suppression_obj.result['diff'] = dict(
+                    before={"event_id": event_id, "suppressed": current_state},
+                    after={"event_id": event_id, "suppressed": desired_state})
 
-            if event_details:
-                event_details['suppressed'] = suppression_state.get('suppressed', False)
-                return event_details
+            suppression_obj.result['changed'] = \
+                suppression_obj.set_suppressed_state(event_id, desired_state)
+
+            if suppression_obj.module.check_mode:
+                suppression_obj.result['msg'] = \
+                    f"Check mode: Event {event_id} would be {action}"
+                suppression_details = {"event_id": event_id,
+                                       "suppressed": current_state,
+                                       "would_change_to": desired_state}
             else:
-                return suppression_state
-        except Exception as e:
-            error_msg = utils.determine_error(error_obj=e)
-            error_message = f'Fetching event details for {event_id} failed with error: {error_msg}'
-            LOG.error(error_message)
-            self.module.fail_json(msg=error_message)
+                suppression_obj.result['msg'] = \
+                    f"Successfully {action} event {event_id}"
+                suppression_details = {"event_id": event_id,
+                                       "suppressed": desired_state}
+
+        EventAlertSuppressionExitHandler().handle(suppression_obj,
+                                                  suppression_details)
+
+
+class EventAlertSuppressionQueryHandler:
+    def handle(self, suppression_obj, suppression_params):
+        event_id = suppression_params['event_id']
+
+        if suppression_params['state'] == 'get':
+            if event_id is None:
+                suppression_details = suppression_obj.get_suppressed_events()
+                suppression_obj.result['msg'] = \
+                    f"Successfully queried {suppression_details['total']} suppressed events"
+            else:
+                suppression_details = {
+                    "event_id": event_id,
+                    "suppressed": suppression_obj.get_suppressed_state(event_id)}
+                suppression_obj.result['msg'] = \
+                    f"Successfully queried suppression state for event {event_id}"
+            EventAlertSuppressionExitHandler().handle(suppression_obj,
+                                                      suppression_details)
+        else:
+            current_state = suppression_obj.get_suppressed_state(event_id)
+            EventAlertSuppressionModifyHandler().handle(suppression_obj,
+                                                        suppression_params,
+                                                        current_state)
+
+
+class EventAlertSuppressionHandler:
+    def handle(self, suppression_obj, suppression_params):
+        EventAlertSuppressionQueryHandler().handle(suppression_obj,
+                                                   suppression_params)
 
 
 def main():
-    """Main function for the event_alert_suppression module"""
-    module_args = dict(
-        event_id=dict(type='str'),
-        state=dict(
-            type='str',
-            choices=['suppressed', 'unsuppressed', 'get'],
-            required=True
-        )
-    )
-
-    required_if = [
-        ('state', 'suppressed', ['event_id']),
-        ('state', 'unsuppressed', ['event_id']),
-    ]
-
-    module = AnsibleModule(
-        argument_spec=module_args,
-        required_if=required_if,
-        supports_check_mode=True
-    )
-
-    event_id = module.params.get('event_id')
-    state = module.params.get('state')
-
-    # Get PowerScale connection
-    api_client = utils.get_powerscale_connection(module.params)
-    from isilon_sdk.v9_10_0 import EventApi
-    event_api = EventApi(api_client)
-
-    event_alert_suppression = EventAlertSuppression(event_api, module)
-
-    result = {}
-    changed = False
-    msg = ''
-
-    try:
-        if state == 'get':
-            if event_id:
-                # Query specific event
-                LOG.info(f'Querying suppression state for event {event_id}')
-                event_details = event_alert_suppression.query_specific_event(event_id)
-                result['event_alert_suppression_details'] = event_details
-                msg = f'Successfully queried suppression state for event {event_id}'
-            else:
-                # Query all suppressed events
-                LOG.info('Querying all suppressed events')
-                suppressed_events = event_alert_suppression.query_all_suppressed_events()
-                result['event_alert_suppression_details'] = suppressed_events
-                msg = f'Successfully queried {suppressed_events["total"]} suppressed events'
-            changed = False
-
-        elif state == 'suppressed':
-            LOG.info(f'Suppressing event {event_id}')
-            current_state = event_alert_suppression.get_event_suppressed_state(event_id)
-            
-            if current_state:
-                # Already suppressed - idempotent
-                LOG.info(f'Event {event_id} is already suppressed')
-                result['event_alert_suppression_details'] = {
-                    'event_id': event_id,
-                    'suppressed': True
-                }
-                msg = f'Event {event_id} is already suppressed'
-                changed = False
-            else:
-                # Suppress the event
-                if module.check_mode:
-                    # Check mode - skip actual mutation
-                    LOG.info(f'Check mode: Would suppress event {event_id}')
-                    result['event_alert_suppression_details'] = {
-                        'event_id': event_id,
-                        'suppressed': False,
-                        'would_change_to': True
-                    }
-                    msg = f'Check mode: Would suppress event {event_id}'
-                    changed = True
-                    # Add diff output for check mode
-                    result['diff'] = {
-                        'before': {
-                            'event_id': event_id,
-                            'suppressed': False
-                        },
-                        'after': {
-                            'event_id': event_id,
-                            'suppressed': True
-                        }
-                    }
-                else:
-                    # Actual suppress operation
-                    event_alert_suppression.set_event_suppressed_state(event_id, True)
-                    
-                    # Post-write verification
-                    new_state = event_alert_suppression.get_event_suppressed_state(event_id)
-                    if new_state:
-                        LOG.info(f'Successfully suppressed event {event_id}')
-                        result['event_alert_suppression_details'] = {
-                            'event_id': event_id,
-                            'suppressed': True
-                        }
-                        msg = f'Successfully suppressed event {event_id}'
-                        changed = True
-                        # Add diff output for actual change
-                        result['diff'] = {
-                            'before': {
-                                'event_id': event_id,
-                                'suppressed': False
-                            },
-                            'after': {
-                                'event_id': event_id,
-                                'suppressed': True
-                            }
-                        }
-                    else:
-                        error_msg = f'Failed to verify suppression state for event {event_id}'
-                        LOG.error(error_msg)
-                        module.fail_json(msg=error_msg)
-
-        elif state == 'unsuppressed':
-            LOG.info(f'Un-suppressing event {event_id}')
-            current_state = event_alert_suppression.get_event_suppressed_state(event_id)
-            
-            if not current_state:
-                # Already unsuppressed - idempotent
-                LOG.info(f'Event {event_id} is already unsuppressed')
-                result['event_alert_suppression_details'] = {
-                    'event_id': event_id,
-                    'suppressed': False
-                }
-                msg = f'Event {event_id} is already unsuppressed'
-                changed = False
-            else:
-                # Un-suppress the event
-                if module.check_mode:
-                    # Check mode - skip actual mutation
-                    LOG.info(f'Check mode: Would un-suppress event {event_id}')
-                    result['event_alert_suppression_details'] = {
-                        'event_id': event_id,
-                        'suppressed': True,
-                        'would_change_to': False
-                    }
-                    msg = f'Check mode: Would un-suppress event {event_id}'
-                    changed = True
-                    # Add diff output for check mode
-                    result['diff'] = {
-                        'before': {
-                            'event_id': event_id,
-                            'suppressed': True
-                        },
-                        'after': {
-                            'event_id': event_id,
-                            'suppressed': False
-                        }
-                    }
-                else:
-                    # Actual un-suppress operation
-                    event_alert_suppression.set_event_suppressed_state(event_id, False)
-                    
-                    # Post-write verification
-                    new_state = event_alert_suppression.get_event_suppressed_state(event_id)
-                    if not new_state:
-                        LOG.info(f'Successfully un-suppressed event {event_id}')
-                        result['event_alert_suppression_details'] = {
-                            'event_id': event_id,
-                            'suppressed': False
-                        }
-                        msg = f'Successfully un-suppressed event {event_id}'
-                        changed = True
-                        # Add diff output for actual change
-                        result['diff'] = {
-                            'before': {
-                                'event_id': event_id,
-                                'suppressed': True
-                            },
-                            'after': {
-                                'event_id': event_id,
-                                'suppressed': False
-                            }
-                        }
-                    else:
-                        error_msg = f'Failed to verify un-suppression state for event {event_id}'
-                        LOG.error(error_msg)
-                        module.fail_json(msg=error_msg)
-
-        module.exit_json(changed=changed, msg=msg, **result)
-
-    except Exception as e:
-        error_msg = utils.determine_error(error_obj=e)
-        error_message = f'Event alert suppression operation failed with error: {error_msg}'
-        LOG.error(error_message)
-        module.fail_json(msg=error_message)
+    """ perform action on PowerScale event alert suppression object and
+        perform action on it based on user input from playbook."""
+    obj = EventAlertSuppression()
+    EventAlertSuppressionHandler().handle(obj, obj.module.params)
 
 
 if __name__ == '__main__':

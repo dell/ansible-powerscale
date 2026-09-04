@@ -12,12 +12,13 @@ __metaclass__ = type
 class MockEventAlertSuppressionApi:
 
     EVENT_ID = "100010001"
+    INVALID_EVENT_ID = "999999999"
     EVENT_NAME = "SYS_DISK_VARFULL"
     EVENT_CATEGORY = "100000000"
     EVENT_DESCRIPTION = "The /var partition is near capacity (>{val:.1f}% used)"
     EVENT_NODE = True
 
-    COMMON_ARGS = {
+    SUPPRESSION_COMMON_ARGS = {
         "event_id": None,
         "state": None
     }
@@ -30,28 +31,40 @@ class MockEventAlertSuppressionApi:
         "suppressed": False
     }
 
-    EVENT_DETAILS = {
+    SUPPRESSION_ENTRY = {
         "id": EVENT_ID,
         "name": EVENT_NAME,
         "category": EVENT_CATEGORY,
         "description": EVENT_DESCRIPTION,
         "node": EVENT_NODE,
-        "suppressed": False
+        "suppressed": True
+    }
+
+    SUPPRESSION_ENTRY_2 = {
+        "id": "930100005",
+        "name": "HW_INFINIBAND_LINK_DOWN",
+        "category": "930000000",
+        "description": "Infiniband link is down",
+        "node": True,
+        "suppressed": True
     }
 
     SUPPRESSED_EVENTS_LIST = {
         "resume": None,
-        "suppressions": [
-            {
-                "id": EVENT_ID,
-                "name": EVENT_NAME,
-                "category": EVENT_CATEGORY,
-                "description": EVENT_DESCRIPTION,
-                "node": EVENT_NODE,
-                "suppressed": True
-            }
-        ],
+        "suppressions": [SUPPRESSION_ENTRY],
         "total": 1
+    }
+
+    SUPPRESSED_EVENTS_LIST_PAGE_1 = {
+        "resume": "1-suppress-token",
+        "suppressions": [SUPPRESSION_ENTRY],
+        "total": 2
+    }
+
+    SUPPRESSED_EVENTS_LIST_PAGE_2 = {
+        "resume": None,
+        "suppressions": [SUPPRESSION_ENTRY_2],
+        "total": 2
     }
 
     EMPTY_SUPPRESSED_EVENTS = {
@@ -60,27 +73,15 @@ class MockEventAlertSuppressionApi:
         "total": 0
     }
 
-    EVENTGROUP_DEFINITIONS = {
-        "eventgroup-definitions": [
-            {
-                "id": EVENT_ID,
-                "name": EVENT_NAME,
-                "category": EVENT_CATEGORY,
-                "description": EVENT_DESCRIPTION,
-                "node": EVENT_NODE,
-                "suppressed": False
-            }
-        ]
-    }
-
     @staticmethod
     def get_event_alert_suppression_exception(response_type):
         err_msg_dict = {
-            'get_suppress_state': f'Fetching suppression state for event {MockEventAlertSuppressionApi.EVENT_ID} failed with error: SDK Error message',
-            'set_suppress_state': f'Updating suppression state for event {MockEventAlertSuppressionApi.EVENT_ID} failed with error: SDK Error message',
-            'query_all_suppressed': 'Fetching suppressed events failed with error: SDK Error message',
-            'query_specific_event': f'Fetching event details for {MockEventAlertSuppressionApi.EVENT_ID} failed with error: SDK Error message',
-            'invalid_event_id': f'Event {MockEventAlertSuppressionApi.EVENT_ID} is not a valid event type ID',
-            'missing_event_id': 'event_id is required when state is suppressed or unsuppressed'
+            'get_suppress_state': f'Fetching suppression state for event {MockEventAlertSuppressionApi.EVENT_ID} '
+                                  f'failed with error: SDK Error message',
+            'get_invalid_suppress_state': f'Fetching suppression state for event {MockEventAlertSuppressionApi.INVALID_EVENT_ID} '
+                                          f'failed with error: SDK Error message',
+            'set_suppress_state': f'Updating suppression state for event {MockEventAlertSuppressionApi.EVENT_ID} '
+                                  f'failed with error: SDK Error message',
+            'query_all_suppressed': 'Fetching suppressed events failed with error: SDK Error message'
         }
         return err_msg_dict.get(response_type)

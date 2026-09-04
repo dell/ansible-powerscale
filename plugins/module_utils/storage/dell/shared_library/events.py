@@ -226,20 +226,43 @@ class Events:
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
-    def set_event_suppressed_state(self, event_id, suppressed):
+    def get_event_suppress_list(self):
+        """
+        Get all suppressed events
+        :return: List of suppressed events
+        :rtype: list
+        """
+        try:
+            suppressions = []
+            suppress_list = (self.event_api.get_event_suppress()).to_dict()
+            suppressions.extend(suppress_list.get('suppressions') or [])
+            resume = suppress_list.get('resume')
+
+            while resume:
+                suppress_list = (self.event_api.get_event_suppress(
+                    resume=resume)).to_dict()
+                suppressions.extend(suppress_list.get('suppressions') or [])
+                resume = suppress_list.get('resume')
+            return suppressions
+
+        except Exception as e:
+            error_msg = utils.determine_error(error_obj=e)
+            error_message = f'Fetching suppressed events failed with error: {error_msg}'
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    def set_event_suppressed_state(self, event_id, event_suppress_id_params):
         """
         Set the suppression state for a specific event
         :param event_id: Event ID
-        :param suppressed: Desired suppression state (True/False)
+        :param event_suppress_id_params: SDK EventSuppressIdParams instance
         :return: Success status
         :rtype: bool
         """
         try:
-            from isilon_sdk.v9_10_0 import EventSuppressIdParams
-            params = EventSuppressIdParams(suppressed=suppressed)
             (self.event_api.update_event_suppress_by_id(
                 event_suppress_id=event_id,
-                event_suppress_id_params=params))
+                event_suppress_id_params=event_suppress_id_params))
             return True
         except Exception as e:
             error_msg = utils.determine_error(error_obj=e)

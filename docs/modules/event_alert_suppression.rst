@@ -57,6 +57,7 @@ Notes
   - This module operates on a single event ID per task.
   - Bulk suppression of multiple event IDs is not supported.
   - Time-based suppression or auto-revert is not supported by the OneFS API.
+  - Querying with I(event_id) returns only the suppression state. Event metadata such as name, category and description is returned only when querying all suppressed events.
 
 
 
@@ -109,6 +110,17 @@ Examples
 Return Values
 -------------
 
+changed
+    Whether or not the resource has changed.
+
+    Returned: always
+
+    Type: bool
+
+    Sample: false
+
+
+
 event_alert_suppression_details
     Details of the event alert suppression.
 
@@ -119,9 +131,9 @@ event_alert_suppression_details
     Contains:
 
         suppressions (list)
-            List of suppressed events (when querying all events).
+            List of suppressed events.
 
-            Returned: when state is C(get) and event_id is not provided
+            Returned: when I(state) is C(get) and I(event_id) is not provided
 
             Type: list
 
@@ -154,84 +166,53 @@ event_alert_suppression_details
 
 
 
-        event_id (str)
-            Event ID (when querying a specific event).
-
-            Returned: when state is C(get) and event_id is provided
-
-            Type: str
-
-
-
-        name (str)
-            Event name (when querying a specific event).
-
-            Returned: when state is C(get) and event_id is provided
-
-            Type: str
-
-
-
-        category (str)
-            Event category (when querying a specific event).
-
-            Returned: when state is C(get) and event_id is provided
-
-            Type: str
-
-
-
-        description (str)
-            Event description (when querying a specific event).
-
-            Returned: when state is C(get) and event_id is provided
-
-            Type: str
-
-
-
-        node (bool)
-            Whether the event is node-specific (when querying a specific event).
-
-            Returned: when state is C(get) and event_id is provided
-
-            Type: bool
-
-
-
-        suppressed (bool)
-            Whether the event is suppressed (when querying a specific event).
-
-            Returned: when state is C(get) and event_id is provided
-
-            Type: bool
-
-
-
         total (int)
             Total count of suppressed events.
 
-            Returned: when state is C(get) and event_id is not provided
+            Returned: when I(state) is C(get) and I(event_id) is not provided
 
             Type: int
 
 
 
-changed
-    Whether the module made any changes.
+        event_id (str)
+            Event ID.
 
-    Returned: always
+            Returned: when I(event_id) is provided
 
-    Type: bool
+            Type: str
+
+
+
+        suppressed (bool)
+            Whether the event is currently suppressed.
+
+            Returned: when I(event_id) is provided
+
+            Type: bool
+
+
+
+        would_change_to (bool)
+            The suppression state that would be applied.
+
+            Returned: when run in check mode and a change is required
+
+            Type: bool
+
+
+    Sample: {"event_id": "100010001", "suppressed": true}
 
 
 
 msg
-    Status message.
+    Status message describing the operation performed.
 
     Returned: always
 
     Type: str
+
+    Sample: Successfully suppressed event 100010001
 
 
 

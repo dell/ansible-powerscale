@@ -3,141 +3,109 @@
   hosts: localhost
   connection: local
   vars:
-    onefs_host: "10.247.102.193"
-    api_user: "root"
-    api_password: "Password123!"
+    onefs_host: "x.x.x.x"
+    api_user: "user"
+    api_password: "xxxx"
     verify_ssl: false
-    test_event_id: "100010001"
+    event_id: "100010001"
 
   tasks:
-    - name: Suppress an event alert (AC-001)
+    - name: Suppress an event alert
       dellemc.powerscale.event_alert_suppression:
         onefs_host: "{{ onefs_host }}"
-        port_no: "{{ port_no }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         verify_ssl: "{{ verify_ssl }}"
-        event_id: "{{ test_event_id }}"
+        event_id: "{{ event_id }}"
         state: "suppressed"
-      # Expected: changed=true, event_alert_suppression_details shows suppressed=true
+      # Expected: changed=true, event_alert_suppression_details.suppressed=true
 
-    - name: Un-suppress an event alert (AC-002)
+    - name: Suppress an event alert again - idempotent
       dellemc.powerscale.event_alert_suppression:
         onefs_host: "{{ onefs_host }}"
-        port_no: "{{ port_no }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         verify_ssl: "{{ verify_ssl }}"
-        event_id: "{{ test_event_id }}"
-        state: "unsuppressed"
-      # Expected: changed=true, event_alert_suppression_details shows suppressed=false
+        event_id: "{{ event_id }}"
+        state: "suppressed"
+      # Expected: changed=false, msg reports the event is already suppressed
 
-    - name: Query all suppressed events (AC-003)
+    - name: Query the suppression state of a specific event
       dellemc.powerscale.event_alert_suppression:
         onefs_host: "{{ onefs_host }}"
-        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        event_id: "{{ event_id }}"
+        state: "get"
+      # Expected: changed=false, event_alert_suppression_details with
+      # event_id and suppressed. Event metadata is only returned by the
+      # query-all task below.
+
+    - name: Query all suppressed events
+      dellemc.powerscale.event_alert_suppression:
+        onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         verify_ssl: "{{ verify_ssl }}"
         state: "get"
-      # Expected: changed=false, event_alert_suppression_details.suppressions list with full metadata (id, name, category, description, node, suppressed)
+      # Expected: changed=false, event_alert_suppression_details.suppressions
+      # with full metadata (id, name, category, description, node, suppressed)
+      # and event_alert_suppression_details.total
 
-    - name: Query a specific event's suppression state (AC-003)
+    - name: Un-suppress an event alert in check mode
       dellemc.powerscale.event_alert_suppression:
         onefs_host: "{{ onefs_host }}"
-        port_no: "{{ port_no }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         verify_ssl: "{{ verify_ssl }}"
-        event_id: "{{ test_event_id }}"
-        state: "get"
-      # Expected: changed=false, event_alert_suppression_details shows full metadata for the event (id, name, category, description, node, suppressed)
-
-    - name: Idempotent suppress - already suppressed (AC-004)
-      dellemc.powerscale.event_alert_suppression:
-        onefs_host: "{{ onefs_host }}"
-        port_no: "{{ port_no }}"
-        api_user: "{{ api_user }}"
-        api_password: "{{ api_password }}"
-        verify_ssl: "{{ verify_ssl }}"
-        event_id: "{{ test_event_id }}"
-        state: "suppressed"
-      # Expected: changed=false if already suppressed, event_alert_suppression_details shows current state
-
-    - name: Idempotent un-suppress - already unsuppressed (AC-004)
-      dellemc.powerscale.event_alert_suppression:
-        onefs_host: "{{ onefs_host }}"
-        port_no: "{{ port_no }}"
-        api_user: "{{ api_user }}"
-        api_password: "{{ api_password }}"
-        verify_ssl: "{{ verify_ssl }}"
-        event_id: "{{ test_event_id }}"
+        event_id: "{{ event_id }}"
         state: "unsuppressed"
-      # Expected: changed=false if already unsuppressed, event_alert_suppression_details shows current state
+      check_mode: true
+      # Expected: changed=true, no cluster modification,
+      # event_alert_suppression_details.would_change_to=false
 
-    - name: Invalid event ID error handling (AC-005)
+    - name: Un-suppress an event alert and report the diff
       dellemc.powerscale.event_alert_suppression:
         onefs_host: "{{ onefs_host }}"
-        port_no: "{{ port_no }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        event_id: "{{ event_id }}"
+        state: "unsuppressed"
+      diff: true
+      # Expected: changed=true, diff.before.suppressed=true,
+      # diff.after.suppressed=false
+
+    - name: Un-suppress an event alert again - idempotent
+      dellemc.powerscale.event_alert_suppression:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        event_id: "{{ event_id }}"
+        state: "unsuppressed"
+      # Expected: changed=false, msg reports the event is already un-suppressed
+
+    - name: Suppress an invalid event ID - expected to fail
+      dellemc.powerscale.event_alert_suppression:
+        onefs_host: "{{ onefs_host }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         verify_ssl: "{{ verify_ssl }}"
         event_id: "999999999"
         state: "suppressed"
-      # Expected: Fails with clear error message about invalid event ID (AEC_NOT_FOUND)
+      register: invalid_event_result
+      ignore_errors: true
+      # Expected: task fails with a message reporting the invalid event ID
 
-    - name: Missing event_id error handling (AC-005)
+    - name: Suppress without event_id - expected to fail
       dellemc.powerscale.event_alert_suppression:
         onefs_host: "{{ onefs_host }}"
-        port_no: "{{ port_no }}"
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         verify_ssl: "{{ verify_ssl }}"
         state: "suppressed"
-      # Expected: Fails due to required_if validation (event_id is required when state is suppressed)
-
-    - name: Check mode - suppress an event alert (AC-006)
-      dellemc.powerscale.event_alert_suppression:
-        onefs_host: "{{ onefs_host }}"
-        port_no: "{{ port_no }}"
-        api_user: "{{ api_user }}"
-        api_password: "{{ api_password }}"
-        verify_ssl: "{{ verify_ssl }}"
-        event_id: "{{ test_event_id }}"
-        state: "suppressed"
-      check_mode: true
-      # Expected: changed=true, no actual API mutation, event_alert_suppression_details includes would_change_to field, diff output shows before/after
-
-    - name: Check mode - un-suppress an event alert (AC-006)
-      dellemc.powerscale.event_alert_suppression:
-        onefs_host: "{{ onefs_host }}"
-        port_no: "{{ port_no }}"
-        api_user: "{{ api_user }}"
-        api_password: "{{ api_password }}"
-        verify_ssl: "{{ verify_ssl }}"
-        event_id: "{{ test_event_id }}"
-        state: "unsuppressed"
-      check_mode: true
-      # Expected: changed=true, no actual API mutation, event_alert_suppression_details includes would_change_to field, diff output shows before/after
-
-    - name: Diff mode - suppress an event alert (AC-006)
-      dellemc.powerscale.event_alert_suppression:
-        onefs_host: "{{ onefs_host }}"
-        port_no: "{{ port_no }}"
-        api_user: "{{ api_user }}"
-        api_password: "{{ api_password }}"
-        verify_ssl: "{{ verify_ssl }}"
-        event_id: "{{ test_event_id }}"
-        state: "suppressed"
-      # Expected: changed=true, diff output shows before: {suppressed: false}, after: {suppressed: true}
-
-    - name: Diff mode - un-suppress an event alert (AC-006)
-      dellemc.powerscale.event_alert_suppression:
-        onefs_host: "{{ onefs_host }}"
-        port_no: "{{ port_no }}"
-        api_user: "{{ api_user }}"
-        api_password: "{{ api_password }}"
-        verify_ssl: "{{ verify_ssl }}"
-        event_id: "{{ test_event_id }}"
-        state: "unsuppressed"
-      # Expected: changed=true, diff output shows before: {suppressed: true}, after: {suppressed: false}
+      register: missing_event_id_result
+      ignore_errors: true
+      # Expected: task fails on required_if validation before any API call
