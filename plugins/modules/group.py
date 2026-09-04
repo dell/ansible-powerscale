@@ -361,6 +361,120 @@ EXAMPLES = r'''
       - user_id: "{{user_id}}"
     user_state: "present-in-group"
     state: "present"
+
+- name: Add an AD group to a local group in an Access Zone
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "local"
+    access_zone: "{{access_zone}}"
+    group_name: "{{group_name}}"
+    group_members:
+      - group_name: "DOMAIN\\ad_child_group"
+        provider_type: "ads"
+    group_member_state: "present-in-group"
+    state: "present"
+
+- name: Add a local group to a local group (nested groups)
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "local"
+    access_zone: "{{access_zone}}"
+    group_name: "{{group_name}}"
+    group_members:
+      - group_name: "child_local_group"
+    group_member_state: "present-in-group"
+    state: "present"
+
+- name: Add a well-known SID by display name
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "local"
+    access_zone: "{{access_zone}}"
+    group_name: "{{group_name}}"
+    well_known_sids:
+      - "Everyone"
+    well_known_sid_state: "present-in-group"
+    state: "present"
+
+- name: Add a well-known SID by SID string
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "local"
+    access_zone: "{{access_zone}}"
+    group_name: "{{group_name}}"
+    well_known_sids:
+      - "S-1-1-0"
+    well_known_sid_state: "present-in-group"
+    state: "present"
+
+- name: Mixed member type management (users, groups, and SIDs)
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "local"
+    access_zone: "{{access_zone}}"
+    group_name: "{{group_name}}"
+    users:
+      - user_name: "{{user_name}}"
+    user_state: "present-in-group"
+    group_members:
+      - group_name: "child_local_group"
+    group_member_state: "present-in-group"
+    well_known_sids:
+      - "Everyone"
+    well_known_sid_state: "present-in-group"
+    state: "present"
+
+- name: Remove group members and well-known SIDs
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "local"
+    access_zone: "{{access_zone}}"
+    group_name: "{{group_name}}"
+    group_members:
+      - group_name: "child_local_group"
+    group_member_state: "absent-in-group"
+    well_known_sids:
+      - "Everyone"
+    well_known_sid_state: "absent-in-group"
+    state: "present"
+
+- name: Check/diff mode - preview group and SID membership changes
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "local"
+    access_zone: "{{access_zone}}"
+    group_name: "{{group_name}}"
+    group_members:
+      - group_name: "child_local_group"
+    group_member_state: "present-in-group"
+    well_known_sids:
+      - "Everyone"
+    well_known_sid_state: "present-in-group"
+    state: "present"
+  check_mode: true
+  diff: true
+  register: result
 '''
 
 RETURN = r'''
