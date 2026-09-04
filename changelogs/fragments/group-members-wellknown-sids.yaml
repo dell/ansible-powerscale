@@ -1,0 +1,14 @@
+---
+minor_changes:
+  - group - Added ``group_members`` parameter to manage child group membership
+    with support for cross-provider resolution via ``provider_type`` suboption.
+  - group - Added ``group_member_state`` parameter (``present-in-group`` /
+    ``absent-in-group``) to control child group membership.
+  - group - Added ``well_known_sids`` parameter to manage well-known SID
+    membership by display name (case-insensitive) or SID string (exact match).
+  - group - Added ``well_known_sid_state`` parameter (``present-in-group`` /
+    ``absent-in-group``) to control well-known SID membership.
+  - group - Check mode and diff mode now report ``group_members`` and
+    ``well_known_sids`` in the diff output alongside existing user membership.
+  - group - Error messages for invalid well-known SIDs now include the full list
+    of supported display names from the cluster.
