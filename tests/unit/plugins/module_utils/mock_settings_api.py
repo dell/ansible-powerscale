@@ -21,6 +21,7 @@ class MockSettingsApi:
         "mail_relay": "mailrelay.itp.xyz.net",
         "mail_sender": "lab-a2@dell.com",
         "mail_subject": "lab-alerts",
+        "smtp_port": 25,
         "name": "PIE-IsilonS-24241-Cluster",
         "description": "description",
         "logon_details": {"message_title": "This is the new title",
@@ -63,7 +64,8 @@ class MockSettingsApi:
 
     GET_SETTINGS = {'settings': {'mail_relay': 'mailrelay.itp.xyz.net',
                                  'mail_sender': 'lab-a2@dell.com',
-                                 'mail_subject': 'lab-alerts'}}
+                                 'mail_subject': 'lab-alerts',
+                                 'smtp_port': 25}}
 
     # Declarative NTP mock data — multiple current servers
     NTP_SERVERS_TWO_CURRENT = {

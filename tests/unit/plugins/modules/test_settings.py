@@ -56,17 +56,25 @@ class TestSettings(PowerScaleUnitBase):
         self.set_module_params(self.settings_args,
                                {"mail_relay": "mailrelaymod.itp.xyz.net",
                                 "mail_sender": "lab-a2_mod@dell.com",
-                                "mail_subject": "lab_mod-alerts"})
+                                "mail_subject": "lab_mod-alerts",
+                                "smtp_port": 587})
         powerscale_module_mock.get_email_settings = MagicMock(return_value=MockSettingsApi.GET_SETTINGS)
         powerscale_module_mock.update_cluster_email = MagicMock(return_value=True)
         SettingsHandler().handle(powerscale_module_mock, powerscale_module_mock.module.params)
+        powerscale_module_mock.cluster_api.update_cluster_email.assert_called_with({
+            "mail_relay": "mailrelaymod.itp.xyz.net",
+            "mail_sender": "lab-a2_mod@dell.com",
+            "mail_subject": "lab_mod-alerts",
+            "smtp_port": 587
+        })
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
 
     def test_update_email_settings_exception(self, powerscale_module_mock):
         self.set_module_params(self.settings_args,
                                {"mail_relay": "mailrelaymod.itp.xyz.net",
                                 "mail_sender": "lab-a2_mod@dell.com",
-                                "mail_subject": "lab_mod-alerts"})
+                                "mail_subject": "lab_mod-alerts",
+                                "smtp_port": 587})
         powerscale_module_mock.get_email_settings = MagicMock(return_value=MockSettingsApi.GET_SETTINGS)
         powerscale_module_mock.cluster_api.update_cluster_email = MagicMock(side_effect=MockApiException)
         self.capture_fail_json_call(
@@ -202,6 +210,7 @@ class TestSettings(PowerScaleUnitBase):
     # from unmocked email/cluster/owner getters returning MagicMock.
     _NTP_ONLY = {
         "mail_relay": None, "mail_sender": None, "mail_subject": None,
+        "smtp_port": None,
         "name": None, "description": None, "logon_details": None,
         "company": None, "location": None,
         "primary_contact": None, "secondary_contact": None,

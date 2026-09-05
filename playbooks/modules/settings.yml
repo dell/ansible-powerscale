@@ -12,6 +12,7 @@
     mail_relay: 'mailrelay.itp11.dell.com'
     mail_sender: 'lab-a21@dell.com'
     mail_subject: 'alerts11'
+    smtp_port: 25
     ntp_servers_add:
       - '10.**.**.21'
       - '10.**.**.22'
@@ -32,6 +33,7 @@
         mail_relay: "{{ mail_relay }}"
         mail_sender: "{{ mail_sender }}"
         mail_subject: "{{ mail_subject }}"
+        smtp_port: "{{ smtp_port }}"
         name: "PIE-IsilonS-24241-Cluster"
         description: "This is new description for the cluster"
         logon_details:
