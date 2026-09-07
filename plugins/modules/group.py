@@ -101,15 +101,92 @@ options:
     - It is required when users are added or removed from a group.
     type: str
     choices: ['present-in-group', 'absent-in-group']
+  group_members:
+    description:
+    - List of child groups to add to or remove from the group.
+    - Each entry is a dictionary with a required C(group_name) key and an
+      optional C(provider_type) key (defaults to the group-level
+      I(provider_type)).
+    - The child group must already exist in the specified authentication
+      provider and access zone.
+    - Requires I(group_member_state) to be set.
+    type: list
+    elements: dict
+    suboptions:
+      group_name:
+        description:
+        - The name of the child group to add or remove.
+        type: str
+        required: true
+      provider_type:
+        description:
+        - The authentication provider in which to resolve the child group.
+        - When omitted the group-level I(provider_type) is used.
+        type: str
+        default: 'local'
+        choices: [ 'local', 'file', 'ldap', 'ads', 'nis']
+  group_member_state:
+    description:
+    - Determines whether the child groups listed in I(group_members) will
+      be added to or removed from the group.
+    - Required when I(group_members) is specified.
+    type: str
+    choices: ['present-in-group', 'absent-in-group']
+  well_known_sids:
+    description:
+    - List of well-known security identifiers (SIDs) to add to or remove
+      from the group.
+    - Each element is a string — either a display name (case-insensitive)
+      or a SID string (exact match).
+    - "Commonly used well-known SIDs:"
+    - "  C(Everyone)           — S-1-1-0"
+    - "  C(Authenticated Users) — S-1-5-11"
+    - "  C(Batch)              — S-1-5-3"
+    - "  C(Creator Owner)      — S-1-3-0"
+    - "  C(Dialup)             — S-1-5-1"
+    - "  C(Interactive)        — S-1-5-4"
+    - "  C(Network)            — S-1-5-2"
+    - "  C(Service)            — S-1-5-6"
+    - The authoritative list of supported SIDs for a specific cluster
+      can be obtained via C(GET /platform/1/auth/wellknowns).
+    - Requires I(well_known_sid_state) to be set.
+    type: list
+    elements: str
+  well_known_sid_state:
+    description:
+    - Determines whether the well-known SIDs listed in I(well_known_sids)
+      will be added to or removed from the group.
+    - Required when I(well_known_sids) is specified.
+    type: str
+    choices: ['present-in-group', 'absent-in-group']
 attributes:
   check_mode:
-    description: Runs task to validate without performing action on the target machine.
+    description:
+    - Fully supported for all member types (users, group_members,
+      well_known_sids).
+    - Reports whether changes would be made without applying them.
     support: full
   diff_mode:
-    description: Runs the task to report the changes made or to be made.
+    description:
+    - Reports before/after membership state for users, group_members,
+      and well_known_sids.
     support: full
 notes:
 - Cross-provider group membership requires OneFS 9.11.0 or later.
+- Existing playbooks using only I(users) and I(user_state) continue to
+  work unchanged. The I(group_members) and I(well_known_sids) parameters
+  are optional and default to empty when omitted.
+- B(Troubleshooting)
+- If a child group cannot be resolved, verify that the group exists in the
+  specified authentication provider and access zone. The module will fail
+  with an error message identifying the unresolvable group.
+- If a well-known SID is not recognised, verify the display name or SID
+  string against the cluster's supported list via
+  C(GET /platform/1/auth/wellknowns). The error message includes the full
+  list of supported display names.
+- Circular membership (group A contains group B which contains group A) is
+  not detected by the module. OneFS may reject or silently ignore such
+  configurations depending on the version.
 '''
 
 EXAMPLES = r'''
@@ -284,6 +361,124 @@ EXAMPLES = r'''
       - user_id: "{{user_id}}"
     user_state: "present-in-group"
     state: "present"
+
+- name: Add an AD group to a local group in an Access Zone
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "local"
+    access_zone: "{{access_zone}}"
+    group_name: "{{group_name}}"
+    group_members:
+      - group_name: "DOMAIN\\ad_child_group"
+        provider_type: "ads"
+    group_member_state: "present-in-group"
+    state: "present"
+
+- name: Add an LDAP group to a local group
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "local"
+    access_zone: "{{access_zone}}"
+    group_name: "{{group_name}}"
+    group_members:
+      - group_name: "{{ldap_group_name}}"
+        provider_type: "ldap"
+    group_member_state: "present-in-group"
+    state: "present"
+
+- name: Add a well-known SID by display name
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "local"
+    access_zone: "{{access_zone}}"
+    group_name: "{{group_name}}"
+    well_known_sids:
+      - "Everyone"
+    well_known_sid_state: "present-in-group"
+    state: "present"
+
+- name: Add a well-known SID by SID string
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "local"
+    access_zone: "{{access_zone}}"
+    group_name: "{{group_name}}"
+    well_known_sids:
+      - "S-1-1-0"
+    well_known_sid_state: "present-in-group"
+    state: "present"
+
+- name: Mixed member type management (users, groups, and SIDs)
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "local"
+    access_zone: "{{access_zone}}"
+    group_name: "{{group_name}}"
+    users:
+      - user_name: "{{user_name}}"
+    user_state: "present-in-group"
+    group_members:
+      - group_name: "{{ldap_group_name}}"
+        provider_type: "ldap"
+    group_member_state: "present-in-group"
+    well_known_sids:
+      - "Everyone"
+    well_known_sid_state: "present-in-group"
+    state: "present"
+
+- name: Remove group members and well-known SIDs
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "local"
+    access_zone: "{{access_zone}}"
+    group_name: "{{group_name}}"
+    group_members:
+      - group_name: "{{ldap_group_name}}"
+        provider_type: "ldap"
+    group_member_state: "absent-in-group"
+    well_known_sids:
+      - "Everyone"
+    well_known_sid_state: "absent-in-group"
+    state: "present"
+
+- name: Check/diff mode - preview group and SID membership changes
+  dellemc.powerscale.group:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "local"
+    access_zone: "{{access_zone}}"
+    group_name: "{{group_name}}"
+    group_members:
+      - group_name: "{{ldap_group_name}}"
+        provider_type: "ldap"
+    group_member_state: "present-in-group"
+    well_known_sids:
+      - "Everyone"
+    well_known_sid_state: "present-in-group"
+    state: "present"
+  check_mode: true
+  diff: true
+  register: result
 '''
 
 RETURN = r'''
@@ -319,7 +514,10 @@ group_details:
             type: str
             sample: "lsa-local-provider:system"
         members:
-            description: The list of sid's the members of group.
+            description: The list of all members of the group, including
+                         users, child groups, and well-known SIDs. Each
+                         entry contains a C(type) field indicating the
+                         member kind (C(user), C(group), or C(wellknown)).
             type: complex
             contains:
                 sid:
@@ -334,7 +532,8 @@ group_details:
                             description: The name of the resource.
                             type: str
                         type_of_resource:
-                            description: The resource's type is mentioned.
+                            description: The resource's type — one of C(user),
+                                         C(group), or C(wellknown).
                             type: str
                             sample: "user"
     sample:
@@ -372,7 +571,18 @@ diff:
             type: dict
             contains:
                 members:
-                    description: Sorted list of member names before the operation.
+                    description: Sorted list of user member names before the
+                                 operation.
+                    type: list
+                    elements: str
+                group_members:
+                    description: Sorted list of child group names before the
+                                 operation.
+                    type: list
+                    elements: str
+                well_known_sids:
+                    description: Sorted list of well-known SID display names
+                                 before the operation.
                     type: list
                     elements: str
         after:
@@ -380,13 +590,32 @@ diff:
             type: dict
             contains:
                 members:
-                    description: Sorted list of member names after the operation.
+                    description: Sorted list of user member names after the
+                                 operation.
+                    type: list
+                    elements: str
+                group_members:
+                    description: Sorted list of child group names after the
+                                 operation.
+                    type: list
+                    elements: str
+                well_known_sids:
+                    description: Sorted list of well-known SID display names
+                                 after the operation.
                     type: list
                     elements: str
     sample:
         {
-            "before": {"members": ["Guest", "ldap_user"]},
-            "after": {"members": ["Guest"]}
+            "before": {
+                "members": ["Guest", "ldap_user"],
+                "group_members": ["child_group"],
+                "well_known_sids": ["Everyone"]
+            },
+            "after": {
+                "members": ["Guest"],
+                "group_members": [],
+                "well_known_sids": []
+            }
         }
 
 '''
@@ -436,6 +665,7 @@ class Group(object):
         # lazily -- a playbook that never specifies a per-member provider_type
         # makes no additional API calls at all.
         self._providers_cache = {}
+        self._members_cache = {}
         self._onefs_version_validated = False
         LOG.info('Got the isi_sdk instance for authorization on to PowerScale')
 
@@ -586,6 +816,226 @@ class Group(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
+    def resolve_group_id(self, group_name, provider_type, access_zone):
+        """Resolve a child group to its unique SID identifier.
+
+        Uses ``AuthApi.get_auth_group`` with the given provider so the cluster
+        looks up the group in the correct authentication backend. Returns the
+        SID string (e.g. ``SID:S-1-5-…``) that can be passed directly to the
+        group-membership API.
+
+        :param group_name: the name of the child group to resolve.
+        :param provider_type: bare provider type (local, file, ldap, ads, nis).
+        :param access_zone: the access zone the parent group lives in.
+        :return: the group's ``SID:…`` identifier string.
+        """
+        cache = getattr(self, '_group_resolution_cache', {})
+        cache_key = (group_name.lower(), provider_type, access_zone)
+        if cache_key in cache:
+            return cache[cache_key]
+        auth_group_id = "GROUP:" + group_name
+        try:
+            api_response = self.api_instance.get_auth_group(
+                auth_group_id=auth_group_id,
+                zone=access_zone, provider=provider_type)
+            groups = api_response.to_dict().get('groups') or []
+            if not groups:
+                error_message = (
+                    "Group '%s' could not be resolved in provider '%s'"
+                    " in access zone '%s'"
+                    % (group_name, provider_type, access_zone))
+                LOG.error(error_message)
+                self.module.fail_json(msg=error_message)
+            resolved_id = groups[0]['sid']['id']
+            cache[cache_key] = resolved_id
+            self._group_resolution_cache = cache
+            LOG.info("Resolved group '%s' in provider '%s' zone '%s' to %s",
+                     group_name, provider_type, access_zone, resolved_id)
+            return resolved_id
+        except Exception as e:
+            error = self.determine_error(error_obj=e)
+            error_message = (
+                "Group '%s' could not be resolved in provider '%s'"
+                " in access zone '%s': %s"
+                % (group_name, provider_type, access_zone, error))
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    def add_group_member_to_group(self, group, resolved_id, member_name,
+                                  access_zone, provider_type):
+        """Add a child group to a parent group in PowerScale.
+
+        Checks current membership first for idempotency. If the child group
+        is already a member, returns False without making any API call.
+
+        :param group: the parent group identifier (e.g. ``GROUP:parent``).
+        :param resolved_id: the resolved SID of the child group.
+        :param member_name: display name for logging.
+        :param access_zone: the access zone.
+        :param provider_type: the parent group's provider type.
+        :return: True if the member was added, False if already present.
+        """
+        # Check current membership for idempotency
+        current_members = self.get_group_members(group, access_zone,
+                                                 provider_type)
+        for member in (current_members or []):
+            if (member.get('id') == resolved_id or
+                    member.get('name', '').lower() == member_name.lower()):
+                LOG.info("Group member '%s' is already in group %s",
+                         member_name, group)
+                return False
+        LOG.info("Adding group member '%s' to group %s", member_name, group)
+        if self.module.check_mode:
+            LOG.info("Check mode: skipping create_group_member for %s",
+                     member_name)
+            return True
+        group_member = utils.isi_sdk.AuthAccessAccessItemFileGroup(resolved_id)
+        self.group_api_instance.create_group_member(
+            group_member, group, zone=access_zone, provider=provider_type)
+        self._invalidate_members_cache()
+        return True
+
+    def remove_group_member_from_group(self, group, resolved_id, member_name,
+                                       access_zone, provider_type):
+        """Remove a child group from a parent group in PowerScale.
+
+        Checks current membership first for idempotency. If the child group
+        is not a member, returns False without making any API call.
+
+        :param group: the parent group identifier (e.g. ``GROUP:parent``).
+        :param resolved_id: the resolved SID of the child group.
+        :param member_name: display name for logging.
+        :param access_zone: the access zone.
+        :param provider_type: the parent group's provider type.
+        :return: True if the member was removed, False if not present.
+        """
+        # Check current membership for idempotency
+        current_members = self.get_group_members(group, access_zone,
+                                                 provider_type)
+        is_member = False
+        for member in (current_members or []):
+            if (member.get('id') == resolved_id or
+                    member.get('name', '').lower() == member_name.lower()):
+                is_member = True
+                break
+        if not is_member:
+            LOG.info("Group member '%s' is not in group %s, nothing to remove",
+                     member_name, group)
+            return False
+        LOG.info("Removing group member '%s' from group %s",
+                 member_name, group)
+        if self.module.check_mode:
+            LOG.info("Check mode: skipping delete_group_member for %s",
+                     member_name)
+            return True
+        self.group_api_instance.delete_group_member(
+            resolved_id, group, zone=access_zone, provider=provider_type)
+        self._invalidate_members_cache()
+        return True
+
+    def resolve_well_known_sid(self, value):
+        """Resolve a well-known SID display name or SID string.
+
+        Matches display names case-insensitively and SID strings exactly.
+
+        :param value: a display name (e.g. ``"Everyone"``) or SID string
+            (e.g. ``"S-1-1-0"``).
+        :return: ``(sid_id, display_name)`` tuple where *sid_id* is the
+            ``SID:…`` identifier and *display_name* is the canonical
+            display name from the cluster.
+        """
+        wellknowns = self._get_wellknowns()
+        # Try case-insensitive display name match first
+        for wk in wellknowns:
+            if wk['name'].lower() == value.lower():
+                resolved = "SID:" + wk['sid']
+                LOG.info("Resolved well-known SID '%s' to %s",
+                         value, resolved)
+                return resolved, wk['name']
+        # Try exact SID string match
+        for wk in wellknowns:
+            if wk['sid'] == value:
+                resolved = "SID:" + wk['sid']
+                LOG.info("Resolved well-known SID string '%s' to %s",
+                         value, resolved)
+                return resolved, wk['name']
+        supported = sorted(set(wk['name'] for wk in wellknowns))
+        error_message = (
+            "'%s' is not a recognised well-known SID name or SID string."
+            " Supported display names: %s"
+            % (value, ', '.join(supported)))
+        LOG.error(error_message)
+        self.module.fail_json(msg=error_message)
+
+    def add_wellknown_to_group(self, group, resolved_id, member_name,
+                               access_zone, provider_type):
+        """Add a well-known SID to a group in PowerScale.
+
+        Checks current membership first for idempotency.
+
+        :param group: the parent group identifier (e.g. ``GROUP:parent``).
+        :param resolved_id: the resolved SID identifier (e.g. ``SID:S-1-1-0``).
+        :param member_name: display name for logging.
+        :param access_zone: the access zone.
+        :param provider_type: the parent group's provider type.
+        :return: True if the member was added, False if already present.
+        """
+        current_members = self.get_group_members(group, access_zone,
+                                                 provider_type)
+        for member in (current_members or []):
+            if (member.get('id') == resolved_id or
+                    member.get('name', '').lower() == member_name.lower()):
+                LOG.info("Well-known SID '%s' is already in group %s",
+                         member_name, group)
+                return False
+        LOG.info("Adding well-known SID '%s' to group %s",
+                 member_name, group)
+        if self.module.check_mode:
+            LOG.info("Check mode: skipping create_group_member for %s",
+                     member_name)
+            return True
+        group_member = utils.isi_sdk.AuthAccessAccessItemFileGroup(resolved_id)
+        self.group_api_instance.create_group_member(
+            group_member, group, zone=access_zone, provider=provider_type)
+        self._invalidate_members_cache()
+        return True
+
+    def remove_wellknown_from_group(self, group, resolved_id, member_name,
+                                    access_zone, provider_type):
+        """Remove a well-known SID from a group in PowerScale.
+
+        Checks current membership first for idempotency.
+
+        :param group: the parent group identifier (e.g. ``GROUP:parent``).
+        :param resolved_id: the resolved SID identifier.
+        :param member_name: display name for logging.
+        :param access_zone: the access zone.
+        :param provider_type: the parent group's provider type.
+        :return: True if the member was removed, False if not present.
+        """
+        current_members = self.get_group_members(group, access_zone,
+                                                 provider_type)
+        is_member = False
+        for member in (current_members or []):
+            if (member.get('id') == resolved_id or
+                    member.get('name', '').lower() == member_name.lower()):
+                is_member = True
+                break
+        if not is_member:
+            LOG.info("Well-known SID '%s' is not in group %s,"
+                     " nothing to remove", member_name, group)
+            return False
+        LOG.info("Removing well-known SID '%s' from group %s",
+                 member_name, group)
+        if self.module.check_mode:
+            LOG.info("Check mode: skipping delete_group_member for %s",
+                     member_name)
+            return True
+        self.group_api_instance.delete_group_member(
+            resolved_id, group, zone=access_zone, provider=provider_type)
+        self._invalidate_members_cache()
+        return True
+
     def check_provider_type(self, provider, message):
         """ Check the provider and return the updated provider"""
         if provider.lower() != "local":
@@ -698,14 +1148,24 @@ class Group(object):
             self.module.fail_json(msg=error_message)
 
     def get_group_members(self, group, zone, provider):
-        """Get the Group Member Details in PowerScale"""
+        """Get the Group Member Details in PowerScale.
+
+        Results are cached per ``(group, zone, provider)`` tuple so that
+        multiple helpers (add/remove for groups, users, SIDs) share a
+        single API call per invocation (NFR-1).
+        """
+        provider = 'local' if not provider else provider
+        cache_key = (group, zone, provider)
+        if cache_key in self._members_cache:
+            LOG.info("Returning cached members for %s", group)
+            return self._members_cache[cache_key]
         try:
             LOG.info("Getting members of group %s", group)
-            provider = 'local' if not provider else provider
             api_response = self.group_api_instance.list_group_members(
                 group, zone=zone, provider=provider)
             api_response_dict = api_response.to_dict()
             LOG.info("Group Members: %s", api_response_dict['members'])
+            self._members_cache[cache_key] = api_response_dict['members']
             return api_response_dict['members']
         except Exception as e:
             error = self.determine_error(error_obj=e)
@@ -713,6 +1173,10 @@ class Group(object):
                             % (group, error)
             LOG.info(error_message)
             self.module.fail_json(msg=error_message)
+
+    def _invalidate_members_cache(self):
+        """Clear the members cache after a membership write operation."""
+        self._members_cache.clear()
 
     def add_user_to_group(self, group, user,
                           zone, provider, cross_provider=False):
@@ -732,6 +1196,7 @@ class Group(object):
                 api_response = self.group_api_instance.create_group_member(
                     group_member, group, zone=zone, provider=provider)
             LOG.info(api_response)
+            self._invalidate_members_cache()
             return True
         except Exception as e:
             error = self.determine_error(error_obj=e)
@@ -756,6 +1221,7 @@ class Group(object):
                 provider = self.check_provider_type(provider, 'Remove User from')
                 self.group_api_instance.delete_group_member(
                     user, group, zone=zone, provider=provider)
+            self._invalidate_members_cache()
             return True
 
         except Exception as e:
@@ -865,15 +1331,23 @@ class Group(object):
 
         Computes the *before* member list from the current group membership,
         and the *after* list by projecting the additions/removals described
-        by ``users`` and ``user_state``.
+        by ``users`` / ``user_state``, ``group_members`` /
+        ``group_member_state``, and ``well_known_sids`` /
+        ``well_known_sid_state``.
 
-        :return: dict with ``before`` and ``after`` keys, each containing a
-            ``members`` list. Returns ``None`` when diff mode is not active.
+        :return: dict with ``before`` and ``after`` keys, each containing
+            ``members``, ``group_members``, and ``well_known_sids`` lists.
+            Returns ``None`` when diff mode is not active.
         """
         if not getattr(self.module, '_diff', False):
             return None
-        current_members = self.get_group_members(group, access_zone, provider_type)
-        before_names = [m.get('name', '') for m in (current_members or [])]
+        current_members = self.get_group_members(
+            group, access_zone, provider_type)
+
+        # --- users diff (existing behaviour) ---
+        before_names = [
+            m.get('name', '') for m in (current_members or [])
+            if m.get('type') == 'user']
         after_names = list(before_names)
         for user in (users or []):
             if not isinstance(user, dict):
@@ -885,9 +1359,76 @@ class Group(object):
             elif user_state == 'absent-in-group':
                 after_names = [n for n in after_names
                                if n.lower() != name.lower()]
+
+        # --- group_members diff ---
+        group_members = self.module.params.get('group_members') or []
+        group_member_state = self.module.params.get('group_member_state')
+        before_group_members = [
+            m for m in (current_members or []) if m.get('type') == 'group']
+        after_group_members = list(before_group_members)
+        before_groups = [m.get('name', '') for m in before_group_members]
+        for entry in group_members:
+            if not isinstance(entry, dict):
+                continue
+            gname = entry.get('group_name', '')
+            resolved_id = self.resolve_group_id(
+                gname, entry.get('provider_type') or 'local', access_zone)
+            if group_member_state == 'present-in-group':
+                if not any(
+                        m.get('id') == resolved_id or
+                        m.get('name', '').lower() == gname.lower()
+                        for m in after_group_members):
+                    after_group_members.append(
+                        {'id': resolved_id, 'name': gname, 'type': 'group'})
+            elif group_member_state == 'absent-in-group':
+                after_group_members = [
+                    m for m in after_group_members
+                    if m.get('id') != resolved_id and
+                    m.get('name', '').lower() != gname.lower()]
+        after_groups = [m.get('name', '') for m in after_group_members]
+
+        # --- well_known_sids diff ---
+        well_known_sids = self.module.params.get('well_known_sids') or []
+        wk_sid_state = self.module.params.get('well_known_sid_state')
+        before_sid_members = [
+            m for m in (current_members or [])
+            if m.get('type') == 'wellknown']
+        after_sid_members = list(before_sid_members)
+        before_sids = [m.get('name', '') for m in before_sid_members]
+        for sid_value in well_known_sids:
+            try:
+                resolved_id, display_name = self.resolve_well_known_sid(
+                    sid_value)
+            except SystemExit:
+                continue
+            if wk_sid_state == 'present-in-group':
+                if not any(
+                        m.get('id') == resolved_id or
+                        m.get('name', '').lower() == display_name.lower()
+                        for m in after_sid_members):
+                    after_sid_members.append({
+                        'id': resolved_id,
+                        'name': display_name,
+                        'type': 'wellknown',
+                    })
+            elif wk_sid_state == 'absent-in-group':
+                after_sid_members = [
+                    m for m in after_sid_members
+                    if m.get('id') != resolved_id and
+                    m.get('name', '').lower() != display_name.lower()]
+        after_sids = [m.get('name', '') for m in after_sid_members]
+
         return {
-            'before': {'members': sorted(before_names)},
-            'after': {'members': sorted(after_names)},
+            'before': {
+                'members': sorted(before_names),
+                'group_members': sorted(before_groups),
+                'well_known_sids': sorted(before_sids),
+            },
+            'after': {
+                'members': sorted(after_names),
+                'group_members': sorted(after_groups),
+                'well_known_sids': sorted(after_sids),
+            },
         }
 
     def _validate_group_params(self, group, users, user_state):
@@ -900,6 +1441,111 @@ class Group(object):
         if not user_state and users:
             self.module.fail_json(msg="'user_state' is not specified,"
                                       " 'users' are given")
+        # Validate group_members / group_member_state pairing
+        group_members = self.module.params.get('group_members') or []
+        group_member_state = self.module.params.get('group_member_state')
+        if not group_members and group_member_state:
+            self.module.fail_json(
+                msg="'group_member_state' is given,"
+                    " 'group_members' are not specified")
+        if not group_member_state and group_members:
+            self.module.fail_json(
+                msg="'group_member_state' is not specified,"
+                    " 'group_members' are given")
+        # Validate well_known_sids / well_known_sid_state pairing
+        well_known_sids = self.module.params.get('well_known_sids') or []
+        well_known_sid_state = self.module.params.get('well_known_sid_state')
+        if not well_known_sids and well_known_sid_state:
+            self.module.fail_json(
+                msg="'well_known_sid_state' is given,"
+                    " 'well_known_sids' are not specified")
+        if not well_known_sid_state and well_known_sids:
+            self.module.fail_json(
+                msg="'well_known_sid_state' is not specified,"
+                    " 'well_known_sids' are given")
+
+    def _validate_group_members_entries(self, group_members):
+        """Validate each entry in the group_members list (FR-6.1).
+
+        Each entry must be a dict with ``group_name`` (required) and optional
+        ``provider_type``. No unsupported keys are allowed. Validation runs
+        upfront before any write API call.
+        """
+        allowed_keys = {'group_name', 'provider_type'}
+        for idx, entry in enumerate(group_members):
+            if not isinstance(entry, dict):
+                self.module.fail_json(
+                    msg="group_members entry at index %d must be a dict,"
+                        " got %s" % (idx, type(entry).__name__))
+            unsupported = set(entry.keys()) - allowed_keys
+            if unsupported:
+                self.module.fail_json(
+                    msg="group_members entry at index %d contains unsupported"
+                        " keys. Supported keys are: group_name,"
+                        " provider_type." % idx)
+            if 'group_name' not in entry:
+                self.module.fail_json(
+                    msg="group_members entry at index %d is missing required"
+                        " key 'group_name'" % idx)
+            provider = entry.get('provider_type')
+            if provider and provider not in VALID_PROVIDER_TYPES:
+                self.module.fail_json(
+                    msg="group_members entry at index %d has invalid"
+                        " provider_type '%s'. Valid values are: %s."
+                        % (idx, provider,
+                           ', '.join(VALID_PROVIDER_TYPES)))
+
+    def _validate_wellknown_sids_entries(self, well_known_sids):
+        """Validate each entry in the well_known_sids list (FR-6.2).
+
+        Each value is matched against ``GET /platform/1/auth/wellknowns``:
+        display names are matched case-insensitively; SID strings must match
+        exactly. Unrecognised values cause immediate failure before any write.
+        """
+        if not well_known_sids:
+            return
+        wellknowns = self._get_wellknowns()
+        name_map = {wk['name'].lower(): wk for wk in wellknowns}
+        sid_map = {wk['sid']: wk for wk in wellknowns}
+        for value in well_known_sids:
+            if value.lower() not in name_map and value not in sid_map:
+                supported = sorted(set(wk['name'] for wk in wellknowns))
+                self.module.fail_json(
+                    msg="'%s' is not a recognised well-known SID name"
+                        " or SID string."
+                        " Supported display names: %s"
+                        % (value, ', '.join(supported)))
+
+    def _get_wellknowns(self):
+        """Fetch and cache well-known SID personas from the cluster.
+
+        :return: list of dicts with ``name`` and ``sid`` keys.
+        """
+        if hasattr(self, '_wellknowns_cache'):
+            return self._wellknowns_cache
+        try:
+            get_wellknowns = getattr(
+                self.api_instance, 'list_auth_wellknowns', None)
+            if not callable(get_wellknowns):
+                get_wellknowns = self.api_instance.get_auth_wellknowns
+            api_response = get_wellknowns()
+            wellknowns = api_response.to_dict().get('wellknowns') or []
+            self._wellknowns_cache = [
+                {
+                    'name': wk['name'],
+                    'sid': (wk.get('sid') or wk.get('id', '')).replace(
+                        'SID:', '', 1),
+                }
+                for wk in wellknowns
+            ]
+            LOG.info("Fetched %d well-known SIDs",
+                     len(self._wellknowns_cache))
+            return self._wellknowns_cache
+        except Exception as e:
+            error = self.determine_error(error_obj=e)
+            error_message = "Failed to fetch well-known SIDs: %s" % error
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
 
     def _process_user_entry(self, group, user, user_state, access_zone,
                             provider_type, index=0):
@@ -946,6 +1592,53 @@ class Group(object):
             group, None, user['user_id'], user_state, access_zone,
             provider_type, member_provider=member_provider)
 
+    def _process_group_members(self, group, group_members, group_member_state,
+                               access_zone, provider_type):
+        """Process group_members entries: resolve and add/remove child groups.
+
+        :return: True if any membership changed, False otherwise.
+        """
+        changed = False
+        for entry in group_members:
+            child_name = entry['group_name']
+            child_provider = entry.get('provider_type') or 'local'
+            resolved_id = self.resolve_group_id(
+                child_name, child_provider, access_zone)
+            if group_member_state == 'present-in-group':
+                if self.add_group_member_to_group(
+                        group, resolved_id, child_name,
+                        access_zone, provider_type):
+                    changed = True
+            elif group_member_state == 'absent-in-group':
+                if self.remove_group_member_from_group(
+                        group, resolved_id, child_name,
+                        access_zone, provider_type):
+                    changed = True
+        return changed
+
+    def _process_well_known_sids(self, group, well_known_sids,
+                                 well_known_sid_state, access_zone,
+                                 provider_type):
+        """Process well_known_sids entries: resolve and add/remove SIDs.
+
+        :return: True if any membership changed, False otherwise.
+        """
+        changed = False
+        for sid_value in well_known_sids:
+            resolved_id, display_name = self.resolve_well_known_sid(
+                sid_value)
+            if well_known_sid_state == 'present-in-group':
+                if self.add_wellknown_to_group(
+                        group, resolved_id, display_name,
+                        access_zone, provider_type):
+                    changed = True
+            elif well_known_sid_state == 'absent-in-group':
+                if self.remove_wellknown_from_group(
+                        group, resolved_id, display_name,
+                        access_zone, provider_type):
+                    changed = True
+        return changed
+
     def _handle_present_state(self, group, group_name, group_id, access_zone, provider_type, users, user_state):
         """Handle present state logic. Returns (changed, group_details)."""
         group_details = self.get_group_details(group, access_zone, provider_type)
@@ -965,19 +1658,42 @@ class Group(object):
                 LOG.error(error_message)
                 self.module.fail_json(msg=error_message)
 
+        changed = False
+
+        # Compute the membership diff before processing, so the diff
+        # reflects the intended changes even in check mode.
+        diff = self._build_member_diff(
+            group, access_zone, provider_type, users, user_state)
+        if diff is not None:
+            self.result['diff'] = diff
+
+        # Processing order: users -> group_members -> well_known_sids (FR-3.1)
+
+        # Step 1: Process users (existing behaviour)
         if user_state and users:
-            # Compute the membership diff before processing, so the diff
-            # reflects the intended changes even in check mode.
-            diff = self._build_member_diff(
-                group, access_zone, provider_type, users, user_state)
-            if diff is not None:
-                self.result['diff'] = diff
-            changed = False
             for idx, user in enumerate(users):
                 if self._process_user_entry(group, user, user_state, access_zone, provider_type, index=idx):
                     changed = True
-            return changed
-        return False
+
+        # Step 2: Process group_members
+        group_members = self.module.params.get('group_members') or []
+        group_member_state = self.module.params.get('group_member_state')
+        if group_member_state and group_members:
+            if self._process_group_members(
+                    group, group_members, group_member_state,
+                    access_zone, provider_type):
+                changed = True
+
+        # Step 3: Process well_known_sids
+        well_known_sids = self.module.params.get('well_known_sids') or []
+        well_known_sid_state = self.module.params.get('well_known_sid_state')
+        if well_known_sid_state and well_known_sids:
+            if self._process_well_known_sids(
+                    group, well_known_sids, well_known_sid_state,
+                    access_zone, provider_type):
+                changed = True
+
+        return changed
 
     def perform_module_operation(self):
         """
@@ -998,6 +1714,13 @@ class Group(object):
             group = 'GID:' + str(group_id)
 
         self._validate_group_params(group, users, user_state)
+        # Upfront validation for group_members and well_known_sids (FR-6)
+        group_members = self.module.params.get('group_members') or []
+        if group_members:
+            self._validate_group_members_entries(group_members)
+        well_known_sids = self.module.params.get('well_known_sids') or []
+        if well_known_sids:
+            self._validate_wellknown_sids_entries(well_known_sids)
 
         changed = False
         if state == 'present':
@@ -1030,7 +1753,15 @@ def get_group_parameters():
         state=dict(required=True, type='str', choices=['present', 'absent']),
         users=dict(required=False, type='list', elements='dict'),
         user_state=dict(required=False, type='str',
-                        choices=['present-in-group', 'absent-in-group'])
+                        choices=['present-in-group', 'absent-in-group']),
+        group_members=dict(required=False, type='list', elements='dict'),
+        group_member_state=dict(required=False, type='str',
+                                choices=['present-in-group',
+                                         'absent-in-group']),
+        well_known_sids=dict(required=False, type='list', elements='str'),
+        well_known_sid_state=dict(required=False, type='str',
+                                  choices=['present-in-group',
+                                           'absent-in-group'])
     )
 
 
