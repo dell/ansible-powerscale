@@ -396,7 +396,7 @@ Examples
         group_member_state: "present-in-group"
         state: "present"
 
-    - name: Add a local group to a local group (nested groups)
+    - name: Add an LDAP group to a local group
       dellemc.powerscale.group:
         onefs_host: "{{onefs_host}}"
         api_user: "{{api_user}}"
@@ -406,7 +406,8 @@ Examples
         access_zone: "{{access_zone}}"
         group_name: "{{group_name}}"
         group_members:
-          - group_name: "child_local_group"
+          - group_name: "{{ldap_group_name}}"
+            provider_type: "ldap"
         group_member_state: "present-in-group"
         state: "present"
 
@@ -451,7 +452,8 @@ Examples
           - user_name: "{{user_name}}"
         user_state: "present-in-group"
         group_members:
-          - group_name: "child_local_group"
+          - group_name: "{{ldap_group_name}}"
+            provider_type: "ldap"
         group_member_state: "present-in-group"
         well_known_sids:
           - "Everyone"
@@ -468,7 +470,8 @@ Examples
         access_zone: "{{access_zone}}"
         group_name: "{{group_name}}"
         group_members:
-          - group_name: "child_local_group"
+          - group_name: "{{ldap_group_name}}"
+            provider_type: "ldap"
         group_member_state: "absent-in-group"
         well_known_sids:
           - "Everyone"
@@ -485,7 +488,8 @@ Examples
         access_zone: "{{access_zone}}"
         group_name: "{{group_name}}"
         group_members:
-          - group_name: "child_local_group"
+          - group_name: "{{ldap_group_name}}"
+            provider_type: "ldap"
         group_member_state: "present-in-group"
         well_known_sids:
           - "Everyone"
