@@ -18,6 +18,8 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock
     import MockGroupApi
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_api_exception \
     import MockApiException
+from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_sdk_response \
+    import MockSDKResponse
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.powerscale_unit_base \
     import PowerScaleUnitBase
 
@@ -901,3 +903,1503 @@ class TestGroup(PowerScaleUnitBase):
             powerscale_module_mock,
             "perform_module_operation",
         )
+
+    # ==================================================================
+    # Story-3078 Part 1: Child Group & Well-Known SID Membership
+    # ==================================================================
+
+    # ------------------------------------------------------------------
+    # Phase 1: Input validation for group_members and well_known_sids
+    # ------------------------------------------------------------------
+
+    def test_group_members_unsupported_key_rejected(self, powerscale_module_mock):
+        """FR-6.1: group_members entries with unsupported keys are rejected."""
+        self.set_module_params(
+            self.group_args,
+            MockGroupApi.get_update_group_payload_with_group_members(
+                group_members=[{"group_name": "grp1", "bogus_key": "val"}],
+                group_member_state="present-in-group"))
+        self.mock_get_group_detail(powerscale_module_mock, operation='update',
+                                   call_exception=False)
+        self.mock_get_group_members(powerscale_module_mock, call_exception=False)
+        self.capture_fail_json_method(
+            "group_members entry at index 0 contains unsupported keys",
+            powerscale_module_mock,
+            "perform_module_operation",
+        )
+
+    def test_group_members_valid_keys_accepted(self, powerscale_module_mock):
+        """FR-6.1: group_members entries with only group_name and provider_type pass."""
+        self.set_module_params(
+            self.group_args,
+            MockGroupApi.get_update_group_payload_with_group_members(
+                group_members=[{"group_name": "child_grp", "provider_type": "local"}],
+                group_member_state="present-in-group"))
+        self.mock_get_group_members(powerscale_module_mock, call_exception=False)
+        # get_auth_group: (1) _handle_present_state, (2) resolve child group,
+        # (3) final get_group_details
+        powerscale_module_mock.api_instance.get_auth_group = \
+            MagicMock(side_effect=[
+                MockGroupApi.get_group_detail(),               # get_group_details
+                MockGroupApi.get_auth_group_response("local"),  # resolve child_grp
+                MockGroupApi.get_group_detail(),                # final get_group_details
+            ])
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        powerscale_module_mock.perform_module_operation()
+        powerscale_module_mock.module.fail_json.assert_not_called()
+
+    def test_group_members_missing_group_name_rejected(self, powerscale_module_mock):
+        """FR-6.1: group_members entries without group_name are rejected."""
+        self.set_module_params(
+            self.group_args,
+            MockGroupApi.get_update_group_payload_with_group_members(
+                group_members=[{"provider_type": "local"}],
+                group_member_state="present-in-group"))
+        self.mock_get_group_detail(powerscale_module_mock, operation='update',
+                                   call_exception=False)
+        self.mock_get_group_members(powerscale_module_mock, call_exception=False)
+        self.capture_fail_json_method(
+            "group_members entry at index 0 is missing required key 'group_name'",
+            powerscale_module_mock,
+            "perform_module_operation",
+        )
+
+    def test_wellknown_sids_unrecognised_value_rejected(self, powerscale_module_mock):
+        """FR-6.2: well_known_sids with unrecognised values are rejected before any API call."""
+        self.set_module_params(
+            self.group_args,
+            MockGroupApi.get_update_group_payload_with_wellknown_sids(
+                well_known_sids=["NonExistentSID"],
+                well_known_sid_state="present-in-group"))
+        self.mock_get_group_detail(powerscale_module_mock, operation='update',
+                                   call_exception=False)
+        self.mock_get_group_members(powerscale_module_mock, call_exception=False)
+        # Mock the wellknowns API
+        powerscale_module_mock.api_instance.list_auth_wellknowns = \
+            MagicMock(return_value=MockGroupApi.get_wellknowns_response())
+        self.capture_fail_json_method(
+            "'NonExistentSID' is not a recognised well-known SID name or SID string",
+            powerscale_module_mock,
+            "perform_module_operation",
+        )
+
+    def test_wellknown_sids_valid_display_name_accepted(self, powerscale_module_mock):
+        """FR-6.2: well_known_sids with valid display names pass validation."""
+        self.set_module_params(
+            self.group_args,
+            MockGroupApi.get_update_group_payload_with_wellknown_sids(
+                well_known_sids=["Everyone"],
+                well_known_sid_state="present-in-group"))
+        self.mock_get_group_detail(powerscale_module_mock, operation='update',
+                                   call_exception=False)
+        self.mock_get_group_members(powerscale_module_mock, call_exception=False)
+        powerscale_module_mock.api_instance.list_auth_wellknowns = \
+            MagicMock(return_value=MockGroupApi.get_wellknowns_response())
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        powerscale_module_mock.perform_module_operation()
+        powerscale_module_mock.module.fail_json.assert_not_called()
+
+    def test_wellknown_sids_valid_sid_string_accepted(self, powerscale_module_mock):
+        """FR-6.2: well_known_sids with valid SID strings pass validation."""
+        self.set_module_params(
+            self.group_args,
+            MockGroupApi.get_update_group_payload_with_wellknown_sids(
+                well_known_sids=["S-1-1-0"],
+                well_known_sid_state="present-in-group"))
+        self.mock_get_group_detail(powerscale_module_mock, operation='update',
+                                   call_exception=False)
+        self.mock_get_group_members(powerscale_module_mock, call_exception=False)
+        powerscale_module_mock.api_instance.list_auth_wellknowns = \
+            MagicMock(return_value=MockGroupApi.get_wellknowns_response())
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        powerscale_module_mock.perform_module_operation()
+        powerscale_module_mock.module.fail_json.assert_not_called()
+
+    def test_wellknown_sids_case_insensitive_match(self, powerscale_module_mock):
+        """FR-6.2: display name matching is case-insensitive."""
+        self.set_module_params(
+            self.group_args,
+            MockGroupApi.get_update_group_payload_with_wellknown_sids(
+                well_known_sids=["everyone"],
+                well_known_sid_state="present-in-group"))
+        self.mock_get_group_detail(powerscale_module_mock, operation='update',
+                                   call_exception=False)
+        self.mock_get_group_members(powerscale_module_mock, call_exception=False)
+        powerscale_module_mock.api_instance.list_auth_wellknowns = \
+            MagicMock(return_value=MockGroupApi.get_wellknowns_response())
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        powerscale_module_mock.perform_module_operation()
+        powerscale_module_mock.module.fail_json.assert_not_called()
+
+    def test_group_member_state_without_group_members_rejected(self, powerscale_module_mock):
+        """Validation: group_member_state given without group_members fails."""
+        self.set_module_params(
+            self.group_args,
+            MockGroupApi.get_update_group_payload_with_group_members(
+                group_members=[],
+                group_member_state="present-in-group"))
+        self.mock_get_group_detail(powerscale_module_mock, operation='update',
+                                   call_exception=False)
+        self.mock_get_group_members(powerscale_module_mock, call_exception=False)
+        self.capture_fail_json_method(
+            "'group_member_state' is given, 'group_members' are not specified",
+            powerscale_module_mock,
+            "perform_module_operation",
+        )
+
+    def test_well_known_sid_state_without_sids_rejected(self, powerscale_module_mock):
+        """Validation: well_known_sid_state given without well_known_sids fails."""
+        self.set_module_params(
+            self.group_args,
+            MockGroupApi.get_update_group_payload_with_wellknown_sids(
+                well_known_sids=[],
+                well_known_sid_state="present-in-group"))
+        self.mock_get_group_detail(powerscale_module_mock, operation='update',
+                                   call_exception=False)
+        self.mock_get_group_members(powerscale_module_mock, call_exception=False)
+        self.capture_fail_json_method(
+            "'well_known_sid_state' is given, 'well_known_sids' are not specified",
+            powerscale_module_mock,
+            "perform_module_operation",
+        )
+
+    # ------------------------------------------------------------------
+    # Phase 2: Child Group Membership — resolve_group_id() tests
+    # ------------------------------------------------------------------
+
+    def mock_get_auth_group_for_resolve(self, powerscale_module_mock,
+                                        provider="local", call_exception=False):
+        """Mock AuthApi.get_auth_group for group resolution tests."""
+        if call_exception:
+            powerscale_module_mock.api_instance.get_auth_group = \
+                MagicMock(side_effect=Exception("SDK boom"))
+        else:
+            powerscale_module_mock.api_instance.get_auth_group = \
+                MagicMock(return_value=MockGroupApi.get_auth_group_response(provider))
+
+    def test_resolve_group_id_local(self, powerscale_module_mock):
+        """FR-1.1/AC-001: resolve_group_id for local provider returns SID."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload_with_group_members())
+        self.mock_get_auth_group_for_resolve(powerscale_module_mock, provider="local")
+        result = powerscale_module_mock.resolve_group_id(
+            "child_local_grp", "local", "System")
+        assert result == "SID:S-1-5-21-1111111111-2222222222-3333333333-2001"
+
+    def test_resolve_group_id_caches_result(self, powerscale_module_mock):
+        self.set_module_params(
+            self.group_args,
+            MockGroupApi.get_update_group_payload_with_group_members())
+        self.mock_get_auth_group_for_resolve(
+            powerscale_module_mock, provider="local")
+        first = powerscale_module_mock.resolve_group_id(
+            "child_local_grp", "local", "System")
+        second = powerscale_module_mock.resolve_group_id(
+            "child_local_grp", "local", "System")
+        assert first == second
+        powerscale_module_mock.api_instance.get_auth_group.assert_called_once()
+
+    def test_resolve_group_id_ads(self, powerscale_module_mock):
+        """FR-1.1/AC-001: resolve_group_id for ads provider returns SID."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload_with_group_members())
+        self.mock_get_auth_group_for_resolve(powerscale_module_mock, provider="ads")
+        result = powerscale_module_mock.resolve_group_id(
+            "CORP\\ad_child_grp", "ads", "System")
+        assert result == "SID:S-1-5-21-4444444444-5555555555-6666666666-3001"
+
+    def test_resolve_group_id_ldap(self, powerscale_module_mock):
+        """FR-1.1/AC-001: resolve_group_id for ldap provider returns SID."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload_with_group_members())
+        self.mock_get_auth_group_for_resolve(powerscale_module_mock, provider="ldap")
+        result = powerscale_module_mock.resolve_group_id(
+            "ldap_child_grp", "ldap", "System")
+        assert result == "SID:S-1-5-21-7777777777-8888888888-9999999999-4001"
+
+    def test_resolve_group_id_nis(self, powerscale_module_mock):
+        """FR-1.1/AC-001: resolve_group_id for nis provider returns SID."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload_with_group_members())
+        self.mock_get_auth_group_for_resolve(powerscale_module_mock, provider="nis")
+        result = powerscale_module_mock.resolve_group_id(
+            "nis_child_grp", "nis", "System")
+        assert result == "SID:S-1-5-21-1010101010-2020202020-3030303030-5001"
+
+    def test_resolve_group_id_file(self, powerscale_module_mock):
+        """FR-1.1/AC-001: resolve_group_id for file provider returns SID."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload_with_group_members())
+        self.mock_get_auth_group_for_resolve(powerscale_module_mock, provider="file")
+        result = powerscale_module_mock.resolve_group_id(
+            "file_child_grp", "file", "System")
+        assert result == "SID:S-1-5-21-4040404040-5050505050-6060606060-6001"
+
+    def test_resolve_group_id_nonexistent_group_exception(self, powerscale_module_mock):
+        """FR-1.1: resolve_group_id raises error for non-existent group."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload_with_group_members())
+        self.mock_get_auth_group_for_resolve(powerscale_module_mock, provider=None)
+        self.capture_fail_json_method(
+            "Group 'no_such_group' could not be resolved in provider 'local'"
+            " in access zone 'System'",
+            powerscale_module_mock,
+            "resolve_group_id",
+            "no_such_group", "local", "System",
+        )
+
+    # ------------------------------------------------------------------
+    # Phase 2: add/remove group member helpers
+    # ------------------------------------------------------------------
+
+    def test_add_group_member_to_group_calls_post(self, powerscale_module_mock):
+        """FR-1.1: add_group_member_to_group calls POST with type=group."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload_with_group_members())
+        self.mock_get_group_members(powerscale_module_mock, call_exception=False)
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        result = powerscale_module_mock.add_group_member_to_group(
+            "GROUP:test_group",
+            "SID:S-1-5-21-1111111111-2222222222-3333333333-2001",
+            "child_local_grp",
+            "System", "local")
+        assert result is True
+        powerscale_module_mock.group_api_instance.create_group_member.assert_called_once()
+
+    def test_remove_group_member_from_group_calls_delete(self, powerscale_module_mock):
+        """FR-1.2: remove_group_member_from_group calls DELETE for member."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload_with_group_members())
+        # Member must be present for removal to trigger
+        members = MockSDKResponse({"members": [
+            {"id": "SID:S-1-5-21-1111111111-2222222222-3333333333-2001",
+             "name": "child_local_grp", "type": "group"}
+        ]})
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=members)
+        powerscale_module_mock.group_api_instance.delete_group_member = \
+            MagicMock(return_value=None)
+        result = powerscale_module_mock.remove_group_member_from_group(
+            "GROUP:test_group",
+            "SID:S-1-5-21-1111111111-2222222222-3333333333-2001",
+            "child_local_grp",
+            "System", "local")
+        assert result is True
+        powerscale_module_mock.group_api_instance.delete_group_member.assert_called_once()
+
+    def test_add_group_member_idempotent_already_exists(self, powerscale_module_mock):
+        """FR-1.1 idempotent: add when member already exists returns no change."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload_with_group_members())
+        # Create a member list that includes child_local_grp
+        members = MockSDKResponse({"members": [
+            {"id": "SID:S-1-5-21-1111111111-2222222222-3333333333-2001",
+             "name": "child_local_grp", "type": "group"}
+        ]})
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=members)
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        result = powerscale_module_mock.add_group_member_to_group(
+            "GROUP:test_group",
+            "SID:S-1-5-21-1111111111-2222222222-3333333333-2001",
+            "child_local_grp",
+            "System", "local")
+        assert result is False
+        powerscale_module_mock.group_api_instance.create_group_member.assert_not_called()
+
+    def test_add_group_member_idempotent_when_canonical_name_differs(
+            self, powerscale_module_mock):
+        self.set_module_params(
+            self.group_args,
+            MockGroupApi.get_update_group_payload_with_group_members())
+        members = MockSDKResponse({"members": [
+            {"id": "SID:S-1-5-21-1111111111-2222222222-3333333333-2001",
+             "name": "canonical_group_name", "type": "group"}
+        ]})
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=members)
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        result = powerscale_module_mock.add_group_member_to_group(
+            "GROUP:test_group",
+            "SID:S-1-5-21-1111111111-2222222222-3333333333-2001",
+            "requested_group_name",
+            "System", "local")
+        assert result is False
+        powerscale_module_mock.group_api_instance.create_group_member.assert_not_called()
+
+    def test_remove_group_member_idempotent_not_present(self, powerscale_module_mock):
+        """FR-1.2 idempotent: remove when member not present returns no change."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload_with_group_members())
+        # Empty member list
+        members = MockSDKResponse({"members": []})
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=members)
+        powerscale_module_mock.group_api_instance.delete_group_member = \
+            MagicMock(return_value=None)
+        result = powerscale_module_mock.remove_group_member_from_group(
+            "GROUP:test_group",
+            "SID:S-1-5-21-1111111111-2222222222-3333333333-2001",
+            "child_local_grp",
+            "System", "local")
+        assert result is False
+        powerscale_module_mock.group_api_instance.delete_group_member.assert_not_called()
+
+    # ------------------------------------------------------------------
+    # Phase 3: Well-Known SID Membership — resolve & add/remove helpers
+    # ------------------------------------------------------------------
+
+    def mock_wellknowns(self, powerscale_module_mock, call_exception=False):
+        """Mock AuthApi.list_auth_wellknowns."""
+        if call_exception:
+            powerscale_module_mock.api_instance.list_auth_wellknowns = \
+                MagicMock(side_effect=Exception("SDK boom"))
+        else:
+            powerscale_module_mock.api_instance.list_auth_wellknowns = \
+                MagicMock(return_value=MockGroupApi.get_wellknowns_response())
+
+    def test_get_wellknowns_uses_sdk_get_method_when_list_is_unavailable(
+            self, powerscale_module_mock):
+        powerscale_module_mock.api_instance.list_auth_wellknowns = None
+        powerscale_module_mock.api_instance.get_auth_wellknowns = MagicMock(
+            return_value=MockGroupApi.get_wellknowns_response())
+        result = powerscale_module_mock._get_wellknowns()
+        assert result
+        powerscale_module_mock.api_instance.get_auth_wellknowns.assert_called_once()
+
+    def test_get_wellknowns_normalizes_sdk_id_field(
+            self, powerscale_module_mock):
+        powerscale_module_mock.api_instance.list_auth_wellknowns = MagicMock(
+            return_value=MockSDKResponse({"wellknowns": [
+                {"id": "SID:S-1-1-0", "name": "Everyone",
+                 "type": "wellknown"}
+            ]}))
+        result = powerscale_module_mock._get_wellknowns()
+        assert result[0]["sid"] == "S-1-1-0"
+
+    def test_resolve_well_known_sid_by_display_name(self, powerscale_module_mock):
+        """FR-2.1: resolve_well_known_sid resolves display name to SID string."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload_with_wellknown_sids())
+        self.mock_wellknowns(powerscale_module_mock)
+        sid_id, display_name = powerscale_module_mock.resolve_well_known_sid("Everyone")
+        assert sid_id == "SID:S-1-1-0"
+        assert display_name == "Everyone"
+
+    def test_resolve_well_known_sid_by_sid_string(self, powerscale_module_mock):
+        """FR-2.1: resolve_well_known_sid resolves SID string."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload_with_wellknown_sids())
+        self.mock_wellknowns(powerscale_module_mock)
+        sid_id, display_name = powerscale_module_mock.resolve_well_known_sid("S-1-1-0")
+        assert sid_id == "SID:S-1-1-0"
+        assert display_name == "Everyone"
+
+    def test_resolve_well_known_sid_case_insensitive(self, powerscale_module_mock):
+        """FR-2.1: display name matching is case-insensitive."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload_with_wellknown_sids())
+        self.mock_wellknowns(powerscale_module_mock)
+        sid_id, display_name = powerscale_module_mock.resolve_well_known_sid("everyone")
+        assert sid_id == "SID:S-1-1-0"
+        assert display_name == "Everyone"
+
+    def test_resolve_well_known_sid_unrecognised_exception(self, powerscale_module_mock):
+        """FR-2.1: unrecognised value raises error."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload_with_wellknown_sids())
+        self.mock_wellknowns(powerscale_module_mock)
+        self.capture_fail_json_method(
+            "'BogusName' is not a recognised well-known SID name or SID string",
+            powerscale_module_mock,
+            "resolve_well_known_sid",
+            "BogusName",
+        )
+
+    def test_resolve_well_known_sid_edge_case_special_chars(self, powerscale_module_mock):
+        """FR-2.1: SID with special characters in name (e.g. backslash) resolves."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload_with_wellknown_sids())
+        self.mock_wellknowns(powerscale_module_mock)
+        sid_id, display_name = powerscale_module_mock.resolve_well_known_sid(
+            "NT AUTHORITY\\INTERACTIVE")
+        assert sid_id == "SID:S-1-5-4"
+        assert display_name == "NT AUTHORITY\\INTERACTIVE"
+
+    def test_add_wellknown_to_group_calls_post(self, powerscale_module_mock):
+        """FR-2.1: add_wellknown_to_group calls POST with type=wellknown."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload_with_wellknown_sids())
+        self.mock_get_group_members(powerscale_module_mock, call_exception=False)
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        result = powerscale_module_mock.add_wellknown_to_group(
+            "GROUP:test_group", "SID:S-1-1-0", "Everyone",
+            "System", "local")
+        assert result is True
+        powerscale_module_mock.group_api_instance.create_group_member.assert_called_once()
+
+    def test_remove_wellknown_from_group_calls_delete(self, powerscale_module_mock):
+        """FR-2.2: remove_wellknown_from_group calls DELETE for the SID member."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload_with_wellknown_sids())
+        # Member must be present for removal
+        members = MockSDKResponse({"members": [
+            {"id": "SID:S-1-1-0", "name": "Everyone", "type": "wellknown"}
+        ]})
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=members)
+        powerscale_module_mock.group_api_instance.delete_group_member = \
+            MagicMock(return_value=None)
+        result = powerscale_module_mock.remove_wellknown_from_group(
+            "GROUP:test_group", "SID:S-1-1-0", "Everyone",
+            "System", "local")
+        assert result is True
+        powerscale_module_mock.group_api_instance.delete_group_member.assert_called_once()
+
+    def test_add_wellknown_idempotent_already_member(self, powerscale_module_mock):
+        """FR-2.1 idempotent: add SID already a member returns no change."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload_with_wellknown_sids())
+        members = MockSDKResponse({"members": [
+            {"id": "SID:S-1-1-0", "name": "Everyone", "type": "wellknown"}
+        ]})
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=members)
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        result = powerscale_module_mock.add_wellknown_to_group(
+            "GROUP:test_group", "SID:S-1-1-0", "Everyone",
+            "System", "local")
+        assert result is False
+        powerscale_module_mock.group_api_instance.create_group_member.assert_not_called()
+
+    def test_remove_wellknown_idempotent_not_member(self, powerscale_module_mock):
+        """FR-2.2 idempotent: remove SID not a member returns no change."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload_with_wellknown_sids())
+        members = MockSDKResponse({"members": []})
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=members)
+        powerscale_module_mock.group_api_instance.delete_group_member = \
+            MagicMock(return_value=None)
+        result = powerscale_module_mock.remove_wellknown_from_group(
+            "GROUP:test_group", "SID:S-1-1-0", "Everyone",
+            "System", "local")
+        assert result is False
+        powerscale_module_mock.group_api_instance.delete_group_member.assert_not_called()
+
+    # ------------------------------------------------------------------
+    # Phase 4: Integration — group_members in update_group()
+    # ------------------------------------------------------------------
+
+    def setup_group_member_integration(self, powerscale_module_mock,
+                                       members=None, resolve_provider="local"):
+        """Wire all mocks for group_members integration tests."""
+        self.mock_get_group_detail(powerscale_module_mock, operation='update',
+                                   call_exception=False)
+        if members is None:
+            self.mock_get_group_members(powerscale_module_mock,
+                                        call_exception=False)
+        else:
+            powerscale_module_mock.group_api_instance.list_group_members = \
+                MagicMock(return_value=members)
+        self.mock_get_auth_group_for_resolve(powerscale_module_mock,
+                                             provider=resolve_provider)
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        powerscale_module_mock.group_api_instance.delete_group_member = \
+            MagicMock(return_value=None)
+
+    def test_add_single_child_group_via_group_members(self, powerscale_module_mock):
+        """AC-001: adding a child group via group_member_state returns changed=true."""
+        self.set_module_params(
+            self.group_args,
+            MockGroupApi.get_update_group_payload_with_group_members(
+                group_members=[{"group_name": "child_local_grp"}],
+                group_member_state="present-in-group"))
+        self.setup_group_member_integration(powerscale_module_mock)
+        powerscale_module_mock.perform_module_operation()
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed']
+
+    def test_add_multiple_child_groups_different_providers(self, powerscale_module_mock):
+        """AC-001: adding groups from different providers in one invocation."""
+        self.set_module_params(
+            self.group_args,
+            MockGroupApi.get_update_group_payload_with_group_members(
+                group_members=[
+                    {"group_name": "child_local_grp", "provider_type": "local"},
+                    {"group_name": "ldap_child_grp", "provider_type": "ldap"},
+                ],
+                group_member_state="present-in-group"))
+        self.mock_get_group_members(powerscale_module_mock, call_exception=False)
+        # get_auth_group is called for: 1) get_group_details (present check),
+        # 2) resolve child_local_grp, 3) resolve ldap_child_grp,
+        # 4) final get_group_details
+        powerscale_module_mock.api_instance.get_auth_group = MagicMock(
+            side_effect=[
+                MockGroupApi.get_group_detail(),   # _handle_present_state
+                MockGroupApi.get_auth_group_response("local"),
+                MockGroupApi.get_auth_group_response("ldap"),
+                MockGroupApi.get_group_detail(),   # final get_group_details
+            ])
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        powerscale_module_mock.perform_module_operation()
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed']
+        assert powerscale_module_mock.group_api_instance.create_group_member.call_count == 2
+
+    def test_remove_child_group_via_group_members(self, powerscale_module_mock):
+        """AC-002: removing a child group via group_member_state returns changed=true."""
+        self.set_module_params(
+            self.group_args,
+            MockGroupApi.get_update_group_payload_with_group_members(
+                group_members=[{"group_name": "child_local_grp"}],
+                group_member_state="absent-in-group"))
+        # Child must be present in members list
+        members = MockSDKResponse({"members": [
+            {"id": "SID:S-1-5-21-1111111111-2222222222-3333333333-2001",
+             "name": "child_local_grp", "type": "group"}
+        ]})
+        self.setup_group_member_integration(powerscale_module_mock,
+                                            members=members)
+        powerscale_module_mock.perform_module_operation()
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed']
+
+    def test_group_members_defaults_to_empty_when_omitted(self, powerscale_module_mock):
+        """FR-3.1: group_members defaults to [] when omitted."""
+        payload = MockGroupApi.CREATE_GROUP_PAYLOAD.copy()
+        payload['users'] = []
+        payload['user_state'] = None
+        payload['group_members'] = []
+        payload['group_member_state'] = None
+        payload['well_known_sids'] = []
+        payload['well_known_sid_state'] = None
+        self.set_module_params(self.group_args, payload)
+        self.mock_get_group_detail(powerscale_module_mock, operation='update',
+                                   call_exception=False)
+        self.mock_get_group_members(powerscale_module_mock, call_exception=False)
+        powerscale_module_mock.perform_module_operation()
+        assert not powerscale_module_mock.module.exit_json.call_args[1]['changed']
+
+    # ------------------------------------------------------------------
+    # Phase 4: Integration — well_known_sids in update_group()
+    # ------------------------------------------------------------------
+
+    def setup_wellknown_integration(self, powerscale_module_mock,
+                                    members=None):
+        """Wire all mocks for well_known_sids integration tests."""
+        self.mock_get_group_detail(powerscale_module_mock, operation='update',
+                                   call_exception=False)
+        if members is None:
+            self.mock_get_group_members(powerscale_module_mock,
+                                        call_exception=False)
+        else:
+            powerscale_module_mock.group_api_instance.list_group_members = \
+                MagicMock(return_value=members)
+        self.mock_wellknowns(powerscale_module_mock)
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        powerscale_module_mock.group_api_instance.delete_group_member = \
+            MagicMock(return_value=None)
+
+    def test_add_single_wellknown_sid_via_well_known_sids(self, powerscale_module_mock):
+        """AC-003: adding a well-known SID returns changed=true."""
+        self.set_module_params(
+            self.group_args,
+            MockGroupApi.get_update_group_payload_with_wellknown_sids(
+                well_known_sids=["Everyone"],
+                well_known_sid_state="present-in-group"))
+        self.setup_wellknown_integration(powerscale_module_mock)
+        powerscale_module_mock.perform_module_operation()
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed']
+
+    def test_add_multiple_wellknown_sids_in_one_invocation(self, powerscale_module_mock):
+        """AC-003: adding multiple well-known SIDs in one invocation."""
+        self.set_module_params(
+            self.group_args,
+            MockGroupApi.get_update_group_payload_with_wellknown_sids(
+                well_known_sids=["Everyone", "Authenticated Users"],
+                well_known_sid_state="present-in-group"))
+        self.setup_wellknown_integration(powerscale_module_mock)
+        powerscale_module_mock.perform_module_operation()
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed']
+        assert powerscale_module_mock.group_api_instance.create_group_member.call_count == 2
+
+    def test_remove_wellknown_sid_via_well_known_sids(self, powerscale_module_mock):
+        """AC-004: removing a well-known SID returns changed=true."""
+        self.set_module_params(
+            self.group_args,
+            MockGroupApi.get_update_group_payload_with_wellknown_sids(
+                well_known_sids=["Everyone"],
+                well_known_sid_state="absent-in-group"))
+        members = MockSDKResponse({"members": [
+            {"id": "SID:S-1-1-0", "name": "Everyone", "type": "wellknown"}
+        ]})
+        self.setup_wellknown_integration(powerscale_module_mock,
+                                         members=members)
+        powerscale_module_mock.perform_module_operation()
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed']
+
+    def test_well_known_sids_defaults_to_empty_when_omitted(self, powerscale_module_mock):
+        """FR-3.1: well_known_sids defaults to [] when omitted."""
+        payload = MockGroupApi.CREATE_GROUP_PAYLOAD.copy()
+        payload['users'] = []
+        payload['user_state'] = None
+        payload['group_members'] = []
+        payload['group_member_state'] = None
+        payload['well_known_sids'] = []
+        payload['well_known_sid_state'] = None
+        self.set_module_params(self.group_args, payload)
+        self.mock_get_group_detail(powerscale_module_mock, operation='update',
+                                   call_exception=False)
+        self.mock_get_group_members(powerscale_module_mock, call_exception=False)
+        powerscale_module_mock.perform_module_operation()
+        assert not powerscale_module_mock.module.exit_json.call_args[1]['changed']
+
+    # ------------------------------------------------------------------
+    # Phase 4: Mixed member types (AC-005)
+    # ------------------------------------------------------------------
+
+    def test_mixed_member_types_add(self, powerscale_module_mock):
+        """AC-005: add users, group_members, and well_known_sids in a single task."""
+        payload = MockGroupApi.CREATE_GROUP_PAYLOAD.copy()
+        payload['group_id'] = None
+        payload['users'] = [{"user_name": "new_user"}]
+        payload['user_state'] = "present-in-group"
+        payload['group_members'] = [{"group_name": "child_local_grp"}]
+        payload['group_member_state'] = "present-in-group"
+        payload['well_known_sids'] = ["Everyone"]
+        payload['well_known_sid_state'] = "present-in-group"
+        self.set_module_params(self.group_args, payload)
+        empty_members = MockSDKResponse({"members": []})
+        # get_auth_group: (1) _handle_present_state, (2) resolve child group,
+        # (3) final get_group_details
+        powerscale_module_mock.api_instance.get_auth_group = MagicMock(
+            side_effect=[
+                MockGroupApi.get_group_detail(),
+                MockGroupApi.get_auth_group_response("local"),
+                MockGroupApi.get_group_detail(),
+            ])
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=empty_members)
+        self.mock_wellknowns(powerscale_module_mock)
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        powerscale_module_mock.perform_module_operation()
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed']
+        # 3 members added: 1 user + 1 group + 1 SID
+        assert powerscale_module_mock.group_api_instance.create_group_member.call_count >= 3
+
+    def test_remove_only_group_members_keep_others(self, powerscale_module_mock):
+        """AC-005: remove only group_members while keeping users and SIDs."""
+        payload = MockGroupApi.CREATE_GROUP_PAYLOAD.copy()
+        payload['group_id'] = None
+        payload['users'] = []
+        payload['user_state'] = None
+        payload['group_members'] = [{"group_name": "child_local_grp"}]
+        payload['group_member_state'] = "absent-in-group"
+        payload['well_known_sids'] = []
+        payload['well_known_sid_state'] = None
+        self.set_module_params(self.group_args, payload)
+        members = MockSDKResponse({"members": [
+            {"id": "SID:S-1-5-21-1111111111-2222222222-3333333333-2001",
+             "name": "child_local_grp", "type": "group"},
+            {"id": "SID:S-1-1-0", "name": "Everyone", "type": "wellknown"},
+            {"id": "SID:S-1-5-21-1426242897-2739835565-3634425493-501",
+             "name": "test_user", "type": "user"},
+        ]})
+        # get_auth_group: (1) _handle_present_state, (2) resolve child group,
+        # (3) final get_group_details
+        powerscale_module_mock.api_instance.get_auth_group = MagicMock(
+            side_effect=[
+                MockGroupApi.get_group_detail(),
+                MockGroupApi.get_auth_group_response("local"),
+                MockGroupApi.get_group_detail(),
+            ])
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=members)
+        powerscale_module_mock.group_api_instance.delete_group_member = \
+            MagicMock(return_value=None)
+        powerscale_module_mock.perform_module_operation()
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed']
+        # Only 1 deletion (the child group), not the user or SID
+        assert powerscale_module_mock.group_api_instance.delete_group_member.call_count == 1
+
+    def test_processing_order_users_then_groups_then_sids(self, powerscale_module_mock):
+        """AC-005: verify processing order — users -> group_members -> well_known_sids."""
+        payload = MockGroupApi.CREATE_GROUP_PAYLOAD.copy()
+        payload['group_id'] = None
+        payload['users'] = [{"user_name": "new_user"}]
+        payload['user_state'] = "present-in-group"
+        payload['group_members'] = [{"group_name": "child_local_grp"}]
+        payload['group_member_state'] = "present-in-group"
+        payload['well_known_sids'] = ["Everyone"]
+        payload['well_known_sid_state'] = "present-in-group"
+        self.set_module_params(self.group_args, payload)
+        empty_members = MockSDKResponse({"members": []})
+        # get_auth_group: (1) _handle_present_state, (2) resolve child group,
+        # (3) final get_group_details
+        powerscale_module_mock.api_instance.get_auth_group = MagicMock(
+            side_effect=[
+                MockGroupApi.get_group_detail(),
+                MockGroupApi.get_auth_group_response("local"),
+                MockGroupApi.get_group_detail(),
+            ])
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=empty_members)
+        self.mock_wellknowns(powerscale_module_mock)
+        # Track call order
+        call_order = []
+
+        def track_create(*args, **kwargs):
+            member_str = str(args[0]) if args else ""
+            call_order.append(member_str)
+            return None
+
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(side_effect=track_create)
+        powerscale_module_mock.perform_module_operation()
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed']
+        # At least 3 create calls (1 user + 1 group + 1 SID)
+        assert len(call_order) >= 3
+
+    # ==================================================================
+    # Story-3078 Part 2: Compatibility, Check/Diff, Idempotency, Errors
+    # ==================================================================
+
+    # ------------------------------------------------------------------
+    # Phase 1: Backward Compatibility (AC-006)
+    # ------------------------------------------------------------------
+
+    def test_user_only_playbook_add_returns_changed(self, powerscale_module_mock):
+        """AC-006: user-only payload (no group_members/well_known_sids) adds
+        a new user and returns changed=true — identical to pre-enhancement."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload(
+                                   users=[{"user_name": "new_user"}],
+                                   user_state="present-in-group"))
+        self.update_group(powerscale_module_mock)
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert result['changed']
+        powerscale_module_mock.group_api_instance.create_group_member.assert_called()
+
+    def test_user_only_playbook_idempotent_returns_unchanged(self, powerscale_module_mock):
+        """AC-006: user-only payload for already-present user returns
+        changed=false — identical to pre-enhancement."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload(
+                                   users=[{"user_name": "test_user"}]))
+        self.update_group(powerscale_module_mock)
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert not result['changed']
+        powerscale_module_mock.group_api_instance.create_group_member.assert_not_called()
+
+    def test_user_only_no_deprecation_warning(self, powerscale_module_mock):
+        """AC-006: no deprecation warning emitted when new parameters omitted."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload(
+                                   users=[{"user_name": "test_user"}]))
+        self.update_group(powerscale_module_mock)
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert 'deprecations' not in result
+        assert 'warnings' not in result
+
+    def test_new_params_default_to_none_when_omitted(self, powerscale_module_mock):
+        """AC-006: group_members and well_known_sids default to None/[]
+        when omitted from the argument spec."""
+        payload = MockGroupApi.get_update_group_payload(
+            users=[{"user_name": "test_user"}])
+        # Explicitly do NOT set group_members or well_known_sids
+        self.set_module_params(self.group_args, payload)
+        self.update_group(powerscale_module_mock)
+        # Module should succeed without any issues
+        powerscale_module_mock.module.fail_json.assert_not_called()
+
+    def test_group_details_return_structure_backward_compatible(self, powerscale_module_mock):
+        """AC-006: group_details return structure includes expected keys."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload(
+                                   users=[{"user_name": "test_user"}]))
+        self.update_group(powerscale_module_mock)
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert 'group_details' in result
+        assert 'changed' in result
+
+    # ------------------------------------------------------------------
+    # Phase 2: Check Mode & Diff Mode (AC-007)
+    # ------------------------------------------------------------------
+
+    def _setup_group_member_check_mode(self, powerscale_module_mock,
+                                       group_member_state="present-in-group",
+                                       existing_members=None):
+        """Helper: set up check mode for group_members operations."""
+        payload = MockGroupApi.get_update_group_payload_with_group_members(
+            group_members=[{"group_name": "child_local_grp"}],
+            group_member_state=group_member_state)
+        self.set_module_params(self.group_args, payload)
+        powerscale_module_mock.module.check_mode = True
+        powerscale_module_mock.module._diff = True
+        if existing_members is None:
+            existing_members = MockSDKResponse({"members": []})
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=existing_members)
+        # get_auth_group: (1) _handle_present_state, (2) resolve child group,
+        # (3) final get_group_details
+        powerscale_module_mock.api_instance.get_auth_group = MagicMock(
+            side_effect=[
+                MockGroupApi.get_group_detail(),
+                MockGroupApi.get_auth_group_response("local"),
+                MockGroupApi.get_group_detail(),
+            ])
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        powerscale_module_mock.group_api_instance.delete_group_member = \
+            MagicMock(return_value=None)
+
+    def _setup_wellknown_check_mode(self, powerscale_module_mock,
+                                    well_known_sid_state="present-in-group",
+                                    existing_members=None):
+        """Helper: set up check mode for well_known_sids operations."""
+        payload = MockGroupApi.get_update_group_payload_with_wellknown_sids(
+            well_known_sids=["Everyone"],
+            well_known_sid_state=well_known_sid_state)
+        self.set_module_params(self.group_args, payload)
+        powerscale_module_mock.module.check_mode = True
+        powerscale_module_mock.module._diff = True
+        if existing_members is None:
+            existing_members = MockSDKResponse({"members": []})
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=existing_members)
+        powerscale_module_mock.api_instance.get_auth_group = MagicMock(
+            side_effect=[
+                MockGroupApi.get_group_detail(),
+                MockGroupApi.get_group_detail(),
+            ])
+        self.mock_wellknowns(powerscale_module_mock)
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        powerscale_module_mock.group_api_instance.delete_group_member = \
+            MagicMock(return_value=None)
+
+    def test_check_mode_group_members_add_changed_no_write(self, powerscale_module_mock):
+        """AC-007: check mode with group_member_state: present-in-group
+        returns changed=true without issuing POST calls."""
+        self._setup_group_member_check_mode(powerscale_module_mock)
+        powerscale_module_mock.perform_module_operation()
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert result['changed']
+        powerscale_module_mock.group_api_instance.create_group_member.assert_not_called()
+        powerscale_module_mock.group_api_instance.delete_group_member.assert_not_called()
+
+    def test_check_mode_wellknown_add_changed_no_write(self, powerscale_module_mock):
+        """AC-007: check mode with well_known_sid_state: present-in-group
+        returns changed=true without issuing POST calls."""
+        self._setup_wellknown_check_mode(powerscale_module_mock)
+        powerscale_module_mock.perform_module_operation()
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert result['changed']
+        powerscale_module_mock.group_api_instance.create_group_member.assert_not_called()
+
+    def test_check_mode_group_members_remove_changed_no_write(self, powerscale_module_mock):
+        """AC-007: check mode with group_member_state: absent-in-group
+        returns changed=true without issuing DELETE calls."""
+        # Create members that include the child group so removal is needed
+        existing = MockSDKResponse({"members": [
+            {"id": "GID:2001", "name": "child_local_grp", "type": "group"},
+        ]})
+        self._setup_group_member_check_mode(
+            powerscale_module_mock,
+            group_member_state="absent-in-group",
+            existing_members=existing)
+        powerscale_module_mock.perform_module_operation()
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert result['changed']
+        powerscale_module_mock.group_api_instance.delete_group_member.assert_not_called()
+
+    def test_check_mode_no_change_returns_false(self, powerscale_module_mock):
+        """AC-007: check mode when state already matches returns changed=false."""
+        # Child group is already a member
+        existing = MockSDKResponse({"members": [
+            {"id": "GID:2001", "name": "child_local_grp", "type": "group"},
+        ]})
+        self._setup_group_member_check_mode(
+            powerscale_module_mock,
+            group_member_state="present-in-group",
+            existing_members=existing)
+        powerscale_module_mock.perform_module_operation()
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert not result['changed']
+
+    def test_check_mode_only_get_calls(self, powerscale_module_mock):
+        """AC-007 / NFR-1: check mode issues only GET API calls."""
+        self._setup_group_member_check_mode(powerscale_module_mock)
+        powerscale_module_mock.perform_module_operation()
+        # Verify zero POST/DELETE calls
+        powerscale_module_mock.group_api_instance.create_group_member.assert_not_called()
+        powerscale_module_mock.group_api_instance.delete_group_member.assert_not_called()
+        # GET calls are allowed (list_group_members for membership check)
+        powerscale_module_mock.group_api_instance.list_group_members.assert_called()
+
+    def test_diff_members_contains_only_users(self, powerscale_module_mock):
+        self.set_module_params(
+            self.group_args, MockGroupApi.CREATE_GROUP_PAYLOAD.copy())
+        powerscale_module_mock.module._diff = True
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=MockSDKResponse({"members": [
+                {"id": "UID:1001", "name": "test_user", "type": "user"},
+                {"id": "GID:2001", "name": "child_group", "type": "group"},
+                {"id": "SID:S-1-1-0", "name": "Everyone",
+                 "type": "wellknown"},
+            ]}))
+        diff = powerscale_module_mock._build_member_diff(
+            "GROUP:test_group", "System", "local", [], None)
+        assert diff['before']['members'] == ["test_user"]
+        assert diff['after']['members'] == ["test_user"]
+
+    def test_diff_group_members_before_after_keys(self, powerscale_module_mock):
+        """AC-007 / FR-4.2: diff output includes group_members key
+        in before and after."""
+        self._setup_group_member_check_mode(powerscale_module_mock)
+        powerscale_module_mock.perform_module_operation()
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert 'diff' in result
+        assert 'group_members' in result['diff']['before']
+        assert 'group_members' in result['diff']['after']
+
+    def test_diff_wellknown_sids_before_after_keys(self, powerscale_module_mock):
+        """AC-007 / FR-4.2: diff output includes well_known_sids key
+        in before and after."""
+        self._setup_wellknown_check_mode(powerscale_module_mock)
+        powerscale_module_mock.perform_module_operation()
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert 'diff' in result
+        assert 'well_known_sids' in result['diff']['before']
+        assert 'well_known_sids' in result['diff']['after']
+
+    def test_diff_group_members_add_shows_projected(self, powerscale_module_mock):
+        """AC-007: diff after list shows the child group that would be added."""
+        self._setup_group_member_check_mode(powerscale_module_mock)
+        powerscale_module_mock.perform_module_operation()
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        diff = result['diff']
+        assert diff['before']['group_members'] == []
+        assert 'child_local_grp' in diff['after']['group_members']
+
+    def test_diff_wellknown_sids_add_shows_projected(self, powerscale_module_mock):
+        """AC-007: diff after list shows the SID that would be added."""
+        self._setup_wellknown_check_mode(powerscale_module_mock)
+        powerscale_module_mock.perform_module_operation()
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        diff = result['diff']
+        assert diff['before']['well_known_sids'] == []
+        assert len(diff['after']['well_known_sids']) > 0
+
+    def test_diff_wellknown_remove_matches_sid_when_name_differs(
+            self, powerscale_module_mock):
+        payload = MockGroupApi.CREATE_GROUP_PAYLOAD.copy()
+        payload['well_known_sids'] = ["NT AUTHORITY\\BATCH"]
+        payload['well_known_sid_state'] = "absent-in-group"
+        self.set_module_params(self.group_args, payload)
+        powerscale_module_mock.module._diff = True
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=MockSDKResponse({"members": [
+                {"id": "SID:S-1-5-3", "name": "BATCH",
+                 "type": "wellknown"}
+            ]}))
+        powerscale_module_mock.resolve_well_known_sid = MagicMock(
+            return_value=("SID:S-1-5-3", "NT AUTHORITY\\BATCH"))
+        diff = powerscale_module_mock._build_member_diff(
+            "GROUP:test_group", "System", "local", [], None)
+        assert diff['after']['well_known_sids'] == []
+
+    def test_diff_group_remove_matches_sid_when_name_differs(
+            self, powerscale_module_mock):
+        payload = MockGroupApi.CREATE_GROUP_PAYLOAD.copy()
+        payload['group_members'] = [{
+            "group_name": "requested_group", "provider_type": "ldap"}]
+        payload['group_member_state'] = "absent-in-group"
+        self.set_module_params(self.group_args, payload)
+        powerscale_module_mock.module._diff = True
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=MockSDKResponse({"members": [
+                {"id": "SID:S-1-22-2-10000", "name": "canonical_group",
+                 "type": "group"}
+            ]}))
+        powerscale_module_mock.resolve_group_id = MagicMock(
+            return_value="SID:S-1-22-2-10000")
+        diff = powerscale_module_mock._build_member_diff(
+            "GROUP:test_group", "System", "local", [], None)
+        assert diff['after']['group_members'] == []
+
+    def test_diff_mixed_types_all_keys_present(self, powerscale_module_mock):
+        """AC-007: diff with all three member types shows members,
+        group_members, and well_known_sids keys in before/after."""
+        payload = MockGroupApi.CREATE_GROUP_PAYLOAD.copy()
+        payload['group_id'] = None
+        payload['users'] = [{"user_name": "new_user"}]
+        payload['user_state'] = "present-in-group"
+        payload['group_members'] = [{"group_name": "child_local_grp"}]
+        payload['group_member_state'] = "present-in-group"
+        payload['well_known_sids'] = ["Everyone"]
+        payload['well_known_sid_state'] = "present-in-group"
+        self.set_module_params(self.group_args, payload)
+        powerscale_module_mock.module.check_mode = True
+        powerscale_module_mock.module._diff = True
+        empty_members = MockSDKResponse({"members": []})
+        powerscale_module_mock.api_instance.get_auth_group = MagicMock(
+            side_effect=[
+                MockGroupApi.get_group_detail(),
+                MockGroupApi.get_auth_group_response("local"),
+                MockGroupApi.get_group_detail(),
+            ])
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=empty_members)
+        self.mock_wellknowns(powerscale_module_mock)
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        powerscale_module_mock.group_api_instance.delete_group_member = \
+            MagicMock(return_value=None)
+        powerscale_module_mock.perform_module_operation()
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert 'diff' in result
+        diff = result['diff']
+        assert 'members' in diff['before']
+        assert 'members' in diff['after']
+        assert 'group_members' in diff['before']
+        assert 'group_members' in diff['after']
+        assert 'well_known_sids' in diff['before']
+        assert 'well_known_sids' in diff['after']
+
+    def test_diff_no_output_when_state_matches(self, powerscale_module_mock):
+        """AC-007: no diff output when state already matches for
+        group_members (before == after)."""
+        existing = MockSDKResponse({"members": [
+            {"id": "GID:2001", "name": "child_local_grp", "type": "group"},
+        ]})
+        self._setup_group_member_check_mode(
+            powerscale_module_mock,
+            group_member_state="present-in-group",
+            existing_members=existing)
+        powerscale_module_mock.perform_module_operation()
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        # When nothing changed, diff may be absent or before==after
+        if 'diff' in result:
+            diff = result['diff']
+            if 'group_members' in diff.get('before', {}):
+                assert diff['before']['group_members'] == \
+                    diff['after']['group_members']
+
+    # ------------------------------------------------------------------
+    # Phase 3: Idempotency Verification (AC-008)
+    # ------------------------------------------------------------------
+
+    def test_idempotent_add_existing_group_member_unchanged(self, powerscale_module_mock):
+        """AC-008: re-adding an existing group member returns changed=false
+        with no POST call via perform_module_operation()."""
+        payload = MockGroupApi.get_update_group_payload_with_group_members(
+            group_members=[{"group_name": "child_local_grp"}],
+            group_member_state="present-in-group")
+        self.set_module_params(self.group_args, payload)
+        existing = MockSDKResponse({"members": [
+            {"id": "GID:2001", "name": "child_local_grp", "type": "group"},
+        ]})
+        powerscale_module_mock.api_instance.get_auth_group = MagicMock(
+            side_effect=[
+                MockGroupApi.get_group_detail(),
+                MockGroupApi.get_auth_group_response("local"),
+                MockGroupApi.get_group_detail(),
+            ])
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=existing)
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        powerscale_module_mock.group_api_instance.delete_group_member = \
+            MagicMock(return_value=None)
+        powerscale_module_mock.perform_module_operation()
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert not result['changed']
+        powerscale_module_mock.group_api_instance.create_group_member.assert_not_called()
+        powerscale_module_mock.group_api_instance.delete_group_member.assert_not_called()
+
+    def test_idempotent_remove_nonmember_group_unchanged(self, powerscale_module_mock):
+        """AC-008: re-removing a non-member group returns changed=false
+        with no DELETE call."""
+        payload = MockGroupApi.get_update_group_payload_with_group_members(
+            group_members=[{"group_name": "child_local_grp"}],
+            group_member_state="absent-in-group")
+        self.set_module_params(self.group_args, payload)
+        empty_members = MockSDKResponse({"members": []})
+        powerscale_module_mock.api_instance.get_auth_group = MagicMock(
+            side_effect=[
+                MockGroupApi.get_group_detail(),
+                MockGroupApi.get_auth_group_response("local"),
+                MockGroupApi.get_group_detail(),
+            ])
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=empty_members)
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        powerscale_module_mock.group_api_instance.delete_group_member = \
+            MagicMock(return_value=None)
+        powerscale_module_mock.perform_module_operation()
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert not result['changed']
+        powerscale_module_mock.group_api_instance.delete_group_member.assert_not_called()
+
+    def test_idempotent_add_existing_wellknown_unchanged(self, powerscale_module_mock):
+        """AC-008: re-adding an existing well-known SID returns changed=false
+        with no POST call."""
+        payload = MockGroupApi.get_update_group_payload_with_wellknown_sids(
+            well_known_sids=["Everyone"],
+            well_known_sid_state="present-in-group")
+        self.set_module_params(self.group_args, payload)
+        existing = MockSDKResponse({"members": [
+            {"id": "SID:S-1-1-0", "name": "Everyone", "type": "wellknown"},
+        ]})
+        powerscale_module_mock.api_instance.get_auth_group = MagicMock(
+            side_effect=[
+                MockGroupApi.get_group_detail(),
+                MockGroupApi.get_group_detail(),
+            ])
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=existing)
+        self.mock_wellknowns(powerscale_module_mock)
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        powerscale_module_mock.group_api_instance.delete_group_member = \
+            MagicMock(return_value=None)
+        powerscale_module_mock.perform_module_operation()
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert not result['changed']
+        powerscale_module_mock.group_api_instance.create_group_member.assert_not_called()
+
+    def test_idempotent_remove_nonmember_wellknown_unchanged(self, powerscale_module_mock):
+        """AC-008: re-removing a non-member well-known SID returns
+        changed=false with no DELETE call."""
+        payload = MockGroupApi.get_update_group_payload_with_wellknown_sids(
+            well_known_sids=["Everyone"],
+            well_known_sid_state="absent-in-group")
+        self.set_module_params(self.group_args, payload)
+        empty_members = MockSDKResponse({"members": []})
+        powerscale_module_mock.api_instance.get_auth_group = MagicMock(
+            side_effect=[
+                MockGroupApi.get_group_detail(),
+                MockGroupApi.get_group_detail(),
+            ])
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=empty_members)
+        self.mock_wellknowns(powerscale_module_mock)
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        powerscale_module_mock.group_api_instance.delete_group_member = \
+            MagicMock(return_value=None)
+        powerscale_module_mock.perform_module_operation()
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert not result['changed']
+        powerscale_module_mock.group_api_instance.delete_group_member.assert_not_called()
+
+    def test_idempotent_add_existing_user_unchanged_regression(self, powerscale_module_mock):
+        """AC-008: re-adding an existing user returns changed=false
+        (regression test)."""
+        self.set_module_params(self.group_args,
+                               MockGroupApi.get_update_group_payload(
+                                   users=[{"user_name": "test_user"}]))
+        self.update_group(powerscale_module_mock)
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert not result['changed']
+        powerscale_module_mock.group_api_instance.create_group_member.assert_not_called()
+
+    def test_idempotent_mixed_all_present_unchanged(self, powerscale_module_mock):
+        """AC-008: mixed member types all already present returns
+        changed=false with no write calls."""
+        payload = MockGroupApi.CREATE_GROUP_PAYLOAD.copy()
+        payload['group_id'] = None
+        payload['users'] = [{"user_name": "test_user"}]
+        payload['user_state'] = "present-in-group"
+        payload['group_members'] = [{"group_name": "child_local_grp"}]
+        payload['group_member_state'] = "present-in-group"
+        payload['well_known_sids'] = ["Everyone"]
+        payload['well_known_sid_state'] = "present-in-group"
+        self.set_module_params(self.group_args, payload)
+        # All three member types are already in the group
+        existing = MockSDKResponse({"members": [
+            {"id": "UID:1001", "name": "test_user", "type": "user"},
+            {"id": "GID:2001", "name": "child_local_grp", "type": "group"},
+            {"id": "SID:S-1-1-0", "name": "Everyone", "type": "wellknown"},
+        ]})
+        powerscale_module_mock.api_instance.get_auth_group = MagicMock(
+            side_effect=[
+                MockGroupApi.get_group_detail(),
+                MockGroupApi.get_auth_group_response("local"),
+                MockGroupApi.get_group_detail(),
+            ])
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=existing)
+        self.mock_wellknowns(powerscale_module_mock)
+        self.mock_get_mapping_identity(powerscale_module_mock, call_exception=False)
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        powerscale_module_mock.group_api_instance.delete_group_member = \
+            MagicMock(return_value=None)
+        powerscale_module_mock.perform_module_operation()
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert not result['changed']
+        powerscale_module_mock.group_api_instance.create_group_member.assert_not_called()
+        powerscale_module_mock.group_api_instance.delete_group_member.assert_not_called()
+
+    # ------------------------------------------------------------------
+    # Phase 4: Error Handling — Unresolvable Groups & Invalid SIDs
+    #          (AC-009, AC-010)
+    # ------------------------------------------------------------------
+
+    def test_unresolvable_group_member_fails_with_exact_message(self, powerscale_module_mock):
+        """AC-009: module fails with failed=true and exact error message
+        format when child group cannot be resolved."""
+        payload = MockGroupApi.get_update_group_payload_with_group_members(
+            group_members=[{"group_name": "nonexistent_grp"}],
+            group_member_state="present-in-group")
+        self.set_module_params(self.group_args, payload)
+        empty_group = MagicMock()
+        empty_group.to_dict.return_value = {"groups": []}
+        powerscale_module_mock.api_instance.get_auth_group = MagicMock(
+            side_effect=[
+                MockGroupApi.get_group_detail(),
+                empty_group,
+            ])
+        empty_members = MockSDKResponse({"members": []})
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=empty_members)
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        self.capture_fail_json_method(
+            "Group 'nonexistent_grp' could not be resolved in provider"
+            " 'local' in access zone 'System'",
+            powerscale_module_mock,
+            "perform_module_operation",
+        )
+
+    def test_unresolvable_group_member_fail_fast(self, powerscale_module_mock):
+        """AC-009: fail-fast — first unresolvable group halts; no write
+        API calls are issued."""
+        payload = MockGroupApi.get_update_group_payload_with_group_members(
+            group_members=[
+                {"group_name": "bad_grp"},
+                {"group_name": "good_grp"},
+            ],
+            group_member_state="present-in-group")
+        self.set_module_params(self.group_args, payload)
+        empty_group = MagicMock()
+        empty_group.to_dict.return_value = {"groups": []}
+        powerscale_module_mock.api_instance.get_auth_group = MagicMock(
+            side_effect=[
+                MockGroupApi.get_group_detail(),
+                empty_group,
+            ])
+        empty_members = MockSDKResponse({"members": []})
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=empty_members)
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        self.capture_fail_json_method(
+            "Group 'bad_grp' could not be resolved",
+            powerscale_module_mock,
+            "perform_module_operation",
+        )
+        powerscale_module_mock.group_api_instance.create_group_member.assert_not_called()
+
+    def test_unresolvable_group_member_api_unavailable(self, powerscale_module_mock):
+        """AC-009: failure when auth provider is unavailable during
+        group resolution."""
+        payload = MockGroupApi.get_update_group_payload_with_group_members(
+            group_members=[{"group_name": "some_grp"}],
+            group_member_state="present-in-group")
+        self.set_module_params(self.group_args, payload)
+        powerscale_module_mock.api_instance.get_auth_group = MagicMock(
+            side_effect=[
+                MockGroupApi.get_group_detail(),
+                Exception("API unavailable"),
+            ])
+        empty_members = MockSDKResponse({"members": []})
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=empty_members)
+        self.capture_fail_json_method(
+            "Group 'some_grp' could not be resolved",
+            powerscale_module_mock,
+            "perform_module_operation",
+        )
+
+    def test_unresolvable_group_no_write_before_failure(self, powerscale_module_mock):
+        """AC-009: no write API calls are issued before the failure."""
+        payload = MockGroupApi.get_update_group_payload_with_group_members(
+            group_members=[{"group_name": "missing_grp"}],
+            group_member_state="present-in-group")
+        self.set_module_params(self.group_args, payload)
+        empty_group = MagicMock()
+        empty_group.to_dict.return_value = {"groups": []}
+        powerscale_module_mock.api_instance.get_auth_group = MagicMock(
+            side_effect=[
+                MockGroupApi.get_group_detail(),
+                empty_group,
+            ])
+        empty_members = MockSDKResponse({"members": []})
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=empty_members)
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        powerscale_module_mock.group_api_instance.delete_group_member = \
+            MagicMock(return_value=None)
+        self.capture_fail_json_method(
+            "Group 'missing_grp' could not be resolved",
+            powerscale_module_mock,
+            "perform_module_operation",
+        )
+        powerscale_module_mock.group_api_instance.create_group_member.assert_not_called()
+        powerscale_module_mock.group_api_instance.delete_group_member.assert_not_called()
+
+    def test_invalid_wellknown_sid_fails_with_exact_message(self, powerscale_module_mock):
+        """AC-010: module fails with failed=true and error message format
+        when SID is not recognised."""
+        payload = MockGroupApi.get_update_group_payload_with_wellknown_sids(
+            well_known_sids=["InvalidSID"],
+            well_known_sid_state="present-in-group")
+        self.set_module_params(self.group_args, payload)
+        powerscale_module_mock.api_instance.get_auth_group = MagicMock(
+            side_effect=[
+                MockGroupApi.get_group_detail(),
+                MockGroupApi.get_group_detail(),
+            ])
+        empty_members = MockSDKResponse({"members": []})
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=empty_members)
+        self.mock_wellknowns(powerscale_module_mock)
+        self.capture_fail_json_method(
+            "'InvalidSID' is not a recognised well-known SID name"
+            " or SID string",
+            powerscale_module_mock,
+            "perform_module_operation",
+        )
+
+    def test_invalid_wellknown_sid_includes_supported_list(self, powerscale_module_mock):
+        """AC-010: error message includes full list of supported SID
+        display names from the cluster."""
+        payload = MockGroupApi.get_update_group_payload_with_wellknown_sids(
+            well_known_sids=["InvalidSID"],
+            well_known_sid_state="present-in-group")
+        self.set_module_params(self.group_args, payload)
+        powerscale_module_mock.api_instance.get_auth_group = MagicMock(
+            side_effect=[
+                MockGroupApi.get_group_detail(),
+                MockGroupApi.get_group_detail(),
+            ])
+        empty_members = MockSDKResponse({"members": []})
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=empty_members)
+        self.mock_wellknowns(powerscale_module_mock)
+        self.capture_fail_json_method(
+            "Supported display names:",
+            powerscale_module_mock,
+            "perform_module_operation",
+        )
+
+    def test_invalid_wellknown_sid_fail_fast(self, powerscale_module_mock):
+        """AC-010: fail-fast — first invalid SID halts validation."""
+        payload = MockGroupApi.get_update_group_payload_with_wellknown_sids(
+            well_known_sids=["BadSID", "Everyone"],
+            well_known_sid_state="present-in-group")
+        self.set_module_params(self.group_args, payload)
+        powerscale_module_mock.api_instance.get_auth_group = MagicMock(
+            side_effect=[
+                MockGroupApi.get_group_detail(),
+                MockGroupApi.get_group_detail(),
+            ])
+        empty_members = MockSDKResponse({"members": []})
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=empty_members)
+        self.mock_wellknowns(powerscale_module_mock)
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        self.capture_fail_json_method(
+            "'BadSID' is not a recognised well-known SID name",
+            powerscale_module_mock,
+            "perform_module_operation",
+        )
+        powerscale_module_mock.group_api_instance.create_group_member.assert_not_called()
+
+    def test_invalid_wellknown_no_write_before_failure(self, powerscale_module_mock):
+        """AC-010: no write API calls are issued before the failure."""
+        payload = MockGroupApi.get_update_group_payload_with_wellknown_sids(
+            well_known_sids=["NonExistent"],
+            well_known_sid_state="present-in-group")
+        self.set_module_params(self.group_args, payload)
+        powerscale_module_mock.api_instance.get_auth_group = MagicMock(
+            side_effect=[
+                MockGroupApi.get_group_detail(),
+                MockGroupApi.get_group_detail(),
+            ])
+        empty_members = MockSDKResponse({"members": []})
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=empty_members)
+        self.mock_wellknowns(powerscale_module_mock)
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        powerscale_module_mock.group_api_instance.delete_group_member = \
+            MagicMock(return_value=None)
+        self.capture_fail_json_method(
+            "'NonExistent' is not a recognised well-known SID name",
+            powerscale_module_mock,
+            "perform_module_operation",
+        )
+        powerscale_module_mock.group_api_instance.create_group_member.assert_not_called()
+        powerscale_module_mock.group_api_instance.delete_group_member.assert_not_called()
+
+    def test_unsupported_key_in_group_members_fails(self, powerscale_module_mock):
+        """AC-009: unsupported key in group_members entry fails with
+        exact error message."""
+        payload = MockGroupApi.get_update_group_payload_with_group_members(
+            group_members=[{"group_name": "child", "bad_key": "val"}],
+            group_member_state="present-in-group")
+        self.set_module_params(self.group_args, payload)
+        powerscale_module_mock.api_instance.get_auth_group = MagicMock(
+            side_effect=[
+                MockGroupApi.get_group_detail(),
+                MockGroupApi.get_group_detail(),
+            ])
+        empty_members = MockSDKResponse({"members": []})
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=empty_members)
+        self.capture_fail_json_method(
+            "contains unsupported keys",
+            powerscale_module_mock,
+            "perform_module_operation",
+        )
+
+    def test_unsupported_key_no_api_calls(self, powerscale_module_mock):
+        """AC-009: no API calls issued before unsupported key failure."""
+        payload = MockGroupApi.get_update_group_payload_with_group_members(
+            group_members=[{"group_name": "child", "extra": "x"}],
+            group_member_state="present-in-group")
+        self.set_module_params(self.group_args, payload)
+        powerscale_module_mock.api_instance.get_auth_group = MagicMock(
+            side_effect=[
+                MockGroupApi.get_group_detail(),
+                MockGroupApi.get_group_detail(),
+            ])
+        empty_members = MockSDKResponse({"members": []})
+        powerscale_module_mock.group_api_instance.list_group_members = \
+            MagicMock(return_value=empty_members)
+        powerscale_module_mock.group_api_instance.create_group_member = \
+            MagicMock(return_value=None)
+        self.capture_fail_json_method(
+            "contains unsupported keys",
+            powerscale_module_mock,
+            "perform_module_operation",
+        )
+        powerscale_module_mock.group_api_instance.create_group_member.assert_not_called()

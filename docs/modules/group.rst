@@ -100,6 +100,67 @@ Parameters
     It is required when users are added or removed from a group.
 
 
+  group_members (optional, list, None)
+    List of child groups to add to or remove from the group.
+
+    Each entry is a dictionary with a required :literal:`group\_name` key and an optional :literal:`provider\_type` key (defaults to the group\-level :emphasis:`provider\_type`\ ).
+
+    The child group must already exist in the specified authentication provider and access zone.
+
+    Requires :emphasis:`group\_member\_state` to be set.
+
+
+    group_name (True, str, None)
+      The name of the child group to add or remove.
+
+
+    provider_type (optional, str, local)
+      The authentication provider in which to resolve the child group.
+
+      When omitted the group\-level :emphasis:`provider\_type` is used.
+
+
+
+  group_member_state (optional, str, None)
+    Determines whether the child groups listed in :emphasis:`group\_members` will be added to or removed from the group.
+
+    Required when :emphasis:`group\_members` is specified.
+
+
+  well_known_sids (optional, list, None)
+    List of well\-known security identifiers (SIDs) to add to or remove from the group.
+
+    Each element is a string — either a display name (case\-insensitive) or a SID string (exact match).
+
+    Commonly used well\-known SIDs:
+
+    :literal:`Everyone`           — S\-1\-1\-0
+
+    :literal:`Authenticated Users` — S\-1\-5\-11
+
+    :literal:`Batch`              — S\-1\-5\-3
+
+    :literal:`Creator Owner`      — S\-1\-3\-0
+
+    :literal:`Dialup`             — S\-1\-5\-1
+
+    :literal:`Interactive`        — S\-1\-5\-4
+
+    :literal:`Network`            — S\-1\-5\-2
+
+    :literal:`Service`            — S\-1\-5\-6
+
+    The authoritative list of supported SIDs for a specific cluster can be obtained via :literal:`GET /platform/1/auth/wellknowns`.
+
+    Requires :emphasis:`well\_known\_sid\_state` to be set.
+
+
+  well_known_sid_state (optional, str, None)
+    Determines whether the well\-known SIDs listed in :emphasis:`well\_known\_sids` will be added to or removed from the group.
+
+    Required when :emphasis:`well\_known\_sids` is specified.
+
+
   onefs_host (True, str, None)
     IP address or FQDN of the PowerScale cluster.
 
@@ -132,6 +193,11 @@ Notes
 
 .. note::
    - Cross\-provider group membership requires OneFS 9.11.0 or later.
+   - Existing playbooks using only :emphasis:`users` and :emphasis:`user\_state` continue to work unchanged. The :emphasis:`group\_members` and :emphasis:`well\_known\_sids` parameters are optional and default to empty when omitted.
+   - :strong:`Troubleshooting`
+   - If a child group cannot be resolved, verify that the group exists in the specified authentication provider and access zone. The module will fail with an error message identifying the unresolvable group.
+   - If a well\-known SID is not recognised, verify the display name or SID string against the cluster's supported list via :literal:`GET /platform/1/auth/wellknowns`. The error message includes the full list of supported display names.
+   - Circular membership (group A contains group B which contains group A) is not detected by the module. OneFS may reject or silently ignore such configurations depending on the version.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -315,6 +381,124 @@ Examples
         user_state: "present-in-group"
         state: "present"
 
+    - name: Add an AD group to a local group in an Access Zone
+      dellemc.powerscale.group:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        provider_type: "local"
+        access_zone: "{{access_zone}}"
+        group_name: "{{group_name}}"
+        group_members:
+          - group_name: "DOMAIN\\ad_child_group"
+            provider_type: "ads"
+        group_member_state: "present-in-group"
+        state: "present"
+
+    - name: Add an LDAP group to a local group
+      dellemc.powerscale.group:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        provider_type: "local"
+        access_zone: "{{access_zone}}"
+        group_name: "{{group_name}}"
+        group_members:
+          - group_name: "{{ldap_group_name}}"
+            provider_type: "ldap"
+        group_member_state: "present-in-group"
+        state: "present"
+
+    - name: Add a well-known SID by display name
+      dellemc.powerscale.group:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        provider_type: "local"
+        access_zone: "{{access_zone}}"
+        group_name: "{{group_name}}"
+        well_known_sids:
+          - "Everyone"
+        well_known_sid_state: "present-in-group"
+        state: "present"
+
+    - name: Add a well-known SID by SID string
+      dellemc.powerscale.group:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        provider_type: "local"
+        access_zone: "{{access_zone}}"
+        group_name: "{{group_name}}"
+        well_known_sids:
+          - "S-1-1-0"
+        well_known_sid_state: "present-in-group"
+        state: "present"
+
+    - name: Mixed member type management (users, groups, and SIDs)
+      dellemc.powerscale.group:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        provider_type: "local"
+        access_zone: "{{access_zone}}"
+        group_name: "{{group_name}}"
+        users:
+          - user_name: "{{user_name}}"
+        user_state: "present-in-group"
+        group_members:
+          - group_name: "{{ldap_group_name}}"
+            provider_type: "ldap"
+        group_member_state: "present-in-group"
+        well_known_sids:
+          - "Everyone"
+        well_known_sid_state: "present-in-group"
+        state: "present"
+
+    - name: Remove group members and well-known SIDs
+      dellemc.powerscale.group:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        provider_type: "local"
+        access_zone: "{{access_zone}}"
+        group_name: "{{group_name}}"
+        group_members:
+          - group_name: "{{ldap_group_name}}"
+            provider_type: "ldap"
+        group_member_state: "absent-in-group"
+        well_known_sids:
+          - "Everyone"
+        well_known_sid_state: "absent-in-group"
+        state: "present"
+
+    - name: Check/diff mode - preview group and SID membership changes
+      dellemc.powerscale.group:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        provider_type: "local"
+        access_zone: "{{access_zone}}"
+        group_name: "{{group_name}}"
+        group_members:
+          - group_name: "{{ldap_group_name}}"
+            provider_type: "ldap"
+        group_member_state: "present-in-group"
+        well_known_sids:
+          - "Everyone"
+        well_known_sid_state: "present-in-group"
+        state: "present"
+      check_mode: true
+      diff: true
+      register: result
+
 
 
 Return Values
@@ -354,7 +538,7 @@ group_details (When group exists, complex, {'dn': 'CN=group_11,CN=Groups,DC=VXXX
 
 
   members (, complex, )
-    The list of sid's the members of group.
+    The list of all members of the group, including users, child groups, and well\-known SIDs. Each entry contains a :literal:`type` field indicating the member kind (\ :literal:`user`\ , :literal:`group`\ , or :literal:`wellknown`\ ).
 
 
     sid (, complex, )
@@ -370,13 +554,13 @@ group_details (When group exists, complex, {'dn': 'CN=group_11,CN=Groups,DC=VXXX
 
 
       type_of_resource (, str, user)
-        The resource's type is mentioned.
+        The resource's type — one of :literal:`user`\ , :literal:`group`\ , or :literal:`wellknown`.
 
 
 
 
 
-diff (When diff mode is active and membership changes are requested., dict, {'before': {'members': ['Guest', 'ldap_user']}, 'after': {'members': ['Guest']}})
+diff (When diff mode is active and membership changes are requested., dict, {'before': {'members': ['Guest', 'ldap_user'], 'group_members': ['child_group'], 'well_known_sids': ['Everyone']}, 'after': {'members': ['Guest'], 'group_members': [], 'well_known_sids': []}})
   The membership diff computed when diff mode is enabled.
 
 
@@ -385,7 +569,15 @@ diff (When diff mode is active and membership changes are requested., dict, {'be
 
 
     members (, list, )
-      Sorted list of member names before the operation.
+      Sorted list of user member names before the operation.
+
+
+    group_members (, list, )
+      Sorted list of child group names before the operation.
+
+
+    well_known_sids (, list, )
+      Sorted list of well\-known SID display names before the operation.
 
 
 
@@ -394,7 +586,15 @@ diff (When diff mode is active and membership changes are requested., dict, {'be
 
 
     members (, list, )
-      Sorted list of member names after the operation.
+      Sorted list of user member names after the operation.
+
+
+    group_members (, list, )
+      Sorted list of child group names after the operation.
+
+
+    well_known_sids (, list, )
+      Sorted list of well\-known SID display names after the operation.
 
 
 

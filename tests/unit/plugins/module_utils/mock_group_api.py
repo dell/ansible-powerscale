@@ -23,6 +23,10 @@ class MockGroupApi:
         'provider_type': None,
         'users': [],
         'user_state': None,
+        'group_members': [],
+        'group_member_state': None,
+        'well_known_sids': [],
+        'well_known_sid_state': None,
         'state': None
     }
     CREATE_GROUP_PAYLOAD = {
@@ -177,6 +181,127 @@ class MockGroupApi:
         ]
     }
 
+    # Mirrors the response from ``GET /platform/1/auth/wellknowns``.
+    # Includes the ER table SIDs plus edge cases (special characters, long
+    # names) per the spec.
+    GET_WELLKNOWNS = {
+        "wellknowns": [
+            {
+                "gid": None,
+                "name": "Everyone",
+                "sid": "S-1-1-0",
+                "uid": None
+            },
+            {
+                "gid": None,
+                "name": "Creator Owner",
+                "sid": "S-1-3-0",
+                "uid": None
+            },
+            {
+                "gid": None,
+                "name": "Authenticated Users",
+                "sid": "S-1-5-11",
+                "uid": None
+            },
+            {
+                "gid": None,
+                "name": "Batch",
+                "sid": "S-1-5-3",
+                "uid": None
+            },
+            {
+                "gid": None,
+                "name": "NT AUTHORITY\\INTERACTIVE",
+                "sid": "S-1-5-4",
+                "uid": None
+            },
+            {
+                "gid": None,
+                "name": "This Organization",
+                "sid": "S-1-5-15",
+                "uid": None
+            }
+        ]
+    }
+
+    # Auth group responses for resolve_group_id() — mirrors the response from
+    # ``GET /platform/1/auth/groups/{v1AuthGroupId}`` for child group
+    # resolution across all five provider types.
+    GET_AUTH_GROUP_LOCAL = {
+        "groups": [
+            {
+                "dn": "CN=child_local_grp,CN=Groups,DC=VXX267-XX",
+                "name": "child_local_grp",
+                "provider": "lsa-local-provider:System",
+                "gid": {"id": "GID:2001", "name": "child_local_grp", "type": "group"},
+                "sid": {
+                    "id": "SID:S-1-5-21-1111111111-2222222222-3333333333-2001",
+                    "name": "child_local_grp", "type": "group"
+                },
+                "type": "group"
+            }
+        ]
+    }
+    GET_AUTH_GROUP_ADS = {
+        "groups": [
+            {
+                "dn": "CN=ad_child_grp,CN=Groups,DC=CORP,DC=EXAMPLE,DC=COM",
+                "name": "CORP\\ad_child_grp",
+                "provider": "lsa-activedirectory-provider:CORP.EXAMPLE.COM",
+                "gid": {"id": "GID:3001", "name": "CORP\\ad_child_grp", "type": "group"},
+                "sid": {
+                    "id": "SID:S-1-5-21-4444444444-5555555555-6666666666-3001",
+                    "name": "CORP\\ad_child_grp", "type": "group"
+                },
+                "type": "group"
+            }
+        ]
+    }
+    GET_AUTH_GROUP_LDAP = {
+        "groups": [
+            {
+                "dn": "cn=ldap_child_grp,ou=Groups,dc=example,dc=org",
+                "name": "ldap_child_grp",
+                "provider": "lsa-ldap-provider:example.org",
+                "gid": {"id": "GID:4001", "name": "ldap_child_grp", "type": "group"},
+                "sid": {
+                    "id": "SID:S-1-5-21-7777777777-8888888888-9999999999-4001",
+                    "name": "ldap_child_grp", "type": "group"
+                },
+                "type": "group"
+            }
+        ]
+    }
+    GET_AUTH_GROUP_NIS = {
+        "groups": [
+            {
+                "name": "nis_child_grp",
+                "provider": "lsa-nis-provider:CorpNIS",
+                "gid": {"id": "GID:5001", "name": "nis_child_grp", "type": "group"},
+                "sid": {
+                    "id": "SID:S-1-5-21-1010101010-2020202020-3030303030-5001",
+                    "name": "nis_child_grp", "type": "group"
+                },
+                "type": "group"
+            }
+        ]
+    }
+    GET_AUTH_GROUP_FILE = {
+        "groups": [
+            {
+                "name": "file_child_grp",
+                "provider": "lsa-file-provider:System",
+                "gid": {"id": "GID:6001", "name": "file_child_grp", "type": "group"},
+                "sid": {
+                    "id": "SID:S-1-5-21-4040404040-5050505050-6060606060-6001",
+                    "name": "file_child_grp", "type": "group"
+                },
+                "type": "group"
+            }
+        ]
+    }
+
     @staticmethod
     def get_create_group_payload(id=None, name=None, users=None, user_state=None, provider_type=None):
         group_payload = MockGroupApi.CREATE_GROUP_PAYLOAD.copy()
@@ -277,3 +402,70 @@ class MockGroupApi:
     def get_group_members_mixed():
         """Return a member list containing both local and LDAP members."""
         return MockSDKResponse(copy.deepcopy(MockGroupApi.GET_GROUP_MEMBERS_MIXED))
+
+    @staticmethod
+    def get_wellknowns_response():
+        """Build the well-known SIDs response from ``GET /platform/1/auth/wellknowns``."""
+        return MockSDKResponse(copy.deepcopy(MockGroupApi.GET_WELLKNOWNS))
+
+    @staticmethod
+    def get_auth_group_response(provider="local"):
+        """Build a single-group auth response for resolve_group_id().
+
+        The response supports both access patterns used by the module:
+        - ``api_response.to_dict().get('groups')`` (used by resolve_group_id)
+        - ``api_response.groups[0].to_dict()`` (used by get_group_details)
+
+        :param provider: one of ``'local'``, ``'ads'``, ``'ldap'``, ``'nis'``,
+            ``'file'``. Pass ``None`` to return an empty group list
+            (unresolvable group).
+        """
+        if provider is None:
+            return MockSDKResponse({"groups": []})
+        fixtures = {
+            "local": MockGroupApi.GET_AUTH_GROUP_LOCAL,
+            "ads": MockGroupApi.GET_AUTH_GROUP_ADS,
+            "ldap": MockGroupApi.GET_AUTH_GROUP_LDAP,
+            "nis": MockGroupApi.GET_AUTH_GROUP_NIS,
+            "file": MockGroupApi.GET_AUTH_GROUP_FILE,
+        }
+        fixture = fixtures.get(provider, MockGroupApi.GET_AUTH_GROUP_LOCAL)
+        data = copy.deepcopy(fixture)
+        # Build a response that supports both `.to_dict()` and `.groups[]`
+        mock_group = MagicMock()
+        mock_group.name = data['groups'][0]['name']
+        mock_group.to_dict.return_value = data['groups'][0]
+        mock_api_response = MagicMock()
+        mock_api_response.groups = [mock_group]
+        mock_api_response.to_dict.return_value = data
+        return mock_api_response
+
+    @staticmethod
+    def get_update_group_payload_with_group_members(
+            group_members=None, group_member_state=None, **kwargs):
+        """Build a payload that exercises the ``group_members`` parameter."""
+        payload = MockGroupApi.CREATE_GROUP_PAYLOAD.copy()
+        payload['group_id'] = None  # avoid check_if_id_exists clash
+        payload['users'] = []
+        payload['user_state'] = None
+        payload['group_members'] = group_members or []
+        payload['group_member_state'] = group_member_state
+        payload['well_known_sids'] = []
+        payload['well_known_sid_state'] = None
+        payload.update(kwargs)
+        return payload
+
+    @staticmethod
+    def get_update_group_payload_with_wellknown_sids(
+            well_known_sids=None, well_known_sid_state=None, **kwargs):
+        """Build a payload that exercises the ``well_known_sids`` parameter."""
+        payload = MockGroupApi.CREATE_GROUP_PAYLOAD.copy()
+        payload['group_id'] = None  # avoid check_if_id_exists clash
+        payload['users'] = []
+        payload['user_state'] = None
+        payload['group_members'] = []
+        payload['group_member_state'] = None
+        payload['well_known_sids'] = well_known_sids or []
+        payload['well_known_sid_state'] = well_known_sid_state
+        payload.update(kwargs)
+        return payload
