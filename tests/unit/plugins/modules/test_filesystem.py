@@ -143,6 +143,45 @@ class TestFileSystem(PowerScaleUnitBase):
         self.capture_fail_json_call(MockFileSystemApi.get_error_responses(
             "delete_file_system_with_export_exception"), FilesystemHandler)
 
+    def test_delete_file_system_nfs_export_lookup_not_found(self, powerscale_module_mock):
+        # A "not found" response from the NFS export lookup itself (STATUS_NOT_FOUND /
+        # 0xc0000225) is deterministic, not transient: it must be treated as "no exports
+        # exist" on the first attempt, with no retry/backoff delay, and deletion should
+        # proceed.
+        self.get_filesystem_args.update(
+            {"path": self.path1, "recursive_force_delete": True, "access_zone": "System", "state": "absent"})
+        powerscale_module_mock.module.params = self.get_filesystem_args
+        powerscale_module_mock.get_filesystem = MagicMock(return_value=MockFileSystemApi.FILESYSTEM_DETAILS)
+        powerscale_module_mock.protocol_api.list_nfs_exports = MagicMock(
+            side_effect=MockApiException(404, "STATUS_NOT_FOUND (0xc0000225)"))
+        powerscale_module_mock.protocol_api.list_smb_shares = MagicMock(
+            return_value=MockSDKResponse(MockFileSystemApi.EMPTY_SMB_SHARES))
+        powerscale_module_mock.module.check_mode = False
+        FilesystemHandler().handle(
+            powerscale_module_mock, powerscale_module_mock.module.params)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed']
+        powerscale_module_mock.namespace_api.delete_directory.assert_called()
+        # exactly one lookup attempt - no retry
+        assert powerscale_module_mock.protocol_api.list_nfs_exports.call_count == 1
+
+    def test_delete_file_system_smb_share_lookup_not_found(self, powerscale_module_mock):
+        # Same "not found" handling for the SMB share lookup.
+        self.get_filesystem_args.update(
+            {"path": self.path1, "recursive_force_delete": True, "access_zone": "System", "state": "absent"})
+        powerscale_module_mock.module.params = self.get_filesystem_args
+        powerscale_module_mock.get_filesystem = MagicMock(return_value=MockFileSystemApi.FILESYSTEM_DETAILS)
+        powerscale_module_mock.protocol_api.list_nfs_exports = MagicMock(
+            return_value=MockSDKResponse(MockFileSystemApi.EMPTY_NFS_EXPORTS))
+        powerscale_module_mock.protocol_api.list_smb_shares = MagicMock(
+            side_effect=MockApiException(404, "STATUS_NOT_FOUND (0xc0000225)"))
+        powerscale_module_mock.module.check_mode = False
+        FilesystemHandler().handle(
+            powerscale_module_mock, powerscale_module_mock.module.params)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed']
+        powerscale_module_mock.namespace_api.delete_directory.assert_called()
+        # exactly one lookup attempt - no retry
+        assert powerscale_module_mock.protocol_api.list_smb_shares.call_count == 1
+
     def test_create_file_system_with_access_control_rights(self, powerscale_module_mock):
         self.get_filesystem_args.update({"path": self.path1, "owner": {"name": "test"}, "group": {"name": "group_test"},
                                          "access_control_rights":
