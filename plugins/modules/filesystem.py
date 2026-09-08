@@ -869,6 +869,13 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.sh
 
 LOG = utils.get_logger('filesystem')
 
+# NT status code surfaced by PAPI when an export/share lookup target cannot be found.
+# This is a deterministic "not found" condition, not a transient failure - retrying it
+# with backoff does not change the outcome, it only adds latency. It is treated as
+# "no exports/shares exist" so that deleting a filesystem with no exports/shares is not
+# blocked by this lookup.
+_EXPORT_LOOKUP_NOT_FOUND_MARKERS = ('STATUS_NOT_FOUND', '0xc0000225')
+
 
 class FileSystem(object):
     """Class with Filesystem operations"""
@@ -1205,22 +1212,41 @@ class FileSystem(object):
         """
         try:
             # Check for NFS exports
-            nfs_exports = self.protocol_api.list_nfs_exports(
-                path='/' + path, zone=access_zone).to_dict()
-            if nfs_exports['exports']:
+            try:
+                nfs_exports = self.protocol_api.list_nfs_exports(
+                    path='/' + path, zone=access_zone).to_dict()
+            except Exception as e:
+                error_msg = self.determine_error(error_obj=e)
+                if any(marker in str(error_msg) for marker in _EXPORT_LOOKUP_NOT_FOUND_MARKERS):
+                    LOG.warning("NFS export lookup reported not-found for path %s; "
+                                "assuming no NFS exports exist: %s", path, error_msg)
+                    nfs_exports = {'exports': []}
+                else:
+                    raise e
+            if nfs_exports and nfs_exports.get('exports'):
                 error_message = 'The Filesystem path {0} has NFS ' \
                                 'exports. Hence, deleting this directory ' \
                                 'is not safe'.format(path)
                 LOG.error(error_message)
                 self.module.fail_json(msg=error_message)
             # Check for SMB shares
-            smb_shares = self.protocol_api.list_smb_shares(zone=access_zone).to_dict()
-            for share in smb_shares['shares']:
-                if share['path'] == '/' + path:
-                    error_message = 'The Filesystem path {0} has SMB ' \
-                                    'Shares. Hence, deleting this directory ' \
-                                    'is not safe'.format(path)
-                    LOG.error(error_message)
+            try:
+                smb_shares = self.protocol_api.list_smb_shares(zone=access_zone).to_dict()
+            except Exception as e:
+                error_msg = self.determine_error(error_obj=e)
+                if any(marker in str(error_msg) for marker in _EXPORT_LOOKUP_NOT_FOUND_MARKERS):
+                    LOG.warning("SMB share lookup reported not-found for zone %s; "
+                                "assuming no SMB shares exist: %s", access_zone, error_msg)
+                    smb_shares = {'shares': []}
+                else:
+                    raise e
+            if smb_shares and smb_shares.get('shares'):
+                for share in smb_shares['shares']:
+                    if share['path'] == '/' + path:
+                        error_message = 'The Filesystem path {0} has SMB ' \
+                                        'Shares. Hence, deleting this directory ' \
+                                        'is not safe'.format(path)
+                        LOG.error(error_message)
                     self.module.fail_json(msg=error_message)
             if not self.module.check_mode:
                 self.namespace_api.delete_directory(directory_path=path, recursive=recursive_force_delete)

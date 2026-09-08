@@ -284,7 +284,8 @@ class NfsAlias(object):
             LOG.info(msg)
             if not self.module.check_mode:
                 self.protocol_api.create_nfs_alias(nfs_alias, zone=access_zone)
-            return True
+                return True
+            return False
 
         except Exception as e:
             error_message = 'Create NFS alias for path: {0}' \
@@ -326,7 +327,7 @@ class NfsAlias(object):
                     nfs_alias,
                     self.result['nfs_alias_details']['id'],
                     zone=self.result['nfs_alias_details']['zone'])
-            return True
+                return True
 
         except Exception as e:
             error_message = 'Modify NFS alias failed with error: {0}'.format(
@@ -346,8 +347,8 @@ class NfsAlias(object):
             LOG.info(msg)
             if not self.module.check_mode:
                 self.protocol_api.delete_nfs_alias(nfs_alias['id'], zone=nfs_alias['zone'])
-
-            return True
+                return True
+            return False
         except Exception as e:
             error_message = (
                 'Delete NFS alias with path: {0}, zone: {1}, id: {2} failed'

@@ -308,7 +308,7 @@ class ServerCertificate(PowerScaleBase):
             self.module.fail_json(msg='The maximum length for description is 2048.')
         if certificate_key_password is not None and len(certificate_key_password) > 256:
             self.module.fail_json(msg='The maximum length for certificate_key_password is 256.')
-        if threshold is not None and not (0 < threshold < 4294967295):
+        if threshold is not None and not (0 <= threshold <= 4294967295):
             self.module.fail_json(msg='The range of certificate_pre_expiration_threshold is 0 - 4294967295.')
 
     def get_certificate_details(self, module_params):
@@ -333,9 +333,13 @@ class ServerCertificate(PowerScaleBase):
                         break
 
             if certificate_id is not None:
-                certificate_list = self.certificate_api.get_certificate_server_by_id(certificate_id).to_dict()
-                if certificate_list:
-                    certificate = certificate_list['certificates'][0]
+                resp = self.certificate_api.get_certificate_server_by_id(certificate_id).to_dict()
+                # Handle both single certificate object and wrapped list response
+                if isinstance(resp, dict) and 'certificates' in resp:
+                    if resp['certificates']:
+                        certificate = resp['certificates'][0]
+                elif resp:
+                    certificate = resp
         except Exception as e:
             error_message = f"Failed to retrieve the server certificate: {utils.determine_error(e)}"
             LOG.error(error_message)
