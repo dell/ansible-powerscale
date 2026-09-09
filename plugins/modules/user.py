@@ -115,6 +115,19 @@ options:
     - It is required when a role is added or removed from user.
     type: str
     choices: ['present-for-user', 'absent-for-user']
+  password_expires:
+    description:
+    - Whether the user's password is subject to the password expiration
+      policy defined on the PowerScale cluster.
+    - Only supported for local users (I(provider_type)=C(local)).
+    type: bool
+  expiry:
+    description:
+    - Unix epoch timestamp (integer) at which the user account expires.
+    - Set to C(0) to clear a previously configured account expiry.
+    - Only supported for local users (I(provider_type)=C(local)).
+    - The valid range is C(0) to C(4294967295) (inclusive).
+    type: int
   update_password:
     description:
     - This parameter controls the way the I(password) is updated during
@@ -328,6 +341,20 @@ user_details:
                 type:
                     description: The resource's type is mentioned.
                     type: str
+        expired:
+            description: Whether the user account has expired.
+            type: bool
+        password_expired:
+            description: Whether the user's password has expired.
+            type: bool
+        password_expiry:
+            description: Unix epoch timestamp at which the user's password
+                         will expire.
+            type: int
+        max_password_age:
+            description: Maximum password age in seconds before the password
+                         must be changed.
+            type: int
 '''
 
 from ansible.module_utils.basic import AnsibleModule
