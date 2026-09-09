@@ -7,6 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 __metaclass__ = type
+import copy
 
 
 class MockUserApi:
@@ -27,6 +28,8 @@ class MockUserApi:
         'role_name': None,
         'role_state': None,
         'home_directory': None,
+        'password_expires': None,
+        'expiry': None,
         'state': None
     }
 
@@ -110,6 +113,22 @@ class MockUserApi:
         }
     }
 
+    VALID_EXPIRY = 1729564800
+    UPDATED_EXPIRY = 1735689600
+    MAX_VALID_EXPIRY = 4294967295
+
+    @staticmethod
+    def get_user_details(password_expires=None, expiry=None):
+        """Return a copy of GET_USER_DETAILS with the password and account
+        expiry fields overridden, so each test can pin its own starting state.
+        """
+        user_details = copy.deepcopy(MockUserApi.GET_USER_DETAILS)
+        if password_expires is not None:
+            user_details['password_expires'] = password_expires
+        if expiry is not None:
+            user_details['expiry'] = expiry
+        return user_details
+
     @staticmethod
     def get_error_responses(response_type):
         err_msg_dict = {
@@ -131,5 +150,9 @@ class MockUserApi:
             "update_user_add_role_error": "Add user UID:7000 to role AuditAdmin failed with SDK Error message",
             "update_user_remove_role_error": "Remove user UID:7000 from role AuditAdmin failed with SDK Error message",
             "update_password_error": "Update password for User 'UID:7000' failed with",
+            "password_expires_non_local_provider": "password_expires is only supported for local users",
+            "expiry_non_local_provider": "expiry is only supported for local users",
+            "expiry_invalid_type": "expiry must be a Unix epoch timestamp (integer)",
+            "expiry_out_of_range": "expiry must be between 0 and 4294967295",
         }
         return err_msg_dict.get(response_type)
