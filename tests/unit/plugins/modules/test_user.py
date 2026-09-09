@@ -826,6 +826,42 @@ class TestUser(PowerScaleUnitBase):
         assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
 
     # ================================================================
+    # Phase 4: Output Fields and Documentation Parity
+    # ================================================================
+
+    def test_user_details_surfaces_expiry_output_fields(self, powerscale_module_mock):
+        """AC-011: user_details must include expired, password_expired,
+        password_expiry, and max_password_age from the API response."""
+        self.set_module_params(self.user_args, {
+            'user_name': "test_user_1",
+            'user_id': 7000,
+            'access_zone': "System",
+            'provider_type': "local",
+            'password': 'test_user_password_placeholder',
+            'email': 'test_user_2@gamil.com',
+            'state': 'present'})
+        mock_api_response = MagicMock()
+        mock_user = MagicMock()
+        mock_user.to_dict.return_value = MockUserApi.GET_USER_DETAILS
+        mock_api_response.users = [mock_user]
+        powerscale_module_mock.api_instance.get_auth_user.return_value = mock_api_response
+        mock_roles_response = MagicMock()
+        mock_roles_response.roles = []
+        powerscale_module_mock.api_instance.list_auth_roles.return_value = mock_roles_response
+        powerscale_module_mock.perform_module_operation()
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        ud = result['user_details']
+        assert 'expired' in ud, "expired must be in user_details"
+        assert 'password_expired' in ud, "password_expired must be in user_details"
+        assert 'password_expiry' in ud, "password_expiry must be in user_details"
+        assert 'max_password_age' in ud, "max_password_age must be in user_details"
+        # Verify the values match the mock fixture
+        assert ud['expired'] is False
+        assert ud['password_expired'] is False
+        assert ud['password_expiry'] == 1678765332
+        assert ud['max_password_age'] == 2419200
+
+    # ================================================================
     # Phase 3: Check Mode and Diff Support
     # ================================================================
 
