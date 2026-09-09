@@ -413,6 +413,30 @@ class User(object):
                 LOG.error(error_message)
                 self.module.fail_json(msg=error_message)
 
+    def validate_expiry(self):
+        """Validate that expiry is a Unix epoch timestamp within the range
+        accepted by the PowerScale PAPI schema. Timestamps that are already
+        in the past are valid input here - the API enforces that policy and
+        its error is surfaced to the user.
+        """
+        expiry = self.module.params.get('expiry')
+        if expiry is None:
+            return
+        # bool is a subclass of int in Python, so True would otherwise be
+        # silently accepted as epoch 1.
+        if isinstance(expiry, bool) or not isinstance(expiry, int):
+            error_message = \
+                "expiry must be a Unix epoch timestamp (integer)," \
+                " got '%s'" % expiry
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+        if expiry < MIN_EXPIRY_EPOCH or expiry > MAX_EXPIRY_EPOCH:
+            error_message = \
+                "expiry must be between %s and %s, got '%s'" \
+                % (MIN_EXPIRY_EPOCH, MAX_EXPIRY_EPOCH, expiry)
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
     def check_provider_type(self, provider, message):
         """ Check the provider and return the updated provider"""
         if provider.lower() != "local":
@@ -846,6 +870,7 @@ class User(object):
         # Validate the local-only parameters before any API call is issued so
         # an unsupported provider fails fast with a parameter-specific message.
         self.validate_local_only_params(provider_type)
+        self.validate_expiry()
         home_directory, auth_user_id = self.set_validate_params(access_zone, user_name, user_id,
                                                                 email, role_name, role_state)
         if state == "present":
