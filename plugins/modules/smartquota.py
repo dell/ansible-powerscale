@@ -1459,7 +1459,7 @@ class SmartQuota(object):
 
         target_quota_id = quota_id
         if not target_quota_id and not self.module.check_mode:
-            _, target_quota_id = self.get_quota_details(
+            ignored_quota, target_quota_id = self.get_quota_details(
                 include_snapshots=include_snapshots, zone=access_zone,
                 type=quota_type, path=complete_path, persona=sid)
 
