@@ -451,3 +451,100 @@
         quota_type: "{{ default_group_quota_type }}"
         access_zone: "{{ access_zone }}"
         state: "absent"
+
+    - name: Create a Quota and its notification rules in a single task
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        quota_type: "{{ dir_quota_type }}"
+        access_zone: "{{ access_zone }}"
+        quota:
+          thresholds_on: "fs_logical_size"
+          hard_limit_size: "{{ hard_limit_size }}"
+          cap_unit: "{{ cap_unit }}"
+          include_snapshots: false
+        quota_notification_rules:
+          - condition: "exceeded"
+            threshold: "hard"
+            action_alert: true
+            action_email_owner: true
+        state: "present"
+      register: combined_create_result
+
+    - name: Preview creating a new notification rule with check_mode and diff
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        quota_type: "{{ dir_quota_type }}"
+        access_zone: "{{ access_zone }}"
+        quota_notification_rules:
+          - condition: "exceeded"
+            threshold: "advisory"
+            action_alert: true
+        state: "present"
+      check_mode: true
+      diff: true
+      register: preview_notification_result
+
+    - name: Create a notification rule for the Quota
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        quota_type: "{{ dir_quota_type }}"
+        access_zone: "{{ access_zone }}"
+        quota_notification_rules:
+          - condition: "exceeded"
+            threshold: "advisory"
+            action_alert: true
+        state: "present"
+      register: create_notification_result
+
+    - name: Update the notification rule's actions by id
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        quota_type: "{{ dir_quota_type }}"
+        access_zone: "{{ access_zone }}"
+        quota_notification_rules:
+          - id: "{{ create_notification_result.quota_details.notification_rules[0].id }}"
+            action_alert: false
+            action_email_owner: true
+        state: "present"
+
+    - name: Delete the specific notification rule by id
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        quota_type: "{{ dir_quota_type }}"
+        access_zone: "{{ access_zone }}"
+        quota_notification_rules:
+          - id: "{{ create_notification_result.quota_details.notification_rules[0].id }}"
+            state: "absent"
+        state: "present"
+
+    - name: Delete all notification rules for the Quota
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{ onefs_host }}"
+        verify_ssl: "{{ verify_ssl }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        path: "{{ path }}"
+        quota_type: "{{ dir_quota_type }}"
+        access_zone: "{{ access_zone }}"
+        quota_notification_rules: []
+        state: "present"

@@ -244,6 +244,16 @@ notes:
 - The I(check_mode) is supported.
 - Once the limits are assigned, then the quota cannot be converted to
   accounting. Only modification to the threshold limits is permitted.
+- Running with C(--diff) returns C(diff.before)/C(diff.after) reflecting
+  the I(quota_notification_rules) state immediately before and after the
+  change. I(quota) threshold changes are not currently reflected in
+  C(diff).
+- I(quota_notification_rules) requires the target quota to already exist,
+  or to be created in the same task via I(quota). If a quota is created
+  in the same task and its notification rule(s) then fail to be created,
+  the module fails with an error explicitly stating that the quota was
+  created but its notification rules were not; the quota is not rolled
+  back.
 '''
 EXAMPLES = r'''
 - name: Create a Quota for a User excluding snapshot
@@ -472,6 +482,42 @@ EXAMPLES = r'''
     quota_type: "directory"
     quota_notification_rules: []
     state: "present"
+
+- name: Create a Quota and its notification rules in a single task
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "directory"
+    quota:
+      thresholds_on: "fs_logical_size"
+      hard_limit_size: 10
+      cap_unit: "TB"
+      include_snapshots: false
+    quota_notification_rules:
+      - condition: "exceeded"
+        threshold: "hard"
+        action_alert: true
+        action_email_owner: true
+    state: "present"
+
+- name: Preview a notification rule change with check_mode and diff
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "directory"
+    quota_notification_rules:
+      - condition: "exceeded"
+        threshold: "advisory"
+        action_alert: true
+    state: "present"
+  check_mode: true
+  diff: true
 '''
 RETURN = r'''
 changed:
@@ -479,6 +525,33 @@ changed:
     returned: always
     type: bool
     sample: "true"
+
+diff:
+    description: The before/after diff of the quota notification rules when running in diff mode.
+    returned: When diff mode is enabled and a quota_notification_rules change is detected.
+    type: dict
+    contains:
+        before:
+            description: The notification rules configured for the quota before the change.
+            type: list
+            elements: dict
+        after:
+            description: The notification rules configured for the quota after the change.
+            type: list
+            elements: dict
+    sample: {
+        "before": [],
+        "after": [
+            {
+                "action_alert": true,
+                "action_email_address": null,
+                "action_email_owner": false,
+                "condition": "exceeded",
+                "id": "id1",
+                "threshold": "advisory"
+            }
+        ]
+    }
 
 quota_details:
     description: The quota details.
@@ -630,6 +703,11 @@ class SmartQuota(object):
         # result is a dictionary that contains changed status and
         # smart quota details
         self.result = {"changed": False}
+        # Tracks whether the quota itself was created during this
+        # invocation (combined quota + notification-rules creation), so
+        # that a subsequent notification-rule failure can report a clear,
+        # specific error rather than a generic API failure message.
+        self._quota_just_created = False
         PREREQS_VALIDATE = utils.validate_module_pre_reqs(self.module.params)
         if PREREQS_VALIDATE \
                 and not PREREQS_VALIDATE["all_packages_found"]:
@@ -925,6 +1003,9 @@ class SmartQuota(object):
         except Exception as e:
             error_message = "Create notification rule for quota %s failed with %s" \
                             % (quota_id, determine_error(e))
+            if self._quota_just_created:
+                error_message = "Quota was created successfully, but %s" \
+                                % (error_message[0].lower() + error_message[1:])
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
@@ -1017,7 +1098,7 @@ class SmartQuota(object):
                 return False
         return True
 
-    def reconcile_quota_notification_rules(self, quota_id, desired_rules):
+    def reconcile_quota_notification_rules(self, quota_id, desired_rules, diff_dict=None):
         """
         Reconcile the requested notification rules against the rules
         currently configured for a quota, performing only the create,
@@ -1026,17 +1107,26 @@ class SmartQuota(object):
         :param quota_id: The Id of the Quota.
         :param desired_rules: The `quota_notification_rules` list from
             module params (may be an empty list to delete all rules).
+        :param diff_dict: Optional dict to populate with 'before'/'after'
+            notification-rule state, used to support C(diff) mode.
         :return: True if any create/update/delete action was performed.
         """
         current_rules = self.list_quota_notification_rules(quota_id)
+        if diff_dict is not None:
+            diff_dict['before'] = copy.deepcopy(current_rules)
 
         if not desired_rules:
             if current_rules:
                 self.delete_all_quota_notification_rules(quota_id)
+                if diff_dict is not None:
+                    diff_dict['after'] = []
                 return True
+            if diff_dict is not None:
+                diff_dict['after'] = copy.deepcopy(current_rules)
             return False
 
         current_by_id = {rule['id']: rule for rule in current_rules if rule.get('id')}
+        after_rules = [dict(rule) for rule in current_rules]
         changed = False
 
         for desired in desired_rules:
@@ -1044,15 +1134,23 @@ class SmartQuota(object):
             rule_state = desired.get('state') or 'present'
             current_rule = current_by_id.get(rule_id) if rule_id else None
 
+            if rule_id and current_rule is None:
+                self.module.fail_json(
+                    msg="Notification rule with id %s does not exist for "
+                        "quota %s" % (rule_id, quota_id))
+
             if rule_state == 'absent':
-                if current_rule is not None:
-                    self.delete_quota_notification_rule(quota_id, rule_id)
-                    changed = True
+                self.delete_quota_notification_rule(quota_id, rule_id)
+                changed = True
+                after_rules = [r for r in after_rules if r.get('id') != rule_id]
                 continue
 
             if current_rule is None:
-                self.create_quota_notification_rule(quota_id, desired)
+                new_id = self.create_quota_notification_rule(quota_id, desired)
                 changed = True
+                new_rule = dict(desired)
+                new_rule['id'] = new_id if isinstance(new_id, str) else None
+                after_rules.append(new_rule)
                 continue
 
             immutable_changed = any(
@@ -1060,12 +1158,21 @@ class SmartQuota(object):
                 for field in self.NOTIFICATION_IMMUTABLE_FIELDS)
             if immutable_changed:
                 self.delete_quota_notification_rule(quota_id, rule_id)
-                self.create_quota_notification_rule(quota_id, desired)
+                new_id = self.create_quota_notification_rule(quota_id, desired)
                 changed = True
+                after_rules = [r for r in after_rules if r.get('id') != rule_id]
+                new_rule = dict(desired)
+                new_rule['id'] = new_id if isinstance(new_id, str) else rule_id
+                after_rules.append(new_rule)
             elif not self._notification_rule_content_equal(desired, current_rule):
                 self.update_quota_notification_rule(quota_id, rule_id, desired)
                 changed = True
+                merged = dict(current_rule)
+                merged.update({k: v for k, v in desired.items() if v is not None})
+                after_rules = [merged if r.get('id') == rule_id else r for r in after_rules]
 
+        if diff_dict is not None:
+            diff_dict['after'] = after_rules
         return changed
 
     def delete(self, quota_id, path):
@@ -1286,6 +1393,8 @@ class SmartQuota(object):
         if quota_type == "user" or quota_type == "group":
             persona_obj = utils.isi_sdk.AuthAccessAccessItemFileGroup(id=sid)
         self.create(complete_path, quota_type, access_zone, quota, persona_obj)
+        if not self.module.check_mode:
+            self._quota_just_created = True
         return True
 
     def _handle_quota_deletion(self, quota_id, complete_path):
@@ -1305,8 +1414,28 @@ class SmartQuota(object):
         quota_details = add_limits_with_unit(quota_details)
         return quota_details
 
+    def _validate_notification_rules(self, notification_rules):
+        """
+        Validate quota_notification_rules parameters before any create,
+        update, or delete API call is attempted.
+        :param notification_rules: The `quota_notification_rules` list
+            from module params, or None if the parameter was not supplied.
+        """
+        if not notification_rules:
+            return
+        for index, rule in enumerate(notification_rules):
+            rule_state = rule.get('state') or 'present'
+            if rule_state == 'absent':
+                continue
+            if not any(rule.get(field) is not None
+                       for field in self.NOTIFICATION_ACTION_FIELDS):
+                self.module.fail_json(
+                    msg="quota_notification_rules[%d] requires at least one "
+                        "of action_alert, action_email_owner, or "
+                        "action_email_address to be set" % index)
+
     def _handle_notification_rules(self, state, quota_details, quota_id, include_snapshots,
-                                   access_zone, quota_type, complete_path, sid):
+                                   access_zone, quota_type, complete_path, sid, diff_dict=None):
         """
         Reconcile quota_notification_rules, if supplied, once the target
         quota's Id is known. For a quota created in this same invocation,
@@ -1326,6 +1455,9 @@ class SmartQuota(object):
 
         if not target_quota_id:
             return False
+        if diff_dict is not None:
+            return self.reconcile_quota_notification_rules(
+                target_quota_id, notification_rules, diff_dict=diff_dict)
         return self.reconcile_quota_notification_rules(target_quota_id, notification_rules)
 
     def perform_module_operation(self):
@@ -1333,6 +1465,9 @@ class SmartQuota(object):
         Perform different actions on Smart Quota module based on parameters
         chosen in playbook
         """
+        self._validate_notification_rules(
+            self.module.params.get('quota_notification_rules'))
+
         quota_type, user_name, group_name, state, access_zone, complete_path, sid, quota, include_snapshots = \
             self._prepare_quota_parameters()
 
@@ -1358,14 +1493,17 @@ class SmartQuota(object):
             changed = self._handle_quota_deletion(quota_id, complete_path)
 
         # Reconcile notification rules, if requested
+        notification_diff = {} if self.module._diff else None
         changed = self._handle_notification_rules(
             state, quota_details, quota_id, include_snapshots, access_zone,
-            quota_type, complete_path, sid) or changed
+            quota_type, complete_path, sid, diff_dict=notification_diff) or changed
 
         quota_details = self._process_final_quota_details(quota_type, user_name, group_name, include_snapshots, access_zone, complete_path, sid)
 
         self.result["changed"] = changed
         self.result["quota_details"] = quota_details
+        if self.module._diff and notification_diff:
+            self.result["diff"] = notification_diff
         self.module.exit_json(**self.result)
 
 

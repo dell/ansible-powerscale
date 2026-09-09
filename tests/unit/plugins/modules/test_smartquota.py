@@ -11,6 +11,7 @@ __metaclass__ = type
 import copy
 import pytest
 from mock.mock import MagicMock, PropertyMock
+from ansible.module_utils.common.arg_spec import ArgumentSpecValidator
 # pylint: disable=unused-import
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.initial_mock \
     import utils
@@ -39,6 +40,17 @@ class TestSmartQuota(PowerScaleUnitBase):
         # isolated copy, shadowing the class attribute on the instance.
         self.get_smartquota_args = copy.deepcopy(
             MockSmartQuotaApi.SMART_QUOTA_COMMON_ARGS)
+
+    @pytest.fixture(autouse=True)
+    def default_diff_mode(self, powerscale_module_mock):
+        # `powerscale_module_mock.module` is a bare MagicMock, so accessing
+        # `.module._diff` (unset by the shared base fixture, unlike
+        # `.module.check_mode`) auto-vivifies a truthy child MagicMock.
+        # That would make every test exercise the new diff-mode code path
+        # in perform_module_operation, changing call signatures asserted
+        # by pre-existing tests. Default it to False here; diff-mode tests
+        # override it explicitly to True.
+        powerscale_module_mock.module._diff = False
 
     @pytest.fixture
     def module_object(self, mocker):
@@ -1061,14 +1073,178 @@ class TestSmartQuota(PowerScaleUnitBase):
         powerscale_module_mock.create_quota_notification_rule.assert_called_once_with(self.QUOTA_ID, desired[0])
         powerscale_module_mock.update_quota_notification_rule.assert_not_called()
 
-    def test_reconcile_notification_rules_absent_unknown_id_is_no_op(self, powerscale_module_mock):
-        """Deleting a rule id that doesn't currently exist makes no API call."""
+    def test_reconcile_notification_rules_absent_unknown_id_fails(self, powerscale_module_mock):
+        """Deleting a rule id that doesn't currently exist fails with a descriptive error (FR-12)."""
         powerscale_module_mock.list_quota_notification_rules = MagicMock(return_value=[])
         powerscale_module_mock.delete_quota_notification_rule = MagicMock()
         desired = [{"id": "rule-unknown", "state": "absent"}]
-        changed = powerscale_module_mock.reconcile_quota_notification_rules(self.QUOTA_ID, desired)
-        assert changed is False
+        self.capture_fail_json_method(
+            "Notification rule with id rule-unknown does not exist for quota %s" % self.QUOTA_ID,
+            powerscale_module_mock, 'reconcile_quota_notification_rules', self.QUOTA_ID, desired)
         powerscale_module_mock.delete_quota_notification_rule.assert_not_called()
+
+    def test_reconcile_notification_rules_update_unknown_id_fails(self, powerscale_module_mock):
+        """Updating a rule id that doesn't currently exist fails with a descriptive error (FR-12)."""
+        powerscale_module_mock.list_quota_notification_rules = MagicMock(return_value=[])
+        powerscale_module_mock.create_quota_notification_rule = MagicMock()
+        desired = [{"id": "rule-unknown", "action_alert": True, "state": "present"}]
+        self.capture_fail_json_method(
+            "Notification rule with id rule-unknown does not exist for quota %s" % self.QUOTA_ID,
+            powerscale_module_mock, 'reconcile_quota_notification_rules', self.QUOTA_ID, desired)
+        powerscale_module_mock.create_quota_notification_rule.assert_not_called()
+
+    def test_reconcile_notification_rules_check_mode_create_makes_no_write_call(self, powerscale_module_mock):
+        """FR-8: under check_mode, a new-rule create computes changed=True
+        without any create/update/delete API call (only the read-only list
+        GET call, common to both modes, is made)."""
+        powerscale_module_mock.module.check_mode = True
+        powerscale_module_mock.quota_api_instance.api_client.call_api = MagicMock(
+            return_value=MockSmartQuotaApi.get_no_notification_rules_response())
+        desired = [{"condition": "exceeded", "threshold": "advisory", "action_alert": True, "state": "present"}]
+        changed = powerscale_module_mock.reconcile_quota_notification_rules(self.QUOTA_ID, desired)
+        assert changed is True
+        # Only the GET (list) call is made; no POST/PUT/DELETE happens.
+        powerscale_module_mock.quota_api_instance.api_client.call_api.assert_called_once()
+        called_method = powerscale_module_mock.quota_api_instance.api_client.call_api.call_args[0][1]
+        assert called_method == 'GET'
+
+    def test_reconcile_notification_rules_check_mode_update_makes_no_write_call(self, powerscale_module_mock):
+        """FR-8: under check_mode, updating an existing rule computes
+        changed=True without any create/update/delete API call."""
+        powerscale_module_mock.module.check_mode = True
+        powerscale_module_mock.quota_api_instance.api_client.call_api = MagicMock(
+            return_value=MockSmartQuotaApi.get_single_notification_rule_response())
+        desired = [{"id": "rule-0001", "action_alert": False, "state": "present"}]
+        changed = powerscale_module_mock.reconcile_quota_notification_rules(self.QUOTA_ID, desired)
+        assert changed is True
+        powerscale_module_mock.quota_api_instance.api_client.call_api.assert_called_once()
+        called_method = powerscale_module_mock.quota_api_instance.api_client.call_api.call_args[0][1]
+        assert called_method == 'GET'
+
+    def test_reconcile_notification_rules_check_mode_delete_makes_no_write_call(self, powerscale_module_mock):
+        """FR-8: under check_mode, deleting a rule computes changed=True
+        without any create/update/delete API call."""
+        powerscale_module_mock.module.check_mode = True
+        powerscale_module_mock.quota_api_instance.api_client.call_api = MagicMock(
+            return_value=MockSmartQuotaApi.get_single_notification_rule_response())
+        desired = [{"id": "rule-0001", "state": "absent"}]
+        changed = powerscale_module_mock.reconcile_quota_notification_rules(self.QUOTA_ID, desired)
+        assert changed is True
+        powerscale_module_mock.quota_api_instance.api_client.call_api.assert_called_once()
+        called_method = powerscale_module_mock.quota_api_instance.api_client.call_api.call_args[0][1]
+        assert called_method == 'GET'
+
+    def test_reconcile_notification_rules_check_mode_delete_all_makes_no_write_call(self, powerscale_module_mock):
+        """FR-8: under check_mode, deleting all rules computes changed=True
+        without any create/update/delete API call."""
+        powerscale_module_mock.module.check_mode = True
+        powerscale_module_mock.quota_api_instance.api_client.call_api = MagicMock(
+            return_value=MockSmartQuotaApi.get_multiple_notification_rules_response())
+        changed = powerscale_module_mock.reconcile_quota_notification_rules(self.QUOTA_ID, [])
+        assert changed is True
+        powerscale_module_mock.quota_api_instance.api_client.call_api.assert_called_once()
+        called_method = powerscale_module_mock.quota_api_instance.api_client.call_api.call_args[0][1]
+        assert called_method == 'GET'
+
+    def test_reconcile_notification_rules_diff_create(self, powerscale_module_mock):
+        """FR-9: diff.before/after accurately reflect a rule creation."""
+        powerscale_module_mock.list_quota_notification_rules = MagicMock(return_value=[])
+        powerscale_module_mock.create_quota_notification_rule = MagicMock(return_value="rule-new")
+        desired = [{"condition": "exceeded", "threshold": "advisory", "action_alert": True, "state": "present"}]
+        diff_dict = {}
+        changed = powerscale_module_mock.reconcile_quota_notification_rules(
+            self.QUOTA_ID, desired, diff_dict=diff_dict)
+        assert changed is True
+        assert diff_dict['before'] == []
+        assert diff_dict['after'] == [dict(desired[0], id="rule-new")]
+
+    def test_reconcile_notification_rules_diff_update(self, powerscale_module_mock):
+        """FR-9: diff.before/after accurately reflect a rule update."""
+        powerscale_module_mock.list_quota_notification_rules = MagicMock(
+            return_value=[dict(MockSmartQuotaApi.NOTIFICATION_RULE_1)])
+        powerscale_module_mock.update_quota_notification_rule = MagicMock(return_value=True)
+        desired = [{"id": "rule-0001", "action_alert": False, "state": "present"}]
+        diff_dict = {}
+        changed = powerscale_module_mock.reconcile_quota_notification_rules(
+            self.QUOTA_ID, desired, diff_dict=diff_dict)
+        assert changed is True
+        assert diff_dict['before'] == [dict(MockSmartQuotaApi.NOTIFICATION_RULE_1)]
+        assert diff_dict['after'][0]['action_alert'] is False
+        assert diff_dict['after'][0]['id'] == "rule-0001"
+
+    def test_reconcile_notification_rules_diff_delete(self, powerscale_module_mock):
+        """FR-9: diff.before/after accurately reflect a rule deletion."""
+        powerscale_module_mock.list_quota_notification_rules = MagicMock(
+            return_value=[dict(MockSmartQuotaApi.NOTIFICATION_RULE_1)])
+        powerscale_module_mock.delete_quota_notification_rule = MagicMock(return_value=True)
+        desired = [{"id": "rule-0001", "state": "absent"}]
+        diff_dict = {}
+        changed = powerscale_module_mock.reconcile_quota_notification_rules(
+            self.QUOTA_ID, desired, diff_dict=diff_dict)
+        assert changed is True
+        assert diff_dict['before'] == [dict(MockSmartQuotaApi.NOTIFICATION_RULE_1)]
+        assert diff_dict['after'] == []
+
+    def test_reconcile_notification_rules_diff_delete_all(self, powerscale_module_mock):
+        """FR-9: diff.before/after accurately reflect deleting all rules."""
+        powerscale_module_mock.list_quota_notification_rules = MagicMock(return_value=[
+            dict(MockSmartQuotaApi.NOTIFICATION_RULE_1), dict(MockSmartQuotaApi.NOTIFICATION_RULE_2)])
+        powerscale_module_mock.delete_all_quota_notification_rules = MagicMock(return_value=True)
+        diff_dict = {}
+        changed = powerscale_module_mock.reconcile_quota_notification_rules(
+            self.QUOTA_ID, [], diff_dict=diff_dict)
+        assert changed is True
+        assert len(diff_dict['before']) == 2
+        assert diff_dict['after'] == []
+
+    def test_reconcile_notification_rules_diff_no_op(self, powerscale_module_mock):
+        """FR-9: diff.before/after are equal when there is no effective change."""
+        powerscale_module_mock.list_quota_notification_rules = MagicMock(
+            return_value=[dict(MockSmartQuotaApi.NOTIFICATION_RULE_1)])
+        desired = [{
+            "id": "rule-0001", "condition": "exceeded", "threshold": "advisory",
+            "action_alert": True, "action_email_owner": False, "action_email_address": None,
+            "state": "present"
+        }]
+        diff_dict = {}
+        changed = powerscale_module_mock.reconcile_quota_notification_rules(
+            self.QUOTA_ID, desired, diff_dict=diff_dict)
+        assert changed is False
+        assert diff_dict['before'] == diff_dict['after']
+
+    def test_perform_module_operation_includes_diff_when_diff_mode_enabled(self, powerscale_module_mock):
+        """FR-9: perform_module_operation surfaces diff.before/after in the result when --diff is used."""
+        powerscale_module_mock.module.check_mode = False
+        powerscale_module_mock.module._diff = True
+        self._mock_perform_module_operation_internals(
+            powerscale_module_mock, {"id": self.QUOTA_ID}, self.QUOTA_ID)
+
+        def fake_reconcile(quota_id, rules, diff_dict=None):
+            if diff_dict is not None:
+                diff_dict['before'] = []
+                diff_dict['after'] = [dict(rules[0], id="rule-new")]
+            return True
+        powerscale_module_mock.reconcile_quota_notification_rules = MagicMock(side_effect=fake_reconcile)
+        self.set_module_params(self.get_smartquota_args, {
+            "path": MockSmartQuotaApi.PATH1, "quota_type": "directory", "state": "present",
+            "quota_notification_rules": [{"condition": "exceeded", "threshold": "advisory", "action_alert": True}]})
+        powerscale_module_mock.perform_module_operation()
+        result_kwargs = powerscale_module_mock.module.exit_json.call_args[1]
+        assert result_kwargs["diff"]["before"] == []
+        assert result_kwargs["diff"]["after"][0]["id"] == "rule-new"
+
+    def test_perform_module_operation_omits_diff_when_diff_mode_disabled(self, powerscale_module_mock):
+        """When --diff is not used, no diff key is added to the result."""
+        powerscale_module_mock.module.check_mode = False
+        powerscale_module_mock.module._diff = False
+        self._mock_perform_module_operation_internals(
+            powerscale_module_mock, {"id": self.QUOTA_ID}, self.QUOTA_ID)
+        self.set_module_params(self.get_smartquota_args, {
+            "path": MockSmartQuotaApi.PATH1, "quota_type": "directory", "state": "present",
+            "quota_notification_rules": [{"condition": "exceeded", "threshold": "advisory", "action_alert": True}]})
+        powerscale_module_mock.perform_module_operation()
+        result_kwargs = powerscale_module_mock.module.exit_json.call_args[1]
+        assert "diff" not in result_kwargs
 
     def test_quota_notification_rules_argument_spec(self):
         """The argument spec exposes quota_notification_rules with the expected suboptions."""
@@ -1087,6 +1263,71 @@ class TestSmartQuota(PowerScaleUnitBase):
         assert options['action_email_address']['elements'] == 'str'
         assert options['state']['choices'] == ['present', 'absent']
         assert options['state']['default'] == 'present'
+
+    def test_invalid_condition_choice_fails_argument_spec_validation(self):
+        """FR-10: an out-of-choices `condition` value fails argument-spec
+        validation, which Ansible performs inside AnsibleModule.__init__
+        before any module code (and thus before any API call) executes.
+        Validated directly against the real argument_spec via
+        ArgumentSpecValidator, independent of any AnsibleModule mocking
+        elsewhere in this test suite (see initial_mock.py, which globally
+        replaces ansible.module_utils.basic.AnsibleModule for other tests)."""
+        params = {"quota_notification_rules": [
+            {"condition": "not-a-real-condition", "threshold": "advisory", "action_alert": True}]}
+        result = ArgumentSpecValidator(get_smartquota_parameters()).validate(params)
+        assert result.error_messages
+        assert any("condition" in msg for msg in result.error_messages)
+
+    def test_invalid_threshold_choice_fails_argument_spec_validation(self):
+        """FR-10: an out-of-choices `threshold` value fails argument-spec
+        validation before any module code executes."""
+        params = {"quota_notification_rules": [
+            {"condition": "exceeded", "threshold": "not-a-real-threshold", "action_alert": True}]}
+        result = ArgumentSpecValidator(get_smartquota_parameters()).validate(params)
+        assert result.error_messages
+        assert any("threshold" in msg for msg in result.error_messages)
+
+    def test_valid_condition_and_threshold_choices_pass_argument_spec_validation(self):
+        """A rule using documented `condition`/`threshold` choices passes
+        argument-spec validation without error."""
+        params = {
+            "path": MockSmartQuotaApi.PATH1, "quota_type": "directory", "state": "present",
+            "quota_notification_rules": [
+                {"condition": "exceeded", "threshold": "advisory", "action_alert": True}]}
+        result = ArgumentSpecValidator(get_smartquota_parameters()).validate(params)
+        assert not result.error_messages
+
+    def test_validate_notification_rules_missing_action_fails(self, powerscale_module_mock):
+        """FR-11: a rule with no action fields set fails before any API call."""
+        rules = [{"condition": "exceeded", "threshold": "advisory"}]
+        self.capture_fail_json_method(
+            "quota_notification_rules[0] requires at least one of "
+            "action_alert, action_email_owner, or action_email_address to be set",
+            powerscale_module_mock, '_validate_notification_rules', rules)
+
+    def test_validate_notification_rules_action_alert_present_passes(self, powerscale_module_mock):
+        """A rule with action_alert set passes validation without raising."""
+        rules = [{"condition": "exceeded", "threshold": "advisory", "action_alert": True}]
+        powerscale_module_mock._validate_notification_rules(rules)
+        powerscale_module_mock.module.fail_json.assert_not_called()
+
+    def test_validate_notification_rules_action_email_address_passes(self, powerscale_module_mock):
+        """A rule with only action_email_address set passes validation."""
+        rules = [{"condition": "exceeded", "threshold": "advisory",
+                  "action_email_address": ["admin@example.com"]}]
+        powerscale_module_mock._validate_notification_rules(rules)
+        powerscale_module_mock.module.fail_json.assert_not_called()
+
+    def test_validate_notification_rules_absent_skips_action_check(self, powerscale_module_mock):
+        """A rule being deleted (state=absent) does not require an action field."""
+        rules = [{"id": "rule-0001", "state": "absent"}]
+        powerscale_module_mock._validate_notification_rules(rules)
+        powerscale_module_mock.module.fail_json.assert_not_called()
+
+    def test_validate_notification_rules_none_is_noop(self, powerscale_module_mock):
+        """No quota_notification_rules parameter supplied is a no-op."""
+        powerscale_module_mock._validate_notification_rules(None)
+        powerscale_module_mock.module.fail_json.assert_not_called()
 
     QUOTA_ID = "2nQKAAEAAAAAAAAAAAAAQIMCAAAAAAAA"
 
@@ -1146,6 +1387,41 @@ class TestSmartQuota(PowerScaleUnitBase):
         self.capture_fail_json_method(
             MockSmartQuotaApi.smartquota_notification_create_error_response(self.QUOTA_ID),
             powerscale_module_mock, 'create_quota_notification_rule', self.QUOTA_ID, rule)
+
+    def test_create_quota_notification_rule_exception_after_combined_quota_creation(self, powerscale_module_mock):
+        """Combined-create partial failure: if the quota was just created in
+        this invocation but its notification rule fails, the error clearly
+        states the quota was created but the rule was not."""
+        powerscale_module_mock.module.check_mode = False
+        powerscale_module_mock._quota_just_created = True
+        powerscale_module_mock.quota_api_instance.api_client.call_api = MagicMock(
+            side_effect=utils.ApiException)
+        rule = {"condition": "exceeded", "threshold": "advisory", "action_alert": True}
+        self.capture_fail_json_method(
+            "Quota was created successfully, but " +
+            MockSmartQuotaApi.smartquota_notification_create_error_response(
+                self.QUOTA_ID)[0].lower() +
+            MockSmartQuotaApi.smartquota_notification_create_error_response(self.QUOTA_ID)[1:],
+            powerscale_module_mock, 'create_quota_notification_rule', self.QUOTA_ID, rule)
+
+    def test_handle_quota_creation_sets_just_created_flag(self, powerscale_module_mock):
+        """FR-13: a real (non-check_mode) quota creation records that the
+        quota was created in this invocation, so a combined-create
+        notification-rule failure can report clearly (see above)."""
+        powerscale_module_mock.module.check_mode = False
+        powerscale_module_mock.create = MagicMock(return_value=None)
+        assert powerscale_module_mock._quota_just_created is False
+        powerscale_module_mock._handle_quota_creation(
+            "directory", "System", MockSmartQuotaApi.PATH1, None, {})
+        assert powerscale_module_mock._quota_just_created is True
+
+    def test_handle_quota_creation_check_mode_does_not_set_flag(self, powerscale_module_mock):
+        """Under check_mode, no quota is actually created, so the flag stays False."""
+        powerscale_module_mock.module.check_mode = True
+        powerscale_module_mock.create = MagicMock(return_value=True)
+        powerscale_module_mock._handle_quota_creation(
+            "directory", "System", MockSmartQuotaApi.PATH1, None, {})
+        assert powerscale_module_mock._quota_just_created is False
 
     def test_update_quota_notification_rule_success(self, powerscale_module_mock):
         """Updating a notification rule's action fields calls the API and returns True."""
