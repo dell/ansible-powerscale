@@ -1093,7 +1093,7 @@ class TestUser(PowerScaleUnitBase):
     # ================================================================
 
     @pytest.mark.parametrize("version_label", ['9.13.x', '9.14.x', '9.15.x'])
-    def test_isi_sdk_compatibility_accepted(self, powerscale_module_mock, version_label):
+    def test_isi_sdk_compatibility_accepted(self, powerscale_module_mock, version_label, mocker):
         """FR-1 / AC-010: when the SDK model exposes password_expires and
         expiry attributes (OneFS 9.13.x / 9.14.x / 9.15.x), the compatibility
         gate passes and the module proceeds normally."""
@@ -1112,14 +1112,14 @@ class TestUser(PowerScaleUnitBase):
                 password_expires=True, expiry=MockUserApi.VALID_EXPIRY)])
         utils.isi_sdk.AuthUserCreateParams = MagicMock(
             return_value=MockUserApi.CREATE_USER_WITH_ID)
-        utils.isi_sdk.AuthUser = sdk_model
+        mocker.patch.object(utils.isi_sdk, 'AuthUser', sdk_model)
         powerscale_module_mock.api_instance.create_auth_user = MagicMock(
             return_value=7000)
         powerscale_module_mock.perform_module_operation()
         # Module must NOT have failed
         powerscale_module_mock.module.fail_json.assert_not_called()
 
-    def test_isi_sdk_compatibility_missing_attributes_exception(self, powerscale_module_mock):
+    def test_isi_sdk_compatibility_missing_attributes_exception(self, powerscale_module_mock, mocker):
         """FR-2 / AC-010: when the SDK model lacks password_expires/expiry
         attributes, the module must fail with a clear unsupported-version
         message before any create/update API call."""
@@ -1134,14 +1134,14 @@ class TestUser(PowerScaleUnitBase):
             'state': 'present'})
         powerscale_module_mock.get_user_details = MagicMock(
             side_effect=[None, MockUserApi.GET_USER_DETAILS])
-        utils.isi_sdk.AuthUser = sdk_model
+        mocker.patch.object(utils.isi_sdk, 'AuthUser', sdk_model)
         powerscale_module_mock.api_instance.create_auth_user = MagicMock()
         self.capture_fail_json_call(MockUserApi.get_error_responses(
             "sdk_compatibility_unsupported"), invoke_perform_module=True)
         # Ensure no write API call was made
         powerscale_module_mock.api_instance.create_auth_user.assert_not_called()
 
-    def test_isi_sdk_compatibility_skipped_when_params_absent(self, powerscale_module_mock):
+    def test_isi_sdk_compatibility_skipped_when_params_absent(self, powerscale_module_mock, mocker):
         """FR-3: when neither password_expires nor expiry is supplied, the
         compatibility check is skipped entirely — no hasattr() introspection
         call is issued, even if the SDK model lacks the attributes."""
@@ -1154,7 +1154,7 @@ class TestUser(PowerScaleUnitBase):
             'password': 'test_user_password_placeholder',
             'email': 'test_user_2@gamil.com',
             'state': 'present'})
-        utils.isi_sdk.AuthUser = sdk_model
+        mocker.patch.object(utils.isi_sdk, 'AuthUser', sdk_model)
         powerscale_module_mock.get_user_details = MagicMock(
             side_effect=[MockUserApi.GET_USER_DETAILS, MockUserApi.GET_USER_DETAILS])
         powerscale_module_mock.perform_module_operation()
