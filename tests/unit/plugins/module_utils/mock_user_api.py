@@ -129,6 +129,31 @@ class MockUserApi:
             user_details['expiry'] = expiry
         return user_details
 
+    # ----------------------------------------------------------------
+    # SDK model compatibility fixtures (part3 — API Compatibility Gate)
+    # ----------------------------------------------------------------
+    # Represents SDK models for OneFS versions that support
+    # password_expires and expiry attributes on AuthUser.
+
+    class CompatibleAuthUser:
+        """SDK model stub for OneFS 9.13.x / 9.14.x / 9.15.x — attributes
+        present."""
+        password_expires = None
+        expiry = None
+
+    class IncompatibleAuthUser:
+        """SDK model stub for an unsupported OneFS version — attributes
+        absent."""
+        pass
+
+    # Mapping from OneFS version label to SDK model fixture.
+    SDK_MODEL_FIXTURES = {
+        '9.13.x': CompatibleAuthUser,
+        '9.14.x': CompatibleAuthUser,
+        '9.15.x': CompatibleAuthUser,
+        'unsupported': IncompatibleAuthUser,
+    }
+
     @staticmethod
     def get_error_responses(response_type):
         err_msg_dict = {
@@ -154,5 +179,6 @@ class MockUserApi:
             "expiry_non_local_provider": "expiry is only supported for local users",
             "expiry_invalid_type": "expiry must be a Unix epoch timestamp (integer)",
             "expiry_out_of_range": "expiry must be between 0 and 4294967295",
+            "sdk_compatibility_unsupported": "The installed isi_sdk does not support",
         }
         return err_msg_dict.get(response_type)
