@@ -982,7 +982,7 @@ class TestSmartQuota(PowerScaleUnitBase):
         powerscale_module_mock.update_quota_notification_rule = MagicMock()
         powerscale_module_mock.delete_quota_notification_rule = MagicMock()
         powerscale_module_mock.delete_all_quota_notification_rules = MagicMock()
-        desired = [{"condition": "exceeded", "threshold": "advisory", "action_alert": True, "state": "present"}]
+        desired = [{"condition": "exceeded", "threshold": "advisory", "action_alert": True, "holdoff": 3600, "state": "present"}]
         changed = powerscale_module_mock.reconcile_quota_notification_rules(self.QUOTA_ID, desired)
         assert changed is True
         powerscale_module_mock.create_quota_notification_rule.assert_called_once_with(self.QUOTA_ID, desired[0])
@@ -1261,8 +1261,24 @@ class TestSmartQuota(PowerScaleUnitBase):
         assert options['action_email_owner']['type'] == 'bool'
         assert options['action_email_address']['type'] == 'list'
         assert options['action_email_address']['elements'] == 'str'
+        assert options['holdoff']['type'] == 'int'
         assert options['state']['choices'] == ['present', 'absent']
         assert options['state']['default'] == 'present'
+
+    def test_reconcile_notification_rules_with_holdoff(self, powerscale_module_mock):
+        """Notification rules with holdoff parameter are created correctly."""
+        powerscale_module_mock.list_quota_notification_rules = MagicMock(return_value=[])
+        powerscale_module_mock.create_quota_notification_rule = MagicMock(return_value="rule-new")
+        powerscale_module_mock.update_quota_notification_rule = MagicMock()
+        powerscale_module_mock.delete_quota_notification_rule = MagicMock()
+        powerscale_module_mock.delete_all_quota_notification_rules = MagicMock()
+        desired = [{"condition": "exceeded", "threshold": "hard", "action_alert": True, "holdoff": 3600, "state": "present"}]
+        changed = powerscale_module_mock.reconcile_quota_notification_rules(self.QUOTA_ID, desired)
+        assert changed is True
+        powerscale_module_mock.create_quota_notification_rule.assert_called_once_with(self.QUOTA_ID, desired[0])
+        # Verify holdoff is included in the call
+        call_args = powerscale_module_mock.create_quota_notification_rule.call_args[0]
+        assert call_args[1]['holdoff'] == 3600
 
     def test_invalid_condition_choice_fails_argument_spec_validation(self):
         """FR-10: an out-of-choices `condition` value fails argument-spec

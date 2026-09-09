@@ -217,6 +217,12 @@ options:
         - List of email addresses to notify when the rule matches.
         type: list
         elements: str
+      holdoff:
+        description:
+        - Time in seconds to wait before sending another notification after the
+          rule has triggered.
+        - Required for certain condition/threshold combinations (e.g., C(exceeded)/C(hard)).
+        type: int
       state:
         description:
         - Whether this specific notification rule should exist or not.
@@ -988,7 +994,7 @@ class SmartQuota(object):
         """
         body = {k: rule[k] for k in
                ('condition', 'threshold', 'action_alert',
-                'action_email_owner', 'action_email_address')
+                'action_email_owner', 'action_email_address', 'holdoff')
                if rule.get(k) is not None}
         try:
             if not self.module.check_mode:
@@ -1082,7 +1088,7 @@ class SmartQuota(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
-    NOTIFICATION_ACTION_FIELDS = ('action_alert', 'action_email_owner', 'action_email_address')
+    NOTIFICATION_ACTION_FIELDS = ('action_alert', 'action_email_owner', 'action_email_address', 'holdoff')
     NOTIFICATION_IMMUTABLE_FIELDS = ('condition', 'threshold')
 
     def _notification_rule_content_equal(self, desired, current):
@@ -1617,6 +1623,7 @@ def get_smartquota_parameters():
                 action_alert=dict(type='bool'),
                 action_email_owner=dict(type='bool'),
                 action_email_address=dict(type='list', elements='str'),
+                holdoff=dict(type='int'),
                 state=dict(type='str', choices=['present', 'absent'], default='present')
             )
         ),

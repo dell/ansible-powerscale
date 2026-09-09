@@ -471,6 +471,7 @@
             threshold: "hard"
             action_alert: true
             action_email_owner: true
+            holdoff: 3600
         state: "present"
       register: combined_create_result
 
@@ -487,6 +488,7 @@
           - condition: "exceeded"
             threshold: "advisory"
             action_alert: true
+            holdoff: 3600
         state: "present"
       check_mode: true
       diff: true
@@ -505,6 +507,7 @@
           - condition: "exceeded"
             threshold: "advisory"
             action_alert: true
+            holdoff: 3600
         state: "present"
       register: create_notification_result
 
