@@ -15,7 +15,8 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shar
     import utils
 
 
-from ansible_collections.dellemc.powerscale.plugins.modules.smartquota import SmartQuota
+from ansible_collections.dellemc.powerscale.plugins.modules.smartquota import SmartQuota, \
+    get_smartquota_parameters
 from ansible_collections.dellemc.powerscale.tests.unit.plugins. \
     module_utils.mock_smartquota_api import MockSmartQuotaApi
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_api_exception \
@@ -853,6 +854,24 @@ class TestSmartQuota(PowerScaleUnitBase):
             MockSmartQuotaApi.smartquota_create_quota_response(
                 path=MockSmartQuotaApi.PATH1),
             invoke_perform_module=True)
+
+    def test_quota_notification_rules_argument_spec(self):
+        """The argument spec exposes quota_notification_rules with the expected suboptions."""
+        params = get_smartquota_parameters()
+        assert 'quota_notification_rules' in params
+        spec = params['quota_notification_rules']
+        assert spec['type'] == 'list'
+        assert spec['elements'] == 'dict'
+        options = spec['options']
+        assert options['id']['type'] == 'str'
+        assert options['condition']['choices'] == ['exceeded', 'denied', 'violated', 'expired']
+        assert options['threshold']['choices'] == ['hard', 'soft', 'advisory']
+        assert options['action_alert']['type'] == 'bool'
+        assert options['action_email_owner']['type'] == 'bool'
+        assert options['action_email_address']['type'] == 'list'
+        assert options['action_email_address']['elements'] == 'str'
+        assert options['state']['choices'] == ['present', 'absent']
+        assert options['state']['default'] == 'present'
 
     QUOTA_ID = "2nQKAAEAAAAAAAAAAAAAQIMCAAAAAAAA"
 

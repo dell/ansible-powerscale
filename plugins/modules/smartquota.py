@@ -172,6 +172,60 @@ options:
            the quota thresholds as share size.
          type: bool
          default: false
+  quota_notification_rules:
+    description:
+    - List of notification rules to configure for the Smart Quota.
+    - Each rule defines a I(condition) and I(threshold) at which it triggers,
+      along with one or more actions.
+    - Set to an empty list to delete all custom notification rules for the
+      quota and revert it to the global default notification rules.
+    - This parameter requires the quota to already exist, or to be created
+      in the same task via I(quota).
+    type: list
+    elements: dict
+    suboptions:
+      id:
+        description:
+        - The system-assigned Id of an existing notification rule.
+        - Required to update or delete a specific rule. Omit when creating
+          a new rule.
+        type: str
+      condition:
+        description:
+        - The condition that triggers the notification rule.
+        - This field cannot be changed after the rule is created; changing
+          it will delete and recreate the rule.
+        type: str
+        choices: ['exceeded', 'denied', 'violated', 'expired']
+      threshold:
+        description:
+        - The quota threshold that the rule monitors.
+        - This field cannot be changed after the rule is created; changing
+          it will delete and recreate the rule.
+        type: str
+        choices: ['hard', 'soft', 'advisory']
+      action_alert:
+        description:
+        - Whether to send a cluster alert when the rule matches.
+        type: bool
+      action_email_owner:
+        description:
+        - Whether to email the quota domain owner when the rule matches.
+        type: bool
+      action_email_address:
+        description:
+        - List of email addresses to notify when the rule matches.
+        type: list
+        elements: str
+      state:
+        description:
+        - Whether this specific notification rule should exist or not.
+        - C(present) creates the rule if I(id) is not given, or updates it
+          if I(id) matches an existing rule.
+        - C(absent) deletes the rule identified by I(id).
+        choices: ['absent', 'present']
+        type: str
+        default: 'present'
   state:
     description:
     - Define whether the Smart Quota should exist or not.
@@ -1251,6 +1305,20 @@ def get_smartquota_parameters():
                    required_together=[['soft_grace_period', 'period_unit']],
                    mutually_exclusive=[['soft_limit_size', 'percent_soft'],
                                        ['advisory_limit_size', 'percent_advisory']]),
+        quota_notification_rules=dict(
+            type='list', elements='dict',
+            options=dict(
+                id=dict(type='str'),
+                condition=dict(type='str',
+                               choices=['exceeded', 'denied', 'violated', 'expired']),
+                threshold=dict(type='str',
+                               choices=['hard', 'soft', 'advisory']),
+                action_alert=dict(type='bool'),
+                action_email_owner=dict(type='bool'),
+                action_email_address=dict(type='list', elements='str'),
+                state=dict(type='str', choices=['present', 'absent'], default='present')
+            )
+        ),
         state=dict(required=True, type='str', choices=['present', 'absent'])
     )
 
