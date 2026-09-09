@@ -466,10 +466,15 @@ class User(object):
                     "GROUP:" + primary_group)
 
             provider = self.check_provider_type(provider, 'Create')
-            auth_user = utils.isi_sdk.AuthUserCreateParams(
+            create_params = dict(
                 name=user_name, uid=user_id, password=password, enabled=enabled,
                 primary_group=primary_group, home_directory=home_directory,
                 shell=shell, gecos=full_name, email=email)
+            if self.module.params.get('password_expires') is not None:
+                create_params['password_expires'] = self.module.params['password_expires']
+            if self.module.params.get('expiry') is not None:
+                create_params['expiry'] = self.module.params['expiry']
+            auth_user = utils.isi_sdk.AuthUserCreateParams(**create_params)
 
             api_response = self.api_instance.create_auth_user(
                 auth_user=auth_user,
@@ -502,6 +507,16 @@ class User(object):
         """ Determines whether the user details are to be modified or not."""
         if self.module.params['enabled'] is not None:
             if self.module.params['enabled'] != user_details['enabled']:
+                return True
+
+        if self.module.params['password_expires'] is not None:
+            if self.module.params['password_expires'] != \
+                    user_details.get('password_expires'):
+                return True
+
+        if self.module.params['expiry'] is not None:
+            if self.module.params['expiry'] != \
+                    user_details.get('expiry'):
                 return True
 
         parameter_list = ['full_name', 'home_directory']
@@ -558,10 +573,15 @@ class User(object):
             if primary_group:
                 primary_group = utils.isi_sdk.AuthAccessAccessItemFileGroup(
                     "GROUP:" + primary_group)
-            auth_user = utils.isi_sdk.AuthUser(primary_group=primary_group,
-                                               home_directory=home_directory,
-                                               shell=shell, gecos=full_name,
-                                               email=email, enabled=enabled)
+            update_params = dict(primary_group=primary_group,
+                                 home_directory=home_directory,
+                                 shell=shell, gecos=full_name,
+                                 email=email, enabled=enabled)
+            if self.module.params.get('password_expires') is not None:
+                update_params['password_expires'] = self.module.params['password_expires']
+            if self.module.params.get('expiry') is not None:
+                update_params['expiry'] = self.module.params['expiry']
+            auth_user = utils.isi_sdk.AuthUser(**update_params)
             provider = self.check_provider_type(provider, 'Update')
             self.api_instance.update_auth_user(
                 auth_user=auth_user, auth_user_id=auth_user_id,
@@ -925,7 +945,9 @@ def get_user_params_from_details(user_details):
         'home_directory': user_details['home_directory'],
         'shell': user_details['shell'],
         'full_name': user_details['gecos'],
-        'email': user_details['email']}
+        'email': user_details['email'],
+        'password_expires': user_details.get('password_expires'),
+        'expiry': user_details.get('expiry')}
     return user_params
 
 
