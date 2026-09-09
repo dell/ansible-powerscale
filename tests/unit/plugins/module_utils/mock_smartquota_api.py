@@ -140,3 +140,63 @@ class MockSmartQuotaApi:
             return 10737418240.0
         else:
             return 5368709120.0
+
+    NOTIFICATION_RULE_1 = {
+        "id": "rule-0001",
+        "condition": "exceeded",
+        "threshold": "advisory",
+        "action_alert": True,
+        "action_email_owner": False,
+        "action_email_address": None
+    }
+
+    NOTIFICATION_RULE_2 = {
+        "id": "rule-0002",
+        "condition": "exceeded",
+        "threshold": "hard",
+        "action_alert": False,
+        "action_email_owner": True,
+        "action_email_address": ["admin@example.com"]
+    }
+
+    @staticmethod
+    def get_no_notification_rules_response():
+        return {"notifications": [], "total": 0}
+
+    @staticmethod
+    def get_single_notification_rule_response():
+        return {"notifications": [MockSmartQuotaApi.NOTIFICATION_RULE_1], "total": 1}
+
+    @staticmethod
+    def get_multiple_notification_rules_response():
+        return {
+            "notifications": [
+                MockSmartQuotaApi.NOTIFICATION_RULE_1,
+                MockSmartQuotaApi.NOTIFICATION_RULE_2
+            ],
+            "total": 2
+        }
+
+    @staticmethod
+    def smartquota_notification_rule_create_response():
+        return {"id": "rule-0001"}
+
+    @staticmethod
+    def smartquota_notification_list_error_response(quota_id):
+        return "List notification rules for quota " + quota_id + " failed with"
+
+    @staticmethod
+    def smartquota_notification_create_error_response(quota_id):
+        return "Create notification rule for quota " + quota_id + " failed with"
+
+    @staticmethod
+    def smartquota_notification_update_error_response(rule_id, quota_id):
+        return "Update notification rule " + rule_id + " for quota " + quota_id + " failed with"
+
+    @staticmethod
+    def smartquota_notification_delete_error_response(rule_id, quota_id):
+        return "Delete notification rule " + rule_id + " for quota " + quota_id + " failed with"
+
+    @staticmethod
+    def smartquota_notification_delete_all_error_response(quota_id):
+        return "Delete notification rules for quota " + quota_id + " failed with"
