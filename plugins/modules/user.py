@@ -119,14 +119,36 @@ options:
     description:
     - Whether the user's password is subject to the password expiration
       policy defined on the PowerScale cluster.
+    - When C(true), the cluster's password-age policy applies and the
+      user must change their password before it reaches the configured
+      I(max_password_age).
+    - When C(false), the password never expires regardless of
+      cluster-level policy.
     - Only supported for local users (I(provider_type)=C(local)).
+      The module will fail with a parameter-specific error if used
+      with a non-local provider.
+    - Omitting this parameter on update leaves the current setting
+      unchanged (idempotent).
     type: bool
   expiry:
     description:
     - Unix epoch timestamp (integer) at which the user account expires.
-    - Set to C(0) to clear a previously configured account expiry.
+    - After this timestamp the account is disabled and the user can no
+      longer authenticate.
+    - Set to C(0) to clear a previously configured account expiry,
+      making the account permanent.
     - Only supported for local users (I(provider_type)=C(local)).
-    - The valid range is C(0) to C(4294967295) (inclusive).
+      The module will fail with a parameter-specific error if used
+      with a non-local provider.
+    - The valid range is C(0) to C(4294967295) (inclusive). Boolean
+      values are rejected even though Python treats C(bool) as a
+      subclass of C(int).
+    - Omitting this parameter on update leaves the current expiry
+      unchanged (idempotent).
+    - "B(Epoch conversion tip:) Use C(date -d '2025-06-30T23:59:59Z'
+      +%s) on Linux or C(Get-Date '2025-06-30T23:59:59Z' -UFormat %s)
+      in PowerShell to obtain the epoch value. All timestamps are
+      in UTC."
     type: int
   update_password:
     description:
