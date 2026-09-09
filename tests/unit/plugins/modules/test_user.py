@@ -614,6 +614,81 @@ class TestUser(PowerScaleUnitBase):
         powerscale_module_mock.validate_local_only_params("local")
         powerscale_module_mock.module.fail_json.assert_not_called()
 
+    def test_create_user_expiry_non_local_provider_exception(self, powerscale_module_mock):
+        # FR-5.1: expiry is restricted to local users
+        self.set_module_params(self.user_args, {
+            'user_name': "test_user_1",
+            'access_zone': "System",
+            'provider_type': "ads",
+            'password': 'test_user_password_placeholder',
+            'expiry': MockUserApi.VALID_EXPIRY,
+            'state': 'present'})
+        powerscale_module_mock.get_user_details = MagicMock(
+            side_effect=[None, MockUserApi.GET_USER_DETAILS])
+        self.capture_fail_json_call(MockUserApi.get_error_responses(
+            "expiry_non_local_provider"), invoke_perform_module=True)
+
+    @pytest.mark.parametrize("invalid_expiry", [-1, 4294967296, 5000000000])
+    def test_create_user_expiry_out_of_range_exception(self, powerscale_module_mock, invalid_expiry):
+        # FR-5.2: expiry must fall within the PAPI schema range 0..4294967295
+        self.set_module_params(self.user_args, {
+            'user_name': "test_user_1",
+            'access_zone': "System",
+            'provider_type': "local",
+            'password': 'test_user_password_placeholder',
+            'expiry': invalid_expiry,
+            'state': 'present'})
+        powerscale_module_mock.get_user_details = MagicMock(
+            side_effect=[None, MockUserApi.GET_USER_DETAILS])
+        self.capture_fail_json_call(MockUserApi.get_error_responses(
+            "expiry_out_of_range"), invoke_perform_module=True)
+
+    @pytest.mark.parametrize("invalid_expiry", ["2024-10-22T00:00:00", 1729564800.5, True])
+    def test_create_user_expiry_invalid_type_exception(self, powerscale_module_mock, invalid_expiry):
+        # FR-5.2: non-integer expiry values are rejected with the epoch message.
+        # Booleans are rejected explicitly: bool is a subclass of int in Python,
+        # so True would otherwise silently pass as epoch 1.
+        self.set_module_params(self.user_args, {
+            'user_name': "test_user_1",
+            'access_zone': "System",
+            'provider_type': "local",
+            'password': 'test_user_password_placeholder',
+            'expiry': invalid_expiry,
+            'state': 'present'})
+        powerscale_module_mock.get_user_details = MagicMock(
+            side_effect=[None, MockUserApi.GET_USER_DETAILS])
+        self.capture_fail_json_call(MockUserApi.get_error_responses(
+            "expiry_invalid_type"), invoke_perform_module=True)
+
+    @pytest.mark.parametrize("valid_expiry", [0, 1729564800, 4294967295])
+    def test_expiry_valid_timestamp_accepted(self, powerscale_module_mock, valid_expiry):
+        # FR-2: boundary values 0 and 4294967295 are inclusive and accepted
+        self.set_module_params(self.user_args, {
+            'user_name': "test_user_1",
+            'access_zone': "System",
+            'provider_type': "local",
+            'password': 'test_user_password_placeholder',
+            'expiry': valid_expiry,
+            'state': 'present'})
+        powerscale_module_mock.validate_expiry()
+        powerscale_module_mock.module.fail_json.assert_not_called()
+
+    def test_expiry_non_local_provider_no_api_call(self, powerscale_module_mock):
+        # FR-5.1: validation fires before any create/update API call
+        self.set_module_params(self.user_args, {
+            'user_name': "test_user_1",
+            'access_zone': "System",
+            'provider_type': "ldap",
+            'password': 'test_user_password_placeholder',
+            'expiry': MockUserApi.VALID_EXPIRY,
+            'state': 'present'})
+        powerscale_module_mock.get_user_details = MagicMock(
+            side_effect=[None, MockUserApi.GET_USER_DETAILS])
+        powerscale_module_mock.api_instance.create_auth_user = MagicMock()
+        self.capture_fail_json_call(MockUserApi.get_error_responses(
+            "expiry_non_local_provider"), invoke_perform_module=True)
+        powerscale_module_mock.api_instance.create_auth_user.assert_not_called()
+
     def test_delete_user(self, powerscale_module_mock):
         self.set_module_params(self.user_args, {
             'user_name': "test_user_1",
