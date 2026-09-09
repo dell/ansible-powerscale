@@ -740,6 +740,147 @@ class SmartQuota(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
+    QUOTA_NOTIFICATIONS_PATH = '/platform/7/quota/quotas/{QuotaId}/notifications'
+    QUOTA_NOTIFICATION_PATH = '/platform/7/quota/quotas/{QuotaId}/notifications/{NotificationId}'
+
+    def _call_quota_notification_api(self, path, method, body=None, response_type=None):
+        """
+        Invoke the PowerScale quota notification-rules PAPI endpoints via the
+        isi_sdk API client's generic call_api. The isilon-sdk Python bindings
+        do not generate typed methods for these endpoints (only the global
+        /platform/7/quota/settings/notifications endpoints are generated),
+        even though the endpoints exist on the OneFS PAPI itself. This keeps
+        all requests routed through the same authenticated SDK ApiClient
+        used by every other generated method.
+        :param path: The resource path with placeholders already substituted.
+        :param method: The HTTP method, e.g. 'GET', 'POST', 'PUT', 'DELETE'.
+        :param body: Optional JSON-serializable request body.
+        :param response_type: 'object' to get a deserialized dict/list back,
+            or None when no response body is expected.
+        :return: The deserialized response, or None.
+        """
+        return self.quota_api_instance.api_client.call_api(
+            path, method, {}, [], {}, body=body, post_params=[], files={},
+            response_type=response_type, auth_settings=['basicAuth'],
+            _return_http_data_only=True, _preload_content=True)
+
+    def list_quota_notification_rules(self, quota_id):
+        """
+        List the notification rules configured for a quota.
+        :param quota_id: The Id of the Quota.
+        :return: List of notification rule dicts (empty list if none).
+        """
+        try:
+            response = self._call_quota_notification_api(
+                self.QUOTA_NOTIFICATIONS_PATH.format(QuotaId=quota_id),
+                'GET', response_type='object')
+            return (response or {}).get('notifications', []) or []
+        except Exception as e:
+            error_message = "List notification rules for quota %s failed with %s" \
+                            % (quota_id, determine_error(e))
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    def create_quota_notification_rule(self, quota_id, rule):
+        """
+        Create a notification rule for a quota.
+        :param quota_id: The Id of the Quota.
+        :param rule: dict with condition, threshold, and action fields.
+        :return: The Id of the created rule, or True under check_mode.
+        """
+        body = {k: rule[k] for k in
+               ('condition', 'threshold', 'action_alert',
+                'action_email_owner', 'action_email_address')
+               if rule.get(k) is not None}
+        try:
+            if not self.module.check_mode:
+                response = self._call_quota_notification_api(
+                    self.QUOTA_NOTIFICATIONS_PATH.format(QuotaId=quota_id),
+                    'POST', body=body, response_type='object')
+                msg = "Notification rule created for quota %s: %s" \
+                    % (quota_id, response)
+                LOG.info(msg)
+                return (response or {}).get('id')
+            return True
+        except Exception as e:
+            error_message = "Create notification rule for quota %s failed with %s" \
+                            % (quota_id, determine_error(e))
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    def update_quota_notification_rule(self, quota_id, rule_id, rule):
+        """
+        Update a notification rule's action fields for a quota.
+        Note: condition/threshold are immutable once a rule is created;
+        the PAPI PUT endpoint only accepts action fields.
+        :param quota_id: The Id of the Quota.
+        :param rule_id: The Id of the notification rule.
+        :param rule: dict with action fields to update.
+        :return: True if the operation is successful.
+        """
+        body = {k: rule[k] for k in
+               ('action_alert', 'action_email_owner', 'action_email_address')
+               if rule.get(k) is not None}
+        try:
+            if not self.module.check_mode:
+                self._call_quota_notification_api(
+                    self.QUOTA_NOTIFICATION_PATH.format(
+                        QuotaId=quota_id, NotificationId=rule_id),
+                    'PUT', body=body)
+                msg = "Notification rule %s updated for quota %s" \
+                    % (rule_id, quota_id)
+                LOG.info(msg)
+            return True
+        except Exception as e:
+            error_message = "Update notification rule %s for quota %s failed with %s" \
+                            % (rule_id, quota_id, determine_error(e))
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    def delete_quota_notification_rule(self, quota_id, rule_id):
+        """
+        Delete a specific notification rule for a quota.
+        :param quota_id: The Id of the Quota.
+        :param rule_id: The Id of the notification rule.
+        :return: True if the operation is successful.
+        """
+        try:
+            if not self.module.check_mode:
+                self._call_quota_notification_api(
+                    self.QUOTA_NOTIFICATION_PATH.format(
+                        QuotaId=quota_id, NotificationId=rule_id),
+                    'DELETE')
+                msg = "Notification rule %s deleted for quota %s" \
+                    % (rule_id, quota_id)
+                LOG.info(msg)
+            return True
+        except Exception as e:
+            error_message = "Delete notification rule %s for quota %s failed with %s" \
+                            % (rule_id, quota_id, determine_error(e))
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    def delete_all_quota_notification_rules(self, quota_id):
+        """
+        Delete all notification rules for a quota, reverting it to the
+        global default notification rules.
+        :param quota_id: The Id of the Quota.
+        :return: True if the operation is successful.
+        """
+        try:
+            if not self.module.check_mode:
+                self._call_quota_notification_api(
+                    self.QUOTA_NOTIFICATIONS_PATH.format(QuotaId=quota_id),
+                    'DELETE')
+                msg = "All notification rules deleted for quota %s" % quota_id
+                LOG.info(msg)
+            return True
+        except Exception as e:
+            error_message = "Delete notification rules for quota %s failed with %s" \
+                            % (quota_id, determine_error(e))
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
     def delete(self, quota_id, path):
         """
         Delete the Smart Quota.

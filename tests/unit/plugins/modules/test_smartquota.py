@@ -853,3 +853,142 @@ class TestSmartQuota(PowerScaleUnitBase):
             MockSmartQuotaApi.smartquota_create_quota_response(
                 path=MockSmartQuotaApi.PATH1),
             invoke_perform_module=True)
+
+    QUOTA_ID = "2nQKAAEAAAAAAAAAAAAAQIMCAAAAAAAA"
+
+    def test_list_quota_notification_rules_empty(self, powerscale_module_mock):
+        """Listing notification rules for a quota with none configured returns []."""
+        powerscale_module_mock.quota_api_instance.api_client.call_api = MagicMock(
+            return_value=MockSmartQuotaApi.get_no_notification_rules_response())
+        result = powerscale_module_mock.list_quota_notification_rules(self.QUOTA_ID)
+        assert result == []
+
+    def test_list_quota_notification_rules_single(self, powerscale_module_mock):
+        """Listing notification rules for a quota with one rule returns that rule."""
+        powerscale_module_mock.quota_api_instance.api_client.call_api = MagicMock(
+            return_value=MockSmartQuotaApi.get_single_notification_rule_response())
+        result = powerscale_module_mock.list_quota_notification_rules(self.QUOTA_ID)
+        assert result == [MockSmartQuotaApi.NOTIFICATION_RULE_1]
+
+    def test_list_quota_notification_rules_multiple(self, powerscale_module_mock):
+        """Listing notification rules for a quota with multiple rules returns all of them."""
+        powerscale_module_mock.quota_api_instance.api_client.call_api = MagicMock(
+            return_value=MockSmartQuotaApi.get_multiple_notification_rules_response())
+        result = powerscale_module_mock.list_quota_notification_rules(self.QUOTA_ID)
+        assert result == [MockSmartQuotaApi.NOTIFICATION_RULE_1, MockSmartQuotaApi.NOTIFICATION_RULE_2]
+
+    def test_list_quota_notification_rules_exception(self, powerscale_module_mock):
+        """SDK ApiException while listing notification rules fails the module."""
+        powerscale_module_mock.quota_api_instance.api_client.call_api = MagicMock(
+            side_effect=utils.ApiException)
+        self.capture_fail_json_method(
+            MockSmartQuotaApi.smartquota_notification_list_error_response(self.QUOTA_ID),
+            powerscale_module_mock, 'list_quota_notification_rules', self.QUOTA_ID)
+
+    def test_create_quota_notification_rule_success(self, powerscale_module_mock):
+        """Creating a notification rule calls the API and returns the new rule id."""
+        powerscale_module_mock.module.check_mode = False
+        powerscale_module_mock.quota_api_instance.api_client.call_api = MagicMock(
+            return_value=MockSmartQuotaApi.smartquota_notification_rule_create_response())
+        rule = {"condition": "exceeded", "threshold": "advisory", "action_alert": True}
+        result = powerscale_module_mock.create_quota_notification_rule(self.QUOTA_ID, rule)
+        assert result == "rule-0001"
+
+    def test_create_quota_notification_rule_check_mode(self, powerscale_module_mock):
+        """Creating a notification rule under check_mode makes no API call."""
+        powerscale_module_mock.module.check_mode = True
+        powerscale_module_mock.quota_api_instance.api_client.call_api = MagicMock()
+        rule = {"condition": "exceeded", "threshold": "advisory", "action_alert": True}
+        result = powerscale_module_mock.create_quota_notification_rule(self.QUOTA_ID, rule)
+        assert result is True
+        powerscale_module_mock.quota_api_instance.api_client.call_api.assert_not_called()
+
+    def test_create_quota_notification_rule_exception(self, powerscale_module_mock):
+        """SDK ApiException while creating a notification rule fails the module."""
+        powerscale_module_mock.module.check_mode = False
+        powerscale_module_mock.quota_api_instance.api_client.call_api = MagicMock(
+            side_effect=utils.ApiException)
+        rule = {"condition": "exceeded", "threshold": "advisory", "action_alert": True}
+        self.capture_fail_json_method(
+            MockSmartQuotaApi.smartquota_notification_create_error_response(self.QUOTA_ID),
+            powerscale_module_mock, 'create_quota_notification_rule', self.QUOTA_ID, rule)
+
+    def test_update_quota_notification_rule_success(self, powerscale_module_mock):
+        """Updating a notification rule's action fields calls the API and returns True."""
+        powerscale_module_mock.module.check_mode = False
+        powerscale_module_mock.quota_api_instance.api_client.call_api = MagicMock(
+            return_value=None)
+        rule = {"action_alert": False, "action_email_owner": True}
+        result = powerscale_module_mock.update_quota_notification_rule(
+            self.QUOTA_ID, "rule-0001", rule)
+        assert result is True
+
+    def test_update_quota_notification_rule_check_mode(self, powerscale_module_mock):
+        """Updating a notification rule under check_mode makes no API call."""
+        powerscale_module_mock.module.check_mode = True
+        powerscale_module_mock.quota_api_instance.api_client.call_api = MagicMock()
+        rule = {"action_alert": False}
+        result = powerscale_module_mock.update_quota_notification_rule(
+            self.QUOTA_ID, "rule-0001", rule)
+        assert result is True
+        powerscale_module_mock.quota_api_instance.api_client.call_api.assert_not_called()
+
+    def test_update_quota_notification_rule_exception(self, powerscale_module_mock):
+        """SDK ApiException while updating a notification rule fails the module."""
+        powerscale_module_mock.module.check_mode = False
+        powerscale_module_mock.quota_api_instance.api_client.call_api = MagicMock(
+            side_effect=utils.ApiException)
+        rule = {"action_alert": False}
+        self.capture_fail_json_method(
+            MockSmartQuotaApi.smartquota_notification_update_error_response("rule-0001", self.QUOTA_ID),
+            powerscale_module_mock, 'update_quota_notification_rule', self.QUOTA_ID, "rule-0001", rule)
+
+    def test_delete_quota_notification_rule_success(self, powerscale_module_mock):
+        """Deleting a specific notification rule calls the API and returns True."""
+        powerscale_module_mock.module.check_mode = False
+        powerscale_module_mock.quota_api_instance.api_client.call_api = MagicMock(
+            return_value=None)
+        result = powerscale_module_mock.delete_quota_notification_rule(self.QUOTA_ID, "rule-0001")
+        assert result is True
+
+    def test_delete_quota_notification_rule_check_mode(self, powerscale_module_mock):
+        """Deleting a specific notification rule under check_mode makes no API call."""
+        powerscale_module_mock.module.check_mode = True
+        powerscale_module_mock.quota_api_instance.api_client.call_api = MagicMock()
+        result = powerscale_module_mock.delete_quota_notification_rule(self.QUOTA_ID, "rule-0001")
+        assert result is True
+        powerscale_module_mock.quota_api_instance.api_client.call_api.assert_not_called()
+
+    def test_delete_quota_notification_rule_exception(self, powerscale_module_mock):
+        """SDK ApiException while deleting a specific notification rule fails the module."""
+        powerscale_module_mock.module.check_mode = False
+        powerscale_module_mock.quota_api_instance.api_client.call_api = MagicMock(
+            side_effect=utils.ApiException)
+        self.capture_fail_json_method(
+            MockSmartQuotaApi.smartquota_notification_delete_error_response("rule-0001", self.QUOTA_ID),
+            powerscale_module_mock, 'delete_quota_notification_rule', self.QUOTA_ID, "rule-0001")
+
+    def test_delete_all_quota_notification_rules_success(self, powerscale_module_mock):
+        """Deleting all notification rules for a quota calls the API and returns True."""
+        powerscale_module_mock.module.check_mode = False
+        powerscale_module_mock.quota_api_instance.api_client.call_api = MagicMock(
+            return_value=None)
+        result = powerscale_module_mock.delete_all_quota_notification_rules(self.QUOTA_ID)
+        assert result is True
+
+    def test_delete_all_quota_notification_rules_check_mode(self, powerscale_module_mock):
+        """Deleting all notification rules under check_mode makes no API call."""
+        powerscale_module_mock.module.check_mode = True
+        powerscale_module_mock.quota_api_instance.api_client.call_api = MagicMock()
+        result = powerscale_module_mock.delete_all_quota_notification_rules(self.QUOTA_ID)
+        assert result is True
+        powerscale_module_mock.quota_api_instance.api_client.call_api.assert_not_called()
+
+    def test_delete_all_quota_notification_rules_exception(self, powerscale_module_mock):
+        """SDK ApiException while deleting all notification rules fails the module."""
+        powerscale_module_mock.module.check_mode = False
+        powerscale_module_mock.quota_api_instance.api_client.call_api = MagicMock(
+            side_effect=utils.ApiException)
+        self.capture_fail_json_method(
+            MockSmartQuotaApi.smartquota_notification_delete_all_error_response(self.QUOTA_ID),
+            powerscale_module_mock, 'delete_all_quota_notification_rules', self.QUOTA_ID)
