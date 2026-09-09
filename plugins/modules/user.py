@@ -127,7 +127,7 @@ options:
     default: always
     type: str
 notes:
-- The I(check_mode) is not supported.
+- The I(check_mode) is supported.
 '''
 
 EXAMPLES = r'''
@@ -358,7 +358,7 @@ class User(object):
 
         # initialize the ansible module
         self.module = AnsibleModule(argument_spec=self.module_params,
-                                    supports_check_mode=False,
+                                    supports_check_mode=True,
                                     required_one_of=required_one_of)
 
         # result is a dictionary that contains changed status and
@@ -741,6 +741,9 @@ class User(object):
                             " missing"
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
+        if self.module.check_mode:
+            LOG.info("Check mode: skipping create_user for %s", user_name)
+            return True
         shell = self.module.params['shell']
         self.create_user(user_name, user_id, password, access_zone,
                          provider_type, enabled, primary_group,
@@ -758,6 +761,12 @@ class User(object):
         """Modifying details of a user"""
 
         LOG.info("Modifying the user details.")
+        # Compute the diff before processing, so the diff reflects the
+        # intended changes even in check mode.
+        diff = self._build_expiry_diff(user_details)
+        if diff is not None:
+            self.result['diff'] = diff
+
         # Check for changes in role
         shell = self.module.params['shell']
         role_flag = self.is_user_part_of_role(
@@ -768,12 +777,18 @@ class User(object):
 
         if role_flag:
             if role_state == "absent-for-user":
-                role_changed = self.remove_role_from_user(
-                    auth_user_id, role_name)
+                if not self.module.check_mode:
+                    role_changed = self.remove_role_from_user(
+                        auth_user_id, role_name)
+                else:
+                    role_changed = True
         else:
             if role_state == "present-for-user":
-                role_changed = self.add_role_to_user(
-                    auth_user_id, role_name)
+                if not self.module.check_mode:
+                    role_changed = self.add_role_to_user(
+                        auth_user_id, role_name)
+                else:
+                    role_changed = True
 
         old_user_details = get_user_params_from_details(user_details)
         modified_sensitive = self.is_user_modified_sensitive(old_user_details)
@@ -784,13 +799,17 @@ class User(object):
             home_directory = None
 
         if modified_sensitive or modified_insensitive:
-            user_details_changed = self.update_user(
-                auth_user_id, access_zone, provider_type, enabled,
-                primary_group, home_directory, shell, full_name, email)
+            if self.module.check_mode:
+                user_details_changed = True
+            else:
+                user_details_changed = self.update_user(
+                    auth_user_id, access_zone, provider_type, enabled,
+                    primary_group, home_directory, shell, full_name, email)
 
         password_changed = False
         if utils.parse_version(self.array_version) < utils.parse_version("9.5"):
-            password_changed = self.modify_password(auth_user_id, access_zone)
+            if not self.module.check_mode:
+                password_changed = self.modify_password(auth_user_id, access_zone)
         return user_details_changed or role_changed or password_changed
 
     def delete_existing_user(self, provider_type, auth_user_id, access_zone,
@@ -804,6 +823,8 @@ class User(object):
         user_details = self.get_user_details(
             auth_user_id, access_zone, provider_type)
         if user_details:
+            if self.module.check_mode:
+                return True
             get_roles_flag = True
             if (not role_name) and (role_state is None) and \
                     (access_zone.lower() != "system"):
@@ -856,6 +877,27 @@ class User(object):
                     " System Access Zone, got %s" % access_zone)
 
         return home_directory, auth_user_id
+
+    def _build_expiry_diff(self, user_details):
+        """Build a before/after diff dict for password_expires and expiry.
+
+        Returns None when diff mode is not active or no expiry-related
+        parameters are being changed.
+        """
+        if not getattr(self.module, '_diff', False):
+            return None
+        before = {
+            'password_expires': user_details.get('password_expires'),
+            'expiry': user_details.get('expiry'),
+        }
+        after = dict(before)
+        if self.module.params.get('password_expires') is not None:
+            after['password_expires'] = self.module.params['password_expires']
+        if self.module.params.get('expiry') is not None:
+            after['expiry'] = self.module.params['expiry']
+        if before == after:
+            return None
+        return {'before': before, 'after': after}
 
     def check_if_id_exists(self, user_name, user_details):
         """
