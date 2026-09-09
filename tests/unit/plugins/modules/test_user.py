@@ -16,7 +16,7 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shar
     import utils
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.powerscale_unit_base \
     import PowerScaleUnitBase
-from ansible_collections.dellemc.powerscale.plugins.modules.user import User
+from ansible_collections.dellemc.powerscale.plugins.modules.user import User, get_user_parameters
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_user_api \
     import MockUserApi
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_api_exception \
@@ -580,6 +580,39 @@ class TestUser(PowerScaleUnitBase):
                               side_effect=[MockApiException]):
                 self.capture_fail_json_call(MockUserApi.get_error_responses(
                     "update_user_remove_role_error"), invoke_perform_module=True)
+
+    def test_user_parameters_include_password_expires_and_expiry(self):
+        # AC-001, AC-002: both parameters are part of the module argument spec
+        user_params = get_user_parameters()
+        assert user_params['password_expires']['type'] == 'bool'
+        assert user_params['expiry']['type'] == 'int'
+
+    def test_create_user_password_expires_non_local_provider_exception(self, powerscale_module_mock):
+        # FR-5.1: password_expires is restricted to local users, and the error
+        # must name the parameter rather than the generic create-provider message
+        self.set_module_params(self.user_args, {
+            'user_name': "test_user_1",
+            'access_zone': "System",
+            'provider_type': "ldap",
+            'password': 'test_user_password_placeholder',
+            'password_expires': True,
+            'state': 'present'})
+        powerscale_module_mock.get_user_details = MagicMock(
+            side_effect=[None, MockUserApi.GET_USER_DETAILS])
+        self.capture_fail_json_call(MockUserApi.get_error_responses(
+            "password_expires_non_local_provider"), invoke_perform_module=True)
+
+    def test_password_expires_local_provider_accepted(self, powerscale_module_mock):
+        # FR-1: local provider passes validation without failing the module
+        self.set_module_params(self.user_args, {
+            'user_name': "test_user_1",
+            'access_zone': "System",
+            'provider_type': "local",
+            'password': 'test_user_password_placeholder',
+            'password_expires': True,
+            'state': 'present'})
+        powerscale_module_mock.validate_local_only_params("local")
+        powerscale_module_mock.module.fail_json.assert_not_called()
 
     def test_delete_user(self, powerscale_module_mock):
         self.set_module_params(self.user_args, {
