@@ -543,6 +543,36 @@ class User(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
+    def _validate_isi_sdk_compatibility(self):
+        """Verify the installed isi_sdk exposes password_expires and expiry
+        on the AuthUser model.  Only called when the playbook actually sets
+        one of these parameters (lazy check per FR-3 / NFR-1).
+
+        Fails with a clear unsupported-version message before any
+        create/update API call (FR-2).
+        """
+        needs_check = (
+            self.module.params.get('password_expires') is not None
+            or self.module.params.get('expiry') is not None
+        )
+        if not needs_check:
+            return
+
+        sdk_model = getattr(utils.isi_sdk, 'AuthUser', None)
+        missing = []
+        for attr in ('password_expires', 'expiry'):
+            if sdk_model is None or not hasattr(sdk_model, attr):
+                missing.append(attr)
+        if missing:
+            error_message = (
+                "The installed isi_sdk does not support the following "
+                "attributes on AuthUser: %s.  Upgrade to a OneFS SDK "
+                "version that supports password expiration and account "
+                "expiry (9.13.x or later)." % ', '.join(missing)
+            )
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
     def check_provider_type(self, provider, message):
         """ Check the provider and return the updated provider"""
         if provider.lower() != "local":
@@ -1039,6 +1069,7 @@ class User(object):
         # an unsupported provider fails fast with a parameter-specific message.
         self.validate_local_only_params(provider_type)
         self.validate_expiry()
+        self._validate_isi_sdk_compatibility()
         home_directory, auth_user_id = self.set_validate_params(access_zone, user_name, user_id,
                                                                 email, role_name, role_state)
         if state == "present":
