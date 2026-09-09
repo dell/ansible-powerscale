@@ -8,8 +8,9 @@ from __future__ import (absolute_import, division, print_function)
 
 __metaclass__ = type
 
+import copy
 import pytest
-from mock.mock import MagicMock
+from mock.mock import MagicMock, PropertyMock
 # pylint: disable=unused-import
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.initial_mock \
     import utils
@@ -28,8 +29,33 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shar
 class TestSmartQuota(PowerScaleUnitBase):
     get_smartquota_args = MockSmartQuotaApi.SMART_QUOTA_COMMON_ARGS
 
+    @pytest.fixture(autouse=True)
+    def reset_smartquota_args(self):
+        # `get_smartquota_args` is a class-level dict mutated in-place via
+        # `.update()` by many tests below. Without resetting it per test,
+        # keys set by one test (e.g. user_name/group_name/provider_type)
+        # silently leak into later tests that don't set/clear them,
+        # producing order-dependent failures. Give each test its own
+        # isolated copy, shadowing the class attribute on the instance.
+        self.get_smartquota_args = copy.deepcopy(
+            MockSmartQuotaApi.SMART_QUOTA_COMMON_ARGS)
+
     @pytest.fixture
     def module_object(self, mocker):
+        # utils.isi_sdk is a single shared MagicMock (see initial_mock.py).
+        # Because MagicMock auto-caches child attributes/return_values, API
+        # instances such as utils.isi_sdk.QuotaApi(...).return_value are the
+        # SAME object across every SmartQuota instance unless reset here.
+        # Without this, a mutation like `quota_api_instance.create_quota_quota
+        # = MagicMock(side_effect=...)` in one test silently leaks into every
+        # test that runs afterwards in this file. Reset before every test,
+        # before SmartQuota() (and its SDK API instances) is constructed.
+        # Scoped to this test module only to avoid affecting other modules'
+        # test fixtures that may rely on isi_sdk state set up elsewhere.
+        utils.isi_sdk = MagicMock()
+        type(utils.isi_sdk).major = PropertyMock(return_value=9)
+        type(utils.isi_sdk).minor = PropertyMock(return_value=7)
+        utils.get_size_bytes = MagicMock(return_value=10737418240.0)
         utils.convert_size_with_unit = MagicMock()
         return SmartQuota
 
@@ -77,6 +103,7 @@ class TestSmartQuota(PowerScaleUnitBase):
         self.get_smartquota_args.update(params)
         powerscale_module_mock.module.params = self.get_smartquota_args
         powerscale_module_mock.get_quota_params = MagicMock(return_value=None)
+        utils.get_size_bytes = MagicMock(return_value=10737418240.0)
         utils.isi_sdk.QuotaQuotaThresholds = MagicMock(return_value=None)
         utils.validate_threshold_overhead_parameter = MagicMock(
             return_value=None)
@@ -114,6 +141,7 @@ class TestSmartQuota(PowerScaleUnitBase):
         self.get_smartquota_args.update(params)
         powerscale_module_mock.module.params = self.get_smartquota_args
         powerscale_module_mock.get_quota_params = MagicMock(return_value=None)
+        utils.get_size_bytes = MagicMock(return_value=10737418240.0)
         utils.isi_sdk.QuotaQuotaThresholds = MagicMock(return_value=None)
         utils.validate_threshold_overhead_parameter = MagicMock(
             return_value=None)
@@ -162,7 +190,7 @@ class TestSmartQuota(PowerScaleUnitBase):
         powerscale_module_mock.perform_module_operation()
         assert powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
 
-    def test_smartquota_create_quota_exception(self, powerscale_module_mock):
+    def test_smartquota_create_quota_exception(self, powerscale_module_mock, mocker):
         self.get_smartquota_args.update({"path": "/ifs/ATest3",
                                          "access_zone": "System",
                                          "quota_type": "directory",
@@ -183,7 +211,7 @@ class TestSmartQuota(PowerScaleUnitBase):
                                          "state": "present"})
         powerscale_module_mock.module.check_mode = False
         powerscale_module_mock.module.params = self.get_smartquota_args
-        utils.get_size_bytes = MagicMock(side_effect=[
+        mocker.patch('ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.initial_mock.utils.get_size_bytes', side_effect=[
             MockSmartQuotaApi.get_smartquota_dependent_response("advisory"),
             MockSmartQuotaApi.get_smartquota_dependent_response("hard"),
             MockSmartQuotaApi.get_smartquota_dependent_response("soft")])
@@ -196,7 +224,7 @@ class TestSmartQuota(PowerScaleUnitBase):
         utils.isi_sdk.QuotaQuotaThresholds = MagicMock(return_value=None)
         utils.isi_sdk.QuotaQuotaCreateParams = MagicMock(return_value=None)
         powerscale_module_mock.add_limits_with_unit = MagicMock()
-        utils.convert_size_with_unit = MagicMock(return_value=None)
+        mocker.patch('ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.initial_mock.utils.convert_size_with_unit', return_value=None)
         powerscale_module_mock.quota_api_instance.update_quota_quota = MagicMock()
         utils.isi_sdk.AuthAccessAccessItemFileGroup = MagicMock(
             return_value=[])
