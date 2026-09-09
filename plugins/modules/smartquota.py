@@ -935,6 +935,73 @@ class SmartQuota(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
+    NOTIFICATION_ACTION_FIELDS = ('action_alert', 'action_email_owner', 'action_email_address')
+    NOTIFICATION_IMMUTABLE_FIELDS = ('condition', 'threshold')
+
+    def _notification_rule_content_equal(self, desired, current):
+        """
+        Check whether a desired notification rule dict matches the current
+        rule on all fields the caller actually specified.
+        :param desired: The requested rule dict.
+        :param current: The current rule dict as returned by the API.
+        :return: True if there is no effective difference.
+        """
+        for field in self.NOTIFICATION_IMMUTABLE_FIELDS + self.NOTIFICATION_ACTION_FIELDS:
+            if desired.get(field) is not None and desired.get(field) != current.get(field):
+                return False
+        return True
+
+    def reconcile_quota_notification_rules(self, quota_id, desired_rules):
+        """
+        Reconcile the requested notification rules against the rules
+        currently configured for a quota, performing only the create,
+        update, or delete operations necessary to converge to the
+        requested state.
+        :param quota_id: The Id of the Quota.
+        :param desired_rules: The `quota_notification_rules` list from
+            module params (may be an empty list to delete all rules).
+        :return: True if any create/update/delete action was performed.
+        """
+        current_rules = self.list_quota_notification_rules(quota_id)
+
+        if not desired_rules:
+            if current_rules:
+                self.delete_all_quota_notification_rules(quota_id)
+                return True
+            return False
+
+        current_by_id = {rule['id']: rule for rule in current_rules if rule.get('id')}
+        changed = False
+
+        for desired in desired_rules:
+            rule_id = desired.get('id')
+            rule_state = desired.get('state') or 'present'
+            current_rule = current_by_id.get(rule_id) if rule_id else None
+
+            if rule_state == 'absent':
+                if current_rule is not None:
+                    self.delete_quota_notification_rule(quota_id, rule_id)
+                    changed = True
+                continue
+
+            if current_rule is None:
+                self.create_quota_notification_rule(quota_id, desired)
+                changed = True
+                continue
+
+            immutable_changed = any(
+                desired.get(field) is not None and desired[field] != current_rule.get(field)
+                for field in self.NOTIFICATION_IMMUTABLE_FIELDS)
+            if immutable_changed:
+                self.delete_quota_notification_rule(quota_id, rule_id)
+                self.create_quota_notification_rule(quota_id, desired)
+                changed = True
+            elif not self._notification_rule_content_equal(desired, current_rule):
+                self.update_quota_notification_rule(quota_id, rule_id, desired)
+                changed = True
+
+        return changed
+
     def delete(self, quota_id, path):
         """
         Delete the Smart Quota.
