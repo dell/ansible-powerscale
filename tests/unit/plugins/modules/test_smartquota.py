@@ -236,7 +236,10 @@ class TestSmartQuota(PowerScaleUnitBase):
         utils.isi_sdk.QuotaQuotaThresholds = MagicMock(return_value=None)
         utils.isi_sdk.QuotaQuotaCreateParams = MagicMock(return_value=None)
         powerscale_module_mock.add_limits_with_unit = MagicMock()
-        mocker.patch('ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.initial_mock.utils.convert_size_with_unit', return_value=None)
+        mocker.patch(
+            'ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.initial_mock.utils.convert_size_with_unit',
+            return_value=None
+        )
         powerscale_module_mock.quota_api_instance.update_quota_quota = MagicMock()
         utils.isi_sdk.AuthAccessAccessItemFileGroup = MagicMock(
             return_value=[])

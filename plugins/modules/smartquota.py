@@ -995,7 +995,8 @@ class SmartQuota(object):
         body = {k: rule[k] for k in
                 ('condition', 'threshold', 'action_alert',
                  'action_email_owner', 'action_email_address', 'holdoff')
-                if rule.get(k) is not None}
+                if rule.get(k) is not None
+                }
         try:
             if not self.module.check_mode:
                 response = self._call_quota_notification_api(
@@ -1027,7 +1028,8 @@ class SmartQuota(object):
         """
         body = {k: rule[k] for k in
                 ('action_alert', 'action_email_owner', 'action_email_address')
-                if rule.get(k) is not None}
+                if rule.get(k) is not None
+                }
         try:
             if not self.module.check_mode:
                 self._call_quota_notification_api(
