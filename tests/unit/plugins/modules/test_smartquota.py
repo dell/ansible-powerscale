@@ -855,6 +855,66 @@ class TestSmartQuota(PowerScaleUnitBase):
                 path=MockSmartQuotaApi.PATH1),
             invoke_perform_module=True)
 
+    def _mock_perform_module_operation_internals(self, powerscale_module_mock, quota_details, quota_id):
+        """Common wiring-test setup: stub out already-tested internals."""
+        powerscale_module_mock._prepare_quota_parameters = MagicMock(return_value=(
+            "directory", None, None, "present", "System", MockSmartQuotaApi.PATH1, None, None, False))
+        powerscale_module_mock._validate_quota_type_params = MagicMock()
+        powerscale_module_mock.validate_quota_cap_unit = MagicMock()
+        powerscale_module_mock.get_quota_details = MagicMock(return_value=(quota_details, quota_id))
+        powerscale_module_mock._handle_quota_creation = MagicMock(return_value=True)
+        powerscale_module_mock._handle_quota_update = MagicMock(return_value=False)
+        powerscale_module_mock._handle_quota_deletion = MagicMock(return_value=True)
+        powerscale_module_mock._process_final_quota_details = MagicMock(return_value={"id": quota_id})
+        powerscale_module_mock.reconcile_quota_notification_rules = MagicMock(return_value=True)
+
+    def test_perform_module_operation_reconciles_notifications_for_existing_quota(self, powerscale_module_mock):
+        """When the quota already exists, notification reconciliation uses its known id."""
+        powerscale_module_mock.module.check_mode = False
+        self._mock_perform_module_operation_internals(
+            powerscale_module_mock, {"id": self.QUOTA_ID}, self.QUOTA_ID)
+        self.set_module_params(self.get_smartquota_args, {
+            "path": MockSmartQuotaApi.PATH1, "quota_type": "directory", "state": "present",
+            "quota_notification_rules": [{"condition": "exceeded", "threshold": "advisory", "action_alert": True}]})
+        powerscale_module_mock.perform_module_operation()
+        powerscale_module_mock.reconcile_quota_notification_rules.assert_called_once_with(
+            self.QUOTA_ID, [{"condition": "exceeded", "threshold": "advisory", "action_alert": True}])
+        assert powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
+
+    def test_perform_module_operation_reconciles_notifications_after_create(self, powerscale_module_mock):
+        """When the quota is newly created, the freshly resolved id is used for reconciliation."""
+        powerscale_module_mock.module.check_mode = False
+        self._mock_perform_module_operation_internals(powerscale_module_mock, None, None)
+        powerscale_module_mock.get_quota_details = MagicMock(side_effect=[
+            (None, None), (dict(id=self.QUOTA_ID), self.QUOTA_ID)])
+        self.set_module_params(self.get_smartquota_args, {
+            "path": MockSmartQuotaApi.PATH1, "quota_type": "directory", "state": "present",
+            "quota_notification_rules": [{"condition": "exceeded", "threshold": "advisory", "action_alert": True}]})
+        powerscale_module_mock.perform_module_operation()
+        powerscale_module_mock.reconcile_quota_notification_rules.assert_called_once_with(
+            self.QUOTA_ID, [{"condition": "exceeded", "threshold": "advisory", "action_alert": True}])
+
+    def test_perform_module_operation_skips_reconciliation_when_param_absent(self, powerscale_module_mock):
+        """Existing playbooks without quota_notification_rules are unaffected (NFR-1)."""
+        powerscale_module_mock.module.check_mode = False
+        self._mock_perform_module_operation_internals(
+            powerscale_module_mock, {"id": self.QUOTA_ID}, self.QUOTA_ID)
+        self.set_module_params(self.get_smartquota_args, {
+            "path": MockSmartQuotaApi.PATH1, "quota_type": "directory", "state": "present",
+            "quota_notification_rules": None})
+        powerscale_module_mock.perform_module_operation()
+        powerscale_module_mock.reconcile_quota_notification_rules.assert_not_called()
+
+    def test_perform_module_operation_skips_reconciliation_new_quota_check_mode(self, powerscale_module_mock):
+        """A brand-new quota's notifications cannot be reconciled under check_mode (no id yet)."""
+        powerscale_module_mock.module.check_mode = True
+        self._mock_perform_module_operation_internals(powerscale_module_mock, None, None)
+        self.set_module_params(self.get_smartquota_args, {
+            "path": MockSmartQuotaApi.PATH1, "quota_type": "directory", "state": "present",
+            "quota_notification_rules": [{"condition": "exceeded", "threshold": "advisory", "action_alert": True}]})
+        powerscale_module_mock.perform_module_operation()
+        powerscale_module_mock.reconcile_quota_notification_rules.assert_not_called()
+
     def test_final_quota_details_includes_notification_rules(self, powerscale_module_mock):
         """The final quota details output includes the current notification rules."""
         powerscale_module_mock.get_quota_details = MagicMock(

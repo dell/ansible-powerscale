@@ -1305,6 +1305,29 @@ class SmartQuota(object):
         quota_details = add_limits_with_unit(quota_details)
         return quota_details
 
+    def _handle_notification_rules(self, state, quota_details, quota_id, include_snapshots,
+                                   access_zone, quota_type, complete_path, sid):
+        """
+        Reconcile quota_notification_rules, if supplied, once the target
+        quota's Id is known. For a quota created in this same invocation,
+        the Id is only known after a real (non-check_mode) creation, so
+        reconciliation for a brand-new quota is skipped under check_mode.
+        :return: True if any notification rule change was made.
+        """
+        notification_rules = self.module.params.get('quota_notification_rules')
+        if state != "present" or notification_rules is None:
+            return False
+
+        target_quota_id = quota_id
+        if not target_quota_id and not self.module.check_mode:
+            _, target_quota_id = self.get_quota_details(
+                include_snapshots=include_snapshots, zone=access_zone,
+                type=quota_type, path=complete_path, persona=sid)
+
+        if not target_quota_id:
+            return False
+        return self.reconcile_quota_notification_rules(target_quota_id, notification_rules)
+
     def perform_module_operation(self):
         """
         Perform different actions on Smart Quota module based on parameters
@@ -1333,6 +1356,11 @@ class SmartQuota(object):
         # Delete Quota
         if state == "absent" and quota_details:
             changed = self._handle_quota_deletion(quota_id, complete_path)
+
+        # Reconcile notification rules, if requested
+        changed = self._handle_notification_rules(
+            state, quota_details, quota_id, include_snapshots, access_zone,
+            quota_type, complete_path, sid) or changed
 
         quota_details = self._process_final_quota_details(quota_type, user_name, group_name, include_snapshots, access_zone, complete_path, sid)
 
