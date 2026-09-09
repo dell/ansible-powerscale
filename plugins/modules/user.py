@@ -298,6 +298,57 @@ EXAMPLES = r'''
     password: "new_password"
     update_password: "always"
     state: "present"
+
+- name: Create security user with password expiration enabled
+  dellemc.powerscale.user:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "local"
+    user_name: "security_user"
+    password: "S3cur3P@ss!"
+    password_expires: true
+    state: "present"
+
+- name: Create service account with password expiration disabled
+  dellemc.powerscale.user:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "local"
+    user_name: "svc_backup"
+    password: "Svc@P@ss!"
+    password_expires: false
+    state: "present"
+
+- name: Create contractor account with account expiry
+  dellemc.powerscale.user:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "local"
+    user_name: "contractor_jones"
+    password: "Tmp@P@ss!"
+    expiry: 1751328000
+    password_expires: true
+    state: "present"
+
+- name: Preview password_expires change using check mode and diff
+  dellemc.powerscale.user:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "local"
+    user_name: "security_user"
+    password_expires: false
+    state: "present"
+  check_mode: true
+  diff: true
+  register: preview
 '''
 
 RETURN = r'''
@@ -364,18 +415,24 @@ user_details:
                     description: The resource's type is mentioned.
                     type: str
         expired:
-            description: Whether the user account has expired.
+            description: Whether the user account has expired based on the
+                         configured I(expiry) timestamp. C(true) means the
+                         account is disabled and the user cannot authenticate.
             type: bool
         password_expired:
-            description: Whether the user's password has expired.
+            description: Whether the user's password has exceeded the cluster's
+                         maximum password age. C(true) means the user must
+                         change their password at next login.
             type: bool
         password_expiry:
-            description: Unix epoch timestamp at which the user's password
-                         will expire.
+            description: Unix epoch timestamp (seconds since 1970-01-01 UTC)
+                         at which the user's password will expire. Only
+                         meaningful when I(password_expires) is C(true).
             type: int
         max_password_age:
             description: Maximum password age in seconds before the password
-                         must be changed.
+                         must be changed. This value comes from the cluster's
+                         password policy and is read-only.
             type: int
 '''
 
