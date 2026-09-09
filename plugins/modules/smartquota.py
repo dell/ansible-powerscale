@@ -993,9 +993,9 @@ class SmartQuota(object):
         :return: The Id of the created rule, or True under check_mode.
         """
         body = {k: rule[k] for k in
-               ('condition', 'threshold', 'action_alert',
-                'action_email_owner', 'action_email_address', 'holdoff')
-               if rule.get(k) is not None}
+                ('condition', 'threshold', 'action_alert',
+                 'action_email_owner', 'action_email_address', 'holdoff')
+                if rule.get(k) is not None}
         try:
             if not self.module.check_mode:
                 response = self._call_quota_notification_api(
@@ -1026,8 +1026,8 @@ class SmartQuota(object):
         :return: True if the operation is successful.
         """
         body = {k: rule[k] for k in
-               ('action_alert', 'action_email_owner', 'action_email_address')
-               if rule.get(k) is not None}
+                ('action_alert', 'action_email_owner', 'action_email_address')
+                if rule.get(k) is not None}
         try:
             if not self.module.check_mode:
                 self._call_quota_notification_api(
@@ -1408,7 +1408,9 @@ class SmartQuota(object):
         LOG.info("Delete Quota")
         return self.delete(quota_id, complete_path)
 
-    def _process_final_quota_details(self, quota_type, user_name, group_name, include_snapshots, access_zone, complete_path, sid):
+    def _process_final_quota_details(self, quota_type, user_name, group_name,
+                                     include_snapshots, access_zone,
+                                     complete_path, sid):
         """Get and process final quota details for response."""
         quota_details, quota_id = self.get_quota_details(
             include_snapshots, access_zone, quota_type, complete_path, sid)
@@ -1502,9 +1504,13 @@ class SmartQuota(object):
         notification_diff = {} if self.module._diff else None
         changed = self._handle_notification_rules(
             state, quota_details, quota_id, include_snapshots, access_zone,
-            quota_type, complete_path, sid, diff_dict=notification_diff) or changed
+            quota_type, complete_path, sid, diff_dict=notification_diff
+        ) or changed
 
-        quota_details = self._process_final_quota_details(quota_type, user_name, group_name, include_snapshots, access_zone, complete_path, sid)
+        quota_details = self._process_final_quota_details(
+            quota_type, user_name, group_name, include_snapshots,
+            access_zone, complete_path, sid
+        )
 
         self.result["changed"] = changed
         self.result["quota_details"] = quota_details
