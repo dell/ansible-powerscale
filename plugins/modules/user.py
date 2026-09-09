@@ -896,6 +896,8 @@ def get_user_parameters():
         shell=dict(type='str'),
         full_name=dict(type='str'),
         email=dict(type='str'),
+        password_expires=dict(type='bool'),
+        expiry=dict(type='int'),
         state=dict(type='str', required=True,
                    choices=['present', 'absent']),
         role_name=dict(type='str'),
