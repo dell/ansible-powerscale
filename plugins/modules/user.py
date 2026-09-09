@@ -337,6 +337,11 @@ import re
 
 LOG = utils.get_logger('user')
 
+LOCAL_PROVIDER = 'local'
+MIN_EXPIRY_EPOCH = 0
+MAX_EXPIRY_EPOCH = 4294967295
+LOCAL_ONLY_PARAMS = ('password_expires', 'expiry')
+
 
 class User(object):
     """Class with user operations"""
@@ -391,6 +396,22 @@ class User(object):
                             'failed with error: %s' % (access_zone, self.determine_error(e))
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
+
+    def validate_local_only_params(self, provider):
+        """Validate that password_expires and expiry are only used with local
+        users. Fails with a parameter-specific message so the user is told
+        which parameter is unsupported, rather than the generic
+        create/update/delete provider error.
+        """
+        for param in LOCAL_ONLY_PARAMS:
+            if self.module.params.get(param) is None:
+                continue
+            if provider is None or provider.lower() != LOCAL_PROVIDER:
+                error_message = \
+                    "%s is only supported for local users," \
+                    " got '%s' provider" % (param, provider)
+                LOG.error(error_message)
+                self.module.fail_json(msg=error_message)
 
     def check_provider_type(self, provider, message):
         """ Check the provider and return the updated provider"""
@@ -822,6 +843,9 @@ class User(object):
         role_state = self.module.params['role_state']
 
         changed = False
+        # Validate the local-only parameters before any API call is issued so
+        # an unsupported provider fails fast with a parameter-specific message.
+        self.validate_local_only_params(provider_type)
         home_directory, auth_user_id = self.set_validate_params(access_zone, user_name, user_id,
                                                                 email, role_name, role_state)
         if state == "present":
