@@ -855,6 +855,26 @@ class TestSmartQuota(PowerScaleUnitBase):
                 path=MockSmartQuotaApi.PATH1),
             invoke_perform_module=True)
 
+    def test_final_quota_details_includes_notification_rules(self, powerscale_module_mock):
+        """The final quota details output includes the current notification rules."""
+        powerscale_module_mock.get_quota_details = MagicMock(
+            return_value=(dict(MockSmartQuotaApi.GET_QUOTA_WITH_NEW_PARAMS), self.QUOTA_ID))
+        powerscale_module_mock.list_quota_notification_rules = MagicMock(
+            return_value=[MockSmartQuotaApi.NOTIFICATION_RULE_1])
+        result = powerscale_module_mock._process_final_quota_details(
+            "directory", None, None, False, "System", MockSmartQuotaApi.PATH1, None)
+        assert result['notification_rules'] == [MockSmartQuotaApi.NOTIFICATION_RULE_1]
+        powerscale_module_mock.list_quota_notification_rules.assert_called_once_with(self.QUOTA_ID)
+
+    def test_final_quota_details_no_quota_skips_notification_lookup(self, powerscale_module_mock):
+        """When the quota does not exist, notification rules are not looked up."""
+        powerscale_module_mock.get_quota_details = MagicMock(return_value=(None, None))
+        powerscale_module_mock.list_quota_notification_rules = MagicMock()
+        result = powerscale_module_mock._process_final_quota_details(
+            "directory", None, None, False, "System", MockSmartQuotaApi.PATH1, None)
+        assert result is None
+        powerscale_module_mock.list_quota_notification_rules.assert_not_called()
+
     def test_reconcile_notification_rules_all_new(self, powerscale_module_mock):
         """All-new rules (no id) are created; changed is True."""
         powerscale_module_mock.list_quota_notification_rules = MagicMock(return_value=[])

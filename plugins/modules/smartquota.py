@@ -420,6 +420,58 @@ EXAMPLES = r'''
     quota:
       include_snapshots: false
     state: "present"
+
+- name: Create a notification rule for a Quota
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "directory"
+    quota_notification_rules:
+      - condition: "exceeded"
+        threshold: "advisory"
+        action_alert: true
+    state: "present"
+
+- name: Update a notification rule's actions by id
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "directory"
+    quota_notification_rules:
+      - id: "<notification_rule_id>"
+        action_alert: false
+        action_email_owner: true
+    state: "present"
+
+- name: Delete a specific notification rule by id
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "directory"
+    quota_notification_rules:
+      - id: "<notification_rule_id>"
+        state: "absent"
+    state: "present"
+
+- name: Delete all notification rules for a Quota
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "directory"
+    quota_notification_rules: []
+    state: "present"
 '''
 RETURN = r'''
 changed:
@@ -476,6 +528,20 @@ quota_details:
                     "logical": 0,
                     "physical": 2048
                 }
+        notification_rules:
+            description: The list of notification rules configured for the Quota.
+            type: list
+            elements: dict
+            sample: [
+                    {
+                        "action_alert": true,
+                        "action_email_address": null,
+                        "action_email_owner": false,
+                        "condition": "exceeded",
+                        "id": "id1",
+                        "threshold": "advisory"
+                    }
+                ]
     sample:
       {
         "container": true,
@@ -1234,6 +1300,8 @@ class SmartQuota(object):
         if (quota_type == "user" or quota_type == "group") and quota_details:
             quota_details['persona']['type'] = quota_type
             quota_details['persona']['name'] = user_name if user_name else group_name
+        if quota_details and quota_id:
+            quota_details['notification_rules'] = self.list_quota_notification_rules(quota_id)
         quota_details = add_limits_with_unit(quota_details)
         return quota_details
 
