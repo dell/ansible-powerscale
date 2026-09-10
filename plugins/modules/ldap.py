@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: (c) 2021-2024, Dell Technologies
+# Copyright: (c) 2021-2026, Dell Technologies
 
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
@@ -78,6 +78,24 @@ options:
         - Specifies the password for the distinguished name for binding to
           the LDAP server.
         type: str
+      group_base_dn:
+        description:
+        - Configures a distinct LDAP group search base, independently of I(base_dn).
+        - Omission preserves the server value; an empty string C("") clears it.
+        type: str
+        version_added: '4.0.0'
+      provider_domain:
+        description:
+        - Qualifies users and groups with an explicit domain in multi-domain forests.
+        - Omission preserves the server value; an empty string C("") clears it.
+        type: str
+        version_added: '4.0.0'
+      authentication:
+        description:
+        - Enables or disables authentication through the LDAP provider.
+        - An explicit C(false) disables authentication; omission preserves the server value.
+        type: bool
+        version_added: '4.0.0'
 
   state:
     description:
@@ -87,27 +105,6 @@ options:
     choices: ['absent', 'present']
     type: str
     required: true
-
-  group_base_dn:
-    description:
-    - Configures a distinct LDAP group search base, independently of I(base_dn).
-    - Omission preserves the server value; an empty string C("") clears it.
-    type: str
-    version_added: '4.0.0'
-
-  provider_domain:
-    description:
-    - Qualifies users and groups with an explicit domain in multi-domain forests.
-    - Omission preserves the server value; an empty string C("") clears it.
-    type: str
-    version_added: '4.0.0'
-
-  authentication:
-    description:
-    - Enables or disables authentication through the LDAP provider.
-    - An explicit C(false) disables authentication; omission preserves the server value.
-    type: bool
-    version_added: '4.0.0'
 
 notes:
 - This module does not support modification of I(bind_password) of LDAP provider.
