@@ -172,6 +172,66 @@ options:
            the quota thresholds as share size.
          type: bool
          default: false
+  quota_notification_rules:
+    description:
+    - List of notification rules to configure for the Smart Quota.
+    - Each rule defines a I(condition) and I(threshold) at which it triggers,
+      along with one or more actions.
+    - Set to an empty list to delete all custom notification rules for the
+      quota and revert it to the global default notification rules.
+    - This parameter requires the quota to already exist, or to be created
+      in the same task via I(quota).
+    type: list
+    elements: dict
+    suboptions:
+      id:
+        description:
+        - The system-assigned Id of an existing notification rule.
+        - Required to update or delete a specific rule. Omit when creating
+          a new rule.
+        type: str
+      condition:
+        description:
+        - The condition that triggers the notification rule.
+        - This field cannot be changed after the rule is created; changing
+          it will delete and recreate the rule.
+        type: str
+        choices: ['exceeded', 'denied', 'violated', 'expired']
+      threshold:
+        description:
+        - The quota threshold that the rule monitors.
+        - This field cannot be changed after the rule is created; changing
+          it will delete and recreate the rule.
+        type: str
+        choices: ['hard', 'soft', 'advisory']
+      action_alert:
+        description:
+        - Whether to send a cluster alert when the rule matches.
+        type: bool
+      action_email_owner:
+        description:
+        - Whether to email the quota domain owner when the rule matches.
+        type: bool
+      action_email_address:
+        description:
+        - List of email addresses to notify when the rule matches.
+        type: list
+        elements: str
+      holdoff:
+        description:
+        - Time in seconds to wait before sending another notification after the
+          rule has triggered.
+        - Required for certain condition/threshold combinations (e.g., C(exceeded)/C(hard)).
+        type: int
+      state:
+        description:
+        - Whether this specific notification rule should exist or not.
+        - C(present) creates the rule if I(id) is not given, or updates it
+          if I(id) matches an existing rule.
+        - C(absent) deletes the rule identified by I(id).
+        choices: ['absent', 'present']
+        type: str
+        default: 'present'
   state:
     description:
     - Define whether the Smart Quota should exist or not.
@@ -190,6 +250,16 @@ notes:
 - The I(check_mode) is supported.
 - Once the limits are assigned, then the quota cannot be converted to
   accounting. Only modification to the threshold limits is permitted.
+- Running with C(--diff) returns C(diff.before)/C(diff.after) reflecting
+  the I(quota_notification_rules) state immediately before and after the
+  change. I(quota) threshold changes are not currently reflected in
+  C(diff).
+- I(quota_notification_rules) requires the target quota to already exist,
+  or to be created in the same task via I(quota). If a quota is created
+  in the same task and its notification rule(s) then fail to be created,
+  the module fails with an error explicitly stating that the quota was
+  created but its notification rules were not; the quota is not rolled
+  back.
 '''
 EXAMPLES = r'''
 - name: Create a Quota for a User excluding snapshot
@@ -366,6 +436,94 @@ EXAMPLES = r'''
     quota:
       include_snapshots: false
     state: "present"
+
+- name: Create a notification rule for a Quota
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "directory"
+    quota_notification_rules:
+      - condition: "exceeded"
+        threshold: "advisory"
+        action_alert: true
+    state: "present"
+
+- name: Update a notification rule's actions by id
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "directory"
+    quota_notification_rules:
+      - id: "<notification_rule_id>"
+        action_alert: false
+        action_email_owner: true
+    state: "present"
+
+- name: Delete a specific notification rule by id
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "directory"
+    quota_notification_rules:
+      - id: "<notification_rule_id>"
+        state: "absent"
+    state: "present"
+
+- name: Delete all notification rules for a Quota
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "directory"
+    quota_notification_rules: []
+    state: "present"
+
+- name: Create a Quota and its notification rules in a single task
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "directory"
+    quota:
+      thresholds_on: "fs_logical_size"
+      hard_limit_size: 10
+      cap_unit: "TB"
+      include_snapshots: false
+    quota_notification_rules:
+      - condition: "exceeded"
+        threshold: "hard"
+        action_alert: true
+        action_email_owner: true
+    state: "present"
+
+- name: Preview a notification rule change with check_mode and diff
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "directory"
+    quota_notification_rules:
+      - condition: "exceeded"
+        threshold: "advisory"
+        action_alert: true
+    state: "present"
+  check_mode: true
+  diff: true
 '''
 RETURN = r'''
 changed:
@@ -373,6 +531,33 @@ changed:
     returned: always
     type: bool
     sample: "true"
+
+diff:
+    description: The before/after diff of the quota notification rules when running in diff mode.
+    returned: When diff mode is enabled and a quota_notification_rules change is detected.
+    type: dict
+    contains:
+        before:
+            description: The notification rules configured for the quota before the change.
+            type: list
+            elements: dict
+        after:
+            description: The notification rules configured for the quota after the change.
+            type: list
+            elements: dict
+    sample: {
+        "before": [],
+        "after": [
+            {
+                "action_alert": true,
+                "action_email_address": null,
+                "action_email_owner": false,
+                "condition": "exceeded",
+                "id": "id1",
+                "threshold": "advisory"
+            }
+        ]
+    }
 
 quota_details:
     description: The quota details.
@@ -422,6 +607,20 @@ quota_details:
                     "logical": 0,
                     "physical": 2048
                 }
+        notification_rules:
+            description: The list of notification rules configured for the Quota.
+            type: list
+            elements: dict
+            sample: [
+                    {
+                        "action_alert": true,
+                        "action_email_address": null,
+                        "action_email_owner": false,
+                        "condition": "exceeded",
+                        "id": "id1",
+                        "threshold": "advisory"
+                    }
+                ]
     sample:
       {
         "container": true,
@@ -510,6 +709,11 @@ class SmartQuota(object):
         # result is a dictionary that contains changed status and
         # smart quota details
         self.result = {"changed": False}
+        # Tracks whether the quota itself was created during this
+        # invocation (combined quota + notification-rules creation), so
+        # that a subsequent notification-rule failure can report a clear,
+        # specific error rather than a generic API failure message.
+        self._quota_just_created = False
         PREREQS_VALIDATE = utils.validate_module_pre_reqs(self.module.params)
         if PREREQS_VALIDATE \
                 and not PREREQS_VALIDATE["all_packages_found"]:
@@ -740,6 +944,245 @@ class SmartQuota(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
+    QUOTA_NOTIFICATIONS_PATH = '/platform/7/quota/quotas/{QuotaId}/notifications'
+    QUOTA_NOTIFICATION_PATH = '/platform/7/quota/quotas/{QuotaId}/notifications/{NotificationId}'
+
+    def _call_quota_notification_api(self, path, method, body=None, response_type=None):
+        """
+        Invoke the PowerScale quota notification-rules PAPI endpoints via the
+        isi_sdk API client's generic call_api. The isilon-sdk Python bindings
+        do not generate typed methods for these endpoints (only the global
+        /platform/7/quota/settings/notifications endpoints are generated),
+        even though the endpoints exist on the OneFS PAPI itself. This keeps
+        all requests routed through the same authenticated SDK ApiClient
+        used by every other generated method.
+        :param path: The resource path with placeholders already substituted.
+        :param method: The HTTP method, e.g. 'GET', 'POST', 'PUT', 'DELETE'.
+        :param body: Optional JSON-serializable request body.
+        :param response_type: 'object' to get a deserialized dict/list back,
+            or None when no response body is expected.
+        :return: The deserialized response, or None.
+        """
+        return self.quota_api_instance.api_client.call_api(
+            path, method, {}, [], {}, body=body, post_params=[], files={},
+            response_type=response_type, auth_settings=['basicAuth'],
+            _return_http_data_only=True, _preload_content=True)
+
+    def list_quota_notification_rules(self, quota_id):
+        """
+        List the notification rules configured for a quota.
+        :param quota_id: The Id of the Quota.
+        :return: List of notification rule dicts (empty list if none).
+        """
+        try:
+            response = self._call_quota_notification_api(
+                self.QUOTA_NOTIFICATIONS_PATH.format(QuotaId=quota_id),
+                'GET', response_type='object')
+            return (response or {}).get('notifications', []) or []
+        except Exception as e:
+            error_message = "List notification rules for quota %s failed with %s" \
+                            % (quota_id, determine_error(e))
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    def create_quota_notification_rule(self, quota_id, rule):
+        """
+        Create a notification rule for a quota.
+        :param quota_id: The Id of the Quota.
+        :param rule: dict with condition, threshold, and action fields.
+        :return: The Id of the created rule, or True under check_mode.
+        """
+        body = {k: rule[k] for k in
+                ('condition', 'threshold', 'action_alert',
+                 'action_email_owner', 'action_email_address', 'holdoff')
+                if rule.get(k) is not None
+                }
+        try:
+            if not self.module.check_mode:
+                response = self._call_quota_notification_api(
+                    self.QUOTA_NOTIFICATIONS_PATH.format(QuotaId=quota_id),
+                    'POST', body=body, response_type='object')
+                msg = "Notification rule created for quota %s: %s" \
+                    % (quota_id, response)
+                LOG.info(msg)
+                return (response or {}).get('id')
+            return True
+        except Exception as e:
+            error_message = "Create notification rule for quota %s failed with %s" \
+                            % (quota_id, determine_error(e))
+            if self._quota_just_created:
+                error_message = "Quota was created successfully, but %s" \
+                                % (error_message[0].lower() + error_message[1:])
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    def update_quota_notification_rule(self, quota_id, rule_id, rule):
+        """
+        Update a notification rule's action fields for a quota.
+        Note: condition/threshold are immutable once a rule is created;
+        the PAPI PUT endpoint only accepts action fields.
+        :param quota_id: The Id of the Quota.
+        :param rule_id: The Id of the notification rule.
+        :param rule: dict with action fields to update.
+        :return: True if the operation is successful.
+        """
+        body = {k: rule[k] for k in
+                ('action_alert', 'action_email_owner', 'action_email_address')
+                if rule.get(k) is not None
+                }
+        try:
+            if not self.module.check_mode:
+                self._call_quota_notification_api(
+                    self.QUOTA_NOTIFICATION_PATH.format(
+                        QuotaId=quota_id, NotificationId=rule_id),
+                    'PUT', body=body)
+                msg = "Notification rule %s updated for quota %s" \
+                    % (rule_id, quota_id)
+                LOG.info(msg)
+            return True
+        except Exception as e:
+            error_message = "Update notification rule %s for quota %s failed with %s" \
+                            % (rule_id, quota_id, determine_error(e))
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    def delete_quota_notification_rule(self, quota_id, rule_id):
+        """
+        Delete a specific notification rule for a quota.
+        :param quota_id: The Id of the Quota.
+        :param rule_id: The Id of the notification rule.
+        :return: True if the operation is successful.
+        """
+        try:
+            if not self.module.check_mode:
+                self._call_quota_notification_api(
+                    self.QUOTA_NOTIFICATION_PATH.format(
+                        QuotaId=quota_id, NotificationId=rule_id),
+                    'DELETE')
+                msg = "Notification rule %s deleted for quota %s" \
+                    % (rule_id, quota_id)
+                LOG.info(msg)
+            return True
+        except Exception as e:
+            error_message = "Delete notification rule %s for quota %s failed with %s" \
+                            % (rule_id, quota_id, determine_error(e))
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    def delete_all_quota_notification_rules(self, quota_id):
+        """
+        Delete all notification rules for a quota, reverting it to the
+        global default notification rules.
+        :param quota_id: The Id of the Quota.
+        :return: True if the operation is successful.
+        """
+        try:
+            if not self.module.check_mode:
+                self._call_quota_notification_api(
+                    self.QUOTA_NOTIFICATIONS_PATH.format(QuotaId=quota_id),
+                    'DELETE')
+                msg = "All notification rules deleted for quota %s" % quota_id
+                LOG.info(msg)
+            return True
+        except Exception as e:
+            error_message = "Delete notification rules for quota %s failed with %s" \
+                            % (quota_id, determine_error(e))
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    NOTIFICATION_ACTION_FIELDS = ('action_alert', 'action_email_owner', 'action_email_address', 'holdoff')
+    NOTIFICATION_IMMUTABLE_FIELDS = ('condition', 'threshold')
+
+    def _notification_rule_content_equal(self, desired, current):
+        """
+        Check whether a desired notification rule dict matches the current
+        rule on all fields the caller actually specified.
+        :param desired: The requested rule dict.
+        :param current: The current rule dict as returned by the API.
+        :return: True if there is no effective difference.
+        """
+        for field in self.NOTIFICATION_IMMUTABLE_FIELDS + self.NOTIFICATION_ACTION_FIELDS:
+            if desired.get(field) is not None and desired.get(field) != current.get(field):
+                return False
+        return True
+
+    def reconcile_quota_notification_rules(self, quota_id, desired_rules, diff_dict=None):
+        """
+        Reconcile the requested notification rules against the rules
+        currently configured for a quota, performing only the create,
+        update, or delete operations necessary to converge to the
+        requested state.
+        :param quota_id: The Id of the Quota.
+        :param desired_rules: The `quota_notification_rules` list from
+            module params (may be an empty list to delete all rules).
+        :param diff_dict: Optional dict to populate with 'before'/'after'
+            notification-rule state, used to support C(diff) mode.
+        :return: True if any create/update/delete action was performed.
+        """
+        current_rules = self.list_quota_notification_rules(quota_id)
+        if diff_dict is not None:
+            diff_dict['before'] = copy.deepcopy(current_rules)
+
+        if not desired_rules:
+            if current_rules:
+                self.delete_all_quota_notification_rules(quota_id)
+                if diff_dict is not None:
+                    diff_dict['after'] = []
+                return True
+            if diff_dict is not None:
+                diff_dict['after'] = copy.deepcopy(current_rules)
+            return False
+
+        current_by_id = {rule['id']: rule for rule in current_rules if rule.get('id')}
+        after_rules = [dict(rule) for rule in current_rules]
+        changed = False
+
+        for desired in desired_rules:
+            rule_id = desired.get('id')
+            rule_state = desired.get('state') or 'present'
+            current_rule = current_by_id.get(rule_id) if rule_id else None
+
+            if rule_id and current_rule is None:
+                self.module.fail_json(
+                    msg="Notification rule with id %s does not exist for "
+                        "quota %s" % (rule_id, quota_id))
+
+            if rule_state == 'absent':
+                self.delete_quota_notification_rule(quota_id, rule_id)
+                changed = True
+                after_rules = [r for r in after_rules if r.get('id') != rule_id]
+                continue
+
+            if current_rule is None:
+                new_id = self.create_quota_notification_rule(quota_id, desired)
+                changed = True
+                new_rule = dict(desired)
+                new_rule['id'] = new_id if isinstance(new_id, str) else None
+                after_rules.append(new_rule)
+                continue
+
+            immutable_changed = any(
+                desired.get(field) is not None and desired[field] != current_rule.get(field)
+                for field in self.NOTIFICATION_IMMUTABLE_FIELDS)
+            if immutable_changed:
+                self.delete_quota_notification_rule(quota_id, rule_id)
+                new_id = self.create_quota_notification_rule(quota_id, desired)
+                changed = True
+                after_rules = [r for r in after_rules if r.get('id') != rule_id]
+                new_rule = dict(desired)
+                new_rule['id'] = new_id if isinstance(new_id, str) else rule_id
+                after_rules.append(new_rule)
+            elif not self._notification_rule_content_equal(desired, current_rule):
+                self.update_quota_notification_rule(quota_id, rule_id, desired)
+                changed = True
+                merged = dict(current_rule)
+                merged.update({k: v for k, v in desired.items() if v is not None})
+                after_rules = [merged if r.get('id') == rule_id else r for r in after_rules]
+
+        if diff_dict is not None:
+            diff_dict['after'] = after_rules
+        return changed
+
     def delete(self, quota_id, path):
         """
         Delete the Smart Quota.
@@ -958,6 +1401,8 @@ class SmartQuota(object):
         if quota_type == "user" or quota_type == "group":
             persona_obj = utils.isi_sdk.AuthAccessAccessItemFileGroup(id=sid)
         self.create(complete_path, quota_type, access_zone, quota, persona_obj)
+        if not self.module.check_mode:
+            self._quota_just_created = True
         return True
 
     def _handle_quota_deletion(self, quota_id, complete_path):
@@ -965,21 +1410,74 @@ class SmartQuota(object):
         LOG.info("Delete Quota")
         return self.delete(quota_id, complete_path)
 
-    def _process_final_quota_details(self, quota_type, user_name, group_name, include_snapshots, access_zone, complete_path, sid):
+    def _process_final_quota_details(self, quota_type, user_name, group_name,
+                                     include_snapshots, access_zone,
+                                     complete_path, sid):
         """Get and process final quota details for response."""
         quota_details, quota_id = self.get_quota_details(
             include_snapshots, access_zone, quota_type, complete_path, sid)
         if (quota_type == "user" or quota_type == "group") and quota_details:
             quota_details['persona']['type'] = quota_type
             quota_details['persona']['name'] = user_name if user_name else group_name
+        if quota_details and quota_id:
+            quota_details['notification_rules'] = self.list_quota_notification_rules(quota_id)
         quota_details = add_limits_with_unit(quota_details)
         return quota_details
+
+    def _validate_notification_rules(self, notification_rules):
+        """
+        Validate quota_notification_rules parameters before any create,
+        update, or delete API call is attempted.
+        :param notification_rules: The `quota_notification_rules` list
+            from module params, or None if the parameter was not supplied.
+        """
+        if not notification_rules:
+            return
+        for index, rule in enumerate(notification_rules):
+            rule_state = rule.get('state') or 'present'
+            if rule_state == 'absent':
+                continue
+            if not any(rule.get(field) is not None
+                       for field in self.NOTIFICATION_ACTION_FIELDS):
+                self.module.fail_json(
+                    msg="quota_notification_rules[%d] requires at least one "
+                        "of action_alert, action_email_owner, or "
+                        "action_email_address to be set" % index)
+
+    def _handle_notification_rules(self, state, quota_details, quota_id, include_snapshots,
+                                   access_zone, quota_type, complete_path, sid, diff_dict=None):
+        """
+        Reconcile quota_notification_rules, if supplied, once the target
+        quota's Id is known. For a quota created in this same invocation,
+        the Id is only known after a real (non-check_mode) creation, so
+        reconciliation for a brand-new quota is skipped under check_mode.
+        :return: True if any notification rule change was made.
+        """
+        notification_rules = self.module.params.get('quota_notification_rules')
+        if state != "present" or notification_rules is None:
+            return False
+
+        target_quota_id = quota_id
+        if not target_quota_id and not self.module.check_mode:
+            ignored_quota, target_quota_id = self.get_quota_details(
+                include_snapshots=include_snapshots, zone=access_zone,
+                type=quota_type, path=complete_path, persona=sid)
+
+        if not target_quota_id:
+            return False
+        if diff_dict is not None:
+            return self.reconcile_quota_notification_rules(
+                target_quota_id, notification_rules, diff_dict=diff_dict)
+        return self.reconcile_quota_notification_rules(target_quota_id, notification_rules)
 
     def perform_module_operation(self):
         """
         Perform different actions on Smart Quota module based on parameters
         chosen in playbook
         """
+        self._validate_notification_rules(
+            self.module.params.get('quota_notification_rules'))
+
         quota_type, user_name, group_name, state, access_zone, complete_path, sid, quota, include_snapshots = \
             self._prepare_quota_parameters()
 
@@ -1004,10 +1502,22 @@ class SmartQuota(object):
         if state == "absent" and quota_details:
             changed = self._handle_quota_deletion(quota_id, complete_path)
 
-        quota_details = self._process_final_quota_details(quota_type, user_name, group_name, include_snapshots, access_zone, complete_path, sid)
+        # Reconcile notification rules, if requested
+        notification_diff = {} if self.module._diff else None
+        changed = self._handle_notification_rules(
+            state, quota_details, quota_id, include_snapshots, access_zone,
+            quota_type, complete_path, sid, diff_dict=notification_diff
+        ) or changed
+
+        quota_details = self._process_final_quota_details(
+            quota_type, user_name, group_name, include_snapshots,
+            access_zone, complete_path, sid
+        )
 
         self.result["changed"] = changed
         self.result["quota_details"] = quota_details
+        if self.module._diff and notification_diff:
+            self.result["diff"] = notification_diff
         self.module.exit_json(**self.result)
 
 
@@ -1110,6 +1620,21 @@ def get_smartquota_parameters():
                    required_together=[['soft_grace_period', 'period_unit']],
                    mutually_exclusive=[['soft_limit_size', 'percent_soft'],
                                        ['advisory_limit_size', 'percent_advisory']]),
+        quota_notification_rules=dict(
+            type='list', elements='dict',
+            options=dict(
+                id=dict(type='str'),
+                condition=dict(type='str',
+                               choices=['exceeded', 'denied', 'violated', 'expired']),
+                threshold=dict(type='str',
+                               choices=['hard', 'soft', 'advisory']),
+                action_alert=dict(type='bool'),
+                action_email_owner=dict(type='bool'),
+                action_email_address=dict(type='list', elements='str'),
+                holdoff=dict(type='int'),
+                state=dict(type='str', choices=['present', 'absent'], default='present')
+            )
+        ),
         state=dict(required=True, type='str', choices=['present', 'absent'])
     )
 

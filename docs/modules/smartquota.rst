@@ -168,6 +168,55 @@ Parameters
 
 
 
+  quota_notification_rules (optional, list, None)
+    List of notification rules to configure for the Smart Quota.
+
+    Each rule defines a :emphasis:`condition` and :emphasis:`threshold` at which it triggers, along with one or more actions.
+
+    Set to an empty list to delete all custom notification rules for the quota and revert it to the global default notification rules.
+
+    This parameter requires the quota to already exist, or to be created in the same task via :emphasis:`quota`.
+
+
+    id (optional, str, None)
+      The system\-assigned Id of an existing notification rule.
+
+      Required to update or delete a specific rule. Omit when creating a new rule.
+
+
+    condition (optional, str, None)
+      The condition that triggers the notification rule.
+
+      This field cannot be changed after the rule is created; changing it will delete and recreate the rule.
+
+
+    threshold (optional, str, None)
+      The quota threshold that the rule monitors.
+
+      This field cannot be changed after the rule is created; changing it will delete and recreate the rule.
+
+
+    action_alert (optional, bool, None)
+      Whether to send a cluster alert when the rule matches.
+
+
+    action_email_owner (optional, bool, None)
+      Whether to email the quota domain owner when the rule matches.
+
+
+    action_email_address (optional, list, None)
+      List of email addresses to notify when the rule matches.
+
+
+    state (optional, str, present)
+      Whether this specific notification rule should exist or not.
+
+      :literal:`present` creates the rule if :emphasis:`id` is not given, or updates it if :emphasis:`id` matches an existing rule.
+
+      :literal:`absent` deletes the rule identified by :emphasis:`id`.
+
+
+
   state (True, str, None)
     Define whether the Smart Quota should exist or not.
 
@@ -211,6 +260,8 @@ Notes
    - There can be two quotas for each type per directory, one with snapshots included and one without snapshots included.
    - The :emphasis:`check\_mode` is supported.
    - Once the limits are assigned, then the quota cannot be converted to accounting. Only modification to the threshold limits is permitted.
+   - Running with \-\-diff returns diff.before/diff.after reflecting the :emphasis:`quota\_notification\_rules` state immediately before and after the change. :emphasis:`quota` threshold changes are not currently reflected in diff.
+   - :emphasis:`quota\_notification\_rules` requires the target quota to already exist, or to be created in the same task via :emphasis:`quota`. If a quota is created in the same task and its notification rule(s) then fail to be created, the module fails with an error explicitly stating that the quota was created but its notification rules were not; the quota is not rolled back.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -397,6 +448,94 @@ Examples
           include_snapshots: false
         state: "present"
 
+    - name: Create a notification rule for a Quota
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "<path>"
+        quota_type: "directory"
+        quota_notification_rules:
+          - condition: "exceeded"
+            threshold: "advisory"
+            action_alert: true
+        state: "present"
+
+    - name: Update a notification rule's actions by id
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "<path>"
+        quota_type: "directory"
+        quota_notification_rules:
+          - id: "<notification_rule_id>"
+            action_alert: false
+            action_email_owner: true
+        state: "present"
+
+    - name: Delete a specific notification rule by id
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "<path>"
+        quota_type: "directory"
+        quota_notification_rules:
+          - id: "<notification_rule_id>"
+            state: "absent"
+        state: "present"
+
+    - name: Delete all notification rules for a Quota
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "<path>"
+        quota_type: "directory"
+        quota_notification_rules: []
+        state: "present"
+
+    - name: Create a Quota and its notification rules in a single task
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "<path>"
+        quota_type: "directory"
+        quota:
+          thresholds_on: "fs_logical_size"
+          hard_limit_size: 10
+          cap_unit: "TB"
+          include_snapshots: false
+        quota_notification_rules:
+          - condition: "exceeded"
+            threshold: "hard"
+            action_alert: true
+            action_email_owner: true
+        state: "present"
+
+    - name: Preview a notification rule change with check_mode and diff
+      dellemc.powerscale.smartquota:
+        onefs_host: "{{onefs_host}}"
+        verify_ssl: "{{verify_ssl}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        path: "<path>"
+        quota_type: "directory"
+        quota_notification_rules:
+          - condition: "exceeded"
+            threshold: "advisory"
+            action_alert: true
+        state: "present"
+      check_mode: true
+      diff: true
+
 
 
 Return Values
@@ -404,6 +543,20 @@ Return Values
 
 changed (always, bool, true)
   Whether or not the resource has changed.
+
+
+diff (When diff mode is enabled and a quota_notification_rules change is detected., dict, {'before': [], 'after': [{'action_alert': True, 'action_email_address': None, 'action_email_owner': False, 'condition': 'exceeded', 'id': 'id1', 'threshold': 'advisory'}]})
+  The before/after diff of the quota notification rules when running in diff mode.
+
+
+  before (, list, )
+    The notification rules configured for the quota before the change.
+
+
+  after (, list, )
+    The notification rules configured for the quota after the change.
+
+
 
 
 quota_details (When Quota exists., complex, {'container': True, 'description': '', 'efficiency_ratio': None, 'enforced': False, 'id': 'iddd', 'include_snapshots': False, 'labels': '', 'linked': False, 'notifications': 'default', 'path': 'VALUE_SPECIFIED_IN_NO_LOG_PARAMETER', 'persona': {'id': 'UID:9355', 'name': 'test_user_12', 'type': 'user'}, 'ready': True, 'reduction_ratio': None, 'thresholds': {'advisory': None, 'advisory_exceeded': False, 'advisory_last_exceeded': None, 'hard': None, 'hard_exceeded': False, 'hard_last_exceeded': None, 'percent_advisory': None, 'percent_soft': None, 'soft': None, 'soft_exceeded': False, 'soft_grace': None, 'soft_last_exceeded': None}, 'thresholds_on': 'applogicalsize', 'type': 'user', 'usage': {'applogical': 0, 'applogical_ready': True, 'fslogical': 0, 'fslogical_ready': True, 'fsphysical': 0, 'fsphysical_ready': False, 'inodes': 0, 'inodes_ready': True, 'physical': 0, 'physical_data': 0, 'physical_data_ready': True, 'physical_protection': 0, 'physical_protection_ready': True, 'physical_ready': True, 'shadow_refs': 0, 'shadow_refs_ready': True}})
@@ -432,6 +585,10 @@ quota_details (When Quota exists., complex, {'container': True, 'description': '
 
   usage (, dict, {'inodes': 1, 'logical': 0, 'physical': 2048})
     The Quota usage.
+
+
+  notification_rules (, list, [{'action_alert': True, 'action_email_address': None, 'action_email_owner': False, 'condition': 'exceeded', 'id': 'id1', 'threshold': 'advisory'}])
+    The list of notification rules configured for the Quota.
 
 
 
