@@ -357,3 +357,112 @@
         access_zone: "{{ access_zone }}"
         user_name: "devconad\\ad_user_1"
         state: "present"
+
+    # ----------------------------------------------------------------
+    # Password expiration and account expiry examples
+    # (requires local provider)
+    # ----------------------------------------------------------------
+
+    - name: Create user with password expiration enabled
+      register: result
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "{{ provider_type }}"
+        user_name: "expiry_test_user"
+        password: "Test@P@ss123"
+        password_expires: true
+        state: "present"
+
+    - name: Create user with password expiration enabled - Idempotency check
+      register: idempotent_result
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "{{ provider_type }}"
+        user_name: "expiry_test_user"
+        password: "Test@P@ss123"
+        password_expires: true
+        state: "present"
+
+    - name: Verify idempotency - changed should be false
+      ansible.builtin.assert:
+        that:
+          - not idempotent_result.changed
+        fail_msg: "Idempotency check failed: changed={{ idempotent_result.changed }}"
+
+    - name: Create contractor user with account expiry set
+      register: result
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "{{ provider_type }}"
+        user_name: "contractor_user"
+        password: "Contr@ct0r!"
+        # Epoch timestamp for account expiry (use: date -d '2025-12-31T23:59:59Z' +%s)
+        expiry: 1751328000
+        password_expires: true
+        state: "present"
+
+    - name: Update contractor account expiry to a new timestamp
+      register: result
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "{{ provider_type }}"
+        user_name: "contractor_user"
+        # Extended contract: new expiry date
+        expiry: 1782864000
+        state: "present"
+
+    - name: Preview password_expires change with check mode and diff
+      register: preview
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "{{ provider_type }}"
+        user_name: "expiry_test_user"
+        password_expires: false
+        state: "present"
+      check_mode: true
+      diff: true
+
+    - name: Display check mode preview result
+      ansible.builtin.debug:
+        msg:
+          changed: "{{ preview.changed }}"
+          diff: "{{ preview.diff | default('no diff') }}"
+
+    # Note: password_expires and expiry are only supported for local users.
+    # Using them with a non-local provider_type (e.g. ads, ldap, nis, file)
+    # will result in a parameter-specific error message.
+
+    - name: Cleanup - Delete expiry_test_user
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "{{ provider_type }}"
+        user_name: "expiry_test_user"
+        state: "absent"
+
+    - name: Cleanup - Delete contractor_user
+      dellemc.powerscale.user:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        provider_type: "{{ provider_type }}"
+        user_name: "contractor_user"
+        state: "absent"
