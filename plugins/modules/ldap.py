@@ -80,20 +80,45 @@ options:
         type: str
       group_base_dn:
         description:
-        - Configures a distinct LDAP group search base, independently of I(base_dn).
-        - Omission preserves the server value; an empty string C("") clears it.
+        - Specifies the LDAP search base DN used exclusively for group lookups.
+        - When set, group searches use this DN instead of the provider-level I(base_dn).
+          This is useful when groups reside in a different subtree from users.
+        - Unlike I(base_dn), which controls the overall search root for all identity
+          lookups, I(group_base_dn) narrows only the group search scope.
+        - Maximum length is 255 characters. DN syntax validation is delegated to OneFS.
+        - Omission (C(None)) preserves the current server value.
+          An explicit empty string C("") clears the override so group lookups fall back
+          to I(base_dn).
+        - Comparison is byte-exact; a case-only change (e.g. C(OU=Groups) to C(ou=groups))
+          is treated as a modification.
         type: str
         version_added: '4.0.0'
       provider_domain:
         description:
-        - Qualifies users and groups with an explicit domain in multi-domain forests.
-        - Omission preserves the server value; an empty string C("") clears it.
+        - Specifies an explicit domain name used to qualify users and groups returned
+          by this LDAP provider.
+        - In multi-domain environments, this prevents ambiguity when multiple providers
+          return identities with the same short name.
+        - Unlike C(user_domain) and C(group_domain), which are read-only attributes
+          auto-populated by OneFS, I(provider_domain) is a user-configurable setting
+          that overrides the auto-detected domain qualifier.
+        - No client-side format check or auto-detection is applied; the value is passed
+          to OneFS as-is. Maximum length is 255 characters.
+        - Omission (C(None)) preserves the current server value.
+          An explicit empty string C("") clears the override.
         type: str
         version_added: '4.0.0'
       authentication:
         description:
-        - Enables or disables authentication through the LDAP provider.
-        - An explicit C(false) disables authentication; omission preserves the server value.
+        - Controls whether the LDAP provider is used for authentication.
+        - When set to C(true), the provider participates in both identity resolution
+          and user authentication (the default OneFS behavior).
+        - When set to C(false), the provider becomes an B(identity-only provider).
+          It remains fully usable for identity lookups and authorization decisions,
+          but is excluded from the authentication process. This is not the same as
+          disabling the provider — identity and authorization continue to function.
+        - Omission (C(None)) preserves the current server value. An explicit C(false) is
+          a valid, distinct value and is transmitted to OneFS.
         type: bool
         version_added: '4.0.0'
 
@@ -109,6 +134,14 @@ options:
 notes:
 - This module does not support modification of I(bind_password) of LDAP provider.
 - The value specified for I(bind_password) will be ignored during modify.
+- B(Troubleshooting) — If OneFS returns an error about invalid DN syntax for
+  I(group_base_dn), verify the value is a well-formed LDAP distinguished name
+  (e.g. C(ou=groups,dc=example,dc=com)). The module does not validate DN syntax
+  client-side; all validation is performed by the OneFS API.
+- B(Troubleshooting) — If group or user lookups fail with domain-qualification
+  errors in a multi-domain environment, verify that I(provider_domain) is set to
+  the correct domain name. The value must match the domain expected by OneFS; no
+  auto-detection or format normalization is performed.
 attributes:
   check_mode:
     description:
