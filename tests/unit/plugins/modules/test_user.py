@@ -16,7 +16,7 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shar
     import utils
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.powerscale_unit_base \
     import PowerScaleUnitBase
-from ansible_collections.dellemc.powerscale.plugins.modules.user import User
+from ansible_collections.dellemc.powerscale.plugins.modules.user import User, get_user_parameters
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_user_api \
     import MockUserApi
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_api_exception \
@@ -581,6 +581,398 @@ class TestUser(PowerScaleUnitBase):
                 self.capture_fail_json_call(MockUserApi.get_error_responses(
                     "update_user_remove_role_error"), invoke_perform_module=True)
 
+    def test_user_parameters_include_password_expires_and_expiry(self):
+        # AC-001, AC-002: both parameters are part of the module argument spec
+        user_params = get_user_parameters()
+        assert user_params['password_expires']['type'] == 'bool'
+        assert user_params['expiry']['type'] == 'int'
+
+    def test_create_user_password_expires_non_local_provider_exception(self, powerscale_module_mock):
+        # FR-5.1: password_expires is restricted to local users, and the error
+        # must name the parameter rather than the generic create-provider message
+        self.set_module_params(self.user_args, {
+            'user_name': "test_user_1",
+            'access_zone': "System",
+            'provider_type': "ldap",
+            'password': 'test_user_password_placeholder',
+            'password_expires': True,
+            'state': 'present'})
+        powerscale_module_mock.get_user_details = MagicMock(
+            side_effect=[None, MockUserApi.GET_USER_DETAILS])
+        self.capture_fail_json_call(MockUserApi.get_error_responses(
+            "password_expires_non_local_provider"), invoke_perform_module=True)
+
+    def test_password_expires_local_provider_accepted(self, powerscale_module_mock):
+        # FR-1: local provider passes validation without failing the module
+        self.set_module_params(self.user_args, {
+            'user_name': "test_user_1",
+            'access_zone': "System",
+            'provider_type': "local",
+            'password': 'test_user_password_placeholder',
+            'password_expires': True,
+            'state': 'present'})
+        powerscale_module_mock.validate_local_only_params("local")
+        powerscale_module_mock.module.fail_json.assert_not_called()
+
+    def test_create_user_expiry_non_local_provider_exception(self, powerscale_module_mock):
+        # FR-5.1: expiry is restricted to local users
+        self.set_module_params(self.user_args, {
+            'user_name': "test_user_1",
+            'access_zone': "System",
+            'provider_type': "ads",
+            'password': 'test_user_password_placeholder',
+            'expiry': MockUserApi.VALID_EXPIRY,
+            'state': 'present'})
+        powerscale_module_mock.get_user_details = MagicMock(
+            side_effect=[None, MockUserApi.GET_USER_DETAILS])
+        self.capture_fail_json_call(MockUserApi.get_error_responses(
+            "expiry_non_local_provider"), invoke_perform_module=True)
+
+    @pytest.mark.parametrize("invalid_expiry", [-1, 4294967296, 5000000000])
+    def test_create_user_expiry_out_of_range_exception(self, powerscale_module_mock, invalid_expiry):
+        # FR-5.2: expiry must fall within the PAPI schema range 0..4294967295
+        self.set_module_params(self.user_args, {
+            'user_name': "test_user_1",
+            'access_zone': "System",
+            'provider_type': "local",
+            'password': 'test_user_password_placeholder',
+            'expiry': invalid_expiry,
+            'state': 'present'})
+        powerscale_module_mock.get_user_details = MagicMock(
+            side_effect=[None, MockUserApi.GET_USER_DETAILS])
+        self.capture_fail_json_call(MockUserApi.get_error_responses(
+            "expiry_out_of_range"), invoke_perform_module=True)
+
+    @pytest.mark.parametrize("invalid_expiry", ["2024-10-22T00:00:00", 1729564800.5, True])
+    def test_create_user_expiry_invalid_type_exception(self, powerscale_module_mock, invalid_expiry):
+        # FR-5.2: non-integer expiry values are rejected with the epoch message.
+        # Booleans are rejected explicitly: bool is a subclass of int in Python,
+        # so True would otherwise silently pass as epoch 1.
+        self.set_module_params(self.user_args, {
+            'user_name': "test_user_1",
+            'access_zone': "System",
+            'provider_type': "local",
+            'password': 'test_user_password_placeholder',
+            'expiry': invalid_expiry,
+            'state': 'present'})
+        powerscale_module_mock.get_user_details = MagicMock(
+            side_effect=[None, MockUserApi.GET_USER_DETAILS])
+        self.capture_fail_json_call(MockUserApi.get_error_responses(
+            "expiry_invalid_type"), invoke_perform_module=True)
+
+    @pytest.mark.parametrize("valid_expiry", [0, 1729564800, 4294967295])
+    def test_expiry_valid_timestamp_accepted(self, powerscale_module_mock, valid_expiry):
+        # FR-2: boundary values 0 and 4294967295 are inclusive and accepted
+        self.set_module_params(self.user_args, {
+            'user_name': "test_user_1",
+            'access_zone': "System",
+            'provider_type': "local",
+            'password': 'test_user_password_placeholder',
+            'expiry': valid_expiry,
+            'state': 'present'})
+        powerscale_module_mock.validate_expiry()
+        powerscale_module_mock.module.fail_json.assert_not_called()
+
+    def test_expiry_non_local_provider_no_api_call(self, powerscale_module_mock):
+        # FR-5.1: validation fires before any create/update API call
+        self.set_module_params(self.user_args, {
+            'user_name': "test_user_1",
+            'access_zone': "System",
+            'provider_type': "ldap",
+            'password': 'test_user_password_placeholder',
+            'expiry': MockUserApi.VALID_EXPIRY,
+            'state': 'present'})
+        powerscale_module_mock.get_user_details = MagicMock(
+            side_effect=[None, MockUserApi.GET_USER_DETAILS])
+        powerscale_module_mock.api_instance.create_auth_user = MagicMock()
+        self.capture_fail_json_call(MockUserApi.get_error_responses(
+            "expiry_non_local_provider"), invoke_perform_module=True)
+        powerscale_module_mock.api_instance.create_auth_user.assert_not_called()
+
+    # ================================================================
+    # Phase 2: Create/Update Wiring and Idempotency
+    # ================================================================
+
+    def test_create_user_with_password_expires_and_expiry(self, powerscale_module_mock):
+        """AC-001, AC-002: password_expires and expiry are forwarded to
+        AuthUserCreateParams during user creation."""
+        self.set_module_params(self.user_args, {
+            'user_name': "test_user_1",
+            'user_id': 7000,
+            'access_zone': "System",
+            'provider_type': "local",
+            'password': 'test_user_password_placeholder',
+            'password_expires': False,
+            'expiry': MockUserApi.VALID_EXPIRY,
+            'state': 'present'})
+        powerscale_module_mock.get_user_details = MagicMock(
+            side_effect=[None, MockUserApi.get_user_details(
+                password_expires=False, expiry=MockUserApi.VALID_EXPIRY)])
+        utils.isi_sdk.AuthUserCreateParams = MagicMock(
+            return_value=MockUserApi.CREATE_USER_WITH_ID)
+        powerscale_module_mock.api_instance.create_auth_user = MagicMock(
+            return_value=7000)
+        powerscale_module_mock.perform_module_operation()
+        # Assert that AuthUserCreateParams received the new parameters
+        create_kwargs = utils.isi_sdk.AuthUserCreateParams.call_args[1]
+        assert create_kwargs.get('password_expires') is False, \
+            "password_expires must be forwarded to AuthUserCreateParams"
+        assert create_kwargs.get('expiry') == MockUserApi.VALID_EXPIRY, \
+            "expiry must be forwarded to AuthUserCreateParams"
+
+    def test_modify_user_preserve_password_expires_when_omitted(self, powerscale_module_mock):
+        """FR-3 / AC-004: when password_expires is not specified on update,
+        the existing value must be preserved (no API call to change it)."""
+        user_details = MockUserApi.get_user_details(
+            password_expires=True, expiry=MockUserApi.VALID_EXPIRY)
+        self.set_module_params(self.user_args, {
+            'user_name': "test_user_1",
+            'user_id': 7000,
+            'access_zone': "System",
+            'provider_type': "local",
+            'password': 'test_user_password_placeholder',
+            'email': 'test_user_2@gamil.com',
+            'state': 'present'})
+        powerscale_module_mock.get_user_details = MagicMock(
+            side_effect=[user_details, user_details])
+        powerscale_module_mock.perform_module_operation()
+        # changed must be False — nothing was modified
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
+
+    def test_modify_user_preserve_expiry_when_omitted(self, powerscale_module_mock):
+        """FR-3 / AC-004: when expiry is not specified on update,
+        the existing value must be preserved."""
+        user_details = MockUserApi.get_user_details(
+            password_expires=True, expiry=MockUserApi.VALID_EXPIRY)
+        self.set_module_params(self.user_args, {
+            'user_name': "test_user_1",
+            'user_id': 7000,
+            'access_zone': "System",
+            'provider_type': "local",
+            'password': 'test_user_password_placeholder',
+            'email': 'test_user_2@gamil.com',
+            'state': 'present'})
+        powerscale_module_mock.get_user_details = MagicMock(
+            side_effect=[user_details, user_details])
+        powerscale_module_mock.perform_module_operation()
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
+
+    def test_modify_user_explicit_expiry_zero_clears_expiry(self, powerscale_module_mock):
+        """FR-3 / AC-004: explicit expiry=0 clears account expiry and
+        reports changed=True."""
+        user_details_before = MockUserApi.get_user_details(
+            password_expires=True, expiry=MockUserApi.VALID_EXPIRY)
+        user_details_after = MockUserApi.get_user_details(
+            password_expires=True, expiry=0)
+        self.set_module_params(self.user_args, {
+            'user_name': "test_user_1",
+            'user_id': 7000,
+            'access_zone': "System",
+            'provider_type': "local",
+            'password': 'test_user_password_placeholder',
+            'email': 'test_user_2@gamil.com',
+            'expiry': 0,
+            'state': 'present'})
+        powerscale_module_mock.get_user_details = MagicMock(
+            side_effect=[user_details_before, user_details_after])
+        utils.isi_sdk.AuthUser = MagicMock(return_value=MagicMock())
+        powerscale_module_mock.api_instance.update_auth_user = MagicMock()
+        powerscale_module_mock.perform_module_operation()
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+        # Verify update_auth_user was called (i.e. the change was sent)
+        powerscale_module_mock.api_instance.update_auth_user.assert_called()
+
+    def test_modify_user_password_expires_change_reports_changed_true(self, powerscale_module_mock):
+        """FR-3 / AC-004: toggling password_expires from True to False
+        reports changed=True."""
+        user_details_before = MockUserApi.get_user_details(
+            password_expires=True, expiry=MockUserApi.VALID_EXPIRY)
+        user_details_after = MockUserApi.get_user_details(
+            password_expires=False, expiry=MockUserApi.VALID_EXPIRY)
+        self.set_module_params(self.user_args, {
+            'user_name': "test_user_1",
+            'user_id': 7000,
+            'access_zone': "System",
+            'provider_type': "local",
+            'password': 'test_user_password_placeholder',
+            'email': 'test_user_2@gamil.com',
+            'password_expires': False,
+            'state': 'present'})
+        powerscale_module_mock.get_user_details = MagicMock(
+            side_effect=[user_details_before, user_details_after])
+        utils.isi_sdk.AuthUser = MagicMock(return_value=MagicMock())
+        powerscale_module_mock.api_instance.update_auth_user = MagicMock()
+        powerscale_module_mock.perform_module_operation()
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is True
+
+    def test_modify_user_identical_params_reports_changed_false(self, powerscale_module_mock):
+        """AC-004: when all supplied params match existing state,
+        changed must be False (idempotent)."""
+        user_details = MockUserApi.get_user_details(
+            password_expires=True, expiry=MockUserApi.VALID_EXPIRY)
+        self.set_module_params(self.user_args, {
+            'user_name': "test_user_1",
+            'user_id': 7000,
+            'access_zone': "System",
+            'provider_type': "local",
+            'password': 'test_user_password_placeholder',
+            'email': 'test_user_2@gamil.com',
+            'password_expires': True,
+            'expiry': MockUserApi.VALID_EXPIRY,
+            'state': 'present'})
+        powerscale_module_mock.get_user_details = MagicMock(
+            side_effect=[user_details, user_details])
+        powerscale_module_mock.perform_module_operation()
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed'] is False
+
+    # ================================================================
+    # Phase 4: Output Fields and Documentation Parity
+    # ================================================================
+
+    def test_user_details_surfaces_expiry_output_fields(self, powerscale_module_mock):
+        """AC-011: user_details must include expired, password_expired,
+        password_expiry, and max_password_age from the API response."""
+        self.set_module_params(self.user_args, {
+            'user_name': "test_user_1",
+            'user_id': 7000,
+            'access_zone': "System",
+            'provider_type': "local",
+            'password': 'test_user_password_placeholder',
+            'email': 'test_user_2@gamil.com',
+            'state': 'present'})
+        mock_api_response = MagicMock()
+        mock_user = MagicMock()
+        mock_user.to_dict.return_value = MockUserApi.GET_USER_DETAILS
+        mock_api_response.users = [mock_user]
+        powerscale_module_mock.api_instance.get_auth_user.return_value = mock_api_response
+        mock_roles_response = MagicMock()
+        mock_roles_response.roles = []
+        powerscale_module_mock.api_instance.list_auth_roles.return_value = mock_roles_response
+        powerscale_module_mock.perform_module_operation()
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        ud = result['user_details']
+        assert 'expired' in ud, "expired must be in user_details"
+        assert 'password_expired' in ud, "password_expired must be in user_details"
+        assert 'password_expiry' in ud, "password_expiry must be in user_details"
+        assert 'max_password_age' in ud, "max_password_age must be in user_details"
+        # Verify the values match the mock fixture
+        assert ud['expired'] is False
+        assert ud['password_expired'] is False
+        assert ud['password_expiry'] == 1678765332
+        assert ud['max_password_age'] == 2419200
+
+    # ================================================================
+    # Phase 3: Check Mode and Diff Support
+    # ================================================================
+
+    def test_modify_password_expires_check_mode_diff(self, powerscale_module_mock):
+        """FR-4, FR-5, AC-003: in check mode, password_expires change is
+        reported via changed=True and result['diff'] without calling the API."""
+        user_details_before = MockUserApi.get_user_details(
+            password_expires=True, expiry=MockUserApi.VALID_EXPIRY)
+        self.set_module_params(self.user_args, {
+            'user_name': "test_user_1",
+            'user_id': 7000,
+            'access_zone': "System",
+            'provider_type': "local",
+            'password': 'test_user_password_placeholder',
+            'email': 'test_user_2@gamil.com',
+            'password_expires': False,
+            'state': 'present'})
+        powerscale_module_mock.get_user_details = MagicMock(
+            side_effect=[user_details_before, user_details_before])
+        powerscale_module_mock.module.check_mode = True
+        powerscale_module_mock.module._diff = True
+        powerscale_module_mock.api_instance.update_auth_user = MagicMock()
+        powerscale_module_mock.perform_module_operation()
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert result['changed'] is True
+        # API must NOT have been called
+        powerscale_module_mock.api_instance.update_auth_user.assert_not_called()
+        # Diff must show before/after for password_expires
+        assert 'diff' in result
+        assert result['diff']['before']['password_expires'] is True
+        assert result['diff']['after']['password_expires'] is False
+
+    def test_modify_expiry_check_mode_diff(self, powerscale_module_mock):
+        """FR-4, FR-5, AC-003: in check mode, expiry change is reported
+        via changed=True and result['diff'] without calling the API."""
+        user_details_before = MockUserApi.get_user_details(
+            password_expires=True, expiry=MockUserApi.VALID_EXPIRY)
+        self.set_module_params(self.user_args, {
+            'user_name': "test_user_1",
+            'user_id': 7000,
+            'access_zone': "System",
+            'provider_type': "local",
+            'password': 'test_user_password_placeholder',
+            'email': 'test_user_2@gamil.com',
+            'expiry': 0,
+            'state': 'present'})
+        powerscale_module_mock.get_user_details = MagicMock(
+            side_effect=[user_details_before, user_details_before])
+        powerscale_module_mock.module.check_mode = True
+        powerscale_module_mock.module._diff = True
+        powerscale_module_mock.api_instance.update_auth_user = MagicMock()
+        powerscale_module_mock.perform_module_operation()
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert result['changed'] is True
+        powerscale_module_mock.api_instance.update_auth_user.assert_not_called()
+        assert 'diff' in result
+        assert result['diff']['before']['expiry'] == MockUserApi.VALID_EXPIRY
+        assert result['diff']['after']['expiry'] == 0
+
+    def test_check_mode_no_changes(self, powerscale_module_mock):
+        """AC-003: check mode with no changes reports changed=False and
+        no diff."""
+        user_details = MockUserApi.get_user_details(
+            password_expires=True, expiry=MockUserApi.VALID_EXPIRY)
+        self.set_module_params(self.user_args, {
+            'user_name': "test_user_1",
+            'user_id': 7000,
+            'access_zone': "System",
+            'provider_type': "local",
+            'password': 'test_user_password_placeholder',
+            'email': 'test_user_2@gamil.com',
+            'password_expires': True,
+            'expiry': MockUserApi.VALID_EXPIRY,
+            'state': 'present'})
+        powerscale_module_mock.get_user_details = MagicMock(
+            side_effect=[user_details, user_details])
+        powerscale_module_mock.module.check_mode = True
+        powerscale_module_mock.module._diff = True
+        powerscale_module_mock.perform_module_operation()
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert result['changed'] is False
+
+    def test_diff_without_check_mode(self, powerscale_module_mock):
+        """FR-5: diff output is emitted even when check_mode is False,
+        as long as _diff is truthy."""
+        user_details_before = MockUserApi.get_user_details(
+            password_expires=True, expiry=MockUserApi.VALID_EXPIRY)
+        user_details_after = MockUserApi.get_user_details(
+            password_expires=False, expiry=MockUserApi.VALID_EXPIRY)
+        self.set_module_params(self.user_args, {
+            'user_name': "test_user_1",
+            'user_id': 7000,
+            'access_zone': "System",
+            'provider_type': "local",
+            'password': 'test_user_password_placeholder',
+            'email': 'test_user_2@gamil.com',
+            'password_expires': False,
+            'state': 'present'})
+        powerscale_module_mock.get_user_details = MagicMock(
+            side_effect=[user_details_before, user_details_after])
+        powerscale_module_mock.module.check_mode = False
+        powerscale_module_mock.module._diff = True
+        utils.isi_sdk.AuthUser = MagicMock(return_value=MagicMock())
+        powerscale_module_mock.api_instance.update_auth_user = MagicMock()
+        powerscale_module_mock.perform_module_operation()
+        result = powerscale_module_mock.module.exit_json.call_args[1]
+        assert result['changed'] is True
+        assert 'diff' in result
+        assert result['diff']['before']['password_expires'] is True
+        assert result['diff']['after']['password_expires'] is False
+
     def test_delete_user(self, powerscale_module_mock):
         self.set_module_params(self.user_args, {
             'user_name': "test_user_1",
@@ -695,3 +1087,76 @@ class TestUser(PowerScaleUnitBase):
             side_effect=[MockUserApi.GET_USER_DETAILS, None])
         self.capture_fail_json_call(MockUserApi.get_error_responses(
             "delete_user_non_local_provider_error"), invoke_perform_module=True)
+
+    # ================================================================
+    # Part 3: API Compatibility Gate (isi_sdk hasattr check)
+    # ================================================================
+
+    @pytest.mark.parametrize("version_label", ['9.13.x', '9.14.x', '9.15.x'])
+    def test_isi_sdk_compatibility_accepted(self, powerscale_module_mock, version_label, mocker):
+        """FR-1 / AC-010: when the SDK model exposes password_expires and
+        expiry attributes (OneFS 9.13.x / 9.14.x / 9.15.x), the compatibility
+        gate passes and the module proceeds normally."""
+        sdk_model = MockUserApi.SDK_MODEL_FIXTURES[version_label]
+        self.set_module_params(self.user_args, {
+            'user_name': "test_user_1",
+            'user_id': 7000,
+            'access_zone': "System",
+            'provider_type': "local",
+            'password': 'test_user_password_placeholder',
+            'password_expires': True,
+            'expiry': MockUserApi.VALID_EXPIRY,
+            'state': 'present'})
+        powerscale_module_mock.get_user_details = MagicMock(
+            side_effect=[None, MockUserApi.get_user_details(
+                password_expires=True, expiry=MockUserApi.VALID_EXPIRY)])
+        utils.isi_sdk.AuthUserCreateParams = MagicMock(
+            return_value=MockUserApi.CREATE_USER_WITH_ID)
+        mocker.patch.object(utils.isi_sdk, 'AuthUser', sdk_model)
+        powerscale_module_mock.api_instance.create_auth_user = MagicMock(
+            return_value=7000)
+        powerscale_module_mock.perform_module_operation()
+        # Module must NOT have failed
+        powerscale_module_mock.module.fail_json.assert_not_called()
+
+    def test_isi_sdk_compatibility_missing_attributes_exception(self, powerscale_module_mock, mocker):
+        """FR-2 / AC-010: when the SDK model lacks password_expires/expiry
+        attributes, the module must fail with a clear unsupported-version
+        message before any create/update API call."""
+        sdk_model = MockUserApi.SDK_MODEL_FIXTURES['unsupported']
+        self.set_module_params(self.user_args, {
+            'user_name': "test_user_1",
+            'user_id': 7000,
+            'access_zone': "System",
+            'provider_type': "local",
+            'password': 'test_user_password_placeholder',
+            'password_expires': True,
+            'state': 'present'})
+        powerscale_module_mock.get_user_details = MagicMock(
+            side_effect=[None, MockUserApi.GET_USER_DETAILS])
+        mocker.patch.object(utils.isi_sdk, 'AuthUser', sdk_model)
+        powerscale_module_mock.api_instance.create_auth_user = MagicMock()
+        self.capture_fail_json_call(MockUserApi.get_error_responses(
+            "sdk_compatibility_unsupported"), invoke_perform_module=True)
+        # Ensure no write API call was made
+        powerscale_module_mock.api_instance.create_auth_user.assert_not_called()
+
+    def test_isi_sdk_compatibility_skipped_when_params_absent(self, powerscale_module_mock, mocker):
+        """FR-3: when neither password_expires nor expiry is supplied, the
+        compatibility check is skipped entirely — no hasattr() introspection
+        call is issued, even if the SDK model lacks the attributes."""
+        sdk_model = MockUserApi.SDK_MODEL_FIXTURES['unsupported']
+        self.set_module_params(self.user_args, {
+            'user_name': "test_user_1",
+            'user_id': 7000,
+            'access_zone': "System",
+            'provider_type': "local",
+            'password': 'test_user_password_placeholder',
+            'email': 'test_user_2@gamil.com',
+            'state': 'present'})
+        mocker.patch.object(utils.isi_sdk, 'AuthUser', sdk_model)
+        powerscale_module_mock.get_user_details = MagicMock(
+            side_effect=[MockUserApi.GET_USER_DETAILS, MockUserApi.GET_USER_DETAILS])
+        powerscale_module_mock.perform_module_operation()
+        # Module must NOT have failed — gate was skipped
+        powerscale_module_mock.module.fail_json.assert_not_called()

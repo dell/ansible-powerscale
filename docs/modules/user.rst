@@ -21,7 +21,7 @@ Requirements
 The below requirements are needed on the host that executes this module.
 
 - A Dell PowerScale Storage system.
-- Ansible-core 2.17 or later.
+- Ansible\-core 2.17 or later.
 - Python 3.11, 3.12 or 3.13.
 
 
@@ -88,7 +88,7 @@ Parameters
 
     For a user in a system access zone, the absolute path has to be given.
 
-    For users in a non-system access zone, the path relative to the non-system Access Zone's base directory has to be given.
+    For users in a non\-system access zone, the path relative to the non\-system Access Zone's base directory has to be given.
 
 
   shell (optional, str, None)
@@ -121,6 +121,34 @@ Parameters
     It is required when a role is added or removed from user.
 
 
+  password_expires (optional, bool, None)
+    Whether the user's password is subject to the password expiration policy defined on the PowerScale cluster.
+
+    When :literal:`true`\ , the cluster's password\-age policy applies and the user must change their password before it reaches the configured :emphasis:`max\_password\_age`.
+
+    When :literal:`false`\ , the password never expires regardless of cluster\-level policy.
+
+    Only supported for local users (\ :emphasis:`provider\_type`\ =\ :literal:`local`\ ). The module will fail with a parameter\-specific error if used with a non\-local provider.
+
+    Omitting this parameter on update leaves the current setting unchanged (idempotent).
+
+
+  expiry (optional, int, None)
+    Unix epoch timestamp (integer) at which the user account expires.
+
+    After this timestamp the account is disabled and the user can no longer authenticate.
+
+    Set to :literal:`0` to clear a previously configured account expiry, making the account permanent.
+
+    Only supported for local users (\ :emphasis:`provider\_type`\ =\ :literal:`local`\ ). The module will fail with a parameter\-specific error if used with a non\-local provider.
+
+    The valid range is :literal:`0` to :literal:`4294967295` (inclusive). Boolean values are rejected even though Python treats :literal:`bool` as a subclass of :literal:`int`.
+
+    Omitting this parameter on update leaves the current expiry unchanged (idempotent).
+
+    :strong:`Epoch conversion tip:`\  Use :literal:`date \-d '2025\-06\-30T23:59:59Z' +%s` on Linux or :literal:`Get\-Date '2025\-06\-30T23:59:59Z' \-UFormat %s` in PowerShell to obtain the epoch value. All timestamps are in UTC.
+
+
   update_password (optional, str, always)
     This parameter controls the way the :emphasis:`password` is updated during the creation and modification of a user.
 
@@ -142,9 +170,9 @@ Parameters
   verify_ssl (True, bool, None)
     boolean variable to specify whether to validate SSL certificate or not.
 
-    :literal:`true` - indicates that the SSL certificate should be verified.
+    :literal:`true` \- indicates that the SSL certificate should be verified.
 
-    :literal:`false` - indicates that the SSL certificate should not be verified.
+    :literal:`false` \- indicates that the SSL certificate should not be verified.
 
 
   api_user (True, str, None)
@@ -162,7 +190,7 @@ Notes
 -----
 
 .. note::
-   - The :emphasis:`check\_mode` is not supported.
+   - The :emphasis:`check\_mode` is supported.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -307,6 +335,57 @@ Examples
         update_password: "always"
         state: "present"
 
+    - name: Create security user with password expiration enabled
+      dellemc.powerscale.user:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        provider_type: "local"
+        user_name: "security_user"
+        password: "S3cur3P@ss!"
+        password_expires: true
+        state: "present"
+
+    - name: Create service account with password expiration disabled
+      dellemc.powerscale.user:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        provider_type: "local"
+        user_name: "svc_backup"
+        password: "Svc@P@ss!"
+        password_expires: false
+        state: "present"
+
+    - name: Create contractor account with account expiry
+      dellemc.powerscale.user:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        provider_type: "local"
+        user_name: "contractor_jones"
+        password: "Tmp@P@ss!"
+        expiry: 1751328000
+        password_expires: true
+        state: "present"
+
+    - name: Preview password_expires change using check mode and diff
+      dellemc.powerscale.user:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        provider_type: "local"
+        user_name: "security_user"
+        password_expires: false
+        state: "present"
+      check_mode: true
+      diff: true
+      register: preview
+
 
 
 Return Values
@@ -384,6 +463,22 @@ user_details (When user exists, complex, )
     type (, str, )
       The resource's type is mentioned.
 
+
+
+  expired (, bool, )
+    Whether the user account has expired based on the configured :emphasis:`expiry` timestamp. :literal:`true` means the account is disabled and the user cannot authenticate.
+
+
+  password_expired (, bool, )
+    Whether the user's password has exceeded the cluster's maximum password age. :literal:`true` means the user must change their password at next login.
+
+
+  password_expiry (, int, )
+    Unix epoch timestamp (seconds since 1970\-01\-01 UTC) at which the user's password will expire. Only meaningful when :emphasis:`password\_expires` is :literal:`true`.
+
+
+  max_password_age (, int, )
+    Maximum password age in seconds before the password must be changed. This value comes from the cluster's password policy and is read\-only.
 
 
 

@@ -115,6 +115,41 @@ options:
     - It is required when a role is added or removed from user.
     type: str
     choices: ['present-for-user', 'absent-for-user']
+  password_expires:
+    description:
+    - Whether the user's password is subject to the password expiration
+      policy defined on the PowerScale cluster.
+    - When C(true), the cluster's password-age policy applies and the
+      user must change their password before it reaches the configured
+      I(max_password_age).
+    - When C(false), the password never expires regardless of
+      cluster-level policy.
+    - Only supported for local users (I(provider_type)=C(local)).
+      The module will fail with a parameter-specific error if used
+      with a non-local provider.
+    - Omitting this parameter on update leaves the current setting
+      unchanged (idempotent).
+    type: bool
+  expiry:
+    description:
+    - Unix epoch timestamp (integer) at which the user account expires.
+    - After this timestamp the account is disabled and the user can no
+      longer authenticate.
+    - Set to C(0) to clear a previously configured account expiry,
+      making the account permanent.
+    - Only supported for local users (I(provider_type)=C(local)).
+      The module will fail with a parameter-specific error if used
+      with a non-local provider.
+    - The valid range is C(0) to C(4294967295) (inclusive). Boolean
+      values are rejected even though Python treats C(bool) as a
+      subclass of C(int).
+    - Omitting this parameter on update leaves the current expiry
+      unchanged (idempotent).
+    - "B(Epoch conversion tip:) Use C(date -d '2025-06-30T23:59:59Z'
+      +%s) on Linux or C(Get-Date '2025-06-30T23:59:59Z' -UFormat %s)
+      in PowerShell to obtain the epoch value. All timestamps are
+      in UTC."
+    type: int
   update_password:
     description:
     - This parameter controls the way the I(password) is updated during
@@ -127,7 +162,7 @@ options:
     default: always
     type: str
 notes:
-- The I(check_mode) is not supported.
+- The I(check_mode) is supported.
 '''
 
 EXAMPLES = r'''
@@ -263,6 +298,57 @@ EXAMPLES = r'''
     password: "new_password"
     update_password: "always"
     state: "present"
+
+- name: Create security user with password expiration enabled
+  dellemc.powerscale.user:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "local"
+    user_name: "security_user"
+    password: "S3cur3P@ss!"
+    password_expires: true
+    state: "present"
+
+- name: Create service account with password expiration disabled
+  dellemc.powerscale.user:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "local"
+    user_name: "svc_backup"
+    password: "Svc@P@ss!"
+    password_expires: false
+    state: "present"
+
+- name: Create contractor account with account expiry
+  dellemc.powerscale.user:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "local"
+    user_name: "contractor_jones"
+    password: "Tmp@P@ss!"
+    expiry: 1751328000
+    password_expires: true
+    state: "present"
+
+- name: Preview password_expires change using check mode and diff
+  dellemc.powerscale.user:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    provider_type: "local"
+    user_name: "security_user"
+    password_expires: false
+    state: "present"
+  check_mode: true
+  diff: true
+  register: preview
 '''
 
 RETURN = r'''
@@ -328,6 +414,26 @@ user_details:
                 type:
                     description: The resource's type is mentioned.
                     type: str
+        expired:
+            description: Whether the user account has expired based on the
+                         configured I(expiry) timestamp. C(true) means the
+                         account is disabled and the user cannot authenticate.
+            type: bool
+        password_expired:
+            description: Whether the user's password has exceeded the cluster's
+                         maximum password age. C(true) means the user must
+                         change their password at next login.
+            type: bool
+        password_expiry:
+            description: Unix epoch timestamp (seconds since 1970-01-01 UTC)
+                         at which the user's password will expire. Only
+                         meaningful when I(password_expires) is C(true).
+            type: int
+        max_password_age:
+            description: Maximum password age in seconds before the password
+                         must be changed. This value comes from the cluster's
+                         password policy and is read-only.
+            type: int
 '''
 
 from ansible.module_utils.basic import AnsibleModule
@@ -336,6 +442,11 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
 import re
 
 LOG = utils.get_logger('user')
+
+LOCAL_PROVIDER = 'local'
+MIN_EXPIRY_EPOCH = 0
+MAX_EXPIRY_EPOCH = 4294967295
+LOCAL_ONLY_PARAMS = ('password_expires', 'expiry')
 
 
 class User(object):
@@ -353,7 +464,7 @@ class User(object):
 
         # initialize the ansible module
         self.module = AnsibleModule(argument_spec=self.module_params,
-                                    supports_check_mode=False,
+                                    supports_check_mode=True,
                                     required_one_of=required_one_of)
 
         # result is a dictionary that contains changed status and
@@ -392,6 +503,76 @@ class User(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
+    def validate_local_only_params(self, provider):
+        """Validate that password_expires and expiry are only used with local
+        users. Fails with a parameter-specific message so the user is told
+        which parameter is unsupported, rather than the generic
+        create/update/delete provider error.
+        """
+        for param in LOCAL_ONLY_PARAMS:
+            if self.module.params.get(param) is None:
+                continue
+            if provider is None or provider.lower() != LOCAL_PROVIDER:
+                error_message = \
+                    "%s is only supported for local users," \
+                    " got '%s' provider" % (param, provider)
+                LOG.error(error_message)
+                self.module.fail_json(msg=error_message)
+
+    def validate_expiry(self):
+        """Validate that expiry is a Unix epoch timestamp within the range
+        accepted by the PowerScale PAPI schema. Timestamps that are already
+        in the past are valid input here - the API enforces that policy and
+        its error is surfaced to the user.
+        """
+        expiry = self.module.params.get('expiry')
+        if expiry is None:
+            return
+        # bool is a subclass of int in Python, so True would otherwise be
+        # silently accepted as epoch 1.
+        if isinstance(expiry, bool) or not isinstance(expiry, int):
+            error_message = \
+                "expiry must be a Unix epoch timestamp (integer)," \
+                " got '%s'" % expiry
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+        if expiry < MIN_EXPIRY_EPOCH or expiry > MAX_EXPIRY_EPOCH:
+            error_message = \
+                "expiry must be between %s and %s, got '%s'" \
+                % (MIN_EXPIRY_EPOCH, MAX_EXPIRY_EPOCH, expiry)
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    def _validate_isi_sdk_compatibility(self):
+        """Verify the installed isi_sdk exposes password_expires and expiry
+        on the AuthUser model.  Only called when the playbook actually sets
+        one of these parameters (lazy check per FR-3 / NFR-1).
+
+        Fails with a clear unsupported-version message before any
+        create/update API call (FR-2).
+        """
+        needs_check = (
+            self.module.params.get('password_expires') is not None
+            or self.module.params.get('expiry') is not None
+        )
+        if not needs_check:
+            return
+
+        sdk_model = getattr(utils.isi_sdk, 'AuthUser', None)
+        missing = []
+        for attr in ('password_expires', 'expiry'):
+            if sdk_model is None or not hasattr(sdk_model, attr):
+                missing.append(attr)
+        if missing:
+            error_message = (
+                "The installed isi_sdk does not support the following "
+                "attributes on AuthUser: %s.  Upgrade to a OneFS SDK "
+                "version that supports password expiration and account "
+                "expiry (9.13.x or later)." % ', '.join(missing)
+            )
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
     def check_provider_type(self, provider, message):
         """ Check the provider and return the updated provider"""
         if provider.lower() != "local":
@@ -421,10 +602,15 @@ class User(object):
                     "GROUP:" + primary_group)
 
             provider = self.check_provider_type(provider, 'Create')
-            auth_user = utils.isi_sdk.AuthUserCreateParams(
+            create_params = dict(
                 name=user_name, uid=user_id, password=password, enabled=enabled,
                 primary_group=primary_group, home_directory=home_directory,
                 shell=shell, gecos=full_name, email=email)
+            if self.module.params.get('password_expires') is not None:
+                create_params['password_expires'] = self.module.params['password_expires']
+            if self.module.params.get('expiry') is not None:
+                create_params['expiry'] = self.module.params['expiry']
+            auth_user = utils.isi_sdk.AuthUserCreateParams(**create_params)
 
             api_response = self.api_instance.create_auth_user(
                 auth_user=auth_user,
@@ -457,6 +643,16 @@ class User(object):
         """ Determines whether the user details are to be modified or not."""
         if self.module.params['enabled'] is not None:
             if self.module.params['enabled'] != user_details['enabled']:
+                return True
+
+        if self.module.params['password_expires'] is not None:
+            if self.module.params['password_expires'] != \
+                    user_details.get('password_expires'):
+                return True
+
+        if self.module.params['expiry'] is not None:
+            if self.module.params['expiry'] != \
+                    user_details.get('expiry'):
                 return True
 
         parameter_list = ['full_name', 'home_directory']
@@ -513,10 +709,15 @@ class User(object):
             if primary_group:
                 primary_group = utils.isi_sdk.AuthAccessAccessItemFileGroup(
                     "GROUP:" + primary_group)
-            auth_user = utils.isi_sdk.AuthUser(primary_group=primary_group,
-                                               home_directory=home_directory,
-                                               shell=shell, gecos=full_name,
-                                               email=email, enabled=enabled)
+            update_params = dict(primary_group=primary_group,
+                                 home_directory=home_directory,
+                                 shell=shell, gecos=full_name,
+                                 email=email, enabled=enabled)
+            if self.module.params.get('password_expires') is not None:
+                update_params['password_expires'] = self.module.params['password_expires']
+            if self.module.params.get('expiry') is not None:
+                update_params['expiry'] = self.module.params['expiry']
+            auth_user = utils.isi_sdk.AuthUser(**update_params)
             provider = self.check_provider_type(provider, 'Update')
             self.api_instance.update_auth_user(
                 auth_user=auth_user, auth_user_id=auth_user_id,
@@ -676,6 +877,9 @@ class User(object):
                             " missing"
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
+        if self.module.check_mode:
+            LOG.info("Check mode: skipping create_user for %s", user_name)
+            return True
         shell = self.module.params['shell']
         self.create_user(user_name, user_id, password, access_zone,
                          provider_type, enabled, primary_group,
@@ -693,6 +897,12 @@ class User(object):
         """Modifying details of a user"""
 
         LOG.info("Modifying the user details.")
+        # Compute the diff before processing, so the diff reflects the
+        # intended changes even in check mode.
+        diff = self._build_expiry_diff(user_details)
+        if diff is not None:
+            self.result['diff'] = diff
+
         # Check for changes in role
         shell = self.module.params['shell']
         role_flag = self.is_user_part_of_role(
@@ -703,12 +913,18 @@ class User(object):
 
         if role_flag:
             if role_state == "absent-for-user":
-                role_changed = self.remove_role_from_user(
-                    auth_user_id, role_name)
+                if not self.module.check_mode:
+                    role_changed = self.remove_role_from_user(
+                        auth_user_id, role_name)
+                else:
+                    role_changed = True
         else:
             if role_state == "present-for-user":
-                role_changed = self.add_role_to_user(
-                    auth_user_id, role_name)
+                if not self.module.check_mode:
+                    role_changed = self.add_role_to_user(
+                        auth_user_id, role_name)
+                else:
+                    role_changed = True
 
         old_user_details = get_user_params_from_details(user_details)
         modified_sensitive = self.is_user_modified_sensitive(old_user_details)
@@ -719,13 +935,17 @@ class User(object):
             home_directory = None
 
         if modified_sensitive or modified_insensitive:
-            user_details_changed = self.update_user(
-                auth_user_id, access_zone, provider_type, enabled,
-                primary_group, home_directory, shell, full_name, email)
+            if self.module.check_mode:
+                user_details_changed = True
+            else:
+                user_details_changed = self.update_user(
+                    auth_user_id, access_zone, provider_type, enabled,
+                    primary_group, home_directory, shell, full_name, email)
 
         password_changed = False
         if utils.parse_version(self.array_version) < utils.parse_version("9.5"):
-            password_changed = self.modify_password(auth_user_id, access_zone)
+            if not self.module.check_mode:
+                password_changed = self.modify_password(auth_user_id, access_zone)
         return user_details_changed or role_changed or password_changed
 
     def delete_existing_user(self, provider_type, auth_user_id, access_zone,
@@ -739,6 +959,8 @@ class User(object):
         user_details = self.get_user_details(
             auth_user_id, access_zone, provider_type)
         if user_details:
+            if self.module.check_mode:
+                return True
             get_roles_flag = True
             if (not role_name) and (role_state is None) and \
                     (access_zone.lower() != "system"):
@@ -792,6 +1014,27 @@ class User(object):
 
         return home_directory, auth_user_id
 
+    def _build_expiry_diff(self, user_details):
+        """Build a before/after diff dict for password_expires and expiry.
+
+        Returns None when diff mode is not active or no expiry-related
+        parameters are being changed.
+        """
+        if not getattr(self.module, '_diff', False):
+            return None
+        before = {
+            'password_expires': user_details.get('password_expires'),
+            'expiry': user_details.get('expiry'),
+        }
+        after = dict(before)
+        if self.module.params.get('password_expires') is not None:
+            after['password_expires'] = self.module.params['password_expires']
+        if self.module.params.get('expiry') is not None:
+            after['expiry'] = self.module.params['expiry']
+        if before == after:
+            return None
+        return {'before': before, 'after': after}
+
     def check_if_id_exists(self, user_name, user_details):
         """
         Check if the id exists
@@ -822,6 +1065,11 @@ class User(object):
         role_state = self.module.params['role_state']
 
         changed = False
+        # Validate the local-only parameters before any API call is issued so
+        # an unsupported provider fails fast with a parameter-specific message.
+        self.validate_local_only_params(provider_type)
+        self.validate_expiry()
+        self._validate_isi_sdk_compatibility()
         home_directory, auth_user_id = self.set_validate_params(access_zone, user_name, user_id,
                                                                 email, role_name, role_state)
         if state == "present":
@@ -876,7 +1124,9 @@ def get_user_params_from_details(user_details):
         'home_directory': user_details['home_directory'],
         'shell': user_details['shell'],
         'full_name': user_details['gecos'],
-        'email': user_details['email']}
+        'email': user_details['email'],
+        'password_expires': user_details.get('password_expires'),
+        'expiry': user_details.get('expiry')}
     return user_params
 
 
@@ -896,6 +1146,8 @@ def get_user_parameters():
         shell=dict(type='str'),
         full_name=dict(type='str'),
         email=dict(type='str'),
+        password_expires=dict(type='bool'),
+        expiry=dict(type='int'),
         state=dict(type='str', required=True,
                    choices=['present', 'absent']),
         role_name=dict(type='str'),
