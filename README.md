@@ -25,7 +25,7 @@ The Ansible Modules for Dell PowerScale support the following features:
 - Get details of Groupnet, Subnet, Network Pool and Network Rule.
 - Modify cluster email settings.
 - Get cluster email settings and NTP Server details.
-- Add and remove NTP Servers
+- Add and remove NTP Servers.
 - Create an access zone.
 - Get network and smart pool settings.
 - Modify network and smart pool settings.
