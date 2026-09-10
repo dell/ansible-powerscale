@@ -225,6 +225,66 @@ EXAMPLES = r'''
     verify_ssl: "{{verify_ssl}}"
     ldap_name: "ldap_test"
     state: "absent"
+
+- name: Configure a separate group search hierarchy
+  dellemc.powerscale.ldap:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    ldap_name: "ldap_test"
+    base_dn: "DC=ansildap,DC=com"
+    ldap_parameters:
+      group_base_dn: "OU=Groups,DC=ansildap,DC=com"
+    state: "present"
+
+- name: Create an identity-only LDAP provider (excluded from authentication)
+  dellemc.powerscale.ldap:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    ldap_name: "ldap_identity_only"
+    server_uris:
+      - "{{server_uri_1}}"
+    server_uri_state: 'present-in-ldap'
+    base_dn: "DC=ansildap,DC=com"
+    ldap_parameters:
+      groupnet: "groupnet0"
+      bind_dn: "cn=admin,dc=ansildap,dc=com"
+      bind_password: "{{bind_password}}"
+      authentication: false
+    state: "present"
+
+- name: Qualify users and groups with an explicit domain in a multi-domain environment
+  dellemc.powerscale.ldap:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    ldap_name: "ldap_test"
+    ldap_parameters:
+      provider_domain: "corp.example.com"
+    state: "present"
+
+- name: Preview LDAP changes without applying them (check mode + diff)
+  dellemc.powerscale.ldap:
+    onefs_host: "{{onefs_host}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    verify_ssl: "{{verify_ssl}}"
+    ldap_name: "ldap_test"
+    ldap_parameters:
+      group_base_dn: "OU=NewGroups,DC=ansildap,DC=com"
+      authentication: true
+    state: "present"
+  check_mode: true
+  diff: true
+  register: ldap_preview
+
+- name: Show the preview diff
+  ansible.builtin.debug:
+    var: ldap_preview.diff
 '''
 
 RETURN = r'''
