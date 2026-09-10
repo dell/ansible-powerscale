@@ -360,7 +360,7 @@
 
     # ----------------------------------------------------------------
     # Password expiration and account expiry examples
-    # (Story-86232-part2 — requires local provider)
+    # (requires local provider)
     # ----------------------------------------------------------------
 
     - name: Create user with password expiration enabled
