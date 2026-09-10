@@ -125,6 +125,9 @@ class TestLdap(PowerScaleUnitBase):
     def test_create_throws_exception(self, powerscale_module_mock):
         self.get_ldap_args.update({
             'ldap_name': 'ldap2',
+            'server_uris': ['ldap://uri1', 'ldaps://uri2'],
+            'server_uri_state': 'present-in-ldap',
+            'base_dn': 'DC=ansildap,DC=com',
             "ldap_parameters": {
                 'groupnet': "groupnet_ansildap",
                 'bind_dn': "cn=admin,dc=example,dc=com",
