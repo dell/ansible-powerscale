@@ -88,10 +88,39 @@ options:
     type: str
     required: true
 
+  group_base_dn:
+    description:
+    - Configures a distinct LDAP group search base, independently of I(base_dn).
+    - Omission preserves the server value; an empty string C("") clears it.
+    type: str
+    version_added: '4.0.0'
+
+  provider_domain:
+    description:
+    - Qualifies users and groups with an explicit domain in multi-domain forests.
+    - Omission preserves the server value; an empty string C("") clears it.
+    type: str
+    version_added: '4.0.0'
+
+  authentication:
+    description:
+    - Enables or disables authentication through the LDAP provider.
+    - An explicit C(false) disables authentication; omission preserves the server value.
+    type: bool
+    version_added: '4.0.0'
+
 notes:
 - This module does not support modification of I(bind_password) of LDAP provider.
 - The value specified for I(bind_password) will be ignored during modify.
-- The I(check_mode) is not supported.
+attributes:
+  check_mode:
+    description:
+    - Runs task to validate without performing action on the target machine.
+    support: full
+  diff_mode:
+    description:
+    - Runs the task to report the changes made or to be made.
+    support: full
 '''
 
 EXAMPLES = r'''
@@ -204,6 +233,15 @@ ldap_provider_details:
        status:
            description: Specifies the status of the provider.
            type: str
+       group_base_dn:
+           description: Specifies the LDAP group search base DN.
+           type: str
+       provider_domain:
+           description: Specifies the LDAP provider domain qualifier.
+           type: str
+       authentication:
+           description: Whether authentication is enabled for the LDAP provider.
+           type: bool
     sample: {
         "linked_access_zones": [
             "System"
@@ -213,7 +251,10 @@ ldap_provider_details:
         "groupnet": "groupnet",
         "name": "sample-ldap",
         "server_uris": "ldap://xx.xx.xx.xx",
-        "status": "online"
+        "status": "online",
+        "group_base_dn": "",
+        "provider_domain": "",
+        "authentication": true
     }
 '''
 
@@ -237,7 +278,7 @@ class Ldap(object):
         # initialize the Ansible module
         self.module = AnsibleModule(
             argument_spec=self.module_params,
-            supports_check_mode=False,
+            supports_check_mode=True,
             required_together=required_together
         )
 
@@ -253,6 +294,18 @@ class Ldap(object):
         self.auth_api_instance = utils.isi_sdk.AuthApi(self.api_client)
         self.zones_api_instance = utils.isi_sdk.ZonesApi(self.api_client)
         LOG.info('Got the isi_sdk instance for authorization on to PowerScale')
+
+    def validate_ldap_params_length(self, ldap_parameters):
+        """Validate length constraints for new LDAP parameters."""
+        if ldap_parameters:
+            group_base_dn = ldap_parameters.get('group_base_dn')
+            if group_base_dn is not None and len(group_base_dn) > 255:
+                self.module.fail_json(
+                    msg="group_base_dn exceeds the maximum length of 255 characters")
+            provider_domain = ldap_parameters.get('provider_domain')
+            if provider_domain is not None and len(provider_domain) > 255:
+                self.module.fail_json(
+                    msg="provider_domain exceeds the maximum length of 255 characters")
 
     def create(self, ldap_name, server_uris, server_uri_state, base_dn,
                ldap_parameters):
@@ -285,38 +338,52 @@ class Ldap(object):
                 msg="Please specify the server_uri_state as present-in-ldap."
                     " Server_uris is mandatory while creating LDAP prodiver.")
 
+        self.validate_ldap_params_length(ldap_parameters)
+
         ldap_create_params = {
             'name': ldap_name, 'server_uris': server_uris,
             'base_dn': base_dn
         }
         if ldap_parameters:
-            if ldap_parameters['groupnet']:
+            if ldap_parameters.get('groupnet'):
                 ldap_create_params['groupnet'] = ldap_parameters['groupnet']
-            if ldap_parameters['bind_dn']:
+            if ldap_parameters.get('bind_dn'):
                 ldap_create_params['bind_dn'] = ldap_parameters['bind_dn']
-            if ldap_parameters['bind_password']:
+            if ldap_parameters.get('bind_password'):
                 ldap_create_params['bind_password'] = \
                     ldap_parameters['bind_password']
+            if ldap_parameters.get('group_base_dn') is not None:
+                ldap_create_params['group_base_dn'] = ldap_parameters['group_base_dn']
+            if ldap_parameters.get('provider_domain') is not None:
+                ldap_create_params['provider_domain'] = ldap_parameters['provider_domain']
+            if ldap_parameters.get('authentication') is not None:
+                ldap_create_params['authentication'] = ldap_parameters['authentication']
 
         ldap_provider_obj = \
             utils.isi_sdk.ProvidersLdapItem(**ldap_create_params)
         try:
-            api_response = self.auth_api_instance.create_providers_ldap_item(
-                providers_ldap_item=ldap_provider_obj)
-            message = "LDAP domain created, %s" % api_response
-            LOG.info(message)
-            return api_response
+            if not self.module.check_mode:
+                api_response = self.auth_api_instance.create_providers_ldap_item(
+                    providers_ldap_item=ldap_provider_obj)
+                message = "LDAP domain created, %s" % api_response
+                LOG.info(message)
+            if self.module._diff:
+                diff_after = {k: v for k, v in ldap_create_params.items()
+                              if k != 'bind_password'}
+                self.result['diff'] = {'before': {}, 'after': diff_after}
+            return True
         except utils.ApiException as e:
             error_message = "Add an LDAP provider failed with" + \
                 utils.determine_error(error_obj=e)
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
-    def update(self, ldap_name, modified_ldap):
+    def update(self, ldap_name, modified_ldap, ldap_details=None):
         """
          Modify the details of the LDAP provider.
         :param ldap_name: Specifies the LDAP provider name.
         :param modified_ldap: Parameters to modify.
+        :param ldap_details: Current state of the LDAP provider (for diff).
         :return: True if the operation is successful.
         """
         ldap_update_params = {}
@@ -328,11 +395,23 @@ class Ldap(object):
             ldap_provider_params = utils.isi_sdk.ProvidersLdapIdParams(
                 **ldap_update_params)
 
-            self.auth_api_instance.update_providers_ldap_by_id(
-                providers_ldap_id_params=ldap_provider_params,
-                providers_ldap_id=ldap_name)
-            message = "LDAP provider updated successfully."
-            LOG.info(message)
+            if not self.module.check_mode:
+                self.auth_api_instance.update_providers_ldap_by_id(
+                    providers_ldap_id_params=ldap_provider_params,
+                    providers_ldap_id=ldap_name)
+                message = "LDAP provider updated successfully."
+                LOG.info(message)
+
+            if self.module._diff and ldap_details:
+                diff_before = {}
+                diff_after = {}
+                for key in modified_ldap:
+                    if key == 'bind_password':
+                        continue
+                    diff_before[key] = ldap_details.get(key)
+                    diff_after[key] = modified_ldap[key]
+                self.result['diff'] = {'before': diff_before, 'after': diff_after}
+
             return True
         except utils.ApiException as e:
             error_message = "Modifying LDAP provider failed with" + \
@@ -340,17 +419,25 @@ class Ldap(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
-    def delete(self, ldap_name):
+    def delete(self, ldap_name, ldap_details=None):
         """
          Delete the details of the LDAP provider.
         :param ldap_name: Specifies the LDAP provider name.
+        :param ldap_details: Current state of the LDAP provider (for diff).
         :return: True if the operation is successful.
         """
         try:
-            self.auth_api_instance.delete_providers_ldap_by_id(
-                providers_ldap_id=ldap_name)
-            message = "LDAP provider deleted successfully."
-            LOG.info(message)
+            if not self.module.check_mode:
+                self.auth_api_instance.delete_providers_ldap_by_id(
+                    providers_ldap_id=ldap_name)
+                message = "LDAP provider deleted successfully."
+                LOG.info(message)
+
+            if self.module._diff:
+                diff_before = {k: v for k, v in (ldap_details or {}).items()
+                               if k != 'bind_password'} if ldap_details else {}
+                self.result['diff'] = {'before': diff_before, 'after': {}}
+
             return True
         except utils.ApiException as e:
             error_message = "Deleting LDAP provider failed with" + \
@@ -394,6 +481,9 @@ class Ldap(object):
         """Filter input LDAP dict, removing unchanged/special keys."""
         if not input_ldap:
             return {}
+
+        self.validate_ldap_params_length(input_ldap)
+
         for key in list(input_ldap):
             key_lower = key.lower()
             if key_lower == "groupnet":
@@ -403,6 +493,18 @@ class Ldap(object):
                 del input_ldap[key]
             elif key_lower == "bind_password":
                 del input_ldap[key]
+            elif key_lower in ("group_base_dn", "provider_domain"):
+                # Byte-exact comparison; None means omitted (preserve server value)
+                if input_ldap[key] is None:
+                    del input_ldap[key]
+                elif input_ldap[key] == array_ldap.get(key):
+                    del input_ldap[key]
+            elif key_lower == "authentication":
+                # None means omitted (preserve); explicit False is a valid value
+                if input_ldap[key] is None:
+                    del input_ldap[key]
+                elif input_ldap[key] == array_ldap.get(key):
+                    del input_ldap[key]
             elif input_ldap[key] is None or input_ldap[key] == array_ldap[key]:
                 del input_ldap[key]
         return input_ldap
@@ -520,12 +622,14 @@ class Ldap(object):
                                                    ldap_details)
             if modified_ldap:
                 LOG.info('Modifying LDAP provider.')
-                changed = self.update(ldap_name, modified_ldap)
+                changed = self.update(ldap_name, modified_ldap, ldap_details)
+            elif self.module._diff:
+                self.result['diff'] = {'before': {}, 'after': {}}
 
         # Delete LDAP provider
         if state == "absent" and ldap_details:
             LOG.info('Deleting LDAP provider.')
-            changed = self.delete(ldap_name)
+            changed = self.delete(ldap_name, ldap_details)
 
         ldap_details = self.get_ldap_details(ldap_name)
         if ldap_details:
@@ -551,6 +655,9 @@ def get_ldap_parameters():
                 groupnet=dict(type='str'),
                 bind_dn=dict(type='str'),
                 bind_password=dict(type='str', no_log=True),
+                group_base_dn=dict(type='str'),
+                provider_domain=dict(type='str'),
+                authentication=dict(type='bool'),
             )
         ),
         state=dict(required=True, type='str', choices=['present', 'absent'])
