@@ -1,0 +1,8 @@
+---
+minor_changes:
+  - dellemc.powerscale.ldap - Added ``group_base_dn`` parameter to configure a distinct LDAP group search base independently of ``base_dn``.
+  - dellemc.powerscale.ldap - Added ``provider_domain`` parameter to qualify users and groups with an explicit domain in multi-domain forests.
+  - dellemc.powerscale.ldap - Added ``authentication`` boolean parameter to enable or disable authentication through the LDAP provider.
+  - dellemc.powerscale.ldap - Added full ``check_mode`` support; all create, modify, and delete operations report ``changed`` without contacting the array.
+  - dellemc.powerscale.ldap - Added full ``diff_mode`` support; ``before``/``after`` diffs are emitted for create, modify, and delete when ``--diff`` is active.
+  - dellemc.powerscale.ldap - Ensured ``bind_password`` is never exposed in diff output or error messages.
