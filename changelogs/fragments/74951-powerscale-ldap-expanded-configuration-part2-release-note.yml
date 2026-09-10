@@ -1,0 +1,10 @@
+---
+minor_changes:
+  - >-
+    dellemc.powerscale.ldap - The LDAP module now supports ``check_mode`` and ``diff_mode``.
+    When invoked with ``--check``, all create, modify, and delete operations report
+    ``changed`` without making API calls to the PowerScale array. When invoked with
+    ``--diff``, a ``before``/``after`` dictionary is returned showing only the parameters
+    that would change. ``bind_password`` is never included in diff output. These changes
+    affect the module's return data structure when ``--diff`` is active; playbooks that
+    parse ``ldap_provider_details`` are unaffected.
