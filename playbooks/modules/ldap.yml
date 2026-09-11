@@ -130,6 +130,114 @@
         ldap_name: "{{ ldap_name }}"
         state: "{{ state_present }}"
 
+    # --- New parameter tasks (group_base_dn, provider_domain, authentication) ---
+
+    - name: Configure group_base_dn on an existing provider
+      dellemc.powerscale.ldap:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        ldap_name: "{{ ldap_name }}"
+        ldap_parameters:
+          group_base_dn: "OU=Groups,DC=ansildap,DC=com"
+        state: "{{ state_present }}"
+
+    - name: Configure group_base_dn Idempotency case
+      dellemc.powerscale.ldap:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        ldap_name: "{{ ldap_name }}"
+        ldap_parameters:
+          group_base_dn: "OU=Groups,DC=ansildap,DC=com"
+        state: "{{ state_present }}"
+
+    - name: Clear group_base_dn with an empty string
+      dellemc.powerscale.ldap:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        ldap_name: "{{ ldap_name }}"
+        ldap_parameters:
+          group_base_dn: ""
+        state: "{{ state_present }}"
+
+    - name: Set provider_domain for multi-domain qualification
+      dellemc.powerscale.ldap:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        ldap_name: "{{ ldap_name }}"
+        ldap_parameters:
+          provider_domain: "corp.example.com"
+        state: "{{ state_present }}"
+
+    - name: Clear provider_domain
+      dellemc.powerscale.ldap:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        ldap_name: "{{ ldap_name }}"
+        ldap_parameters:
+          provider_domain: ""
+        state: "{{ state_present }}"
+
+    - name: Disable authentication (identity-only provider)
+      dellemc.powerscale.ldap:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        ldap_name: "{{ ldap_name }}"
+        ldap_parameters:
+          authentication: false
+        state: "{{ state_present }}"
+
+    - name: Re-enable authentication
+      dellemc.powerscale.ldap:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        ldap_name: "{{ ldap_name }}"
+        ldap_parameters:
+          authentication: true
+        state: "{{ state_present }}"
+
+    - name: Re-enable authentication Idempotency case
+      dellemc.powerscale.ldap:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        ldap_name: "{{ ldap_name }}"
+        ldap_parameters:
+          authentication: true
+        state: "{{ state_present }}"
+
+    - name: Preview LDAP changes with check mode and diff
+      dellemc.powerscale.ldap:
+        onefs_host: "{{ onefs_host }}"
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+        verify_ssl: "{{ verify_ssl }}"
+        ldap_name: "{{ ldap_name }}"
+        ldap_parameters:
+          group_base_dn: "OU=Preview,DC=ansildap,DC=com"
+        state: "{{ state_present }}"
+      check_mode: true
+      diff: true
+      register: ldap_check_diff_result
+
+    - name: Display check mode and diff result
+      ansible.builtin.debug:
+        var: ldap_check_diff_result
+
     - name: Delete a LDAP provider
       dellemc.powerscale.ldap:
         onefs_host: "{{ onefs_host }}"

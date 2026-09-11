@@ -19,7 +19,10 @@ LDAP = {'ldap': [{
         "groupnet": "groupnet",
         "name": "sample-ldap",
         "server_uris": "ldap://xx.xx.xx.xx",
-        "status": "online"
+        "status": "online",
+        "group_base_dn": "",
+        "provider_domain": "",
+        "authentication": True
         }
 ]
 }
@@ -63,3 +66,11 @@ def ldap_exception_msg():
 
 def ldap_exception2_msg():
     return 'failed with error'
+
+
+def group_base_dn_exceeds_length_msg():
+    return 'group_base_dn exceeds the maximum length of 255 characters'
+
+
+def provider_domain_exceeds_length_msg():
+    return 'provider_domain exceeds the maximum length of 255 characters'
