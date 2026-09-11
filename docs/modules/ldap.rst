@@ -73,6 +73,42 @@ Parameters
       Specifies the password for the distinguished name for binding to the LDAP server.
 
 
+    group_base_dn (optional, str, None)
+      Specifies the LDAP search base DN used exclusively for group lookups.
+
+      When set, group searches use this DN instead of the provider-level :emphasis:`base\_dn`. This is useful when groups reside in a different subtree from users.
+
+      Unlike :emphasis:`base\_dn`\ , which controls the overall search root for all identity lookups, :emphasis:`group\_base\_dn` narrows only the group search scope.
+
+      Maximum length is 255 characters. DN syntax validation is delegated to OneFS.
+
+      Omission (\ :literal:`None`\ ) preserves the current server value. An explicit empty string :literal:`""` clears the override so group lookups fall back to :emphasis:`base\_dn`.
+
+      Comparison is byte-exact; a case-only change (e.g. :literal:`OU=Groups` to :literal:`ou=groups`\ ) is treated as a modification.
+
+
+    provider_domain (optional, str, None)
+      Specifies an explicit domain name used to qualify users and groups returned by this LDAP provider.
+
+      In multi-domain environments, this prevents ambiguity when multiple providers return identities with the same short name.
+
+      Unlike :literal:`user\_domain` and :literal:`group\_domain`\ , which are read-only attributes auto-populated by OneFS, :emphasis:`provider\_domain` is a user-configurable setting that overrides the auto-detected domain qualifier.
+
+      No client-side format check or auto-detection is applied; the value is passed to OneFS as-is. Maximum length is 255 characters.
+
+      Omission (\ :literal:`None`\ ) preserves the current server value. An explicit empty string :literal:`""` clears the override.
+
+
+    authentication (optional, bool, None)
+      Controls whether the LDAP provider is used for authentication.
+
+      When set to :literal:`true`\ , the provider participates in both identity resolution and user authentication (the default OneFS behavior).
+
+      When set to :literal:`false`\ , the provider becomes an :strong:`identity-only provider`. It remains fully usable for identity lookups and authorization decisions, but is excluded from the authentication process. This is not the same as disabling the provider — identity and authorization continue to function.
+
+      Omission (\ :literal:`None`\ ) preserves the current server value. An explicit :literal:`false` is a valid, distinct value and is transmitted to OneFS.
+
+
 
   state (True, str, None)
     The state of the LDAP provider after the task is performed.
@@ -115,7 +151,8 @@ Notes
 .. note::
    - This module does not support modification of :emphasis:`bind\_password` of LDAP provider.
    - The value specified for :emphasis:`bind\_password` will be ignored during modify.
-   - The :emphasis:`check\_mode` is not supported.
+   - :strong:`Troubleshooting` — If OneFS returns an error about invalid DN syntax for :emphasis:`group\_base\_dn`\ , verify the value is a well-formed LDAP distinguished name (e.g. :literal:`ou=groups,dc=example,dc=com`\ ). The module does not validate DN syntax client-side; all validation is performed by the OneFS API.
+   - :strong:`Troubleshooting` — If group or user lookups fail with domain-qualification errors in a multi-domain environment, verify that :emphasis:`provider\_domain` is set to the correct domain name. The value must match the domain expected by OneFS; no auto-detection or format normalization is performed.
    - The modules present in this collection named as 'dellemc.powerscale' are built to support the Dell PowerScale storage platform.
 
 
@@ -199,6 +236,66 @@ Examples
         ldap_name: "ldap_test"
         state: "absent"
 
+    - name: Configure a separate group search hierarchy
+      dellemc.powerscale.ldap:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        ldap_name: "ldap_test"
+        base_dn: "DC=ansildap,DC=com"
+        ldap_parameters:
+          group_base_dn: "OU=Groups,DC=ansildap,DC=com"
+        state: "present"
+
+    - name: Create an identity-only LDAP provider (excluded from authentication)
+      dellemc.powerscale.ldap:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        ldap_name: "ldap_identity_only"
+        server_uris:
+          - "{{server_uri_1}}"
+        server_uri_state: 'present-in-ldap'
+        base_dn: "DC=ansildap,DC=com"
+        ldap_parameters:
+          groupnet: "groupnet0"
+          bind_dn: "cn=admin,dc=ansildap,dc=com"
+          bind_password: "{{bind_password}}"
+          authentication: false
+        state: "present"
+
+    - name: Qualify users and groups with an explicit domain in a multi-domain environment
+      dellemc.powerscale.ldap:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        ldap_name: "ldap_test"
+        ldap_parameters:
+          provider_domain: "corp.example.com"
+        state: "present"
+
+    - name: Preview LDAP changes without applying them (check mode + diff)
+      dellemc.powerscale.ldap:
+        onefs_host: "{{onefs_host}}"
+        api_user: "{{api_user}}"
+        api_password: "{{api_password}}"
+        verify_ssl: "{{verify_ssl}}"
+        ldap_name: "ldap_test"
+        ldap_parameters:
+          group_base_dn: "OU=NewGroups,DC=ansildap,DC=com"
+          authentication: true
+        state: "present"
+      check_mode: true
+      diff: true
+      register: ldap_preview
+
+    - name: Show the preview diff
+      ansible.builtin.debug:
+        var: ldap_preview.diff
+
 
 
 Return Values
@@ -208,7 +305,7 @@ changed (always, bool, false)
   Whether or not the resource has changed.
 
 
-ldap_provider_details (When LDAP provider exists, complex, {'linked_access_zones': ['System'], 'base_dn': 'dc=sample,dc=ldap,dc=domain,dc=com', 'bind_dn': 'cn=administrator,dc=sample,dc=ldap,dc=domain,dc=com', 'groupnet': 'groupnet', 'name': 'sample-ldap', 'server_uris': 'ldap://xx.xx.xx.xx', 'status': 'online'})
+ldap_provider_details (When LDAP provider exists, complex, {'linked_access_zones': ['System'], 'base_dn': 'dc=sample,dc=ldap,dc=domain,dc=com', 'bind_dn': 'cn=administrator,dc=sample,dc=ldap,dc=domain,dc=com', 'groupnet': 'groupnet', 'name': 'sample-ldap', 'server_uris': 'ldap://xx.xx.xx.xx', 'status': 'online', 'group_base_dn': '', 'provider_domain': '', 'authentication': True})
   The LDAP provider details.
 
 
@@ -238,6 +335,18 @@ ldap_provider_details (When LDAP provider exists, complex, {'linked_access_zones
 
   status (, str, )
     Specifies the status of the provider.
+
+
+  group_base_dn (, str, )
+    Specifies the LDAP group search base DN.
+
+
+  provider_domain (, str, )
+    Specifies the LDAP provider domain qualifier.
+
+
+  authentication (, bool, )
+    Whether authentication is enabled for the LDAP provider.
 
 
 

@@ -1,8 +1,0 @@
----
-minor_changes:
-  - dellemc.powerscale.ldap - Expanded module documentation with full descriptions, constraints, and clearing/omission semantics for ``group_base_dn``, ``provider_domain``, and ``authentication`` parameters.
-  - dellemc.powerscale.ldap - Added disambiguation notes to clearly differentiate ``group_base_dn`` from ``base_dn``, and ``provider_domain`` from read-only ``user_domain``/``group_domain`` attributes.
-  - dellemc.powerscale.ldap - Documented ``authentication: false`` as producing an identity-only provider that remains usable for identity lookups and authorization.
-  - dellemc.powerscale.ldap - Added troubleshooting notes for invalid DN syntax and domain-qualification errors.
-  - dellemc.powerscale.ldap - Added EXAMPLES for separate group hierarchy, identity-only provider, multi-domain qualification, and check-mode/diff preview.
-  - dellemc.powerscale.ldap - Extended example playbook (``playbooks/modules/ldap.yml``) with end-to-end tasks exercising all new parameters, clearing, idempotency, and check/diff mode.
