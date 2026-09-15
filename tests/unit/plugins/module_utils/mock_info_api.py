@@ -604,7 +604,7 @@ class MockGatherfactsApi:
             return {
                 "openfiles": [
                     {
-                        "file": "C:\\ifs\\data_path",
+                        "file": "/ifs/data_path",
                         "id": 1880,
                         "locks": 0,
                         "permissions": [
@@ -619,7 +619,7 @@ class MockGatherfactsApi:
         elif response_type == 'module':
             return [
                 {
-                    "file": "C:\\ifs\\data_path",
+                    "file": "/ifs/data_path",
                     "id": 1880,
                     "locks": 0,
                     "permissions": [
@@ -641,7 +641,7 @@ class MockGatherfactsApi:
             return {
                 "openfiles": [
                     {
-                        "file": "C:\\ifs\\new_data",
+                        "file": "/ifs/new_data",
                         "id": 188,
                         "locks": 0,
                         "permissions": [
@@ -660,7 +660,7 @@ class MockGatherfactsApi:
             return {
                 "openfiles": [
                     {
-                        "file": "C:\\ifs\\data",
+                        "file": "/ifs/data",
                         "id": 1880,
                         "locks": 0,
                         "permissions": [
@@ -675,7 +675,7 @@ class MockGatherfactsApi:
         elif response_type == 'module':
             return [
                 {
-                    "file": "C:\\ifs\\data",
+                    "file": "/ifs/data",
                     "id": 1880,
                     "locks": 0,
                     "permissions": [
@@ -684,7 +684,7 @@ class MockGatherfactsApi:
                     "user": "admin"
                 },
                 {
-                    "file": "C:\\ifs\\new_data",
+                    "file": "/ifs/new_data",
                     "id": 188,
                     "locks": 0,
                     "permissions": [
