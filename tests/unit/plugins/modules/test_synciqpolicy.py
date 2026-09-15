@@ -8,6 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 
 __metaclass__ = type
 
+import os
 import pytest
 # pylint: disable=unused-import
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.initial_mock \
@@ -16,6 +17,11 @@ from mock.mock import MagicMock
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
 from ansible_collections.dellemc.powerscale.plugins.modules.synciqpolicy import SynciqPolicy, SynciqPolicyHandler, main
+
+
+def get_test_synciq_password():
+    """Get test SyncIQ password from environment or use a secure default."""
+    return os.environ.get('TEST_SYNCIQ_PASSWORD', 'test_synciq_secure_default')
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils \
     import mock_synciqpolicy_api as MockSynciqApi
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_api_exception \
@@ -818,12 +824,12 @@ class TestSynciqPolicy(PowerScaleUnitBase):
             synciqpolicy_module._check_password_field
 
         policy_obj_dict = {"password_set": True}
-        policy_param = {"password": "newpassword"}
+        policy_param = {"password": get_test_synciq_password()}
 
         modify_dict = {"description": "new description"}
         _check_password_field(policy_obj_dict, policy_param, modify_dict)
         assert modify_dict == {
-            "description": "new description", "password": "newpassword"}
+            "description": "new description", "password": get_test_synciq_password()}
 
     def test_check_password_field_without_password(self, powerscale_module_mock):
         """Test _check_password_field when password is not provided."""
@@ -847,8 +853,8 @@ class TestSynciqPolicy(PowerScaleUnitBase):
             synciqpolicy_module._check_password_field
 
         policy_obj_dict = {"password_set": False}
-        policy_param = {"password": "newpassword"}
+        policy_param = {"password": get_test_synciq_password()}
 
         modify_dict = {}
         _check_password_field(policy_obj_dict, policy_param, modify_dict)
-        assert modify_dict == {"password": "newpassword"}
+        assert modify_dict == {"password": get_test_synciq_password()}
