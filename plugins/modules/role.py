@@ -295,25 +295,20 @@ class Role(PowerScaleBase):
             if role_obj:
                 role_details = role_obj.roles[0]
                 role_details = role_details.to_dict()
-                msg = f"Role details are: {role_details}"
-                LOG.info(msg)
+                LOG.info("Successfully retrieved role details")
                 return role_details
 
         except utils.ApiException as e:
             if str(e.status) == "404":
-                log_msg = f"Role {role_name} status is {e.status}"
-                LOG.info(log_msg)
+                LOG.info("Role not found: %s", role_name)
                 return None
             else:
-                error_msg = utils.determine_error(error_obj=e)
-                error_message = f"Failed to get details of Role " \
-                                f"{role_name} with error {str(error_msg)}"
+                error_message = f"Failed to get details of Role {role_name}"
                 LOG.error(error_message)
                 self.module.fail_json(msg=error_message)
 
         except Exception as e:
-            error_msg = f"Got error {utils.determine_error(e)} while getting" \
-                        f" Role details: {role_name}"
+            error_msg = f"Failed to get Role details: {role_name}"
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
@@ -409,23 +404,18 @@ class Role(PowerScaleBase):
         """Create Role"""
         role = self._create_role_params_object(role_params)
         try:
-            msg = f'Creating Role with parameters: {role})'
-            LOG.info(msg)
+            LOG.info('Creating role: %s', role_params.get('name', 'unknown'))
             role_details = {}
             if not self.module.check_mode:
                 response = self.auth_api.create_auth_role(role, zone=role_params['access_zone'])
-                msg = f'reponse from array: {response})'
-                LOG.info(msg)
+                LOG.info('Role creation response received from array')
                 if response:
                     role_details = self.get_role_details(role_params['role_name'], role_params['access_zone'])
-                msg = f"Successfully created auth role with " \
-                      f"details {role_details}."
-                LOG.info(msg)
+                LOG.info('Successfully created auth role')
                 return role_details
 
         except Exception as e:
-            error_msg = f"Create role with failed with error" \
-                        f": {utils.determine_error(e)}"
+            error_msg = "Create role failed"
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
@@ -451,8 +441,7 @@ class Role(PowerScaleBase):
                 return self.get_role_details(role_name, access_zone)
 
         except Exception as e:
-            error_msg = f"Delete role {role_name}failed with " \
-                        f"error: {utils.determine_error(e)}"
+            error_msg = f"Delete role {role_name} failed"
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
@@ -476,9 +465,7 @@ class Role(PowerScaleBase):
             return True
 
         except Exception as e:
-            error_msg = f"Modify role with {modify_params} " \
-                        f"failed with " \
-                        f"error: {utils.determine_error(e)}"
+            error_msg = "Modify role failed"
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 
@@ -657,22 +644,17 @@ class Role(PowerScaleBase):
         """Copy the role"""
         copy_role = self.create_copy_params(new_name, role_params, role_details)
         try:
-            msg = f'Creating Role with parameters in copy: {copy_role})'
-            LOG.info(msg)
+            LOG.info('Creating role copy: %s', new_name)
             role_details = {}
             if not self.module.check_mode:
                 response = self.auth_api.create_auth_role(copy_role, zone=role_params['access_zone'])
-                msg = f'reponse from array: {response})'
-                LOG.info(msg)
+                LOG.info('Role copy response received from array')
                 if response:
                     role_details = self.get_role_details(new_name, role_params['access_zone'])
-                msg = f"Successfully created auth role with " \
-                    f"details {role_details}."
-                LOG.info(msg)
+                LOG.info('Successfully created auth role copy')
                 return role_details
         except Exception as e:
-            error_msg = f"Create role with failed with error" \
-                        f": {utils.determine_error(e)}"
+            error_msg = "Create role failed"
             LOG.error(error_msg)
             self.module.fail_json(msg=error_msg)
 

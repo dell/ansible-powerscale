@@ -39,10 +39,7 @@ class Auth:
                 zone=zone, provider=provider).to_dict()
             return resp
         except Exception as e:
-            error_msg = utils.determine_error(error_obj=e)
-            error_message = f'Failed to get the group details for group {name} ' \
-                            f'in zone {zone} and provider {provider} due to' \
-                            f' error {str(error_msg)}'
+            error_message = f'Failed to get the group details for group {name}'
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
@@ -60,10 +57,7 @@ class Auth:
                 zone=zone, provider=provider).to_dict()
             return resp
         except Exception as e:
-            error_msg = utils.determine_error(error_obj=e)
-            error_message = f'Failed to get the user details for {name} in zone ' \
-                            f'{zone} and provider {provider} due to error ' \
-                            f'{error_msg}.'
+            error_message = f'Failed to get the user details for {name}'
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
@@ -83,9 +77,7 @@ class Auth:
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
         except Exception as e:
-            error_msg = utils.determine_error(error_obj=e)
-            error_message = (f'Failed to get the wellknown id for wellknown '
-                             f'{name} due to error {str(error_msg)}.')
+            error_message = f'Failed to get the wellknown id for wellknown {name}'
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
@@ -119,9 +111,7 @@ class Auth:
             resp = self.auth_api.list_auth_roles(zone=zone).to_dict()
             return resp
         except Exception as e:
-            error_msg = utils.determine_error(error_obj=e)
-            error_message = f'Failed to get the auth role list ' \
-                            f'due to error {error_msg}.'
+            error_message = 'Failed to get the auth role list'
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
@@ -149,14 +139,9 @@ class Auth:
                 user_list_details = (self.auth_api.list_auth_users(resume=resume, **filter_params)).to_dict()
                 user_list.extend(user_list_details['users'])
                 resume = user_list_details['resume']
-            msg = f"Got user list from PowerScale cluster {self.module.params['onefs_host']}"
-            LOG.info(msg)
+            LOG.info("Successfully retrieved user list from PowerScale cluster")
             return user_list
         except Exception as e:
-            error_msg = (
-                'Get Users List for PowerScale cluster: {0} and access zone: {1} '
-                'failed with error: {2}' .format(
-                    self.module.params['onefs_host'], zone,
-                    utils.determine_error(e)))
-            LOG.error(error_msg)
+            error_message = 'Get Users List for PowerScale cluster and access zone failed'
+            LOG.error(error_message)
             self.module.fail_json(msg=error_msg)
