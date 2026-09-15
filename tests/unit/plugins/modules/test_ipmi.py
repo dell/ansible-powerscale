@@ -160,7 +160,7 @@ class TestIpmi(PowerScaleUnitBase):
     def test_update_user_password_always_changed(self, powerscale_module_mock):
         """Test that user password update always marks changed."""
         powerscale_module_mock.module.params = self._get_args({
-            "user": {"username": "admin", "password": "get_test_password()"},
+            "user": {"username": "admin", "password": get_test_password()},
         })
         current_config = copy.deepcopy(MockIpmiApi.IPMI_FULL_CONFIG_RESPONSE)
 
@@ -255,7 +255,7 @@ class TestIpmi(PowerScaleUnitBase):
         powerscale_module_mock.module.params = self._get_args({
             "settings": {"enabled": False},
             "network": {"gateway": "10.0.0.2"},
-            "user": {"username": "newadmin", "password": "get_test_password()"},
+            "user": {"username": "newadmin", "password": get_test_password()},
             "features": [{"id": "sol", "enabled": True}],
         })
         current_config = copy.deepcopy(MockIpmiApi.IPMI_FULL_CONFIG_RESPONSE)
@@ -327,7 +327,7 @@ class TestIpmi(PowerScaleUnitBase):
     def test_update_user_exception(self, powerscale_module_mock):
         """Test exception during user update."""
         powerscale_module_mock.module.params = self._get_args({
-            "user": {"username": "admin", "password": "get_test_password()"},
+            "user": {"username": "admin", "password": get_test_password()},
         })
         current_config = copy.deepcopy(MockIpmiApi.IPMI_FULL_CONFIG_RESPONSE)
 
@@ -431,7 +431,7 @@ class TestIpmi(PowerScaleUnitBase):
         powerscale_module_mock.module.params = self._get_args({
             "settings": {"enabled": False},
             "network": {"gateway": "10.0.0.2"},
-            "user": {"username": "newuser", "password": "get_test_password()"},
+            "user": {"username": "newuser", "password": get_test_password()},
             "features": [{"id": "sol", "enabled": True}],
         })
         powerscale_module_mock.module.check_mode = True
@@ -480,7 +480,7 @@ class TestIpmi(PowerScaleUnitBase):
     def test_diff_mode_user_password_excluded(self, powerscale_module_mock):
         """Test that diff mode excludes password from user state."""
         powerscale_module_mock.module.params = self._get_args({
-            "user": {"username": "newadmin", "password": "get_test_password()"},
+            "user": {"username": "newadmin", "password": get_test_password()},
         })
         powerscale_module_mock.module._diff = True
         current_config = copy.deepcopy(MockIpmiApi.IPMI_FULL_CONFIG_RESPONSE)
@@ -523,7 +523,7 @@ class TestIpmi(PowerScaleUnitBase):
         powerscale_module_mock.module.params = self._get_args({
             "settings": {"enabled": False},
             "network": {"gateway": "10.0.0.2"},
-            "user": {"username": "newadmin", "password": "get_test_password()"},
+            "user": {"username": "newadmin", "password": get_test_password()},
             "features": [{"id": "sol", "enabled": True}],
         })
         powerscale_module_mock.module._diff = True
@@ -639,7 +639,7 @@ class TestIpmi(PowerScaleUnitBase):
     def test_user_password_only_update(self, powerscale_module_mock):
         """Test user update with only password (no username)."""
         powerscale_module_mock.module.params = self._get_args({
-            "user": {"username": None, "password": "get_test_password()"},
+            "user": {"username": None, "password": get_test_password()},
         })
         current_config = copy.deepcopy(MockIpmiApi.IPMI_FULL_CONFIG_RESPONSE)
 
@@ -654,7 +654,7 @@ class TestIpmi(PowerScaleUnitBase):
         assert powerscale_module_mock.module.exit_json.call_args[1]["changed"] is True
         call_args = powerscale_module_mock.ipmi_api.update_ipmi_user.call_args[0][0]
         assert "username" not in call_args
-        assert call_args["password"] == "get_test_password()"
+        assert call_args["password"] == get_test_password()
 
 
 class TestIpmiApi:
@@ -951,7 +951,7 @@ class TestIpmiApi:
         """Test update_ipmi_user makes PUT request."""
         self._setup_request_mock(mock_open_url, {})
         api = self._make_api()
-        api.update_ipmi_user({"username": "admin", "password": "get_test_password()"})
+        api.update_ipmi_user({"username": "admin", "password": get_test_password()})
         assert mock_open_url.call_count == 3
 
     def test_update_ipmi_user_exception(self, mock_open_url):
