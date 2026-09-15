@@ -272,7 +272,7 @@ class TestGroup(PowerScaleUnitBase):
                                MockGroupApi.get_update_group_payload(user_state="absent-in-group"))
         self.update_group(powerscale_module_mock, call_delete_member_exception=True, run_operation=False)
         self.capture_fail_json_method(
-            "Remove user GID:1000 from group failed with ",
+            "Remove user GID:1000 from group failed",
             powerscale_module_mock,
             "perform_module_operation",
         )
@@ -281,7 +281,7 @@ class TestGroup(PowerScaleUnitBase):
         self.set_module_params(self.group_args, MockGroupApi.get_update_group_payload())
         self.update_group(powerscale_module_mock, call_mapping_identity_exception=True, run_operation=False)
         self.capture_fail_json_method(
-            "Get user_name for 1000 failed with  ",
+            "Get user_name for 1000 failed",
             powerscale_module_mock,
             "perform_module_operation",
         )
