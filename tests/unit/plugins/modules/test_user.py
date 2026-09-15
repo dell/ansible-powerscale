@@ -18,16 +18,17 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shar
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.powerscale_unit_base \
     import PowerScaleUnitBase
 from ansible_collections.dellemc.powerscale.plugins.modules.user import User, get_user_parameters
-
-
-def get_test_user_password():
-    """Get test user password from environment or use a secure default."""
-    return os.environ.get('TEST_USER_PASSWORD', 'test_user_secure_default')
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_user_api \
     import MockUserApi
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_api_exception \
     import MockApiException
 from ansible.module_utils.compat.version import LooseVersion
+
+
+def get_test_user_password():
+    """Get test user password from environment or use a secure default."""
+    return os.environ.get('TEST_USER_PASSWORD', 'test_user_secure_default')
+
 
 utils.pkg_resources = MagicMock()
 utils.parse_version = LooseVersion

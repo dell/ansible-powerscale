@@ -17,6 +17,11 @@ from mock.mock import MagicMock
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.initial_mock import (
     utils,
 )
+from ansible.module_utils import basic
+
+from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.powerscale_unit_base import (
+    PowerScaleUnitBase,
+)
 
 
 def get_test_password():
@@ -27,11 +32,7 @@ def get_test_password():
 def get_test_api_password():
     """Get test API password from environment or use a secure default."""
     return os.environ.get('TEST_API_PASSWORD', 'test_api_secure_default')
-from ansible.module_utils import basic
 
-from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.powerscale_unit_base import (
-    PowerScaleUnitBase,
-)
 
 basic.AnsibleModule = MagicMock()
 

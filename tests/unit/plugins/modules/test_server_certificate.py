@@ -14,11 +14,6 @@ from mock.mock import MagicMock
 # pylint: disable=unused-import
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.initial_mock \
     import utils
-
-
-def get_test_key_password():
-    """Get test key password from environment or use a secure default."""
-    return os.environ.get('TEST_KEY_PASSWORD', 'test_key_secure_default')
 from ansible_collections.dellemc.powerscale.plugins.modules.server_certificate import ServerCertificate, ServerCertificateHandler
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_server_certificate_api \
     import MockServerCertificateApi
@@ -26,6 +21,11 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock
     import MockApiException
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.powerscale_unit_base \
     import PowerScaleUnitBase
+
+
+def get_test_key_password():
+    """Get test key password from environment or use a secure default."""
+    return os.environ.get('TEST_KEY_PASSWORD', 'test_key_secure_default')
 
 
 CRT_PATH = "/ifs/server.crt"

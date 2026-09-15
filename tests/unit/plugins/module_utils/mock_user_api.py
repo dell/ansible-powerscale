@@ -157,8 +157,8 @@ class MockUserApi:
     @staticmethod
     def get_error_responses(response_type):
         err_msg_dict = {
-            "get_create_user_id": "Create User 'test_user_1' failed with ",
-            "get_user_details_error": "Get User Details UID:7000 failed with ",
+            "get_create_user_id": "Create User 'test_user_1' failed",
+            "get_user_details_error": "Get User Details UID:7000 failed",
             "get_user_details_role_error": "Exception when calling AuthApi->list_auth_roles",
             "create_user_with_empty_name": "Unable to create a user, 'user_name' is missing",
             "create_user_with_empty_password": "Unable to create a user, 'password' is missing",
@@ -169,12 +169,12 @@ class MockUserApi:
             "param_error_email_format": "Email is not in the correct format",
             "param_error_role_name_and_state": "role_name and role_state both are required",
             "param_error_role_and_zone": "roles can be assigned to users and groups of System Access Zone",
-            "delete_user_error": "Delete User 'UID:7000' failed with ",
+            "delete_user_error": "Delete User 'UID:7000' failed",
             "delete_user_non_local_provider_error": "Cannot delete user from fake-provider provider_type",
-            "update_user_error": "Update User 'UID:7000' failed with ",
-            "update_user_add_role_error": "Add user UID:7000 to role AuditAdmin failed with SDK Error message",
-            "update_user_remove_role_error": "Remove user UID:7000 from role AuditAdmin failed with SDK Error message",
-            "update_password_error": "Update password for User 'UID:7000' failed with",
+            "update_user_error": "Update User 'UID:7000' failed",
+            "update_user_add_role_error": "Add user UID:7000 to role AuditAdmin failed",
+            "update_user_remove_role_error": "Remove user UID:7000 from role AuditAdmin failed",
+            "update_password_error": "Update password for User 'UID:7000' failed",
             "password_expires_non_local_provider": "password_expires is only supported for local users",
             "expiry_non_local_provider": "expiry is only supported for local users",
             "expiry_invalid_type": "expiry must be a Unix epoch timestamp (integer)",

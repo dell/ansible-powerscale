@@ -724,7 +724,7 @@ class User(object):
 
     def get_user_details(self, auth_user_id, zone, provider):
         """Get the User Account Details in PowerScale"""
-        error_msg = "Get User Details %s failed with %s"
+        error_msg = "Get User Details %s failed"
         try:
             api_response = self.api_instance.get_auth_user(
                 auth_user_id=auth_user_id,

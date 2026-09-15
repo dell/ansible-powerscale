@@ -967,7 +967,7 @@ class MockGatherfactsApi:
                 ]
             }
         else:
-            return "Get Users List for PowerScale cluster: **.***.**.*** and access zone: System failed with error: SDK Error message"
+            return "Get Users List for PowerScale cluster and access zone failed"
 
     @staticmethod
     def get_groups_response(response_type):
@@ -1299,7 +1299,7 @@ class MockGatherfactsApi:
                         ]
                     }]
         else:
-            return "Failed to get the auth role list due to error SDK Error message."
+            return "Failed to get the auth role list"
 
     @staticmethod
     def get_support_assist_settings(response_type):

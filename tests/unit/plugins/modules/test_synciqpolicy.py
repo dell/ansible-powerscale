@@ -17,17 +17,17 @@ from mock.mock import MagicMock
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
     import utils
 from ansible_collections.dellemc.powerscale.plugins.modules.synciqpolicy import SynciqPolicy, SynciqPolicyHandler, main
-
-
-def get_test_synciq_password():
-    """Get test SyncIQ password from environment or use a secure default."""
-    return os.environ.get('TEST_SYNCIQ_PASSWORD', 'test_synciq_secure_default')
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils \
     import mock_synciqpolicy_api as MockSynciqApi
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_api_exception \
     import MockApiException
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.powerscale_unit_base \
     import PowerScaleUnitBase
+
+
+def get_test_synciq_password():
+    """Get test SyncIQ password from environment or use a secure default."""
+    return os.environ.get('TEST_SYNCIQ_PASSWORD', 'test_synciq_secure_default')
 
 
 class Policy:

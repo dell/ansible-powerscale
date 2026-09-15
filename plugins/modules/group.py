@@ -626,7 +626,7 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
 import re
 
 LOG = utils.get_logger('group')
-GET_GROUP_ERR_MSG = "Get Group Details %s failed with %s"
+GET_GROUP_ERR_MSG = "Get Group Details %s failed"
 # Cross-provider group membership requires OneFS to resolve a member by its
 # unique id across authentication providers, supported from OneFS 9.11.0.
 MIN_ONEFS_VERSION_CROSS_PROVIDER = '9.11.0'
