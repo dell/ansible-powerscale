@@ -144,4 +144,4 @@ class Auth:
         except Exception as e:
             error_message = 'Get Users List for PowerScale cluster and access zone failed'
             LOG.error(error_message)
-            self.module.fail_json(msg=error_msg)
+            self.module.fail_json(msg=error_message)
