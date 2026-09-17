@@ -214,7 +214,7 @@ class TestGroup(PowerScaleUnitBase):
         self.set_module_params(self.group_args, MockGroupApi.CREATE_GROUP_PAYLOAD)
         self.create_group(powerscale_module_mock, call_create_exception=True, run_operation=False)
         self.capture_fail_json_method(
-            "Create Group test_group failed with ",
+            "Create Group test_group failed",
             powerscale_module_mock,
             "perform_module_operation",
         )
@@ -223,7 +223,7 @@ class TestGroup(PowerScaleUnitBase):
         self.set_module_params(self.group_args, MockGroupApi.get_create_group_payload(id=1000))
         self.create_group(powerscale_module_mock, call_get_exception=True, run_operation=False)
         self.capture_fail_json_method(
-            "Get Group Details GID:1000 failed with ",
+            "Get Group Details GID:1000 failed",
             powerscale_module_mock,
             "perform_module_operation",
         )
@@ -232,7 +232,7 @@ class TestGroup(PowerScaleUnitBase):
         self.set_module_params(self.group_args, MockGroupApi.get_create_group_payload(id=1000))
         self.create_group(powerscale_module_mock, call_get_exception='500', run_operation=False)
         self.capture_fail_json_method(
-            "Get Group Details GID:1000 failed with SDK Error message",
+            "Get Group Details GID:1000 failed",
             powerscale_module_mock,
             "perform_module_operation",
         )
@@ -256,7 +256,7 @@ class TestGroup(PowerScaleUnitBase):
         self.set_module_params(self.group_args, MockGroupApi.get_update_group_payload())
         self.update_group(powerscale_module_mock, call_create_member_exception=True, run_operation=False)
         self.capture_fail_json_method(
-            "Add user UID:1000 to group failed with  ",
+            "Add user UID:1000 to group failed",
             powerscale_module_mock,
             "perform_module_operation",
         )
@@ -272,7 +272,7 @@ class TestGroup(PowerScaleUnitBase):
                                MockGroupApi.get_update_group_payload(user_state="absent-in-group"))
         self.update_group(powerscale_module_mock, call_delete_member_exception=True, run_operation=False)
         self.capture_fail_json_method(
-            "Remove user GID:1000 from group failed with ",
+            "Remove user GID:1000 from group failed",
             powerscale_module_mock,
             "perform_module_operation",
         )
@@ -281,7 +281,7 @@ class TestGroup(PowerScaleUnitBase):
         self.set_module_params(self.group_args, MockGroupApi.get_update_group_payload())
         self.update_group(powerscale_module_mock, call_mapping_identity_exception=True, run_operation=False)
         self.capture_fail_json_method(
-            "Get user_name for 1000 failed with  ",
+            "Get user_name for 1000 failed",
             powerscale_module_mock,
             "perform_module_operation",
         )
@@ -899,7 +899,7 @@ class TestGroup(PowerScaleUnitBase):
         self.set_module_params(self.group_args, MockGroupApi.get_delete_group_payload())
         self.delete_group(powerscale_module_mock, call_delete_exception=True)
         self.capture_fail_json_method(
-            "Delete GID:1000  failed with ",
+            "Delete GID:1000 failed",
             powerscale_module_mock,
             "perform_module_operation",
         )

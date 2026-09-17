@@ -8,6 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 
 __metaclass__ = type
 
+import os
 import pytest
 from mock.mock import MagicMock
 # pylint: disable=unused-import
@@ -22,9 +23,14 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shar
     import PowerScaleUnitBase
 
 
+def get_test_key_password():
+    """Get test key password from environment or use a secure default."""
+    return os.environ.get('TEST_KEY_PASSWORD', 'test_key_secure_default')
+
+
 CRT_PATH = "/ifs/server.crt"
 KEY_PATH = "/ifs/server.key"
-KEY_PASSWORD = "test_key_password_placeholder"
+KEY_PASSWORD = get_test_key_password()
 ALIAS_NAME = "test"
 CERTIFICATE_ID = "6999b9c02949c962e84b600560a8faf001ab24438a474c2f662c95a17cd81034"
 

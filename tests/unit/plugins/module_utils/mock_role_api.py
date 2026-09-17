@@ -345,9 +345,9 @@ class MockRoleApi:
     @staticmethod
     def get_role_exception_response(response_type):
         if response_type == 'delete_role_exception':
-            return "Delete role Test_Role123failed with error: SDK Error message"
+            return "Delete role Test_Role123 failed"
         elif response_type == 'create_role_exception':
-            return "Create role with failed with error: SDK Error message"
+            return "Create role failed"
         elif response_type == 'role_name_empty':
             return "Role name cannot be empty"
         elif response_type == 'description_invalid_length':
@@ -357,8 +357,8 @@ class MockRoleApi:
         if response_type == 'get_details_exception':
             return "Failed to get details of Role"
         elif response_type == 'modify_exception':
-            return "failed with error: SDK Error message"
+            return "Modify role failed"
         elif response_type == 'empty_name_exception':
             return "Role name cannot be empty"
         elif response_type == 'invalid_privilege_exception':
-            return "Privilage invalid_privilege is either invalid or cannot be added to role in non-System access zone."
+            return "Privilege invalid_privilege is either invalid or cannot be added to role in non-System access zone."

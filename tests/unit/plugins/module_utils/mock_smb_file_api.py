@@ -11,7 +11,7 @@ __metaclass__ = type
 MODULE_UTILS_PATH = 'ansible_collections.dellemc.powerscale.plugins.modules.smb_file.utils'
 
 SmbFile = {'openfiles': [{
-    'file': 'C:\\ifs',
+    'file': '/ifs/data',
     'id': 1593,
     'locks': 0,
     'permissions': ['read'],

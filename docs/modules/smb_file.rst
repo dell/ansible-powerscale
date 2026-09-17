@@ -126,11 +126,11 @@ changed (always, bool, false)
   A boolean indicating if the task had to make changes.
 
 
-smb_file_details (always, dict, {'smb_file_details': [{'file': 'C:\\ifs', 'id': 1370, 'locks': 0, 'permissions': ['read'], 'user': 'admin'}]})
+smb_file_details (always, dict, {'smb_file_details': [{'file': '/ifs/data', 'id': 1370, 'locks': 0, 'permissions': ['read'], 'user': 'admin'}]})
   The SMB file details.
 
 
-  file (, str, C:\\ifs)
+  file (, str, /ifs/data)
     Path of file within /ifs.
 
 

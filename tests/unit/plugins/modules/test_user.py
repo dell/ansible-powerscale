@@ -8,6 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 
 __metaclass__ = type
 
+import os
 import pytest
 from mock.mock import patch, MagicMock
 
@@ -22,6 +23,12 @@ from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock
 from ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.mock_api_exception \
     import MockApiException
 from ansible.module_utils.compat.version import LooseVersion
+
+
+def get_test_user_password():
+    """Get test user password from environment or use a secure default."""
+    return os.environ.get('TEST_USER_PASSWORD', 'test_user_secure_default')
+
 
 utils.pkg_resources = MagicMock()
 utils.parse_version = LooseVersion
@@ -52,7 +59,7 @@ class TestUser(PowerScaleUnitBase):
             'access_zone': "System",
             'provider_type': "local",
             'full_name': 'Test User',
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'email': 'test_user_2@gamil.com',
             'shell': "/usr/local/bin/zsh",
             'primary_group': "Isilon Users",
@@ -83,7 +90,7 @@ class TestUser(PowerScaleUnitBase):
             'access_zone': "System",
             'provider_type': "local",
             'full_name': 'Test User',
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'email': 'test_user_2@gamil.com',
             'shell': "/usr/local/bin/zsh",
             'primary_group': "Isilon Users",
@@ -100,7 +107,7 @@ class TestUser(PowerScaleUnitBase):
             'access_zone': "non-System",
             'provider_type': "local",
             'full_name': 'Test User',
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'email': 'test_user_2@gamil.com',
             'shell': "/usr/local/bin/zsh",
             'primary_group': "Isilon Users",
@@ -115,7 +122,7 @@ class TestUser(PowerScaleUnitBase):
             'access_zone': "System",
             'provider_type': "local",
             'full_name': 'Test User',
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'email': 'test_user_2@gamil.com',
             'shell': "/usr/local/bin/zsh",
             'primary_group': "Isilon Users",
@@ -142,7 +149,7 @@ class TestUser(PowerScaleUnitBase):
             'access_zone': "System",
             'provider_type': "local",
             'full_name': 'Test User',
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'email': 'test_user_2@gamil.com',
             'shell': "/usr/local/bin/zsh",
             'primary_group': "Isilon Users",
@@ -164,7 +171,7 @@ class TestUser(PowerScaleUnitBase):
             'access_zone': "System",
             'provider_type': "local",
             'full_name': 'Test User',
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'email': 'test_user_2@gamil.com',
             'shell': "/usr/local/bin/zsh",
             'primary_group': "Isilon Users",
@@ -205,7 +212,7 @@ class TestUser(PowerScaleUnitBase):
             'access_zone': "System",
             'provider_type': "local",
             'full_name': 'Test User',
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'email': 'test_user_2@gamil.com',
             'shell': "/usr/local/bin/zsh",
             'primary_group': "Isilon Users",
@@ -222,7 +229,7 @@ class TestUser(PowerScaleUnitBase):
             'access_zone': "System",
             'provider_type': "local",
             'full_name': 'Test User',
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'email': 'test_user_2@gamil.com',
             'shell': "/usr/local/bin/zsh",
             'primary_group': "Isilon Users",
@@ -243,7 +250,7 @@ class TestUser(PowerScaleUnitBase):
             'access_zone': "System",
             'provider_type': "ldap",
             'full_name': 'Test User',
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'email': 'test_user_2@gamil.com',
             'shell': "/usr/local/bin/zsh",
             'primary_group': "Isilon Users",
@@ -266,7 +273,7 @@ class TestUser(PowerScaleUnitBase):
             'access_zone': "System",
             'provider_type': "local",
             'full_name': 'Test User',
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'email': 'test_user_2@gamil.com',
             'shell': "/usr/local/bin/zsh",
             'primary_group': "Isilon Users",
@@ -282,7 +289,7 @@ class TestUser(PowerScaleUnitBase):
             'access_zone': "test-zone",
             'provider_type': "local",
             'full_name': 'Test User',
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'home_directory': "test_user_1",
             'email': 'test_user_2@gamil.com',
             'shell': "/usr/local/bin/zsh",
@@ -300,7 +307,7 @@ class TestUser(PowerScaleUnitBase):
             'access_zone': "test-zone",
             'provider_type': "local",
             'full_name': 'Test User',
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'home_directory': "test_user_1",
             'email': 'test_user_2@gamil.com',
             'shell': "/usr/local/bin/zsh",
@@ -319,7 +326,7 @@ class TestUser(PowerScaleUnitBase):
             'access_zone': "test-zone",
             'provider_type': "local",
             'full_name': 'Test User',
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'home_directory': "test_user_1",
             'email': 'fake_email',
             'shell': "/usr/local/bin/zsh",
@@ -338,7 +345,7 @@ class TestUser(PowerScaleUnitBase):
             'access_zone': "test-zone",
             'provider_type': "local",
             'full_name': 'Test User',
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'home_directory': "test_user_1",
             'email': 'test_user_2@gamil.com',
             'shell': "/usr/local/bin/zsh",
@@ -357,7 +364,7 @@ class TestUser(PowerScaleUnitBase):
             'access_zone': "test-zone",
             'provider_type': "local",
             'full_name': 'Test User',
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'home_directory': "test_user_1",
             'email': 'test_user_2@gamil.com',
             'shell': "/usr/local/bin/zsh",
@@ -377,7 +384,7 @@ class TestUser(PowerScaleUnitBase):
             'access_zone': "System",
             'provider_type': "local",
             'full_name': 'Test User',
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'home_directory': "/home/test_user_1",
             'email': 'test_user_2@gamil.com',
             'shell': "/usr/local/bin/zsh",
@@ -399,7 +406,7 @@ class TestUser(PowerScaleUnitBase):
             'access_zone': "System",
             'provider_type': "local",
             'full_name': 'Test User',
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'home_directory': "/home/test_user_1",
             'email': 'test_user_2@gamil.com',
             'shell': "/usr/local/bin/zsh",
@@ -422,7 +429,7 @@ class TestUser(PowerScaleUnitBase):
             'user_id': 7000,
             'access_zone': "System",
             'provider_type': "local",
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'email': 'test_user_2@gamil.com',
             'state': 'present'})
         powerscale_module_mock.get_user_details = MagicMock(
@@ -439,7 +446,7 @@ class TestUser(PowerScaleUnitBase):
             'provider_type': "local",
             'full_name': 'Test User',
             'update_password': 'always',
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'home_directory': "/home/test_user_1",
             'email': 'test_user_2@gamil.com',
             'shell': "/usr/local/bin/zsh",
@@ -465,7 +472,7 @@ class TestUser(PowerScaleUnitBase):
             'provider_type': "local",
             'full_name': 'Test User',
             'update_password': 'always',
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'home_directory': "/home/test_user_1",
             'email': 'test_user_2@gamil.com',
             'shell': "/usr/local/bin/zsh",
@@ -495,7 +502,7 @@ class TestUser(PowerScaleUnitBase):
             'provider_type': "local",
             'full_name': 'Test User',
             'update_password': 'always',
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'home_directory': "/home/test_user_1",
             'email': 'test_user_2@gamil.com',
             'shell': "/usr/local/bin/zsh",
@@ -521,7 +528,7 @@ class TestUser(PowerScaleUnitBase):
             'provider_type': "local",
             'full_name': 'Test User',
             'update_password': 'always',
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'home_directory': "/home/test_user_1",
             'email': 'test_user_2@gamil.com',
             'shell': "/usr/local/bin/zsh",
@@ -560,7 +567,7 @@ class TestUser(PowerScaleUnitBase):
             'provider_type': "local",
             'full_name': 'Test User',
             'update_password': 'always',
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'home_directory': "/home/test_user_1",
             'email': 'test_user_2@gamil.com',
             'shell': "/usr/local/bin/zsh",
@@ -594,7 +601,7 @@ class TestUser(PowerScaleUnitBase):
             'user_name': "test_user_1",
             'access_zone': "System",
             'provider_type': "ldap",
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'password_expires': True,
             'state': 'present'})
         powerscale_module_mock.get_user_details = MagicMock(
@@ -608,7 +615,7 @@ class TestUser(PowerScaleUnitBase):
             'user_name': "test_user_1",
             'access_zone': "System",
             'provider_type': "local",
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'password_expires': True,
             'state': 'present'})
         powerscale_module_mock.validate_local_only_params("local")
@@ -620,7 +627,7 @@ class TestUser(PowerScaleUnitBase):
             'user_name': "test_user_1",
             'access_zone': "System",
             'provider_type': "ads",
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'expiry': MockUserApi.VALID_EXPIRY,
             'state': 'present'})
         powerscale_module_mock.get_user_details = MagicMock(
@@ -635,7 +642,7 @@ class TestUser(PowerScaleUnitBase):
             'user_name': "test_user_1",
             'access_zone': "System",
             'provider_type': "local",
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'expiry': invalid_expiry,
             'state': 'present'})
         powerscale_module_mock.get_user_details = MagicMock(
@@ -652,7 +659,7 @@ class TestUser(PowerScaleUnitBase):
             'user_name': "test_user_1",
             'access_zone': "System",
             'provider_type': "local",
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'expiry': invalid_expiry,
             'state': 'present'})
         powerscale_module_mock.get_user_details = MagicMock(
@@ -667,7 +674,7 @@ class TestUser(PowerScaleUnitBase):
             'user_name': "test_user_1",
             'access_zone': "System",
             'provider_type': "local",
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'expiry': valid_expiry,
             'state': 'present'})
         powerscale_module_mock.validate_expiry()
@@ -679,7 +686,7 @@ class TestUser(PowerScaleUnitBase):
             'user_name': "test_user_1",
             'access_zone': "System",
             'provider_type': "ldap",
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'expiry': MockUserApi.VALID_EXPIRY,
             'state': 'present'})
         powerscale_module_mock.get_user_details = MagicMock(
@@ -701,7 +708,7 @@ class TestUser(PowerScaleUnitBase):
             'user_id': 7000,
             'access_zone': "System",
             'provider_type': "local",
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'password_expires': False,
             'expiry': MockUserApi.VALID_EXPIRY,
             'state': 'present'})
@@ -730,7 +737,7 @@ class TestUser(PowerScaleUnitBase):
             'user_id': 7000,
             'access_zone': "System",
             'provider_type': "local",
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'email': 'test_user_2@gamil.com',
             'state': 'present'})
         powerscale_module_mock.get_user_details = MagicMock(
@@ -749,7 +756,7 @@ class TestUser(PowerScaleUnitBase):
             'user_id': 7000,
             'access_zone': "System",
             'provider_type': "local",
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'email': 'test_user_2@gamil.com',
             'state': 'present'})
         powerscale_module_mock.get_user_details = MagicMock(
@@ -769,7 +776,7 @@ class TestUser(PowerScaleUnitBase):
             'user_id': 7000,
             'access_zone': "System",
             'provider_type': "local",
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'email': 'test_user_2@gamil.com',
             'expiry': 0,
             'state': 'present'})
@@ -794,7 +801,7 @@ class TestUser(PowerScaleUnitBase):
             'user_id': 7000,
             'access_zone': "System",
             'provider_type': "local",
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'email': 'test_user_2@gamil.com',
             'password_expires': False,
             'state': 'present'})
@@ -815,7 +822,7 @@ class TestUser(PowerScaleUnitBase):
             'user_id': 7000,
             'access_zone': "System",
             'provider_type': "local",
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'email': 'test_user_2@gamil.com',
             'password_expires': True,
             'expiry': MockUserApi.VALID_EXPIRY,
@@ -837,7 +844,7 @@ class TestUser(PowerScaleUnitBase):
             'user_id': 7000,
             'access_zone': "System",
             'provider_type': "local",
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'email': 'test_user_2@gamil.com',
             'state': 'present'})
         mock_api_response = MagicMock()
@@ -875,7 +882,7 @@ class TestUser(PowerScaleUnitBase):
             'user_id': 7000,
             'access_zone': "System",
             'provider_type': "local",
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'email': 'test_user_2@gamil.com',
             'password_expires': False,
             'state': 'present'})
@@ -904,7 +911,7 @@ class TestUser(PowerScaleUnitBase):
             'user_id': 7000,
             'access_zone': "System",
             'provider_type': "local",
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'email': 'test_user_2@gamil.com',
             'expiry': 0,
             'state': 'present'})
@@ -931,7 +938,7 @@ class TestUser(PowerScaleUnitBase):
             'user_id': 7000,
             'access_zone': "System",
             'provider_type': "local",
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'email': 'test_user_2@gamil.com',
             'password_expires': True,
             'expiry': MockUserApi.VALID_EXPIRY,
@@ -956,7 +963,7 @@ class TestUser(PowerScaleUnitBase):
             'user_id': 7000,
             'access_zone': "System",
             'provider_type': "local",
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'email': 'test_user_2@gamil.com',
             'password_expires': False,
             'state': 'present'})
@@ -980,7 +987,7 @@ class TestUser(PowerScaleUnitBase):
             'access_zone': "System",
             'provider_type': "local",
             'full_name': 'Test User',
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'home_directory': "/home/test_user_1",
             'email': 'test_user_2@gamil.com',
             'shell': "/usr/local/bin/zsh",
@@ -1001,7 +1008,7 @@ class TestUser(PowerScaleUnitBase):
             'access_zone': "System",
             'provider_type': "local",
             'full_name': 'Test User',
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'home_directory': "/home/test_user_1",
             'email': 'test_user_2@gamil.com',
             'shell': "/usr/local/bin/zsh",
@@ -1032,7 +1039,7 @@ class TestUser(PowerScaleUnitBase):
             'access_zone': "non-System",
             'provider_type': "local",
             'full_name': 'Test User',
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'home_directory': "/home/test_user_1",
             'email': 'test_user_2@gamil.com',
             'shell': "/usr/local/bin/zsh",
@@ -1052,7 +1059,7 @@ class TestUser(PowerScaleUnitBase):
             'access_zone': "System",
             'provider_type': "local",
             'full_name': 'Test User',
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'home_directory': "/home/test_user_1",
             'email': 'test_user_2@gamil.com',
             'shell': "/usr/local/bin/zsh",
@@ -1075,7 +1082,7 @@ class TestUser(PowerScaleUnitBase):
             'access_zone': "System",
             'provider_type': "fake-provider",
             'full_name': 'Test User',
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'home_directory': "/home/test_user_1",
             'email': 'test_user_2@gamil.com',
             'shell': "/usr/local/bin/zsh",
@@ -1103,7 +1110,7 @@ class TestUser(PowerScaleUnitBase):
             'user_id': 7000,
             'access_zone': "System",
             'provider_type': "local",
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'password_expires': True,
             'expiry': MockUserApi.VALID_EXPIRY,
             'state': 'present'})
@@ -1129,7 +1136,7 @@ class TestUser(PowerScaleUnitBase):
             'user_id': 7000,
             'access_zone': "System",
             'provider_type': "local",
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'password_expires': True,
             'state': 'present'})
         powerscale_module_mock.get_user_details = MagicMock(
@@ -1151,7 +1158,7 @@ class TestUser(PowerScaleUnitBase):
             'user_id': 7000,
             'access_zone': "System",
             'provider_type': "local",
-            'password': 'test_user_password_placeholder',
+            'password': get_test_user_password(),
             'email': 'test_user_2@gamil.com',
             'state': 'present'})
         mocker.patch.object(utils.isi_sdk, 'AuthUser', sdk_model)

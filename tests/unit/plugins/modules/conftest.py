@@ -3,11 +3,17 @@
 
 import sys
 import json
+import os
 import pytest
 from mock.mock import MagicMock
 
 
 UTILS_PATH = 'ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.utils'
+
+
+def get_test_password():
+    """Get test password from environment or use a secure default."""
+    return os.environ.get('TEST_API_PASSWORD', 'test_api_secure_default')
 
 
 @pytest.fixture(autouse=True, scope="function")
@@ -23,7 +29,7 @@ def _patch_ansible_for_unit_tests(monkeypatch, mocker):
         "ANSIBLE_MODULE_ARGS": {
             "onefs_host": "test.example.com",
             "api_user": "admin",
-            "api_password": "test_api_password_placeholder",
+            "api_password": get_test_password(),
             "verify_ssl": "False"
         }
     }

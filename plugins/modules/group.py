@@ -626,7 +626,7 @@ from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell \
 import re
 
 LOG = utils.get_logger('group')
-GET_GROUP_ERR_MSG = "Get Group Details %s failed with %s"
+GET_GROUP_ERR_MSG = "Get Group Details %s failed"
 # Cross-provider group membership requires OneFS to resolve a member by its
 # unique id across authentication providers, supported from OneFS 9.11.0.
 MIN_ONEFS_VERSION_CROSS_PROVIDER = '9.11.0'
@@ -696,9 +696,7 @@ class Group(object):
             self._providers_cache[access_zone] = provider_types
             return provider_types
         except Exception as e:
-            error = self.determine_error(error_obj=e)
-            error_message = "Failed to fetch authentication providers for" \
-                            " access zone '%s': %s" % (access_zone, error)
+            error_message = "Failed to fetch authentication providers for access zone '%s'" % access_zone
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
@@ -733,9 +731,7 @@ class Group(object):
                 LOG.error(error_message)
                 self.module.fail_json(msg=error_message)
         except Exception as e:
-            error = self.determine_error(error_obj=e)
-            error_message = "Failed to determine the OneFS version of the" \
-                            " cluster: %s" % error
+            error_message = "Failed to determine the OneFS version of the cluster"
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
         self._onefs_version_validated = True
@@ -809,10 +805,7 @@ class Group(object):
                      display_name, provider_type, access_zone, resolved_id)
             return resolved_id
         except Exception as e:
-            error = self.determine_error(error_obj=e)
-            error_message = "Failed to resolve user '%s' in provider" \
-                            " '%s', access zone '%s': %s" \
-                            % (display_name, provider_type, access_zone, error)
+            error_message = "Failed to resolve user '%s' in provider '%s', access zone '%s'" % (display_name, provider_type, access_zone)
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
@@ -853,11 +846,7 @@ class Group(object):
                      group_name, provider_type, access_zone, resolved_id)
             return resolved_id
         except Exception as e:
-            error = self.determine_error(error_obj=e)
-            error_message = (
-                "Group '%s' could not be resolved in provider '%s'"
-                " in access zone '%s': %s"
-                % (group_name, provider_type, access_zone, error))
+            error_message = "Group '%s' could not be resolved in provider '%s' in access zone '%s'" % (group_name, provider_type, access_zone)
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
@@ -1082,12 +1071,10 @@ class Group(object):
                 name=group_name, gid=group_id, members=users_list)
             api_response = self.api_instance.create_auth_group(
                 auth_group=auth_group, zone=zone, provider=provider)
-            LOG.info("The group is created with id: %s", str(api_response))
+            LOG.info("Group %s created successfully", group_name)
             return True
         except Exception as e:
-            error = self.determine_error(error_obj=e)
-            error_message = "Create Group %s failed with %s" \
-                            % (group_name, error)
+            error_message = "Create Group %s failed" % group_name
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
@@ -1100,9 +1087,7 @@ class Group(object):
                 group, zone=zone, provider=provider)
             return True
         except Exception as e:
-            error = self.determine_error(error_obj=e)
-            error_message = "Delete %s  failed with %s" \
-                            % (group, error)
+            error_message = "Delete %s failed" % group
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
@@ -1114,7 +1099,7 @@ class Group(object):
                 api_response = self.api_instance.get_auth_group(
                     auth_group_id=group,
                     provider=provider, zone=zone)
-                LOG.info("Group Details: %s", str(api_response))
+                LOG.info("Successfully retrieved group details for group %s", group)
                 api_response_dict = api_response.groups[0].to_dict()
                 group_user_details = self.get_group_members(
                     group, zone, provider)
@@ -1131,19 +1116,15 @@ class Group(object):
                         return item.to_dict()
         except utils.ApiException as e:
             if str(e.status) == "404":
-                error_message = GET_GROUP_ERR_MSG % (
-                    group, self.determine_error(e))
-                LOG.info(error_message)
+                LOG.info("Group not found: %s", group)
                 return None
             else:
-                error_message = GET_GROUP_ERR_MSG % (
-                    group, self.determine_error(e))
+                error_message = GET_GROUP_ERR_MSG % group
                 LOG.error(error_message)
                 self.module.fail_json(msg=error_message)
 
         except Exception as e:
-            error_message = GET_GROUP_ERR_MSG % (
-                group, self.determine_error(e))
+            error_message = GET_GROUP_ERR_MSG % group
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
@@ -1195,13 +1176,11 @@ class Group(object):
                 provider = self.check_provider_type(provider, 'Add User to')
                 api_response = self.group_api_instance.create_group_member(
                     group_member, group, zone=zone, provider=provider)
-            LOG.info(api_response)
+            LOG.info("User successfully added to group")
             self._invalidate_members_cache()
             return True
         except Exception as e:
-            error = self.determine_error(error_obj=e)
-            error_message = "Add user %s to group failed with %s " \
-                            % (user, error)
+            error_message = "Add user %s to group failed" % user
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
@@ -1225,9 +1204,7 @@ class Group(object):
             return True
 
         except Exception as e:
-            error = self.determine_error(error_obj=e)
-            error_message = "Remove user %s from group failed with %s" \
-                            % (group, error)
+            error_message = "Remove user %s from group failed" % group
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
@@ -1240,9 +1217,7 @@ class Group(object):
                 mapping_identity_id, nocreate=True, zone=zone)
             return api_response.identities[0].targets[0].target.name
         except Exception as e:
-            error = self.determine_error(error_obj=e)
-            error_message = "Get user_name for %s failed with  %s" \
-                            % (user_id, error)
+            error_message = "Get user_name for %s failed" % user_id
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
@@ -1542,8 +1517,7 @@ class Group(object):
                      len(self._wellknowns_cache))
             return self._wellknowns_cache
         except Exception as e:
-            error = self.determine_error(error_obj=e)
-            error_message = "Failed to fetch well-known SIDs: %s" % error
+            error_message = "Failed to fetch well-known SIDs"
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 

@@ -176,7 +176,7 @@ class MockSMBApi:
             'modify_err': "Failed to update the SMB share: test_sample_smb with error: SDK Error message",
             'delete_err': "Failed to delete a SMB share: test_sample_smb with error: SDK Error message",
             'modify_path_err': "Modifying path for a SMB Share is not allowed through Ansible Module",
-            'sid_err': "Failed to get the user details for root in zone None and provider None due to error",
+            'sid_err': "Failed to get the user details for root",
             'smb_parm_err': "Failed to get SMB params from details",
             'wellknown_err': "Wellknown root does not exist. Provide valid wellknown"
         }
