@@ -498,8 +498,7 @@ class User(object):
                      access_zone, zone_base_path)
             return zone_base_path
         except Exception as e:
-            error_message = 'Unable to fetch base path of Access Zone %s, ' \
-                            'failed with error: %s' % (access_zone, self.determine_error(e))
+            error_message = 'Unable to fetch base path of Access Zone %s' % access_zone
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
@@ -616,11 +615,9 @@ class User(object):
                 auth_user=auth_user,
                 zone=zone, provider=provider)
 
-            LOG.info('User is created with the SID: %s', str(api_response))
+            LOG.info('User %s created successfully', user_name)
         except Exception as e:
-            error = self.determine_error(error_obj=e)
-            error_message = \
-                "Create User '%s' failed with %s" % (user_name, error)
+            error_message = "Create User '%s' failed" % user_name
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
@@ -633,9 +630,7 @@ class User(object):
             LOG.info("User %s is deleted", auth_user_id)
             return True
         except Exception as e:
-            error = self.determine_error(error_obj=e)
-            error_message = "Delete User '%s' failed with %s" \
-                            % (auth_user_id, error)
+            error_message = "Delete User '%s' failed" % auth_user_id
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
@@ -695,9 +690,7 @@ class User(object):
                 return True
             return False
         except Exception as e:
-            error = self.determine_error(error_obj=e)
-            error_message = "Update password for User '%s' failed with %s" \
-                            % (auth_user_id, error)
+            error_message = "Update password for User '%s' failed" % auth_user_id
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
@@ -725,39 +718,33 @@ class User(object):
             LOG.info("User %s is updated", auth_user_id)
             return True
         except Exception as e:
-            error = self.determine_error(error_obj=e)
-            error_message = "Update User '%s' failed with %s" \
-                            % (auth_user_id, error)
+            error_message = "Update User '%s' failed" % auth_user_id
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
     def get_user_details(self, auth_user_id, zone, provider):
         """Get the User Account Details in PowerScale"""
-        error_msg = "Get User Details %s failed with %s"
+        error_msg = "Get User Details %s failed"
         try:
             api_response = self.api_instance.get_auth_user(
                 auth_user_id=auth_user_id,
                 zone=zone, provider=provider)
-            LOG.info('User details are %s', str(api_response))
+            LOG.info('Successfully retrieved user details for user ID %s', auth_user_id)
             api_response_dict = api_response.users[0].to_dict()
 
             return api_response_dict
 
         except utils.ApiException as e:
             if str(e.status) == "404":
-                error_message = error_msg \
-                    % (auth_user_id, self.determine_error(e))
-                LOG.info(error_message)
+                LOG.info("User not found: %s", auth_user_id)
                 return None
             else:
-                error_message = error_msg \
-                    % (auth_user_id, self.determine_error(e))
+                error_message = error_msg % auth_user_id
                 LOG.error(error_message)
                 self.module.fail_json(msg=error_message)
 
         except Exception as e:
-            error_message = error_msg \
-                % (auth_user_id, self.determine_error(e))
+            error_message = error_msg % auth_user_id
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
@@ -773,9 +760,7 @@ class User(object):
             LOG.info(message)
             return True
         except Exception as e:
-            error = self.determine_error(error_obj=e)
-            error_message = "Add user %s to role %s failed with %s " \
-                            % (auth_user_id, role_name, error)
+            error_message = "Add user %s to role %s failed" % (auth_user_id, role_name)
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
@@ -784,14 +769,10 @@ class User(object):
         try:
             self.role_api_instance.delete_role_member(
                 role_member_id, role=role_name)
-            message = 'User %s removed from role %s ' \
-                      % (role_member_id, role_name)
-            LOG.info(message)
+            LOG.info('User successfully removed from role %s', role_name)
             return True
         except Exception as e:
-            error = self.determine_error(error_obj=e)
-            error_message = "Remove user %s from role %s failed with %s " \
-                            % (role_member_id, role_name, error)
+            error_message = "Remove user %s from role %s failed" % (role_member_id, role_name)
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 

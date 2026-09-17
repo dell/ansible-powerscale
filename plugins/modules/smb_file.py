@@ -91,7 +91,7 @@ smb_file_details:
         file:
             description: Path of file within /ifs.
             type: str
-            sample: 'C:\\ifs'
+            sample: '/ifs/data'
         id:
             description: The ID of the SMB open file.
             type: int
@@ -112,7 +112,7 @@ smb_file_details:
         {
         "smb_file_details": [
             {
-            "file": "C:\\ifs",
+            "file": "/ifs/data",
             "id": 1370,
             "locks": 0,
             "permissions": [

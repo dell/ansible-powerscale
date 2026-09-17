@@ -80,7 +80,7 @@ class TestSmbFile(PowerScaleUnitBase):
         self.capture_fail_json_call(MockSmbFileApi.close_smb_file_failed_msg(), invoke_perform_module=True)
 
     def test_get_file_id_with_file_path(self, powerscale_module_mock):
-        file_path = "C:\\ifs"
+        file_path = "/ifs/data"
         powerscale_module_mock.get_smb_files = MagicMock(
             return_value=MockSmbFileApi.SmbFile["openfiles"])
         resp = powerscale_module_mock.get_file_id(file_path=file_path)

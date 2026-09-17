@@ -604,7 +604,7 @@ class MockGatherfactsApi:
             return {
                 "openfiles": [
                     {
-                        "file": "C:\\ifs\\data_path",
+                        "file": "/ifs/data_path",
                         "id": 1880,
                         "locks": 0,
                         "permissions": [
@@ -619,7 +619,7 @@ class MockGatherfactsApi:
         elif response_type == 'module':
             return [
                 {
-                    "file": "C:\\ifs\\data_path",
+                    "file": "/ifs/data_path",
                     "id": 1880,
                     "locks": 0,
                     "permissions": [
@@ -641,7 +641,7 @@ class MockGatherfactsApi:
             return {
                 "openfiles": [
                     {
-                        "file": "C:\\ifs\\new_data",
+                        "file": "/ifs/new_data",
                         "id": 188,
                         "locks": 0,
                         "permissions": [
@@ -660,7 +660,7 @@ class MockGatherfactsApi:
             return {
                 "openfiles": [
                     {
-                        "file": "C:\\ifs\\data",
+                        "file": "/ifs/data",
                         "id": 1880,
                         "locks": 0,
                         "permissions": [
@@ -675,7 +675,7 @@ class MockGatherfactsApi:
         elif response_type == 'module':
             return [
                 {
-                    "file": "C:\\ifs\\data",
+                    "file": "/ifs/data",
                     "id": 1880,
                     "locks": 0,
                     "permissions": [
@@ -684,7 +684,7 @@ class MockGatherfactsApi:
                     "user": "admin"
                 },
                 {
-                    "file": "C:\\ifs\\new_data",
+                    "file": "/ifs/new_data",
                     "id": 188,
                     "locks": 0,
                     "permissions": [
@@ -967,7 +967,7 @@ class MockGatherfactsApi:
                 ]
             }
         else:
-            return "Get Users List for PowerScale cluster: **.***.**.*** and access zone: System failed with error: SDK Error message"
+            return "Get Users List for PowerScale cluster and access zone failed"
 
     @staticmethod
     def get_groups_response(response_type):
@@ -1299,7 +1299,7 @@ class MockGatherfactsApi:
                         ]
                     }]
         else:
-            return "Failed to get the auth role list due to error SDK Error message."
+            return "Failed to get the auth role list"
 
     @staticmethod
     def get_support_assist_settings(response_type):

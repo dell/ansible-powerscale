@@ -1385,7 +1385,7 @@ Providers (When C(providers) is in a given I(gather_subset), list, {'provider_in
 
 
 
-SmbOpenFiles (When C(smb_files) is in a given I(gather_subset), list, [{'file': 'C:\\ifs', 'id': 1370, 'locks': 0, 'node': 'xx.xx.xx.xx', 'permissions': ['read'], 'user': 'admin'}])
+SmbOpenFiles (When C(smb_files) is in a given I(gather_subset), list, [{'file': '/ifs/data', 'id': 1370, 'locks': 0, 'node': 'xx.xx.xx.xx', 'permissions': ['read'], 'user': 'admin'}])
   List of SMB open files.
 
 

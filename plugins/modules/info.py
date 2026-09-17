@@ -1532,7 +1532,7 @@ SmbOpenFiles:
             type: str
     sample: [
         {
-            "file": "C:\\ifs",
+            "file": "/ifs/data",
             "id": 1370,
             "locks": 0,
             "node": xx.xx.xx.xx,
