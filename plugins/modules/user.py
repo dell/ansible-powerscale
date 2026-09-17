@@ -497,7 +497,7 @@ class User(object):
             LOG.info("Successfully got zone_base_path for %s is %s",
                      access_zone, zone_base_path)
             return zone_base_path
-        except Exception as e:
+        except Exception:
             error_message = 'Unable to fetch base path of Access Zone %s' % access_zone
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
@@ -601,22 +601,23 @@ class User(object):
                     "GROUP:" + primary_group)
 
             provider = self.check_provider_type(provider, 'Create')
-            create_params = dict(
-                name=user_name, uid=user_id, password=password, enabled=enabled,
-                primary_group=primary_group, home_directory=home_directory,
-                shell=shell, gecos=full_name, email=email)
+            create_params = {
+                'name': user_name, 'uid': user_id, 'password': password,
+                'enabled': enabled, 'primary_group': primary_group,
+                'home_directory': home_directory, 'shell': shell,
+                'gecos': full_name, 'email': email}
             if self.module.params.get('password_expires') is not None:
                 create_params['password_expires'] = self.module.params['password_expires']
             if self.module.params.get('expiry') is not None:
                 create_params['expiry'] = self.module.params['expiry']
             auth_user = utils.isi_sdk.AuthUserCreateParams(**create_params)
 
-            api_response = self.api_instance.create_auth_user(
+            self.api_instance.create_auth_user(
                 auth_user=auth_user,
                 zone=zone, provider=provider)
 
             LOG.info('User %s created successfully', user_name)
-        except Exception as e:
+        except Exception:
             error_message = "Create User '%s' failed" % user_name
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
@@ -629,36 +630,32 @@ class User(object):
                 auth_user_id=auth_user_id, zone=zone, provider=provider)
             LOG.info("User %s is deleted", auth_user_id)
             return True
-        except Exception as e:
+        except Exception:
             error_message = "Delete User '%s' failed" % auth_user_id
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
+    def _is_param_changed(self, param, user_details, key=None):
+        """Check if a single parameter differs from the current user state."""
+        value = self.module.params[param]
+        detail_key = key or param
+        if value is None:
+            return False
+        return value != user_details.get(detail_key)
+
     def is_user_modified_sensitive(self, user_details):
         """ Determines whether the user details are to be modified or not."""
-        if self.module.params['enabled'] is not None:
-            if self.module.params['enabled'] != user_details['enabled']:
-                return True
+        if self._is_param_changed('enabled', user_details):
+            return True
+        if self._is_param_changed('password_expires', user_details):
+            return True
+        if self._is_param_changed('expiry', user_details):
+            return True
 
-        if self.module.params['password_expires'] is not None:
-            if self.module.params['password_expires'] != \
-                    user_details.get('password_expires'):
-                return True
-
-        if self.module.params['expiry'] is not None:
-            if self.module.params['expiry'] != \
-                    user_details.get('expiry'):
-                return True
-
-        parameter_list = ['full_name', 'home_directory']
-
-        for parameter in parameter_list:
+        for parameter in ('full_name', 'home_directory'):
             if self.module.params[parameter]:
-                if user_details[parameter]:
-                    if self.module.params[parameter] != \
-                            user_details[parameter]:
-                        return True
-                else:
+                if not user_details[parameter] or \
+                        self.module.params[parameter] != user_details[parameter]:
                     return True
         return False
 
@@ -689,7 +686,7 @@ class User(object):
                 LOG.info("User %s password is updated", auth_user_id)
                 return True
             return False
-        except Exception as e:
+        except Exception:
             error_message = "Update password for User '%s' failed" % auth_user_id
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
@@ -702,10 +699,10 @@ class User(object):
             if primary_group:
                 primary_group = utils.isi_sdk.AuthAccessAccessItemFileGroup(
                     "GROUP:" + primary_group)
-            update_params = dict(primary_group=primary_group,
-                                 home_directory=home_directory,
-                                 shell=shell, gecos=full_name,
-                                 email=email, enabled=enabled)
+            update_params = {'primary_group': primary_group,
+                             'home_directory': home_directory,
+                             'shell': shell, 'gecos': full_name,
+                             'email': email, 'enabled': enabled}
             if self.module.params.get('password_expires') is not None:
                 update_params['password_expires'] = self.module.params['password_expires']
             if self.module.params.get('expiry') is not None:
@@ -717,7 +714,7 @@ class User(object):
                 zone=zone, provider=provider)
             LOG.info("User %s is updated", auth_user_id)
             return True
-        except Exception as e:
+        except Exception:
             error_message = "Update User '%s' failed" % auth_user_id
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
@@ -759,7 +756,7 @@ class User(object):
                       % (auth_user_id, role_name)
             LOG.info(message)
             return True
-        except Exception as e:
+        except Exception:
             error_message = "Add user %s to role %s failed" % (auth_user_id, role_name)
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
@@ -771,7 +768,7 @@ class User(object):
                 role_member_id, role=role_name)
             LOG.info('User successfully removed from role %s', role_name)
             return True
-        except Exception as e:
+        except Exception:
             error_message = "Remove user %s from role %s failed" % (role_member_id, role_name)
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
@@ -846,18 +843,24 @@ class User(object):
                         provider_type, enabled, primary_group,
                         home_directory, full_name, email,
                         role_state, role_name, auth_user_id):
-        """Create a new user"""
+        """Create a new user.
 
+        Validates required parameters and creates the user. In check mode
+        the actual creation is skipped. On validation failure the module
+        exits via ``fail_json`` (never returns).
+        """
         if not user_name:
             error_message = "Unable to create a user, 'user_name' is" \
                             " missing"
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
+            return False
         if not password:
             error_message = "Unable to create a user, 'password' is" \
                             " missing"
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
+            return False
         if self.module.check_mode:
             LOG.info("Check mode: skipping create_user for %s", user_name)
             return True
@@ -871,93 +874,83 @@ class User(object):
 
         return True
 
+    def _handle_role_change(self, user_name, user_id, role_name,
+                            role_state, auth_user_id):
+        """Process role add/remove for a user. Returns True if changed."""
+        role_flag = self.is_user_part_of_role(user_name, user_id, role_name)
+        LOG.debug("role_flag %s", role_flag)
+
+        if role_flag and role_state == "absent-for-user":
+            if self.module.check_mode:
+                return True
+            return self.remove_role_from_user(auth_user_id, role_name)
+        if not role_flag and role_state == "present-for-user":
+            if self.module.check_mode:
+                return True
+            return self.add_role_to_user(auth_user_id, role_name)
+        return False
+
+    def _handle_user_details_update(self, auth_user_id, user_details,
+                                    home_directory, access_zone,
+                                    provider_type, enabled, primary_group,
+                                    full_name, email):
+        """Check and apply user detail modifications. Returns True if changed."""
+        old_user_details = get_user_params_from_details(user_details)
+        modified = (self.is_user_modified_sensitive(old_user_details) or
+                    self.is_user_modified_insensitive(old_user_details))
+        if not modified:
+            return False
+        if self.module.check_mode:
+            return True
+        if home_directory and user_details['home_directory'] == home_directory:
+            home_directory = None
+        shell = self.module.params['shell']
+        return self.update_user(
+            auth_user_id, access_zone, provider_type, enabled,
+            primary_group, home_directory, shell, full_name, email)
+
     def modify_existing_user(self, user_name, user_id, role_name, role_state,
                              auth_user_id, user_details, home_directory,
                              access_zone, provider_type, enabled,
                              primary_group, full_name, email):
         """Modifying details of a user"""
-
         LOG.info("Modifying the user details.")
-        # Compute the diff before processing, so the diff reflects the
-        # intended changes even in check mode.
         diff = self._build_expiry_diff(user_details)
         if diff is not None:
             self.result['diff'] = diff
 
-        # Check for changes in role
-        shell = self.module.params['shell']
-        role_flag = self.is_user_part_of_role(
-            user_name, user_id, role_name)
-        role_changed = False
-        message = "role_flag %s" % role_flag
-        LOG.debug(message)
-
-        if role_flag:
-            if role_state == "absent-for-user":
-                if not self.module.check_mode:
-                    role_changed = self.remove_role_from_user(
-                        auth_user_id, role_name)
-                else:
-                    role_changed = True
-        else:
-            if role_state == "present-for-user":
-                if not self.module.check_mode:
-                    role_changed = self.add_role_to_user(
-                        auth_user_id, role_name)
-                else:
-                    role_changed = True
-
-        old_user_details = get_user_params_from_details(user_details)
-        modified_sensitive = self.is_user_modified_sensitive(old_user_details)
-        modified_insensitive = self.is_user_modified_insensitive(old_user_details)
-        user_details_changed = False
-        if home_directory and \
-                user_details['home_directory'] == home_directory:
-            home_directory = None
-
-        if modified_sensitive or modified_insensitive:
-            if self.module.check_mode:
-                user_details_changed = True
-            else:
-                user_details_changed = self.update_user(
-                    auth_user_id, access_zone, provider_type, enabled,
-                    primary_group, home_directory, shell, full_name, email)
+        role_changed = self._handle_role_change(
+            user_name, user_id, role_name, role_state, auth_user_id)
+        user_details_changed = self._handle_user_details_update(
+            auth_user_id, user_details, home_directory, access_zone,
+            provider_type, enabled, primary_group, full_name, email)
 
         password_changed = False
-        if utils.parse_version(self.array_version) < utils.parse_version("9.5"):
-            if not self.module.check_mode:
-                password_changed = self.modify_password(auth_user_id, access_zone)
+        if utils.parse_version(self.array_version) < utils.parse_version("9.5") \
+                and not self.module.check_mode:
+            password_changed = self.modify_password(auth_user_id, access_zone)
         return user_details_changed or role_changed or password_changed
 
     def delete_existing_user(self, provider_type, auth_user_id, access_zone,
                              role_name, role_state, user_name, user_id):
         """Delete the user and related objects"""
-
         if provider_type.lower() != 'local':
             self.module.fail_json(
                 msg="Cannot delete user from %s provider_type"
                     % provider_type)
         user_details = self.get_user_details(
             auth_user_id, access_zone, provider_type)
-        if user_details:
-            if self.module.check_mode:
-                return True
-            get_roles_flag = True
-            if (not role_name) and (role_state is None) and \
-                    (access_zone.lower() != "system"):
-                get_roles_flag = False
-            roles_for_user = []
-            if get_roles_flag:
-                roles_for_user = self.get_roles_for_user(
-                    user_name, user_id)
-
-            if get_roles_flag and len(roles_for_user) != 0:
-                for role in roles_for_user:
-                    self.remove_role_from_user(auth_user_id, role)
-            return self.delete_user(auth_user_id, access_zone,
-                                    provider_type)
-        else:
+        if not user_details:
             return False
+        if self.module.check_mode:
+            return True
+        need_roles = role_name or role_state is not None or \
+            access_zone.lower() == "system"
+        if need_roles:
+            roles_for_user = self.get_roles_for_user(user_name, user_id)
+            for role in roles_for_user:
+                self.remove_role_from_user(auth_user_id, role)
+        return self.delete_user(auth_user_id, access_zone, provider_type)
 
     def set_validate_params(self, access_zone, user_name, user_id,
                             email, role_name, role_state):
@@ -1114,28 +1107,28 @@ def get_user_params_from_details(user_details):
 def get_user_parameters():
     """This method provide parameter required for the ansible user
     modules on PowerScale"""
-    return dict(
-        user_name=dict(type='str'),
-        user_id=dict(type='int'),
-        password=dict(type='str', no_log=True),
-        access_zone=dict(type='str', default='system'),
-        provider_type=dict(type='str', default='local',
-                           choices=['local', 'file', 'ldap', 'ads', 'nis']),
-        enabled=dict(type='bool'),
-        primary_group=dict(type='str'),
-        home_directory=dict(type='str'),
-        shell=dict(type='str'),
-        full_name=dict(type='str'),
-        email=dict(type='str'),
-        password_expires=dict(type='bool'),
-        expiry=dict(type='int'),
-        state=dict(type='str', required=True,
-                   choices=['present', 'absent']),
-        role_name=dict(type='str'),
-        role_state=dict(type='str',
-                        choices=['present-for-user', 'absent-for-user']),
-        update_password=dict(type='str', choices=['on_create', 'always'], default='always')
-    )
+    return {
+        'user_name': {'type': 'str'},
+        'user_id': {'type': 'int'},
+        'password': {'type': 'str', 'no_log': True},
+        'access_zone': {'type': 'str', 'default': 'system'},
+        'provider_type': {'type': 'str', 'default': 'local',
+                          'choices': ['local', 'file', 'ldap', 'ads', 'nis']},
+        'enabled': {'type': 'bool'},
+        'primary_group': {'type': 'str'},
+        'home_directory': {'type': 'str'},
+        'shell': {'type': 'str'},
+        'full_name': {'type': 'str'},
+        'email': {'type': 'str'},
+        'password_expires': {'type': 'bool'},
+        'expiry': {'type': 'int'},
+        'state': {'type': 'str', 'required': True,
+                  'choices': ['present', 'absent']},
+        'role_name': {'type': 'str'},
+        'role_state': {'type': 'str',
+                       'choices': ['present-for-user', 'absent-for-user']},
+        'update_password': {'type': 'str', 'choices': ['on_create', 'always'], 'default': 'always'},
+    }
 
 
 def main():

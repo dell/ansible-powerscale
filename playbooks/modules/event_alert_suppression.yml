@@ -17,8 +17,9 @@
         api_password: "{{ api_password }}"
         verify_ssl: "{{ verify_ssl }}"
         event_id: "{{ event_id }}"
+        # Expected: changed=true,
+        # event_alert_suppression_details.suppressed=true
         state: "suppressed"
-      # Expected: changed=true, event_alert_suppression_details.suppressed=true
 
     - name: Suppress an event alert again - idempotent
       dellemc.powerscale.event_alert_suppression:
@@ -27,8 +28,9 @@
         api_password: "{{ api_password }}"
         verify_ssl: "{{ verify_ssl }}"
         event_id: "{{ event_id }}"
+        # Expected: changed=false,
+        # msg reports the event is already suppressed
         state: "suppressed"
-      # Expected: changed=false, msg reports the event is already suppressed
 
     - name: Query the suppression state of a specific event
       dellemc.powerscale.event_alert_suppression:
@@ -37,10 +39,11 @@
         api_password: "{{ api_password }}"
         verify_ssl: "{{ verify_ssl }}"
         event_id: "{{ event_id }}"
+        # Expected: changed=false,
+        # event_alert_suppression_details with event_id
+        # and suppressed. Event metadata is only returned
+        # by the query-all task below.
         state: "query"
-      # Expected: changed=false, event_alert_suppression_details with
-      # event_id and suppressed. Event metadata is only returned by the
-      # query-all task below.
 
     - name: Query all suppressed events
       dellemc.powerscale.event_alert_suppression:
@@ -48,10 +51,12 @@
         api_user: "{{ api_user }}"
         api_password: "{{ api_password }}"
         verify_ssl: "{{ verify_ssl }}"
+        # Expected: changed=false,
+        # event_alert_suppression_details.suppressions
+        # with full metadata (id, name, category,
+        # description, node, suppressed) and
+        # event_alert_suppression_details.total
         state: "query"
-      # Expected: changed=false, event_alert_suppression_details.suppressions
-      # with full metadata (id, name, category, description, node, suppressed)
-      # and event_alert_suppression_details.total
 
     - name: Un-suppress an event alert in check mode
       dellemc.powerscale.event_alert_suppression:
@@ -84,8 +89,9 @@
         api_password: "{{ api_password }}"
         verify_ssl: "{{ verify_ssl }}"
         event_id: "{{ event_id }}"
+        # Expected: changed=false,
+        # msg reports the event is already un-suppressed
         state: "unsuppressed"
-      # Expected: changed=false, msg reports the event is already un-suppressed
 
     - name: Suppress an invalid event ID - expected to fail
       dellemc.powerscale.event_alert_suppression:

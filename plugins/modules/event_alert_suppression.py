@@ -237,10 +237,10 @@ class EventAlertSuppression(PowerScaleBase):
         }
 
     def get_event_alert_suppression_parameters(self):
-        return dict(
-            event_id=dict(type='str'),
-            state=dict(type='str', required=True,
-                       choices=['suppressed', 'unsuppressed', 'query']))
+        return {
+            'event_id': {'type': 'str'},
+            'state': {'type': 'str', 'required': True,
+                      'choices': ['suppressed', 'unsuppressed', 'query']}}
 
 
 class EventAlertSuppressionExitHandler:

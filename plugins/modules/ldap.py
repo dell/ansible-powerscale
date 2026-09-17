@@ -397,6 +397,21 @@ class Ldap(object):
                 self.module.fail_json(
                     msg="provider_domain exceeds the maximum length of 255 characters")
 
+    def _merge_ldap_create_params(self, ldap_create_params, ldap_parameters):
+        """Merge optional ldap_parameters into the create params dict."""
+        if not ldap_parameters:
+            return
+        # Keys that use truthiness check (empty string / None → skip)
+        truthy_keys = ('groupnet', 'bind_dn', 'bind_password')
+        # Keys that use explicit None check (empty string is valid)
+        none_keys = ('group_base_dn', 'provider_domain', 'authentication')
+        for key in truthy_keys:
+            if ldap_parameters.get(key):
+                ldap_create_params[key] = ldap_parameters[key]
+        for key in none_keys:
+            if ldap_parameters.get(key) is not None:
+                ldap_create_params[key] = ldap_parameters[key]
+
     def create(self, ldap_name, server_uris, server_uri_state, base_dn,
                ldap_parameters):
         """
@@ -434,20 +449,7 @@ class Ldap(object):
             'name': ldap_name, 'server_uris': server_uris,
             'base_dn': base_dn
         }
-        if ldap_parameters:
-            if ldap_parameters.get('groupnet'):
-                ldap_create_params['groupnet'] = ldap_parameters['groupnet']
-            if ldap_parameters.get('bind_dn'):
-                ldap_create_params['bind_dn'] = ldap_parameters['bind_dn']
-            if ldap_parameters.get('bind_password'):
-                ldap_create_params['bind_password'] = \
-                    ldap_parameters['bind_password']
-            if ldap_parameters.get('group_base_dn') is not None:
-                ldap_create_params['group_base_dn'] = ldap_parameters['group_base_dn']
-            if ldap_parameters.get('provider_domain') is not None:
-                ldap_create_params['provider_domain'] = ldap_parameters['provider_domain']
-            if ldap_parameters.get('authentication') is not None:
-                ldap_create_params['authentication'] = ldap_parameters['authentication']
+        self._merge_ldap_create_params(ldap_create_params, ldap_parameters)
 
         ldap_provider_obj = \
             utils.isi_sdk.ProvidersLdapItem(**ldap_create_params)
@@ -567,6 +569,21 @@ class Ldap(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
+    def _should_remove_ldap_key(self, key, key_lower, input_ldap, array_ldap):
+        """Determine if a key should be removed from the LDAP update dict."""
+        if key_lower == "groupnet":
+            if input_ldap[key] and input_ldap[key] != array_ldap[key]:
+                self.module.fail_json(msg='Modification of'
+                                      ' groupnet is not supported.')
+            return True
+        if key_lower == "bind_password":
+            return True
+        # Keys where None means omitted (preserve server value)
+        if key_lower in ("group_base_dn", "provider_domain", "authentication"):
+            return input_ldap[key] is None or \
+                input_ldap[key] == array_ldap.get(key)
+        return input_ldap[key] is None or input_ldap[key] == array_ldap[key]
+
     def _filter_ldap_keys(self, input_ldap, array_ldap):
         """Filter input LDAP dict, removing unchanged/special keys."""
         if not input_ldap:
@@ -575,27 +592,8 @@ class Ldap(object):
         self.validate_ldap_params_length(input_ldap)
 
         for key in list(input_ldap):
-            key_lower = key.lower()
-            if key_lower == "groupnet":
-                if input_ldap[key] and input_ldap[key] != array_ldap[key]:
-                    self.module.fail_json(msg='Modification of'
-                                          ' groupnet is not supported.')
-                del input_ldap[key]
-            elif key_lower == "bind_password":
-                del input_ldap[key]
-            elif key_lower in ("group_base_dn", "provider_domain"):
-                # Byte-exact comparison; None means omitted (preserve server value)
-                if input_ldap[key] is None:
-                    del input_ldap[key]
-                elif input_ldap[key] == array_ldap.get(key):
-                    del input_ldap[key]
-            elif key_lower == "authentication":
-                # None means omitted (preserve); explicit False is a valid value
-                if input_ldap[key] is None:
-                    del input_ldap[key]
-                elif input_ldap[key] == array_ldap.get(key):
-                    del input_ldap[key]
-            elif input_ldap[key] is None or input_ldap[key] == array_ldap[key]:
+            if self._should_remove_ldap_key(
+                    key, key.lower(), input_ldap, array_ldap):
                 del input_ldap[key]
         return input_ldap
 
@@ -734,24 +732,24 @@ def get_ldap_parameters():
     This method provides parameters required for the ansible LDAP auth
     module on PowerScale
     """
-    return dict(
-        ldap_name=dict(type='str', required=True),
-        server_uris=dict(type='list', elements='str', no_log=True),
-        server_uri_state=dict(type='str', choices=['present-in-ldap',
-                                                   'absent-in-ldap']),
-        base_dn=dict(type='str'),
-        ldap_parameters=dict(
-            type='dict', options=dict(
-                groupnet=dict(type='str'),
-                bind_dn=dict(type='str'),
-                bind_password=dict(type='str', no_log=True),
-                group_base_dn=dict(type='str'),
-                provider_domain=dict(type='str'),
-                authentication=dict(type='bool'),
-            )
-        ),
-        state=dict(required=True, type='str', choices=['present', 'absent'])
-    )
+    return {
+        'ldap_name': {'type': 'str', 'required': True},
+        'server_uris': {'type': 'list', 'elements': 'str', 'no_log': True},
+        'server_uri_state': {'type': 'str', 'choices': ['present-in-ldap',
+                                                         'absent-in-ldap']},
+        'base_dn': {'type': 'str'},
+        'ldap_parameters': {
+            'type': 'dict', 'options': {
+                'groupnet': {'type': 'str'},
+                'bind_dn': {'type': 'str'},
+                'bind_password': {'type': 'str', 'no_log': True},
+                'group_base_dn': {'type': 'str'},
+                'provider_domain': {'type': 'str'},
+                'authentication': {'type': 'bool'},
+            }
+        },
+        'state': {'required': True, 'type': 'str', 'choices': ['present', 'absent']},
+    }
 
 
 def main():
