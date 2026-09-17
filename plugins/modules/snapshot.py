@@ -522,12 +522,9 @@ class Snapshot(object):
                     mod_details['is_timestamp_modified'] = True
                     mod_details['new_expiration_timestamp_value'] = expiration_timestamp
                     return True
-        elif existing_expires is None and expiration_timestamp is not None:
-            mod_details['is_timestamp_modified'] = True
-            mod_details['new_expiration_timestamp_value'] = expiration_timestamp
-            return True
-        elif existing_expires is not None and desired_retention \
-                and desired_retention.lower() == 'none' and expiration_timestamp is None:
+        elif (existing_expires is None and expiration_timestamp is not None) or \
+                (existing_expires is not None and desired_retention
+                 and desired_retention.lower() == 'none' and expiration_timestamp is None):
             mod_details['is_timestamp_modified'] = True
             mod_details['new_expiration_timestamp_value'] = expiration_timestamp
             return True
@@ -541,9 +538,9 @@ class Snapshot(object):
                                 effective_path):
         """Determines whether the snapshot has been modified"""
         LOG.info("Determining if the snap has been modified...")
-        snapshot_modification_details = dict(
-            is_alias_modified=False, new_alias_value=None,
-            is_timestamp_modified=False, new_expiration_timestamp_value=None)
+        snapshot_modification_details = {
+            'is_alias_modified': False, 'new_alias_value': None,
+            'is_timestamp_modified': False, 'new_expiration_timestamp_value': None}
 
         snap_data = snapshot['snapshots'][0]
 

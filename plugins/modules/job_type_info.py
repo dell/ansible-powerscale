@@ -244,10 +244,10 @@ class JobTypeInfo(object):
         sort = self.module.params['sort']
         dir_param = self.module.params['dir']
 
-        result = dict(
-            changed=False,
-            job_types=[]
-        )
+        result = {
+            'changed': False,
+            'job_types': []
+        }
 
         if job_type_id:
             job_type_details = self.get_job_type(job_type_id)
@@ -274,12 +274,12 @@ def get_job_type_info_parameters():
     This method provides parameters required for the ansible Job Type
     Info module on PowerScale
     """
-    return dict(
-        job_type_id=dict(type='str'),
-        include_hidden=dict(type='bool', default=False),
-        sort=dict(type='str'),
-        dir=dict(type='str', choices=['ASC', 'DESC'])
-    )
+    return {
+        'job_type_id': {'type': 'str'},
+        'include_hidden': {'type': 'bool', 'default': False},
+        'sort': {'type': 'str'},
+        'dir': {'type': 'str', 'choices': ['ASC', 'DESC']}
+    }
 
 
 if __name__ == '__main__':

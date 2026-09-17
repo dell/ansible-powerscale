@@ -1345,36 +1345,35 @@ class NfsExport(PowerScaleBase):
 
         return flags
 
+    def _process_single_size_field(self, nfs_export, sz):
+        """Process a single size field and return whether it was modified."""
+        param = self.module.params.get(sz)
+        if param is None:
+            return False
+
+        try:
+            new_val = utils.get_size_bytes(param['size_value'], param['size_unit'])
+        except Exception:
+            new_val = None
+        # keys in NFS export details sometimes differ (file_name_max_size -> name_max_size)
+        export_key = 'name_max_size' if sz == 'file_name_max_size' else sz
+        export_value = None
+        if self.result.get('NFS_export_details'):
+            export_value = self.result['NFS_export_details'].get(export_key)
+        # consider modified only if the converted value differs from existing
+        if new_val is None or export_value is None or new_val != export_value:
+            nfs_export.__setattr__(export_key, new_val)
+            return True
+        return False
+
     def _process_size_fields(self, nfs_export):
         """Process size fields and return modification flags."""
         size_fields = ['file_name_max_size', 'block_size', 'directory_transfer_size',
                        'read_transfer_max_size', 'read_transfer_multiple', 'read_transfer_size',
                        'write_transfer_max_size', 'write_transfer_multiple', 'write_transfer_size',
                        'max_file_size']
-        size_flags = []
 
-        for sz in size_fields:
-            param = self.module.params.get(sz)
-            if param is not None:
-                try:
-                    new_val = utils.get_size_bytes(param['size_value'], param['size_unit'])
-                except Exception:
-                    new_val = None
-                # keys in NFS export details sometimes differ (file_name_max_size -> name_max_size)
-                export_key = 'name_max_size' if sz == 'file_name_max_size' else sz
-                export_value = None
-                if self.result.get('NFS_export_details'):
-                    export_value = self.result['NFS_export_details'].get(export_key)
-                # consider modified only if the converted value differs from existing
-                if new_val is None or export_value is None or new_val != export_value:
-                    nfs_export.__setattr__(export_key, new_val)
-                    size_flags.append(True)
-                else:
-                    size_flags.append(False)
-            else:
-                size_flags.append(False)
-
-        return size_flags
+        return [self._process_single_size_field(nfs_export, sz) for sz in size_fields]
 
     def _process_simple_fields(self, nfs_export):
         """Process simple fields using _check_mod_field. Returns flags and values dict."""
@@ -1411,42 +1410,17 @@ class NfsExport(PowerScaleBase):
 
     def _apply_field_modifications(self, nfs_export, flags, values):
         """Apply field modifications to nfs_export based on flags and values."""
-        if flags.get('read_only'):
-            nfs_export.read_only = values.get('read_only')
-        if flags.get('all_dirs'):
-            nfs_export.all_dirs = values.get('all_dirs')
-        if flags.get('description'):
-            nfs_export.description = values.get('description')
-        if flags.get('map_lookup_uid'):
-            nfs_export.map_lookup_uid = values.get('map_lookup_uid')
-        if flags.get('commit_asynchronous'):
-            nfs_export.commit_asynchronous = values.get('commit_asynchronous')
-        if flags.get('setattr_asynchronous'):
-            nfs_export.setattr_asynchronous = values.get('setattr_asynchronous')
-        if flags.get('readdirplus'):
-            nfs_export.readdirplus = values.get('readdirplus')
-        if flags.get('return_32bit_file_ids'):
-            nfs_export.return_32bit_file_ids = values.get('return_32bit_file_ids')
-        if flags.get('can_set_time'):
-            nfs_export.can_set_time = values.get('can_set_time')
-        if flags.get('symlinks'):
-            nfs_export.symlinks = values.get('symlinks')
-        if flags.get('encoding'):
-            nfs_export.encoding = values.get('encoding')
-        if flags.get('write_datasync_action'):
-            nfs_export.write_datasync_action = values.get('write_datasync_action')
-        if flags.get('write_datasync_reply'):
-            nfs_export.write_datasync_reply = values.get('write_datasync_reply')
-        if flags.get('write_filesync_action'):
-            nfs_export.write_filesync_action = values.get('write_filesync_action')
-        if flags.get('write_filesync_reply'):
-            nfs_export.write_filesync_reply = values.get('write_filesync_reply')
-        if flags.get('write_unstable_action'):
-            nfs_export.write_unstable_action = values.get('write_unstable_action')
-        if flags.get('write_unstable_reply'):
-            nfs_export.write_unstable_reply = values.get('write_unstable_reply')
-        if flags.get('time_delta'):
-            nfs_export.time_delta = values.get('time_delta')
+        modifiable_fields = [
+            'read_only', 'all_dirs', 'description', 'map_lookup_uid',
+            'commit_asynchronous', 'setattr_asynchronous', 'readdirplus',
+            'return_32bit_file_ids', 'can_set_time', 'symlinks', 'encoding',
+            'write_datasync_action', 'write_datasync_reply',
+            'write_filesync_action', 'write_filesync_reply',
+            'write_unstable_action', 'write_unstable_reply', 'time_delta'
+        ]
+        for field in modifiable_fields:
+            if flags.get(field):
+                setattr(nfs_export, field, values.get(field))
 
     def modify_nfs_export(self, path, access_zone, ignore_unresolvable_hosts):
         '''
@@ -1567,77 +1541,77 @@ class NfsExport(PowerScaleBase):
 
     def get_size_paramters(self):
         """Return the Ansible argument spec for size parameters (value + unit)."""
-        return dict(type='dict', options=dict(
-                    size_value=dict(type='int', required=True),
-                    size_unit=dict(type='str', required=True, choices=['B', 'KB', 'MB', 'GB', 'TB', 'PB'])))
+        return {'type': 'dict', 'options': {
+                    'size_value': {'type': 'int', 'required': True},
+                    'size_unit': {'type': 'str', 'required': True, 'choices': ['B', 'KB', 'MB', 'GB', 'TB', 'PB']}}}
 
     def get_nfs_map_parameters(self):
         """Return the Ansible argument spec for NFS map parameters."""
-        return dict(type='dict', options=dict(
-            enabled=dict(type='bool', default=True),
-            primary_group=dict(),
-            secondary_groups=dict(type='list', elements='dict', options=dict(
-                                  name=dict(required=True),
-                                  state=dict(choices=['present', 'absent'], default='present'))),
-            user=dict()))
+        return {'type': 'dict', 'options': {
+            'enabled': {'type': 'bool', 'default': True},
+            'primary_group': {},
+            'secondary_groups': {'type': 'list', 'elements': 'dict', 'options': {
+                                  'name': {'required': True},
+                                  'state': {'choices': ['present', 'absent'], 'default': 'present'}}},
+            'user': {}}}
 
     def get_sync_parameters(self):
         """Return the Ansible argument spec for write sync choice parameters."""
-        return dict(type='str', choices=['DATASYNC', 'FILESYNC', 'UNSTABLE'])
+        return {'type': 'str', 'choices': ['DATASYNC', 'FILESYNC', 'UNSTABLE']}
 
     def get_nfs_parameters(self):
-        return dict(
-            path=dict(required=True, type='str'),
-            access_zone=dict(type='str', default='System'),
-            clients=dict(type='list', elements='str'),
-            root_clients=dict(type='list', elements='str'),
-            read_only_clients=dict(type='list', elements='str'),
-            read_write_clients=dict(type='list', elements='str'),
-            client_state=dict(type='str',
-                              choices=['present-in-export',
-                                       'absent-in-export']),
-            description=dict(type='str'),
-            read_only=dict(type='bool'),
-            ignore_unresolvable_hosts=dict(type='bool'),
-            sub_directories_mountable=dict(type='bool'),
-            security_flavors=dict(
-                type='list', elements='str',
-                choices=['unix', 'kerberos', 'kerberos_integrity',
-                         'kerberos_privacy']),
+        return {
+            'path': {'required': True, 'type': 'str'},
+            'access_zone': {'type': 'str', 'default': 'System'},
+            'clients': {'type': 'list', 'elements': 'str'},
+            'root_clients': {'type': 'list', 'elements': 'str'},
+            'read_only_clients': {'type': 'list', 'elements': 'str'},
+            'read_write_clients': {'type': 'list', 'elements': 'str'},
+            'client_state': {'type': 'str',
+                             'choices': ['present-in-export',
+                                         'absent-in-export']},
+            'description': {'type': 'str'},
+            'read_only': {'type': 'bool'},
+            'ignore_unresolvable_hosts': {'type': 'bool'},
+            'sub_directories_mountable': {'type': 'bool'},
+            'security_flavors': {
+                'type': 'list', 'elements': 'str',
+                'choices': ['unix', 'kerberos', 'kerberos_integrity',
+                            'kerberos_privacy']},
             # Advanced per-export NFS settings (mirror of nfs_default_settings)
-            map_failure=self.get_nfs_map_parameters(),
-            file_name_max_size=self.get_size_paramters(),
-            block_size=self.get_size_paramters(),
-            directory_transfer_size=self.get_size_paramters(),
-            read_transfer_max_size=self.get_size_paramters(),
-            read_transfer_multiple=self.get_size_paramters(),
-            read_transfer_size=self.get_size_paramters(),
-            write_transfer_max_size=self.get_size_paramters(),
-            write_transfer_multiple=self.get_size_paramters(),
-            write_transfer_size=self.get_size_paramters(),
-            max_file_size=self.get_size_paramters(),
-            commit_asynchronous=dict(type='bool'),
-            setattr_asynchronous=dict(type='bool'),
-            readdirplus=dict(type='bool'),
-            return_32bit_file_ids=dict(type='bool'),
-            can_set_time=dict(type='bool'),
-            map_lookup_uid=dict(type='bool'),
-            symlinks=dict(type='bool'),
-            write_datasync_action=self.get_sync_parameters(),
-            write_datasync_reply=self.get_sync_parameters(),
-            write_filesync_action=self.get_sync_parameters(),
-            write_filesync_reply=self.get_sync_parameters(),
-            write_unstable_action=self.get_sync_parameters(),
-            write_unstable_reply=self.get_sync_parameters(),
-            encoding=dict(type='str'),
-            time_delta=dict(type='dict', options=dict(
-                time_value=dict(type='float', required=True),
-                time_unit=dict(type='str', required=True, choices=['seconds', 'nanoseconds', 'milliseconds', 'microseconds']))),
-            map_root=self.get_nfs_map_parameters(),
-            map_non_root=self.get_nfs_map_parameters(),
-            state=dict(required=True, type='str', choices=['present',
-                                                           'absent'])
-        )
+            'map_failure': self.get_nfs_map_parameters(),
+            'file_name_max_size': self.get_size_paramters(),
+            'block_size': self.get_size_paramters(),
+            'directory_transfer_size': self.get_size_paramters(),
+            'read_transfer_max_size': self.get_size_paramters(),
+            'read_transfer_multiple': self.get_size_paramters(),
+            'read_transfer_size': self.get_size_paramters(),
+            'write_transfer_max_size': self.get_size_paramters(),
+            'write_transfer_multiple': self.get_size_paramters(),
+            'write_transfer_size': self.get_size_paramters(),
+            'max_file_size': self.get_size_paramters(),
+            'commit_asynchronous': {'type': 'bool'},
+            'setattr_asynchronous': {'type': 'bool'},
+            'readdirplus': {'type': 'bool'},
+            'return_32bit_file_ids': {'type': 'bool'},
+            'can_set_time': {'type': 'bool'},
+            'map_lookup_uid': {'type': 'bool'},
+            'symlinks': {'type': 'bool'},
+            'write_datasync_action': self.get_sync_parameters(),
+            'write_datasync_reply': self.get_sync_parameters(),
+            'write_filesync_action': self.get_sync_parameters(),
+            'write_filesync_reply': self.get_sync_parameters(),
+            'write_unstable_action': self.get_sync_parameters(),
+            'write_unstable_reply': self.get_sync_parameters(),
+            'encoding': {'type': 'str'},
+            'time_delta': {'type': 'dict', 'options': {
+                'time_value': {'type': 'float', 'required': True},
+                'time_unit': {'type': 'str', 'required': True, 'choices': ['seconds', 'nanoseconds', 'milliseconds', 'microseconds']}}},
+            'map_root': self.get_nfs_map_parameters(),
+            'map_non_root': self.get_nfs_map_parameters(),
+            'state': {'required': True, 'type': 'str', 'choices': ['present',
+                                                                    'absent']}
+        }
 
 
 def get_security_keys(security_flavors):

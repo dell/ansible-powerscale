@@ -631,6 +631,9 @@ GET_GROUP_ERR_MSG = "Get Group Details %s failed with %s"
 # unique id across authentication providers, supported from OneFS 9.11.0.
 MIN_ONEFS_VERSION_CROSS_PROVIDER = '9.11.0'
 VALID_PROVIDER_TYPES = ['local', 'file', 'ldap', 'ads', 'nis']
+CHECK_MODE_SKIP_CREATE_MEMBER = "Check mode: skipping create_group_member for %s"
+CHECK_MODE_SKIP_DELETE_MEMBER = "Check mode: skipping delete_group_member for %s"
+USER_PREFIX = "USER:"
 
 
 class Group(object):
@@ -792,7 +795,7 @@ class Group(object):
         :param access_zone: the access zone the group lives in.
         :return: the user's ``SID:…`` identifier string.
         """
-        auth_user_id = ("USER:" + user_name) if user_name else ("UID:" + user_id)
+        auth_user_id = (USER_PREFIX + user_name) if user_name else ("UID:" + user_id)
         display_name = user_name or user_id
         try:
             api_response = self.api_instance.get_auth_user(
@@ -886,8 +889,7 @@ class Group(object):
                 return False
         LOG.info("Adding group member '%s' to group %s", member_name, group)
         if self.module.check_mode:
-            LOG.info("Check mode: skipping create_group_member for %s",
-                     member_name)
+            LOG.info(CHECK_MODE_SKIP_CREATE_MEMBER, member_name)
             return True
         group_member = utils.isi_sdk.AuthAccessAccessItemFileGroup(resolved_id)
         self.group_api_instance.create_group_member(
@@ -925,8 +927,7 @@ class Group(object):
         LOG.info("Removing group member '%s' from group %s",
                  member_name, group)
         if self.module.check_mode:
-            LOG.info("Check mode: skipping delete_group_member for %s",
-                     member_name)
+            LOG.info(CHECK_MODE_SKIP_DELETE_MEMBER, member_name)
             return True
         self.group_api_instance.delete_group_member(
             resolved_id, group, zone=access_zone, provider=provider_type)
@@ -959,13 +960,33 @@ class Group(object):
                 LOG.info("Resolved well-known SID string '%s' to %s",
                          value, resolved)
                 return resolved, wk['name']
-        supported = sorted(set(wk['name'] for wk in wellknowns))
+        supported = sorted({wk['name'] for wk in wellknowns})
         error_message = (
             "'%s' is not a recognised well-known SID name or SID string."
             " Supported display names: %s"
             % (value, ', '.join(supported)))
         LOG.error(error_message)
         self.module.fail_json(msg=error_message)
+
+    def try_resolve_well_known_sid(self, value):
+        """Try to resolve a well-known SID, returning None on failure.
+
+        Like :meth:`resolve_well_known_sid` but returns ``None`` instead of
+        calling ``fail_json`` when the value cannot be resolved.  This is
+        useful in read-only / diff-computation paths where unresolvable
+        entries should be skipped rather than aborting the module.
+        """
+        wellknowns = self._get_wellknowns()
+        for wk in wellknowns:
+            if wk['name'].lower() == value.lower():
+                resolved = "SID:" + wk['sid']
+                return resolved, wk['name']
+        for wk in wellknowns:
+            if wk['sid'] == value:
+                resolved = "SID:" + wk['sid']
+                return resolved, wk['name']
+        LOG.warning("Could not resolve well-known SID '%s' for diff computation", value)
+        return None
 
     def add_wellknown_to_group(self, group, resolved_id, member_name,
                                access_zone, provider_type):
@@ -991,8 +1012,7 @@ class Group(object):
         LOG.info("Adding well-known SID '%s' to group %s",
                  member_name, group)
         if self.module.check_mode:
-            LOG.info("Check mode: skipping create_group_member for %s",
-                     member_name)
+            LOG.info(CHECK_MODE_SKIP_CREATE_MEMBER, member_name)
             return True
         group_member = utils.isi_sdk.AuthAccessAccessItemFileGroup(resolved_id)
         self.group_api_instance.create_group_member(
@@ -1028,8 +1048,7 @@ class Group(object):
         LOG.info("Removing well-known SID '%s' from group %s",
                  member_name, group)
         if self.module.check_mode:
-            LOG.info("Check mode: skipping delete_group_member for %s",
-                     member_name)
+            LOG.info(CHECK_MODE_SKIP_DELETE_MEMBER, member_name)
             return True
         self.group_api_instance.delete_group_member(
             resolved_id, group, zone=access_zone, provider=provider_type)
@@ -1061,7 +1080,7 @@ class Group(object):
                             " given" % user.keys())
                 if 'user_name' in user:
                     user = utils.isi_sdk.AuthAccessAccessItemFileGroup(
-                        "USER:" + user['user_name'])
+                        USER_PREFIX + user['user_name'])
                     users_list.append(user)
                 elif 'user_id' in user:
                     user = utils.isi_sdk.AuthAccessAccessItemFileGroup(
@@ -1185,7 +1204,7 @@ class Group(object):
             message = "Adding user %s to group %s" % (user, group)
             LOG.info(message)
             if self.module.check_mode:
-                LOG.info("Check mode: skipping create_group_member for %s", user)
+                LOG.info(CHECK_MODE_SKIP_CREATE_MEMBER, user)
                 return True
             group_member = utils.isi_sdk.AuthAccessAccessItemFileGroup(user)
             if cross_provider:
@@ -1212,7 +1231,7 @@ class Group(object):
             message = "Removing user %s from group %s" % (user, group)
             LOG.info(message)
             if self.module.check_mode:
-                LOG.info("Check mode: skipping delete_group_member for %s", user)
+                LOG.info(CHECK_MODE_SKIP_DELETE_MEMBER, user)
                 return True
             if cross_provider:
                 self.group_api_instance.delete_group_member(
@@ -1261,6 +1280,23 @@ class Group(object):
                 return True
         return False
 
+    def _resolve_update_identity(self, user_name, user_id, access_zone,
+                                 provider_type, member_provider):
+        """Resolve the user identity and cross-provider flag for update_group.
+
+        :return: ``(resolved_user, cross_provider)`` tuple where
+            *resolved_user* is the identifier to pass to add/remove and
+            *cross_provider* indicates whether the cross-provider path
+            should be used.
+        """
+        if member_provider:
+            self._preflight_cross_provider(access_zone, member_provider)
+            resolved_id = self._resolve_member_id(
+                user_name, user_id, member_provider, access_zone)
+            return resolved_id, True
+        user = USER_PREFIX + user_name if user_name else "UID:" + user_id
+        return user, False
+
     def update_group(self, group, user_name, user_id,
                      user_state, access_zone, provider_type,
                      member_provider=None):
@@ -1271,38 +1307,19 @@ class Group(object):
             without the ``provider`` query parameter). When ``None``, the
             legacy local-provider path is used (FR-6 backward compat).
         """
-        changed = False
-        if member_provider:
-            # Cross-provider path: resolve the member in the requested
-            # provider and use the unique SID for add/remove.
-            self._preflight_cross_provider(access_zone, member_provider)
-            resolved_id = self._resolve_member_id(
-                user_name, user_id, member_provider, access_zone)
-            # Check membership by matching the resolved name against the
-            # current member list (fetched with the group's own provider).
-            user_flag = self.is_user_part_of_group(
-                group, user_name, user_id, access_zone, provider_type)
-            if user_state == 'present-in-group' and not user_flag:
-                changed = self.add_user_to_group(
-                    group, resolved_id, access_zone, provider_type,
-                    cross_provider=True)
-            if user_state == 'absent-in-group' and user_flag:
-                changed = self.remove_user_from_group(
-                    group, resolved_id, access_zone, provider_type,
-                    cross_provider=True)
-        else:
-            # Legacy path: resolve as USER:<name> or UID:<id>, scoped to
-            # the group's own provider.
-            user_flag = self.is_user_part_of_group(
-                group, user_name, user_id, access_zone, provider_type)
-            user = "USER:" + user_name if user_name else "UID:" + user_id
-            if user_state == 'present-in-group' and not user_flag:
-                changed = self.add_user_to_group(group, user, access_zone,
-                                                 provider_type)
-            if user_state == 'absent-in-group' and user_flag:
-                changed = self.remove_user_from_group(group, user, access_zone,
-                                                      provider_type)
-        return changed
+        resolved_user, cross_provider = self._resolve_update_identity(
+            user_name, user_id, access_zone, provider_type, member_provider)
+        user_flag = self.is_user_part_of_group(
+            group, user_name, user_id, access_zone, provider_type)
+        if user_state == 'present-in-group' and not user_flag:
+            return self.add_user_to_group(
+                group, resolved_user, access_zone, provider_type,
+                cross_provider=cross_provider)
+        if user_state == 'absent-in-group' and user_flag:
+            return self.remove_user_from_group(
+                group, resolved_user, access_zone, provider_type,
+                cross_provider=cross_provider)
+        return False
 
     def determine_error(self, error_obj):
         """Determine the error message to return"""
@@ -1325,6 +1342,85 @@ class Group(object):
             return False
         return True
 
+    @staticmethod
+    def _member_matches(member, resolved_id, name):
+        """Check if a member dict matches by id or case-insensitive name."""
+        return (member.get('id') == resolved_id or
+                member.get('name', '').lower() == name.lower())
+
+    def _compute_users_diff(self, current_members, users, user_state):
+        """Compute before/after user name lists for the diff."""
+        before_names = [
+            m.get('name', '') for m in (current_members or [])
+            if m.get('type') == 'user']
+        after_names = list(before_names)
+        for user in (users or []):
+            if not isinstance(user, dict):
+                continue
+            name = user.get('user_name') or user.get('user_id', '')
+            if user_state == 'present-in-group':
+                if name.lower() not in [n.lower() for n in after_names]:
+                    after_names.append(name)
+            elif user_state == 'absent-in-group':
+                after_names = [n for n in after_names
+                               if n.lower() != name.lower()]
+        return before_names, after_names
+
+    def _compute_group_members_diff(self, current_members, access_zone):
+        """Compute before/after group member name lists for the diff."""
+        group_members = self.module.params.get('group_members') or []
+        group_member_state = self.module.params.get('group_member_state')
+        before_group_members = [
+            m for m in (current_members or []) if m.get('type') == 'group']
+        after_group_members = list(before_group_members)
+        for entry in group_members:
+            if not isinstance(entry, dict):
+                continue
+            gname = entry.get('group_name', '')
+            resolved_id = self.resolve_group_id(
+                gname, entry.get('provider_type') or 'local', access_zone)
+            if group_member_state == 'present-in-group':
+                if not any(self._member_matches(m, resolved_id, gname)
+                           for m in after_group_members):
+                    after_group_members.append(
+                        {'id': resolved_id, 'name': gname, 'type': 'group'})
+            elif group_member_state == 'absent-in-group':
+                after_group_members = [
+                    m for m in after_group_members
+                    if not self._member_matches(m, resolved_id, gname)]
+        before_groups = [m.get('name', '') for m in before_group_members]
+        after_groups = [m.get('name', '') for m in after_group_members]
+        return before_groups, after_groups
+
+    def _compute_wellknown_diff(self, current_members):
+        """Compute before/after well-known SID name lists for the diff."""
+        well_known_sids = self.module.params.get('well_known_sids') or []
+        wk_sid_state = self.module.params.get('well_known_sid_state')
+        before_sid_members = [
+            m for m in (current_members or [])
+            if m.get('type') == 'wellknown']
+        after_sid_members = list(before_sid_members)
+        for sid_value in well_known_sids:
+            result = self.try_resolve_well_known_sid(sid_value)
+            if result is None:
+                continue
+            resolved_id, display_name = result
+            if wk_sid_state == 'present-in-group':
+                if not any(self._member_matches(m, resolved_id, display_name)
+                           for m in after_sid_members):
+                    after_sid_members.append({
+                        'id': resolved_id,
+                        'name': display_name,
+                        'type': 'wellknown',
+                    })
+            elif wk_sid_state == 'absent-in-group':
+                after_sid_members = [
+                    m for m in after_sid_members
+                    if not self._member_matches(m, resolved_id, display_name)]
+        before_sids = [m.get('name', '') for m in before_sid_members]
+        after_sids = [m.get('name', '') for m in after_sid_members]
+        return before_sids, after_sids
+
     def _build_member_diff(self, group, access_zone, provider_type,
                            users, user_state):
         """Build the membership diff for the result when diff mode is active.
@@ -1344,79 +1440,12 @@ class Group(object):
         current_members = self.get_group_members(
             group, access_zone, provider_type)
 
-        # --- users diff (existing behaviour) ---
-        before_names = [
-            m.get('name', '') for m in (current_members or [])
-            if m.get('type') == 'user']
-        after_names = list(before_names)
-        for user in (users or []):
-            if not isinstance(user, dict):
-                continue
-            name = user.get('user_name') or user.get('user_id', '')
-            if user_state == 'present-in-group':
-                if name.lower() not in [n.lower() for n in after_names]:
-                    after_names.append(name)
-            elif user_state == 'absent-in-group':
-                after_names = [n for n in after_names
-                               if n.lower() != name.lower()]
-
-        # --- group_members diff ---
-        group_members = self.module.params.get('group_members') or []
-        group_member_state = self.module.params.get('group_member_state')
-        before_group_members = [
-            m for m in (current_members or []) if m.get('type') == 'group']
-        after_group_members = list(before_group_members)
-        before_groups = [m.get('name', '') for m in before_group_members]
-        for entry in group_members:
-            if not isinstance(entry, dict):
-                continue
-            gname = entry.get('group_name', '')
-            resolved_id = self.resolve_group_id(
-                gname, entry.get('provider_type') or 'local', access_zone)
-            if group_member_state == 'present-in-group':
-                if not any(
-                        m.get('id') == resolved_id or
-                        m.get('name', '').lower() == gname.lower()
-                        for m in after_group_members):
-                    after_group_members.append(
-                        {'id': resolved_id, 'name': gname, 'type': 'group'})
-            elif group_member_state == 'absent-in-group':
-                after_group_members = [
-                    m for m in after_group_members
-                    if m.get('id') != resolved_id and
-                    m.get('name', '').lower() != gname.lower()]
-        after_groups = [m.get('name', '') for m in after_group_members]
-
-        # --- well_known_sids diff ---
-        well_known_sids = self.module.params.get('well_known_sids') or []
-        wk_sid_state = self.module.params.get('well_known_sid_state')
-        before_sid_members = [
-            m for m in (current_members or [])
-            if m.get('type') == 'wellknown']
-        after_sid_members = list(before_sid_members)
-        before_sids = [m.get('name', '') for m in before_sid_members]
-        for sid_value in well_known_sids:
-            try:
-                resolved_id, display_name = self.resolve_well_known_sid(
-                    sid_value)
-            except SystemExit:
-                continue
-            if wk_sid_state == 'present-in-group':
-                if not any(
-                        m.get('id') == resolved_id or
-                        m.get('name', '').lower() == display_name.lower()
-                        for m in after_sid_members):
-                    after_sid_members.append({
-                        'id': resolved_id,
-                        'name': display_name,
-                        'type': 'wellknown',
-                    })
-            elif wk_sid_state == 'absent-in-group':
-                after_sid_members = [
-                    m for m in after_sid_members
-                    if m.get('id') != resolved_id and
-                    m.get('name', '').lower() != display_name.lower()]
-        after_sids = [m.get('name', '') for m in after_sid_members]
+        before_names, after_names = self._compute_users_diff(
+            current_members, users, user_state)
+        before_groups, after_groups = self._compute_group_members_diff(
+            current_members, access_zone)
+        before_sids, after_sids = self._compute_wellknown_diff(
+            current_members)
 
         return {
             'before': {
@@ -1509,7 +1538,7 @@ class Group(object):
         sid_map = {wk['sid']: wk for wk in wellknowns}
         for value in well_known_sids:
             if value.lower() not in name_map and value not in sid_map:
-                supported = sorted(set(wk['name'] for wk in wellknowns))
+                supported = sorted({wk['name'] for wk in wellknowns})
                 self.module.fail_json(
                     msg="'%s' is not a recognised well-known SID name"
                         " or SID string."
@@ -1639,43 +1668,63 @@ class Group(object):
                     changed = True
         return changed
 
-    def _handle_present_state(self, group, group_name, group_id, access_zone, provider_type, users, user_state):
-        """Handle present state logic. Returns (changed, group_details)."""
-        group_details = self.get_group_details(group, access_zone, provider_type)
-        if not group_details:
-            if not group_name:
-                error_message = "Unable to create a group, 'group_name' is missing"
-                LOG.error(error_message)
-                self.module.fail_json(msg=error_message)
-            LOG.info("Create a Group %s ", group_name)
-            users_list = self.create_user_objects(users, user_state)
-            self.create_group(group_name, group_id, access_zone, provider_type, users_list)
-            return True
+    def _create_group_if_missing(self, group, group_name, group_id,
+                                 access_zone, provider_type, users,
+                                 user_state):
+        """Create the group when it does not exist yet.
 
-        if group_id and group_name:
-            if self.check_if_id_exists(group_name, group_details):
-                error_message = f'Group already exists with GID {group_id}'
-                LOG.error(error_message)
-                self.module.fail_json(msg=error_message)
+        :return: ``True`` if the group was created, ``None`` when it
+            already exists and membership processing should continue.
+        """
+        group_details = self.get_group_details(
+            group, access_zone, provider_type)
+        if group_details:
+            self._validate_gid_conflict(
+                group_name, group_id, group_details)
+            return None
+        if not group_name:
+            error_message = \
+                "Unable to create a group, 'group_name' is missing"
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+        LOG.info("Create a Group %s ", group_name)
+        users_list = self.create_user_objects(users, user_state)
+        self.create_group(
+            group_name, group_id, access_zone, provider_type,
+            users_list)
+        return True
 
+    def _validate_gid_conflict(self, group_name, group_id, group_details):
+        """Fail when the caller supplies both name and id that conflict."""
+        if not (group_id and group_name):
+            return
+        if self.check_if_id_exists(group_name, group_details):
+            error_message = f'Group already exists with GID {group_id}'
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    def _process_users(self, group, users, user_state, access_zone,
+                       provider_type):
+        """Process user entries and return True if any membership changed."""
+        if not (user_state and users):
+            return False
         changed = False
+        for idx, user in enumerate(users):
+            if self._process_user_entry(
+                    group, user, user_state, access_zone,
+                    provider_type, index=idx):
+                changed = True
+        return changed
 
-        # Compute the membership diff before processing, so the diff
-        # reflects the intended changes even in check mode.
-        diff = self._build_member_diff(
-            group, access_zone, provider_type, users, user_state)
-        if diff is not None:
-            self.result['diff'] = diff
+    def _process_all_memberships(self, group, access_zone, provider_type,
+                                 users, user_state):
+        """Process users, group_members, and well_known_sids in order.
 
-        # Processing order: users -> group_members -> well_known_sids (FR-3.1)
+        :return: True if any membership changed, False otherwise.
+        """
+        changed = self._process_users(
+            group, users, user_state, access_zone, provider_type)
 
-        # Step 1: Process users (existing behaviour)
-        if user_state and users:
-            for idx, user in enumerate(users):
-                if self._process_user_entry(group, user, user_state, access_zone, provider_type, index=idx):
-                    changed = True
-
-        # Step 2: Process group_members
         group_members = self.module.params.get('group_members') or []
         group_member_state = self.module.params.get('group_member_state')
         if group_member_state and group_members:
@@ -1684,7 +1733,6 @@ class Group(object):
                     access_zone, provider_type):
                 changed = True
 
-        # Step 3: Process well_known_sids
         well_known_sids = self.module.params.get('well_known_sids') or []
         well_known_sid_state = self.module.params.get('well_known_sid_state')
         if well_known_sid_state and well_known_sids:
@@ -1694,6 +1742,25 @@ class Group(object):
                 changed = True
 
         return changed
+
+    def _handle_present_state(self, group, group_name, group_id, access_zone, provider_type, users, user_state):
+        """Handle present state logic. Returns (changed, group_details)."""
+        created = self._create_group_if_missing(
+            group, group_name, group_id, access_zone, provider_type,
+            users, user_state)
+        if created is not None:
+            return created
+
+        # Compute the membership diff before processing, so the diff
+        # reflects the intended changes even in check mode.
+        diff = self._build_member_diff(
+            group, access_zone, provider_type, users, user_state)
+        if diff is not None:
+            self.result['diff'] = diff
+
+        # Processing order: users -> group_members -> well_known_sids (FR-3.1)
+        return self._process_all_memberships(
+            group, access_zone, provider_type, users, user_state)
 
     def perform_module_operation(self):
         """
@@ -1743,26 +1810,26 @@ class Group(object):
 def get_group_parameters():
     """This method provide parameter required for the ansible group
     module on PowerScale"""
-    return dict(
-        group_name=dict(required=False, type='str'),
-        group_id=dict(required=False, type='int'),
-        access_zone=dict(required=False, type='str', default='system'),
-        provider_type=dict(required=False, type='str',
-                           choices=['local', 'file', 'ldap', 'ads', 'nis'],
-                           default='local'),
-        state=dict(required=True, type='str', choices=['present', 'absent']),
-        users=dict(required=False, type='list', elements='dict'),
-        user_state=dict(required=False, type='str',
-                        choices=['present-in-group', 'absent-in-group']),
-        group_members=dict(required=False, type='list', elements='dict'),
-        group_member_state=dict(required=False, type='str',
-                                choices=['present-in-group',
-                                         'absent-in-group']),
-        well_known_sids=dict(required=False, type='list', elements='str'),
-        well_known_sid_state=dict(required=False, type='str',
-                                  choices=['present-in-group',
-                                           'absent-in-group'])
-    )
+    return {
+        'group_name': {'required': False, 'type': 'str'},
+        'group_id': {'required': False, 'type': 'int'},
+        'access_zone': {'required': False, 'type': 'str', 'default': 'system'},
+        'provider_type': {'required': False, 'type': 'str',
+                          'choices': ['local', 'file', 'ldap', 'ads', 'nis'],
+                          'default': 'local'},
+        'state': {'required': True, 'type': 'str', 'choices': ['present', 'absent']},
+        'users': {'required': False, 'type': 'list', 'elements': 'dict'},
+        'user_state': {'required': False, 'type': 'str',
+                       'choices': ['present-in-group', 'absent-in-group']},
+        'group_members': {'required': False, 'type': 'list', 'elements': 'dict'},
+        'group_member_state': {'required': False, 'type': 'str',
+                               'choices': ['present-in-group',
+                                           'absent-in-group']},
+        'well_known_sids': {'required': False, 'type': 'list', 'elements': 'str'},
+        'well_known_sid_state': {'required': False, 'type': 'str',
+                                 'choices': ['present-in-group',
+                                             'absent-in-group']}
+    }
 
 
 def main():

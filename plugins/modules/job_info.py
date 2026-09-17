@@ -337,13 +337,13 @@ class JobInfo(object):
         include_recent = self.module.params['include_recent']
         include_summary = self.module.params['include_summary']
 
-        result = dict(
-            changed=False,
-            job_details=[],
-            total_jobs=0,
-            recent_jobs=None,
-            job_summary=None
-        )
+        result = {
+            'changed': False,
+            'job_details': [],
+            'total_jobs': 0,
+            'recent_jobs': None,
+            'job_summary': None
+        }
 
         # If job_id is specified, get that specific job
         if job_id is not None:
@@ -377,18 +377,18 @@ def get_job_info_parameters():
     This method provides parameters required for the ansible job info
     module on PowerScale
     """
-    return dict(
-        job_id=dict(type='int'),
-        state=dict(type='list', elements='str',
-                   choices=['running', 'paused_user', 'paused_system',
-                            'paused_policy', 'paused_priority']),
-        job_type=dict(type='list', elements='str'),
-        sort=dict(type='str'),
-        dir=dict(type='str', choices=['ASC', 'DESC'], default='ASC'),
-        limit=dict(type='int'),
-        include_recent=dict(type='bool', default=False),
-        include_summary=dict(type='bool', default=False)
-    )
+    return {
+        'job_id': {'type': 'int'},
+        'state': {'type': 'list', 'elements': 'str',
+                  'choices': ['running', 'paused_user', 'paused_system',
+                              'paused_policy', 'paused_priority']},
+        'job_type': {'type': 'list', 'elements': 'str'},
+        'sort': {'type': 'str'},
+        'dir': {'type': 'str', 'choices': ['ASC', 'DESC'], 'default': 'ASC'},
+        'limit': {'type': 'int'},
+        'include_recent': {'type': 'bool', 'default': False},
+        'include_summary': {'type': 'bool', 'default': False}
+    }
 
 
 def main():

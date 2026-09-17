@@ -432,13 +432,13 @@ class SynciqRules(object):
 
     def _initialize_result_dict(self):
         """Initialize the result dictionary with default values."""
-        return dict(
-            changed=False,
-            synciq_rule_details='',
-            create_synciq_rule=False,
-            modify_synciq_rule=False,
-            delete_synciq_rule=False
-        )
+        return {
+            'changed': False,
+            'synciq_rule_details': '',
+            'create_synciq_rule': False,
+            'modify_synciq_rule': False,
+            'delete_synciq_rule': False
+        }
 
     def _get_module_params(self):
         """Get all module parameters."""

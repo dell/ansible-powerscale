@@ -277,14 +277,14 @@ class S3ZoneSettings:
 
     def get_s3_zone_settings_parameters(self):
         """Get s3 zone settings parameters."""
-        return dict(
-            access_zone=dict(default='System'),
-            base_domain=dict(type='str'),
-            root_path=dict(type='str'),
-            object_acl_policy=dict(type='str'),
-            bucket_directory_create_mode=dict(type='int'),
-            use_md5_for_etag=dict(type='bool'),
-            validate_content_md5=dict(type='bool'))
+        return {
+            'access_zone': {'default': 'System'},
+            'base_domain': {'type': 'str'},
+            'root_path': {'type': 'str'},
+            'object_acl_policy': {'type': 'str'},
+            'bucket_directory_create_mode': {'type': 'int'},
+            'use_md5_for_etag': {'type': 'bool'},
+            'validate_content_md5': {'type': 'bool'}}
 
 
 class S3ZoneSettingsExitHandler:

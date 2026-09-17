@@ -210,9 +210,7 @@ class S3Key(object):
         """Get details of an S3 Key"""
         user = self.module.params.get("user")
         access_zone = self.module.params.get("access_zone")
-        msg = (
-            f"Getting S3 Key details for user {user} and access zone:" f" {access_zone}"
-        )
+        msg = f"Getting S3 Key details for user {user} and access zone: {access_zone}"
         LOG.info(msg)
         try:
             s3_key_obj = self.protocol_api.get_s3_key(s3_key_id=user, zone=access_zone)
@@ -370,9 +368,7 @@ class S3KeyCreateHandler:
     def handle(self, key_object, key_params, key_exists, key_details):
         """Handle creation of S3 Key"""
         if key_params["state"] == "present":
-            if not key_exists or (
-                key_exists and key_params.get("generate_new_key") == "always"
-            ):
+            if not key_exists or key_params.get("generate_new_key") == "always":
                 key_details = key_object.create_key()
                 key_object.result["changed"] = True
             else:

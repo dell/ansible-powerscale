@@ -1014,9 +1014,7 @@ def _check_password_field(policy_obj_dict, policy_param, modify_dict):
     """Handle write-only password field comparison."""
     if 'password' not in policy_param:
         return
-    if not policy_obj_dict.get('password_set', False):
-        modify_dict['password'] = policy_param['password']
-    elif modify_dict:
+    if not policy_obj_dict.get('password_set', False) or modify_dict:
         modify_dict['password'] = policy_param['password']
 
 
@@ -1080,59 +1078,59 @@ def get_modified_source_network(policy_obj_source_network, policy_param_source_n
 def get_synciqpolicy_parameters():
     """This method provides parameters required for the ansible SyncIQ policy
        module on PowerScale"""
-    return dict(
-        policy_name=dict(type='str'),
-        new_policy_name=dict(type='str'),
-        description=dict(type='str'),
-        enabled=dict(type='bool'),
-        policy_id=dict(type='str'),
-        action=dict(type='str', choices=['copy', 'sync']),
-        schedule=dict(type='str'),
-        run_job=dict(type='str', choices=['on-schedule',
-                                          'when-source-modified', 'when-snapshot-taken',
-                                          'manual']),
-        skip_when_source_unmodified=dict(type='bool'),
-        rpo_alert=dict(type='int'),
-        rpo_alert_unit=dict(type='str', choices=['minutes', 'hours',
-                                                 'days', 'weeks', 'months', 'years'],
-                            default='minutes'),
-        job_delay=dict(type='int'),
-        job_delay_unit=dict(type='str', choices=['seconds', 'minutes', 'hours', 'days'],
-                            default='seconds'),
-        snapshot_sync_pattern=dict(type='str'),
-        source_cluster=dict(type='dict', options=dict(
-            source_root_path=dict(type='str', no_log=True),
-            source_network=dict(type='dict', options=dict(
-                pool=dict(type='str'),
-                subnet=dict(type='str')
-            )),
-            source_include_directories=dict(type='list', elements='str', no_log=True),
-            source_exclude_directories=dict(type='list', elements='str', no_log=True))),
-        target_cluster=dict(type='dict', options=dict(target_host=dict(type='str', no_log=True),
-                                                      target_path=dict(type='str', no_log=True),
-                                                      target_certificate_id=dict(type='str'),
-                                                      target_certificate_name=dict(type='str'),
-                                                      password=dict(type='str', no_log=True)),
-                            mutually_exclusive=[['target_certificate_id', 'target_certificate_name']]),
-        target_snapshot=dict(type='dict', options=dict(target_snapshot_archive=dict(type='bool'),
-                                                       target_snapshot_expiration=dict(type='int'),
-                                                       exp_time_unit=dict(type='str', choices=['years', 'months',
-                                                                                               'weeks', 'days'],
-                                                                          default='years'),
-                                                       )),
-        job_params=dict(type='dict',
-                        options=dict(action=dict(type='str', required=True,
-                                                 choices=['run', 'resync_prep',
+    return {
+        'policy_name': {'type': 'str'},
+        'new_policy_name': {'type': 'str'},
+        'description': {'type': 'str'},
+        'enabled': {'type': 'bool'},
+        'policy_id': {'type': 'str'},
+        'action': {'type': 'str', 'choices': ['copy', 'sync']},
+        'schedule': {'type': 'str'},
+        'run_job': {'type': 'str', 'choices': ['on-schedule',
+                                                'when-source-modified', 'when-snapshot-taken',
+                                                'manual']},
+        'skip_when_source_unmodified': {'type': 'bool'},
+        'rpo_alert': {'type': 'int'},
+        'rpo_alert_unit': {'type': 'str', 'choices': ['minutes', 'hours',
+                                                       'days', 'weeks', 'months', 'years'],
+                           'default': 'minutes'},
+        'job_delay': {'type': 'int'},
+        'job_delay_unit': {'type': 'str', 'choices': ['seconds', 'minutes', 'hours', 'days'],
+                           'default': 'seconds'},
+        'snapshot_sync_pattern': {'type': 'str'},
+        'source_cluster': {'type': 'dict', 'options': {
+            'source_root_path': {'type': 'str', 'no_log': True},
+            'source_network': {'type': 'dict', 'options': {
+                'pool': {'type': 'str'},
+                'subnet': {'type': 'str'}
+            }},
+            'source_include_directories': {'type': 'list', 'elements': 'str', 'no_log': True},
+            'source_exclude_directories': {'type': 'list', 'elements': 'str', 'no_log': True}}},
+        'target_cluster': {'type': 'dict', 'options': {'target_host': {'type': 'str', 'no_log': True},
+                                                       'target_path': {'type': 'str', 'no_log': True},
+                                                       'target_certificate_id': {'type': 'str'},
+                                                       'target_certificate_name': {'type': 'str'},
+                                                       'password': {'type': 'str', 'no_log': True}},
+                           'mutually_exclusive': [['target_certificate_id', 'target_certificate_name']]},
+        'target_snapshot': {'type': 'dict', 'options': {'target_snapshot_archive': {'type': 'bool'},
+                                                        'target_snapshot_expiration': {'type': 'int'},
+                                                        'exp_time_unit': {'type': 'str', 'choices': ['years', 'months',
+                                                                                                     'weeks', 'days'],
+                                                                          'default': 'years'},
+                                                        }},
+        'job_params': {'type': 'dict',
+                       'options': {'action': {'type': 'str', 'required': True,
+                                              'choices': ['run', 'resync_prep',
                                                           'allow_write',
-                                                          'allow_write_revert']),
-                                     source_snapshot=dict(type='str'),
-                                     workers_per_node=dict(type='int'),
-                                     wait_for_completion=dict(type='bool', default=False))),
-        accelerated_failback=dict(type='bool'),
-        restrict_target_network=dict(type='bool'),
-        target_compare_initial_sync=dict(type='bool'),
-        state=dict(required=True, choices=['present', 'absent'])
-    )
+                                                          'allow_write_revert']},
+                                   'source_snapshot': {'type': 'str'},
+                                   'workers_per_node': {'type': 'int'},
+                                   'wait_for_completion': {'type': 'bool', 'default': False}}},
+        'accelerated_failback': {'type': 'bool'},
+        'restrict_target_network': {'type': 'bool'},
+        'target_compare_initial_sync': {'type': 'bool'},
+        'state': {'required': True, 'choices': ['present', 'absent']}
+    }
 
 
 class SynciqPolicyExitHandler:
@@ -1269,7 +1267,7 @@ class SynciqPolicyHandler:
         else:
             before_dict = synciq_obj.get_synciq_policy_display_attributes(policy_obj)
         if synciq_obj.module._diff:
-            synciq_obj.result['diff'] = dict(before=before_dict, after=diff_dict)
+            synciq_obj.result['diff'] = {'before': before_dict, 'after': diff_dict}
 
     def handle(self, synciq_obj, synciq_params):
         policy_name = synciq_params.get('policy_name')

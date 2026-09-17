@@ -1914,7 +1914,7 @@ class TestGroup(PowerScaleUnitBase):
                 {"id": "SID:S-1-5-3", "name": "BATCH",
                  "type": "wellknown"}
             ]}))
-        powerscale_module_mock.resolve_well_known_sid = MagicMock(
+        powerscale_module_mock.try_resolve_well_known_sid = MagicMock(
             return_value=("SID:S-1-5-3", "NT AUTHORITY\\BATCH"))
         diff = powerscale_module_mock._build_member_diff(
             "GROUP:test_group", "System", "local", [], None)

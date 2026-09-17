@@ -225,9 +225,9 @@ class AlertSettings(PowerScaleBase):
         return modify_dict
 
     def get_alert_setting_parameters(self):
-        return dict(
-            enable_celog_maintenance_mode=dict(type='bool'),
-            prune=dict(type='int'))
+        return {
+            'enable_celog_maintenance_mode': {'type': 'bool'},
+            'prune': {'type': 'int'}}
 
 
 class AlertSettingsExitHandler:

@@ -798,7 +798,7 @@ class SMB(PowerScaleBase):
 
     def set_allow_list(self, allow_rar_list, smb_rar_list):
         """set allow list"""
-        add_allow_list = list()
+        add_allow_list = []
 
         if allow_rar_list and len(allow_rar_list) != 0:
 
@@ -812,7 +812,7 @@ class SMB(PowerScaleBase):
 
     def set_deny_list(self, deny_rar_list, all_smb_rar_list):
         """set deny list"""
-        remove_deny_list = list()
+        remove_deny_list = []
         if deny_rar_list and len(deny_rar_list) != 0:
             for deny in deny_rar_list:
                 if all_smb_rar_list and deny in all_smb_rar_list:
@@ -821,7 +821,7 @@ class SMB(PowerScaleBase):
 
     def preare_unique_rar(self, allow_list, deny_list, smb_root_list):
         """prepare run as root list"""
-        tmp_all_list = list()
+        tmp_all_list = []
         tmp_all_list.extend(smb_root_list)
 
         tmp_allow_list = self.set_allow_list(allow_list, smb_root_list)
@@ -831,13 +831,13 @@ class SMB(PowerScaleBase):
             tmp_all_list.extend(tmp_allow_list)
         tmp_all_list = self.remove_duplicates(tmp_all_list)
 
-        remove_list = list()
+        remove_list = []
         tmp_deny_list = self.set_deny_list(deny_list, tmp_all_list)
 
         if tmp_deny_list:
             remove_list.extend(tmp_deny_list)
 
-        final_rar_list = list()
+        final_rar_list = []
         if tmp_all_list:
 
             for item2 in tmp_all_list:
@@ -1557,64 +1557,64 @@ class SMB(PowerScaleBase):
 
 
 def get_smb_parameters():
-    return dict(
-        share_name=dict(required=True, type='str'),
-        path=dict(type='str', no_log=True),
-        access_zone=dict(type='str', default='System'),
-        description=dict(type='str'),
-        permissions=dict(type='list', elements='dict'),
-        state=dict(required=True, type='str', choices=['present', 'absent']),
-        new_share_name=dict(type='str'),
-        access_based_enumeration=dict(type='bool'),
-        access_based_enumeration_root_only=dict(type='bool'),
-        browsable=dict(type='bool'),
-        ntfs_acl_support=dict(type='bool'),
-        directory_create_mask=dict(type='str'),
-        directory_create_mode=dict(type='str'),
-        file_create_mask=dict(type='str'),
-        file_create_mode=dict(type='str'),
-        create_path=dict(type='bool'),
-        allow_variable_expansion=dict(type='bool'),
-        auto_create_directory=dict(type='bool'),
-        continuously_available=dict(type='bool'),
-        file_filter_extension=dict(
-            type='dict', options=dict(
-                extensions=dict(type='list', elements='str'),
-                type=dict(default='deny', type='str', required=False,
-                          choices=['allow', 'deny']),
-                state=dict(type='str',
-                           choices=['present-in-share', 'absent-in-share']),
-            ),
-            required=False
-        ),
-        file_filtering_enabled=dict(type='bool'),
-        ca_timeout=dict(
-            type='dict', options=dict(
-                value=dict(type='int'),
-                unit=dict(default='seconds', type='str',
-                          choices=['seconds', 'minutes', 'hours']))),
-        strict_ca_lockout=dict(type='bool'),
-        smb3_encryption_enabled=dict(type='bool'),
-        ca_write_integrity=dict(type='str', choices=['none', 'full', 'write-read-coherent']),
-        change_notify=dict(type='str', choices=['all', 'norecurse', 'none']),
-        oplocks=dict(type='bool'),
-        impersonate_guest=dict(type='str', choices=['always', 'never', 'bad_user']),
-        impersonate_user=dict(type='str'),
-        host_acls=dict(type='list', elements='dict',
-                       options=dict(name=dict(type='str', required=True),
-                                    access_type=dict(type='str', required=True))),
-        allow_delete_readonly=dict(type='bool'), allow_execute_always=dict(type='bool'),
-        inheritable_path_acl=dict(type='bool'),
-        run_as_root=dict(
-            type='list', elements='dict',
-            options=dict(
-                name=dict(type='str', required=True),
-                type=dict(type='str', choices=['user', 'group', 'wellknown'],
-                          required=True),
-                provider_type=dict(type='str', default='local'),
-                state=dict(type='str', choices=['allow', 'deny'],
-                           default='allow'))),
-    )
+    return {
+        'share_name': {'required': True, 'type': 'str'},
+        'path': {'type': 'str', 'no_log': True},
+        'access_zone': {'type': 'str', 'default': 'System'},
+        'description': {'type': 'str'},
+        'permissions': {'type': 'list', 'elements': 'dict'},
+        'state': {'required': True, 'type': 'str', 'choices': ['present', 'absent']},
+        'new_share_name': {'type': 'str'},
+        'access_based_enumeration': {'type': 'bool'},
+        'access_based_enumeration_root_only': {'type': 'bool'},
+        'browsable': {'type': 'bool'},
+        'ntfs_acl_support': {'type': 'bool'},
+        'directory_create_mask': {'type': 'str'},
+        'directory_create_mode': {'type': 'str'},
+        'file_create_mask': {'type': 'str'},
+        'file_create_mode': {'type': 'str'},
+        'create_path': {'type': 'bool'},
+        'allow_variable_expansion': {'type': 'bool'},
+        'auto_create_directory': {'type': 'bool'},
+        'continuously_available': {'type': 'bool'},
+        'file_filter_extension': {
+            'type': 'dict', 'options': {
+                'extensions': {'type': 'list', 'elements': 'str'},
+                'type': {'default': 'deny', 'type': 'str', 'required': False,
+                         'choices': ['allow', 'deny']},
+                'state': {'type': 'str',
+                          'choices': ['present-in-share', 'absent-in-share']},
+            },
+            'required': False
+        },
+        'file_filtering_enabled': {'type': 'bool'},
+        'ca_timeout': {
+            'type': 'dict', 'options': {
+                'value': {'type': 'int'},
+                'unit': {'default': 'seconds', 'type': 'str',
+                         'choices': ['seconds', 'minutes', 'hours']}}},
+        'strict_ca_lockout': {'type': 'bool'},
+        'smb3_encryption_enabled': {'type': 'bool'},
+        'ca_write_integrity': {'type': 'str', 'choices': ['none', 'full', 'write-read-coherent']},
+        'change_notify': {'type': 'str', 'choices': ['all', 'norecurse', 'none']},
+        'oplocks': {'type': 'bool'},
+        'impersonate_guest': {'type': 'str', 'choices': ['always', 'never', 'bad_user']},
+        'impersonate_user': {'type': 'str'},
+        'host_acls': {'type': 'list', 'elements': 'dict',
+                      'options': {'name': {'type': 'str', 'required': True},
+                                  'access_type': {'type': 'str', 'required': True}}},
+        'allow_delete_readonly': {'type': 'bool'}, 'allow_execute_always': {'type': 'bool'},
+        'inheritable_path_acl': {'type': 'bool'},
+        'run_as_root': {
+            'type': 'list', 'elements': 'dict',
+            'options': {
+                'name': {'type': 'str', 'required': True},
+                'type': {'type': 'str', 'choices': ['user', 'group', 'wellknown'],
+                         'required': True},
+                'provider_type': {'type': 'str', 'default': 'local'},
+                'state': {'type': 'str', 'choices': ['allow', 'deny'],
+                          'default': 'allow'}}},
+    }
 
 
 class SMBExitHandler:

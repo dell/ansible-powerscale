@@ -4212,44 +4212,44 @@ def get_sync_rule_limit_unit(limit, type):
 def get_info_parameters():
     """This method provide parameter required for the ansible gatherfacts
         modules on PowerScale"""
-    return dict(
-        include_all_access_zones=dict(required=False, type='bool'),
-        access_zone=dict(required=False, type='str',
-                         default='System'),
-        scope=dict(required=False, type='str',
-                   choices=['effective', 'user', 'default'],
-                   default='effective'),
-        gather_subset=dict(
-            type='list', required=True, elements='str',
-            choices=['attributes', 'access_zones', 'nodes',
-                     'providers', 'users', 'groups',
-                     'smb_shares', 'nfs_exports', 'nfs_aliases',
-                     'clients', 'synciq_reports', 'synciq_target_reports',
-                     'synciq_policies', 'synciq_target_cluster_certificates',
-                     'synciq_performance_rules', 'network_groupnets',
-                     'network_pools', 'network_rules', 'network_interfaces',
-                     'network_subnets', 'node_pools', 'storagepool_tiers',
-                     'smb_files', 'user_mapping_rules', 'ldap',
-                     'nfs_zone_settings', 'nfs_default_settings',
-                     'nfs_global_settings', 'synciq_global_settings',
-                     's3_buckets', 'smb_global_settings', 'ntp_servers',
-                     'email_settings', 'cluster_identity', 'cluster_owner',
-                     'snmp_settings', 'server_certificate', 'roles',
-                     'support_assist_settings', 'alert_settings', 'alert_rules',
-                     'alert_channels', 'alert_categories', 'event_group',
-                     'filesystem', 'smartquota', 'writable_snapshots',
-                     'ipmi_config']),
-        filters=dict(type='list',
-                     required=False,
-                     elements='dict',
-                     options=dict(
-                         filter_key=dict(type='str', required=True, no_log=False),
-                         filter_operator=dict(type='str',
-                                              required=True,
-                                              choices=['equal']),
-                         filter_value=dict(type='raw', required=True))),
-        query_parameters=dict(type='dict')
-    )
+    return {
+        'include_all_access_zones': {'required': False, 'type': 'bool'},
+        'access_zone': {'required': False, 'type': 'str',
+                        'default': 'System'},
+        'scope': {'required': False, 'type': 'str',
+                  'choices': ['effective', 'user', 'default'],
+                  'default': 'effective'},
+        'gather_subset': {
+            'type': 'list', 'required': True, 'elements': 'str',
+            'choices': ['attributes', 'access_zones', 'nodes',
+                        'providers', 'users', 'groups',
+                        'smb_shares', 'nfs_exports', 'nfs_aliases',
+                        'clients', 'synciq_reports', 'synciq_target_reports',
+                        'synciq_policies', 'synciq_target_cluster_certificates',
+                        'synciq_performance_rules', 'network_groupnets',
+                        'network_pools', 'network_rules', 'network_interfaces',
+                        'network_subnets', 'node_pools', 'storagepool_tiers',
+                        'smb_files', 'user_mapping_rules', 'ldap',
+                        'nfs_zone_settings', 'nfs_default_settings',
+                        'nfs_global_settings', 'synciq_global_settings',
+                        's3_buckets', 'smb_global_settings', 'ntp_servers',
+                        'email_settings', 'cluster_identity', 'cluster_owner',
+                        'snmp_settings', 'server_certificate', 'roles',
+                        'support_assist_settings', 'alert_settings', 'alert_rules',
+                        'alert_channels', 'alert_categories', 'event_group',
+                        'filesystem', 'smartquota', 'writable_snapshots',
+                        'ipmi_config']},
+        'filters': {'type': 'list',
+                    'required': False,
+                    'elements': 'dict',
+                    'options': {
+                        'filter_key': {'type': 'str', 'required': True, 'no_log': False},
+                        'filter_operator': {'type': 'str',
+                                            'required': True,
+                                            'choices': ['equal']},
+                        'filter_value': {'type': 'raw', 'required': True}}},
+        'query_parameters': {'type': 'dict'}
+    }
 
 
 def filter_dict_list(dict_list, filters):

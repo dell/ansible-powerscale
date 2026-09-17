@@ -159,22 +159,19 @@ class NetworkPoolAPI(object):
             self.session_id = None
 
     def invoke_request(self, uri, method, data=None, query_param=None, headers=None, api_timeout=None, dump=True):
-        try:
-            csrf_token = self._create_session()
-            session_header = {'Cookie': self.session_id,
-                              'X-CSRF-Token': csrf_token,
-                              'Content-Type': CONTENT_TYPE_JSON,
-                              'Referer': self._get_url('')
-                              }
-            if headers:
-                session_header.update(headers)
-            url_kwargs = self._args_with_session(method, api_timeout, headers=session_header)
-            if data and dump:
-                data = json.dumps(data)
-            url = self._build_url(uri, query_param=query_param)
-            resp = open_url(url, data=data, **url_kwargs)
-            resp_data = OpenURLResponse(resp)
-        except (HTTPError, URLError, SSLValidationError, ConnectionError) as err:
-            raise err
+        csrf_token = self._create_session()
+        session_header = {'Cookie': self.session_id,
+                          'X-CSRF-Token': csrf_token,
+                          'Content-Type': CONTENT_TYPE_JSON,
+                          'Referer': self._get_url('')
+                          }
+        if headers:
+            session_header.update(headers)
+        url_kwargs = self._args_with_session(method, api_timeout, headers=session_header)
+        if data and dump:
+            data = json.dumps(data)
+        url = self._build_url(uri, query_param=query_param)
+        resp = open_url(url, data=data, **url_kwargs)
+        resp_data = OpenURLResponse(resp)
         self._delete_session()
         return resp_data

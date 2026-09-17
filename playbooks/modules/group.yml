@@ -390,7 +390,8 @@
     # Child group membership tasks (group_members parameter)
     #
     # group_members: list of dicts, each with a required 'group_name'
-    #   and optional 'provider_type' (defaults to the group-level provider).
+    #   and optional 'provider_type' (defaults to the
+    #   group-level provider).
     # group_member_state: 'present-in-group' to add, 'absent-in-group' to remove.
     # ----------------------------------------------------------------
 

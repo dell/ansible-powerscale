@@ -787,7 +787,7 @@ class AccessZone(object):
                     key <= len(self.unique_auth_providers(existing_items=updated_auth_providers_list,
                                                           new_items=new_auth_providers)) + len(no_priority_list):
                 updated_auth_providers_list.remove(new_auth_providers[key])
-        sorted_providers_by_priority = sorted(new_auth_providers.items(), key=lambda x: x[0])
+        _ = sorted(new_auth_providers.items(), key=lambda x: x[0])
         index = 0
         index1 = 0
 

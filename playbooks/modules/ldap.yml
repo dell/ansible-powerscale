@@ -130,7 +130,8 @@
         ldap_name: "{{ ldap_name }}"
         state: "{{ state_present }}"
 
-    # --- New parameter tasks (group_base_dn, provider_domain, authentication) ---
+    # --- New parameter tasks ---
+    # (group_base_dn, provider_domain, authentication)
 
     - name: Configure group_base_dn on an existing provider
       dellemc.powerscale.ldap:

@@ -1007,10 +1007,10 @@ class NetworkPoolHandler():
         else:
             before = network_pool_details['pools'][0]
         if network_pool_obj.module._diff:
-            network_pool_obj.result['diff'] = dict(
-                before=before,
-                after=diff_dict
-            )
+            network_pool_obj.result['diff'] = {
+                'before': before,
+                'after': diff_dict
+            }
         NetworkPoolCreateHandler().handle(
             network_pool_obj=network_pool_obj, pool_params=pool_params,
             network_pool_details=network_pool_details, modify_param_dict=modify_param_dict)

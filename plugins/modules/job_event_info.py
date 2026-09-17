@@ -343,11 +343,11 @@ class JobEventInfo(object):
         ended_jobs_only = self.module.params['ended_jobs_only']
         limit = self.module.params['limit']
 
-        result = dict(
-            changed=False,
-            job_events=[],
-            total_events=0
-        )
+        result = {
+            'changed': False,
+            'job_events': [],
+            'total_events': 0
+        }
 
         # Validate limit
         if limit is not None and limit < 0:
@@ -409,25 +409,25 @@ def get_job_event_info_parameters():
     This method provides parameters required for the ansible Job Event
     Info module on PowerScale
     """
-    return dict(
-        state=dict(type='str', choices=[
+    return {
+        'state': {'type': 'str', 'choices': [
             'running', 'paused_user', 'paused_system', 'paused_policy',
             'paused_priority', 'cancelled_user', 'cancelled_system',
             'failed', 'succeeded', 'unknown', 'failed_not_retried'
-        ]),
-        begin_time=dict(type='str'),
-        end_time=dict(type='str'),
-        duration=dict(type='dict', options=dict(
-            value=dict(type='int', required=True),
-            unit=dict(type='str', required=True,
-                      choices=['minutes', 'hours', 'days'])
-        )),
-        job_id=dict(type='int'),
-        job_type=dict(type='str'),
-        event_key=dict(type='str', no_log=False),
-        ended_jobs_only=dict(type='bool'),
-        limit=dict(type='int')
-    )
+        ]},
+        'begin_time': {'type': 'str'},
+        'end_time': {'type': 'str'},
+        'duration': {'type': 'dict', 'options': {
+            'value': {'type': 'int', 'required': True},
+            'unit': {'type': 'str', 'required': True,
+                     'choices': ['minutes', 'hours', 'days']}
+        }},
+        'job_id': {'type': 'int'},
+        'job_type': {'type': 'str'},
+        'event_key': {'type': 'str', 'no_log': False},
+        'ended_jobs_only': {'type': 'bool'},
+        'limit': {'type': 'int'}
+    }
 
 
 if __name__ == '__main__':

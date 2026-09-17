@@ -750,63 +750,63 @@ class SupportAssist(PowerScaleBase):
                 if settings_params['contact']['secondary'] != settings_details['contact']['secondary']:
                     self.validate_phone(phone=settings_params['contact']['secondary'].get('phone'))
                     contact['secondary'] = {k: v for k, v in settings_params['contact']['secondary'].items() if v is not None}
-        if contact != {}:
+        if contact:
             modify_dict['contact'] = contact
 
         return modify_dict
 
     def get_support_assist_parameters(self):
-        return dict(
-            accepted_terms=dict(type='bool'),
-            automatic_case_creation=dict(type='bool'),
-            connection=dict(
-                type='dict', options=dict(
-                    gateway_endpoints=dict(
-                        type='list', elements='dict', options=dict(
-                            enabled=dict(type='bool', default=True),
-                            gateway_host=dict(type='str', required=True),
-                            gateway_port=dict(type='int', default=9443),
-                            priority=dict(type='int', default=1),
-                            use_proxy=dict(type='bool', default=False),
-                            validate_ssl=dict(type='bool', default=False),
-                            state=dict(type='str', choices=['present', 'absent'], default='present'))
-                    ),
-                    mode=dict(type='str', choices=['direct', 'gateway']),
-                    network_pools=dict(type='list', elements='dict', options=dict(
-                        pool_name=dict(type='str'),
-                        state=dict(type='str', choices=['present', 'absent'])))
-                )
-            ),
-            connection_state=dict(type='str', choices=['enabled', 'disabled']),
-            enable_download=dict(type='bool'),
-            enable_remote_support=dict(type='bool'),
-            enable_service=dict(type='bool'),
-            contact=dict(
-                type='dict', options=dict(
-                    primary=dict(
-                        type='dict', options=dict(
-                            email=dict(type='str'),
-                            first_name=dict(type='str'),
-                            last_name=dict(type='str'),
-                            phone=dict(type='str'))
-                    ),
-                    secondary=dict(
-                        type='dict', options=dict(
-                            email=dict(type='str'),
-                            first_name=dict(type='str'),
-                            last_name=dict(type='str'),
-                            phone=dict(type='str'))
-                    )
-                )
-            ),
-            telemetry=dict(
-                type='dict', options=dict(
-                    offline_collection_period=dict(type='int'),
-                    telemetry_enabled=dict(type='bool'),
-                    telemetry_persist=dict(type='bool'),
-                    telemetry_threads=dict(type='int')
-                ))
-        )
+        return {
+            'accepted_terms': {'type': 'bool'},
+            'automatic_case_creation': {'type': 'bool'},
+            'connection': {
+                'type': 'dict', 'options': {
+                    'gateway_endpoints': {
+                        'type': 'list', 'elements': 'dict', 'options': {
+                            'enabled': {'type': 'bool', 'default': True},
+                            'gateway_host': {'type': 'str', 'required': True},
+                            'gateway_port': {'type': 'int', 'default': 9443},
+                            'priority': {'type': 'int', 'default': 1},
+                            'use_proxy': {'type': 'bool', 'default': False},
+                            'validate_ssl': {'type': 'bool', 'default': False},
+                            'state': {'type': 'str', 'choices': ['present', 'absent'], 'default': 'present'}}
+                    },
+                    'mode': {'type': 'str', 'choices': ['direct', 'gateway']},
+                    'network_pools': {'type': 'list', 'elements': 'dict', 'options': {
+                        'pool_name': {'type': 'str'},
+                        'state': {'type': 'str', 'choices': ['present', 'absent']}}}
+                }
+            },
+            'connection_state': {'type': 'str', 'choices': ['enabled', 'disabled']},
+            'enable_download': {'type': 'bool'},
+            'enable_remote_support': {'type': 'bool'},
+            'enable_service': {'type': 'bool'},
+            'contact': {
+                'type': 'dict', 'options': {
+                    'primary': {
+                        'type': 'dict', 'options': {
+                            'email': {'type': 'str'},
+                            'first_name': {'type': 'str'},
+                            'last_name': {'type': 'str'},
+                            'phone': {'type': 'str'}}
+                    },
+                    'secondary': {
+                        'type': 'dict', 'options': {
+                            'email': {'type': 'str'},
+                            'first_name': {'type': 'str'},
+                            'last_name': {'type': 'str'},
+                            'phone': {'type': 'str'}}
+                    }
+                }
+            },
+            'telemetry': {
+                'type': 'dict', 'options': {
+                    'offline_collection_period': {'type': 'int'},
+                    'telemetry_enabled': {'type': 'bool'},
+                    'telemetry_persist': {'type': 'bool'},
+                    'telemetry_threads': {'type': 'int'}
+                }}
+        }
 
 
 class SupportAssistExitHandler:

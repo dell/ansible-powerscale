@@ -608,7 +608,7 @@ class Role(PowerScaleBase):
 
     def validate_privileges(self, role_params):
         if role_params.get('privileges'):
-            existing_privileges_names = set(p['name'] for p in role_params['privileges'])
+            existing_privileges_names = {p['name'] for p in role_params['privileges']}
             duplicate_privileges = [privilege for privilege in role_params['privileges']
                                     if privilege['name'] in existing_privileges_names and
                                     any(privilege['permission'] != p['permission']
@@ -677,23 +677,23 @@ class Role(PowerScaleBase):
             self.module.fail_json(msg=error_msg)
 
     def get_role_parameters(self):
-        return dict(
-            role_name=dict(type='str', required=True),
-            new_role_name=dict(type='str'),
-            access_zone=dict(type='str', default='System'),
-            copy_role=dict(type='bool'),
-            description=dict(type='str'),
-            privileges=dict(type='list', elements='dict', options=dict(
-                            name=dict(type='str'),
-                            permission=dict(type='str', choices=['+', 'r', 'w', 'x', '-']),
-                            state=dict(type='str', choices=['present', 'absent'], default='present'))),
-            members=dict(type='list', elements='dict', options=dict(
-                         name=dict(type='str'),
-                         type=dict(type='str', choices=['user', 'group', 'wellknown']),
-                         provider_type=dict(type='str', choices=['local', 'file', 'ldap', 'ads', 'nis'], default='local'),
-                         state=dict(type='str', choices=['present', 'absent'], default='present'))),
-            state=dict(type='str', choices=['present', 'absent'], default='present')
-        )
+        return {
+            'role_name': {'type': 'str', 'required': True},
+            'new_role_name': {'type': 'str'},
+            'access_zone': {'type': 'str', 'default': 'System'},
+            'copy_role': {'type': 'bool'},
+            'description': {'type': 'str'},
+            'privileges': {'type': 'list', 'elements': 'dict', 'options': {
+                            'name': {'type': 'str'},
+                            'permission': {'type': 'str', 'choices': ['+', 'r', 'w', 'x', '-']},
+                            'state': {'type': 'str', 'choices': ['present', 'absent'], 'default': 'present'}}},
+            'members': {'type': 'list', 'elements': 'dict', 'options': {
+                         'name': {'type': 'str'},
+                         'type': {'type': 'str', 'choices': ['user', 'group', 'wellknown']},
+                         'provider_type': {'type': 'str', 'choices': ['local', 'file', 'ldap', 'ads', 'nis'], 'default': 'local'},
+                         'state': {'type': 'str', 'choices': ['present', 'absent'], 'default': 'present'}}},
+            'state': {'type': 'str', 'choices': ['present', 'absent'], 'default': 'present'}
+        }
 
 
 class RoleExitHandler():

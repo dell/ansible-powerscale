@@ -237,10 +237,10 @@ class EventAlertSuppression(PowerScaleBase):
         }
 
     def get_event_alert_suppression_parameters(self):
-        return dict(
-            event_id=dict(type='str'),
-            state=dict(type='str', required=True,
-                       choices=['suppressed', 'unsuppressed', 'query']))
+        return {
+            'event_id': {'type': 'str'},
+            'state': {'type': 'str', 'required': True,
+                      'choices': ['suppressed', 'unsuppressed', 'query']}}
 
 
 class EventAlertSuppressionExitHandler:
@@ -262,9 +262,9 @@ class EventAlertSuppressionModifyHandler:
                                    "suppressed": current_state}
         else:
             if suppression_obj.module._diff:
-                suppression_obj.result['diff'] = dict(
-                    before={"event_id": event_id, "suppressed": current_state},
-                    after={"event_id": event_id, "suppressed": desired_state})
+                suppression_obj.result['diff'] = {
+                    'before': {"event_id": event_id, "suppressed": current_state},
+                    'after': {"event_id": event_id, "suppressed": desired_state}}
 
             suppression_obj.result['changed'] = \
                 suppression_obj.set_suppressed_state(event_id, desired_state)

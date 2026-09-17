@@ -306,22 +306,22 @@ class NFSGlobalSettings:
         return modify_dict
 
     def get_nfs_global_settings_parameters(self):
-        return dict(
-            service=dict(type='bool'), rpc_maxthreads=dict(type='int'),
-            rpc_minthreads=dict(type='int'),
-            rquota_enabled=dict(type='bool'),
-            nfs_rdma_enabled=dict(type='bool'),
-            nfsv3=dict(
-                type='dict', options=dict(
-                    nfsv3_enabled=dict(type='bool'),
-                    nfsv3_rdma_enabled=dict(type='bool'))),
-            nfsv4=dict(
-                type='dict', options=dict(
-                    nfsv4_enabled=dict(type='bool'),
-                    nfsv40_enabled=dict(type='bool'),
-                    nfsv41_enabled=dict(type='bool'),
-                    nfsv42_enabled=dict(type='bool')))
-        )
+        return {
+            'service': {'type': 'bool'}, 'rpc_maxthreads': {'type': 'int'},
+            'rpc_minthreads': {'type': 'int'},
+            'rquota_enabled': {'type': 'bool'},
+            'nfs_rdma_enabled': {'type': 'bool'},
+            'nfsv3': {
+                'type': 'dict', 'options': {
+                    'nfsv3_enabled': {'type': 'bool'},
+                    'nfsv3_rdma_enabled': {'type': 'bool'}}},
+            'nfsv4': {
+                'type': 'dict', 'options': {
+                    'nfsv4_enabled': {'type': 'bool'},
+                    'nfsv40_enabled': {'type': 'bool'},
+                    'nfsv41_enabled': {'type': 'bool'},
+                    'nfsv42_enabled': {'type': 'bool'}}}
+        }
 
 
 class NFSGlobalSettingsExitHandler:

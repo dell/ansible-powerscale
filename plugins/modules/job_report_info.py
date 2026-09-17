@@ -257,11 +257,11 @@ class JobReportInfo(object):
                 all_reports.extend(reports)
                 resume = response.get('resume') if response else None
 
-        result = dict(
-            changed=False,
-            job_reports=all_reports,
-            total_reports=len(all_reports)
-        )
+        result = {
+            'changed': False,
+            'job_reports': all_reports,
+            'total_reports': len(all_reports)
+        }
 
         self.module.exit_json(**result)
 
@@ -271,16 +271,16 @@ def get_job_report_info_parameters():
     This method provides parameters required for the ansible job report
     info module on PowerScale
     """
-    return dict(
-        job_type=dict(type='str'),
-        job_id=dict(type='int'),
-        event_key=dict(type='str', no_log=False),
-        begin=dict(type='int'),
-        end=dict(type='int'),
-        last_phase_only=dict(type='bool'),
-        verbose=dict(type='bool'),
-        limit=dict(type='int')
-    )
+    return {
+        'job_type': {'type': 'str'},
+        'job_id': {'type': 'int'},
+        'event_key': {'type': 'str', 'no_log': False},
+        'begin': {'type': 'int'},
+        'end': {'type': 'int'},
+        'last_phase_only': {'type': 'bool'},
+        'verbose': {'type': 'bool'},
+        'limit': {'type': 'int'}
+    }
 
 
 def main():

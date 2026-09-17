@@ -22,6 +22,10 @@ CONTENT_TYPE_JSON = 'application/json'
 NOT_CONFIGURED_MSG = 'not configured'
 
 
+class IpmiApiError(RuntimeError):
+    """Exception raised for IPMI API errors."""
+
+
 class IpmiApi(object):
     """REST API helper for IPMI configuration on PowerScale."""
 
@@ -56,7 +60,7 @@ class IpmiApi(object):
             url, data=body, headers=headers, method='POST',
             validate_certs=self.verify_ssl
         )
-        resp_body = resp.read()
+        resp.read()
         all_headers = dict(resp.headers)
         cookie = None
         csrf = None
@@ -112,12 +116,12 @@ class IpmiApi(object):
         except HTTPError as e:
             body = e.read()
             error_msg = body.decode('utf-8') if body else str(e)
-            raise Exception(
+            raise IpmiApiError(
                 f"IPMI API {method} {uri} failed with HTTP "
                 f"{e.code}: {error_msg}"
             )
         except URLError as e:
-            raise Exception(
+            raise IpmiApiError(
                 f"IPMI API {method} {uri} connection error: {e.reason}"
             )
         finally:

@@ -586,7 +586,7 @@ class JobPolicy(object):
         job_policy_details = self._get_final_details(
             state, policy_name, policy_id, existing, changed, description, intervals)
 
-        result = dict(changed=changed, job_policy_details=job_policy_details)
+        result = {'changed': changed, 'job_policy_details': job_policy_details}
         if self.module._diff and diff_dict:
             result['diff'] = diff_dict
         self.module.exit_json(**result)
@@ -597,23 +597,23 @@ def get_job_policy_parameters():
     This method provides parameters required for the ansible job policy
     module on PowerScale.
     """
-    return dict(
-        policy_name=dict(type='str'),
-        policy_id=dict(type='str'),
-        description=dict(type='str'),
-        intervals=dict(
-            type='list',
-            elements='dict',
-            options=dict(
-                begin=dict(type='str', required=True),
-                end=dict(type='str', required=True),
-                impact=dict(type='str', required=True,
-                            choices=['Low', 'Medium', 'High', 'Paused'])
-            )
-        ),
-        state=dict(type='str', choices=['present', 'absent'],
-                   default='present')
-    )
+    return {
+        'policy_name': {'type': 'str'},
+        'policy_id': {'type': 'str'},
+        'description': {'type': 'str'},
+        'intervals': {
+            'type': 'list',
+            'elements': 'dict',
+            'options': {
+                'begin': {'type': 'str', 'required': True},
+                'end': {'type': 'str', 'required': True},
+                'impact': {'type': 'str', 'required': True,
+                           'choices': ['Low', 'Medium', 'High', 'Paused']}
+            }
+        },
+        'state': {'type': 'str', 'choices': ['present', 'absent'],
+                  'default': 'present'}
+    }
 
 
 def main():

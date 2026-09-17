@@ -521,7 +521,8 @@
         quota_type: "{{ dir_quota_type }}"
         access_zone: "{{ access_zone }}"
         quota_notification_rules:
-          - id: "{{ create_notification_result.quota_details.notification_rules[0].id }}"
+          - id: >-
+              {{ create_notification_result.quota_details.notification_rules[0].id }}
             action_alert: false
             action_email_owner: true
         state: "present"
@@ -536,7 +537,8 @@
         quota_type: "{{ dir_quota_type }}"
         access_zone: "{{ access_zone }}"
         quota_notification_rules:
-          - id: "{{ create_notification_result.quota_details.notification_rules[0].id }}"
+          - id: >-
+              {{ create_notification_result.quota_details.notification_rules[0].id }}
             state: "absent"
         state: "present"
 

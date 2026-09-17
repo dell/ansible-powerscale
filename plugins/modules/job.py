@@ -566,7 +566,7 @@ class Job(object):
             if diff_dict.get('after') is not None:
                 diff_dict['after'].update(modify_kwargs)
 
-    def _apply_modifications(self, job_id, modify_kwargs, job_details, diff_dict):
+    def _apply_modifications(self, job_id, modify_kwargs, diff_dict):
         """Apply modifications and update job details."""
         self.modify_job(job_id, **modify_kwargs)
         updated_job_details = self.get_job_details(job_id)
@@ -590,7 +590,7 @@ class Job(object):
             self._update_diff_dict(diff_dict, before_details, job_details, modify_kwargs)
 
         if not self.module.check_mode:
-            job_details = self._apply_modifications(job_id, modify_kwargs, job_details, diff_dict)
+            job_details = self._apply_modifications(job_id, modify_kwargs, diff_dict)
 
         return True, outcome if outcome != 'noop' else 'modified', job_details
 
@@ -647,7 +647,7 @@ class Job(object):
                 'job_id': job_id, 'job_state': p.get('job_state'),
                 'priority': p.get('priority'), 'policy': p.get('policy')})
 
-        result = dict(changed=changed, job_details=job_details, outcome=outcome)
+        result = {'changed': changed, 'job_details': job_details, 'outcome': outcome}
         if self.module._diff and diff_dict:
             result['diff'] = diff_dict
         self.module.exit_json(**result)
@@ -658,21 +658,21 @@ def get_job_parameters():
     This method provides parameters required for the ansible job
     module on PowerScale.
     """
-    return dict(
-        job_id=dict(type='int'),
-        job_type=dict(type='str'),
-        job_state=dict(type='str',
-                       choices=['started', 'paused', 'running', 'cancelled']),
-        paths=dict(type='list', elements='str'),
-        priority=dict(type='int'),
-        policy=dict(type='str'),
-        allow_dup=dict(type='bool', default=False),
-        job_params=dict(type='dict'),
-        wait=dict(type='bool', default=False),
-        wait_timeout=dict(type='int', default=300),
-        wait_interval=dict(type='int', default=10),
-        state=dict(type='str', choices=['present'], default='present')
-    )
+    return {
+        'job_id': {'type': 'int'},
+        'job_type': {'type': 'str'},
+        'job_state': {'type': 'str',
+                      'choices': ['started', 'paused', 'running', 'cancelled']},
+        'paths': {'type': 'list', 'elements': 'str'},
+        'priority': {'type': 'int'},
+        'policy': {'type': 'str'},
+        'allow_dup': {'type': 'bool', 'default': False},
+        'job_params': {'type': 'dict'},
+        'wait': {'type': 'bool', 'default': False},
+        'wait_timeout': {'type': 'int', 'default': 300},
+        'wait_interval': {'type': 'int', 'default': 10},
+        'state': {'type': 'str', 'choices': ['present'], 'default': 'present'}
+    }
 
 
 def main():

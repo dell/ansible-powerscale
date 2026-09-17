@@ -1016,7 +1016,7 @@ class Ads(object):
         updated_input_ads = {}
         updated_input_ads = self.remove_none(ads_key=ads_keys, input_ad_param=input_ads)
 
-        for key in list(updated_input_ads):
+        for key in updated_input_ads:
             if updated_input_ads.get(key) != array_ads[0][key]:
 
                 updated_ads_dict[key] = updated_input_ads[key]
@@ -1137,62 +1137,62 @@ class Ads(object):
         This method provides parameters required for the ansible ADS auth
         module on PowerScale
         """
-        return dict(
-            domain_name=dict(type='str'),
-            instance_name=dict(type='str'),
-            ads_user=dict(type='str'),
-            ads_password=dict(type='str', no_log=True),
-            ads_parameters=dict(
-                type='dict', options=dict(
-                    groupnet=dict(type='str'),
-                    home_directory_template=dict(type='str'),
-                    login_shell=dict(type='str',
-                                     choices=['/bin/sh', '/bin/csh',
-                                              '/bin/tcsh', '/bin/zsh',
-                                              '/bin/bash', '/bin/rbash',
-                                              '/sbin/nologin']),
-                    machine_account=dict(type='str'),
-                    organizational_unit=dict(type='str'),
-                    allocate_gids=dict(type='bool'),
-                    allocate_uids=dict(type='bool'),
-                    assume_default_domain=dict(type='bool'),
-                    authentication=dict(type='bool'),
-                    check_online_interval=dict(type='int'),
-                    create_home_directory=dict(type='bool'),
-                    domain_offline_alerts=dict(type='bool'),
-                    ignore_all_trusts=dict(type='bool'),
-                    ignored_trusted_domains=dict(type='list', elements='str'),
-                    include_trusted_domains=dict(type='list', elements='str'),
-                    ldap_sign_and_seal=dict(type='bool'),
-                    lookup_groups=dict(type='bool'),
-                    lookup_normalize_groups=dict(type='bool'),
-                    lookup_normalize_users=dict(type='bool'),
-                    lookup_users=dict(type='bool'),
-                    machine_password_changes=dict(type='bool'),
-                    nss_enumeration=dict(type='bool'),
-                    restrict_findable=dict(type='bool'),
-                    store_sfu_mappings=dict(type='bool'),
-                    machine_password_lifespan=dict(type='int', no_log=False),
-                    rpc_call_timeout=dict(type='int'),
-                    server_retry_limit=dict(type='int'),
-                    sfu_support=dict(type='str', choices=['none', 'rfc2307']),
-                    extra_expected_spns=dict(type='list', elements='str'),
-                    findable_groups=dict(type='list', elements='str'),
-                    findable_users=dict(type='list', elements='str'),
-                    lookup_domains=dict(type='list', elements='str'),
-                    unfindable_groups=dict(type='list', elements='str'),
-                    unfindable_users=dict(type='list', elements='str'),
-                )
-            ),
-            spns=dict(
-                type='list', elements='dict', options=dict(
-                    spn=dict(type='str', required=True),
-                    state=dict(type='str', choices=['present', 'absent'], default='present')
-                )
-            ),
-            spn_command=dict(type='str', choices=['check', 'fix']),
-            state=dict(required=True, type='str', choices=['present', 'absent'])
-        )
+        return {
+            'domain_name': {'type': 'str'},
+            'instance_name': {'type': 'str'},
+            'ads_user': {'type': 'str'},
+            'ads_password': {'type': 'str', 'no_log': True},
+            'ads_parameters': {
+                'type': 'dict', 'options': {
+                    'groupnet': {'type': 'str'},
+                    'home_directory_template': {'type': 'str'},
+                    'login_shell': {'type': 'str',
+                                    'choices': ['/bin/sh', '/bin/csh',
+                                                '/bin/tcsh', '/bin/zsh',
+                                                '/bin/bash', '/bin/rbash',
+                                                '/sbin/nologin']},
+                    'machine_account': {'type': 'str'},
+                    'organizational_unit': {'type': 'str'},
+                    'allocate_gids': {'type': 'bool'},
+                    'allocate_uids': {'type': 'bool'},
+                    'assume_default_domain': {'type': 'bool'},
+                    'authentication': {'type': 'bool'},
+                    'check_online_interval': {'type': 'int'},
+                    'create_home_directory': {'type': 'bool'},
+                    'domain_offline_alerts': {'type': 'bool'},
+                    'ignore_all_trusts': {'type': 'bool'},
+                    'ignored_trusted_domains': {'type': 'list', 'elements': 'str'},
+                    'include_trusted_domains': {'type': 'list', 'elements': 'str'},
+                    'ldap_sign_and_seal': {'type': 'bool'},
+                    'lookup_groups': {'type': 'bool'},
+                    'lookup_normalize_groups': {'type': 'bool'},
+                    'lookup_normalize_users': {'type': 'bool'},
+                    'lookup_users': {'type': 'bool'},
+                    'machine_password_changes': {'type': 'bool'},
+                    'nss_enumeration': {'type': 'bool'},
+                    'restrict_findable': {'type': 'bool'},
+                    'store_sfu_mappings': {'type': 'bool'},
+                    'machine_password_lifespan': {'type': 'int', 'no_log': False},
+                    'rpc_call_timeout': {'type': 'int'},
+                    'server_retry_limit': {'type': 'int'},
+                    'sfu_support': {'type': 'str', 'choices': ['none', 'rfc2307']},
+                    'extra_expected_spns': {'type': 'list', 'elements': 'str'},
+                    'findable_groups': {'type': 'list', 'elements': 'str'},
+                    'findable_users': {'type': 'list', 'elements': 'str'},
+                    'lookup_domains': {'type': 'list', 'elements': 'str'},
+                    'unfindable_groups': {'type': 'list', 'elements': 'str'},
+                    'unfindable_users': {'type': 'list', 'elements': 'str'},
+                }
+            },
+            'spns': {
+                'type': 'list', 'elements': 'dict', 'options': {
+                    'spn': {'type': 'str', 'required': True},
+                    'state': {'type': 'str', 'choices': ['present', 'absent'], 'default': 'present'}
+                }
+            },
+            'spn_command': {'type': 'str', 'choices': ['check', 'fix']},
+            'state': {'required': True, 'type': 'str', 'choices': ['present', 'absent']}
+        }
 
 
 class ADSExitHandler:

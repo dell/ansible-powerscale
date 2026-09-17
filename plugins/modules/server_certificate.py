@@ -274,19 +274,19 @@ class ServerCertificate(PowerScaleBase):
         :return: A dictionary containing the parameters for a certificate.
         :rtype: dict
         """
-        return dict(
-            state=dict(type='str', choices=['present', 'absent'], default='present'),
-            alias_name=dict(type='str'),
-            new_alias_name=dict(type='str'),
-            certificate_id=dict(type='str'),
-            certificate_path=dict(type='path'),
-            certificate_key_path=dict(type='path'),
-            certificate_key_password=dict(type='str', no_log=True),
-            description=dict(type='str'),
-            is_default_certificate=dict(type='bool', default=False),
-            certificate_monitor_enabled=dict(type='bool'),
-            certificate_pre_expiration_threshold=dict(type='int'),
-        )
+        return {
+            'state': {'type': 'str', 'choices': ['present', 'absent'], 'default': 'present'},
+            'alias_name': {'type': 'str'},
+            'new_alias_name': {'type': 'str'},
+            'certificate_id': {'type': 'str'},
+            'certificate_path': {'type': 'path'},
+            'certificate_key_path': {'type': 'path'},
+            'certificate_key_password': {'type': 'str', 'no_log': True},
+            'description': {'type': 'str'},
+            'is_default_certificate': {'type': 'bool', 'default': False},
+            'certificate_monitor_enabled': {'type': 'bool'},
+            'certificate_pre_expiration_threshold': {'type': 'int'},
+        }
 
     def validate_params(self, module_params):
         """
@@ -428,7 +428,7 @@ class ServerCertificate(PowerScaleBase):
                 self.make_certificate_default(module_params, certificate_id['id'])
             certificate = self.get_certificate_details(module_params)
             if new_alias_name is not None and new_alias_name.strip():
-                changed, certificate = self.update_certificate(module_params, certificate)
+                _, certificate = self.update_certificate(module_params, certificate)
         except Exception as e:
             error_message = f"Failed to create the server certificate: {utils.determine_error(e)}"
             LOG.error(error_message)

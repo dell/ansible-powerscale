@@ -192,12 +192,12 @@ class S3GlobalSettings:
 
     def get_s3_global_settings_parameters(self):
         """Get s3 global settings parameters."""
-        return dict(
-            http_port=dict(type='int'),
-            https_port=dict(type='int'),
-            https_only=dict(type='bool'),
-            service=dict(type='bool')
-        )
+        return {
+            'http_port': {'type': 'int'},
+            'https_port': {'type': 'int'},
+            'https_only': {'type': 'bool'},
+            'service': {'type': 'bool'}
+        }
 
 
 class S3GlobalSettingsExitHandler:

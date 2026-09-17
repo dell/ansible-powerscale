@@ -393,7 +393,9 @@
       ansible.builtin.assert:
         that:
           - not idempotent_result.changed
-        fail_msg: "Idempotency check failed: changed={{ idempotent_result.changed }}"
+        fail_msg: >-
+          Idempotency check failed:
+          changed={{ idempotent_result.changed }}
 
     - name: Create contractor user with account expiry set
       register: result
@@ -405,7 +407,8 @@
         provider_type: "{{ provider_type }}"
         user_name: "contractor_user"
         password: "Contr@ct0r!"
-        # Epoch timestamp for account expiry (use: date -d '2025-12-31T23:59:59Z' +%s)
+        # Epoch timestamp for account expiry
+        # (use: date -d '2025-12-31T23:59:59Z' +%s)
         expiry: 1751328000
         password_expires: true
         state: "present"

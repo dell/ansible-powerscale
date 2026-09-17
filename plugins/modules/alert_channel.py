@@ -625,29 +625,29 @@ class AlertChannel(PowerScaleBase):
                     self.module.fail_json(msg=msg)
 
     def get_alert_channel_parameters(self):
-        return dict(
-            allowed_nodes=dict(type='list', elements='int'),
-            enabled=dict(type='bool'),
-            excluded_nodes=dict(type='list', elements='int'),
-            name=dict(type='str', required=True),
-            smtp_parameters=dict(
-                type='dict',
-                options=dict(address=dict(type='list', aliases=['send_to'], elements='str'),
-                             batch=dict(type='str', choices=['NONE', 'ALL', 'CATEGORY', 'SEVERITY']),
-                             batch_period=dict(type='int'),
-                             send_as=dict(type='str', aliases=['send_from']),
-                             smtp_host=dict(type='str'),
-                             smtp_port=dict(type='int'),
-                             smtp_security=dict(type='str', choices=['NONE', 'STARTTLS']),
-                             subject=dict(type='str'),
-                             smtp_use_auth=dict(type='bool'),
-                             smtp_username=dict(type='str'),
-                             smtp_password=dict(type='str', no_log=True),
-                             update_password=dict(type='str', choices=['on_create', 'always'], default='always')
-                             )),
-            state=dict(type='str', choices=['present', 'absent'], default='present'),
-            send_test_alert=dict(type='bool', default=False),
-            type=dict(type='str', choices=['smtp', 'connectemc']))
+        return {
+            'allowed_nodes': {'type': 'list', 'elements': 'int'},
+            'enabled': {'type': 'bool'},
+            'excluded_nodes': {'type': 'list', 'elements': 'int'},
+            'name': {'type': 'str', 'required': True},
+            'smtp_parameters': {
+                'type': 'dict',
+                'options': {'address': {'type': 'list', 'aliases': ['send_to'], 'elements': 'str'},
+                            'batch': {'type': 'str', 'choices': ['NONE', 'ALL', 'CATEGORY', 'SEVERITY']},
+                            'batch_period': {'type': 'int'},
+                            'send_as': {'type': 'str', 'aliases': ['send_from']},
+                            'smtp_host': {'type': 'str'},
+                            'smtp_port': {'type': 'int'},
+                            'smtp_security': {'type': 'str', 'choices': ['NONE', 'STARTTLS']},
+                            'subject': {'type': 'str'},
+                            'smtp_use_auth': {'type': 'bool'},
+                            'smtp_username': {'type': 'str'},
+                            'smtp_password': {'type': 'str', 'no_log': True},
+                            'update_password': {'type': 'str', 'choices': ['on_create', 'always'], 'default': 'always'}
+                            }},
+            'state': {'type': 'str', 'choices': ['present', 'absent'], 'default': 'present'},
+            'send_test_alert': {'type': 'bool', 'default': False},
+            'type': {'type': 'str', 'choices': ['smtp', 'connectemc']}}
 
 
 class AlertChannelExitHandler:
@@ -711,7 +711,7 @@ class AlertChannelHandler:
 
             before_dict = channel_details
         if channel_obj.module._diff:
-            channel_obj.result['diff'] = dict(before=before_dict, after=diff_dict)
+            channel_obj.result['diff'] = {'before': before_dict, 'after': diff_dict}
 
         AlertChannelCreateHandler().handle(channel_obj, channel_params, channel_details)
 

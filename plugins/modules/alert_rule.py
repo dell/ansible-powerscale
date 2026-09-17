@@ -247,25 +247,25 @@ class AlertRule(PowerScaleBase):
         self.result.update({"alert_conditions": {}, "diff": None})
 
     def get_alert_rule_parameters(self):
-        return dict(
-            state=dict(type='str', choices=['present', 'absent'], default='present'),
-            name=dict(type='str', required=True),
-            condition=dict(type='str', choices=['NEW', 'NEW EVENTS', 'ONGOING',
-                                                'SEVERITY INCREASE', 'SEVERITY DECREASE', 'RESOLVED']),
-            categories=dict(type='list', elements='str',
-                            choices=['all', 'SYS_DISK_EVENTS', 'NODE_STATUS_EVENTS',
-                                     'REBOOT_EVENTS', 'SW_EVENTS', 'QUOTA_EVENTS',
-                                     'SNAP_EVENTS', 'WINNET_EVENTS', 'FILESYS_EVENTS',
-                                     'HW_EVENTS', 'CPOOL_EVENTS']),
-            channels=dict(type='list', elements='str'),
-            eventgroup_ids=dict(type='list', elements='str'),
-            exclude_eventgroup_ids=dict(type='list', elements='str'),
-            interval=dict(type='int'),
-            limit=dict(type='int'),
-            transient=dict(type='int'),
-            severities=dict(type='list', elements='str',
-                            choices=['emergency', 'critical', 'warning', 'information']),
-        )
+        return {
+            'state': {'type': 'str', 'choices': ['present', 'absent'], 'default': 'present'},
+            'name': {'type': 'str', 'required': True},
+            'condition': {'type': 'str', 'choices': ['NEW', 'NEW EVENTS', 'ONGOING',
+                                                     'SEVERITY INCREASE', 'SEVERITY DECREASE', 'RESOLVED']},
+            'categories': {'type': 'list', 'elements': 'str',
+                           'choices': ['all', 'SYS_DISK_EVENTS', 'NODE_STATUS_EVENTS',
+                                       'REBOOT_EVENTS', 'SW_EVENTS', 'QUOTA_EVENTS',
+                                       'SNAP_EVENTS', 'WINNET_EVENTS', 'FILESYS_EVENTS',
+                                       'HW_EVENTS', 'CPOOL_EVENTS']},
+            'channels': {'type': 'list', 'elements': 'str'},
+            'eventgroup_ids': {'type': 'list', 'elements': 'str'},
+            'exclude_eventgroup_ids': {'type': 'list', 'elements': 'str'},
+            'interval': {'type': 'int'},
+            'limit': {'type': 'int'},
+            'transient': {'type': 'int'},
+            'severities': {'type': 'list', 'elements': 'str',
+                           'choices': ['emergency', 'critical', 'warning', 'information']},
+        }
 
     def get_alert_rule(self, module_params):
         event_obj = Events(self.event_api, self.module)

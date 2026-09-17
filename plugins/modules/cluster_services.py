@@ -272,13 +272,13 @@ class ClusterServices:
 
     def get_cluster_services_parameters(self):
         """Return argument_spec for module-specific parameters."""
-        return dict(
-            nfs_service=dict(type='bool'),
-            smb_service=dict(type='bool'),
-            s3_service=dict(type='bool'),
-            hdfs_service=dict(type='bool'),
-            antivirus_service=dict(type='bool')
-        )
+        return {
+            'nfs_service': {'type': 'bool'},
+            'smb_service': {'type': 'bool'},
+            's3_service': {'type': 'bool'},
+            'hdfs_service': {'type': 'bool'},
+            'antivirus_service': {'type': 'bool'}
+        }
 
 
 class ClusterServicesExitHandler:

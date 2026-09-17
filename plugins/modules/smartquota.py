@@ -1106,6 +1106,51 @@ class SmartQuota(object):
                 return False
         return True
 
+    def _reconcile_single_rule(self, quota_id, desired, current_by_id, after_rules):
+        """Process a single desired notification rule. Returns (changed, after_rules)."""
+        rule_id = desired.get('id')
+        rule_state = desired.get('state') or 'present'
+        current_rule = current_by_id.get(rule_id) if rule_id else None
+
+        if rule_id and current_rule is None:
+            self.module.fail_json(
+                msg="Notification rule with id %s does not exist for "
+                    "quota %s" % (rule_id, quota_id))
+
+        if rule_state == 'absent':
+            self.delete_quota_notification_rule(quota_id, rule_id)
+            return True, [r for r in after_rules if r.get('id') != rule_id]
+
+        if current_rule is None:
+            new_id = self.create_quota_notification_rule(quota_id, desired)
+            new_rule = dict(desired)
+            new_rule['id'] = new_id if isinstance(new_id, str) else None
+            after_rules.append(new_rule)
+            return True, after_rules
+
+        return self._update_existing_rule(quota_id, desired, current_rule, rule_id, after_rules)
+
+    def _update_existing_rule(self, quota_id, desired, current_rule, rule_id, after_rules):
+        """Update or replace an existing notification rule. Returns (changed, after_rules)."""
+        immutable_changed = any(
+            desired.get(field) is not None and desired[field] != current_rule.get(field)
+            for field in self.NOTIFICATION_IMMUTABLE_FIELDS)
+        if immutable_changed:
+            self.delete_quota_notification_rule(quota_id, rule_id)
+            new_id = self.create_quota_notification_rule(quota_id, desired)
+            after_rules = [r for r in after_rules if r.get('id') != rule_id]
+            new_rule = dict(desired)
+            new_rule['id'] = new_id if isinstance(new_id, str) else rule_id
+            after_rules.append(new_rule)
+            return True, after_rules
+        if not self._notification_rule_content_equal(desired, current_rule):
+            self.update_quota_notification_rule(quota_id, rule_id, desired)
+            merged = dict(current_rule)
+            merged.update({k: v for k, v in desired.items() if v is not None})
+            after_rules = [merged if r.get('id') == rule_id else r for r in after_rules]
+            return True, after_rules
+        return False, after_rules
+
     def reconcile_quota_notification_rules(self, quota_id, desired_rules, diff_dict=None):
         """
         Reconcile the requested notification rules against the rules
@@ -1138,46 +1183,9 @@ class SmartQuota(object):
         changed = False
 
         for desired in desired_rules:
-            rule_id = desired.get('id')
-            rule_state = desired.get('state') or 'present'
-            current_rule = current_by_id.get(rule_id) if rule_id else None
-
-            if rule_id and current_rule is None:
-                self.module.fail_json(
-                    msg="Notification rule with id %s does not exist for "
-                        "quota %s" % (rule_id, quota_id))
-
-            if rule_state == 'absent':
-                self.delete_quota_notification_rule(quota_id, rule_id)
-                changed = True
-                after_rules = [r for r in after_rules if r.get('id') != rule_id]
-                continue
-
-            if current_rule is None:
-                new_id = self.create_quota_notification_rule(quota_id, desired)
-                changed = True
-                new_rule = dict(desired)
-                new_rule['id'] = new_id if isinstance(new_id, str) else None
-                after_rules.append(new_rule)
-                continue
-
-            immutable_changed = any(
-                desired.get(field) is not None and desired[field] != current_rule.get(field)
-                for field in self.NOTIFICATION_IMMUTABLE_FIELDS)
-            if immutable_changed:
-                self.delete_quota_notification_rule(quota_id, rule_id)
-                new_id = self.create_quota_notification_rule(quota_id, desired)
-                changed = True
-                after_rules = [r for r in after_rules if r.get('id') != rule_id]
-                new_rule = dict(desired)
-                new_rule['id'] = new_id if isinstance(new_id, str) else rule_id
-                after_rules.append(new_rule)
-            elif not self._notification_rule_content_equal(desired, current_rule):
-                self.update_quota_notification_rule(quota_id, rule_id, desired)
-                changed = True
-                merged = dict(current_rule)
-                merged.update({k: v for k, v in desired.items() if v is not None})
-                after_rules = [merged if r.get('id') == rule_id else r for r in after_rules]
+            rule_changed, after_rules = self._reconcile_single_rule(
+                quota_id, desired, current_by_id, after_rules)
+            changed = changed or rule_changed
 
         if diff_dict is not None:
             diff_dict['after'] = after_rules
@@ -1444,7 +1452,7 @@ class SmartQuota(object):
                         "of action_alert, action_email_owner, or "
                         "action_email_address to be set" % index)
 
-    def _handle_notification_rules(self, state, quota_details, quota_id, include_snapshots,
+    def _handle_notification_rules(self, state, quota_id, include_snapshots,
                                    access_zone, quota_type, complete_path, sid, diff_dict=None):
         """
         Reconcile quota_notification_rules, if supplied, once the target
@@ -1459,7 +1467,7 @@ class SmartQuota(object):
 
         target_quota_id = quota_id
         if not target_quota_id and not self.module.check_mode:
-            ignored_quota, target_quota_id = self.get_quota_details(
+            _, target_quota_id = self.get_quota_details(
                 include_snapshots=include_snapshots, zone=access_zone,
                 type=quota_type, path=complete_path, persona=sid)
 
@@ -1505,7 +1513,7 @@ class SmartQuota(object):
         # Reconcile notification rules, if requested
         notification_diff = {} if self.module._diff else None
         changed = self._handle_notification_rules(
-            state, quota_details, quota_id, include_snapshots, access_zone,
+            state, quota_id, include_snapshots, access_zone,
             quota_type, complete_path, sid, diff_dict=notification_diff
         ) or changed
 
@@ -1586,57 +1594,57 @@ def make_threshold_obj(advisory, soft, soft_grace, hard):
 def get_smartquota_parameters():
     """This method provides parameters required for the ansible Smart Quota
     module on PowerScale"""
-    return dict(
-        path=dict(required=True, type='str', no_log=True),
-        user_name=dict(type='str'),
-        group_name=dict(type='str'),
-        access_zone=dict(type='str', default='system'),
-        provider_type=dict(type='str', default='local',
-                           choices=['local', 'file', 'ldap', 'ads', 'nis']),
-        quota_type=dict(required=True, type='str',
-                        choices=['user', 'group', 'directory',
-                                 'default-user', 'default-group',
-                                 'default-directory']),
-        description=dict(type='str'),
-        labels=dict(type='str'),
-        force=dict(type='bool'),
-        quota=dict(type='dict',
-                   options=dict(include_snapshots=dict(type='bool', default=False),
-                                container=dict(type='bool', default=False),
-                                include_overheads=dict(type='bool'),
-                                thresholds_on=dict(type='str',
-                                                   choices=['app_logical_size',
+    return {
+        'path': {'required': True, 'type': 'str', 'no_log': True},
+        'user_name': {'type': 'str'},
+        'group_name': {'type': 'str'},
+        'access_zone': {'type': 'str', 'default': 'system'},
+        'provider_type': {'type': 'str', 'default': 'local',
+                          'choices': ['local', 'file', 'ldap', 'ads', 'nis']},
+        'quota_type': {'required': True, 'type': 'str',
+                       'choices': ['user', 'group', 'directory',
+                                   'default-user', 'default-group',
+                                   'default-directory']},
+        'description': {'type': 'str'},
+        'labels': {'type': 'str'},
+        'force': {'type': 'bool'},
+        'quota': {'type': 'dict',
+                  'options': {'include_snapshots': {'type': 'bool', 'default': False},
+                              'container': {'type': 'bool', 'default': False},
+                              'include_overheads': {'type': 'bool'},
+                              'thresholds_on': {'type': 'str',
+                                                'choices': ['app_logical_size',
                                                             'fs_logical_size',
-                                                            'physical_size']),
-                                advisory_limit_size=dict(type='float'),
-                                soft_limit_size=dict(type='float'),
-                                hard_limit_size=dict(type='float'),
-                                soft_grace_period=dict(type='int'),
-                                period_unit=dict(type='str',
-                                                 choices=['days', 'weeks', 'months']),
-                                cap_unit=dict(type='str', choices=['GB', 'TB']),
-                                percent_soft=dict(type='float'),
-                                percent_advisory=dict(type='float')),
-                   required_together=[['soft_grace_period', 'period_unit']],
-                   mutually_exclusive=[['soft_limit_size', 'percent_soft'],
-                                       ['advisory_limit_size', 'percent_advisory']]),
-        quota_notification_rules=dict(
-            type='list', elements='dict',
-            options=dict(
-                id=dict(type='str'),
-                condition=dict(type='str',
-                               choices=['exceeded', 'denied', 'violated', 'expired']),
-                threshold=dict(type='str',
-                               choices=['hard', 'soft', 'advisory']),
-                action_alert=dict(type='bool'),
-                action_email_owner=dict(type='bool'),
-                action_email_address=dict(type='list', elements='str'),
-                holdoff=dict(type='int'),
-                state=dict(type='str', choices=['present', 'absent'], default='present')
-            )
-        ),
-        state=dict(required=True, type='str', choices=['present', 'absent'])
-    )
+                                                            'physical_size']},
+                              'advisory_limit_size': {'type': 'float'},
+                              'soft_limit_size': {'type': 'float'},
+                              'hard_limit_size': {'type': 'float'},
+                              'soft_grace_period': {'type': 'int'},
+                              'period_unit': {'type': 'str',
+                                              'choices': ['days', 'weeks', 'months']},
+                              'cap_unit': {'type': 'str', 'choices': ['GB', 'TB']},
+                              'percent_soft': {'type': 'float'},
+                              'percent_advisory': {'type': 'float'}},
+                  'required_together': [['soft_grace_period', 'period_unit']],
+                  'mutually_exclusive': [['soft_limit_size', 'percent_soft'],
+                                         ['advisory_limit_size', 'percent_advisory']]},
+        'quota_notification_rules': {
+            'type': 'list', 'elements': 'dict',
+            'options': {
+                'id': {'type': 'str'},
+                'condition': {'type': 'str',
+                              'choices': ['exceeded', 'denied', 'violated', 'expired']},
+                'threshold': {'type': 'str',
+                              'choices': ['hard', 'soft', 'advisory']},
+                'action_alert': {'type': 'bool'},
+                'action_email_owner': {'type': 'bool'},
+                'action_email_address': {'type': 'list', 'elements': 'str'},
+                'holdoff': {'type': 'int'},
+                'state': {'type': 'str', 'choices': ['present', 'absent'], 'default': 'present'}
+            }
+        },
+        'state': {'required': True, 'type': 'str', 'choices': ['present', 'absent']}
+    }
 
 
 def main():
