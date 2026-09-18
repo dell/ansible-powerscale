@@ -10,7 +10,7 @@ v3.11.0
 Release Summary
 ---------------
 
-| Release Date: 2026-09-18
+| Release Date: 2026-09-30
 | >- This release adds event alert suppression, expands filesystem, identity, and Smart Quota management, and adds support for PowerScale OneFS 9.15.
 
 Minor Changes
