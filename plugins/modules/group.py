@@ -1619,35 +1619,38 @@ class Group(object):
                     changed = True
         return changed
 
+    def _process_users_for_group(self, group, access_zone,
+                                provider_type, users, user_state):
+        """Process user member additions/removals. Returns changed."""
+        if not (user_state and users):
+            return False
+        changed = False
+        for idx, user in enumerate(users):
+            if self._process_user_entry(group, user, user_state,
+                                        access_zone, provider_type,
+                                        index=idx):
+                changed = True
+        return changed
+
     def _update_existing_group_members(self, group, access_zone,
                                       provider_type, users, user_state):
         """Process all member types for an existing group. Returns changed."""
-        changed = False
-        # Step 1: Process users (existing behaviour)
-        if user_state and users:
-            for idx, user in enumerate(users):
-                if self._process_user_entry(group, user, user_state,
-                                            access_zone, provider_type,
-                                            index=idx):
-                    changed = True
+        changed = self._process_users_for_group(
+            group, access_zone, provider_type, users, user_state)
 
-        # Step 2: Process group_members
         group_members = self.module.params.get('group_members') or []
         group_member_state = self.module.params.get('group_member_state')
         if group_member_state and group_members:
-            if self._process_group_members(
-                    group, group_members, group_member_state,
-                    access_zone, provider_type):
-                changed = True
+            changed = self._process_group_members(
+                group, group_members, group_member_state,
+                access_zone, provider_type) or changed
 
-        # Step 3: Process well_known_sids
         well_known_sids = self.module.params.get('well_known_sids') or []
         well_known_sid_state = self.module.params.get('well_known_sid_state')
         if well_known_sid_state and well_known_sids:
-            if self._process_well_known_sids(
-                    group, well_known_sids, well_known_sid_state,
-                    access_zone, provider_type):
-                changed = True
+            changed = self._process_well_known_sids(
+                group, well_known_sids, well_known_sid_state,
+                access_zone, provider_type) or changed
         return changed
 
     def _handle_present_state(self, group, group_name, group_id, access_zone, provider_type, users, user_state):

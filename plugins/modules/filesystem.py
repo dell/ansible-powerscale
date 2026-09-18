@@ -1764,16 +1764,35 @@ class FileSystem(object):
             })
         return normalized
 
+    def _is_single_ace_modified(self, acl_rights, trustee_id,
+                               filesystem_acl, acl_rights_state):
+        """Check if a single ACE indicates a modification is needed."""
+        matched_acls = [
+            acl for acl in filesystem_acl['acl']
+            if acl.get('trustee', {}).get('id')
+            and acl['trustee']['id'] + ":" + acl['accesstype']
+            == trustee_id + ":" + acl_rights['access_type']]
+        if len(matched_acls) > 1:
+            error_message = (
+                "Multiple existing ACEs match trustee '{0}' with "
+                "access_type '{1}'. Use access_control_rights as a list "
+                "with access_control_rights_state='replace' to "
+                "declaratively manage the full ACL.").format(
+                    acl_rights['trustee']['name'],
+                    acl_rights['access_type'])
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+        if not matched_acls:
+            return acl_rights_state == 'add'
+        if acl_rights_state == 'remove':
+            return True
+        return (acl_rights_state == 'add'
+                and self.is_access_or_inherit_modified(
+                    acl_rights, matched_acls[0]))
+
     def is_acl_rights_modified(self, filesystem_acl, acl_rights_list,
                                acl_rights_state=None, desired_aces=None):
-        """Determines if acl rights of filesystem are modified.
-
-        Accepts acl_rights_list as a list of ACE dicts.
-        For 'replace' state, compares the entire desired ACL list against
-        current ACL using ordered comparison.
-        For 'add'/'remove' states, checks each ACE individually (backward
-        compatible behavior).
-        """
+        """Determines if acl rights of filesystem are modified."""
         if acl_rights_state is None:
             acl_rights_state = self.module.params.get(
                 'access_control_rights_state', 'add')
@@ -1785,31 +1804,10 @@ class FileSystem(object):
             return self._is_replace_acl_modified(filesystem_acl,
                                                  desired_aces=desired_aces)
 
-        # Legacy add/remove behavior — iterate over each ACE
         for idx, acl_rights in enumerate(acl_rights_list):
-            trustee_id = desired_aces[idx]['trustee_id']
-            matched_acls = [
-                acl for acl in filesystem_acl['acl']
-                if acl.get('trustee', {}).get('id')
-                and acl['trustee']['id'] + ":" + acl['accesstype']
-                == trustee_id + ":" + acl_rights['access_type']]
-            if len(matched_acls) > 1:
-                error_message = (
-                    "Multiple existing ACEs match trustee '{0}' with "
-                    "access_type '{1}'. Use access_control_rights as a list "
-                    "with access_control_rights_state='replace' to "
-                    "declaratively manage the full ACL.").format(
-                        acl_rights['trustee']['name'], acl_rights['access_type'])
-                LOG.error(error_message)
-                self.module.fail_json(msg=error_message)
-            if matched_acls:
-                if acl_rights_state == 'add' and \
-                        self.is_access_or_inherit_modified(
-                            acl_rights, matched_acls[0]):
-                    return True
-                if acl_rights_state == 'remove':
-                    return True
-            elif acl_rights_state == 'add':
+            if self._is_single_ace_modified(
+                    acl_rights, desired_aces[idx]['trustee_id'],
+                    filesystem_acl, acl_rights_state):
                 return True
         return False
 
@@ -1938,85 +1936,97 @@ class FileSystem(object):
         self.validate_access_control_rights(self.module.params['access_control_rights'],
                                             self.module.params['access_control_rights_state'])
 
-    def validate_access_control_rights(self, acl_rights, acl_rights_state):
-        """Validates access control rights input object.
+    _ALLOWED_ACCESS_TYPES = ('allow', 'deny')
+    _ALLOWED_INHERIT_FLAGS = ('object_inherit', 'container_inherit',
+                              'inherit_only', 'no_prop_inherit',
+                              'inherited_ace')
+    _ALLOWED_TRUSTEE_TYPES = ('user', 'group', 'wellknown')
 
-        Accepts acl_rights as a list of ACE dicts (single-dict input is
-        already wrapped into a list by __init__).
-        """
+    def _validate_ace_access_type(self, ace):
+        """Validate access_type on a single ACE dict."""
+        access_type = ace.get('access_type')
+        if access_type is None:
+            self.module.fail_json(msg='access_type is required for each '
+                                      'access_control_rights entry')
+        if access_type not in self._ALLOWED_ACCESS_TYPES:
+            self.module.fail_json(
+                msg='Invalid access_type "{0}". Allowed '
+                    'values are: {1}'.format(
+                        access_type,
+                        ', '.join(self._ALLOWED_ACCESS_TYPES)))
+
+    def _validate_ace_inherit_flags(self, ace):
+        """Validate and normalize inherit_flags on a single ACE dict."""
+        inherit_flags = ace.get('inherit_flags')
+        if isinstance(inherit_flags, str):
+            inherit_flags = [inherit_flags]
+            ace['inherit_flags'] = inherit_flags
+        if inherit_flags is not None and not isinstance(inherit_flags, list):
+            self.module.fail_json(msg='inherit_flags must be a list')
+        if not inherit_flags:
+            return
+        invalid_flags = [f for f in inherit_flags
+                         if f not in self._ALLOWED_INHERIT_FLAGS]
+        if invalid_flags:
+            self.module.fail_json(
+                msg='Invalid inherit_flags: {0}. Allowed '
+                    'values are: {1}'.format(
+                        ', '.join(invalid_flags),
+                        ', '.join(self._ALLOWED_INHERIT_FLAGS)))
+
+    def _validate_ace_trustee(self, ace):
+        """Validate and set defaults for trustee on a single ACE dict."""
+        trustee = ace.get('trustee')
+        if not trustee:
+            self.module.fail_json(msg='trustee is required for each '
+                                      'access_control_rights entry')
+        if not isinstance(trustee, dict):
+            self.module.fail_json(msg='trustee must be a dictionary')
+        if 'name' not in trustee:
+            self.module.fail_json(msg='trustee name is required')
+        trustee.setdefault('type', 'user')
+        trustee.setdefault('provider_type', 'local')
+        if trustee['type'] not in self._ALLOWED_TRUSTEE_TYPES:
+            self.module.fail_json(
+                msg='Invalid trustee type "{0}". Allowed '
+                    'values are: {1}'.format(
+                        trustee['type'],
+                        ', '.join(self._ALLOWED_TRUSTEE_TYPES)))
+
+    def _validate_ace_rights_and_flags(self, ace, acl_rights_state):
+        """Validate access_rights / inherit_flags list types and presence."""
+        access_rights = ace.get('access_rights')
+        if isinstance(access_rights, str):
+            access_rights = [access_rights]
+            ace['access_rights'] = access_rights
+        inherit_flags = ace.get('inherit_flags')
+        if isinstance(inherit_flags, str):
+            inherit_flags = [inherit_flags]
+            ace['inherit_flags'] = inherit_flags
+        if acl_rights_state in ('add', 'replace') \
+                and access_rights is None and inherit_flags is None:
+            self.module.fail_json(msg='Please specify access_rights or '
+                                      'inherit_flags to set ACL')
+        if access_rights is not None and not isinstance(access_rights, list):
+            self.module.fail_json(msg='access_rights must be a list')
+        if inherit_flags is not None and not isinstance(inherit_flags, list):
+            self.module.fail_json(msg='inherit_flags must be a list')
+
+    def validate_access_control_rights(self, acl_rights, acl_rights_state):
+        """Validates access control rights input object."""
         if not acl_rights:
             return
         if not isinstance(acl_rights, list):
             self.module.fail_json(msg='access_control_rights must be a list of '
                                       'ACE dictionaries or a single ACE dictionary')
-        allowed_access_types = ('allow', 'deny')
-        allowed_inherit_flags = ('object_inherit', 'container_inherit',
-                                 'inherit_only', 'no_prop_inherit',
-                                 'inherited_ace')
-        allowed_trustee_types = ('user', 'group', 'wellknown')
         for ace in acl_rights:
             if not isinstance(ace, dict):
                 self.module.fail_json(msg='Each entry in access_control_rights '
                                           'must be a dictionary')
-            access_type = ace.get('access_type')
-            if access_type is None:
-                self.module.fail_json(msg='access_type is required for each '
-                                          'access_control_rights entry')
-            if access_type not in allowed_access_types:
-                self.module.fail_json(msg='Invalid access_type "{0}". Allowed '
-                                          'values are: {1}'.format(
-                                              access_type,
-                                              ', '.join(allowed_access_types)))
-            inherit_flags = ace.get('inherit_flags')
-            if isinstance(inherit_flags, str):
-                inherit_flags = [inherit_flags]
-                ace['inherit_flags'] = inherit_flags
-            if inherit_flags is not None and not isinstance(inherit_flags, list):
-                self.module.fail_json(msg='inherit_flags must be a list')
-            if inherit_flags:
-                invalid_flags = [f for f in inherit_flags
-                                 if f not in allowed_inherit_flags]
-                if invalid_flags:
-                    self.module.fail_json(msg='Invalid inherit_flags: {0}. Allowed '
-                                              'values are: {1}'.format(
-                                                  ', '.join(invalid_flags),
-                                                  ', '.join(allowed_inherit_flags)))
-            trustee = ace.get('trustee')
-            if not trustee:
-                self.module.fail_json(msg='trustee is required for each '
-                                          'access_control_rights entry')
-            if not isinstance(trustee, dict):
-                self.module.fail_json(msg='trustee must be a dictionary')
-            if 'name' not in trustee:
-                self.module.fail_json(msg='trustee name is required')
-            if trustee.get('type') is None:
-                trustee['type'] = 'user'
-            if trustee.get('provider_type') is None:
-                trustee['provider_type'] = 'local'
-            trustee_type = trustee.get('type')
-            if trustee_type not in allowed_trustee_types:
-                self.module.fail_json(msg='Invalid trustee type "{0}". Allowed '
-                                          'values are: {1}'.format(
-                                              trustee_type,
-                                              ', '.join(allowed_trustee_types)))
-            access_rights = ace.get('access_rights')
-            if isinstance(access_rights, str):
-                access_rights = [access_rights]
-                ace['access_rights'] = access_rights
-            inherit_flags = ace.get('inherit_flags')
-            if isinstance(inherit_flags, str):
-                inherit_flags = [inherit_flags]
-                ace['inherit_flags'] = inherit_flags
-            # For add/replace, access_rights or inherit_flags must be specified
-            if acl_rights_state in ('add', 'replace') and \
-                    (access_rights is None and inherit_flags is None):
-                self.module.fail_json(msg='Please specify access_rights or '
-                                          'inherit_flags to set ACL')
-            # For all states, if provided, validate they are lists
-            if access_rights is not None and not isinstance(access_rights, list):
-                self.module.fail_json(msg='access_rights must be a list')
-            if inherit_flags is not None and not isinstance(inherit_flags, list):
-                self.module.fail_json(msg='inherit_flags must be a list')
+            self._validate_ace_access_type(ace)
+            self._validate_ace_inherit_flags(ace)
+            self._validate_ace_trustee(ace)
+            self._validate_ace_rights_and_flags(ace, acl_rights_state)
 
     def get_trustee_id(self, trustee_name, type, access_zone, provider):
         if type == 'user':
