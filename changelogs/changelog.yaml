@@ -451,11 +451,11 @@ releases:
         - Updated the Python SDK dependency to isilon-sdk 0.7.0 and set the minimum
           packaging version to 21.0.
       release_summary: |
-        | Release Date: 2026-09-18
+        | Release Date: 2026-09-30
         | >- This release adds event alert suppression, expands filesystem, identity,
         | and Smart Quota management, and adds support for PowerScale OneFS 9.15.
     modules:
       - description: Manage event alert suppression on a PowerScale Storage System.
         name: event_alert_suppression
         namespace: ''
-    release_date: '2026-09-18'
+    release_date: '2026-09-30'
