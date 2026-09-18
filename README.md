@@ -53,6 +53,11 @@ The Ansible Modules for Dell PowerScale support the following features:
 - Get details and modify IPMI configuration settings.
 - Use query parameters and filters for Info module.
 - Configure advanced ACL permissions with multiple Access Control Entries (ACEs) per trustee, supporting differentiated inheritance flags for fine-grained directory and file access control.
+- Manage cross-provider users, nested groups, and well-known SIDs as group members.
+- Manage event alert suppression by suppressing, unsuppressing, and querying event IDs.
+- Configure per-quota notification rules with check mode and diff mode support.
+- Manage password expiration policy and account expiry for local users.
+- Configure LDAP group search bases, provider domains, and authentication modes.
 
 The tasks can be executed by running simple playbooks written in yaml syntax.
 
@@ -78,14 +83,14 @@ The tasks can be executed by running simple playbooks written in yaml syntax.
 Ansible collection for PowerScale is released and licensed under the GPL-3.0 license. See [LICENSE](https://github.com/dell/ansible-powerscale/blob/main/LICENSE) for the full terms.
 
 ## Supported platforms
-  * Dell PowerScale OneFS versions 9.10.x, 9.11.x, and 9.13.x
+  * Dell PowerScale OneFS versions 9.12.x, 9.13.x, and 9.15.x
 
 ## Prerequisites
 This table provides information about the software prerequisites for the Ansible Modules for Dell PowerScale.
 
 | **Ansible Modules** | **OneFS Version** | **Python version** | **Python SDK version** | **Ansible**              |
 |---------------------|-----------------------|--------------------|----------------------------|--------------------------|
-| v3.10.0 | 9.11.x <br> 9.12.x <br> 9.13.x | 3.13 <br> 3.14 | 0.6.0 | 2.18 <br> 2.19 <br> 2.20 |
+| v3.11.0 | 9.12.x <br> 9.13.x <br> 9.15.x | 3.13 <br> 3.14 | 0.7.0 | 2.18 <br> 2.19 <br> 2.20 |
 
 # List of Ansible modules for Dell PowerScale
 
@@ -157,6 +162,7 @@ This table provides information about the software prerequisites for the Ansible
 * [Alert Settings](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/alert_settings.rst)
 * [Alert Channel](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/alert_channel.rst)
 * [Alert Rule](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/alert_rule.rst)
+* [Event Alert Suppression](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/event_alert_suppression.rst)
 * [Writable Snapshots](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/writable_snapshots.rst)
 * [Support Assist](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/support_assist.rst)
 * [IPMI Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/ipmi.rst)
