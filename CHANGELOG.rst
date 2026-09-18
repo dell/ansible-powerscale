@@ -4,6 +4,36 @@ Dellemc.Powerscale Release Notes
 
 .. contents:: Topics
 
+v3.11.0
+======
+
+Release Summary
+---------------
+
+| Release Date: 2026-09-18
+| >- This release adds event alert suppression, expands filesystem, identity, and Smart Quota management, and adds support for PowerScale OneFS 9.15.
+
+Minor Changes
+-------------
+
+- Added support for PowerScale OneFS 9.15.
+- Added multi-ACE filesystem ACL management with declarative whole-ACL replacement.
+- Added cross-provider user membership, nested group membership, and well-known SID management to the Group module.
+- Added per-quota notification rule management with check mode and diff mode support to the Smart Quota module.
+- Added password expiration policy and account expiry management to the User module.
+- Added group search base, provider domain, and authentication mode settings to the LDAP module.
+- Updated the Python SDK dependency to isilon-sdk 0.7.0 and set the minimum packaging version to 21.0.
+
+Bug Fixes
+---------
+
+- Fixed Smart Quota deletion to remain idempotent when the target path does not exist.
+
+New Modules
+-----------
+
+- dellemc.powerscale.event_alert_suppression - Manage event alert suppression on a PowerScale Storage System.
+
 v3.10.0
 ======
 
