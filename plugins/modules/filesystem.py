@@ -913,7 +913,7 @@ class FileSystem(object):
             quota_details='',
             filesystem_snapshots='',
             filesystem_details='',
-            diff=dict(before={}, after={})
+            diff={'before': {}, 'after': {}}
         )
         PREREQS_VALIDATE = utils.validate_module_pre_reqs(self.module.params)
         if PREREQS_VALIDATE \
@@ -1127,6 +1127,19 @@ class FileSystem(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
+    def _verify_replace_acl(self, path, pre_write_acl):
+        """Verify if a replace ACL write changed anything.
+
+        Returns False if the write was a no-op, True otherwise.
+        """
+        if not pre_write_acl or not isinstance(pre_write_acl, dict):
+            return True
+        post_write_acl = self.get_acl(path)
+        if not post_write_acl or not isinstance(post_write_acl, dict):
+            return True
+        self._update_diff_after_from_acl(post_write_acl)
+        return not self._acls_equivalent(pre_write_acl, post_write_acl)
+
     def set_access_control_rights(self, acl_rights, path):
         """Sets the ACL permissions on specified filesystem.
 
@@ -1140,33 +1153,22 @@ class FileSystem(object):
         try:
             acl_state = self.module.params['access_control_rights_state']
             acl = self.get_acl_permissions(acl_rights)
-            if not self.module.check_mode:
-                action = "replace" if acl_state == 'replace' else "update"
+            if self.module.check_mode:
+                return True
+            action = "replace" if acl_state == 'replace' else "update"
+            pre_write_acl = self.get_acl(path) if acl_state == 'replace' else None
 
-                # Capture pre-write state for post-write verification
-                pre_write_acl = None
-                if acl_state == 'replace':
-                    pre_write_acl = self.get_acl(path)
+            permissions = self.isi_sdk.NamespaceAcl(
+                authoritative='acl',
+                action=action,
+                acl=acl)
+            self.namespace_api.set_acl(namespace_path=path,
+                                       zone=self.module.params['access_zone'],
+                                       acl=True,
+                                       namespace_acl=permissions)
 
-                permissions = self.isi_sdk.NamespaceAcl(
-                    authoritative='acl',
-                    action=action,
-                    acl=acl)
-                self.namespace_api.set_acl(namespace_path=path,
-                                           zone=self.module.params['access_zone'],
-                                           acl=True,
-                                           namespace_acl=permissions)
-
-                # Post-write verification for replace mode
-                if acl_state == 'replace' and pre_write_acl \
-                        and isinstance(pre_write_acl, dict):
-                    post_write_acl = self.get_acl(path)
-                    if post_write_acl and isinstance(post_write_acl, dict):
-                        # Update diff.after to reflect actual stored state
-                        self._update_diff_after_from_acl(post_write_acl)
-                        # If stored state is unchanged, the write was a no-op
-                        if self._acls_equivalent(pre_write_acl, post_write_acl):
-                            return False
+            if acl_state == 'replace':
+                return self._verify_replace_acl(path, pre_write_acl)
             return True
         except Exception as e:
             error_message = 'Setting ACL rights of Filesystem %s failed ' \
@@ -1206,48 +1208,52 @@ class FileSystem(object):
                 return False
         return True
 
+    def _check_nfs_exports(self, path, access_zone):
+        """Fail if the filesystem has NFS exports."""
+        try:
+            nfs_exports = self.protocol_api.list_nfs_exports(
+                path='/' + path, zone=access_zone).to_dict()
+        except Exception as e:
+            error_msg = self.determine_error(error_obj=e)
+            if any(marker in str(error_msg) for marker in _EXPORT_LOOKUP_NOT_FOUND_MARKERS):
+                LOG.warning("NFS export lookup reported not-found for path %s; "
+                            "assuming no NFS exports exist: %s", path, error_msg)
+                return
+            raise
+        if nfs_exports and nfs_exports.get('exports'):
+            error_message = 'The Filesystem path {0} has NFS ' \
+                            'exports. Hence, deleting this directory ' \
+                            'is not safe'.format(path)
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+
+    def _check_smb_shares(self, path, access_zone):
+        """Fail if the filesystem has SMB shares."""
+        try:
+            smb_shares = self.protocol_api.list_smb_shares(zone=access_zone).to_dict()
+        except Exception as e:
+            error_msg = self.determine_error(error_obj=e)
+            if any(marker in str(error_msg) for marker in _EXPORT_LOOKUP_NOT_FOUND_MARKERS):
+                LOG.warning("SMB share lookup reported not-found for zone %s; "
+                            "assuming no SMB shares exist: %s", access_zone, error_msg)
+                return
+            raise
+        if smb_shares and smb_shares.get('shares'):
+            for share in smb_shares['shares']:
+                if share['path'] == '/' + path:
+                    error_message = 'The Filesystem path {0} has SMB ' \
+                                    'Shares. Hence, deleting this directory ' \
+                                    'is not safe'.format(path)
+                    LOG.error(error_message)
+                self.module.fail_json(msg=error_message)
+
     def delete_filesystem(self, path, access_zone=None, recursive_force_delete=False):
         """Deletes a FileSystem on PowerScale.
            When recursive_force_delete is true it deletes all sub files and folders recursively.
         """
         try:
-            # Check for NFS exports
-            try:
-                nfs_exports = self.protocol_api.list_nfs_exports(
-                    path='/' + path, zone=access_zone).to_dict()
-            except Exception as e:
-                error_msg = self.determine_error(error_obj=e)
-                if any(marker in str(error_msg) for marker in _EXPORT_LOOKUP_NOT_FOUND_MARKERS):
-                    LOG.warning("NFS export lookup reported not-found for path %s; "
-                                "assuming no NFS exports exist: %s", path, error_msg)
-                    nfs_exports = {'exports': []}
-                else:
-                    raise e
-            if nfs_exports and nfs_exports.get('exports'):
-                error_message = 'The Filesystem path {0} has NFS ' \
-                                'exports. Hence, deleting this directory ' \
-                                'is not safe'.format(path)
-                LOG.error(error_message)
-                self.module.fail_json(msg=error_message)
-            # Check for SMB shares
-            try:
-                smb_shares = self.protocol_api.list_smb_shares(zone=access_zone).to_dict()
-            except Exception as e:
-                error_msg = self.determine_error(error_obj=e)
-                if any(marker in str(error_msg) for marker in _EXPORT_LOOKUP_NOT_FOUND_MARKERS):
-                    LOG.warning("SMB share lookup reported not-found for zone %s; "
-                                "assuming no SMB shares exist: %s", access_zone, error_msg)
-                    smb_shares = {'shares': []}
-                else:
-                    raise e
-            if smb_shares and smb_shares.get('shares'):
-                for share in smb_shares['shares']:
-                    if share['path'] == '/' + path:
-                        error_message = 'The Filesystem path {0} has SMB ' \
-                                        'Shares. Hence, deleting this directory ' \
-                                        'is not safe'.format(path)
-                        LOG.error(error_message)
-                    self.module.fail_json(msg=error_message)
+            self._check_nfs_exports(path, access_zone)
+            self._check_smb_shares(path, access_zone)
             if not self.module.check_mode:
                 self.namespace_api.delete_directory(directory_path=path, recursive=recursive_force_delete)
             return True
@@ -1483,6 +1489,51 @@ class FileSystem(object):
 
         return acl_posix, new_authoritative
 
+    def _check_posix_acl_modification(self, filesystem_acl):
+        """Check if POSIX ACL mode needs modification. Returns (modified, type)."""
+        access_control = self.module.params['access_control']
+        if not access_control:
+            return False, None
+        acl_posix, new_authoritative = self.get_acl_posix(
+            access_control=access_control)
+        LOG.info('ACL provided in the playbook is %s', acl_posix)
+
+        filesystem_acl_error_message = ('Modification of ACL from Ansible '
+                                        'modules is only supported from '
+                                        'POSIX to POSIX mode bits.')
+        cur_auth = filesystem_acl['authoritative']
+        if ((cur_auth == 'acl' and new_authoritative == 'mode') or
+                (cur_auth == 'mode' and new_authoritative == 'acl') or
+                (cur_auth == 'acl' and new_authoritative == 'acl'
+                 and filesystem_acl['mode'] != acl_posix)):
+            LOG.error(filesystem_acl_error_message)
+            self.module.fail_json(msg=filesystem_acl_error_message)
+
+        if acl_posix != filesystem_acl['mode']:
+            return True, "posix"
+        return False, None
+
+    def _check_acl_rights_modification(self, filesystem_acl):
+        """Check if ACL rights need modification. Returns (modified, type)."""
+        acl_rights = self.module.params['access_control_rights']
+        if not acl_rights:
+            return False, None
+        acl_rights_state = self.module.params['access_control_rights_state']
+        desired_aces = self._resolve_desired_acl(acl_rights)
+        if acl_rights_state == 'replace':
+            self._warn_if_api_consolidation(desired_aces)
+        modified = self.is_acl_rights_modified(
+            filesystem_acl, acl_rights, acl_rights_state,
+            desired_aces=desired_aces)
+        # Always compute the diff so idempotent tasks show the
+        # current vs projected ACL state instead of empty JSON.
+        self._compute_acl_diff(
+            filesystem_acl, acl_rights, acl_rights_state,
+            desired_aces=desired_aces)
+        if modified:
+            return True, "acl"
+        return False, None
+
     def is_acl_modified(self, effective_path):
         """Determines if ACLs are modified."""
         try:
@@ -1491,50 +1542,18 @@ class FileSystem(object):
             if not isinstance(filesystem_acl, dict):
                 return True, None
 
-            info_message = 'ACL of the filesystem on ' \
-                           'the array is %s' % filesystem_acl['acl']
-            LOG.info(info_message)
-            if self.module.params['access_control']:
-                acl_posix, new_authoritative = \
-                    self.get_acl_posix(
-                        access_control=self.module.params['access_control'])
+            LOG.info('ACL of the filesystem on the array is %s',
+                     filesystem_acl['acl'])
 
-                info_message = 'ACL provided in the ' \
-                               'playbook is {0}'.format(acl_posix)
-                LOG.info(info_message)
+            modified, acl_type = self._check_posix_acl_modification(
+                filesystem_acl)
+            if modified:
+                return True, acl_type
 
-                filesystem_acl_error_message = 'Modification of ACL from Ansible ' \
-                                               'modules is only supported from ' \
-                                               'POSIX to POSIX mode bits.'
-
-                if (filesystem_acl['authoritative'] == 'acl'
-                    and new_authoritative == 'mode') or \
-                        (filesystem_acl['authoritative'] == 'mode'
-                         and new_authoritative == 'acl') or \
-                        (filesystem_acl['authoritative'] == 'acl'
-                         and new_authoritative == 'acl' and filesystem_acl['mode'] != acl_posix):
-                    LOG.error(filesystem_acl_error_message)
-                    self.module.fail_json(msg=filesystem_acl_error_message)
-
-                if acl_posix != filesystem_acl['mode']:
-                    return True, "posix"
-            if self.module.params['access_control_rights']:
-                acl_rights_state = self.module.params['access_control_rights_state']
-                desired_aces = self._resolve_desired_acl(
-                    self.module.params['access_control_rights'])
-                # Warn if API will consolidate same-trustee same-accesstype ACEs
-                if acl_rights_state == 'replace':
-                    self._warn_if_api_consolidation(desired_aces)
-                modified = self.is_acl_rights_modified(
-                    filesystem_acl, self.module.params['access_control_rights'],
-                    acl_rights_state, desired_aces=desired_aces)
-                # Always compute the diff so idempotent tasks show the
-                # current vs projected ACL state instead of empty JSON.
-                self._compute_acl_diff(
-                    filesystem_acl, self.module.params['access_control_rights'],
-                    acl_rights_state, desired_aces=desired_aces)
-                if modified:
-                    return True, "acl"
+            modified, acl_type = self._check_acl_rights_modification(
+                filesystem_acl)
+            if modified:
+                return True, acl_type
 
             return False, None
 
@@ -1653,16 +1672,8 @@ class FileSystem(object):
                 order.append(key)
         return [merged[k] for k in order]
 
-    def _compute_acl_diff(self, filesystem_acl, acl_rights_list, acl_rights_state,
-                          desired_aces=None):
-        """Computes before/after diff for ACL changes and stores in result.
-
-        The 'after' state reflects what the OneFS API will actually store,
-        i.e. ACEs merged by (trustee_id, accesstype).
-        """
-        if desired_aces is None:
-            desired_aces = self._resolve_desired_acl(acl_rights_list)
-
+    def _normalize_before_acl(self, filesystem_acl):
+        """Extract before ACL display and normalized forms from filesystem ACL."""
         before_acl = []
         before_normalized = []
         for acl in filesystem_acl.get('acl', []):
@@ -1682,35 +1693,50 @@ class FileSystem(object):
                 'access_rights': sorted(acl.get('accessrights', [])),
                 'inherit_flags': sorted(acl.get('inherit_flags', [])),
             })
+        return before_acl, before_normalized
 
+    def _compute_after_normalized(self, before_normalized, desired_aces,
+                                  acl_rights_state):
+        """Compute the after-state normalized ACE list based on state."""
         if acl_rights_state == 'replace':
-            after_normalized = self._merge_aces_by_api_key(desired_aces)
-        elif acl_rights_state == 'add':
-            after_normalized = self._merge_aces_by_api_key(
+            return self._merge_aces_by_api_key(desired_aces)
+        if acl_rights_state == 'add':
+            return self._merge_aces_by_api_key(
                 before_normalized + desired_aces)
-        elif acl_rights_state == 'remove':
+        if acl_rights_state == 'remove':
             desired_keys = {(d['trustee_id'], d['access_type'])
                             for d in desired_aces}
-            after_normalized = self._merge_aces_by_api_key(
+            return self._merge_aces_by_api_key(
                 [a for a in before_normalized
                  if (a['trustee_id'], a['access_type']) not in desired_keys])
-        else:
-            after_normalized = before_normalized
+        return before_normalized
 
-        after_acl = []
-        for ace in after_normalized:
-            after_acl.append({
-                'trustee': {'name': ace['trustee_name'],
-                            'id': ace['trustee_id'],
-                            'type': ace['trustee_type']},
-                'access_type': ace['access_type'],
-                'access_rights': ace['access_rights'],
-                'inherit_flags': ace['inherit_flags'],
-            })
+    @staticmethod
+    def _normalized_to_display(normalized_list):
+        """Convert normalized ACE list to display format."""
+        return [{
+            'trustee': {'name': ace['trustee_name'],
+                        'id': ace['trustee_id'],
+                        'type': ace['trustee_type']},
+            'access_type': ace['access_type'],
+            'access_rights': ace['access_rights'],
+            'inherit_flags': ace['inherit_flags'],
+        } for ace in normalized_list]
+
+    def _compute_acl_diff(self, filesystem_acl, acl_rights_list, acl_rights_state,
+                          desired_aces=None):
+        """Computes before/after diff for ACL changes and stores in result."""
+        if desired_aces is None:
+            desired_aces = self._resolve_desired_acl(acl_rights_list)
+
+        before_acl, before_normalized = self._normalize_before_acl(
+            filesystem_acl)
+        after_normalized = self._compute_after_normalized(
+            before_normalized, desired_aces, acl_rights_state)
 
         self.result['diff'] = {
             'before': {'acl': before_acl},
-            'after': {'acl': after_acl}
+            'after': {'acl': self._normalized_to_display(after_normalized)}
         }
 
     def _get_ace_composite_key(self, trustee_id, access_type, inherit_flags):
@@ -1738,16 +1764,35 @@ class FileSystem(object):
             })
         return normalized
 
+    def _is_single_ace_modified(self, acl_rights, trustee_id,
+                                filesystem_acl, acl_rights_state):
+        """Check if a single ACE indicates a modification is needed."""
+        matched_acls = [
+            acl for acl in filesystem_acl['acl']
+            if acl.get('trustee', {}).get('id')
+            and acl['trustee']['id'] + ":" + acl['accesstype']
+            == trustee_id + ":" + acl_rights['access_type']]
+        if len(matched_acls) > 1:
+            error_message = (
+                "Multiple existing ACEs match trustee '{0}' with "
+                "access_type '{1}'. Use access_control_rights as a list "
+                "with access_control_rights_state='replace' to "
+                "declaratively manage the full ACL.").format(
+                    acl_rights['trustee']['name'],
+                    acl_rights['access_type'])
+            LOG.error(error_message)
+            self.module.fail_json(msg=error_message)
+        if not matched_acls:
+            return acl_rights_state == 'add'
+        if acl_rights_state == 'remove':
+            return True
+        return (acl_rights_state == 'add'
+                and self.is_access_or_inherit_modified(
+                    acl_rights, matched_acls[0]))
+
     def is_acl_rights_modified(self, filesystem_acl, acl_rights_list,
                                acl_rights_state=None, desired_aces=None):
-        """Determines if acl rights of filesystem are modified.
-
-        Accepts acl_rights_list as a list of ACE dicts.
-        For 'replace' state, compares the entire desired ACL list against
-        current ACL using ordered comparison.
-        For 'add'/'remove' states, checks each ACE individually (backward
-        compatible behavior).
-        """
+        """Determines if acl rights of filesystem are modified."""
         if acl_rights_state is None:
             acl_rights_state = self.module.params.get(
                 'access_control_rights_state', 'add')
@@ -1759,31 +1804,10 @@ class FileSystem(object):
             return self._is_replace_acl_modified(filesystem_acl,
                                                  desired_aces=desired_aces)
 
-        # Legacy add/remove behavior — iterate over each ACE
         for idx, acl_rights in enumerate(acl_rights_list):
-            trustee_id = desired_aces[idx]['trustee_id']
-            matched_acls = [
-                acl for acl in filesystem_acl['acl']
-                if acl.get('trustee', {}).get('id')
-                and acl['trustee']['id'] + ":" + acl['accesstype']
-                == trustee_id + ":" + acl_rights['access_type']]
-            if len(matched_acls) > 1:
-                error_message = (
-                    "Multiple existing ACEs match trustee '{0}' with "
-                    "access_type '{1}'. Use access_control_rights as a list "
-                    "with access_control_rights_state='replace' to "
-                    "declaratively manage the full ACL.").format(
-                        acl_rights['trustee']['name'], acl_rights['access_type'])
-                LOG.error(error_message)
-                self.module.fail_json(msg=error_message)
-            if matched_acls:
-                if acl_rights_state == 'add' and \
-                        self.is_access_or_inherit_modified(
-                            acl_rights, matched_acls[0]):
-                    return True
-                if acl_rights_state == 'remove':
-                    return True
-            elif acl_rights_state == 'add':
+            if self._is_single_ace_modified(
+                    acl_rights, desired_aces[idx]['trustee_id'],
+                    filesystem_acl, acl_rights_state):
                 return True
         return False
 
@@ -1912,85 +1936,97 @@ class FileSystem(object):
         self.validate_access_control_rights(self.module.params['access_control_rights'],
                                             self.module.params['access_control_rights_state'])
 
-    def validate_access_control_rights(self, acl_rights, acl_rights_state):
-        """Validates access control rights input object.
+    _ALLOWED_ACCESS_TYPES = ('allow', 'deny')
+    _ALLOWED_INHERIT_FLAGS = ('object_inherit', 'container_inherit',
+                              'inherit_only', 'no_prop_inherit',
+                              'inherited_ace')
+    _ALLOWED_TRUSTEE_TYPES = ('user', 'group', 'wellknown')
 
-        Accepts acl_rights as a list of ACE dicts (single-dict input is
-        already wrapped into a list by __init__).
-        """
+    def _validate_ace_access_type(self, ace):
+        """Validate access_type on a single ACE dict."""
+        access_type = ace.get('access_type')
+        if access_type is None:
+            self.module.fail_json(msg='access_type is required for each '
+                                      'access_control_rights entry')
+        if access_type not in self._ALLOWED_ACCESS_TYPES:
+            self.module.fail_json(
+                msg='Invalid access_type "{0}". Allowed '
+                    'values are: {1}'.format(
+                        access_type,
+                        ', '.join(self._ALLOWED_ACCESS_TYPES)))
+
+    def _validate_ace_inherit_flags(self, ace):
+        """Validate and normalize inherit_flags on a single ACE dict."""
+        inherit_flags = ace.get('inherit_flags')
+        if isinstance(inherit_flags, str):
+            inherit_flags = [inherit_flags]
+            ace['inherit_flags'] = inherit_flags
+        if inherit_flags is not None and not isinstance(inherit_flags, list):
+            self.module.fail_json(msg='inherit_flags must be a list')
+        if not inherit_flags:
+            return
+        invalid_flags = [f for f in inherit_flags
+                         if f not in self._ALLOWED_INHERIT_FLAGS]
+        if invalid_flags:
+            self.module.fail_json(
+                msg='Invalid inherit_flags: {0}. Allowed '
+                    'values are: {1}'.format(
+                        ', '.join(invalid_flags),
+                        ', '.join(self._ALLOWED_INHERIT_FLAGS)))
+
+    def _validate_ace_trustee(self, ace):
+        """Validate and set defaults for trustee on a single ACE dict."""
+        trustee = ace.get('trustee')
+        if not trustee:
+            self.module.fail_json(msg='trustee is required for each '
+                                      'access_control_rights entry')
+        if not isinstance(trustee, dict):
+            self.module.fail_json(msg='trustee must be a dictionary')
+        if 'name' not in trustee:
+            self.module.fail_json(msg='trustee name is required')
+        trustee.setdefault('type', 'user')
+        trustee.setdefault('provider_type', 'local')
+        if trustee['type'] not in self._ALLOWED_TRUSTEE_TYPES:
+            self.module.fail_json(
+                msg='Invalid trustee type "{0}". Allowed '
+                    'values are: {1}'.format(
+                        trustee['type'],
+                        ', '.join(self._ALLOWED_TRUSTEE_TYPES)))
+
+    def _validate_ace_rights_and_flags(self, ace, acl_rights_state):
+        """Validate access_rights / inherit_flags list types and presence."""
+        access_rights = ace.get('access_rights')
+        if isinstance(access_rights, str):
+            access_rights = [access_rights]
+            ace['access_rights'] = access_rights
+        inherit_flags = ace.get('inherit_flags')
+        if isinstance(inherit_flags, str):
+            inherit_flags = [inherit_flags]
+            ace['inherit_flags'] = inherit_flags
+        if acl_rights_state in ('add', 'replace') \
+                and access_rights is None and inherit_flags is None:
+            self.module.fail_json(msg='Please specify access_rights or '
+                                      'inherit_flags to set ACL')
+        if access_rights is not None and not isinstance(access_rights, list):
+            self.module.fail_json(msg='access_rights must be a list')
+        if inherit_flags is not None and not isinstance(inherit_flags, list):
+            self.module.fail_json(msg='inherit_flags must be a list')
+
+    def validate_access_control_rights(self, acl_rights, acl_rights_state):
+        """Validates access control rights input object."""
         if not acl_rights:
             return
         if not isinstance(acl_rights, list):
             self.module.fail_json(msg='access_control_rights must be a list of '
                                       'ACE dictionaries or a single ACE dictionary')
-        allowed_access_types = ('allow', 'deny')
-        allowed_inherit_flags = ('object_inherit', 'container_inherit',
-                                 'inherit_only', 'no_prop_inherit',
-                                 'inherited_ace')
-        allowed_trustee_types = ('user', 'group', 'wellknown')
         for ace in acl_rights:
             if not isinstance(ace, dict):
                 self.module.fail_json(msg='Each entry in access_control_rights '
                                           'must be a dictionary')
-            access_type = ace.get('access_type')
-            if access_type is None:
-                self.module.fail_json(msg='access_type is required for each '
-                                          'access_control_rights entry')
-            if access_type not in allowed_access_types:
-                self.module.fail_json(msg='Invalid access_type "{0}". Allowed '
-                                          'values are: {1}'.format(
-                                              access_type,
-                                              ', '.join(allowed_access_types)))
-            inherit_flags = ace.get('inherit_flags')
-            if isinstance(inherit_flags, str):
-                inherit_flags = [inherit_flags]
-                ace['inherit_flags'] = inherit_flags
-            if inherit_flags is not None and not isinstance(inherit_flags, list):
-                self.module.fail_json(msg='inherit_flags must be a list')
-            if inherit_flags:
-                invalid_flags = [f for f in inherit_flags
-                                 if f not in allowed_inherit_flags]
-                if invalid_flags:
-                    self.module.fail_json(msg='Invalid inherit_flags: {0}. Allowed '
-                                              'values are: {1}'.format(
-                                                  ', '.join(invalid_flags),
-                                                  ', '.join(allowed_inherit_flags)))
-            trustee = ace.get('trustee')
-            if not trustee:
-                self.module.fail_json(msg='trustee is required for each '
-                                          'access_control_rights entry')
-            if not isinstance(trustee, dict):
-                self.module.fail_json(msg='trustee must be a dictionary')
-            if 'name' not in trustee:
-                self.module.fail_json(msg='trustee name is required')
-            if trustee.get('type') is None:
-                trustee['type'] = 'user'
-            if trustee.get('provider_type') is None:
-                trustee['provider_type'] = 'local'
-            trustee_type = trustee.get('type')
-            if trustee_type not in allowed_trustee_types:
-                self.module.fail_json(msg='Invalid trustee type "{0}". Allowed '
-                                          'values are: {1}'.format(
-                                              trustee_type,
-                                              ', '.join(allowed_trustee_types)))
-            access_rights = ace.get('access_rights')
-            if isinstance(access_rights, str):
-                access_rights = [access_rights]
-                ace['access_rights'] = access_rights
-            inherit_flags = ace.get('inherit_flags')
-            if isinstance(inherit_flags, str):
-                inherit_flags = [inherit_flags]
-                ace['inherit_flags'] = inherit_flags
-            # For add/replace, access_rights or inherit_flags must be specified
-            if acl_rights_state in ('add', 'replace') and \
-                    (access_rights is None and inherit_flags is None):
-                self.module.fail_json(msg='Please specify access_rights or '
-                                          'inherit_flags to set ACL')
-            # For all states, if provided, validate they are lists
-            if access_rights is not None and not isinstance(access_rights, list):
-                self.module.fail_json(msg='access_rights must be a list')
-            if inherit_flags is not None and not isinstance(inherit_flags, list):
-                self.module.fail_json(msg='inherit_flags must be a list')
+            self._validate_ace_access_type(ace)
+            self._validate_ace_inherit_flags(ace)
+            self._validate_ace_trustee(ace)
+            self._validate_ace_rights_and_flags(ace, acl_rights_state)
 
     def get_trustee_id(self, trustee_name, type, access_zone, provider):
         if type == 'user':
@@ -2019,55 +2055,54 @@ class FileSystem(object):
                                       provider=provider)['groups'][0]
             return group['gid']['id'] if group['gid']['id'] != trustee['id'] else group['sid']['id']
 
-    def get_acl_permissions(self, acl_rights_list):
-        """Returns ACL permissions from a list of ACE dicts.
+    def _build_acl_permission(self, acl_rights, op):
+        """Build an ACL permission object from an ACE dict."""
+        acl_obj = utils.get_acl_object()
+        acl_obj.op = op
+        trustee_type = acl_rights['trustee'].get('type') or 'user'
+        trustee_provider = acl_rights['trustee'].get('provider_type') or 'local'
+        trustee_id = self.get_trustee_id(
+            acl_rights['trustee']['name'], trustee_type,
+            self.module.params['access_zone'], trustee_provider)
+        trustee = {"name": acl_rights['trustee']['name'],
+                   "id": trustee_id, "type": trustee_type}
+        acl_obj.trustee = trustee
+        acl_obj.accesstype = acl_rights['access_type']
+        acl_obj.accessrights = acl_rights.get('access_rights') or []
+        acl_obj.inherit_flags = acl_rights.get('inherit_flags') or []
+        return acl_obj, trustee_type, trustee_provider
 
-        For 'replace' state, sets op='add' on each ACE (used with
-        NamespaceAcl action='replace' for whole-ACL replacement).
-        For 'add' state, sets op='add'.
-        For 'remove' state, sets op='delete' and includes duplicated-trustee
-        cleanup entries.
-        """
+    def _build_duplicated_trustee_permission(self, acl_rights, trustee,
+                                             trustee_type, trustee_provider):
+        """Build a delete permission for a duplicated trustee."""
+        trustee_id_duplicated = self.get_duplicated_trustee_id(
+            trustee, self.module.params['access_zone'], trustee_provider)
+        acl_obj = utils.get_acl_object()
+        acl_obj.op = "delete"
+        acl_obj.trustee = {"name": acl_rights['trustee']['name'],
+                           "id": trustee_id_duplicated, "type": trustee_type}
+        acl_obj.accesstype = acl_rights['access_type']
+        acl_obj.accessrights = acl_rights.get('access_rights') or []
+        acl_obj.inherit_flags = acl_rights.get('inherit_flags') or []
+        return acl_obj
+
+    def get_acl_permissions(self, acl_rights_list):
+        """Returns ACL permissions from a list of ACE dicts."""
         try:
             permissions = []
             acl_state = self.module.params['access_control_rights_state']
+            op = "delete" if acl_state == 'remove' else "add"
 
             for acl_rights in acl_rights_list:
-                acl_obj = utils.get_acl_object()
-                if acl_state == 'remove':
-                    acl_obj.op = "delete"
-                else:
-                    acl_obj.op = "add"
-                trustee_type = acl_rights['trustee'].get('type') or 'user'
-                trustee_provider = acl_rights['trustee'].get('provider_type') or 'local'
-                trustee_id = \
-                    self.get_trustee_id(acl_rights['trustee']['name'],
-                                        trustee_type,
-                                        self.module.params['access_zone'],
-                                        trustee_provider)
-                trustee_type = trustee_type if trustee_type else "user"
-                trustee = {"name": acl_rights['trustee']['name'], "id": trustee_id, "type": trustee_type}
-                acl_obj.trustee = trustee
-                acl_obj.accesstype = acl_rights['access_type']
-                acl_obj.accessrights = acl_rights.get('access_rights') or []
-                acl_obj.inherit_flags = acl_rights.get('inherit_flags') or []
+                acl_obj, trustee_type, trustee_provider = \
+                    self._build_acl_permission(acl_rights, op)
                 permissions.append(acl_obj)
 
-                # allow customer to remove duplicated trustee
-                if acl_obj.op == "delete" and trustee_type in ['user', 'group']:
-                    trustee_id_duplicated = \
-                        self.get_duplicated_trustee_id(trustee,
-                                                       self.module.params['access_zone'],
-                                                       trustee_provider)
-                    acl_obj_duplicated = utils.get_acl_object()
-                    acl_obj_duplicated.op = "delete"
-                    trustee_duplicated = {"name": acl_rights['trustee']['name'],
-                                          "id": trustee_id_duplicated, "type": trustee_type}
-                    acl_obj_duplicated.trustee = trustee_duplicated
-                    acl_obj_duplicated.accesstype = acl_rights['access_type']
-                    acl_obj_duplicated.accessrights = acl_rights.get('access_rights') or []
-                    acl_obj_duplicated.inherit_flags = acl_rights.get('inherit_flags') or []
-                    permissions.append(acl_obj_duplicated)
+                if op == "delete" and trustee_type in ['user', 'group']:
+                    dup_obj = self._build_duplicated_trustee_permission(
+                        acl_rights, acl_obj.trustee,
+                        trustee_type, trustee_provider)
+                    permissions.append(dup_obj)
 
             return permissions
         except Exception as e:
@@ -2165,33 +2200,23 @@ class FileSystem(object):
                 error_message = 'Please specify a name for the owner.'
                 LOG.error(error_message)
                 self.module.fail_json(msg=error_message)
-            if 'provider_type' in owner:
-                owner_provider = owner['provider_type']
-            else:
-                owner_provider = 'local'
+            owner_provider = owner.get('provider_type', 'local')
 
             owner_id = self.get_owner_id(
                 name=owner['name'],
                 zone=self.module.params['access_zone'],
                 provider=owner_provider)['users'][0]['on_disk_user_identity']['id']
 
-            owner = {'type': 'user', 'id': owner_id,
-                     'name': owner['name']}
-
             acl = self.get_acl(effective_path)
-            modified = False
-            if isinstance(acl, dict):
-                file_uid = acl['owner']['id']
-                info_message = 'The user ID fetched from playbook is ' \
-                               '{0} and the user ID on ' \
-                               'the file is {1}'.format(owner_id, file_uid)
-                LOG.info(info_message)
-                modified = (owner_id != file_uid)
+            if not isinstance(acl, dict) or owner_id == acl['owner']['id']:
+                return False
 
-            if modified:
-                LOG.info('Modifying owner..')
-                self.modify_owner(owner, effective_path)
-                return True
+            LOG.info('The user ID fetched from playbook is %s and the '
+                     'user ID on the file is %s', owner_id, acl['owner']['id'])
+            LOG.info('Modifying owner..')
+            owner_obj = {'type': 'user', 'id': owner_id, 'name': owner['name']}
+            self.modify_owner(owner_obj, effective_path)
+            return True
 
         except Exception as e:
             error_msg = self.determine_error(error_obj=e)
@@ -2211,10 +2236,7 @@ class FileSystem(object):
                 error_message = 'Please specify a name for the group.'
                 LOG.error(error_message)
                 self.module.fail_json(msg=error_message)
-            if 'provider_type' in group:
-                group_provider = group['provider_type']
-            else:
-                group_provider = 'local'
+            group_provider = group.get('provider_type', 'local')
 
             group_sid = self.get_group_id(
                 name=group['name'],
@@ -2225,23 +2247,16 @@ class FileSystem(object):
                 zone=self.module.params['access_zone'])
             group_id = on_disk_id if on_disk_id else group_sid
 
-            group = {'type': 'group', 'id': group_id,
-                     'name': group['name']}
-
             acl = self.get_acl(effective_path)
-            modified = False
-            if isinstance(acl, dict):
-                file_gid = acl['group']['id']
-                info_message = 'The group ID fetched from playbook is ' \
-                               '{0} and the group ID on ' \
-                               'the file is {1}'.format(group_id, file_gid)
-                LOG.info(info_message)
-                modified = (group_id != file_gid)
+            if not isinstance(acl, dict) or group_id == acl['group']['id']:
+                return False
 
-            if modified:
-                LOG.info('Modifying group..')
-                self.modify_group(group, effective_path)
-                return True
+            LOG.info('The group ID fetched from playbook is %s and the '
+                     'group ID on the file is %s', group_id, acl['group']['id'])
+            LOG.info('Modifying group..')
+            group_obj = {'type': 'group', 'id': group_id, 'name': group['name']}
+            self.modify_group(group_obj, effective_path)
+            return True
         except Exception as e:
             error_msg = self.determine_error(error_obj=e)
             error_message = 'Failed to determine if group ' \
@@ -2307,39 +2322,39 @@ class FileSystem(object):
 
 
 def get_filesystem_parameters():
-    return dict(
-        path=dict(required=True, type='str'),
-        access_zone=dict(required=False, type='str',
-                         default='System'),
-        owner=dict(required=False, type='dict'),
-        group=dict(required=False, type='dict'),
-        access_control=dict(required=False, type='str'),
-        access_control_rights=dict(type='raw'),
-        access_control_rights_state=dict(required=False, type='str',
-                                         choices=['add', 'remove', 'replace']),
-        recursive=dict(required=False, type='bool',
-                       default=True),
-        recursive_force_delete=dict(required=False, type='bool',
-                                    default=False),
-        quota=dict(type='dict',
-                   options=dict(include_snap_data=dict(type='bool', default=False),
-                                container=dict(type='bool', default=False),
-                                include_data_protection_overhead=dict(type='bool'),
-                                thresholds_on=dict(type='str',
-                                                   choices=['app_logical_size',
-                                                            'fs_logical_size',
-                                                            'physical_size']),
-                                advisory_limit_size=dict(type='int'),
-                                soft_limit_size=dict(type='int'),
-                                hard_limit_size=dict(type='int'),
-                                quota_state=dict(type='str', choices=['present', 'absent']),
-                                cap_unit=dict(type='str', choices=['GB', 'TB']))),
-
-        state=dict(required=True, type='str',
-                   choices=['present', 'absent']),
-        list_snapshots=dict(required=False, type='bool',
-                            default=False),
-    )
+    return {
+        'path': {'required': True, 'type': 'str'},
+        'access_zone': {'required': False, 'type': 'str',
+                        'default': 'System'},
+        'owner': {'required': False, 'type': 'dict'},
+        'group': {'required': False, 'type': 'dict'},
+        'access_control': {'required': False, 'type': 'str'},
+        'access_control_rights': {'type': 'raw'},
+        'access_control_rights_state': {'required': False, 'type': 'str',
+                                        'choices': ['add', 'remove', 'replace']},
+        'recursive': {'required': False, 'type': 'bool',
+                      'default': True},
+        'recursive_force_delete': {'required': False, 'type': 'bool',
+                                   'default': False},
+        'quota': {'type': 'dict',
+                  'options': {
+                      'include_snap_data': {'type': 'bool', 'default': False},
+                      'container': {'type': 'bool', 'default': False},
+                      'include_data_protection_overhead': {'type': 'bool'},
+                      'thresholds_on': {'type': 'str',
+                                        'choices': ['app_logical_size',
+                                                    'fs_logical_size',
+                                                    'physical_size']},
+                      'advisory_limit_size': {'type': 'int'},
+                      'soft_limit_size': {'type': 'int'},
+                      'hard_limit_size': {'type': 'int'},
+                      'quota_state': {'type': 'str', 'choices': ['present', 'absent']},
+                      'cap_unit': {'type': 'str', 'choices': ['GB', 'TB']}}},
+        'state': {'required': True, 'type': 'str',
+                  'choices': ['present', 'absent']},
+        'list_snapshots': {'required': False, 'type': 'bool',
+                           'default': False},
+    }
 
 
 class FilesystemExitHandler():

@@ -395,7 +395,7 @@ releases:
         - Added Job Management modules for PowerScale job operations
         - Added S3 Global Settings module for managing S3 global configurations
         - Added S3 Key module for managing S3 keys
-        - Added S3 Zone Settings module for managing S3 zone-specific configurations
+        - Added S3 Zone Settings module for S3 zone configs
         - Added Cluster Services module for PowerScale service management
         - Enhanced S3 capabilities with granular zone and global settings
         - Added comprehensive job management and monitoring features

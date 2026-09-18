@@ -38,7 +38,7 @@ class Auth:
                 auth_group_id='GROUP:' + name,
                 zone=zone, provider=provider).to_dict()
             return resp
-        except Exception as e:
+        except Exception:
             error_message = f'Failed to get the group details for group {name}'
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
@@ -56,7 +56,7 @@ class Auth:
                 auth_user_id='USER:' + name,
                 zone=zone, provider=provider).to_dict()
             return resp
-        except Exception as e:
+        except Exception:
             error_message = f'Failed to get the user details for {name}'
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
@@ -76,7 +76,7 @@ class Auth:
                              f'Provide valid wellknown.')
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
-        except Exception as e:
+        except Exception:
             error_message = f'Failed to get the wellknown id for wellknown {name}'
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
@@ -110,7 +110,7 @@ class Auth:
         try:
             resp = self.auth_api.list_auth_roles(zone=zone).to_dict()
             return resp
-        except Exception as e:
+        except Exception:
             error_message = 'Failed to get the auth role list'
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
@@ -141,7 +141,7 @@ class Auth:
                 resume = user_list_details['resume']
             LOG.info("Successfully retrieved user list from PowerScale cluster")
             return user_list
-        except Exception as e:
+        except Exception:
             error_message = 'Get Users List for PowerScale cluster and access zone failed'
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)

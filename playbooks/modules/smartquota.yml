@@ -512,6 +512,10 @@
       register: create_notification_result
 
     - name: Update the notification rule's actions by id
+      vars:
+        rule_id: >-
+          {{ create_notification_result.quota_details
+          .notification_rules[0].id }}
       dellemc.powerscale.smartquota:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -521,12 +525,16 @@
         quota_type: "{{ dir_quota_type }}"
         access_zone: "{{ access_zone }}"
         quota_notification_rules:
-          - id: "{{ create_notification_result.quota_details.notification_rules[0].id }}"
+          - id: "{{ rule_id }}"
             action_alert: false
             action_email_owner: true
         state: "present"
 
     - name: Delete the specific notification rule by id
+      vars:
+        rule_id: >-
+          {{ create_notification_result.quota_details
+          .notification_rules[0].id }}
       dellemc.powerscale.smartquota:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -536,7 +544,7 @@
         quota_type: "{{ dir_quota_type }}"
         access_zone: "{{ access_zone }}"
         quota_notification_rules:
-          - id: "{{ create_notification_result.quota_details.notification_rules[0].id }}"
+          - id: "{{ rule_id }}"
             state: "absent"
         state: "present"
 
