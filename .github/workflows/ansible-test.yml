@@ -65,7 +65,7 @@ jobs:
 
     steps:
       - name: Perform unit testing with ansible-test
-        uses: ansible-community/ansible-test-gh-action@release/v1.16
+        uses: ansible-community/ansible-test-gh-action@b416b6ecf7ddb0ea3b0a51c1d198d715eba52c9d  # release/v1.16
         with:
           testing-type: units
           coverage: ${{ (matrix.python == '3.13' && matrix.ansible == 'stable-2.19') && 'always' ||  'never' }}
@@ -82,8 +82,8 @@ jobs:
 
   sanity:
     needs: [build]
-    uses: ansible/ansible-content-actions/.github/workflows/sanity.yaml@main
+    uses: ansible/ansible-content-actions/.github/workflows/sanity.yaml@c105d6b8b887a36219224da17adc7518aab2401d  # main
 
   ansible-lint:
     needs: [build]
-    uses: ansible/ansible-content-actions/.github/workflows/ansible_lint.yaml@main
+    uses: ansible/ansible-content-actions/.github/workflows/ansible_lint.yaml@c105d6b8b887a36219224da17adc7518aab2401d  # main

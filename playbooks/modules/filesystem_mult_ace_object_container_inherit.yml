@@ -1,5 +1,5 @@
 ---
-# Example: Multi-trustee ACL with object_inherit + container_inherit (full inheritance)
+# Example: Multi-trustee ACL with object + container inherit
 #
 # This playbook demonstrates configuring ACEs for multiple trustees with
 # full inheritance (object_inherit + container_inherit), which propagates
