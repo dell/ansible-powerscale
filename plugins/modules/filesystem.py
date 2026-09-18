@@ -1765,7 +1765,7 @@ class FileSystem(object):
         return normalized
 
     def _is_single_ace_modified(self, acl_rights, trustee_id,
-                               filesystem_acl, acl_rights_state):
+                                filesystem_acl, acl_rights_state):
         """Check if a single ACE indicates a modification is needed."""
         matched_acls = [
             acl for acl in filesystem_acl['acl']

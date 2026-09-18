@@ -1240,8 +1240,8 @@ class Group(object):
         return False
 
     def _apply_membership_change(self, group, user_ref, user_state,
-                                user_flag, access_zone, provider_type,
-                                cross_provider=False):
+                                 user_flag, access_zone, provider_type,
+                                 cross_provider=False):
         """Apply a single add or remove membership change."""
         if user_state == 'present-in-group' and not user_flag:
             return self.add_user_to_group(
@@ -1620,7 +1620,7 @@ class Group(object):
         return changed
 
     def _process_users_for_group(self, group, access_zone,
-                                provider_type, users, user_state):
+                                 provider_type, users, user_state):
         """Process user member additions/removals. Returns changed."""
         if not (user_state and users):
             return False
@@ -1633,7 +1633,7 @@ class Group(object):
         return changed
 
     def _update_existing_group_members(self, group, access_zone,
-                                      provider_type, users, user_state):
+                                       provider_type, users, user_state):
         """Process all member types for an existing group. Returns changed."""
         changed = self._process_users_for_group(
             group, access_zone, provider_type, users, user_state)
@@ -1743,11 +1743,11 @@ def get_group_parameters():
         'group_members': {'required': False, 'type': 'list', 'elements': 'dict'},
         'group_member_state': {'required': False, 'type': 'str',
                                'choices': ['present-in-group',
-                                            'absent-in-group']},
+                                           'absent-in-group']},
         'well_known_sids': {'required': False, 'type': 'list', 'elements': 'str'},
         'well_known_sid_state': {'required': False, 'type': 'str',
                                  'choices': ['present-in-group',
-                                              'absent-in-group']},
+                                             'absent-in-group']},
     }
 
 

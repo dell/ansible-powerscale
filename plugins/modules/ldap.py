@@ -736,7 +736,7 @@ def get_ldap_parameters():
         'ldap_name': {'type': 'str', 'required': True},
         'server_uris': {'type': 'list', 'elements': 'str', 'no_log': True},
         'server_uri_state': {'type': 'str', 'choices': ['present-in-ldap',
-                                                         'absent-in-ldap']},
+                                                        'absent-in-ldap']},
         'base_dn': {'type': 'str'},
         'ldap_parameters': {
             'type': 'dict', 'options': {
