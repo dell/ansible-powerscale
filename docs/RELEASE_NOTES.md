@@ -1,6 +1,6 @@
 **Ansible Modules for Dell Technologies PowerScale**
 =========================================
-### Release notes 3.10.0
+### Release notes 3.11.0
 
 >   © 2026 Dell Inc. or its subsidiaries. All rights reserved. Dell
 >   and other trademarks are trademarks of Dell Inc. or its
@@ -27,6 +27,7 @@ Table 1. Revision history
 
 | Revision | Date            | Description                                               |
 |----------|-----------------|-----------------------------------------------------------|
+| 07       | September 2026  | Ansible Modules for Dell PowerScale 3.11.0                |
 | 06       | June 2026       | Ansible Modules for Dell PowerScale 3.10.0                |
 | 05       | March 2026      | Ansible Modules for Dell PowerScale 3.9.1                 |
 | 04       | June 2025       | Ansible Modules for Dell PowerScale 3.9.0                 |
@@ -81,6 +82,12 @@ The Ansible Modules for Dell PowerScale support the following features:
 - Manage jobs on PowerScale with comprehensive job management and monitoring capabilities.
 - Manage S3 global and zone-specific settings for enhanced S3 capabilities.
 - Manage cluster services for PowerScale service management.
+- Configure advanced filesystem ACLs with multiple Access Control Entries.
+- Manage cross-provider users, nested groups, and well-known SIDs as group members.
+- Suppress, unsuppress, and query event alerts.
+- Configure per-quota notification rules.
+- Manage password expiration policy and account expiry for local users.
+- Configure LDAP group search bases, provider domains, and authentication modes.
   
 The Ansible modules use playbooks, written in yaml syntax, to list, show, create, delete, and modify each of these entities.
 
@@ -88,15 +95,17 @@ New Features and Enhancements
 ---------------------------
 This section describes the features or enhancements of the Ansible Modules for Dell PowerScale for this release.
 
-The Ansible Modules for Dell PowerScale release 3.10.0 provides the following enhancements:
+The Ansible Modules for Dell PowerScale release 3.11.0 provides the following enhancements:
 
-- Added Job Management modules for comprehensive PowerScale job operations and monitoring
-- Added S3 Global Settings module for managing S3 global configurations
-- Added S3 Key module for managing S3 keys
-- Added S3 Zone Settings module for managing S3 zone-specific configurations
-- Added Cluster Services module for PowerScale service management
-- Enhanced S3 capabilities with granular zone and global settings
-- Added comprehensive job management and monitoring features
+- Added support for PowerScale OneFS 9.15.
+- Added the Event Alert Suppression module to suppress, unsuppress, and query event alert suppression.
+- Added multi-ACE filesystem ACL management with declarative whole-ACL replacement.
+- Added cross-provider user membership, nested group membership, and well-known SID management to the Group module.
+- Added per-quota notification rule management with check mode and diff mode support to the Smart Quota module.
+- Added password expiration policy and account expiry management to the User module.
+- Added group search base, provider domain, and authentication mode settings to the LDAP module.
+- Updated the Python SDK dependency to isilon-sdk 0.7.0 and set the minimum packaging version to 21.0.
+- Fixed Smart Quota deletion to remain idempotent when the target path does not exist.
 
 Known issues
 ------------
