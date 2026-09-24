@@ -1,4 +1,4 @@
-# Copyright: (c) 2025, Dell Technologies
+# Copyright: (c) 2025-2026, Dell Technologies
 # Conftest to handle ansible-core 2.19+ argparse compatibility with pytest
 
 import sys
