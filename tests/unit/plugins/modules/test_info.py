@@ -8,6 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 
 __metaclass__ = type
 
+import json
 import pytest
 from unittest.mock import patch
 from mock.mock import MagicMock
@@ -379,7 +380,8 @@ class TestInfo(PowerScaleUnitBase):
             gather_subset)
         self.get_module_args.update({
             'gather_subset': [gather_subset],
-            'zone': "System"
+            'zone': "System",
+            'filters': None
         })
         powerscale_module_mock.module.params = self.get_module_args
         with patch.object(powerscale_module_mock.protocol_api,
@@ -408,6 +410,92 @@ class TestInfo(PowerScaleUnitBase):
             powerscale_module_mock.perform_module_operation()
         assert MockGatherfactsApi.get_gather_facts_module_response(
             gather_subset, "module_filter") == powerscale_module_mock.module.exit_json.call_args[1][return_key]
+
+    def test_get_facts_nfs_exports_max_file_size_fallback(self, powerscale_module_mock):
+        """ECS02C-1213: an export with an out-of-range field (e.g. max_file_size
+        over the SDK's signed 64-bit bound) raises ValueError during typed SDK
+        deserialization. The module must fall back to parsing the raw response
+        instead of failing the entire nfs_exports listing."""
+
+        gather_subset = "nfs_exports"
+        return_key = "NfsExports"
+        raw_api_response = MockGatherfactsApi.get_gather_facts_api_response(
+            gather_subset)
+        self.get_module_args.update({
+            'gather_subset': [gather_subset],
+            'zone': "System",
+            'filters': None
+        })
+        powerscale_module_mock.module.params = self.get_module_args
+        with patch.object(powerscale_module_mock.protocol_api,
+                          MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
+            mock_method.side_effect = [
+                ValueError(
+                    "Invalid value for `max_file_size`, must be a value "
+                    "less than or equal to `9223372036854775807`"),
+                MockSDKResponse(json.dumps(raw_api_response))
+            ]
+            powerscale_module_mock.perform_module_operation()
+        assert MockGatherfactsApi.get_gather_facts_module_response(
+            gather_subset) == powerscale_module_mock.module.exit_json.call_args[1][return_key]
+
+    def test_get_facts_nfs_exports_max_file_size_clamped(self, powerscale_module_mock):
+        """ECS02C-1213: when the raw fallback retrieves an export whose
+        max_file_size exceeds INT64_MAX, the value is clamped to INT64_MAX
+        and the offending export id and paths are logged in the warning."""
+
+        gather_subset = "nfs_exports"
+        return_key = "NfsExports"
+        INT64_MAX = 9223372036854775807
+        oversized_value = 9223372036854775808  # 2^63, one byte over
+        raw_api_response = {"exports": [
+            {"id": "10", "paths": ["/ifs/data/zone1"], "max_file_size": oversized_value},
+            {"id": "20", "paths": ["/ifs/data/zone2"], "max_file_size": 1048576},
+        ]}
+        self.get_module_args.update({
+            'gather_subset': [gather_subset],
+            'zone': "System",
+            'filters': None
+        })
+        powerscale_module_mock.module.params = self.get_module_args
+        with patch.object(powerscale_module_mock.protocol_api,
+                          MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
+            mock_method.side_effect = [
+                ValueError(
+                    "Invalid value for `max_file_size`, must be a value "
+                    "less than or equal to `9223372036854775807`"),
+                MockSDKResponse(json.dumps(raw_api_response))
+            ]
+            powerscale_module_mock.perform_module_operation()
+        result_exports = powerscale_module_mock.module.exit_json.call_args[1][return_key]
+        # The oversized export's max_file_size should be clamped to INT64_MAX
+        assert result_exports[0]["max_file_size"] == INT64_MAX
+        # The valid export should be unchanged
+        assert result_exports[1]["max_file_size"] == 1048576
+        # Both exports should be present (none dropped)
+        assert len(result_exports) == 2
+
+    def test_get_facts_nfs_exports_max_file_size_fallback_also_fails(self, powerscale_module_mock):
+        """ECS02C-1213: if the raw-response fallback itself fails, the module
+        must still fail gracefully via fail_json rather than raising."""
+
+        gather_subset = "nfs_exports"
+        self.get_module_args.update({
+            'gather_subset': [gather_subset],
+            'zone': "System",
+            'filters': None
+        })
+        powerscale_module_mock.module.params = self.get_module_args
+        with patch.object(powerscale_module_mock.protocol_api,
+                          MockGatherfactsApi.get_gather_facts_error_method(gather_subset)) as mock_method:
+            mock_method.side_effect = [
+                ValueError(
+                    "Invalid value for `max_file_size`, must be a value "
+                    "less than or equal to `9223372036854775807`"),
+                MockApiException()
+            ]
+            self.capture_fail_json_call(MockGatherfactsApi.get_gather_facts_error_response(
+                gather_subset), invoke_perform_module=True)
 
     @pytest.mark.parametrize("input_params", [
         {"gather_subset": "smb_files", "return_key": "SmbOpenFiles"},
@@ -446,7 +534,8 @@ class TestInfo(PowerScaleUnitBase):
         return_key = "SmbOpenFiles"
         self.get_module_args.update({
             'gather_subset': [gather_subset],
-            'zone': "System"
+            'zone': "System",
+            'filters': None
         })
         powerscale_module_mock.cluster_ip = "xx.xx.xx.xx"
         powerscale_module_mock.cluster_api.get_cluster_external_ips = MagicMock(
@@ -809,7 +898,8 @@ class TestInfo(PowerScaleUnitBase):
         return_key = "smart_quota"
         self.get_module_args.update({
             'gather_subset': [gather_subset],
-            'zone': "System"
+            'zone': "System",
+            'filters': None
         })
         powerscale_module_mock.module.params = self.get_module_args
 

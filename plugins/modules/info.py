@@ -3218,6 +3218,7 @@ event_groups:
     }
 '''
 
+import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.dellemc.powerscale.plugins.module_utils.storage.dell.shared_library.protocol \
@@ -3445,12 +3446,61 @@ class Info(object):
             nfs_exports_details = (self.protocol_api.list_nfs_exports(zone=access_zone))\
                 .to_dict()
             nfs_exports = nfs_exports_details["exports"]
-            filters = self.module.params.get('filters')
-            filters_dict = self.get_filters(filters)
-            if filters_dict:
-                filtered_nfs_exports = filter_dict_list(nfs_exports, filters_dict)
-                return filtered_nfs_exports
-            return nfs_exports
+        except ValueError as e:
+            # The SDK's typed model deserialization enforces strict numeric
+            # bounds (for example max_file_size <= 2^63 - 1) and raises
+            # ValueError for the entire export list if any single export
+            # has an out-of-range field. Fall back to parsing the raw HTTP
+            # response so one malformed export does not abort the listing.
+            LOG.warning(
+                'Get nfs_exports list for PowerScale cluster: %s returned an export with an '
+                'out-of-range field value (%s). Falling back to raw response parsing.',
+                self.module.params['onefs_host'], utils.determine_error(e))
+            nfs_exports = self.get_nfs_exports_list_raw(access_zone)
+        except Exception as e:
+            error_msg = (
+                'Get nfs_exports list for PowerScale cluster: {0} failed with'
+                'error: {1}'.format(
+                    self.module.params['onefs_host'],
+                    utils.determine_error(e)))
+            LOG.error(error_msg)
+            self.module.fail_json(msg=error_msg)
+
+        filters = self.module.params.get('filters')
+        filters_dict = self.get_filters(filters)
+        if filters_dict:
+            return filter_dict_list(nfs_exports, filters_dict)
+        return nfs_exports
+
+    INT64_MAX = 9223372036854775807
+
+    def get_nfs_exports_list_raw(self, access_zone):
+        """Get the list of nfs_exports bypassing strict SDK model validation.
+
+        Used as a fallback when the SDK's typed deserialization rejects an
+        export due to an out-of-range field (for example max_file_size
+        returned as 8192P / 2^63, one byte over the SDK's signed 64-bit
+        bound). Fetches the raw HTTP response and parses the JSON directly
+        so a single malformed export does not abort the entire listing.
+        Identifies and warns about each export that has out-of-range fields.
+        """
+        try:
+            response = self.protocol_api.list_nfs_exports(
+                zone=access_zone, _preload_content=False)
+            nfs_exports_details = json.loads(response.data)
+            exports = nfs_exports_details.get("exports", [])
+            for export in exports:
+                export_id = export.get('id', 'unknown')
+                export_paths = export.get('paths', [])
+                max_fs = export.get('max_file_size')
+                if max_fs is not None and max_fs > self.INT64_MAX:
+                    LOG.warning(
+                        'NFS export id=%s paths=%s has out-of-range '
+                        'max_file_size=%s (max allowed=%s). The value '
+                        'exceeds the SDK signed 64-bit limit.',
+                        export_id, export_paths, max_fs, self.INT64_MAX)
+                    export['max_file_size'] = self.INT64_MAX
+            return exports
         except Exception as e:
             error_msg = (
                 'Get nfs_exports list for PowerScale cluster: {0} failed with'
