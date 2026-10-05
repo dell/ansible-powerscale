@@ -1245,7 +1245,7 @@ class FileSystem(object):
                                     'Shares. Hence, deleting this directory ' \
                                     'is not safe'.format(path)
                     LOG.error(error_message)
-                self.module.fail_json(msg=error_message)
+                    self.module.fail_json(msg=error_message)
 
     def delete_filesystem(self, path, access_zone=None, recursive_force_delete=False):
         """Deletes a FileSystem on PowerScale.

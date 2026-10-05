@@ -229,6 +229,17 @@ class MockFileSystemApi:
     EMPTY_SMB_SHARES = {
         "shares": []
     }
+    SMB_SHARES_UNRELATED = {
+        "shares": [
+            {"name": "other_share", "path": "/ifs/other/path"}
+        ]
+    }
+    SMB_SHARES_MATCHING = {
+        "shares": [
+            {"name": "other_share", "path": "/ifs/other/path"},
+            {"name": "target_share", "path": "/ifs/ATest3"}
+        ]
+    }
     GROUP_IDENTITY_DETAIL = {
         "identities": [
             {
