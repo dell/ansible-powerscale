@@ -105,6 +105,7 @@ The Ansible Modules for Dell PowerScale release 3.11.0 provides the following en
 - Added password expiration policy and account expiry management to the User module.
 - Added group search base, provider domain, and authentication mode settings to the LDAP module.
 - Updated the Python SDK dependency to isilon-sdk 0.7.0 and set the minimum packaging version to 21.0.
+- Updated minimum supported ansible-core version to 2.16.0 for compatibility with Ansible Automation Platform 2.4 lifecycle and Python 3.12.
 - Fixed Smart Quota deletion to remain idempotent when the target path does not exist.
 
 Known issues
