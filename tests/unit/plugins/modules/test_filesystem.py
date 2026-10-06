@@ -182,6 +182,41 @@ class TestFileSystem(PowerScaleUnitBase):
         # exactly one lookup attempt - no retry
         assert powerscale_module_mock.protocol_api.list_smb_shares.call_count == 1
 
+    def test_delete_file_system_with_unrelated_smb_shares(self, powerscale_module_mock):
+        # Regression: deletion must succeed when the access zone has SMB shares
+        # that do NOT match the path being deleted.  Before the fix,
+        # _check_smb_shares raised UnboundLocalError because fail_json was
+        # outside the 'if share path matches' block.
+        self.get_filesystem_args.update(
+            {"path": self.path1, "recursive_force_delete": True, "access_zone": "System", "state": "absent"})
+        powerscale_module_mock.module.params = self.get_filesystem_args
+        powerscale_module_mock.get_filesystem = MagicMock(return_value=MockFileSystemApi.FILESYSTEM_DETAILS)
+        powerscale_module_mock.protocol_api.list_nfs_exports = MagicMock(
+            return_value=MockSDKResponse(MockFileSystemApi.EMPTY_NFS_EXPORTS))
+        powerscale_module_mock.protocol_api.list_smb_shares = MagicMock(
+            return_value=MockSDKResponse(MockFileSystemApi.SMB_SHARES_UNRELATED))
+        powerscale_module_mock.module.check_mode = False
+        FilesystemHandler().handle(
+            powerscale_module_mock, powerscale_module_mock.module.params)
+        assert powerscale_module_mock.module.exit_json.call_args[1]['changed']
+        powerscale_module_mock.namespace_api.delete_directory.assert_called()
+
+    def test_delete_file_system_with_matching_smb_share(self, powerscale_module_mock):
+        # Regression: deletion must still fail when a matching SMB share exists
+        # (even if other unrelated shares are also present).
+        self.get_filesystem_args.update(
+            {"path": self.path1, "recursive_force_delete": True, "access_zone": "System", "state": "absent"})
+        powerscale_module_mock.module.params = self.get_filesystem_args
+        powerscale_module_mock.get_filesystem = MagicMock(return_value=MockFileSystemApi.FILESYSTEM_DETAILS)
+        powerscale_module_mock.protocol_api.list_nfs_exports = MagicMock(
+            return_value=MockSDKResponse(MockFileSystemApi.EMPTY_NFS_EXPORTS))
+        powerscale_module_mock.protocol_api.list_smb_shares = MagicMock(
+            return_value=MockSDKResponse(MockFileSystemApi.SMB_SHARES_MATCHING))
+        powerscale_module_mock.module.check_mode = False
+        self.capture_fail_json_call(
+            "The Filesystem path ifs/ATest3 has SMB Shares. Hence, deleting this directory is not safe",
+            FilesystemHandler)
+
     def test_create_file_system_with_access_control_rights(self, powerscale_module_mock):
         self.get_filesystem_args.update({"path": self.path1, "owner": {"name": "test"}, "group": {"name": "group_test"},
                                          "access_control_rights":
