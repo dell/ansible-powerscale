@@ -1018,10 +1018,10 @@ class SmartQuota(object):
         :return: The Id of the created rule, or True under check_mode.
         """
         body = {k: rule[k] for k in
-               ('condition', 'threshold', 'action_alert',
-                'action_email_owner', 'action_email_address', 'holdoff',
-                'schedule')
-               if rule.get(k) is not None}
+                ('condition', 'threshold', 'action_alert',
+                 'action_email_owner', 'action_email_address', 'holdoff',
+                 'schedule')
+                if rule.get(k) is not None}
         try:
             if not self.module.check_mode:
                 response = self._call_quota_notification_api(
@@ -1052,9 +1052,9 @@ class SmartQuota(object):
         :return: True if the operation is successful.
         """
         body = {k: rule[k] for k in
-               ('action_alert', 'action_email_owner', 'action_email_address',
-                'holdoff', 'schedule')
-               if rule.get(k) is not None}
+                ('action_alert', 'action_email_owner', 'action_email_address',
+                 'holdoff', 'schedule')
+                if rule.get(k) is not None}
         try:
             if not self.module.check_mode:
                 self._call_quota_notification_api(
