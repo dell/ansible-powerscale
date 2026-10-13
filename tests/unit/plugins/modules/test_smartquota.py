@@ -1447,7 +1447,8 @@ class TestSmartQuota(PowerScaleUnitBase):
         rule = {"condition": "violated", "threshold": "advisory",
                 "schedule": "every day at 2am", "action_alert": True}
         powerscale_module_mock.create_quota_notification_rule(self.QUOTA_ID, rule)
-        _, kwargs = powerscale_module_mock.quota_api_instance.api_client.call_api.call_args
+        call_args = powerscale_module_mock.quota_api_instance.api_client.call_api.call_args
+        kwargs = call_args[1]
         assert kwargs['body']['schedule'] == "every day at 2am"
 
     def test_create_quota_notification_rule_check_mode(self, powerscale_module_mock):
@@ -1525,7 +1526,8 @@ class TestSmartQuota(PowerScaleUnitBase):
         rule = {"schedule": "every day at 3am", "holdoff": 600}
         powerscale_module_mock.update_quota_notification_rule(
             self.QUOTA_ID, "rule-0001", rule)
-        _, kwargs = powerscale_module_mock.quota_api_instance.api_client.call_api.call_args
+        call_args = powerscale_module_mock.quota_api_instance.api_client.call_api.call_args
+        kwargs = call_args[1]
         assert kwargs['body']['schedule'] == "every day at 3am"
         assert kwargs['body']['holdoff'] == 600
 
