@@ -77,6 +77,7 @@ The tasks can be executed by running simple playbooks written in yaml syntax.
 * [Prerequisites](#prerequisites)
 * [List of Ansible modules for Dell PowerScale](#list-of-ansible-modules-for-dell-powerscale)
 * [Installation and execution of Ansible modules for Dell PowerScale](#installation-and-execution-of-ansible-modules-for-dell-powerscale)
+* [Release notes](#release-notes)
 * [Maintanence](#maintanence)
 
 ## License
@@ -178,8 +179,44 @@ This table provides information about the software prerequisites for the Ansible
 * [Job Type Info Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/job_type_info.rst)
 
 ## Installation and execution of Ansible modules for Dell PowerScale
-The installation and execution steps of Ansible modules for Dell PowerScale can be found [here](https://github.com/dell/ansible-powerscale/blob/main/docs/INSTALLATION.md).
 
+### Installing the collection
+
+Install this collection with the Ansible Galaxy command-line tool:
+
+```bash
+ansible-galaxy collection install dellemc.powerscale
+```
+
+### Installing from a requirements file
+
+You can include this collection in a `requirements.yml` file and install it with `ansible-galaxy collection install -r requirements.yml`:
+
+```yaml
+collections:
+  - name: dellemc.powerscale
+```
+
+### Installing a specific version
+
+Use the following syntax to install a specific version (e.g., 3.10.0):
+
+```bash
+ansible-galaxy collection install dellemc.powerscale:==3.10.0
+```
+
+### Upgrading the collection
+
+To upgrade the collection to the latest available version, run the following command:
+
+```bash
+ansible-galaxy collection install dellemc.powerscale --upgrade
+```
+
+For detailed installation and execution steps, including authentication and configuration, see the [full installation guide](https://github.com/dell/ansible-powerscale/blob/main/docs/INSTALLATION.md).
+
+## Release notes
+For information about changes in each release, see the [CHANGELOG.rst](https://github.com/dell/ansible-powerscale/blob/main/CHANGELOG.rst).
 
 ## Support
 
