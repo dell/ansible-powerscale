@@ -180,40 +180,25 @@ This table provides information about the software prerequisites for the Ansible
 
 ## Installation and execution of Ansible modules for Dell PowerScale
 
-### Installing the collection
+* From [Galaxy](https://galaxy.ansible.com/dellemc/powerscale) or [Automation Hub](https://console.redhat.com/ansible/automation-hub/repo/published/dellemc/powerscale):
+Install the latest Ansible collection from the Ansible Galaxy or Automation Hub
+  ```
+  ansible-galaxy collection install dellemc.powerscale
+  ```
 
-Install this collection with the Ansible Galaxy command-line tool:
+* To upgrade:
+Update the `dellemc.powerscale` collection to the latest version available on [Galaxy](https://galaxy.ansible.com/dellemc/powerscale) and [Automation Hub](https://console.redhat.com/ansible/automation-hub/repo/published/dellemc/powerscale)
+  ```
+  ansible-galaxy collection install dellemc.powerscale --upgrade
+  ```
 
-```bash
-ansible-galaxy collection install dellemc.powerscale
-```
+* To install a specific version:
+Install a specific version of the collection from the [Galaxy](https://galaxy.ansible.com/dellemc/powerscale) and [Automation Hub](https://console.redhat.com/ansible/automation-hub/repo/published/dellemc/powerscale)
+  ```
+  ansible-galaxy collection install dellemc.powerscale:==<version>
+  ```
 
-### Installing from a requirements file
-
-You can include this collection in a `requirements.yml` file and install it with `ansible-galaxy collection install -r requirements.yml`:
-
-```yaml
-collections:
-  - name: dellemc.powerscale
-```
-
-### Installing a specific version
-
-Use the following syntax to install a specific version (e.g., 3.10.0):
-
-```bash
-ansible-galaxy collection install dellemc.powerscale:==3.10.0
-```
-
-### Upgrading the collection
-
-To upgrade the collection to the latest available version, run the following command:
-
-```bash
-ansible-galaxy collection install dellemc.powerscale --upgrade
-```
-
-For detailed installation and execution steps, including authentication and configuration, see the [full installation guide](https://github.com/dell/ansible-powerscale/blob/main/docs/INSTALLATION.md).
+For detailed installation and execution steps, see the [installation guide](https://github.com/dell/ansible-powerscale/blob/main/docs/INSTALLATION.md).
 
 ## Release notes
 For information about changes in each release, see the [CHANGELOG.rst](https://github.com/dell/ansible-powerscale/blob/main/CHANGELOG.rst).
