@@ -77,6 +77,7 @@ The tasks can be executed by running simple playbooks written in yaml syntax.
 * [Prerequisites](#prerequisites)
 * [List of Ansible modules for Dell PowerScale](#list-of-ansible-modules-for-dell-powerscale)
 * [Installation and execution of Ansible modules for Dell PowerScale](#installation-and-execution-of-ansible-modules-for-dell-powerscale)
+* [Release notes](#release-notes)
 * [Maintanence](#maintanence)
 
 ## License
@@ -178,8 +179,29 @@ This table provides information about the software prerequisites for the Ansible
 * [Job Type Info Module](https://github.com/dell/ansible-powerscale/blob/main/docs/modules/job_type_info.rst)
 
 ## Installation and execution of Ansible modules for Dell PowerScale
-The installation and execution steps of Ansible modules for Dell PowerScale can be found [here](https://github.com/dell/ansible-powerscale/blob/main/docs/INSTALLATION.md).
 
+* From [Galaxy](https://galaxy.ansible.com/dellemc/powerscale) or [Automation Hub](https://console.redhat.com/ansible/automation-hub/repo/published/dellemc/powerscale):
+Install the latest Ansible collection from the Ansible Galaxy or Automation Hub
+  ```
+  ansible-galaxy collection install dellemc.powerscale
+  ```
+
+* To upgrade:
+Update the `dellemc.powerscale` collection to the latest version available on [Galaxy](https://galaxy.ansible.com/dellemc/powerscale) and [Automation Hub](https://console.redhat.com/ansible/automation-hub/repo/published/dellemc/powerscale)
+  ```
+  ansible-galaxy collection install dellemc.powerscale --upgrade
+  ```
+
+* To install a specific version:
+Install a specific version of the collection from the [Galaxy](https://galaxy.ansible.com/dellemc/powerscale) and [Automation Hub](https://console.redhat.com/ansible/automation-hub/repo/published/dellemc/powerscale)
+  ```
+  ansible-galaxy collection install dellemc.powerscale:==<version>
+  ```
+
+For detailed installation and execution steps, see the [installation guide](https://github.com/dell/ansible-powerscale/blob/main/docs/INSTALLATION.md).
+
+## Release notes
+For information about changes in each release, see the [CHANGELOG.rst](https://github.com/dell/ansible-powerscale/blob/main/CHANGELOG.rst).
 
 ## Support
 

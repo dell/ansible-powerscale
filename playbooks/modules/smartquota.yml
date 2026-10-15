@@ -513,9 +513,7 @@
 
     - name: Update the notification rule's actions by id
       vars:
-        rule_id: >-
-          {{ create_notification_result.quota_details
-          .notification_rules[0].id }}
+        rule_id: "{{ create_notification_result.quota_details.notification_rules[0].id }}"
       dellemc.powerscale.smartquota:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
@@ -532,9 +530,7 @@
 
     - name: Delete the specific notification rule by id
       vars:
-        rule_id: >-
-          {{ create_notification_result.quota_details
-          .notification_rules[0].id }}
+        rule_id: "{{ create_notification_result.quota_details.notification_rules[0].id }}"
       dellemc.powerscale.smartquota:
         onefs_host: "{{ onefs_host }}"
         verify_ssl: "{{ verify_ssl }}"
