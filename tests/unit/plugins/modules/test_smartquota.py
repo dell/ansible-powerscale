@@ -238,8 +238,7 @@ class TestSmartQuota(PowerScaleUnitBase):
         powerscale_module_mock.add_limits_with_unit = MagicMock()
         mocker.patch(
             'ansible_collections.dellemc.powerscale.tests.unit.plugins.module_utils.shared_library.initial_mock.utils.convert_size_with_unit',
-            return_value=None
-        )
+            return_value=None)
         powerscale_module_mock.quota_api_instance.update_quota_quota = MagicMock()
         utils.isi_sdk.AuthAccessAccessItemFileGroup = MagicMock(
             return_value=[])
@@ -1265,6 +1264,8 @@ class TestSmartQuota(PowerScaleUnitBase):
         assert options['action_email_address']['type'] == 'list'
         assert options['action_email_address']['elements'] == 'str'
         assert options['holdoff']['type'] == 'int'
+        assert options['schedule']['type'] == 'str'
+        assert spec['mutually_exclusive'] == [['holdoff', 'schedule']]
         assert options['state']['choices'] == ['present', 'absent']
         assert options['state']['default'] == 'present'
 
@@ -1282,6 +1283,23 @@ class TestSmartQuota(PowerScaleUnitBase):
         # Verify holdoff is included in the call
         call_args = powerscale_module_mock.create_quota_notification_rule.call_args[0]
         assert call_args[1]['holdoff'] == 3600
+
+    def test_reconcile_notification_rules_with_schedule(self, powerscale_module_mock):
+        """GH-289: notification rules with schedule parameter (required by
+        the PowerScale API for `violated`/`expired` conditions) are created
+        correctly."""
+        powerscale_module_mock.list_quota_notification_rules = MagicMock(return_value=[])
+        powerscale_module_mock.create_quota_notification_rule = MagicMock(return_value="rule-new")
+        powerscale_module_mock.update_quota_notification_rule = MagicMock()
+        powerscale_module_mock.delete_quota_notification_rule = MagicMock()
+        powerscale_module_mock.delete_all_quota_notification_rules = MagicMock()
+        desired = [{"condition": "violated", "threshold": "advisory", "action_alert": True,
+                   "schedule": "every day at 2am", "state": "present"}]
+        changed = powerscale_module_mock.reconcile_quota_notification_rules(self.QUOTA_ID, desired)
+        assert changed is True
+        powerscale_module_mock.create_quota_notification_rule.assert_called_once_with(self.QUOTA_ID, desired[0])
+        call_args = powerscale_module_mock.create_quota_notification_rule.call_args[0]
+        assert call_args[1]['schedule'] == "every day at 2am"
 
     def test_invalid_condition_choice_fails_argument_spec_validation(self):
         """FR-10: an out-of-choices `condition` value fails argument-spec
@@ -1348,6 +1366,39 @@ class TestSmartQuota(PowerScaleUnitBase):
         powerscale_module_mock._validate_notification_rules(None)
         powerscale_module_mock.module.fail_json.assert_not_called()
 
+    def test_validate_notification_rules_schedule_only_passes(self, powerscale_module_mock):
+        """GH-289: a `violated` rule with only `schedule` set (no action_alert/
+        action_email_owner/action_email_address) passes module-level
+        validation; the schedule requirement itself is enforced by the
+        PowerScale API, matching the existing holdoff/exceeded behavior."""
+        rules = [{"condition": "violated", "threshold": "advisory",
+                  "schedule": "every day at 2am"}]
+        powerscale_module_mock._validate_notification_rules(rules)
+        powerscale_module_mock.module.fail_json.assert_not_called()
+
+    def test_schedule_and_holdoff_mutually_exclusive_argument_spec_validation(self):
+        """GH-289: `schedule` and `holdoff` cannot both be set on the same
+        notification rule; the PowerScale API only accepts one depending on
+        whether the condition is an ongoing (C(violated)/C(expired)) or
+        instant (C(exceeded)/C(denied)) notification."""
+        params = {"quota_notification_rules": [
+            {"condition": "violated", "threshold": "advisory",
+             "schedule": "every day at 2am", "holdoff": 300}]}
+        result = ArgumentSpecValidator(get_smartquota_parameters()).validate(params)
+        assert result.error_messages
+
+    def test_schedule_valid_argument_spec_validation(self):
+        """A rule using the documented `schedule` string passes
+        argument-spec validation without error."""
+        params = {
+            "path": MockSmartQuotaApi.PATH1, "quota_type": "directory", "state": "present",
+            "quota_notification_rules": [
+                {"condition": "violated", "threshold": "advisory",
+                 "schedule": "every day at 2am",
+                 "action_email_address": ["admin@example.com"]}]}
+        result = ArgumentSpecValidator(get_smartquota_parameters()).validate(params)
+        assert not result.error_messages
+
     QUOTA_ID = "2nQKAAEAAAAAAAAAAAAAQIMCAAAAAAAA"
 
     def test_list_quota_notification_rules_empty(self, powerscale_module_mock):
@@ -1387,6 +1438,20 @@ class TestSmartQuota(PowerScaleUnitBase):
         rule = {"condition": "exceeded", "threshold": "advisory", "action_alert": True}
         result = powerscale_module_mock.create_quota_notification_rule(self.QUOTA_ID, rule)
         assert result == "rule-0001"
+
+    def test_create_quota_notification_rule_includes_schedule_in_body(self, powerscale_module_mock):
+        """GH-289: creating a `violated` rule with `schedule` set sends
+        `schedule` in the PAPI request body (previously dropped, causing
+        the API to reject the rule with "Schedule is required...")."""
+        powerscale_module_mock.module.check_mode = False
+        powerscale_module_mock.quota_api_instance.api_client.call_api = MagicMock(
+            return_value=MockSmartQuotaApi.smartquota_notification_rule_create_response())
+        rule = {"condition": "violated", "threshold": "advisory",
+                "schedule": "every day at 2am", "action_alert": True}
+        powerscale_module_mock.create_quota_notification_rule(self.QUOTA_ID, rule)
+        call_args = powerscale_module_mock.quota_api_instance.api_client.call_api.call_args
+        kwargs = call_args[1]
+        assert kwargs['body']['schedule'] == "every day at 2am"
 
     def test_create_quota_notification_rule_check_mode(self, powerscale_module_mock):
         """Creating a notification rule under check_mode makes no API call."""
@@ -1451,6 +1516,22 @@ class TestSmartQuota(PowerScaleUnitBase):
         result = powerscale_module_mock.update_quota_notification_rule(
             self.QUOTA_ID, "rule-0001", rule)
         assert result is True
+
+    def test_update_quota_notification_rule_includes_schedule_and_holdoff_in_body(self, powerscale_module_mock):
+        """GH-289: updating a rule's `schedule` (or `holdoff`) must send that
+        field in the PAPI PUT body; previously only action fields were sent,
+        so a `schedule`/`holdoff`-only change was silently dropped even
+        though the diff logic detected it."""
+        powerscale_module_mock.module.check_mode = False
+        powerscale_module_mock.quota_api_instance.api_client.call_api = MagicMock(
+            return_value=None)
+        rule = {"schedule": "every day at 3am", "holdoff": 600}
+        powerscale_module_mock.update_quota_notification_rule(
+            self.QUOTA_ID, "rule-0001", rule)
+        call_args = powerscale_module_mock.quota_api_instance.api_client.call_api.call_args
+        kwargs = call_args[1]
+        assert kwargs['body']['schedule'] == "every day at 3am"
+        assert kwargs['body']['holdoff'] == 600
 
     def test_update_quota_notification_rule_check_mode(self, powerscale_module_mock):
         """Updating a notification rule under check_mode makes no API call."""

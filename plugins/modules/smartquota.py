@@ -221,8 +221,17 @@ options:
         description:
         - Time in seconds to wait before sending another notification after the
           rule has triggered.
-        - Required for certain condition/threshold combinations (e.g., C(exceeded)/C(hard)).
+        - Required for instant notification conditions (C(exceeded), C(denied)).
+        - Mutually exclusive with I(schedule).
         type: int
+      schedule:
+        description:
+        - The isidate compatible natural language description of the schedule
+          on which recurring notifications are sent, for example
+          C(every day at 2am) or C(every Sunday at 2am).
+        - Required for ongoing notification conditions (C(violated), C(expired)).
+        - Mutually exclusive with I(holdoff).
+        type: str
       state:
         description:
         - Whether this specific notification rule should exist or not.
@@ -449,6 +458,22 @@ EXAMPLES = r'''
       - condition: "exceeded"
         threshold: "advisory"
         action_alert: true
+    state: "present"
+
+- name: Create a notification rule for the violated condition with a schedule
+  dellemc.powerscale.smartquota:
+    onefs_host: "{{onefs_host}}"
+    verify_ssl: "{{verify_ssl}}"
+    api_user: "{{api_user}}"
+    api_password: "{{api_password}}"
+    path: "<path>"
+    quota_type: "directory"
+    quota_notification_rules:
+      - condition: "violated"
+        threshold: "advisory"
+        schedule: "every day at 2am"
+        action_email_address:
+          - "admin@example.com"
     state: "present"
 
 - name: Update a notification rule's actions by id
@@ -994,9 +1019,9 @@ class SmartQuota(object):
         """
         body = {k: rule[k] for k in
                 ('condition', 'threshold', 'action_alert',
-                 'action_email_owner', 'action_email_address', 'holdoff')
-                if rule.get(k) is not None
-                }
+                 'action_email_owner', 'action_email_address', 'holdoff',
+                 'schedule')
+                if rule.get(k) is not None}
         try:
             if not self.module.check_mode:
                 response = self._call_quota_notification_api(
@@ -1020,16 +1045,16 @@ class SmartQuota(object):
         """
         Update a notification rule's action fields for a quota.
         Note: condition/threshold are immutable once a rule is created;
-        the PAPI PUT endpoint only accepts action fields.
+        the PAPI PUT endpoint only accepts action and schedule/holdoff fields.
         :param quota_id: The Id of the Quota.
         :param rule_id: The Id of the notification rule.
         :param rule: dict with action fields to update.
         :return: True if the operation is successful.
         """
         body = {k: rule[k] for k in
-                ('action_alert', 'action_email_owner', 'action_email_address')
-                if rule.get(k) is not None
-                }
+                ('action_alert', 'action_email_owner', 'action_email_address',
+                 'holdoff', 'schedule')
+                if rule.get(k) is not None}
         try:
             if not self.module.check_mode:
                 self._call_quota_notification_api(
@@ -1090,7 +1115,7 @@ class SmartQuota(object):
             LOG.error(error_message)
             self.module.fail_json(msg=error_message)
 
-    NOTIFICATION_ACTION_FIELDS = ('action_alert', 'action_email_owner', 'action_email_address', 'holdoff')
+    NOTIFICATION_ACTION_FIELDS = ('action_alert', 'action_email_owner', 'action_email_address', 'holdoff', 'schedule')
     NOTIFICATION_IMMUTABLE_FIELDS = ('condition', 'threshold')
 
     def _notification_rule_content_equal(self, desired, current):
@@ -1644,8 +1669,10 @@ def get_smartquota_parameters():
                 'action_email_owner': {'type': 'bool'},
                 'action_email_address': {'type': 'list', 'elements': 'str'},
                 'holdoff': {'type': 'int'},
+                'schedule': {'type': 'str'},
                 'state': {'type': 'str', 'choices': ['present', 'absent'], 'default': 'present'},
-            }
+            },
+            'mutually_exclusive': [['holdoff', 'schedule']],
         },
         'state': {'required': True, 'type': 'str', 'choices': ['present', 'absent']},
     }
